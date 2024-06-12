@@ -9,11 +9,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 
 import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
+import { useDraggableScroll } from "@/hooks/useDraggableScroll";
 
 import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "../../modules/dashboard/icons";
+import { ScrollShadowBox } from "../ScrollShadowBox/ScrollShadowBox";
+
+const DEFAULT_COL_SIZE = 150;
 
 interface TableWithPaginationProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
@@ -31,9 +35,12 @@ interface TableWithPaginationProps<T> extends SystemProps {
   renderDivider?: () => React.ReactElement;
   onPageChange?: (page: number) => any;
   onLimitChange?: (limit: number) => any;
+  fixedColumns?: string[];
+  rightFixedColumn?: string;
 }
 
 function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?: boolean }>) {
+  const { ref } = useDraggableScroll();
   const table = useReactTable({
     data: props.data,
     columns: props.columns,
@@ -64,96 +71,189 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
     props.onLimitChange?.(limit);
   };
 
+  const fixedColumnsSet = new Set(props.fixedColumns);
+
+  const columnWidths = useMemo(() => {
+    return props.columns.reduce(
+      (acc, col) => {
+        const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+        if (columnId) {
+          acc[columnId] = col.size || DEFAULT_COL_SIZE;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }, [props.columns]);
+
+  const calculateLeftPosition = (index: number) => {
+    return props.columns.slice(0, index).reduce((acc, col) => {
+      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
+    }, 0);
+  };
+
+  const calculateRightPosition = (index: number) => {
+    return props.columns.slice(index + 1).reduce((acc, col) => {
+      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
+    }, 0);
+  };
+
+  const tableWidth = useMemo(() => {
+    return props.columns.reduce((acc, col) => {
+      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
+    }, 0);
+  }, [props.columns, columnWidths]);
+
   return (
     <>
-      <Table variant={props?.variant || "primary"}>
-        <Thead>
-          {table.getHeaderGroups().map((headerGroup, index) => (
-            <Tr key={`headerGroup_${index}`}>
-              {headerGroup.headers.map((header, index) => {
-                return (
-                  <Th
-                    key={`header${index}`}
-                    colSpan={header.colSpan}
-                    cursor={header.column.getCanSort() ? "pointer" : "default"}
-                    userSelect={header.column.getCanSort() ? "none" : "initial"}
-                    onClick={header.column.getToggleSortingHandler()}
-                    _hover={
-                      header.column.getCanSort() && !header.column.getIsSorted()
-                        ? {
-                            backgroundColor: "grey.100",
-                            "::after": {
-                              color: "grey.500",
-                              content: '"▼"',
-                              marginLeft: "-14px", // Negative margin to pull icon to the left, based on following Box
-                            },
-                          }
-                        : undefined
-                    }
-                    w={header.getSize()}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
+      <Box overflowX="auto" width="100%">
+        <ScrollShadowBox
+          scrollRef={ref}
+          left={fixedColumnsSet.size ? `${calculateLeftPosition(fixedColumnsSet.size)}px` : "0px"}
+          right="75px"
+          bottom="16px"
+        >
+          <Box
+            ref={ref}
+            position="relative"
+            overflowX="auto"
+            width="100%"
+            maxWidth={`${tableWidth}px`}
+            cursor={"grab"}
+            userSelect="none"
+          >
+            <Table variant={props?.variant || "primary"} width="100%">
+              <Thead>
+                {table.getHeaderGroups().map((headerGroup, headerGroupIndex) => (
+                  <Tr key={`headerGroup_${headerGroupIndex}`}>
+                    {headerGroup.headers.map((header, headerIndex) => {
+                      const isFixedLeft = fixedColumnsSet.has(header.column.id);
+                      const isFixedRight = header.column.id === props.rightFixedColumn;
+                      const columnId =
+                        "accessorKey" in header.column.columnDef
+                          ? header.column.columnDef.accessorKey
+                          : header.column.id;
+                      const width = columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : DEFAULT_COL_SIZE;
+                      const left = isFixedLeft ? calculateLeftPosition(headerIndex) : undefined;
+                      const right = isFixedRight ? calculateRightPosition(headerIndex) : undefined;
 
-                        <Box as="span" display="inline-block" w="14px">
-                          {{
-                            asc: "▲",
-                            desc: "▼",
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </Box>
-                      </>
-                    )}
-                  </Th>
-                );
-              })}
-            </Tr>
-          ))}
-        </Thead>
-        <Tbody>
-          {props.loading ? (
-            <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
-          ) : table.getRowModel().rows.length === 0 ? (
-            <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
-              <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
-                {props.noDataMessage ?? "Aucun résultat"}
-              </Td>
-            </Tr>
-          ) : (
-            table.getRowModel().rows.map((row, index) => {
-              return (
-                <Fragment key={`fragment_${index}`}>
-                  <Tr
-                    key={`row_${index}`}
-                    borderLeftWidth={row.original.prominent ? "4px" : ""}
-                    borderLeftColor="blue_cumulus_main"
-                  >
-                    {row.getVisibleCells().map((cell, index) => {
                       return (
-                        <Td key={`cellContent_${index}`}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </Td>
+                        <Th
+                          key={`header_${headerIndex}`}
+                          colSpan={header.colSpan}
+                          cursor={header.column.getCanSort() ? "pointer" : "default"}
+                          userSelect={header.column.getCanSort() ? "none" : "initial"}
+                          onClick={header.column.getToggleSortingHandler()}
+                          _hover={
+                            header.column.getCanSort() && !header.column.getIsSorted()
+                              ? {
+                                  backgroundColor: "grey.100",
+                                  "::after": {
+                                    color: "grey.500",
+                                    content: '"▼"',
+                                    marginLeft: "-14px",
+                                  },
+                                }
+                              : undefined
+                          }
+                          w={`${width}px`}
+                          position={isFixedLeft || isFixedRight ? "sticky" : undefined}
+                          left={isFixedLeft ? `${left}px` : undefined}
+                          right={isFixedRight ? `${right}px` : undefined}
+                          zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
+                          bg={isFixedLeft || isFixedRight ? "white" : undefined}
+                        >
+                          {header.isPlaceholder ? null : (
+                            <>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              <Box as="span" display="inline-block" w="14px">
+                                {{
+                                  asc: "▲",
+                                  desc: "▼",
+                                }[header.column.getIsSorted() as string] ?? null}
+                              </Box>
+                            </>
+                          )}
+                        </Th>
                       );
                     })}
                   </Tr>
+                ))}
+              </Thead>
+              <Tbody>
+                {props.loading ? (
+                  <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
+                ) : table.getRowModel().rows.length === 0 ? (
+                  <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
+                    <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
+                      {props.noDataMessage ?? "Aucun résultat"}
+                    </Td>
+                  </Tr>
+                ) : (
+                  table.getRowModel().rows.map((row, rowIndex) => {
+                    const rowBg = rowIndex % 2 === 0 ? "gray.50" : "white";
+                    return (
+                      <Fragment key={`fragment_${rowIndex}`}>
+                        <Tr
+                          key={`row_${rowIndex}`}
+                          borderLeftWidth={row.original.prominent ? "4px" : ""}
+                          borderLeftColor="blue_cumulus_main"
+                          bg={rowBg}
+                        >
+                          {row.getVisibleCells().map((cell, cellIndex) => {
+                            const isFixedLeft = fixedColumnsSet.has(cell.column.id);
+                            const isFixedRight = cell.column.id === props.rightFixedColumn;
+                            const columnId =
+                              "accessorKey" in cell.column.columnDef
+                                ? cell.column.columnDef.accessorKey
+                                : cell.column.id;
+                            const width = columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : DEFAULT_COL_SIZE;
+                            const left = isFixedLeft ? calculateLeftPosition(cellIndex) : undefined;
+                            const right = isFixedRight ? calculateRightPosition(cellIndex) : undefined;
 
-                  {row.getIsExpanded() && (
-                    <Tr key={`rowExpanded_${index}`}>
-                      <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
-                    </Tr>
-                  )}
+                            return (
+                              <Td
+                                key={`cellContent_${cellIndex}`}
+                                position={isFixedLeft || isFixedRight ? "sticky" : undefined}
+                                left={isFixedLeft ? `${left}px` : undefined}
+                                right={isFixedRight ? `${right}px` : undefined}
+                                zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
+                                bg={rowBg}
+                                minW={`${width}px`}
+                              >
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </Td>
+                            );
+                          })}
+                        </Tr>
 
-                  {props.renderDivider && (
-                    <Tr key={`rowDivider_${index}`}>
-                      <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
-                    </Tr>
-                  )}
-                </Fragment>
-              );
-            })
-          )}
-        </Tbody>
-      </Table>
+                        {row.getIsExpanded() && (
+                          <Tr key={`rowExpanded_${rowIndex}`}>
+                            <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
+                              {props?.renderSubComponent?.(row)}
+                            </Td>
+                          </Tr>
+                        )}
+
+                        {props.renderDivider && (
+                          <Tr key={`rowDivider_${rowIndex}`}>
+                            <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
+                              {props?.renderDivider?.()}
+                            </Td>
+                          </Tr>
+                        )}
+                      </Fragment>
+                    );
+                  })
+                )}
+              </Tbody>
+            </Table>
+          </Box>
+        </ScrollShadowBox>
+      </Box>
 
       {(props.showPagination ?? true) && (
         <HStack mt={8} spacing={3} justifyContent="space-between">

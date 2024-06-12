@@ -1,17 +1,11 @@
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon, WarningTwoIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Container,
   Input,
   Spinner,
-  Table,
   Text,
-  Thead,
-  Tr,
-  Td,
-  Th,
-  Tbody,
   Flex,
   Heading,
   UnorderedList,
@@ -33,7 +27,6 @@ import { cyrb53Hash, normalize, TD_MANUEL_ELEMENT_LINK } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
-import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import ButtonTeleversement from "@/components/buttons/ButtonTeleversement";
@@ -41,15 +34,14 @@ import SupportLink from "@/components/Links/SupportLink";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import useToaster from "@/hooks/useToaster";
 import { Book, DownloadLine, ValidateIcon, Warning } from "@/theme/components/icons";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 import Eye from "@/theme/components/icons/Eye";
 import Video from "@/theme/components/icons/Video";
 
-import headerTooltips from "./headerTooltips";
 import InfoTeleversement from "./InfoTeleversement";
+import TeleversementTable from "./TeleversementTable";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -115,13 +107,6 @@ function toEffectifsQueue(data: any[]) {
         (e.date_de_naissance_apprenant || "").trim()
     ),
   }));
-}
-
-function fromIsoLikeDateStringToFrenchDate(date: string) {
-  if (!date || String(date) !== date) return date;
-  if (date.match(/^(\d{4})-(\d{2})-(\d{2})$/)) {
-    return formatDateNumericDayMonthYear(date);
-  }
 }
 
 export default function Televersement({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
@@ -436,74 +421,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </HStack>
         )}
 
-        <Box mt={10}>
-          {data && filteredHeaders && (
-            <Box overflowX="auto" mb="8">
-              <Table fontSize="sm">
-                <Thead>
-                  <Tr>
-                    <Th>
-                      <Header header="Ligne" />
-                    </Th>
-                    <Th>Statut</Th>
-                    {filteredHeaders.map((key) => (
-                      <Th key={key}>
-                        <Header header={key} />
-                      </Th>
-                    ))}
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {data.map((row: any, index: number) => {
-                    if (showOnlyColumnsAndLinesWithErrors && row.errors.length === 0) return null;
-                    return (
-                      <Tr key={index}>
-                        <Td>{index + 2}</Td>
-                        <Td>
-                          {row.errors.length === 0 ? (
-                            <Flex color="green.500" alignItems="center">
-                              <CheckIcon />
-                              <Text ml="2">Valide</Text>
-                            </Flex>
-                          ) : (
-                            <Flex color="red.500" alignItems="center">
-                              <WarningTwoIcon />
-                              <Text ml="2">
-                                {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
-                              </Text>
-                            </Flex>
-                          )}
-                        </Td>
-                        {filteredHeaders.map((key) => {
-                          if (row.errors.length > 0) {
-                            const error = row.errors.find((e: any) => e.key === key);
-                            if (error) {
-                              return (
-                                <Td key={key}>
-                                  <Text color="grey.500">
-                                    {(dateFields.includes(key)
-                                      ? fromIsoLikeDateStringToFrenchDate(row[key])
-                                      : row[key]) || "Donnée manquante"}
-                                  </Text>
-                                  <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
-                                </Td>
-                              );
-                            }
-                          }
-                          return (
-                            <Td key={key}>
-                              {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
-                            </Td>
-                          );
-                        })}
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </Box>
-          )}
-        </Box>
         {status === "validation_success" && (
           <>
             <Button
@@ -521,6 +438,16 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Button>
           </>
         )}
+        <Box mt={10}>
+          {data && filteredHeaders && (
+            <TeleversementTable
+              data={data}
+              headers={headers || []}
+              columsWithErrors={columsWithErrors}
+              showOnlyColumnsAndLinesWithErrors={showOnlyColumnsAndLinesWithErrors}
+            />
+          )}
+        </Box>
         {(status === "validation_failure" || status === null) && (
           <>
             <Text fontWeight="bold" fontSize={20}>
@@ -721,19 +648,4 @@ function InfoBetaPanel() {
       </Collapse>
     </Ribbons>
   );
-}
-
-function Header({ header }: { header: string }) {
-  if (headerTooltips[header]) {
-    return (
-      <Flex>
-        {header}
-        <InfoTooltip
-          contentComponent={() => <Box padding="2w">{headerTooltips[header]}</Box>}
-          aria-label="État de la donnée."
-        />
-      </Flex>
-    );
-  }
-  return <>{header}</>;
 }
