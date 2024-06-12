@@ -36,6 +36,7 @@ import {
   FAQ_REFERENCER_ETABLISSEMENT,
 } from "shared";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -852,7 +853,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href="/docs/faq"
+                      href={FAQ_PATH}
                       target="_blank"
                       rel="noopener noreferrer"
                       borderBottom="1px"

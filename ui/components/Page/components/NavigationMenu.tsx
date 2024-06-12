@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
 import { IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import { AuthContext } from "@/common/internal/AuthContext";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -248,7 +249,7 @@ const MenuQuestions = () => {
         <MenuList>
           <MenuItem
             as="a"
-            href="/docs/faq"
+            href={FAQ_PATH}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
