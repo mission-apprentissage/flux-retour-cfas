@@ -60,7 +60,7 @@ export default () => {
     });
 
     try {
-      if (isV3 && !user.source_organisme_id) {
+      if (isV3 && user.source_organisme_id) {
         // Si une erreur est détectée, on met à jour l'organisme pour indiquer qu'il y a des erreurs de transmission
         const hasError = effectifsToQueue.find((effectif) => effectif.validation_errors?.length);
         if (hasError) {

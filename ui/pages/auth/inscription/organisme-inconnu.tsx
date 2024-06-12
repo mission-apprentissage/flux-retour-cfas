@@ -20,12 +20,7 @@ export default function InscriptionOrganismeInconnu() {
           référentiel de l’apprentissage
         </Link>
         . Vous pouvez aussi consulter la{" "}
-        <Link
-          href={"https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"}
-          fontWeight={700}
-          color="bluefrance"
-          whiteSpace="nowrap"
-        >
+        <Link href={"/docs/faq"} fontWeight={700} color="bluefrance" whiteSpace="nowrap">
           FAQ
         </Link>{" "}
         du tableau de bord.

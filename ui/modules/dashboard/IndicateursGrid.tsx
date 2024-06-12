@@ -1,18 +1,69 @@
 import { Box, Center, Grid, GridItem, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { PlausibleGoalType, TypeEffectifNominatif, typesEffectifNominatif, IndicateursEffectifs } from "shared";
+import {
+  PlausibleGoalType,
+  TypeEffectifNominatif,
+  typesEffectifNominatif,
+  IndicateursEffectifs,
+  shouldDisplayContactInEffectifNominatif,
+} from "shared";
 
-import { effectifsExportColumns } from "@/common/exports";
+import { getEffectifsExportColumnFromOrganisationType } from "@/common/actions/organisation.actions";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
+import AppButton, { AppButtonProps } from "@/components/buttons/Button";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import { BasicModal } from "@/components/Modals/BasicModal";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import { EffectifsFiltersFull, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
+
+const DownloadButtonWithModal = ({ children, action, ...props }: AppButtonProps) => {
+  const { organisationType } = useAuth();
+
+  const onDownload = async (close: () => void) => {
+    await action();
+    close();
+  };
+
+  return shouldDisplayContactInEffectifNominatif(organisationType) ? (
+    <BasicModal
+      title="Téléchargement des listes nominatives"
+      renderTrigger={(onOpen) => (
+        <DownloadButton action={() => onOpen()} {...props}>
+          {children}
+        </DownloadButton>
+      )}
+      renderFooter={(onClose) => (
+        <Box mt={5} display="flex">
+          <AppButton variant="secondary" action={onClose} mr={5}>
+            <Text>Annuler</Text>
+          </AppButton>
+          <AppButton variant="primary" action={() => onDownload(onClose)}>
+            <Text>J&apos;ai compris</Text>
+          </AppButton>
+        </Box>
+      )}
+    >
+      <Text>
+        Pour appuyer le travail des cellules régionales interministérielles d&apos;accompagnement vers
+        l&apos;apprentissage, vous avez à votre disposition des listes nominatives des jeunes sans contrat, rupturants
+        et sortie d’apprentissage.
+        <br />
+        Il est recommandé, dans le respect de la mission d&apos;accompagnement des OFA, de prévenir ces derniers de la
+        prise en charge des jeunes dont ils portent la responsabilité.
+      </Text>
+    </BasicModal>
+  ) : (
+    <DownloadButton action={action} {...props}>
+      {children}
+    </DownloadButton>
+  );
+};
 
 interface CardProps {
   label: string;
@@ -68,7 +119,7 @@ type IndicateursGridProps = IndicateursGridPropsReady | IndicateursGridPropsLoad
 
 function IndicateursGrid(props: IndicateursGridProps) {
   const { trackPlausibleEvent } = usePlausibleTracking();
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
 
   const permissionEffectifsNominatifs = auth.acl
     ? Object.entries(auth.acl.effectifsNominatifs)
@@ -115,7 +166,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
     exportDataAsXlsx(
       `tdb-effectifs-${type}-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
       effectifs,
-      effectifsExportColumns
+      getEffectifsExportColumnFromOrganisationType(organisationType)
     );
   }
 
@@ -142,7 +193,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
           big={true}
         >
           {permissionEffectifsNominatifs.includes("apprenant") && effectifsFilters && (
-            <DownloadButton
+            <DownloadButtonWithModal
               variant="link"
               fontSize="sm"
               p="0"
@@ -152,7 +203,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
             >
               Télécharger la liste
-            </DownloadButton>
+            </DownloadButtonWithModal>
           )}
         </Card>
       </GridItem>
@@ -170,7 +221,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
           icon={<ApprentisIcon />}
         >
           {permissionEffectifsNominatifs.includes("apprenti") && effectifsFilters && (
-            <DownloadButton
+            <DownloadButtonWithModal
               variant="link"
               fontSize="sm"
               p="0"
@@ -180,7 +231,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
             >
               Télécharger la liste
-            </DownloadButton>
+            </DownloadButtonWithModal>
           )}
         </Card>
       </GridItem>
@@ -199,7 +250,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
           icon={<RupturantsIcon />}
         >
           {permissionEffectifsNominatifs.includes("rupturant") && effectifsFilters && (
-            <DownloadButton
+            <DownloadButtonWithModal
               variant="link"
               fontSize="sm"
               p="0"
@@ -209,7 +260,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
             >
               Télécharger la liste
-            </DownloadButton>
+            </DownloadButtonWithModal>
           )}
         </Card>
       </GridItem>
@@ -227,7 +278,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
           icon={<InscritsSansContratsIcon />}
         >
           {permissionEffectifsNominatifs.includes("inscritSansContrat") && effectifsFilters && (
-            <DownloadButton
+            <DownloadButtonWithModal
               variant="link"
               fontSize="sm"
               p="0"
@@ -237,7 +288,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
             >
               Télécharger la liste
-            </DownloadButton>
+            </DownloadButtonWithModal>
           )}
         </Card>
       </GridItem>
@@ -258,7 +309,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
           icon={<AbandonsIcon />}
         >
           {permissionEffectifsNominatifs.includes("abandon") && effectifsFilters && (
-            <DownloadButton
+            <DownloadButtonWithModal
               variant="link"
               fontSize="sm"
               p="0"
@@ -268,7 +319,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
             >
               Télécharger la liste
-            </DownloadButton>
+            </DownloadButtonWithModal>
           )}
         </Card>
       </GridItem>

@@ -205,13 +205,10 @@ export const primitivesV1 = {
         description: "Code RNCP de la formation",
         examples: ["RNCP35316", "35316"],
       }),
-    code_cfd: z.preprocess(
-      (v: any) => (v ? String(v) : v),
-      z.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
-        example: "50022141",
-        description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
-      })
-    ),
+    code_cfd: z.coerce.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
+      example: "50022141",
+      description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
+    }),
     libelle_court: z.string().trim().min(2).describe("Libellé court de la formation").openapi({
       description: "Libellé court de la formation",
       example: "CAP PATISSIER",
@@ -423,19 +420,21 @@ export const primitivesV3 = {
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
-  derniere_situation: z.preprocess(
-    (v: any) => (v ? Number(v) : v),
-    z.coerce
-      .number()
-      .int()
-      .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
-        message: "Format invalide (ex : 1003, 3111, 4017)",
-      })
-      .describe("Situation de l'apprenant N-1")
-      .openapi({
-        type: "integer",
-      })
-  ),
+  derniere_situation: z
+    .preprocess(
+      (v: any) => (v ? Number(v) : v),
+      z.coerce
+        .number()
+        .int()
+        .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
+          message: "Format invalide (ex : 1003, 3111, 4017)",
+        })
+    )
+    .describe("Situation de l'apprenant N-1")
+    .openapi({
+      type: "integer",
+      enum: EFFECTIF_DERNIER_SITUATION as any,
+    }),
   dernier_organisme_uai: z
     .string()
     .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")

@@ -122,11 +122,18 @@ export const mapEffectifQueueToEffectif = (
   // dossierApprenant: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
   dossierApprenant: IEffectifQueue
 ): PartialDeep<IEffectif> => {
-  const newHistoriqueStatut = {
-    valeur_statut: dossierApprenant.statut_apprenant,
-    date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
-    date_reception: new Date(),
-  };
+  // Ne pas remplir l'historique statut en cas de v3
+  const { statut_apprenant, date_metier_mise_a_jour_statut } = dossierApprenant;
+  const historiqueStatut =
+    statut_apprenant && date_metier_mise_a_jour_statut
+      ? [
+          {
+            valeur_statut: dossierApprenant.statut_apprenant,
+            date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
+            date_reception: new Date(),
+          },
+        ]
+      : [];
   const contrats: PartialDeep<IEffectif["contrats"]> = [
     stripEmptyFields({
       date_debut: dossierApprenant.contrat_date_debut,
@@ -164,7 +171,7 @@ export const mapEffectifQueueToEffectif = (
     source_organisme_id: dossierApprenant.source_organisme_id,
     id_erp_apprenant: dossierApprenant.id_erp_apprenant,
     apprenant: {
-      historique_statut: [newHistoriqueStatut],
+      historique_statut: historiqueStatut,
       ine: dossierApprenant.ine_apprenant,
       nom: dossierApprenant.nom_apprenant,
       prenom: dossierApprenant.prenom_apprenant,

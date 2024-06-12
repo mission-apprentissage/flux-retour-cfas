@@ -302,121 +302,63 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </HStack>
         </Flex>
 
-        <Box mt={10} px={14} py={10} bg="galt">
-          <Grid templateColumns="1fr" gap={6}>
-            <Box>
-              <UnorderedList styleType="disc" spacing={3} pl={5}>
-                <ListItem>
-                  <Text>
-                    Déclarez tous vos apprenants <strong>en apprentissage</strong>, y compris les apprentis en contrat,
-                    ceux dont le contrat a été rompu, les jeunes sans contrat et les cas d&apos;abandon éventuels.
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text>
-                    Afin de garantir la fraîcheur des données et de permettre un soutien constant de vos apprenants,
-                    nous vous recommandons de nous transmettre les effectifs <strong>une fois par mois</strong>, de
-                    préférence entre le 1er et le 5 de chaque mois.
-                  </Text>
-                </ListItem>
-              </UnorderedList>
-              <Flex mt={4} gap="6" mb={5}>
-                <ButtonTeleversement href="/modele-import.xlsx">
-                  <DownloadSimple mr="2" />
-                  Télécharger le modèle Excel
-                </ButtonTeleversement>
-                <BasicModal
-                  renderTrigger={(onOpen) => (
-                    <ButtonTeleversement
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onOpen();
-                      }}
-                    >
-                      <Eye mr={2} />
-                      Les données obligatoires
-                    </ButtonTeleversement>
-                  )}
-                  title="Les données obligatoires à renseigner"
-                  size="4xl"
-                >
-                  <InfoTeleversement />
-                </BasicModal>
-                <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
-                  <Book mr={2} />
-                  Guide des données
-                </ButtonTeleversement>
-                <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
-                  <Video mr="2" />
-                  Tutoriel en vidéo
-                </ButtonTeleversement>
-              </Flex>
-              {status === "validation_failure" && (
-                <>
-                  <Ribbons variant="error" mb={8}>
-                    <Box mb="8">
-                      <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
-                        {errorsCount === 1
-                          ? "Une erreur a été détectée dans votre fichier"
-                          : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
-                      </Text>
-                      <Text fontSize="sm" color="grey.800">
-                        Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
-                        l&apos;importer à nouveau.
-                      </Text>
-                      {missingHeaders.length > 0 && (
-                        <Text fontSize="sm" color="grey.800">
-                          Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur
-                          présence dans le fichier&nbsp;:{" "}
-                          <UnorderedList mt="4">
-                            {missingHeaders.map((header) => (
-                              <ListItem key={header} color="red.500">
-                                {header}
-                              </ListItem>
-                            ))}
-                          </UnorderedList>
-                        </Text>
-                      )}
-                    </Box>
-                  </Ribbons>
-                </>
-              )}
-              {!!warnings.contratCount && (
-                <Ribbons variant="warning" mb={8}>
-                  <Box mb="8">
-                    <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
-                      {warnings.contratCount}
-                      {warnings.contratCount === 1
-                        ? " apprenant n'a aucune date de début et de fin de contrat renseignée."
-                        : " apprenants n'ont aucune date de début et de fin de contrat renseignée."}
+        {status === null && (
+          <Box mt={10} px={14} py={10} bg="galt">
+            <Grid templateColumns="1fr" gap={6}>
+              <Box>
+                <UnorderedList styleType="disc" spacing={3} pl={5}>
+                  <ListItem>
+                    <Text>
+                      Déclarez tous vos apprenants <strong>en apprentissage</strong>, y compris les apprentis en
+                      contrat, ceux dont le contrat a été rompu, les jeunes sans contrat et les cas d&apos;abandon
+                      éventuels.
                     </Text>
-                    <Text fontSize="sm" color="grey.800">
-                      Nous nous basons sur les dates de contrat, de rupture, de formation et d&apos;exclusion pour
-                      déterminer le statut d&apos;un effectif. N&apos;oubliez pas de remplir les dates de contrat quand
-                      il y en a un, sans quoi les apprentis passent automatiquement en statut &quot;abandon&quot; 3 mois
-                      après leur date d&apos;inscription ou 6 mois après leur date de rupture.
+                  </ListItem>
+                  <ListItem>
+                    <Text>
+                      Afin de garantir la fraîcheur des données et de permettre un soutien constant de vos apprenants,
+                      nous vous recommandons de nous transmettre les effectifs <strong>une fois par mois</strong>, de
+                      préférence entre le 1er et le 5 de chaque mois.
                     </Text>
-                  </Box>
-                </Ribbons>
-              )}
-              {status === "validation_failure" && (
-                <HStack my={8}>
-                  <Switch
-                    id="show-only-errors"
-                    variant="icon"
-                    onChange={(e) => {
-                      setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
-                    }}
-                  />
-                  <FormLabel htmlFor="show-only-errors">
-                    Afficher uniquement les lignes et colonnes avec données en erreur
-                  </FormLabel>
-                </HStack>
-              )}
-              <InfoBetaPanel />
-            </Box>
-          </Grid>
-        </Box>
+                  </ListItem>
+                </UnorderedList>
+                <Flex mt={4} gap="6" mb={5}>
+                  <ButtonTeleversement href="/modele-import.xlsx">
+                    <DownloadSimple mr="2" />
+                    Télécharger le modèle Excel
+                  </ButtonTeleversement>
+                  <BasicModal
+                    renderTrigger={(onOpen) => (
+                      <ButtonTeleversement
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onOpen();
+                        }}
+                      >
+                        <Eye mr={2} />
+                        Les données obligatoires
+                      </ButtonTeleversement>
+                    )}
+                    title="Les données obligatoires à renseigner"
+                    size="4xl"
+                  >
+                    <InfoTeleversement />
+                  </BasicModal>
+                  <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
+                    <Book mr={2} />
+                    Guide des données
+                  </ButtonTeleversement>
+                  <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
+                    <Video mr="2" />
+                    Tutoriel en vidéo
+                  </ButtonTeleversement>
+                </Flex>
+                <InfoBetaPanel />
+              </Box>
+            </Grid>
+          </Box>
+        )}
+
         {status === "validation_success" && (
           <Ribbons variant="success" my={8}>
             <Box mb="8">
@@ -431,16 +373,70 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Box>
           </Ribbons>
         )}
+        {status === "validation_failure" && (
+          <>
+            <Ribbons variant="error" my={8}>
+              <Box mb="8">
+                <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
+                  {errorsCount === 1
+                    ? "Une erreur a été détectée dans votre fichier"
+                    : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
+                </Text>
+                <Text fontSize="sm" color="grey.800">
+                  Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
+                  l&apos;importer à nouveau.
+                </Text>
+                {missingHeaders.length > 0 && (
+                  <Text fontSize="sm" color="grey.800">
+                    Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur présence
+                    dans le fichier&nbsp;:{" "}
+                    <UnorderedList mt="4">
+                      {missingHeaders.map((header) => (
+                        <ListItem key={header} color="red.500">
+                          {header}
+                        </ListItem>
+                      ))}
+                    </UnorderedList>
+                  </Text>
+                )}
+              </Box>
+            </Ribbons>
+          </>
+        )}
+        {!!warnings.contratCount && (
+          <Ribbons variant="warning" mb={8}>
+            <Box mb="8">
+              <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
+                {warnings.contratCount}
+                {warnings.contratCount === 1
+                  ? " apprenant n'a aucune date de début et de fin de contrat renseignée."
+                  : " apprenants n'ont aucune date de début et de fin de contrat renseignée."}
+              </Text>
+              <Text fontSize="sm" color="grey.800">
+                Nous nous basons sur les dates de contrat, de rupture, de formation et d&apos;exclusion pour déterminer
+                le statut d&apos;un effectif. N&apos;oubliez pas de remplir les dates de contrat quand il y en a un,
+                sans quoi les apprentis passent automatiquement en statut &quot;abandon&quot; 3 mois après leur date
+                d&apos;inscription ou 6 mois après leur date de rupture.
+              </Text>
+            </Box>
+          </Ribbons>
+        )}
+        {status === "validation_failure" && (
+          <HStack my={8}>
+            <Switch
+              id="show-only-errors"
+              variant="icon"
+              onChange={(e) => {
+                setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
+              }}
+            />
+            <FormLabel htmlFor="show-only-errors">
+              Afficher uniquement les lignes et colonnes avec données en erreur
+            </FormLabel>
+          </HStack>
+        )}
 
         <Box mt={10}>
-          <Text fontWeight="bold" fontSize={20}>
-            Sélectionner un document à importer
-          </Text>
-          <VStack align="start" mt={3} spacing={0}>
-            <Text>Sélectionner un fichier contenant vos effectifs à importer (maximum 2000).</Text>
-            <Text>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</Text>
-          </VStack>
-
           {data && filteredHeaders && (
             <Box overflowX="auto" mb="8">
               <Table fontSize="sm">
@@ -527,6 +523,13 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         )}
         {(status === "validation_failure" || status === null) && (
           <>
+            <Text fontWeight="bold" fontSize={20}>
+              Sélectionner un document à importer
+            </Text>
+            <VStack align="start" mt={3} spacing={0}>
+              <Text>Sélectionner un fichier contenant vos effectifs à importer (maximum 2000).</Text>
+              <Text>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</Text>
+            </VStack>
             <Box {...getRootProps<any>({ style })} my={8} minH="200px">
               {isSubmitting ? (
                 <Box textAlign="center" flex="1" flexDirection="column">

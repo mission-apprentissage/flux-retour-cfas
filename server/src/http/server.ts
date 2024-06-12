@@ -36,7 +36,7 @@ import {
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
-  getEffectifsNominatifs,
+  getEffectifsNominatifsWithoutId,
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getOrganismeIndicateursEffectifs,
@@ -89,6 +89,7 @@ import { searchOrganismesFormations } from "@/common/actions/organismes/organism
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
@@ -246,7 +247,15 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .use(
+      "/api/doc",
+      swaggerUi.serve,
+      swaggerUi.setup(openapiSpecs, {
+        customCss: ".swagger-ui .topbar { display: none }",
+        customSiteTitle: "API Mission Apprentissage",
+      })
+    )
+    .use("/api/openapi-model", (req, res) => res.download(openApiFilePath))
     .post(
       "/api/v1/auth/login",
       returnResult(async (req, res) => {
@@ -492,7 +501,15 @@ function setupRoutes(app: Application) {
           if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
             throw Boom.forbidden("Permissions invalides");
           }
-          return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
+
+          const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
+            req.user,
+            filters,
+            type,
+            res.locals.organismeId
+          );
+          await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, res.locals.organismeId);
+          return effectifsWithoutIds;
         })
       )
       .get(
@@ -673,7 +690,9 @@ function setupRoutes(app: Application) {
           throw Boom.forbidden("Permissions invalides");
         }
 
-        return await getEffectifsNominatifs(req.user, filters, type);
+        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
+        await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, undefined, req.user.organisation_id);
+        return effectifsWithoutIds;
       })
     )
     .get(

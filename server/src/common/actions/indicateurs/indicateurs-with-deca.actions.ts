@@ -57,6 +57,25 @@ export const getIndicateursEffectifsParOrganisme = async (
   ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDECADb(), true, organismeId)),
 ];
 
+export const getEffectifsNominatifsWithoutId = async (
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  type: TypeEffectifNominatif,
+  organismeId?: ObjectId
+): Promise<{ effectifsWithoutIds: any[]; ids: ObjectId[] }> => {
+  const effectifs = await getEffectifsNominatifs(ctx, filters, type, organismeId);
+  return effectifs.reduce<{ effectifsWithoutIds: any[]; ids: ObjectId[] }>(
+    (acc, { _id, ...rest }) => ({
+      effectifsWithoutIds: [...acc.effectifsWithoutIds, rest],
+      ids: [...acc.ids, _id],
+    }),
+    {
+      effectifsWithoutIds: [],
+      ids: [],
+    }
+  );
+};
+
 export const getEffectifsNominatifs = async (
   ctx: AuthContext,
   filters: FullEffectifsFilters,

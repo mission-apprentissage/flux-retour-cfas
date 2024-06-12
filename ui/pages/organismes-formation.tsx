@@ -163,7 +163,7 @@ const OrganismesFormationPage = () => {
                   transmettre vos données en quelques clics à l’aide des tutoriels qui vous seront proposés sur l’écran
                   de paramétrage et{" "}
                   <Link
-                    href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                    href="/docs/faq"
                     target="_blank"
                     rel="noopener noreferrer"
                     color="action-high-blue-france"
@@ -373,7 +373,7 @@ const OrganismesFormationPage = () => {
         />
 
         <Link
-          href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+          href="/docs/faq"
           color="action-high-blue-france"
           borderBottom="1px"
           textDecoration="none"
