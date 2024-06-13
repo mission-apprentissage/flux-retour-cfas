@@ -15,6 +15,7 @@ import {
   Wrap,
 } from "@chakra-ui/react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
@@ -163,7 +164,7 @@ const OrganismesFormationPage = () => {
                   transmettre vos données en quelques clics à l’aide des tutoriels qui vous seront proposés sur l’écran
                   de paramétrage et{" "}
                   <Link
-                    href="/docs/faq"
+                    href={FAQ_PATH}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="action-high-blue-france"
@@ -373,7 +374,7 @@ const OrganismesFormationPage = () => {
         />
 
         <Link
-          href="/docs/faq"
+          href={FAQ_PATH}
           color="action-high-blue-france"
           borderBottom="1px"
           textDecoration="none"

@@ -70,7 +70,8 @@ const ParametresPage = () => {
   }, []);
 
   if (!organisme) {
-    return <></>;
+    window.location.href = "/";
+    return null;
   }
 
   const title = "Paramétrage de votre moyen de transmission";

@@ -2,6 +2,7 @@ import { Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 
 export default function InscriptionOrganismeInconnu() {
@@ -20,7 +21,7 @@ export default function InscriptionOrganismeInconnu() {
           référentiel de l’apprentissage
         </Link>
         . Vous pouvez aussi consulter la{" "}
-        <Link href={"/docs/faq"} fontWeight={700} color="bluefrance" whiteSpace="nowrap">
+        <Link href={FAQ_PATH} fontWeight={700} color="bluefrance" whiteSpace="nowrap">
           FAQ
         </Link>{" "}
         du tableau de bord.
