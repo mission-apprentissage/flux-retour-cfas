@@ -1,8 +1,17 @@
 import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
-import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate, SIRET_REGEX } from "shared";
+import {
+  PermissionScope,
+  assertUnreachable,
+  entries,
+  getAnneesScolaireListFromDate,
+  SIRET_REGEX,
+  ORGANISATIONS_NATIONALES_MAP,
+  ORGANISATION_TYPE,
+} from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { IOrganisation } from "shared/models/data/organisations.model";
 
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { isValidUAI } from "@/common/utils/validationUtils";
@@ -64,64 +73,152 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
   }, {});
 }
 
+const getDefaultFormationNiveaux = (organisation: IOrganisation) => {
+  if (!organisation) {
+    return [];
+  }
+  if (organisation.type !== ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL) {
+    return [];
+  }
+
+  switch (organisation.nom) {
+    case ORGANISATIONS_NATIONALES_MAP.EDUC_NATIONALE:
+      return ["3", "4"];
+    case ORGANISATIONS_NATIONALES_MAP.ENSEIGNEMENT_SUP:
+      return ["5", "6", "7", "8"];
+    default:
+      return [];
+  }
+};
+
+const buildFilterDate = (filter) => {
+  const value = filter["date"];
+  if (!value) {
+    return {};
+  }
+  return { annee_scolaire: { $in: getAnneesScolaireListFromDate(value) } };
+};
+
+const buildFilterOrganismeRegions = (filter) => {
+  const value = filter["organisme_regions"];
+  if (!value) {
+    return {};
+  }
+
+  return { "_computed.organisme.region": { $in: value } };
+};
+
+const buildFilterOrganismeDepartement = (filter) => {
+  const value = filter["organisme_departements"];
+  if (!value) {
+    return {};
+  }
+  return { "_computed.organisme.departement": { $in: value } };
+};
+
+const buildFilterOrganismeAcademies = (filter) => {
+  const value = filter["organisme_academies"];
+  if (!value) {
+    return {};
+  }
+  return { "_computed.organisme.academie": { $in: value } };
+};
+
+const buildFilterOrganismeBassinsEmploi = (filter) => {
+  const value = filter["organisme_bassinsEmploi"];
+  if (!value) {
+    return {};
+  }
+  return { "_computed.organisme.bassinEmploi": { $in: value } };
+};
+
+const buildFilterOrganismeSearch = (filter) => {
+  const value = filter["organisme_search"];
+  if (!value) {
+    return {};
+  }
+  return { $or: buildOrganismeSearchCondition(value) };
+};
+
+const buildFilterOrganismeReseaux = (filter) => {
+  const value = filter["organisme_reseaux"];
+  if (!value) {
+    return {};
+  }
+  return { "_computed.organisme.reseaux": { $in: value } };
+};
+
+const buildFilterApprenantTrancheAge = (filter) => {
+  const value = filter["apprenant_tranchesAge"];
+  if (!value) {
+    return {};
+  }
+  return {
+    $or: value.map((key) => {
+      const [min, max] = intervalParTrancheAge[key];
+      return {
+        "apprenant.date_de_naissance": {
+          $lt: subYears(new Date(), min),
+          $gte: subYears(new Date(), max),
+        },
+      };
+    }),
+  };
+};
+
+const buildFilterFormationAnnee = (filter) => {
+  const value = filter["formation_annees"];
+  if (!value) {
+    return {};
+  }
+  return { "formation.annee": { $in: value } };
+};
+
+const buildFilterFormationNiveau = (filter, organisation) => {
+  const defaultValue = getDefaultFormationNiveaux(organisation);
+  const value = filter["formation_niveaux"];
+  if (!value) {
+    return defaultValue.length ? { "formation.niveau": { $in: defaultValue } } : {};
+  }
+  return { "formation.niveau": { $in: value } };
+};
+
+const buildFilterFormationCfd = (filter) => {
+  const value = filter["formation_cfds"];
+  if (!value) {
+    return {};
+  }
+  return { "formation.cfd": { $in: value } };
+};
+
+const buildFilterFormationSecteurProfessionnels = (filter) => {
+  const value = filter["formation_secteursProfessionnels"];
+  if (!value) {
+    return {};
+  }
+  return { "_computed.formation.codes_rome": { $in: value } };
+};
+
 export function buildEffectifMongoFilters(
   filters: FullEffectifsFilters,
-  perimetre: PermissionScope | boolean
+  perimetre: PermissionScope | boolean,
+  organisation?: IOrganisation
 ): Filter<IEffectif>[] {
   const perimetreFilter = buildEffectifPerimetreMongoFilters(perimetre);
 
-  const requestedFilter = entries(filters).reduce((acc: Filter<IEffectif>, [key, value]) => {
-    switch (key) {
-      case "date":
-        acc["annee_scolaire"] = { $in: getAnneesScolaireListFromDate(value) };
-        break;
-      case "organisme_regions":
-        acc["_computed.organisme.region"] = { $in: value };
-        break;
-      case "organisme_departements":
-        acc["_computed.organisme.departement"] = { $in: value };
-        break;
-      case "organisme_academies":
-        acc["_computed.organisme.academie"] = { $in: value };
-        break;
-      case "organisme_bassinsEmploi":
-        acc["_computed.organisme.bassinEmploi"] = { $in: value };
-        break;
-      case "organisme_search":
-        acc["$or"] = buildOrganismeSearchCondition(value);
-        break;
-      case "organisme_reseaux":
-        acc["_computed.organisme.reseaux"] = { $in: value };
-        break;
-      case "apprenant_tranchesAge":
-        acc["$or"] = value.map((key) => {
-          const [min, max] = intervalParTrancheAge[key];
-          return {
-            "apprenant.date_de_naissance": {
-              $lt: subYears(new Date(), min),
-              $gte: subYears(new Date(), max),
-            },
-          };
-        });
-        break;
-      case "formation_annees":
-        acc["formation.annee"] = { $in: value };
-        break;
-      case "formation_niveaux":
-        acc["formation.niveau"] = { $in: value };
-        break;
-      case "formation_cfds":
-        acc["formation.cfd"] = { $in: value };
-        break;
-      case "formation_secteursProfessionnels":
-        acc["_computed.formation.codes_rome"] = { $in: value };
-        break;
-      default:
-        assertUnreachable(key);
-    }
-
-    return acc;
-  }, {});
-
+  const requestedFilter = {
+    ...buildFilterDate(filters),
+    ...buildFilterOrganismeRegions(filters),
+    ...buildFilterOrganismeDepartement(filters),
+    ...buildFilterOrganismeAcademies(filters),
+    ...buildFilterOrganismeBassinsEmploi(filters),
+    ...buildFilterOrganismeSearch(filters),
+    ...buildFilterOrganismeReseaux(filters),
+    ...buildFilterApprenantTrancheAge(filters),
+    ...buildFilterFormationAnnee(filters),
+    ...buildFilterFormationNiveau(filters, organisation),
+    ...buildFilterFormationCfd(filters),
+    ...buildFilterFormationSecteurProfessionnels(filters),
+  };
   return [requestedFilter, perimetreFilter];
 }
