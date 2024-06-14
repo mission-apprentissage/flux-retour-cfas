@@ -83,8 +83,6 @@ const mandatoryFields = [
   "prenom_apprenant",
   "date_de_naissance_apprenant",
   "annee_scolaire",
-  "statut_apprenant",
-  "date_metier_mise_a_jour_statut",
   "date_inscription_formation",
   "date_entree_formation",
   "date_fin_formation",
