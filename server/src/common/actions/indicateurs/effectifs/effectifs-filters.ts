@@ -11,7 +11,7 @@ import {
   ORGANISATION_TYPE,
 } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
-import { IOrganisation } from "shared/models/data/organisations.model";
+import { IOrganisation, IOrganisationOperateurPublicNational } from "shared/models/data/organisations.model";
 
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { isValidUAI } from "@/common/utils/validationUtils";
@@ -73,7 +73,7 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
   }, {});
 }
 
-const getDefaultFormationNiveaux = (organisation: IOrganisation) => {
+const getDefaultFormationNiveaux = (organisation: IOrganisationOperateurPublicNational) => {
   if (!organisation) {
     return [];
   }
@@ -206,7 +206,7 @@ export function buildEffectifMongoFilters(
 ): Filter<IEffectif>[] {
   const perimetreFilter = buildEffectifPerimetreMongoFilters(perimetre);
 
-  const requestedFilter = {
+  const requestedFilter: Filter<IEffectif> = {
     ...buildFilterDate(filters),
     ...buildFilterOrganismeRegions(filters),
     ...buildFilterOrganismeDepartement(filters),
