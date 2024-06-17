@@ -135,7 +135,6 @@ function FiltreFormationNiveau(props: FiltreFormationNiveauProps) {
   const { auth } = useAuth();
   const organisation = auth.organisation;
 
-  console.log(organisation);
   return (
     <CheckboxGroup value={props.value} onChange={props.onChange}>
       <Stack>
