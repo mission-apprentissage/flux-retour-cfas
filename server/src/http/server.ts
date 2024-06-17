@@ -670,7 +670,7 @@ function setupRoutes(app: Application) {
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
+        return await getIndicateursEffectifsParDepartement(filters, req.user.acl, req.user.organisation);
       })
     )
     .get(
