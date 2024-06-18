@@ -2,6 +2,7 @@ import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
@@ -155,7 +156,7 @@ export const addComputedFields = ({
 };
 
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
-  let effectif = await effectifsDb().findOne({ _id: effectifId });
+  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: effectifId });
 
   if (!effectif) {
     effectif = await effectifsDECADb().findOne({ _id: effectifId });
