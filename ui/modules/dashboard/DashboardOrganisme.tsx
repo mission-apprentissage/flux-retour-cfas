@@ -61,6 +61,7 @@ import { ExternalLinks } from "../admin/OrganismeDetail";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";
+import InfoTransmissionDeca from "../organismes/InfoTransmissionDeca";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -358,6 +359,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
                   />
                 )}
+                {!organisme.is_transmission_target && <InfoTransmissionDeca date={null} />}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
