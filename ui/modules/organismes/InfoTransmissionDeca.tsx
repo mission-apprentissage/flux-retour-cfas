@@ -26,7 +26,9 @@ function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
         <Text fontSize="zeta" fontWeight="bold">
           Données DECA
         </Text>
-        <Text fontSize="x-small">Dernière MAJ : {props.date ? props.date.toLocaleDateString("fr") : "- -"}</Text>
+        {props.date && (
+          <Text fontSize="x-small">Dernière MAJ : {props.date ? props.date.toLocaleDateString("fr") : "- -"}</Text>
+        )}
       </Box>
       <InfoTooltip contentComponent={() => <Tooltip />} />
     </HStack>
