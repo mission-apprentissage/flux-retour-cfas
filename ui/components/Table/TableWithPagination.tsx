@@ -1,23 +1,21 @@
 import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
-  PaginationState,
   Row,
-  SortingState,
-  flexRender,
+  useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable,
+  PaginationState,
+  SortingState,
+  flexRender,
 } from "@tanstack/react-table";
-import { Fragment, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, Fragment } from "react";
 
 import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
-import { useDraggableScroll } from "@/hooks/useDraggableScroll";
 
 import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "../../modules/dashboard/icons";
-import { ScrollShadowBox } from "../ScrollShadowBox/ScrollShadowBox";
 
-const DEFAULT_COL_SIZE = 150;
+import ConditionalScrollShadowBox from "./ConditionalScrollShadowBox";
 
 interface TableWithPaginationProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
@@ -39,8 +37,19 @@ interface TableWithPaginationProps<T> extends SystemProps {
   rightFixedColumn?: string;
 }
 
-function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?: boolean }>) {
-  const { ref } = useDraggableScroll();
+const DEFAULT_COL_SIZE = 180;
+const DEFAULT_ROW_HEIGHT = 60;
+
+const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent?: boolean }>) => {
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [tableWidth, setTableWidth] = useState(0);
+
+  useEffect(() => {
+    if (tableRef.current) {
+      setTableWidth(tableRef.current.scrollWidth);
+    }
+  }, [props.data, props.columns]);
+
   const table = useReactTable({
     data: props.data,
     columns: props.columns,
@@ -55,30 +64,36 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
     getRowCanExpand: () => true,
   });
 
-  const changePage = (page: number) => {
-    props.onPageChange?.(page);
-  };
+  const changePage = useCallback(
+    (page: number) => {
+      props.onPageChange?.(page);
+    },
+    [props.onPageChange]
+  );
 
-  const nextPage = () => {
+  const nextPage = useCallback(() => {
     props.onPageChange?.(table.getState().pagination.pageIndex + 1);
-  };
+  }, [props.onPageChange, table]);
 
-  const previousPage = () => {
+  const previousPage = useCallback(() => {
     props.onPageChange?.(table.getState().pagination.pageIndex - 1);
-  };
+  }, [props.onPageChange, table]);
 
-  const changeLimit = (limit: number) => {
-    props.onLimitChange?.(limit);
-  };
+  const changeLimit = useCallback(
+    (limit: number) => {
+      props.onLimitChange?.(limit);
+    },
+    [props.onLimitChange]
+  );
 
-  const fixedColumnsSet = new Set(props.fixedColumns);
+  const fixedColumnsSet = useMemo(() => new Set(props.fixedColumns), [props.fixedColumns]);
 
   const columnWidths = useMemo(() => {
     return props.columns.reduce(
       (acc, col) => {
         const columnId = "accessorKey" in col ? col.accessorKey : col.id;
         if (columnId) {
-          acc[columnId] = col.size || DEFAULT_COL_SIZE;
+          acc[columnId as string] = col.size || DEFAULT_COL_SIZE;
         }
         return acc;
       },
@@ -86,174 +101,157 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
     );
   }, [props.columns]);
 
-  const calculateLeftPosition = (index: number) => {
-    return props.columns.slice(0, index).reduce((acc, col) => {
-      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
-      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
-    }, 0);
-  };
+  const calculatePosition = useCallback(
+    (startIndex: number, direction: "left" | "right") => {
+      return props.columns
+        .slice(direction === "left" ? 0 : startIndex + 1, direction === "left" ? startIndex : undefined)
+        .reduce((acc, col) => {
+          const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+          return acc + (columnId ? columnWidths[columnId as string] || DEFAULT_COL_SIZE : 0);
+        }, 0);
+    },
+    [props.columns, columnWidths]
+  );
 
-  const calculateRightPosition = (index: number) => {
-    return props.columns.slice(index + 1).reduce((acc, col) => {
-      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
-      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
-    }, 0);
-  };
-
-  const tableWidth = useMemo(() => {
-    return props.columns.reduce((acc, col) => {
-      const columnId = "accessorKey" in col ? col.accessorKey : col.id;
-      return acc + (columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : 0);
-    }, 0);
-  }, [props.columns, columnWidths]);
+  const rightFixedColumnIndex = props.columns.findIndex(
+    (col) => ("accessorKey" in col ? col.accessorKey : col.id) === props.rightFixedColumn
+  );
 
   return (
     <>
-      <Box overflowX="auto" width="100%">
-        <ScrollShadowBox
-          scrollRef={ref}
-          left={fixedColumnsSet.size ? `${calculateLeftPosition(fixedColumnsSet.size)}px` : "0px"}
-          right="75px"
-          bottom="16px"
-        >
-          <Box
-            ref={ref}
-            position="relative"
-            overflowX="auto"
-            width="100%"
-            maxWidth={`${tableWidth}px`}
-            cursor={"grab"}
-            userSelect="none"
-          >
-            <Table variant={props?.variant || "primary"} width="100%">
-              <Thead>
-                {table.getHeaderGroups().map((headerGroup, headerGroupIndex) => (
-                  <Tr key={`headerGroup_${headerGroupIndex}`}>
-                    {headerGroup.headers.map((header, headerIndex) => {
-                      const isFixedLeft = fixedColumnsSet.has(header.column.id);
-                      const isFixedRight = header.column.id === props.rightFixedColumn;
-                      const columnId =
-                        "accessorKey" in header.column.columnDef
-                          ? header.column.columnDef.accessorKey
-                          : header.column.id;
-                      const width = columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : DEFAULT_COL_SIZE;
-                      const left = isFixedLeft ? calculateLeftPosition(headerIndex) : undefined;
-                      const right = isFixedRight ? calculateRightPosition(headerIndex) : undefined;
+      <ConditionalScrollShadowBox
+        tableWidth={tableWidth}
+        leftPosition={calculatePosition(fixedColumnsSet.size, "left")}
+        rightPosition={rightFixedColumnIndex >= 0 ? calculatePosition(rightFixedColumnIndex - 1, "right") : 0}
+      >
+        <Table ref={tableRef} variant={props?.variant || "primary"} width="100%">
+          <Thead>
+            {table.getHeaderGroups().map((headerGroup, headerGroupIndex) => (
+              <Tr key={`headerGroup_${headerGroupIndex}`}>
+                {headerGroup.headers.map((header, headerIndex) => {
+                  const isFixedLeft = fixedColumnsSet.has(header.column.id);
+                  const isFixedRight = header.column.id === props.rightFixedColumn;
+                  const columnId =
+                    "accessorKey" in header.column.columnDef ? header.column.columnDef.accessorKey : header.column.id;
+                  const width = columnId ? columnWidths[columnId as string] || "auto" : "auto";
 
-                      return (
-                        <Th
-                          key={`header_${headerIndex}`}
-                          colSpan={header.colSpan}
-                          cursor={header.column.getCanSort() ? "pointer" : "default"}
-                          userSelect={header.column.getCanSort() ? "none" : "initial"}
-                          onClick={header.column.getToggleSortingHandler()}
-                          _hover={
-                            header.column.getCanSort() && !header.column.getIsSorted()
-                              ? {
-                                  backgroundColor: "grey.100",
-                                  "::after": {
-                                    color: "grey.500",
-                                    content: '"▼"',
-                                    marginLeft: "-14px",
-                                  },
-                                }
-                              : undefined
-                          }
-                          w={`${width}px`}
-                          position={isFixedLeft || isFixedRight ? "sticky" : undefined}
-                          left={isFixedLeft ? `${left}px` : undefined}
-                          right={isFixedRight ? `${right}px` : undefined}
-                          zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
-                          bg={isFixedLeft || isFixedRight ? "white" : undefined}
-                        >
-                          {header.isPlaceholder ? null : (
-                            <>
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                              <Box as="span" display="inline-block" w="14px">
-                                {{
-                                  asc: "▲",
-                                  desc: "▼",
-                                }[header.column.getIsSorted() as string] ?? null}
-                              </Box>
-                            </>
-                          )}
-                        </Th>
-                      );
-                    })}
-                  </Tr>
-                ))}
-              </Thead>
-              <Tbody>
-                {props.loading ? (
-                  <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
-                ) : table.getRowModel().rows.length === 0 ? (
-                  <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
-                    <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
-                      {props.noDataMessage ?? "Aucun résultat"}
-                    </Td>
-                  </Tr>
-                ) : (
-                  table.getRowModel().rows.map((row, rowIndex) => {
-                    const rowBg = rowIndex % 2 === 0 ? "gray.50" : "white";
-                    return (
-                      <Fragment key={`fragment_${rowIndex}`}>
-                        <Tr
-                          key={`row_${rowIndex}`}
-                          borderLeftWidth={row.original.prominent ? "4px" : ""}
-                          borderLeftColor="blue_cumulus_main"
-                          bg={rowBg}
-                        >
-                          {row.getVisibleCells().map((cell, cellIndex) => {
-                            const isFixedLeft = fixedColumnsSet.has(cell.column.id);
-                            const isFixedRight = cell.column.id === props.rightFixedColumn;
-                            const columnId =
-                              "accessorKey" in cell.column.columnDef
-                                ? cell.column.columnDef.accessorKey
-                                : cell.column.id;
-                            const width = columnId ? columnWidths[columnId] || DEFAULT_COL_SIZE : DEFAULT_COL_SIZE;
-                            const left = isFixedLeft ? calculateLeftPosition(cellIndex) : undefined;
-                            const right = isFixedRight ? calculateRightPosition(cellIndex) : undefined;
+                  return (
+                    <Th
+                      key={`header_${headerIndex}`}
+                      colSpan={header.colSpan}
+                      cursor={header.column.getCanSort() ? "pointer" : "default"}
+                      userSelect={header.column.getCanSort() ? "none" : "initial"}
+                      onClick={header.column.getToggleSortingHandler()}
+                      _hover={
+                        header.column.getCanSort() && !header.column.getIsSorted()
+                          ? {
+                              backgroundColor: "grey.100",
+                              "::after": {
+                                color: "grey.500",
+                                content: '"▼"',
+                                marginLeft: "-14px",
+                              },
+                            }
+                          : undefined
+                      }
+                      w={`${width}px`}
+                      paddingBottom={3}
+                      position={isFixedLeft || isFixedRight ? "sticky" : undefined}
+                      left={isFixedLeft ? `${calculatePosition(headerIndex, "left")}px` : undefined}
+                      right={isFixedRight ? `${calculatePosition(headerIndex, "right")}px` : undefined}
+                      zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
+                      bg={isFixedLeft || isFixedRight ? "white" : undefined}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          <Box as="span" display="inline-block" w="14px">
+                            {{
+                              asc: "▲",
+                              desc: "▼",
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </Box>
+                        </>
+                      )}
+                    </Th>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Thead>
+          <Tbody>
+            {props.loading ? (
+              <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height={`${DEFAULT_ROW_HEIGHT}px`} />
+            ) : table.getRowModel().rows.length === 0 ? (
+              <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
+                <Td
+                  key="noDataCell"
+                  colSpan={99}
+                  h={`${DEFAULT_ROW_HEIGHT}px`}
+                  textAlign="center"
+                  padding={3}
+                  height={props.isRowExpanded ? "auto" : `${DEFAULT_ROW_HEIGHT}px`}
+                >
+                  {props.noDataMessage ?? "Aucun résultat"}
+                </Td>
+              </Tr>
+            ) : (
+              table.getRowModel().rows.map((row, rowIndex) => {
+                const rowBg = rowIndex % 2 === 0 ? "gray.50" : "white";
+                return (
+                  <Fragment key={`fragment_${rowIndex}`}>
+                    <Tr
+                      key={`row_${rowIndex}`}
+                      borderLeftWidth={row.original.prominent ? "4px" : ""}
+                      borderLeftColor="blue_cumulus_main"
+                      bg={rowBg}
+                      height={props.isRowExpanded ? "auto" : `${DEFAULT_ROW_HEIGHT}px`}
+                    >
+                      {row.getVisibleCells().map((cell, cellIndex) => {
+                        const isFixedLeft = fixedColumnsSet.has(cell.column.id);
+                        const isFixedRight = cell.column.id === props.rightFixedColumn;
+                        const columnId =
+                          "accessorKey" in cell.column.columnDef ? cell.column.columnDef.accessorKey : cell.column.id;
+                        const width = columnId ? columnWidths[columnId as string] || "auto" : "auto";
 
-                            return (
-                              <Td
-                                key={`cellContent_${cellIndex}`}
-                                position={isFixedLeft || isFixedRight ? "sticky" : undefined}
-                                left={isFixedLeft ? `${left}px` : undefined}
-                                right={isFixedRight ? `${right}px` : undefined}
-                                zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
-                                bg={rowBg}
-                                minW={`${width}px`}
-                              >
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                              </Td>
-                            );
-                          })}
-                        </Tr>
+                        return (
+                          <Td
+                            key={`cellContent_${cellIndex}`}
+                            position={isFixedLeft || isFixedRight ? "sticky" : undefined}
+                            left={isFixedLeft ? `${calculatePosition(cellIndex, "left")}px` : undefined}
+                            right={isFixedRight ? `${calculatePosition(cellIndex, "right")}px` : undefined}
+                            zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
+                            bg={rowBg}
+                            minW={`${width}px`}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
 
-                        {row.getIsExpanded() && (
-                          <Tr key={`rowExpanded_${rowIndex}`}>
-                            <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
-                              {props?.renderSubComponent?.(row)}
-                            </Td>
-                          </Tr>
-                        )}
+                    {row.getIsExpanded() && (
+                      <Tr key={`rowExpanded_${rowIndex}`}>
+                        <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
+                          {props?.renderSubComponent?.(row)}
+                        </Td>
+                      </Tr>
+                    )}
 
-                        {props.renderDivider && (
-                          <Tr key={`rowDivider_${rowIndex}`}>
-                            <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
-                              {props?.renderDivider?.()}
-                            </Td>
-                          </Tr>
-                        )}
-                      </Fragment>
-                    );
-                  })
-                )}
-              </Tbody>
-            </Table>
-          </Box>
-        </ScrollShadowBox>
-      </Box>
+                    {props.renderDivider && (
+                      <Tr key={`rowDivider_${rowIndex}`}>
+                        <Td colSpan={row.getVisibleCells().length} bg={rowBg}>
+                          {props?.renderDivider?.()}
+                        </Td>
+                      </Tr>
+                    )}
+                  </Fragment>
+                );
+              })
+            )}
+          </Tbody>
+        </Table>
+      </ConditionalScrollShadowBox>
 
       {(props.showPagination ?? true) && (
         <HStack mt={8} spacing={3} justifyContent="space-between">
@@ -264,7 +262,6 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
             <Button variant="unstyled" onClick={() => previousPage()} isDisabled={!table.getCanPreviousPage()}>
               <ChevronLeftIcon />
             </Button>
-
             {table.getState().pagination.pageIndex - 1 > 0 && (
               <Button variant="unstyled" onClick={() => changePage(table.getState().pagination.pageIndex - 2)}>
                 {table.getState().pagination.pageIndex - 1}
@@ -288,7 +285,6 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
                 {table.getState().pagination.pageIndex + 3}
               </Button>
             )}
-
             <Button variant="unstyled" onClick={() => nextPage()} isDisabled={!table.getCanNextPage()}>
               <ChevronRightIcon />
             </Button>
@@ -300,7 +296,6 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
               <LastPageIcon />
             </Button>
           </HStack>
-
           <HStack spacing={3} justifyContent="flex-end">
             <Select
               variant="filled"
@@ -321,6 +316,6 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
       )}
     </>
   );
-}
+};
 
 export default TableWithPagination;

@@ -11,7 +11,7 @@ import { AddFill, SubtractLine } from "@/theme/components/icons";
 
 const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
   {
-    size: 300,
+    size: 250,
     header: () => "Apprenant",
     accessorKey: "apprenant",
     cell: ({ row }) => (
@@ -19,7 +19,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     ),
   },
   {
-    size: 200,
+    size: 170,
     header: () => "Date de naissance",
     accessorKey: "birthdate",
     cell: ({ row }) => (
@@ -27,37 +27,37 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     ),
   },
   {
-    size: 300,
+    size: 130,
     header: () => "Statut",
     accessorKey: "status",
     cell: ({ row }) => <EffectifStatutTag nature={row.original.statut_apprenant} />,
   },
   {
-    size: 200,
+    size: 170,
     header: () => "Code Diplôme",
     accessorKey: "code_diplome",
     cell: ({ row }) => <Text fontSize="1rem">{row.original.formation_cfd}</Text>,
   },
   {
-    size: 200,
+    size: 180,
     header: () => "RNCP",
     accessorKey: "code_rncp",
     cell: ({ row }) => <Text fontSize="1rem">{row.original.formation_rncp}</Text>,
   },
   {
-    size: 200,
+    size: 150,
     header: () => "Heure d'envoi",
     accessorKey: "processed_at",
     cell: ({ row }) => <Text fontSize="1rem">{formatDateHourMinutesSecondsMs(row.original.processed_at)}</Text>,
   },
   {
-    size: 100,
+    size: 80,
     header: () => "Erreurs",
     accessorKey: "errors",
     cell: ({ row }) => <Text fontSize="1rem">{row.original.validation_errors?.length}</Text>,
   },
   {
-    size: 100,
+    size: 70,
     header: () => "",
     accessorKey: "expander",
     cell: ({ row, table }) => {

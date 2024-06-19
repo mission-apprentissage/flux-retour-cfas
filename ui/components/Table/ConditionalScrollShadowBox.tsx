@@ -1,0 +1,48 @@
+import { Box } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+
+import { useDraggableScroll } from "@/hooks/useDraggableScroll";
+
+import { ScrollShadowBox } from "../ScrollShadowBox/ScrollShadowBox";
+
+interface ConditionalScrollShadowBoxProps {
+  children: React.ReactNode;
+  tableWidth: number;
+  leftPosition?: number;
+  rightPosition?: number;
+}
+
+const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
+  children,
+  tableWidth,
+  leftPosition,
+  rightPosition,
+  ...props
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { ref } = useDraggableScroll();
+  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const width = containerRef.current.clientWidth;
+      setHasHorizontalScroll(tableWidth > width);
+    }
+  }, [tableWidth, children]);
+
+  return (
+    <Box ref={containerRef} position="relative" overflow="hidden" width="100%" height="100%" {...props}>
+      {hasHorizontalScroll ? (
+        <ScrollShadowBox scrollRef={ref} left={`${leftPosition}px`} right={`${rightPosition}px`} bottom="16px">
+          <Box ref={ref} position="relative" overflowX="auto" width="100%" cursor="grab" userSelect="none">
+            {children}
+          </Box>
+        </ScrollShadowBox>
+      ) : (
+        <div>{children}</div>
+      )}
+    </Box>
+  );
+};
+
+export default ConditionalScrollShadowBox;
