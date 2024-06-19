@@ -359,7 +359,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
                   />
                 )}
-                {!organisme.is_transmission_target && <InfoTransmissionDeca date={null} />}
+                {!organisme.is_transmission_target && <InfoTransmissionDeca />}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}

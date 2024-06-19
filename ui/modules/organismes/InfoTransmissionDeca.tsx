@@ -4,7 +4,7 @@ import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Checkbox } from "@/theme/components/icons";
 
 interface InfoTransmissionDecaProps {
-  date: Date | null;
+  date?: Date;
 }
 function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
   const Tooltip = () => (
