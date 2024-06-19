@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { Acl } from "shared/constants/permissions";
+import { IOrganisation } from "shared/models";
 
 import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -17,11 +18,14 @@ import {
 
 export const buildDECAFilter = (decaMode) => (decaMode ? { is_deca_compatible: true } : {});
 
-// Attention ca marche pas, il faut ensuite merger par departement et sommer les valeurs
-export const getIndicateursEffectifsParDepartement = async (filters: DateFilters & TerritoireFilters, acl: Acl) => {
+export const getIndicateursEffectifsParDepartement = async (
+  filters: DateFilters & TerritoireFilters,
+  acl: Acl,
+  organisation?: IOrganisation
+) => {
   const indicateurs = [
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false)),
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true)),
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false, organisation)),
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true, organisation)),
   ];
 
   const mapDepartement = indicateurs.reduce((acc, { departement, ...rest }) => {
