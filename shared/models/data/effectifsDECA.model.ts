@@ -88,6 +88,21 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.formation.opcos": 1 }, {}],
 ];
 
+const zodOverride = {
+  apprenant: z.object({
+    situation_avant_contrat: z.number().nullish(),
+    telephone: z.string().nullish(),
+    nationalite: z.number().nullish(),
+    adresse: z.any(),
+  }),
+  formation: z.object({
+    cfd: z.string().nullish(),
+  }),
+  contrat: z.object({
+    type_employeur: z.number().nullish(),
+  }),
+};
+
 const StatutApprenantEnum = zodEnumFromArray(
   STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
 );
@@ -125,14 +140,10 @@ export const zEffectifDECA = z.object({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
     })
     .regex(YEAR_RANGE_REGEX),
-  apprenant: zApprenant.merge(
-    z.object({
-      situation_avant_contrat: z.number().nullish(),
-    })
-  ),
-  formation: zFormationEffectif.nullish(),
+  apprenant: zApprenant.merge(zodOverride.apprenant),
+  formation: zFormationEffectif.merge(zodOverride.formation).nullish(),
   contrats: z
-    .array(zContrat, {
+    .array(zContrat.merge(zodOverride.contrat), {
       // Note: anciennement dans apprenant.contrats
       description: "Historique des contrats de l'apprenant",
     })
