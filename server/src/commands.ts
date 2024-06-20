@@ -646,6 +646,12 @@ program
   .action(createJobAction("send-reminder-emails"));
 
 program
+  .command("tmp:patches:update-deca-formation")
+  .description("Mise a jour des formations des données DECA")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-deca-formation"));
+
+program
   .command("dev:list-http-endpoints")
   .description("Liste les routes du serveur HTTP")
   .action(async () => {
