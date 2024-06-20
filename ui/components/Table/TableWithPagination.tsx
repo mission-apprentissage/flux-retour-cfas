@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr, Flex } from "@chakra-ui/react";
 import {
   ColumnDef,
   Row,
@@ -18,7 +18,7 @@ import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "
 import ConditionalScrollShadowBox from "./ConditionalScrollShadowBox";
 
 interface TableWithPaginationProps<T> extends SystemProps {
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T>[];
   data: T[];
   noDataMessage?: string;
   loading?: boolean;
@@ -28,21 +28,23 @@ interface TableWithPaginationProps<T> extends SystemProps {
   variant?: string;
   showPagination?: boolean;
   pageCount: number;
-  onSortingChange?: (state: SortingState) => any;
+  onSortingChange?: (state: SortingState) => void;
   renderSubComponent?: (row: Row<T>) => React.ReactElement;
   renderDivider?: () => React.ReactElement;
-  onPageChange?: (page: number) => any;
-  onLimitChange?: (limit: number) => any;
+  onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
   fixedColumns?: string[];
   rightFixedColumn?: string;
+  enableHorizontalScroll?: boolean;
 }
 
-const DEFAULT_COL_SIZE = 180;
+const DEFAULT_COL_SIZE = 220;
 const DEFAULT_ROW_HEIGHT = 60;
 
 const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent?: boolean }>) => {
   const tableRef = useRef<HTMLTableElement>(null);
   const [tableWidth, setTableWidth] = useState(0);
+  const [sortingState, setSortingState] = useState<SortingState>(props.sortingState || []);
 
   useEffect(() => {
     if (tableRef.current) {
@@ -54,11 +56,17 @@ const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent
     data: props.data,
     columns: props.columns,
     manualPagination: true,
+    manualSorting: true,
     state: {
       pagination: props.paginationState,
-      sorting: props.sortingState,
+      sorting: sortingState,
     },
     pageCount: props.pageCount,
+    onSortingChange: (updater) => {
+      const newState = typeof updater === "function" ? updater(sortingState) : updater;
+      setSortingState(newState);
+      props.onSortingChange?.(newState);
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowCanExpand: () => true,
@@ -123,6 +131,7 @@ const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent
         tableWidth={tableWidth}
         leftPosition={calculatePosition(fixedColumnsSet.size, "left")}
         rightPosition={rightFixedColumnIndex >= 0 ? calculatePosition(rightFixedColumnIndex - 1, "right") : 0}
+        enableHorizontalScroll={props.enableHorizontalScroll}
       >
         <Table ref={tableRef} variant={props?.variant || "primary"} width="100%">
           <Thead>
@@ -143,13 +152,12 @@ const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent
                       userSelect={header.column.getCanSort() ? "none" : "initial"}
                       onClick={header.column.getToggleSortingHandler()}
                       _hover={
-                        header.column.getCanSort() && !header.column.getIsSorted()
+                        header.column.getCanSort()
                           ? {
                               backgroundColor: "grey.100",
-                              "::after": {
-                                color: "grey.500",
-                                content: '"▼"',
-                                marginLeft: "-14px",
+                              "> div > .sort-icon": {
+                                display: "inline-block",
+                                color: "black",
                               },
                             }
                           : undefined
@@ -163,15 +171,22 @@ const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent
                       bg={isFixedLeft || isFixedRight ? "white" : undefined}
                     >
                       {header.isPlaceholder ? null : (
-                        <>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          <Box as="span" display="inline-block" w="14px">
-                            {{
-                              asc: "▲",
-                              desc: "▼",
-                            }[header.column.getIsSorted() as string] ?? null}
+                        <Flex justify="space-between" align="center">
+                          <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
+                          <Box
+                            ml={2}
+                            className="sort-icon"
+                            display={header.column.getCanSort() ? "inline-block" : "none"}
+                          >
+                            {header.column.getIsSorted() === "desc" && <Box as="span">▲</Box>}
+                            {header.column.getIsSorted() === "asc" && <Box as="span">▼</Box>}
+                            {header.column.getIsSorted() === false && (
+                              <Box as="span" color="grey.400">
+                                ▼
+                              </Box>
+                            )}
                           </Box>
-                        </>
+                        </Flex>
                       )}
                     </Th>
                   );
@@ -222,7 +237,7 @@ const TableWithPagination = <T,>(props: TableWithPaginationProps<T & { prominent
                             right={isFixedRight ? `${calculatePosition(cellIndex, "right")}px` : undefined}
                             zIndex={isFixedLeft || isFixedRight ? 1 : undefined}
                             bg={rowBg}
-                            minW={`${width}px`}
+                            minW={props.enableHorizontalScroll ? (width === "auto" ? "auto" : `${width}px`) : undefined}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </Td>

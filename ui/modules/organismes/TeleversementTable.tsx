@@ -1,11 +1,15 @@
 import { Box, Flex, HStack } from "@chakra-ui/react";
-import { ColumnDef } from "@tanstack/react-table";
-import React, { useState, useMemo } from "react";
+import { ColumnDef, SortingState } from "@tanstack/react-table";
+import React, { useState, useMemo, useCallback } from "react";
+import { normalize } from "shared";
 
 import { televersementHeaders } from "@/common/constants/televersementHeaders";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import TableWithPagination from "@/components/Table/TableWithPagination";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Alert, CheckboxCircle } from "@/theme/components/icons";
+
+import headerTooltips from "./headerTooltips";
 
 interface TeleversementTableProps {
   data: any[];
@@ -27,22 +31,66 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   columnsWithErrors,
   showOnlyColumnsAndLinesWithErrors,
 }) => {
+  const dataWithAdditionalInfo = data.map((row, index) => ({
+    lineNumber: index + 2,
+    ...row,
+    status: row.errors.length === 0 ? "Valide" : `${row.errors.length} erreur${row.errors.length > 1 ? "s" : ""}`,
+  }));
+
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
+  const [sortingState, setSortingState] = useState<SortingState>([]);
+  const [sortedData, setSortedData] = useState(dataWithAdditionalInfo);
+
   const start = paginationState.pageIndex * paginationState.pageSize;
   const end = start + paginationState.pageSize;
 
+  const handleSortingChange = useCallback(
+    (newSortingState: SortingState) => {
+      setSortingState(newSortingState);
+
+      const sorted = [...dataWithAdditionalInfo].sort((a, b) => {
+        for (const sort of newSortingState) {
+          const { id, desc } = sort;
+
+          const fieldA = a[id];
+          const fieldB = b[id];
+
+          if (fieldA === fieldB) continue;
+
+          if (desc) {
+            return normalize(fieldA) < normalize(fieldB) ? 1 : -1;
+          } else {
+            return normalize(fieldA) > normalize(fieldB) ? 1 : -1;
+          }
+        }
+        return 0;
+      });
+
+      setSortedData(sorted);
+    },
+    [dataWithAdditionalInfo]
+  );
+
   const filteredData = useMemo(() => {
     if (showOnlyColumnsAndLinesWithErrors) {
-      return data.filter((row) => row.errors && row.errors.length > 0);
+      return dataWithAdditionalInfo.filter((row) => row.errors && row.errors.length > 0);
     }
-    return data;
-  }, [data, showOnlyColumnsAndLinesWithErrors]);
+    return dataWithAdditionalInfo;
+  }, [dataWithAdditionalInfo, showOnlyColumnsAndLinesWithErrors]);
 
-  const paginatedData = filteredData.slice(start, end);
+  const displayedData = useMemo(() => {
+    if (sortingState.length === 0) {
+      return filteredData;
+    }
+
+    return sortedData;
+  }, [filteredData, sortingState, sortedData]);
+
+  const paginatedData = displayedData.slice(start, end);
 
   const filteredHeaders = useMemo(() => {
     if (showOnlyColumnsAndLinesWithErrors && columnsWithErrors.length) {
@@ -61,14 +109,15 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   const columns: ColumnDef<any, any>[] = useMemo(
     () => [
       {
-        accessorKey: "line",
-        header: "Ligne",
-        cell: (info) => info.row.index + 2 + start,
-        size: 75,
+        accessorKey: "lineNumber",
+        header: () => <Header header="Ligne" />,
+        cell: (info) => info.row.original.lineNumber,
+        size: 100,
+        enableSorting: false,
       },
       ...filteredHeaders.map((header) => ({
         accessorKey: header,
-        header,
+        header: () => <Header header={header} />,
         cell: (info) => {
           const row = info.row.original;
           const value = isDateField(header) ? fromIsoLikeDateStringToFrenchDate(row[header]) : row[header];
@@ -83,20 +132,20 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
       })),
       {
         accessorKey: "status",
-        header: "Statut",
-        size: 120,
+        header: () => <Header header="Status" />,
+        size: 150,
         cell: (info) => {
-          const errors = info.row.original.errors;
-          return errors.length === 0 ? (
+          const status = info.row.original.status;
+          return status === "Valide" ? (
             <HStack color="#18753C">
               <Flex gap={1} justify="center" alignItems="center">
-                <CheckboxCircle /> Valide
+                <CheckboxCircle /> {status}
               </Flex>
             </HStack>
           ) : (
             <HStack color="#B34000">
               <Flex gap={1} justify="center" alignItems="center">
-                <Alert width="18" height="18" /> {errors.length} erreur{errors.length > 1 ? "s" : ""}
+                <Alert width="18" height="18" /> {status}
               </Flex>
             </HStack>
           );
@@ -106,7 +155,7 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
     [filteredHeaders, start]
   );
 
-  const fixedColumns = ["line", "nom_apprenant"];
+  const fixedColumns = ["lineNumber", "nom_apprenant"];
 
   return (
     <>
@@ -119,13 +168,30 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
         paginationState={paginationState}
         onPageChange={(pageIndex) => setPaginationState((prev) => ({ ...prev, pageIndex }))}
         onLimitChange={(pageSize) => setPaginationState((prev) => ({ ...prev, pageSize, pageIndex: 0 }))}
+        onSortingChange={handleSortingChange}
         pageCount={Math.ceil(filteredData.length / paginationState.pageSize)}
         showPagination={true}
         fixedColumns={fixedColumns}
         rightFixedColumn="status"
+        enableHorizontalScroll={true}
       />
     </>
   );
 };
 
 export default TeleversementTable;
+
+function Header({ header }: { header: string }) {
+  if (headerTooltips[header]) {
+    return (
+      <>
+        {header}
+        <InfoTooltip
+          contentComponent={() => <Box padding="2w">{headerTooltips[header]}</Box>}
+          aria-label="État de la donnée."
+        />
+      </>
+    );
+  }
+  return <>{header}</>;
+}

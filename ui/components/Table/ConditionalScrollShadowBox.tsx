@@ -10,6 +10,7 @@ interface ConditionalScrollShadowBoxProps {
   tableWidth: number;
   leftPosition?: number;
   rightPosition?: number;
+  enableHorizontalScroll?: boolean;
 }
 
 const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
@@ -17,14 +18,15 @@ const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
   tableWidth,
   leftPosition,
   rightPosition,
+  enableHorizontalScroll = false,
   ...props
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { ref } = useDraggableScroll();
-  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
+  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(enableHorizontalScroll);
 
   useEffect(() => {
-    if (containerRef.current) {
+    if (containerRef.current && !enableHorizontalScroll) {
       const width = containerRef.current.clientWidth;
       setHasHorizontalScroll(tableWidth > width);
     }
@@ -32,14 +34,14 @@ const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
 
   return (
     <Box ref={containerRef} position="relative" overflow="hidden" width="100%" height="100%" {...props}>
-      {hasHorizontalScroll ? (
+      {enableHorizontalScroll && hasHorizontalScroll ? (
         <ScrollShadowBox scrollRef={ref} left={`${leftPosition}px`} right={`${rightPosition}px`} bottom="16px">
           <Box ref={ref} position="relative" overflowX="auto" width="100%" cursor="grab" userSelect="none">
             {children}
           </Box>
         </ScrollShadowBox>
       ) : (
-        <div>{children}</div>
+        <>{children}</>
       )}
     </Box>
   );

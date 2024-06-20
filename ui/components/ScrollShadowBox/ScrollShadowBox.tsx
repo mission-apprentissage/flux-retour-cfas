@@ -51,7 +51,7 @@ export const ScrollShadowBox: FC<ScrollShadowBoxProps> = ({
           top: top,
           bottom: bottom,
           pointerEvents: "none",
-          zIndex: "20",
+          zIndex: "2",
         },
         "&::before": {
           left: left,

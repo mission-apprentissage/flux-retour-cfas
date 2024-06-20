@@ -1,4 +1,4 @@
-interface FieldConfig {
+export interface FieldConfig {
   type: "string" | "date" | "boolean";
   mandatory: boolean;
 }

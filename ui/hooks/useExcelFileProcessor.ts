@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { cyrb53Hash, normalize } from "shared";
 import XLSX from "xlsx";
 
-import { televersementHeaders } from "@/common/constants/televersementHeaders";
+import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
@@ -40,7 +40,6 @@ const initialState: StateType = {
   showOnlyColumnsAndLinesWithErrors: false,
   status: "idle",
 };
-
 const useExcelFileProcessor = (organismeId: string) => {
   const { toastError } = useToaster();
   const [state, setState] = useState<StateType>(initialState);
@@ -140,6 +139,14 @@ const useExcelFileProcessor = (organismeId: string) => {
           missingHeaders: validHeaders.filter((header) => !cleanHeaders.includes(header)),
         }));
 
+        const mandatoryHeaders = getMandatoryHeaders(televersementHeaders);
+        const missingMandatoryHeaders = filterMissingHeaders(state.missingHeaders, mandatoryHeaders);
+
+        setState((prevState) => ({
+          ...prevState,
+          missingHeaders: missingMandatoryHeaders,
+        }));
+
         const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error: any) => {
           const row = error.path[0];
           const message = error.message;
@@ -213,9 +220,14 @@ const useExcelFileProcessor = (organismeId: string) => {
   };
 };
 
-export default useExcelFileProcessor;
+function getMandatoryHeaders(headers: Record<string, FieldConfig>) {
+  return Object.keys(headers).filter((header) => headers[header].mandatory);
+}
 
-// Enrich data with source and id_erp_apprenant
+function filterMissingHeaders(missingHeaders: string[], mandatoryHeaders: string[]) {
+  return missingHeaders.filter((header) => mandatoryHeaders.includes(header));
+}
+
 function toEffectifsQueue(data: any[]) {
   return data.map((e) => ({
     ...e,
@@ -228,3 +240,5 @@ function toEffectifsQueue(data: any[]) {
     ),
   }));
 }
+
+export default useExcelFileProcessor;
