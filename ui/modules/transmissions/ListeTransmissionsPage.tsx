@@ -29,7 +29,7 @@ const ListeTransmissionsPage = (props: ListeTransmissionsPage) => {
         </Heading>
         <Text mb={16}>
           Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des
-          éléments manquants et/ou invalides sont listés dans un rapport complet téléchargeable.
+          éléments manquants et/ou invalides sont listés dans un rapport complet.
         </Text>
         <TransmissionByDayTable organisme={props.organisme}></TransmissionByDayTable>
       </Container>
