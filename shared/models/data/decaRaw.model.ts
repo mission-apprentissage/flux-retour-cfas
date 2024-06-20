@@ -75,4 +75,4 @@ const zDecaRaw = z.object({
 
 export type IDecaRaw = z.infer<typeof zDecaRaw>;
 
-export default { zod: zDecaRaw, indexes, collectionName };
+export default { zod: z.any(), indexes, collectionName };

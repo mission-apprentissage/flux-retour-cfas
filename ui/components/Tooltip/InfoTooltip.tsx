@@ -29,7 +29,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ headerComponent, conte
         minWidth={6}
         width={6}
         p={0}
-        icon={<InfoCircle w="14px" h="14px" color="disablegrey" fontWeight="normal" />}
+        icon={<InfoCircle w="18px" h="18px" color="disablegrey" fontWeight="normal" />}
         onClick={(e) => {
           e.stopPropagation();
         }}

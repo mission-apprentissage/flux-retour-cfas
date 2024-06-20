@@ -125,7 +125,11 @@ export const zEffectifDECA = z.object({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
     })
     .regex(YEAR_RANGE_REGEX),
-  apprenant: zApprenant,
+  apprenant: zApprenant.merge(
+    z.object({
+      situation_avant_contrat: z.number().nullish(),
+    })
+  ),
   formation: zFormationEffectif.nullish(),
   contrats: z
     .array(zContrat, {

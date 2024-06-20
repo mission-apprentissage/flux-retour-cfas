@@ -838,6 +838,7 @@ export function getOrganismeProjection(
     fiabilisation_statut: 1,
     has_transmission_errors: 1,
     transmission_errors_date: 1,
+    is_transmission_target: 1,
     erps: permissionsOrganisme.infoTransmissionEffectifs,
     erp_unsupported: permissionsOrganisme.infoTransmissionEffectifs,
     first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
