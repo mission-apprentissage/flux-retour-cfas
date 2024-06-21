@@ -14,6 +14,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     size: 300,
     header: () => "Apprenant",
     accessorKey: "apprenant",
+    enableSorting: false,
     cell: ({ row }) => (
       <Text fontSize="1rem" padding={1}>{`${row.original.prenom_apprenant} ${row.original.nom_apprenant}`}</Text>
     ),
@@ -22,6 +23,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     size: 200,
     header: () => "Date de naissance",
     accessorKey: "birthdate",
+    enableSorting: false,
     cell: ({ row }) => (
       <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.date_de_naissance_apprenant)}</Text>
     ),
@@ -30,36 +32,42 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     size: 300,
     header: () => "Statut",
     accessorKey: "status",
+    enableSorting: false,
     cell: ({ row }) => <EffectifStatutTag nature={row.original.statut_apprenant} />,
   },
   {
     size: 200,
     header: () => "Code Diplôme",
     accessorKey: "code_diplome",
+    enableSorting: false,
     cell: ({ row }) => <Text fontSize="1rem">{row.original.formation_cfd}</Text>,
   },
   {
     size: 200,
     header: () => "RNCP",
     accessorKey: "code_rncp",
+    enableSorting: false,
     cell: ({ row }) => <Text fontSize="1rem">{row.original.formation_rncp}</Text>,
   },
   {
     size: 200,
     header: () => "Heure d'envoi",
     accessorKey: "processed_at",
+    enableSorting: false,
     cell: ({ row }) => <Text fontSize="1rem">{formatDateHourMinutesSecondsMs(row.original.processed_at)}</Text>,
   },
   {
     size: 100,
     header: () => "Erreurs",
     accessorKey: "errors",
+    enableSorting: false,
     cell: ({ row }) => <Text fontSize="1rem">{row.original.validation_errors?.length}</Text>,
   },
   {
     size: 100,
     header: () => "",
     accessorKey: "expander",
+    enableSorting: false,
     cell: ({ row, table }) => {
       return row.getCanExpand() ? (
         <Button
