@@ -1,6 +1,6 @@
 import { Box, Flex, HStack } from "@chakra-ui/react";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { normalize } from "shared";
 
 import { televersementHeaders } from "@/common/constants/televersementHeaders";
@@ -31,11 +31,15 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   columnsWithErrors,
   showOnlyColumnsAndLinesWithErrors,
 }) => {
-  const dataWithAdditionalInfo = data.map((row, index) => ({
-    lineNumber: index + 2,
-    ...row,
-    status: row.errors.length === 0 ? "Valide" : `${row.errors.length} erreur${row.errors.length > 1 ? "s" : ""}`,
-  }));
+  const dataWithAdditionalInfo = useMemo(
+    () =>
+      data.map((row, index) => ({
+        lineNumber: index + 2,
+        ...row,
+        status: row.errors.length === 0 ? "Valide" : `${row.errors.length} erreur${row.errors.length > 1 ? "s" : ""}`,
+      })),
+    [data]
+  );
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -45,51 +49,41 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   const [sortingState, setSortingState] = useState<SortingState>([]);
   const [sortedData, setSortedData] = useState(dataWithAdditionalInfo);
 
-  const start = paginationState.pageIndex * paginationState.pageSize;
-  const end = start + paginationState.pageSize;
-
-  const handleSortingChange = useCallback(
-    (newSortingState: SortingState) => {
-      setSortingState(newSortingState);
-
-      const sorted = [...dataWithAdditionalInfo].sort((a, b) => {
-        for (const sort of newSortingState) {
-          const { id, desc } = sort;
-
-          const fieldA = a[id];
-          const fieldB = b[id];
-
-          if (fieldA === fieldB) continue;
-
-          if (desc) {
-            return normalize(fieldA) < normalize(fieldB) ? 1 : -1;
-          } else {
-            return normalize(fieldA) > normalize(fieldB) ? 1 : -1;
-          }
-        }
-        return 0;
-      });
-
-      setSortedData(sorted);
-    },
-    [dataWithAdditionalInfo]
-  );
-
   const filteredData = useMemo(() => {
-    if (showOnlyColumnsAndLinesWithErrors) {
-      return dataWithAdditionalInfo.filter((row) => row.errors && row.errors.length > 0);
-    }
-    return dataWithAdditionalInfo;
+    return showOnlyColumnsAndLinesWithErrors
+      ? dataWithAdditionalInfo.filter((row) => row.errors && row.errors.length > 0)
+      : dataWithAdditionalInfo;
   }, [dataWithAdditionalInfo, showOnlyColumnsAndLinesWithErrors]);
 
-  const displayedData = useMemo(() => {
-    if (sortingState.length === 0) {
-      return filteredData;
-    }
+  useEffect(() => {
+    const sorted = [...filteredData].sort((a, b) => {
+      for (const sort of sortingState) {
+        const { id, desc } = sort;
+        const fieldA = a[id];
+        const fieldB = b[id];
 
-    return sortedData;
-  }, [filteredData, sortingState, sortedData]);
+        if (fieldA === fieldB) continue;
 
+        if (desc) {
+          return normalize(fieldA) < normalize(fieldB) ? 1 : -1;
+        } else {
+          return normalize(fieldA) > normalize(fieldB) ? 1 : -1;
+        }
+      }
+      return 0;
+    });
+
+    setSortedData(sorted);
+  }, [filteredData, sortingState]);
+
+  const handleSortingChange = useCallback((newSortingState: SortingState) => {
+    setSortingState(newSortingState);
+  }, []);
+
+  const displayedData = sortedData;
+
+  const start = paginationState.pageIndex * paginationState.pageSize;
+  const end = start + paginationState.pageSize;
   const paginatedData = displayedData.slice(start, end);
 
   const filteredHeaders = useMemo(() => {
@@ -152,7 +146,7 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
         },
       },
     ],
-    [filteredHeaders, start]
+    [filteredHeaders]
   );
 
   const fixedColumns = ["lineNumber", "nom_apprenant"];

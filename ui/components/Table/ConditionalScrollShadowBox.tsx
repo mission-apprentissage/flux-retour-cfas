@@ -23,10 +23,10 @@ const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { ref } = useDraggableScroll();
-  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(enableHorizontalScroll);
+  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
 
   useEffect(() => {
-    if (containerRef.current && !enableHorizontalScroll) {
+    if (containerRef.current) {
       const width = containerRef.current.clientWidth;
       setHasHorizontalScroll(tableWidth > width);
     }

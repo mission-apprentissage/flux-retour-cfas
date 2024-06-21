@@ -20,6 +20,7 @@ import { useState } from "react";
 import { TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import { _post } from "@/common/httpClient";
+import { toEffectifsQueue } from "@/common/utils/televersement";
 import SupportLink from "@/components/Links/SupportLink";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
@@ -57,16 +58,17 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   } = useExcelFileProcessor(organismeId);
 
   const handleSubmit = async () => {
+    if (errorsCount > 0 || error) {
+      toastError("Please fix the errors before submitting.");
+      setIsSubmitting(false);
+      return;
+    }
     setIsSubmitting(true);
     setStatus("processing");
-    const res = await _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, processedData);
+    const res = await _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(processedData));
     setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
   };
-
-  if (error) {
-    toastError(error);
-  }
 
   if (status === "import_success") return <TeleversementValide isMine={isMine} organismeId={organismeId} />;
 
@@ -250,8 +252,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
               isLoading={isSubmitting}
               loadingText="Import en cours"
               onClick={() => {
-                setIsSubmitting(true);
-                handleSubmit();
+                if (errorsCount === 0 && !error) {
+                  handleSubmit();
+                }
               }}
               size="md"
               variant="primary"

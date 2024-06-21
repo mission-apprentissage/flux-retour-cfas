@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { cyrb53Hash, normalize } from "shared";
 import XLSX from "xlsx";
 
 import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
+import { toEffectifsQueue } from "@/common/utils/televersement";
 
 import useToaster from "./useToaster";
 
@@ -75,8 +75,8 @@ const useExcelFileProcessor = (organismeId: string) => {
         const worksheet = workbook.Sheets[worksheetName];
         const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[];
 
-        const filteredJsonData = rawJsonData.filter((row: string[]) =>
-          row.some((cell) => cell !== null && cell !== undefined && cell.trim() !== "")
+        const filteredJsonData = rawJsonData.filter((row: any[]) =>
+          row.some((cell) => typeof cell === "string" && cell.trim() !== "")
         );
 
         if (filteredJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
@@ -87,7 +87,9 @@ const useExcelFileProcessor = (organismeId: string) => {
         }
 
         const rawHeaders = filteredJsonData[0] as string[];
-        const cleanHeaders = rawHeaders.map((header) => header.toLowerCase().replace(/\*/g, "").trim());
+        const cleanHeaders = rawHeaders.map((header) =>
+          typeof header === "string" ? header.toLowerCase().replace(/\*/g, "").trim() : ""
+        );
 
         const validHeaders = Object.keys(televersementHeaders);
         setState((prevState) => ({ ...prevState, headers: validHeaders }));
@@ -99,6 +101,14 @@ const useExcelFileProcessor = (organismeId: string) => {
           }
         });
 
+        if (Object.keys(headerMap).length === 0) {
+          const errorMsg =
+            "Le format de votre fichier n'est pas conforme. Veuillez respecter celui du fichier-modèle Excel téléchargeable.";
+          toastError(errorMsg);
+          setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
+          return;
+        }
+
         const jsonData: ProcessedDataType[] = filteredJsonData.slice(1).map((row) => {
           const rowObject: ProcessedDataType = { errors: [] };
 
@@ -106,7 +116,7 @@ const useExcelFileProcessor = (organismeId: string) => {
             const index = headerMap[header];
             if (index !== undefined) {
               const config = televersementHeaders[header];
-              const cellValue = (row as string[])[index];
+              const cellValue = (row as any[])[index];
 
               if (config) {
                 if (config.type === "date") {
@@ -226,19 +236,6 @@ function getMandatoryHeaders(headers: Record<string, FieldConfig>) {
 
 function filterMissingHeaders(missingHeaders: string[], mandatoryHeaders: string[]) {
   return missingHeaders.filter((header) => mandatoryHeaders.includes(header));
-}
-
-function toEffectifsQueue(data: any[]) {
-  return data.map((e) => ({
-    ...e,
-    // Generate a unique id for each row, based on the apprenant's name and birthdate.
-    // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693294663898159?thread_ts=1693292246.217809&cid=C02FR2L1VB8
-    id_erp_apprenant: cyrb53Hash(
-      normalize(e.prenom_apprenant || "").trim() +
-        normalize(e.nom_apprenant || "").trim() +
-        (e.date_de_naissance_apprenant || "").trim()
-    ),
-  }));
 }
 
 export default useExcelFileProcessor;
