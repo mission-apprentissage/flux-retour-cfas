@@ -60,25 +60,38 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   }, [showOnlyColumnsAndLinesWithErrors]);
 
   useEffect(() => {
+    if (sortingState.length === 0) {
+      setSortedData(filteredData);
+      return;
+    }
+
+    const { id, desc } = sortingState[0];
+
     const sorted = [...filteredData].sort((a, b) => {
-      for (const sort of sortingState) {
-        const { id, desc } = sort;
-        const fieldA = a[id];
-        const fieldB = b[id];
+      const fieldA = a[id];
+      const fieldB = b[id];
 
-        if (fieldA === fieldB) continue;
+      if (fieldA === fieldB) return 0;
 
-        if (desc) {
-          return normalize(fieldA) < normalize(fieldB) ? 1 : -1;
-        } else {
-          return normalize(fieldA) > normalize(fieldB) ? 1 : -1;
-        }
+      let comparisonResult: number;
+
+      if (fieldA === null || fieldA === undefined) {
+        comparisonResult = -1;
+      } else if (fieldB === null || fieldB === undefined) {
+        comparisonResult = 1;
+      } else if (typeof fieldA === "string" && typeof fieldB === "string") {
+        comparisonResult = normalize(fieldA).localeCompare(normalize(fieldB));
+      } else if (typeof fieldA === "number" && typeof fieldB === "number") {
+        comparisonResult = fieldA - fieldB;
+      } else {
+        comparisonResult = fieldA.toString().localeCompare(fieldB.toString());
       }
-      return 0;
+
+      return desc ? -comparisonResult : comparisonResult;
     });
 
     setSortedData(sorted);
-  }, [filteredData, sortingState]);
+  }, [filteredData, sortingState, setSortedData]);
 
   const handleSortingChange = useCallback((newSortingState: SortingState) => {
     setSortingState(newSortingState);
