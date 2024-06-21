@@ -21,6 +21,7 @@ import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/bu
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
+import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -420,6 +421,11 @@ export async function setupJobProcessor() {
       "tmp:patches:remove-metiers-from-organisme": {
         handler: async () => {
           return removeMetiersFromOrganisme();
+        },
+      },
+      "tmp:patches:update-deca-formation": {
+        handler: async () => {
+          return updateDecaFormation();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
