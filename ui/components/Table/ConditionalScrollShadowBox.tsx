@@ -22,7 +22,7 @@ const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
   ...props
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { ref } = useDraggableScroll();
+  const { ref, onMouseUp, onMouseDown, isDragging } = useDraggableScroll();
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,17 @@ const ConditionalScrollShadowBox: React.FC<ConditionalScrollShadowBoxProps> = ({
     <Box ref={containerRef} position="relative" overflow="hidden" width="100%" height="100%" {...props}>
       {enableHorizontalScroll && hasHorizontalScroll ? (
         <ScrollShadowBox scrollRef={ref} left={`${leftPosition}px`} right={`${rightPosition}px`} bottom="16px">
-          <Box ref={ref} position="relative" overflowX="auto" width="100%" cursor="grab" userSelect="none">
+          <Box
+            ref={ref}
+            onMouseDown={onMouseDown}
+            onMouseLeave={onMouseUp}
+            onMouseUp={onMouseUp}
+            position="relative"
+            overflowX="auto"
+            width="100%"
+            cursor={isDragging ? "grabbing" : "grab"}
+            userSelect="none"
+          >
             {children}
           </Box>
         </ScrollShadowBox>
