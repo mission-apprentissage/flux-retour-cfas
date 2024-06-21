@@ -56,6 +56,10 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
   }, [dataWithAdditionalInfo, showOnlyColumnsAndLinesWithErrors]);
 
   useEffect(() => {
+    setPaginationState((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [showOnlyColumnsAndLinesWithErrors]);
+
+  useEffect(() => {
     const sorted = [...filteredData].sort((a, b) => {
       for (const sort of sortingState) {
         const { id, desc } = sort;
