@@ -61,8 +61,8 @@ export const ScrollShadowBox: FC<ScrollShadowBoxProps> = ({
         },
         "&::after": {
           right: right,
-          width: shadowWidth,
-          display: showShadowRight ? "block" : "none",
+          display: "block",
+          width: showShadowRight ? shadowWidth : "1px",
           background: "linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent)",
         },
       }}
