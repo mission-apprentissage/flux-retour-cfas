@@ -1,7 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, getSIFADate, CODES_STATUT_APPRENANT } from "shared";
+import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT, StatutApprenant } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
@@ -11,39 +11,9 @@ import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
 
-export const isEligibleSIFA = (historique_statut: IEffectif["apprenant"]["historique_statut"]) => {
-  const endOfyear = getSIFADate(new Date());
-
-  const historiqueSorted = historique_statut
-    .filter(({ date_statut }) => date_statut <= endOfyear)
-    .sort((a, b) => {
-      // Si les dates sont identiques, on préfère mettre le statut "apprenti" (3) en premier
-      // pour éviter de sortir de la liste des apprenants qui sont en contrat (et en même temps inscrits)
-      // dans les résultats de SIFA
-      // cf: https://tableaudebord-apprentissage.atlassian.net/browse/TM-554
-      if (new Date(a.date_statut).getTime() === new Date(b.date_statut).getTime()) {
-        return a.valeur_statut === CODES_STATUT_APPRENANT.apprenti ? -1 : 1;
-      }
-      return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
-    });
-
-  const current = historiqueSorted[0];
-  if (current?.valeur_statut === CODES_STATUT_APPRENANT.apprenti) {
-    // Décision 18/01/2023 - Les CFAs connectés en API ne renseigne pas tjrs la date d'inscription de l'apprenant
-    // let aEteInscrit = false;
-    // for (let index = 0; index < historiqueSorted.length - 1; index++) {
-    //   const element = historiqueSorted[index];
-    //   if (element.valeur_statut === CODES_STATUT_APPRENANT.inscrit) {
-    //     aEteInscrit = true;
-    //     break;
-    //   }
-    // }
-    // if (aEteInscrit) {
-    //   return true;
-    // }
-    return true;
-  }
-  return false;
+export const isEligibleSIFA = (statutEnCours?: StatutApprenant): boolean => {
+  if (!statutEnCours) return false;
+  return statutEnCours === STATUT_APPRENANT.APPRENTI;
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
@@ -58,7 +28,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         },
       })
       .toArray()
-  ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<IEffectif>>[];
+  ).filter((effectif) => isEligibleSIFA(effectif._computed?.statut?.en_cours)) as Required<WithId<IEffectif>>[];
 
   const items: any[] = [];
   const organismesUaiCache: Record<string, string> = {};
