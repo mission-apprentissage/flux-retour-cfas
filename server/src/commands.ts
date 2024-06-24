@@ -180,6 +180,12 @@ function createJobAction(name) {
 }
 
 program
+  .command("hydrate:daily")
+  .description("Manually trigger the daily cron job")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:daily"));
+
+program
   .command("db:validate")
   .description("Validate Documents")
   .option("-q, --queued", "Run job asynchronously", false)
