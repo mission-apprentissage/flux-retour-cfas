@@ -20,18 +20,18 @@ import { zFormationEffectif } from "./effectifs/formation.part";
 const collectionName = "effectifsDECA";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [
-    {
-      organisme_id: 1,
-      annee_scolaire: 1,
-      id_erp_apprenant: 1,
-      "apprenant.nom": 1,
-      "apprenant.prenom": 1,
-      "formation.cfd": 1,
-      "formation.annee": 1,
-    },
-    { unique: true },
-  ],
+  // [
+  //   {
+  //     organisme_id: 1,
+  //     annee_scolaire: 1,
+  //     id_erp_apprenant: 1,
+  //     "apprenant.nom": 1,
+  //     "apprenant.prenom": 1,
+  //     "formation.cfd": 1,
+  //     "formation.annee": 1,
+  //   },
+  //   { unique: true },
+  // ],
   [
     {
       "apprenant.nom": "text",
