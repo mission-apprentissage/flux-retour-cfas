@@ -1,8 +1,8 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT, StatutApprenant } from "shared";
-import { IEffectif } from "shared/models/data/effectifs.model";
+import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT } from "shared";
+import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
@@ -11,9 +11,27 @@ import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
 
-export const isEligibleSIFA = (statutEnCours?: StatutApprenant): boolean => {
-  if (!statutEnCours) return false;
-  return statutEnCours === STATUT_APPRENANT.APPRENTI;
+export const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
+  if (!statut) return false;
+
+  if (statut.en_cours === STATUT_APPRENANT.APPRENTI) {
+    return true;
+  }
+
+  const endOfYear = getSIFADate(new Date());
+
+  const parcours = statut.parcours || [];
+  const parcoursSorted = parcours
+    .filter(({ date }) => new Date(date) <= endOfYear)
+    .sort((a, b) => {
+      if (new Date(a.date).getTime() === new Date(b.date).getTime()) {
+        return a.valeur === STATUT_APPRENANT.APPRENTI ? -1 : 1;
+      }
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+  const current = parcoursSorted[0];
+  return current?.valeur === STATUT_APPRENANT.APPRENTI;
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
@@ -28,7 +46,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         },
       })
       .toArray()
-  ).filter((effectif) => isEligibleSIFA(effectif._computed?.statut?.en_cours)) as Required<WithId<IEffectif>>[];
+  ).filter((effectif) => isEligibleSIFA(effectif._computed?.statut)) as Required<WithId<IEffectif>>[];
 
   const items: any[] = [];
   const organismesUaiCache: Record<string, string> = {};

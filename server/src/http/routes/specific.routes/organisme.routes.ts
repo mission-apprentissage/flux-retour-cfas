@@ -31,7 +31,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
   return {
     fromDECA: isDeca,
     organismesEffectifs: effectifs
-      .filter((effectif) => !sifa || isEligibleSIFA(effectif._computed?.statut?.en_cours))
+      .filter((effectif) => !sifa || isEligibleSIFA(effectif._computed?.statut))
       .map((effectif) => ({
         id: effectif._id.toString(),
         id_erp_apprenant: effectif.id_erp_apprenant,
