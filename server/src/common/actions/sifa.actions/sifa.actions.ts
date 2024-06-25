@@ -22,7 +22,7 @@ export const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean
 
   parcours.forEach((parcour) => {
     const parcourDate = new Date(parcour.date).getTime();
-    if (parcourDate <= endOfYear && parcourDate > latestDate) {
+    if (parcourDate <= endOfYear && parcourDate >= latestDate) {
       latestStatus = parcour.valeur;
       latestDate = parcourDate;
     }
