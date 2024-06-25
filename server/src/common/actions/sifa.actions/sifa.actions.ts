@@ -1,7 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT } from "shared";
+import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT, StatutApprenant } from "shared";
 import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
@@ -14,24 +14,21 @@ import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumStri
 export const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
   if (!statut) return false;
 
-  if (statut.en_cours === STATUT_APPRENANT.APPRENTI) {
-    return true;
-  }
-
-  const endOfYear = getSIFADate(new Date());
-
+  const endOfYear = getSIFADate(new Date()).getTime();
   const parcours = statut.parcours || [];
-  const parcoursSorted = parcours
-    .filter(({ date }) => new Date(date) <= endOfYear)
-    .sort((a, b) => {
-      if (new Date(a.date).getTime() === new Date(b.date).getTime()) {
-        return a.valeur === STATUT_APPRENANT.APPRENTI ? -1 : 1;
-      }
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
 
-  const current = parcoursSorted[0];
-  return current?.valeur === STATUT_APPRENANT.APPRENTI;
+  let latestStatus: StatutApprenant | null = null;
+  let latestDate = 0;
+
+  parcours.forEach((parcour) => {
+    const parcourDate = new Date(parcour.date).getTime();
+    if (parcourDate <= endOfYear && parcourDate > latestDate) {
+      latestStatus = parcour.valeur;
+      latestDate = parcourDate;
+    }
+  });
+
+  return latestStatus === STATUT_APPRENANT.APPRENTI;
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
