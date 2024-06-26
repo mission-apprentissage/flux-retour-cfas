@@ -9103,7 +9103,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
     },
     "distance_lieu_formation_etablissement_formateur": {
       "bsonType": [
-        "string",
+        "number",
         "null",
       ],
     },
