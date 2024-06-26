@@ -7,7 +7,44 @@ const headerTooltips = {
       téléverser à nouveau.
     </>
   ),
-
+  type_cfa: (
+    <>
+      <p>2 chiffres attendus. Indiquer au choix&nbsp;:</p>
+      <ul style={{ marginTop: "1em", marginBottom: "1em", listStyleType: "none" }}>
+        <li>
+          <strong>01</strong>&nbsp;: CFA public (éducation nationale)
+        </li>
+        <li>
+          <strong>02</strong>&nbsp;: CFA public (enseignement supérieur)
+        </li>
+        <li>
+          <strong>03</strong>&nbsp;: CFA public agricole
+        </li>
+        <li>
+          <strong>04</strong>&nbsp;: CFA de collectivité territoriale
+        </li>
+        <li>
+          <strong>05</strong>&nbsp;: Autre CFA public
+        </li>
+        <li>
+          <strong>06</strong>&nbsp;: CFA consulaire
+        </li>
+        <li>
+          <strong>07</strong>&nbsp;: CFA de branche
+        </li>
+        <li>
+          <strong>08</strong>&nbsp;: CFA d’entreprise
+        </li>
+        <li>
+          <strong>09</strong>&nbsp;: CFA associatif
+        </li>
+        <li>
+          <strong>10</strong>&nbsp;: Autre CFA privé
+        </li>
+      </ul>
+      <p>(donnée facultative)</p>
+    </>
+  ),
   etablissement_responsable_uai: (
     <>
       Il s’agit de l’établissement <b>signataire du contrat d’apprentissage de l’apprenant</b>, responsable de la
@@ -87,12 +124,7 @@ const headerTooltips = {
       (donnée facultative).
     </>
   ),
-  derniere_situation: (
-    <>
-      Situation ou classe fréquentée l’année dernière (N-1). Pour plus d’aide, se référer à la nomenclature de la notice
-      d’instruction SIFA disponible sur votre onglet “Mon enquête SIFA” (donnée facultative).
-    </>
-  ),
+  derniere_situation: <>Situation ou classe fréquentée l’année dernière (N-1). (donnée facultative).</>,
   dernier_organisme_uai: (
     <>
       L’établissement fréquenté l’année dernière par l’apprenant. Elle peut être renseignée : soit par le numéro UAI de
@@ -144,7 +176,7 @@ const headerTooltips = {
         href={"https://formulaire.defenseurdesdroits.fr/"}
         display="inline"
         textDecoration={"underline"}
-        color="white"
+        color="bluefrance"
         isExternal
       >
         Catalogue de l’apprentissage
