@@ -40,11 +40,17 @@ const initialState: StateType = {
   showOnlyColumnsAndLinesWithErrors: false,
   status: "idle",
 };
+
 const useExcelFileProcessor = (organismeId: string) => {
   const { toastError } = useToaster();
   const [state, setState] = useState<StateType>(initialState);
 
+  const resetState = () => {
+    setState(initialState);
+  };
+
   const onDrop = async (acceptedFiles: File[]) => {
+    resetState();
     setState((prevState) => ({ ...prevState, status: "processing" }));
     const file = acceptedFiles[0];
     if (!file) {
@@ -159,7 +165,12 @@ const useExcelFileProcessor = (organismeId: string) => {
 
         const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error: any) => {
           const row = error.path[0];
-          const message = error.message;
+          let message = error.message;
+
+          if (error.code === "invalid_type") {
+            message = "Format invalide";
+          }
+
           if (!acc[row]) acc[row] = [];
           acc[row].push({
             message,
