@@ -13,21 +13,23 @@ let nbOrganismeNotUpdated = 0;
  */
 export const updateAllOrganismesRelatedFormations = async () => {
   // On récupère l'intégralité des organismes depuis le référentiel ayant un siret (nécessaire pour un update valide)
-  const organismesCursor = await organismesDb().find({}).toArray();
+  const organismesCursor = organismesDb().find({});
   const organismesCount = await organismesDb().estimatedDocumentCount();
 
   logger.info(`Mise à jour avec appels API des ${organismesCount} organismes ...`);
 
-  for await (const organisme of organismesCursor) {
-    logger.info(`Mise à jour de l'organisme UAI ${organisme.uai || "inconnu"} - SIRET ${organisme.siret} ...`);
-
-    try {
-      await updateOneOrganismeRelatedFormations(organisme);
-      nbOrganismeUpdated++;
-    } catch (error: any) {
-      captureException(error);
-      nbOrganismeNotUpdated++;
-      logger.error({ error }, `Erreur lors de la mise à jour de l'organisme ${organisme._id}: ${error.message}`);
+  while (await organismesCursor.hasNext()) {
+    const organisme = await organismesCursor.next();
+    if (organisme) {
+      try {
+        logger.info(`Mise à jour de l'organisme UAI ${organisme.uai || "inconnu"} - SIRET ${organisme.siret} ...`);
+        await updateOneOrganismeRelatedFormations(organisme);
+        nbOrganismeUpdated++;
+      } catch (error: any) {
+        captureException(error);
+        nbOrganismeNotUpdated++;
+        logger.error({ error }, `Erreur lors de la mise à jour de l'organisme ${organisme._id}: ${error.message}`);
+      }
     }
   }
 

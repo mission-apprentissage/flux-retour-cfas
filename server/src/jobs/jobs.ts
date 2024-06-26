@@ -21,6 +21,7 @@ import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/bu
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
+import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -63,6 +64,55 @@ import {
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
 
+const dailyJobs = async () => {
+  await addJob({ name: "hydrate:organismes-referentiel", queued: true });
+
+  // # Remplissage des formations issus du catalogue
+  await addJob({ name: "hydrate:formations-catalogue", queued: true });
+
+  // # Remplissage des organismes depuis le référentiel
+  await addJob({ name: "hydrate:organismes", queued: true });
+
+  // # Mise à jour des relations
+  await addJob({ name: "hydrate:organismes-relations", queued: true });
+
+  // # Mise a jour des bassin d'emploi
+  await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
+
+  // # Remplissage des OPCOs
+  await addJob({ name: "hydrate:opcos", queued: true });
+
+  // # Remplissage des réseaux
+  await addJob({ name: "hydrate:reseaux", queued: true });
+
+  // # Remplissage des ofa inconnus
+  await addJob({ name: "hydrate:ofa-inconnus", queued: true });
+
+  // # Lancement des scripts de fiabilisation des couples UAI - SIRET
+  await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
+
+  // # Mise à jour des organismes via APIs externes
+  await addJob({ name: "update:organismes-with-apis", queued: true });
+
+  // # Mise à jour des niveaux des formations des effectifs
+  await addJob({ name: "effectifs-formation-niveaux", queued: true });
+
+  // # Purge des collections events et queues
+  await addJob({ name: "purge:queues", queued: true });
+
+  // # Mise a jour du nb d'effectifs
+  await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
+
+  // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
+  await addJob({
+    name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
+    queued: true,
+  });
+  await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
+
+  return 0;
+};
+
 export async function setupJobProcessor() {
   return initJobProcessor({
     db: getDatabase(),
@@ -73,55 +123,7 @@ export async function setupJobProcessor() {
         : {
             "Run daily jobs each day at 02h30": {
               cron_string: "30 2 * * *",
-              handler: async () => {
-                // # Remplissage des organismes issus du référentiel
-                await addJob({ name: "hydrate:organismes-referentiel", queued: true });
-
-                // # Remplissage des formations issus du catalogue
-                await addJob({ name: "hydrate:formations-catalogue", queued: true });
-
-                // # Remplissage des organismes depuis le référentiel
-                await addJob({ name: "hydrate:organismes", queued: true });
-
-                // # Mise à jour des relations
-                await addJob({ name: "hydrate:organismes-relations", queued: true });
-
-                // # Mise a jour des bassin d'emploi
-                await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
-
-                // # Remplissage des OPCOs
-                await addJob({ name: "hydrate:opcos", queued: true });
-
-                // # Remplissage des réseaux
-                await addJob({ name: "hydrate:reseaux", queued: true });
-
-                // # Remplissage des ofa inconnus
-                await addJob({ name: "hydrate:ofa-inconnus", queued: true });
-
-                // # Lancement des scripts de fiabilisation des couples UAI - SIRET
-                await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
-
-                // # Mise à jour des organismes via APIs externes
-                await addJob({ name: "update:organismes-with-apis", queued: true });
-
-                // # Mise à jour des niveaux des formations des effectifs
-                await addJob({ name: "effectifs-formation-niveaux", queued: true });
-
-                // # Purge des collections events et queues
-                await addJob({ name: "purge:queues", queued: true });
-
-                // # Mise a jour du nb d'effectifs
-                await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
-
-                // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
-                await addJob({
-                  name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
-                  queued: true,
-                });
-                await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
-
-                return 0;
-              },
+              handler: dailyJobs,
             },
 
             "Send reminder emails at 7h": {
@@ -172,6 +174,9 @@ export async function setupJobProcessor() {
           await hydrateReseaux();
           return;
         },
+      },
+      "hydrate:daily": {
+        handler: dailyJobs,
       },
       "seed:sample": {
         handler: async () => {
@@ -420,6 +425,11 @@ export async function setupJobProcessor() {
       "tmp:patches:remove-metiers-from-organisme": {
         handler: async () => {
           return removeMetiersFromOrganisme();
+        },
+      },
+      "tmp:patches:update-deca-formation": {
+        handler: async () => {
+          return updateDecaFormation();
         },
       },
       "process:effectifs-queue:remove-duplicates": {

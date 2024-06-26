@@ -180,6 +180,12 @@ function createJobAction(name) {
 }
 
 program
+  .command("hydrate:daily")
+  .description("Manually trigger the daily cron job")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:daily"));
+
+program
   .command("db:validate")
   .description("Validate Documents")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -644,6 +650,12 @@ program
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
+
+program
+  .command("tmp:patches:update-deca-formation")
+  .description("Mise a jour des formations des données DECA")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-deca-formation"));
 
 program
   .command("dev:list-http-endpoints")
