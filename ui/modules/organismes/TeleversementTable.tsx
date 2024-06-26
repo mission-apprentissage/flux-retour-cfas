@@ -43,7 +43,7 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const [sortingState, setSortingState] = useState<SortingState>([]);
@@ -131,7 +131,14 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
         header: () => <Header header={header} />,
         cell: (info) => {
           const row = info.row.original;
-          const value = isDateField(header) ? fromIsoLikeDateStringToFrenchDate(row[header]) : row[header];
+          let value = row[header];
+
+          if (televersementHeaders[header]?.type === "boolean") {
+            value = value === true ? "Oui" : value === false ? "Non" : "";
+          } else if (isDateField(header)) {
+            value = fromIsoLikeDateStringToFrenchDate(value);
+          }
+
           const error = row.errors.find((e: any) => e.key === header);
           return (
             <Box>
@@ -143,7 +150,7 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
       })),
       {
         accessorKey: "status",
-        header: () => <Header header="Status" />,
+        header: () => <Header header="Statut" />,
         size: 150,
         cell: (info) => {
           const status = info.row.original.status;
@@ -168,10 +175,17 @@ const TeleversementTable: React.FC<TeleversementTableProps> = ({
 
   const fixedColumns = ["lineNumber", "nom_apprenant"];
 
+  const errorCount = dataWithAdditionalInfo.filter((row) => row.errors && row.errors.length > 0).length;
+  const lineCount = data.length;
+
   return (
     <>
       <Box pb={5}>
-        Votre fichier inclut <strong>{filteredData.length || "N/A"} lignes</strong>
+        Votre fichier inclut{" "}
+        <strong>
+          {lineCount || "N/A"} {`ligne${lineCount > 1 ? "s" : ""}`}
+        </strong>
+        {errorCount > 0 && `, dont ${`${errorCount} ${errorCount === 1 ? "est" : "sont"} en erreur`}`}
       </Box>
       <TableWithPagination
         columns={columns}

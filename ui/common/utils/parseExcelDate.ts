@@ -1,5 +1,5 @@
 export default function parseExcelDate(input: number | string | undefined | null): string | null {
-  if (!input) return null;
+  if (input === undefined || input === null || typeof input === "boolean") return null;
 
   if (typeof input === "number") {
     const excelBaseDate = new Date(Date.UTC(1899, 11, 30));
