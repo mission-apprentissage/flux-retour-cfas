@@ -49,14 +49,6 @@ export const hydrateOrganismesRelations = async () => {
                   {
                     $eq: ["$$this.type", "formateur->responsable"],
                   },
-                  {
-                    $ne: [
-                      "$siren",
-                      {
-                        $substr: ["$$this.siret", 0, 9],
-                      },
-                    ],
-                  },
                 ],
               },
             },
@@ -64,18 +56,39 @@ export const hydrateOrganismesRelations = async () => {
         },
       },
       {
-        $match: {
-          $or: [
-            {
-              "responsablesRelations.1": {
-                $exists: true,
+        $addFields: {
+          sameSiren: {
+            $allElementsTrue: {
+              $map: {
+                input: "$responsablesRelations",
+                in: {
+                  $eq: ["$siren", { $substr: ["$$this.siret", 0, 9] }],
+                },
               },
             },
+          },
+        },
+      },
+      {
+        $match: {
+          $and: [
             {
-              nature: "responsable_formateur",
-              "responsablesRelations.0": {
-                $exists: true,
-              },
+              sameSiren: false,
+            },
+            {
+              $or: [
+                {
+                  "responsablesRelations.1": {
+                    $exists: true,
+                  },
+                },
+                {
+                  nature: "responsable_formateur",
+                  "responsablesRelations.0": {
+                    $exists: true,
+                  },
+                },
+              ],
             },
           ],
         },
