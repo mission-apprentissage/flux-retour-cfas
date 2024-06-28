@@ -468,7 +468,22 @@ export const updateOrganismesHasTransmittedWithHierarchy = async (
       $set: {
         is_deca_compatible: !computedStatus,
       },
-    }
+    },
+    { bypassDocumentValidation: true }
+  );
+};
+
+export const updateDecaCompatibilityFromOrganismeId = async (organismeId: ObjectId, isDecaCompatible: boolean) => {
+  await effectifsDECADb().updateMany(
+    {
+      organisme_id: organismeId,
+    },
+    {
+      $set: {
+        is_deca_compatible: isDecaCompatible,
+      },
+    },
+    { bypassDocumentValidation: true }
   );
 };
 
@@ -823,6 +838,7 @@ export function getOrganismeProjection(
     fiabilisation_statut: 1,
     has_transmission_errors: 1,
     transmission_errors_date: 1,
+    is_transmission_target: 1,
     erps: permissionsOrganisme.infoTransmissionEffectifs,
     erp_unsupported: permissionsOrganisme.infoTransmissionEffectifs,
     first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,

@@ -36,7 +36,7 @@ import {
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
-  getEffectifsNominatifs,
+  getEffectifsNominatifsWithoutId,
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getOrganismeIndicateursEffectifs,
@@ -89,11 +89,12 @@ import { searchOrganismesFormations } from "@/common/actions/organismes/organism
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -249,7 +250,15 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .use(
+      "/api/doc",
+      swaggerUi.serve,
+      swaggerUi.setup(openapiSpecs, {
+        customCss: ".swagger-ui .topbar { display: none }",
+        customSiteTitle: "API Mission Apprentissage",
+      })
+    )
+    .use("/api/openapi-model", (req, res) => res.download(openApiFilePath))
     .post(
       "/api/v1/auth/login",
       returnResult(async (req, res) => {
@@ -495,7 +504,15 @@ function setupRoutes(app: Application) {
           if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
             throw Boom.forbidden("Permissions invalides");
           }
-          return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
+
+          const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
+            req.user,
+            filters,
+            type,
+            res.locals.organismeId
+          );
+          await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, res.locals.organismeId);
+          return effectifsWithoutIds;
         })
       )
       .get(
@@ -657,7 +674,7 @@ function setupRoutes(app: Application) {
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
+        return await getIndicateursEffectifsParDepartement(filters, req.user.acl, req.user.organisation);
       })
     )
     .get(
@@ -677,7 +694,9 @@ function setupRoutes(app: Application) {
           throw Boom.forbidden("Permissions invalides");
         }
 
-        return await getEffectifsNominatifs(req.user, filters, type);
+        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
+        await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, undefined, req.user.organisation_id);
+        return effectifsWithoutIds;
       })
     )
     .get(
@@ -887,10 +906,26 @@ function setupRoutes(app: Application) {
             organisation = await organisationsDb().findOne(organisationBody);
           }
 
-          // génère une nouvelle session avec l'organisation usurpée
-          const sessionToken = await createSession(req.user.email, {
-            impersonatedOrganisation: organisation,
-          });
+          let sessionToken;
+          if (organisation?.type === "ORGANISME_FORMATION") {
+            const userOrganisme = await organismesDb().findOne({
+              siret: organisation.siret,
+              uai: organisation.uai as string,
+            });
+
+            if (userOrganisme) {
+              sessionToken = await createSession(req.user.email, {
+                impersonatedOrganisation: { ...organisation, organisme_id: userOrganisme._id },
+              });
+            } else {
+              throw new Error("Organisme non trouvé.");
+            }
+          } else {
+            sessionToken = await createSession(req.user.email, {
+              impersonatedOrganisation: organisation,
+            });
+          }
+
           responseWithCookie(res, sessionToken);
         })
       )

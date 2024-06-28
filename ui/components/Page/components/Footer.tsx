@@ -1,5 +1,6 @@
 import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } from "@chakra-ui/react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import Link from "@/components/Links/Link";
 import { ExternalLinkLine } from "@/theme/components/icons";
 
@@ -104,11 +105,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
-                >
+                <Link target="_blank" rel="noopener noreferrer" href={FAQ_PATH}>
                   Page d’aide
                 </Link>
               </ListItem>

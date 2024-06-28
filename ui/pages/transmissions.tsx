@@ -1,7 +1,5 @@
-import { Container, Text } from "@chakra-ui/react";
-
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import SimplePage from "@/components/Page/SimplePage";
+import UnauthorizedPage from "@/components/Page/UnauthorizedPage";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 
@@ -17,13 +15,7 @@ const PageTransmissionsDeMonOrganismes = () => {
   }
 
   if (!organisme || error) {
-    return (
-      <SimplePage>
-        <Container maxW="xl" p="8">
-          <Text mb={16}>Vous ne disposez pas des droits nécessaires pour visualiser cette page.</Text>
-        </Container>
-      </SimplePage>
-    );
+    return <UnauthorizedPage />;
   }
 
   return <ListeTransmissionsPage organisme={organisme} />;

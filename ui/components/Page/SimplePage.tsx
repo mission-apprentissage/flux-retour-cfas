@@ -2,6 +2,7 @@ import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import Link from "@/components/Links/Link";
 import { Interrogation } from "@/theme/components/icons";
 
@@ -27,7 +28,7 @@ function SimplePage({ title, children }: Props) {
       </Box>
       <Link
         isExternal
-        href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+        href={FAQ_PATH}
         position="fixed"
         width="60px"
         height="60px"

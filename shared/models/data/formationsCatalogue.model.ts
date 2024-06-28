@@ -131,7 +131,7 @@ const zFormationCatalogue = z.object({
   tags: z.array(z.string().nullish()),
   libelle_court: z.string().nullish(),
   niveau_formation_diplome: z.string(),
-  distance_lieu_formation_etablissement_formateur: z.string().nullish(),
+  distance_lieu_formation_etablissement_formateur: z.number().nullish(),
   niveau_entree_obligatoire: z.number().nullable(),
   entierement_a_distance: z.boolean(),
   france_competence_infos: z.string().nullish(),

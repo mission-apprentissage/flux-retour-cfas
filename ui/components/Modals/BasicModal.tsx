@@ -10,6 +10,7 @@ import {
   Text,
   ModalProps,
   Image,
+  ModalFooter,
 } from "@chakra-ui/react";
 import React, { ReactNode, ReactElement } from "react";
 
@@ -20,8 +21,10 @@ interface BasicModalProps extends Omit<ModalProps, "children" | "isOpen" | "onCl
   button?: ReactNode | string;
   children: ReactNode;
   title?: string;
+  customWidth?: string;
   handleClose?: () => void;
   renderTrigger?: (onOpen: () => void) => ReactNode;
+  renderFooter?: (onClose: () => void) => ReactNode;
 }
 
 export function BasicModal({
@@ -31,6 +34,7 @@ export function BasicModal({
   title,
   handleClose,
   renderTrigger,
+  renderFooter,
   ...modalProps
 }: BasicModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -90,6 +94,7 @@ export function BasicModal({
             </Text>
           </ModalHeader>
           <ModalBody pb={6}>{children}</ModalBody>
+          {renderFooter ? <ModalFooter>{renderFooter(customClose)}</ModalFooter> : null}
         </ModalContent>
       </Modal>
     </>

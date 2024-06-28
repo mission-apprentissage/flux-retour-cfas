@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import UnauthorizedPage from "@/components/Page/UnauthorizedPage";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 
@@ -15,7 +16,7 @@ const PageTransmissionsDeMonOrganismes = () => {
   const date = router.query.date as string;
 
   if (!organisme) {
-    return <></>;
+    return <UnauthorizedPage />;
   }
 
   return <ListeTransmissionsDetails organisme={organisme} date={date} />;

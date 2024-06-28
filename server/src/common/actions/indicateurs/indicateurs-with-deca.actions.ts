@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { Acl } from "shared/constants/permissions";
+import { IOrganisation } from "shared/models";
 
 import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -17,11 +18,14 @@ import {
 
 export const buildDECAFilter = (decaMode) => (decaMode ? { is_deca_compatible: true } : {});
 
-// Attention ca marche pas, il faut ensuite merger par departement et sommer les valeurs
-export const getIndicateursEffectifsParDepartement = async (filters: DateFilters & TerritoireFilters, acl: Acl) => {
+export const getIndicateursEffectifsParDepartement = async (
+  filters: DateFilters & TerritoireFilters,
+  acl: Acl,
+  organisation?: IOrganisation
+) => {
   const indicateurs = [
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false)),
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true)),
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false, organisation)),
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true, organisation)),
   ];
 
   const mapDepartement = indicateurs.reduce((acc, { departement, ...rest }) => {
@@ -56,6 +60,25 @@ export const getIndicateursEffectifsParOrganisme = async (
   ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDb(), false, organismeId)),
   ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDECADb(), true, organismeId)),
 ];
+
+export const getEffectifsNominatifsWithoutId = async (
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  type: TypeEffectifNominatif,
+  organismeId?: ObjectId
+): Promise<{ effectifsWithoutIds: any[]; ids: ObjectId[] }> => {
+  const effectifs = await getEffectifsNominatifs(ctx, filters, type, organismeId);
+  return effectifs.reduce<{ effectifsWithoutIds: any[]; ids: ObjectId[] }>(
+    (acc, { _id, ...rest }) => ({
+      effectifsWithoutIds: [...acc.effectifsWithoutIds, rest],
+      ids: [...acc.ids, _id],
+    }),
+    {
+      effectifsWithoutIds: [],
+      ids: [],
+    }
+  );
+};
 
 export const getEffectifsNominatifs = async (
   ctx: AuthContext,

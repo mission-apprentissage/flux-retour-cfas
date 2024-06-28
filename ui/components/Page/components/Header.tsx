@@ -15,6 +15,7 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { _delete, _post } from "@/common/httpClient";
@@ -30,6 +31,7 @@ import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
+
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
@@ -61,14 +63,14 @@ const UserMenu = () => {
                 <UserFill mt="0.3rem" boxSize={4} />
                 <Box display={["none", "block"]} ml={2}>
                   <Text color="bluefrance" textStyle="sm" textOverflow="ellipsis" maxWidth="200px" overflow="hidden">
-                    {auth.email}
+                    Mon compte
                   </Text>
                 </Box>
               </Flex>
             </MenuButton>
             <MenuList>
               <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
-                Mon compte
+                Informations
               </MenuItem>
               <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
                 Rôles et habilitations
@@ -112,6 +114,33 @@ const UserMenu = () => {
 
 const Header = () => {
   const { auth } = useAuth();
+  const router = useRouter();
+
+  const handleImpersonationExit = async () => {
+    await _delete("/api/v1/admin/impersonate");
+
+    const pathsWithOrganismeId = [
+      "/",
+      "/indicateurs",
+      "/effectifs",
+      "/enquete-sifa",
+      "/transmissions",
+      new RegExp("^/transmissions/\\d{4}-\\d{2}-\\d{2}$"),
+    ];
+
+    const shouldRedirectWithOrganismeId = pathsWithOrganismeId.some((path) =>
+      typeof path === "string" ? router.asPath === path : path.test(router.asPath)
+    );
+
+    const redirectPath =
+      shouldRedirectWithOrganismeId &&
+      auth?.organisation?.type === "ORGANISME_FORMATION" &&
+      auth.organisation.organisme_id
+        ? `/organismes/${auth.organisation.organisme_id}${router.asPath}`
+        : router.asPath;
+
+    window.location.href = redirectPath;
+  };
 
   return (
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
@@ -137,10 +166,7 @@ const Header = () => {
               px={4}
               mt={["2w", "2w", "2w", "0"]}
               mx={["0", "0", "2w", "2w"]}
-              onClick={async () => {
-                await _delete("/api/v1/admin/impersonate");
-                location.href = "/";
-              }}
+              onClick={handleImpersonationExit}
             >
               Imposture en cours
             </Button>

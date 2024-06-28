@@ -1,7 +1,8 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { PermissionOrganisme } from "shared";
+import { IEffectif, PermissionOrganisme } from "shared";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { effectifsDECADb, effectifsDb, voeuxAffelnetDb } from "@/common/model/collections";
@@ -65,7 +66,9 @@ export function requireEffectifOrganismePermission<TParams = any, TQuery = any, 
   return async (req, res, next) => {
     try {
       // On récupère l'organisme rattaché à l'effectif
-      let effectif = await effectifsDb().findOne({ _id: new ObjectId((req.params as any).id) });
+      let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({
+        _id: new ObjectId((req.params as any).id),
+      });
 
       if (!effectif) {
         effectif = await effectifsDECADb().findOne({ _id: new ObjectId((req.params as any).id) });

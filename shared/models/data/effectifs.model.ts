@@ -92,7 +92,7 @@ const StatutApprenantEnum = zodEnumFromArray(
   STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
 );
 
-const zEffectifComputedStatut = z.object({
+export const zEffectifComputedStatut = z.object({
   en_cours: StatutApprenantEnum,
   parcours: z.array(
     z.object({

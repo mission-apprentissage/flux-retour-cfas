@@ -27,7 +27,6 @@ export const formationSchema = {
 
   "formation.duree_formation_relle": {
     fieldType: "numberStepper",
-    required: true,
     label: "Durée de la formation réelle en mois :",
     requiredMessage: "Le nombre d'heures de la formation est obligatoire",
     validateMessage: " n'est pas un nombre d'heures valide",
@@ -78,16 +77,19 @@ export const formationSchema = {
     precision: 0,
   },
   "formation.date_inscription": {
+    required: true,
     fieldType: "date",
     label: "Date d'inscription en formation :",
     showInfo: false,
   },
   "formation.date_entree": {
+    required: true,
     fieldType: "date",
     label: "Date d'entrée en formation :",
     showInfo: false,
   },
   "formation.date_fin": {
+    required: true,
     fieldType: "date",
     label: "Date de fin de formation :",
     showInfo: false,

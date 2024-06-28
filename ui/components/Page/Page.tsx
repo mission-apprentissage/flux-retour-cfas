@@ -1,6 +1,7 @@
 import { Box, Container, ContainerProps } from "@chakra-ui/react";
 import React from "react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import Link from "@/components/Links/Link";
 import Section from "@/components/Section/Section";
 import { Interrogation } from "@/theme/components/icons";
@@ -26,7 +27,7 @@ function Page({ children, childrenContainer, ...rest }: PageProps) {
       </Box>
       <Link
         isExternal
-        href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+        href={FAQ_PATH}
         position="fixed"
         width="60px"
         height="60px"

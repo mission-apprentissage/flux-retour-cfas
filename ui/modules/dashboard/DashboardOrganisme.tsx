@@ -36,6 +36,7 @@ import {
   FAQ_REFERENCER_ETABLISSEMENT,
 } from "shared";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -60,6 +61,7 @@ import { ExternalLinks } from "../admin/OrganismeDetail";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";
+import InfoTransmissionDeca from "../organismes/InfoTransmissionDeca";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -357,6 +359,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
                   />
                 )}
+                {!organisme.is_transmission_target && <InfoTransmissionDeca />}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
@@ -852,7 +855,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                      href={FAQ_PATH}
                       target="_blank"
                       rel="noopener noreferrer"
                       borderBottom="1px"

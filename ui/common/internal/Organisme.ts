@@ -980,6 +980,8 @@ export interface Organisme {
    */
   created_at?: string;
 
+  is_transmission_target?: boolean;
+
   permissions?: {
     viewContacts: boolean;
     infoTransmissionEffectifs: boolean;

@@ -934,15 +934,32 @@ describe("Processus d'ingestion", () => {
           });
 
           const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
+
+          const expectedError = (field: string) => {
+            switch (field) {
+              case "date_de_naissance_apprenant":
+              case "date_metier_mise_a_jour_statut":
+                return "Date invalide";
+
+              case "statut_apprenant":
+                return `Valeurs possibles: ${CODES_STATUT_APPRENANT.abandon},${CODES_STATUT_APPRENANT.inscrit},${CODES_STATUT_APPRENANT.apprenti}`;
+              case "id_formation":
+                return "Code CFD invalide";
+
+              case "prenom_apprenant":
+              case "nom_apprenant":
+              case "annee_scolaire":
+              case "id_erp_apprenant":
+              default:
+                return "String attendu";
+            }
+          };
+
           expect(updatedInput).toMatchObject({
             processed_at: expect.any(Date),
             validation_errors: [
               {
-                message: requiredField.includes("date_")
-                  ? "Date invalide"
-                  : requiredField.includes("statut_apprenant")
-                    ? `Valeurs possibles: ${CODES_STATUT_APPRENANT.abandon},${CODES_STATUT_APPRENANT.inscrit},${CODES_STATUT_APPRENANT.apprenti}`
-                    : "String attendu",
+                message: expectedError(requiredField),
                 path: [requiredField],
               },
             ],

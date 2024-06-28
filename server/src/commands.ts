@@ -180,6 +180,12 @@ function createJobAction(name) {
 }
 
 program
+  .command("hydrate:daily")
+  .description("Manually trigger the daily cron job")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:daily"));
+
+program
   .command("db:validate")
   .description("Validate Documents")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -460,6 +466,12 @@ program
   .action(createJobAction("hydrate:contrats-deca-raw"));
 
 program
+  .command("update:organismes-deca-transmitter")
+  .description("Mise a jour des effectifs DECA désynchronisé")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("update:organismes-deca-transmitter"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -638,6 +650,12 @@ program
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
+
+program
+  .command("tmp:patches:update-deca-formation")
+  .description("Mise a jour des formations des données DECA")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-deca-formation"));
 
 program
   .command("dev:list-http-endpoints")
