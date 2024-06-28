@@ -36,6 +36,70 @@ const computeSort = (sort, direction) => {
   }
 };
 
+// Write indexes for this
+export const getAffelnetCountVoeuxNational = async () => {
+  const voeuxCount = await voeuxAffelnetDb()
+    .aggregate([
+      {
+        $group: {
+          _id: "$voeu_id",
+          data: {
+            $top: {
+              output: "$$ROOT",
+              sortBy: {
+                revision: -1,
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          "data.deleted_at": { $exists: false },
+        },
+      },
+
+      {
+        $facet: {
+          total: [
+            {
+              $count: "total",
+            },
+          ],
+          apprenants: [
+            {
+              $group: {
+                _id: "$data.raw.ine",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $count: "total",
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$total",
+        },
+      },
+      {
+        $unwind: {
+          path: "$apprenants",
+        },
+      },
+      {
+        $project: {
+          total: "$total.total",
+          apprenants: "$apprenants.total",
+        },
+      },
+    ])
+    .toArray();
+  return voeuxCount[0];
+};
+
 export const getAffelnetVoeuxByOrganisme = async (
   organismeId: ObjectId,
   page: number = 1,

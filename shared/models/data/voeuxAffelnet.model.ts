@@ -4,7 +4,10 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "voeuxAffelnet";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ voeu_id: 1, revision: -1 }, {}],
+  [{ deleted_at: 1 }, {}],
+];
 export const zVoeuAffelnet = z.object({
   _id: zObjectId.describe("Identifiant unique MongoDB de l'instance voeu"),
   voeu_id: zObjectId.describe("Identifant du voeu"),

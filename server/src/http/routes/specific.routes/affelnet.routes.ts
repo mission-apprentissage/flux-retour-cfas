@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 //import parentLogger from "@/common/logger";
+import { getAffelnetCountVoeuxNational } from "@/common/actions/affelnet.actions";
 import { voeuxAffelnetDb } from "@/common/model/collections";
 import { requireVoeuOrganismePermission, returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -26,6 +27,9 @@ export default () => {
     validateRequestMiddleware({ body: updateContactedRequest }),
     returnResult(updateContacted)
   );
+
+  // TODO : implement role
+  router.get("/national/count", returnResult(getAffelnetCountVoeuxNational));
 
   return router;
 };
