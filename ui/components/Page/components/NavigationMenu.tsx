@@ -146,6 +146,7 @@ function NavBarOrganismeFormation(): ReactElement {
           Mon enquête SIFA
         </NavItem>
       )}
+      <NavItem to="/voeux-affelnet">Mes vœux Affelnet</NavItem>
       <NavItem to="/national/indicateurs" exactMatch>
         Indicateurs Nationaux
       </NavItem>
@@ -198,6 +199,7 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
             >
               Son enquête SIFA
             </NavItem>
+            <NavItem to="/voeux-affelnet">Ses vœux Affelnet</NavItem>
           </>
         )}
       </Flex>
