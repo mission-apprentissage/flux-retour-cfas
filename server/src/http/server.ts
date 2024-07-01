@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive } from "shared";
+import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive, SOURCE_APPRENANT } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -387,14 +387,8 @@ function setupRoutes(app: Application) {
     async (req, res, next) => {
       const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
-      let erpSource = "INCONNU";
-      if (organisme.erps?.length) {
-        if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
-        if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
-      }
-
       (req.user as any) = {
-        source: erpSource,
+        source: SOURCE_APPRENANT.ERP,
         source_organisme_id: organisme._id.toString(),
       };
 
@@ -404,7 +398,6 @@ function setupRoutes(app: Application) {
         id: `organisme-${organisme._id.toString()}`,
         username: `organisme: ${organisme.siret} / ${organisme.uai}`,
       });
-      Sentry.setTag("erp", erpSource);
 
       next();
     },
@@ -632,7 +625,7 @@ function setupRoutes(app: Application) {
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
             async (req, res, next) => {
-              req.user.source = "televersement";
+              req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);
               next();
             },
