@@ -2,6 +2,7 @@ import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/no
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
+import { SOURCE_APPRENANT } from "shared/constants";
 import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
@@ -465,7 +466,7 @@ async function transformEffectifQueueToEffectif(
   return await completeEffectifAddress(
     mergeEffectifWithDefaults(
       mapEffectifQueueToEffectif(effectifQueue as any) as any,
-      effectifQueue.source !== "televersement"
+      effectifQueue.source !== SOURCE_APPRENANT.FICHIER
     )
   );
 }
@@ -536,7 +537,7 @@ const createOrUpdateEffectif = async (
 
     // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
     // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
-    if (effectif.source !== "televersement") {
+    if (effectif.source !== SOURCE_APPRENANT.FICHIER) {
       await lockEffectif(effectifDb);
     }
 
