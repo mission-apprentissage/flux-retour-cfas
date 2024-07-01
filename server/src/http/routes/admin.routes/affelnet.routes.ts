@@ -91,44 +91,8 @@ export default () => {
 
 const findDeletedVoeux = async (date: Date) => {
   const currentDate = new Date();
-  const aggregation = [
-    {
-      $group: {
-        _id: "$voeu_id",
-        data: {
-          $top: {
-            output: ["$_id", "$created_at", "$revision"],
-            sortBy: {
-              revision: -1,
-            },
-          },
-        },
-      },
-    },
-    {
-      $project: {
-        _id: {
-          $arrayElemAt: ["$data", 0],
-        },
-        voeu_id: "$_id",
-        created_at: {
-          $arrayElemAt: ["$data", 1],
-        },
-        revision: {
-          $arrayElemAt: ["$data", 2],
-        },
-      },
-    },
-    {
-      $match: {
-        created_at: {
-          $lt: date,
-        },
-      },
-    },
-  ];
 
-  const cursor = voeuxAffelnetDb().aggregate(aggregation);
+  const cursor = voeuxAffelnetDb().find({ updated_at: { $lt: date } });
   while (await cursor.hasNext()) {
     const voeu = await cursor.next();
     if (voeu) {
@@ -153,29 +117,28 @@ const createVoeux = async (req, res) => {
     return res.status(400).send("No file uploaded.");
   }
   const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.path);
-
   const currentDate = new Date();
 
-  await PromisePool.withConcurrency(10)
+  await PromisePool.withConcurrency(100)
     .for(parsedCSV)
     .process(async (voeuRaw: IVoeuAffelnetRaw) => {
       const voeu: any = {
         _id: new ObjectId(),
-        voeu_id: null,
-        revision: null,
         organisme_formateur_id: null,
         organisme_responsable_id: null,
         formation_catalogue_id: null,
         created_at: currentDate,
+        updated_at: currentDate,
         is_contacted: false,
+        history: [],
         raw: voeuRaw,
         _computed: {
           formation: {},
+          organisme: {},
         },
       };
 
       if (!voeuRaw.cle_ministere_educatif) {
-        voeu.voeu_id = new ObjectId(); // Risque de créer des doublons pour les voeux sans cle entre 2 imports
         await voeuxAffelnetDb().insertOne(voeu);
       }
 
@@ -227,25 +190,50 @@ const createVoeux = async (req, res) => {
         );
         return;
       }
+      const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = orgaFormateur;
+
+      voeu._computed.organisme = {
+        ...(adresse?.region && { region: adresse?.region }),
+        ...(adresse?.departement && { departement: adresse?.departement }),
+        ...(adresse?.academie && { academie: adresse?.academie }),
+        ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
+        ...(uai && { uai }),
+        ...(siret && { siret }),
+        ...(reseaux && { reseaux }),
+        fiable: fiabilisation_statut === "FIABLE" && !ferme,
+      };
 
       voeu.organisme_formateur_id = orgaFormateur._id;
       voeu.organisme_responsable_id = orgaResponsable._id;
 
-      const previous = await voeuxAffelnetDb().findOne(
-        {
-          "raw.ine": voeuRaw.ine,
-          "raw.cle_ministere_educatif": voeuRaw.cle_ministere_educatif,
-        },
-        {
-          sort: { revision: -1 },
-        }
-      );
-
-      voeu.voeu_id = previous ? previous.voeu_id : new ObjectId();
-      voeu.revision = previous ? previous.revision + 1 : 1;
-
+      const previous = await voeuxAffelnetDb().findOne({
+        "raw.ine": voeuRaw.ine,
+        "raw.cle_ministere_educatif": voeuRaw.cle_ministere_educatif,
+      });
       try {
-        await voeuxAffelnetDb().insertOne(voeu);
+        if (!previous) {
+          await voeuxAffelnetDb().insertOne(voeu);
+        } else {
+          await voeuxAffelnetDb().updateOne(
+            { _id: previous._id },
+            {
+              $set: {
+                organisme_formateur_id: voeu.organisme_formateur_id,
+                organisme_responsable_id: voeu.organisme_responsable_id,
+                formation_catalogue_id: voeu.formation_catalogue_id,
+                is_contacted: false,
+                _computed: voeu._computed,
+                updated_at: currentDate,
+              },
+              $push: {
+                history: {
+                  created_at: currentDate,
+                  raw: voeu.raw,
+                },
+              },
+            }
+          );
+        }
       } catch (e) {
         logger.error(e);
       }

@@ -36,26 +36,18 @@ const computeSort = (sort, direction) => {
   }
 };
 
+const computeFilter = (departement: Array<string>) => {
+  return departement ? { "_computed.organisme.departement": { $in: departement } } : {};
+};
+
 // Write indexes for this
-export const getAffelnetCountVoeuxNational = async () => {
+export const getAffelnetCountVoeuxNational = async (departement: Array<string>) => {
   const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
-        $group: {
-          _id: "$voeu_id",
-          data: {
-            $top: {
-              output: "$$ROOT",
-              sortBy: {
-                revision: -1,
-              },
-            },
-          },
-        },
-      },
-      {
         $match: {
-          "data.deleted_at": { $exists: false },
+          ...computeFilter(departement),
+          deleted_at: { $exists: false },
         },
       },
 
@@ -69,7 +61,7 @@ export const getAffelnetCountVoeuxNational = async () => {
           apprenants: [
             {
               $group: {
-                _id: "$data.raw.ine",
+                _id: "$raw.ine",
                 count: { $sum: 1 },
               },
             },
@@ -97,7 +89,7 @@ export const getAffelnetCountVoeuxNational = async () => {
       },
     ])
     .toArray();
-  return voeuxCount[0];
+  return voeuxCount[0] ?? { total: 0, apprenants: 0 };
 };
 
 export const getAffelnetVoeuxByOrganisme = async (
