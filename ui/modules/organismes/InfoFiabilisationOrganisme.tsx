@@ -1,8 +1,9 @@
 import { WarningTwoIcon } from "@chakra-ui/icons";
-import { HStack, ListItem, Text, UnorderedList, Link } from "@chakra-ui/react";
+import { ListItem, Text, UnorderedList, Link } from "@chakra-ui/react";
 import { STATUT_FIABILISATION_ORGANISME } from "shared";
 import { REFERENTIEL_ONISEP } from "shared/constants";
 
+import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Checkbox } from "@/theme/components/icons";
 
@@ -32,20 +33,13 @@ function InfoFiabilisationOrganisme({ fiabilisationStatut }: { fiabilisationStat
   );
   const isFiable = fiabilisationStatut === STATUT_FIABILISATION_ORGANISME.FIABLE;
   return (
-    <HStack
-      paddingX="1w"
-      paddingY="2px"
-      borderRadius={6}
-      backgroundColor={isFiable ? "greensoft.200" : "#FF732C1A"}
-      color={isFiable ? "greensoft.600" : "#FF732C"}
-    >
-      {isFiable ? <Checkbox /> : <WarningTwoIcon boxSize={4} />}
-
-      <Text fontSize="zeta" fontWeight="bold">
-        {isFiable ? "Organisme fiable" : "Organisme non fiable"}
-      </Text>
-      <InfoTooltip contentComponent={() => <FiableTooltip />} />
-    </HStack>
+    <Tag
+      leftIcon={isFiable ? Checkbox : WarningTwoIcon}
+      primaryText={isFiable ? "Organisme fiable" : "Organisme non fiable"}
+      variant="badge"
+      colorScheme={isFiable ? "green_tag" : "orange_tag"}
+      rightIcon={() => <InfoTooltip contentComponent={FiableTooltip} />}
+    />
   );
 }
 export default InfoFiabilisationOrganisme;
