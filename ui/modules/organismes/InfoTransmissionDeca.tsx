@@ -1,10 +1,12 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
+import { IndicateursEffectifs } from "shared";
 
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Checkbox } from "@/theme/components/icons";
 
 interface InfoTransmissionDecaProps {
   date?: Date;
+  indicateursEffectifs?: IndicateursEffectifs;
 }
 function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
   const Tooltip = () => (
@@ -19,19 +21,22 @@ function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
       </Text>
     </>
   );
+
   return (
-    <HStack paddingX="1w" paddingY="2px" borderRadius={6} backgroundColor="#e1e0eb" color="#352E9A">
-      <Checkbox />
-      <Box>
-        <Text fontSize="zeta" fontWeight="bold">
-          Données DECA
-        </Text>
-        {props.date && (
-          <Text fontSize="x-small">Dernière MAJ : {props.date ? props.date.toLocaleDateString("fr") : "- -"}</Text>
-        )}
-      </Box>
-      <InfoTooltip contentComponent={() => <Tooltip />} />
-    </HStack>
+    props.indicateursEffectifs?.apprenants && (
+      <HStack paddingX="1w" paddingY="2px" borderRadius={6} backgroundColor="#e1e0eb" color="#352E9A">
+        <Checkbox />
+        <Box>
+          <Text fontSize="zeta" fontWeight="bold">
+            Données DECA
+          </Text>
+          {props.date && (
+            <Text fontSize="x-small">Dernière MAJ : {props.date ? props.date.toLocaleDateString("fr") : "- -"}</Text>
+          )}
+        </Box>
+        <InfoTooltip contentComponent={() => <Tooltip />} />
+      </HStack>
+    )
   );
 }
 
