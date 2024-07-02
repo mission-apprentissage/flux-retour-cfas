@@ -1,5 +1,5 @@
 import { extendTheme } from "@chakra-ui/react";
-import { theme } from "@chakra-ui/theme";
+import { theme as baseTheme } from "@chakra-ui/theme";
 
 import { components } from "./components/index";
 import { fonts, colors, fontSizes, space, rootFontSizePx, textStyles } from "./theme-beta";
@@ -45,7 +45,7 @@ const overrides = {
   space,
   components,
   sizes: {
-    ...theme.sizes,
+    ...baseTheme.sizes,
     xs: "20rem",
     sm: "24rem",
     md: "28rem",

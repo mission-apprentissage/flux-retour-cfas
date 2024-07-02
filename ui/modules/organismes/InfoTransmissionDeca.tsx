@@ -1,5 +1,6 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 
+import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Checkbox } from "@/theme/components/icons";
 
@@ -20,18 +21,14 @@ function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
     </>
   );
   return (
-    <HStack paddingX="1w" paddingY="2px" borderRadius={6} backgroundColor="#e1e0eb" color="#352E9A">
-      <Checkbox />
-      <Box>
-        <Text fontSize="zeta" fontWeight="bold">
-          Données DECA
-        </Text>
-        {props.date && (
-          <Text fontSize="x-small">Dernière MAJ : {props.date ? props.date.toLocaleDateString("fr") : "- -"}</Text>
-        )}
-      </Box>
-      <InfoTooltip contentComponent={() => <Tooltip />} />
-    </HStack>
+    <Tag
+      leftIcon={Checkbox}
+      primaryText="Données DECA"
+      secondaryText={props.date ? `Dernière MAJ: ${props.date.toLocaleDateString("fr")}` : ""}
+      variant="badge"
+      colorScheme="blue_tag"
+      rightIcon={() => <InfoTooltip contentComponent={() => <Tooltip />} />}
+    />
   );
 }
 
