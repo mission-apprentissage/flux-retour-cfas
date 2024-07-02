@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { IEffectif, PermissionOrganisme } from "shared";
+import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -112,4 +112,12 @@ export function requireVoeuOrganismePermission<TParams = any, TQuery = any, TBod
       next(err);
     }
   };
+}
+
+export function requireDrafpic(req: Request, _res: Response, next: NextFunction) {
+  ensureValidUser(req.user);
+  if (req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC")) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+  next();
 }

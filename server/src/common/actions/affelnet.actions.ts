@@ -36,17 +36,20 @@ const computeSort = (sort, direction) => {
   }
 };
 
-const computeFilter = (departement: Array<string>) => {
-  return departement ? { "_computed.organisme.departement": { $in: departement } } : {};
+const computeFilter = (departement: Array<string>, region: Array<string>) => {
+  return {
+    ...(departement ? { "_computed.organisme.departement": { $in: departement } } : {}),
+    ...(region ? { "_computed.organisme.region": { $in: region } } : {}),
+  };
 };
 
 // Write indexes for this
-export const getAffelnetCountVoeuxNational = async (departement: Array<string>) => {
+export const getAffelnetCountVoeuxNational = async (departement: Array<string>, regions: Array<string>) => {
   const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
-          ...computeFilter(departement),
+          ...computeFilter(departement, regions),
           deleted_at: { $exists: false },
         },
       },
