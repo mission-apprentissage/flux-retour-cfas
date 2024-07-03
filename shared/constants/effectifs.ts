@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export const STATUT_APPRENANT = {
   ABANDON: "ABANDON",
   PRE_INSCRIT: "PRE_INSCRIT",
@@ -68,3 +70,15 @@ export const MOTIF_SUPPRESSION_LABEL = [
     label: "Autre raison",
   },
 ];
+
+export const SOURCE_APPRENANT = {
+  FICHIER: "FICHIER",
+  ERP: "ERP",
+  DECA: "DECA",
+} as const;
+
+export type SourceApprenant = (typeof SOURCE_APPRENANT)[keyof typeof SOURCE_APPRENANT];
+
+export const SOURCE_APPRENANT_VALUES = Object.values(SOURCE_APPRENANT) as [string, ...string[]];
+
+export const SourceApprenantEnum = z.enum(SOURCE_APPRENANT_VALUES);

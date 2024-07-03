@@ -2003,7 +2003,7 @@ export const legacySchema = {
     },
     source: {
       bsonType: "string",
-      description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
+      description: "Source du dossier apprenant (FICHIER, ERP, DECA, Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
     },
     source_organisme_id: {
       bsonType: "string",

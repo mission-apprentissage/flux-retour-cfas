@@ -1,8 +1,9 @@
 import { WarningTwoIcon } from "@chakra-ui/icons";
-import { Box, HStack, SystemProps, Text } from "@chakra-ui/react";
+import { SystemProps } from "@chakra-ui/react";
 import { isBefore, subMonths, subWeeks } from "date-fns";
 
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import Tag from "@/components/Tag/Tag";
 import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 
@@ -22,100 +23,56 @@ function InfoTransmissionDonnees({
   switch (state) {
     case "donnees_non_disponibles":
       return (
-        <HStack
-          paddingX="1w"
-          paddingY="2px"
-          borderRadius={6}
-          lineHeight="2em"
-          backgroundColor={modeBadge ? "dgalt" : undefined}
-          color="mgalt"
+        <Tag
+          leftIcon={CloseCircle}
+          primaryText={modeBadge ? "Données non disponibles" : "Non disponible"}
+          colorScheme="grey_tag"
+          variant={modeBadge ? "badge" : "text"}
           {...props}
-        >
-          <CloseCircle />
-          <Text fontSize="zeta" fontWeight={modeBadge ? "bold" : undefined}>
-            {modeBadge ? "Données non disponibles" : "Non disponible"}
-          </Text>
-        </HStack>
+        />
       );
     case "donnees_non_transmises":
       return (
-        <HStack
-          paddingX="1w"
-          paddingY="2px"
-          borderRadius={6}
-          lineHeight="2em"
-          backgroundColor={modeBadge ? "#E1000F30" : undefined}
-          color="error"
+        <Tag
+          leftIcon={CloseCircle}
+          primaryText={modeBadge ? "Données non transmises" : "Ne transmet pas"}
+          variant={modeBadge ? "badge" : "text"}
+          colorScheme="red_tag"
           {...props}
-        >
-          <CloseCircle />
-          <Text fontSize="zeta" fontWeight={modeBadge ? "bold" : undefined}>
-            {modeBadge ? "Données non transmises" : "Ne transmet pas"}
-          </Text>
-        </HStack>
+        />
       );
     case "donnees_obsoletes":
       return (
-        <HStack
-          paddingX="1w"
-          paddingY="2px"
-          borderRadius={6}
-          backgroundColor={modeBadge ? "#E631221A" : undefined}
-          color="#E63122"
+        <Tag
+          leftIcon={WarningTwoIcon}
+          primaryText={modeBadge ? "Données obsolètes" : "Ne transmet plus"}
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          colorScheme="red_tag"
+          variant={modeBadge ? "badge" : "text"}
           {...props}
-        >
-          <WarningTwoIcon boxSize={4} />
-          <Box>
-            <Text fontSize="zeta" fontWeight={modeBadge ? "bold" : undefined}>
-              {modeBadge ? "Données obsolètes" : "Ne transmet plus"}
-            </Text>
-            <Text fontSize="x-small">
-              {modeBadge && "Dernière "}MAJ&nbsp;: {formatDateNumericDayMonthYear(lastTransmissionDate as string)}
-            </Text>
-          </Box>
-        </HStack>
+        />
       );
     case "donnees_anciennes":
       return (
-        <HStack
-          paddingX="1w"
-          paddingY="2px"
-          borderRadius={6}
-          backgroundColor={modeBadge ? "#FF732C1A" : undefined}
-          color="#FF732C"
+        <Tag
+          leftIcon={Checkbox}
+          primaryText={modeBadge ? "Données transmises" : "Transmet"}
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          colorScheme="orange_tag"
+          variant={modeBadge ? "badge" : "text"}
           {...props}
-        >
-          <Checkbox />
-          <Box>
-            <Text fontSize="zeta" fontWeight={modeBadge ? "bold" : undefined}>
-              {modeBadge ? "Données transmises" : "Transmet"}
-            </Text>
-            <Text fontSize="x-small">
-              {modeBadge && "Dernière "}MAJ&nbsp;: {formatDateNumericDayMonthYear(lastTransmissionDate as string)}
-            </Text>
-          </Box>
-        </HStack>
+        />
       );
     case "donnees_recentes":
       return (
-        <HStack
-          paddingX="1w"
-          paddingY="2px"
-          borderRadius={6}
-          backgroundColor={modeBadge ? "greensoft.200" : undefined}
-          color="greensoft.600"
+        <Tag
+          leftIcon={Checkbox}
+          primaryText={modeBadge ? "Données transmises" : "Transmet"}
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          colorScheme="green_tag"
+          variant={modeBadge ? "badge" : "text"}
           {...props}
-        >
-          <Checkbox />
-          <Box>
-            <Text fontSize="zeta" fontWeight={modeBadge ? "bold" : undefined}>
-              {modeBadge ? "Données transmises" : "Transmet"}
-            </Text>
-            <Text fontSize="x-small">
-              {modeBadge && "Dernière "}MAJ&nbsp;: {formatDateNumericDayMonthYear(lastTransmissionDate as string)}
-            </Text>
-          </Box>
-        </HStack>
+        />
       );
   }
 }

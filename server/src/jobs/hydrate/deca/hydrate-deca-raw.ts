@@ -2,6 +2,7 @@ import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
 import { ObjectId, WithoutId } from "mongodb";
+import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisme } from "shared/models";
 import { IDecaRaw } from "shared/models/data/decaRaw.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
@@ -153,7 +154,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     created_at: new Date(),
     updated_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
-    source: "DECA",
+    source: SOURCE_APPRENANT.DECA,
     annee_scolaire: startYear <= 2023 && endYear >= 2024 ? "2023-2024" : `${startYear}-${endYear}`,
   };
 
