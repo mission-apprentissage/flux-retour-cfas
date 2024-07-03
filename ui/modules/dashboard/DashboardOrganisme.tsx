@@ -400,6 +400,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       colorScheme="grey_tag"
                       size="lg"
                       fontSize="epsilon"
+                      borderRadius="0"
                       rightIcon={() =>
                         !organisme.uai ? (
                           <InfoTooltip
