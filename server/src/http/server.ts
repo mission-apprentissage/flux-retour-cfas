@@ -139,7 +139,6 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
-import affelnetOrganismeRoutes from "./routes/organismes.routes/affelnet.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
@@ -656,7 +655,6 @@ function setupRoutes(app: Application) {
           )
       )
       .use("/transmission", transmissionRoutes())
-      .use("/affelnet", affelnetOrganismeRoutes())
   );
 
   /********************************

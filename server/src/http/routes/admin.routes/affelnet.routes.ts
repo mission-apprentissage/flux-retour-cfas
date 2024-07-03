@@ -139,7 +139,8 @@ const createVoeux = async (req, res) => {
       };
 
       if (!voeuRaw.cle_ministere_educatif) {
-        await voeuxAffelnetDb().insertOne(voeu);
+        logger.error(`Pas de cle_ministere_educatif`);
+        return;
       }
 
       const formationsCatalogue = await formationsCatalogueDb().findOne(
