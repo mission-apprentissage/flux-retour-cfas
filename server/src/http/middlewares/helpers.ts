@@ -114,9 +114,12 @@ export function requireVoeuOrganismePermission<TParams = any, TQuery = any, TBod
   };
 }
 
-export function requireDrafpic(req: Request, _res: Response, next: NextFunction) {
+export function requireOrganismeRegional(req: Request, _res: Response, next: NextFunction) {
   ensureValidUser(req.user);
-  if (req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC")) {
+  if (
+    req.user.organisation.type !== (ORGANISATION_TYPE.DREETS as "DREETS") &&
+    req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC")
+  ) {
     throw Boom.forbidden("Accès non autorisé");
   }
   next();

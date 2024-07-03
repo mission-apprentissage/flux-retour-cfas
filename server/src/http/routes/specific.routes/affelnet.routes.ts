@@ -5,7 +5,7 @@ import { z } from "zod";
 //import parentLogger from "@/common/logger";
 import { getAffelnetCountVoeuxNational } from "@/common/actions/affelnet.actions";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { requireDrafpic, returnResult } from "@/http/middlewares/helpers";
+import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 // const logger = parentLogger.child({
@@ -18,7 +18,7 @@ export default () => {
   // TODO : implement role
   router.get(
     "/national/count",
-    requireDrafpic,
+    requireOrganismeRegional,
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
