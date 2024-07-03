@@ -45,18 +45,22 @@ export const hydrateFormationsCatalogue = async () => {
     if (pendingFormations.length > 0) {
       queriesInProgress.push(
         ...pendingFormations.map(({ _id, ...formation }) =>
-          formationsCatalogueDb().updateOne(
-            {
-              cle_ministere_educatif: formation.cle_ministere_educatif,
-            },
-            {
-              $set: formation,
-              $setOnInsert: { _id },
-            },
-            {
-              upsert: true,
-            }
-          )
+          formationsCatalogueDb()
+            .updateOne(
+              {
+                cle_ministere_educatif: formation.cle_ministere_educatif,
+              },
+              {
+                $set: formation,
+                $setOnInsert: { _id },
+              },
+              {
+                upsert: true,
+              }
+            )
+            .catch((err) => {
+              logger.error({ err: err }, "insertion formation échouée", formation.cle_ministere_educatif);
+            })
         )
       );
     }

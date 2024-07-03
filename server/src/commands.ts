@@ -658,6 +658,18 @@ program
   .action(createJobAction("tmp:patches:update-deca-formation"));
 
 program
+  .command("tmp:patches:update-effectifs-queue-source")
+  .description("Mise a jour du chanps source dans les effectifs queue")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-effectifs-queue-source"));
+
+program
+  .command("tmp:patches:update-effectifs-source")
+  .description("Mise a jour du chanps source dans les effectifs queue")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-effectifs-source"));
+
+program
   .command("dev:list-http-endpoints")
   .description("Liste les routes du serveur HTTP")
   .action(async () => {
