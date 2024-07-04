@@ -46,8 +46,8 @@ function InfoTransmissionDonnees({
         <Tag
           leftIcon={WarningTwoIcon}
           primaryText={modeBadge ? "Données obsolètes" : "Ne transmet plus"}
-          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
-          colorScheme="red_tag"
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          colorScheme="redlight_tag"
           variant={modeBadge ? "badge" : "text"}
           {...props}
         />
@@ -57,7 +57,7 @@ function InfoTransmissionDonnees({
         <Tag
           leftIcon={Checkbox}
           primaryText={modeBadge ? "Données transmises" : "Transmet"}
-          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
           colorScheme="orange_tag"
           variant={modeBadge ? "badge" : "text"}
           {...props}
@@ -68,7 +68,7 @@ function InfoTransmissionDonnees({
         <Tag
           leftIcon={Checkbox}
           primaryText={modeBadge ? "Données transmises" : "Transmet"}
-          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ: ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
+          secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
           colorScheme="green_tag"
           variant={modeBadge ? "badge" : "text"}
           {...props}
