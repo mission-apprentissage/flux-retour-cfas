@@ -107,8 +107,9 @@ const NavBarPublic = () => {
 };
 
 // pour tous les utilisateurs transverses (pour le moment)
-function NavBarTransverse(): ReactElement {
+function NavBarTransverse(): React.ReactElement {
   const { organisationType } = useAuth();
+
   return (
     <>
       <NavItem to="/" exactMatch>
@@ -116,6 +117,9 @@ function NavBarTransverse(): ReactElement {
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+      {(organisationType === "DREETS" || organisationType === "DRAFPIC") && (
+        <NavItem to="/voeux-affelnet">Voeux Affelnet</NavItem>
+      )}
       <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
       <MenuQuestions />
     </>
