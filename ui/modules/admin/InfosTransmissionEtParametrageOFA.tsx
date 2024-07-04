@@ -1,8 +1,9 @@
-import { Badge, Box, HStack, Stack, Text, Link } from "@chakra-ui/react";
+import { Box, Stack, Text, Link, HStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 
 import { _get } from "@/common/httpClient";
+import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
 interface InfosTransmissionParametrageOFAProps {
@@ -32,30 +33,27 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
 
   return (
     <Stack borderColor="#0063CB" borderWidth="2px" w="fit-content" p="2w" {...props}>
-      <HStack color="#0063CB">
+      <Box color="#0063CB" display="flex" alignItems="center">
         <Box as="i" className="ri-eye-fill" />
-        <Box>
-          <Text fontSize="zeta" fontWeight="bold">
-            Encart réservé aux administrateurs
-          </Text>
-        </Box>
-      </HStack>
-      <HStack>
+        <Text fontSize="zeta" fontWeight="bold" ml="2">
+          Encart réservé aux administrateurs
+        </Text>
+      </Box>
+      <HStack spacing="1w">
         <Text>Transmission API :</Text>
         {parametrage?.transmission_api_active ? (
-          <HStack spacing="1w">
+          <Box display="flex" alignItems="center">
             <BadgeYes />
             {parametrage.transmission_api_version && (
-              <Badge
+              <Tag
                 fontSize="epsilon"
                 textColor="grey.800"
                 textTransform="none"
                 paddingX="1w"
                 paddingY="2px"
                 backgroundColor="#ECEAE3"
-              >
-                {parametrage.transmission_api_version}
-              </Badge>
+                primaryText={parametrage.transmission_api_version}
+              />
             )}
             <Text>
               (
@@ -64,15 +62,15 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                 : "Date non disponible"}
               )
             </Text>
-          </HStack>
+          </Box>
         ) : (
           <BadgeNo />
         )}
       </HStack>
-      <HStack>
+      <HStack spacing="1w">
         <Text>Transmission manuelle :</Text>
         {parametrage?.transmission_manuelle_active ? (
-          <HStack spacing="1w">
+          <Box display="flex" alignItems="center">
             <BadgeYes />
             <Text>
               (
@@ -81,28 +79,26 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                 : "Date non disponible"}
               )
             </Text>
-          </HStack>
+          </Box>
         ) : (
           <BadgeNo />
         )}
       </HStack>
-      <HStack>
+      <HStack spacing="1w">
         <Text>Paramétrage :</Text>
         {parametrage?.parametrage_erp_active ? (
           <HStack spacing="1w">
             <BadgeYes />
             {parametrage.erps?.map((erp, index) => (
-              <Badge
+              <Tag
                 key={index}
-                fontSize="epsilon"
-                textColor="grey.800"
                 textTransform="none"
-                paddingX="1w"
-                paddingY="2px"
-                backgroundColor="#ECEAE3"
-              >
-                {erp.toUpperCase()}
-              </Badge>
+                variant="badge"
+                colorScheme="grey_tag"
+                primaryText={erp.toUpperCase()}
+                size="md"
+                borderRadius={0}
+              />
             ))}
             <Text>
               (
@@ -116,13 +112,13 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
-      <HStack>
+      <HStack spacing="1w">
         <Text>Clé d’API présente :</Text>
         {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
       </HStack>
       {parametrage?.organisme_transmetteur ? (
-        <HStack>
-          <Text>Dernier organisme transmetteur des effectifs :</Text>
+        <Box display="flex" alignItems="center">
+          <Text>Dernier organisme transmetteur des effectifs : </Text>
           <Link
             key={parametrage?.organisme_transmetteur._id}
             href={`/organismes/${parametrage?.organisme_transmetteur._id}`}
@@ -135,33 +131,14 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
               parametrage?.organisme_transmetteur.raison_sociale ??
               "Organisme inconnu"}
           </Link>
-        </HStack>
-      ) : (
-        <></>
-      )}
+        </Box>
+      ) : null}
     </Stack>
   );
 };
 
-const BadgeYes = () => (
-  <HStack paddingX="1w" paddingY="2px" borderRadius={6} backgroundColor="greensoft.200" color="greensoft.600">
-    <Checkbox />
-    <Box>
-      <Text fontSize="zeta" fontWeight="bold">
-        Oui
-      </Text>
-    </Box>
-  </HStack>
-);
+const BadgeYes = () => <Tag leftIcon={Checkbox} primaryText="Oui" variant="badge" colorScheme="green_tag" size="md" />;
 
-const BadgeNo = () => (
-  <HStack paddingX="1w" paddingY="2px" borderRadius={6} backgroundColor="red.200" color="red.600">
-    <CloseCircle />
-    <Box>
-      <Text fontSize="zeta" fontWeight="bold">
-        Non
-      </Text>
-    </Box>
-  </HStack>
-);
+const BadgeNo = () => <Tag leftIcon={CloseCircle} primaryText="Non" variant="badge" colorScheme="red_tag" size="md" />;
+
 export default InfosTransmissionEtParametrageOFA;

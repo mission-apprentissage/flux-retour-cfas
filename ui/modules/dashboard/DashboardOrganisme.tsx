@@ -1,6 +1,5 @@
 import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import {
-  Badge,
   Box,
   Button,
   Container,
@@ -50,6 +49,7 @@ import CerfaLink from "@/components/Cerfa/CerfaLink";
 import NotificationTransmissionError from "@/components/Notifications/TransmissionErrors";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
+import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -352,6 +352,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 <Text color="bluefrance" fontWeight={700} textTransform="uppercase">
                   {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
                 </Text>
+              </HStack>
+              <HStack mt="4" gap="4" alignItems="center">
                 {organisme.permissions?.infoTransmissionEffectifs && (
                   <InfoTransmissionDonnees
                     modeBadge={true}
@@ -359,7 +361,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
                   />
                 )}
-                {!organisme.is_transmission_target && <InfoTransmissionDeca />}
+                {!organisme.is_transmission_target && (
+                  <InfoTransmissionDeca indicateursEffectifs={indicateursEffectifs} />
+                )}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
@@ -390,178 +394,176 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 <Wrap fontSize="epsilon" textColor="grey.800">
                   <HStack>
                     <Text>UAI&nbsp;:</Text>
-                    <Badge
+                    <Tag
+                      primaryText={organisme.uai || "Inconnue"}
+                      variant="badge"
+                      colorScheme="grey_tag"
+                      size="lg"
                       fontSize="epsilon"
-                      textColor="grey.800"
-                      textTransform="none"
-                      paddingX="1w"
-                      paddingY="2px"
-                      backgroundColor="#ECEAE3"
-                    >
-                      {organisme.uai || "Inconnue"}
-                      {!organisme.uai && (
-                        <InfoTooltip
-                          contentComponent={() => (
-                            <Box>
-                              <Text>
-                                <strong>Votre UAI est inconnue</strong>
-                              </Text>
-                              <UnorderedList mt={4}>
-                                <ListItem>
-                                  Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme « Inconnue »
-                                  alors que votre organisme en possède une, veuillez la communiquer en écrivant à{" "}
-                                  <Link
-                                    isExternal
-                                    href="mailto:referentiel-uai-siret@onisep.fr"
-                                    textDecoration="underline"
-                                    display="inline"
-                                  >
-                                    referentiel-uai-siret@onisep.fr
-                                  </Link>{" "}
-                                  avec la fiche UAI, afin qu’elle soit mise à jour. L&apos;absence de ce numéro bloque
-                                  l’enregistrement des contrats d’apprentissage. L&apos;UAI est recommandée pour être
-                                  reconnu OFA.
-                                </ListItem>
-                                <ListItem>
-                                  Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
-                                  services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la
-                                  page d’
-                                  <Link
-                                    isExternal
-                                    href={FAQ_REFERENCER_ETABLISSEMENT}
-                                    textDecoration="underline"
-                                    display="inline"
-                                  >
-                                    Aide et FAQ
-                                  </Link>
-                                  .
-                                </ListItem>
-                              </UnorderedList>
-                            </Box>
-                          )}
-                        />
-                      )}
-                    </Badge>
+                      borderRadius="0"
+                      rightIcon={() =>
+                        !organisme.uai ? (
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                <Text>
+                                  <strong>Votre UAI est inconnue</strong>
+                                </Text>
+                                <UnorderedList mt={4}>
+                                  <ListItem>
+                                    Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme « Inconnue »
+                                    alors que votre organisme en possède une, veuillez la communiquer en écrivant à{" "}
+                                    <Link
+                                      isExternal
+                                      href="mailto:referentiel-uai-siret@onisep.fr"
+                                      textDecoration="underline"
+                                      display="inline"
+                                    >
+                                      referentiel-uai-siret@onisep.fr
+                                    </Link>{" "}
+                                    avec la fiche UAI, afin qu’elle soit mise à jour. L&apos;absence de ce numéro bloque
+                                    l’enregistrement des contrats d’apprentissage. L&apos;UAI est recommandée pour être
+                                    reconnu OFA.
+                                  </ListItem>
+                                  <ListItem>
+                                    Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
+                                    services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans
+                                    la page d’
+                                    <Link
+                                      isExternal
+                                      href={FAQ_REFERENCER_ETABLISSEMENT}
+                                      textDecoration="underline"
+                                      display="inline"
+                                    >
+                                      Aide et FAQ
+                                    </Link>
+                                    .
+                                  </ListItem>
+                                </UnorderedList>
+                              </Box>
+                            )}
+                          />
+                        ) : null
+                      }
+                    />
                   </HStack>
 
                   <HStack>
                     <Text>SIRET&nbsp;:</Text>
-                    <Badge
+                    <Tag
+                      primaryText={`${formatSiretSplitted(organisme.siret)} (${organisme.ferme ? "fermé" : "en activité"})`}
+                      variant="badge"
+                      colorScheme="grey_tag"
+                      size="lg"
                       fontSize="epsilon"
-                      textColor="grey.800"
-                      paddingX="1w"
-                      paddingY="2px"
-                      backgroundColor="#ECEAE3"
-                      textTransform="none"
-                    >
-                      {formatSiretSplitted(organisme.siret)} ({organisme.ferme ? "fermé" : "en activité"})
-                    </Badge>
+                      borderRadius="0"
+                    />
                   </HStack>
 
                   <HStack>
                     <Text>Nature&nbsp;:</Text>
-                    <Badge
+                    <Tag
+                      primaryText={natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
+                      variant="badge"
+                      colorScheme="grey_tag"
+                      size="lg"
                       fontSize="epsilon"
-                      textTransform="none"
-                      textColor="grey.800"
-                      paddingX="1w"
-                      paddingY="2px"
-                      backgroundColor="#ECEAE3"
-                    >
-                      {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
-                      {natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" && (
-                        <InfoTooltip
-                          contentComponent={() => (
-                            <Box>
-                              <Text>
-                                <strong>Votre Nature est inconnue</strong>
-                              </Text>
-                              <Text mt="2w">
-                                Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de
-                                formation n’est pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès
-                                de votre Carif-Oref régional pour renseigner cette donnée. Veuillez noter que la
-                                modification de la nature d’un organisme impacte ses relations avec les autres
-                                organismes.
-                              </Text>
-                              <Link
-                                isExternal
-                                textDecoration="underline"
-                                display="inline"
-                                href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                              >
-                                En savoir plus sur la démarche.
-                              </Link>
-                            </Box>
-                          )}
-                        />
-                      )}
-                      {natureOrganismeDeFormationTooltip[organisme.nature] && (
-                        <InfoTooltip
-                          contentComponent={() => <Box>{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
-                        />
-                      )}
-                    </Badge>
+                      borderRadius="0"
+                      rightIcon={() =>
+                        natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" ? (
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                <Text>
+                                  <strong>Votre Nature est inconnue</strong>
+                                </Text>
+                                <Text mt="2w">
+                                  Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de
+                                  formation n’est pas collectée ou mal référencée par le Carif-Oref. Adressez-vous
+                                  auprès de votre Carif-Oref régional pour renseigner cette donnée. Veuillez noter que
+                                  la modification de la nature d’un organisme impacte ses relations avec les autres
+                                  organismes.
+                                </Text>
+                                <Link
+                                  isExternal
+                                  textDecoration="underline"
+                                  display="inline"
+                                  href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                                >
+                                  En savoir plus sur la démarche.
+                                </Link>
+                              </Box>
+                            )}
+                          />
+                        ) : (
+                          natureOrganismeDeFormationTooltip[organisme.nature] && (
+                            <InfoTooltip
+                              contentComponent={() => <Box>{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
+                            />
+                          )
+                        )
+                      }
+                    />
                   </HStack>
 
                   {modePublique && (
                     <HStack>
                       <Text>Certifié Qualiopi&nbsp;:</Text>
-                      <Badge
+                      <Tag
+                        primaryText={organisme.qualiopi ? "Oui" : "Non"}
+                        variant="badge"
+                        colorScheme="grey_tag"
+                        size="lg"
                         fontSize="epsilon"
-                        textColor="grey.800"
-                        paddingX="1w"
-                        paddingY="2px"
-                        backgroundColor="#ECEAE3"
-                        textTransform="none"
-                      >
-                        {organisme.qualiopi ? "Oui" : "Non"}
-
-                        <InfoTooltip
-                          contentComponent={() => (
-                            <Box>
-                              La donnée Certifié qualiopi provient de la{" "}
-                              <Link
-                                isExternal
-                                href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS}
-                                textDecoration="underline"
-                                display="inline"
-                              >
-                                Liste Publique des Organismes de Formations
-                              </Link>
-                              . Si cette information est erronée, merci de leur signaler.
-                            </Box>
-                          )}
-                        />
-                      </Badge>
+                        borderRadius="0"
+                        rightIcon={() => (
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                La donnée Certifié qualiopi provient de la{" "}
+                                <Link
+                                  isExternal
+                                  href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS}
+                                  textDecoration="underline"
+                                  display="inline"
+                                >
+                                  Liste Publique des Organismes de Formations
+                                </Link>
+                                . Si cette information est erronée, merci de leur signaler.
+                              </Box>
+                            )}
+                          />
+                        )}
+                      />
                       <Text>Prépa-apprentissage&nbsp;:</Text>
-                      <Badge
+                      <Tag
+                        primaryText={organisme.prepa_apprentissage ? "Oui" : "Non"}
+                        variant="badge"
+                        colorScheme="grey_tag"
+                        size="lg"
                         fontSize="epsilon"
-                        textColor="grey.800"
-                        paddingX="1w"
-                        paddingY="2px"
-                        backgroundColor="#ECEAE3"
-                        textTransform="none"
-                      >
-                        {organisme.prepa_apprentissage ? "Oui" : "Non"}
-                        <InfoTooltip
-                          contentComponent={() => (
-                            <Box>
-                              La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
-                              d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                              bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et que
-                              votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
-                              <Link
-                                isExternal
-                                href="mailto:tableau-de-bord@apprentissage.gouv.fr"
-                                textDecoration="underline"
-                                display="inline"
-                              >
-                                tableau-de-bord@apprentissage.gouv.fr
-                              </Link>
-                            </Box>
-                          )}
-                        />
-                      </Badge>
+                        borderRadius="0"
+                        rightIcon={() => (
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
+                                d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
+                                bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et
+                                que votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
+                                <Link
+                                  isExternal
+                                  href="mailto:tableau-de-bord@apprentissage.gouv.fr"
+                                  textDecoration="underline"
+                                  display="inline"
+                                >
+                                  tableau-de-bord@apprentissage.gouv.fr
+                                </Link>
+                              </Box>
+                            )}
+                          />
+                        )}
+                      />
                     </HStack>
                   )}
                 </Wrap>
@@ -572,17 +574,15 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}&nbsp;:
                     </Text>
                     {organisme.reseaux.map((reseau) => (
-                      <Badge
-                        fontSize="epsilon"
-                        textColor="grey.800"
-                        paddingX="1w"
-                        paddingY="2px"
-                        backgroundColor="#ECEAE3"
-                        textTransform="none"
+                      <Tag
                         key={reseau}
-                      >
-                        {TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
-                      </Badge>
+                        primaryText={TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
+                        variant="badge"
+                        colorScheme="grey_tag"
+                        size="lg"
+                        fontSize="epsilon"
+                        borderRadius="0"
+                      />
                     ))}
                   </HStack>
                 )}

@@ -12,11 +12,13 @@ import { Select } from "./select";
 import { Switch } from "./switch";
 import { Table } from "./table";
 import { Tabs } from "./tabs";
+import { Tag } from "./tag";
 import { Text } from "./text";
 import { Textarea } from "./textarea";
 
 const components = {
   Tabs,
+  Tag,
   Button,
   Input,
   NumberInput,

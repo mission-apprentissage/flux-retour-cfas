@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/modules/dashboard/DashboardOrganisme.tsx
+  checksum: 1c87719cbf9d12856f175d428c7e37db395840e094da5f807cd17c240389abc7
 - filename: ui/common/utils/televersement.ts
   checksum: a6097b52f42a834065f03b2852bcd9f90c48ea18c0757d473ca80f5c838240a2
 - filename: ui/components/Televersement/DocumentsActionButtons.tsx
