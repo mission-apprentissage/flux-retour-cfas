@@ -6,6 +6,7 @@ interface ERP {
   helpFilePath?: string;
   helpFileSize?: string;
   apiV3?: boolean;
+  disabled?: boolean;
 }
 
 export const ERPS = sortAlphabeticallyBy("name", [
@@ -71,11 +72,13 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "ammon",
     name: "Ammon",
     apiV3: true,
+    disabled: true,
   },
   {
     id: "formasup-paca",
     name: "Formasup PACA",
     apiV3: true,
+    disabled: true,
   },
 ] satisfies ERP[]);
 

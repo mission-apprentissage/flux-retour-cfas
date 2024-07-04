@@ -242,7 +242,7 @@ const ParametresPage = () => {
                 <option selected hidden disabled value="">
                   ERP...
                 </option>
-                {ERPS.map((erp) => (
+                {ERPS.filter(({ disabled }) => !disabled).map((erp) => (
                   <option value={erp.id} key={erp.id}>
                     {erp.name}
                   </option>
