@@ -442,8 +442,8 @@ export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
           fiabilisation_statut: isUaiPresentInReferentiel
             ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE
             : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
-          $addToSet: { rule_ids: 9 },
         },
+        $addToSet: { rule_ids: 9 },
       },
       { bypassDocumentValidation: true }
     );
