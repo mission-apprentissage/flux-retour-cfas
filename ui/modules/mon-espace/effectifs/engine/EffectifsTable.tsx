@@ -3,7 +3,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import React, { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { ERPS, getStatut } from "shared";
+import { getStatut } from "shared";
 
 import Table from "@/components/Table/Table";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -294,17 +294,9 @@ const EffectifsTable = ({
                   ),
                   cell: ({ row }) => {
                     const { source } = organismesEffectifs[row.id];
-                    const sources = {
-                      TDB_MANUEL: "Saisie manuelle",
-                      TDB_FILE: "Fichier",
-                      ...ERPS.reduce((acc, item) => {
-                        acc[item.id] = item.name;
-                        return acc;
-                      }, {}),
-                    };
                     return (
                       <HStack textAlign="left">
-                        <Text fontSize="1rem">{sources[source.toUpperCase()] ?? "Fichier"}</Text>
+                        <Text fontSize="1rem">{source}</Text>
                       </HStack>
                     );
                   },

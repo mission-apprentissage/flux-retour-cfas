@@ -3088,7 +3088,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "source": {
       "bsonType": "string",
-      "description": "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
+      "enum": [
+        "FICHIER",
+        "ERP",
+        "DECA",
+      ],
     },
     "source_organisme_id": {
       "bsonType": [
@@ -5935,7 +5939,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "source": {
       "bsonType": "string",
-      "description": "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
+      "enum": [
+        "FICHIER",
+        "ERP",
+        "DECA",
+      ],
     },
     "source_organisme_id": {
       "bsonType": [
@@ -8675,7 +8683,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "source": {
       "bsonType": "string",
-      "description": "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
+      "enum": [
+        "FICHIER",
+        "ERP",
+        "DECA",
+      ],
     },
     "source_organisme_id": {
       "bsonType": [
@@ -8707,6 +8719,13 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         },
       ],
       "description": "Date de mise à jour en base de données",
+    },
+    "user_erp_id": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Id de l'utilisateur ERP",
     },
     "validation_errors": {
       "anyOf": [

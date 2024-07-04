@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
@@ -84,7 +85,7 @@ const createEff = (org) => ({
   date_metier_mise_a_jour_statut: `2023-12-28T04:05:47.647Z`,
   id_erp_apprenant: new ObjectId().toString(),
   api_version: "v3",
-  source: "SOURCE_TEST",
+  source: SOURCE_APPRENANT.FICHIER,
   source_organisme_id: "9999999",
   date_inscription_formation: `2023-09-01T00:00:00.000Z`,
   date_entree_formation: `2023-09-01T00:00:00.000Z`,
@@ -163,7 +164,7 @@ const createEffDECA = (org) => ({
   updated_at: new Date("2024-04-24T09:23:11.040Z"),
   created_at: new Date("2024-04-24T09:23:11.021Z"),
   annee_scolaire: "2023-2024",
-  source: "SOURCE_TEST",
+  source: SOURCE_APPRENANT.FICHIER,
   source_organisme_id: "9999999",
   id_erp_apprenant: new ObjectId().toString(),
   organisme_id: org._id,

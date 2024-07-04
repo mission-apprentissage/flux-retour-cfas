@@ -1,5 +1,5 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3, RouteConfig } from "@asteasolutions/zod-to-openapi";
-import { TD_API_ELEMENT_LINK } from "shared/constants";
+import { SourceApprenantEnum, TD_API_ELEMENT_LINK } from "shared/constants";
 import { z } from "zod";
 
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -59,10 +59,10 @@ const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base().extend
     type: "string",
     format: "YYYY-MM-DDT00:00:00Z",
   }),
-  source: z.string().openapi({
+  source: SourceApprenantEnum.openapi({
     description: "Source de l'effectif (nom de l'ERP)",
     type: "string",
-    example: "my-erp",
+    example: "ERP",
   }),
   source_organisme_id: z.string().openapi({
     description: "Identifiant interne de l'organisme qui a envoyé l'effectif",

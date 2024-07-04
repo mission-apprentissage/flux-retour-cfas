@@ -4,7 +4,7 @@ import { zObjectId } from "zod-mongodb-schema";
 
 import effectifsModel from "shared/models/data/effectifs.model";
 
-import { CODES_STATUT_APPRENANT_ENUM } from "../../constants";
+import { CODES_STATUT_APPRENANT_ENUM, SourceApprenantEnum } from "../../constants";
 import { zAdresse } from "../parts/adresseSchema";
 
 import { zContrat } from "./effectifs/contrat.part";
@@ -34,8 +34,9 @@ const apprenantProps = effectifsProps.apprenant.shape;
 
 // internal fields (shared with api V3)
 export const internalFields = {
-  source: z.string({ description: effectifsProps.source.description }),
+  source: SourceApprenantEnum,
   source_organisme_id: z.string({ description: effectifsProps.source_organisme_id.description }).nullish(),
+  user_erp_id: z.string({ description: "Id de l'utilisateur ERP" }).nullish(),
   effectif_id: zObjectId.describe("Id de l'effectif associé").nullish(),
   organisme_id: zObjectId.describe("Id de l'organisme associé").nullish(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),

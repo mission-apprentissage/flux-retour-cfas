@@ -89,6 +89,7 @@ export const extensions = {
 export const primitivesV1 = {
   source: z.string().min(1), // configured by API
   source_organisme_id: z.string().min(1), // configured by API
+  user_erp_id: z.string().min(1),
   api_version: z.union([z.literal("v1"), z.literal("v2"), z.literal("v3"), z.literal(""), z.null()]), // configured by API
   apprenant: {
     nom: z.string().trim().min(1).toUpperCase().openapi({
