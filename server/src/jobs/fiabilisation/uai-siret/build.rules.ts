@@ -28,7 +28,10 @@ export const checkCoupleFiable = async (
   if (organismeFiableForCouple) {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
+      {
+        $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE },
+        $addToSet: { rule_ids: 1 },
+      },
       { upsert: true }
     );
 
@@ -80,6 +83,7 @@ export const checkMatchReferentielUaiUniqueSiretDifferent = async (
           siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
           type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         },
+        $addToSet: { rule_ids: 2 },
       },
       { upsert: true }
     );
@@ -121,6 +125,7 @@ export const checkMatchReferentielSiretUaiDifferent = async (
           siret_fiable: coupleUaiSiretTdbToCheck.siret,
           type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         },
+        $addToSet: { rule_ids: 3 },
       },
       { upsert: true }
     );
@@ -196,6 +201,7 @@ export const checkUaiMultiplesRelationsAndLieux = async (
                     siret_fiable: coupleUaiSiretTdbToCheck.siret,
                     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
                   },
+                  $addToSet: { rule_ids: 4 },
                 },
                 { upsert: true }
               );
@@ -300,6 +306,7 @@ export const checkSiretMultiplesRelationsAndLieux = async (
                     siret_fiable: coupleUaiSiretTdbToCheck.siret,
                     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
                   },
+                  $addToSet: { rule_ids: 5.1 },
                 },
                 { upsert: true }
               );
@@ -324,6 +331,7 @@ export const checkSiretMultiplesRelationsAndLieux = async (
                 siret_fiable: coupleUaiSiretTdbToCheck.siret,
                 type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
               },
+              $addToSet: { rule_ids: 5.2 },
             },
             { upsert: true }
           );
@@ -351,7 +359,10 @@ export const checkUaiAucunLieuReferentiel = async (coupleUaiSiretTdbToCheck) => 
   if (organismesMatchsUaiInLieuxReferentiel === 0) {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE } },
+      {
+        $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE },
+        $addToSet: { rule_ids: 7 },
+      },
       { upsert: true }
     );
     // MAJ du statut de l'organisme lié
@@ -386,6 +397,7 @@ export const checkUaiLieuReferentiel = async ({ uai, siret }) => {
           uai_fiable: uai,
           type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         },
+        $addToSet: { rule_ids: 8 },
       },
       { upsert: true }
     );
@@ -419,6 +431,7 @@ export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
       type: isUaiPresentInReferentiel
         ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE
         : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
+      rule_ids: [9],
     });
 
     // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
@@ -429,6 +442,7 @@ export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
           fiabilisation_statut: isUaiPresentInReferentiel
             ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE
             : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
+          $addToSet: { rule_ids: 9 },
         },
       },
       { bypassDocumentValidation: true }

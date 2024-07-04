@@ -30,6 +30,7 @@ export interface FiabilisationUaiSiret {
    * Le SIRET fiable lié au couple à fiabiliser
    */
   siret_fiable?: string;
+  rule_ids?: number[];
 }
 
 export type FiabilisationUaiSiretJson = Jsonify<FiabilisationUaiSiret>;
