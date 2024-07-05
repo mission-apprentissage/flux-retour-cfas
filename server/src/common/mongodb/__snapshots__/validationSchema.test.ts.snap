@@ -8759,6 +8759,19 @@ exports[`validation-schema should create validation schema for fiabilisationUaiS
         },
       ],
     },
+    "rule_ids": {
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "number",
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "siret": {
       "bsonType": [
         "string",
