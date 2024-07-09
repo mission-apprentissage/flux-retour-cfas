@@ -87,3 +87,17 @@ export const getAffelnetCountVoeuxNational = async (departement: Array<string>, 
     apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
   };
 };
+
+export const getAffelnetVoeux = (departement, regions) =>
+  voeuxAffelnetDb().aggregate([
+    {
+      $match: {
+        ...computeFilter(departement, regions),
+      },
+    },
+    {
+      $project: {
+        nom: "$raw.nom",
+      },
+    },
+  ]);
