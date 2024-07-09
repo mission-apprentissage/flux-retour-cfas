@@ -28,7 +28,7 @@ export default () => {
   );
 
   router.get(
-    "/export/non-concretisee",
+    "/export/non-concretise",
     requireOrganismeRegional,
     validateRequestMiddleware({
       query: z.object({
