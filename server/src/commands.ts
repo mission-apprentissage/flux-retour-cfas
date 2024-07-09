@@ -360,6 +360,12 @@ program
   .action(createJobAction("clear:users"));
 
 program
+  .command("clear:organismes-rules-ids")
+  .description("Clear organismes extra attributes")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("clear:organismes-rules-ids"));
+
+program
   .command("hydrate:bassins-emploi")
   .description("Remplissage de la collection bassinsEmploi")
   .option("-q, --queued", "Run job asynchronously", false)
