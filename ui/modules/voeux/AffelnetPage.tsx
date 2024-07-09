@@ -7,33 +7,47 @@ import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
-import FiltreOrganismeTerritoire from "../indicateurs/filters/FiltreOrganismeTerritoire";
+import FiltreOrganismeDepartement from "../indicateurs/filters/FiltreOrganismeDepartement";
 import {
-  convertEffectifsFiltersToQuery,
-  DateFilters,
-  parseTerritoireFiltersFromQuery,
+  EffectifsFiltersFullQuery,
+  parseEffectifsFiltersFullFromQuery,
   TerritoireFilters,
 } from "../models/effectifs-filters";
 
-function VoeuxAffelnetPage() {
-  const filters = useMemo(() => parseTerritoireFiltersFromQuery(router.query), [router.query, router.isReady]);
+function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
+  const { voeuxFormules, apprenantVoeuxFormules, apprenantsNonContretise } = affelnetCount;
 
-  const onFilterChange = useCallback(
-    (update: Partial<TerritoireFilters & DateFilters>) => {
-      router.push(
+  const effectifsFilters = useMemo(
+    () => parseEffectifsFiltersFullFromQuery(router.query as unknown as EffectifsFiltersFullQuery),
+    [router.query]
+  );
+
+  const updateState = useCallback(
+    (newDepartements: TerritoireFilters) => {
+      const validDepartements = newDepartements.organisme_departements.filter((dept) => dept.trim() !== "");
+
+      const updatedQuery = {
+        ...router.query,
+        ...(validDepartements.length > 0 ? { organisme_departements: validDepartements.join(",") } : {}),
+      };
+
+      if (!validDepartements.length) {
+        delete updatedQuery.organisme_departements;
+      }
+
+      void router.push(
         {
           pathname: router.pathname,
-          query: convertEffectifsFiltersToQuery({ ...filters, ...update }),
+          query: updatedQuery,
         },
         undefined,
         { shallow: true }
       );
     },
-    [filters]
+    [router]
   );
 
   return (
@@ -46,8 +60,8 @@ function VoeuxAffelnetPage() {
           <HStack spacing={8}>
             <VStack alignItems="start" w="100%">
               <Text>
-                Retrouvez ci-dessous les <strong>124 000</strong> vœux formulés en 2024 via la plateforme Affelnet
-                (offre post-3ème).
+                Retrouvez ci-dessous les <strong>{isLoading ? "..." : voeuxFormules}</strong> vœux formulés en 2024 via
+                la plateforme Affelnet (offre post-3ème).
               </Text>
               <Text as="i">
                 Source :{" "}
@@ -80,22 +94,9 @@ function VoeuxAffelnetPage() {
           </Heading>
           <HStack spacing={8}>
             <Text>Filtrer par</Text>
-            <FiltreOrganismeTerritoire
-              value={{
-                regions: filters.organisme_regions,
-                departements: filters.organisme_departements,
-                academies: filters.organisme_academies,
-                bassinsEmploi: filters.organisme_bassinsEmploi,
-              }}
-              onRegionsChange={(organisme_regions) => onFilterChange({ organisme_regions })}
-              onDepartementsChange={(organisme_departements) => onFilterChange({ organisme_departements })}
-              onAcademiesChange={(organisme_academies) => onFilterChange({ organisme_academies })}
-              onBassinsEmploiChange={(organisme_bassinsEmploi) => onFilterChange({ organisme_bassinsEmploi })}
-              button={({ isOpen, setIsOpen, buttonLabel }) => (
-                <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
-                  {buttonLabel}
-                </SecondarySelectButton>
-              )}
+            <FiltreOrganismeDepartement
+              value={effectifsFilters.organisme_departements}
+              onChange={(departements) => updateState({ organisme_departements: departements })}
             />
           </HStack>
           <Grid templateColumns="repeat(4, 1fr)" templateRows="repeat(2, 1fr)" height="250px" gap={4} mx="auto">
@@ -103,7 +104,7 @@ function VoeuxAffelnetPage() {
               <Box p={4}>
                 <Box className="ri-heart-fill ri-lg" color="#C2B24C" boxSize={6} />
                 <Text fontSize="2xl" fontWeight="bold">
-                  124 000
+                  {isLoading ? "..." : voeuxFormules}
                 </Text>
                 <Flex alignItems="center" gap={3}>
                   <Text>
@@ -137,17 +138,17 @@ function VoeuxAffelnetPage() {
               <Box p={4}>
                 <Box className="ri-user-fill ri-lg" color="#4F9D91" boxSize={6} />
                 <Text fontSize="2xl" fontWeight="bold">
-                  83 000
+                  {isLoading ? "..." : apprenantVoeuxFormules}
                 </Text>
                 <Text>jeunes ont formulé au moins un vœu en apprentissage</Text>
               </Box>
             </GridItem>
-            <GridItem colSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#FA7659">
+            <GridItem colSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#FA7659" p={2}>
               <Box p={4} height="full">
                 <Flex alignItems="center" gap={2}>
                   <Box className="ri-user-shared-fill ri-lg" color="#FA7659" />
                   <Text fontSize="2xl" fontWeight="bold">
-                    4 200
+                    {isLoading ? "..." : apprenantsNonContretise}
                   </Text>
                 </Flex>
                 <Flex alignItems="center" gap={2}>
@@ -200,12 +201,12 @@ function VoeuxAffelnetPage() {
                 </Flex>
               </Box>
             </GridItem>
-            <GridItem colSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#FCC63A">
+            <GridItem colSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#FCC63A" p={2}>
               <Box p={4} height="full">
                 <Flex alignItems="center" gap={2}>
                   <Box className="ri-user-heart-fill ri-lg" color="#FCC63A" />
                   <Text fontSize="2xl" fontWeight="bold">
-                    15 000
+                    En cours
                   </Text>
                 </Flex>
                 <Flex alignItems="center" gap={2}>
