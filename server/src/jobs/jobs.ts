@@ -7,7 +7,7 @@ import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
-import { clear, clearUsers } from "./clear/clear-all";
+import { clear, clearOrganismesRuleIds, clearUsers } from "./clear/clear-all";
 import { purgeQueues } from "./clear/purge-queues";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
@@ -203,6 +203,11 @@ export async function setupJobProcessor() {
       "clear:users": {
         handler: async () => {
           return clearUsers();
+        },
+      },
+      "clear:organismes-rules-ids": {
+        handler: async () => {
+          return clearOrganismesRuleIds();
         },
       },
       "hydrate:bassins-emploi": {
