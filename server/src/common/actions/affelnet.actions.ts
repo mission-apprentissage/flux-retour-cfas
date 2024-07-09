@@ -87,3 +87,38 @@ export const getAffelnetCountVoeuxNational = async (departement: Array<string>, 
     apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
   };
 };
+
+export const getAffelnetVoeux = (departement: Array<string>, regions: Array<string>) =>
+  voeuxAffelnetDb()
+    .aggregate([
+      {
+        $match: {
+          ...computeFilter(departement, regions),
+          deleted_at: { $exists: true },
+        },
+      },
+      {},
+      {
+        $project: {
+          _id: 0,
+          nom: "$raw.nom",
+          prenom_1: "$raw.prenom_1",
+          prenom_2: "$raw.prenom_2",
+          prenom_3: "$raw.prenom_3",
+          mail_responsable_1: "$raw.mail_responsable_1",
+          mail_responsable_2: "$raw.mail_responsable_2",
+          telephone_responsable_1: "$raw.telephone_responsable_1",
+          telephone_responsable_2: "$raw.telephone_responsable_2",
+          ville_etab_origine: "$raw.ville_etab_origine",
+          type_etab_origine: "$raw.type_etab_origine",
+          libelle_etab_origine: "$raw.libelle_etab_origine",
+        },
+      },
+      {
+        $sort: {
+          nom: 1,
+          prenom_1: 1,
+        },
+      },
+    ])
+    .toArray();
