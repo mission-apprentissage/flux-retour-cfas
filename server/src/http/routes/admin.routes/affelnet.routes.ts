@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import { PromisePool } from "@supercharge/promise-pool";
 import { parse } from "csv-parse/sync";
 import express from "express";
@@ -79,7 +77,8 @@ const logger = parentLogger.child({
 });
 
 // Check right directory in docker
-const upload = multer({ dest: "uploads/" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 export default () => {
   const router = express.Router();
@@ -101,9 +100,8 @@ const findDeletedVoeux = async (date: Date) => {
   }
 };
 
-const parseCsvFile = async (filePath: string) => {
-  const fileContent = fs.readFileSync(filePath, "utf-8");
-  const records = parse(fileContent, {
+const parseCsvFile = async (buffer: Buffer) => {
+  const records = parse(buffer, {
     columns: AFFELNET_HEADER,
     skip_empty_lines: true,
     delimiter: ";",
@@ -116,7 +114,8 @@ const createVoeux = async (req, res) => {
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
-  const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.path);
+
+  const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.buffer);
   const currentDate = new Date();
 
   await PromisePool.withConcurrency(100)
