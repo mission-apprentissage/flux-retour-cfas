@@ -97,7 +97,6 @@ export const getAffelnetVoeux = (departement: Array<string>, regions: Array<stri
           deleted_at: { $exists: true },
         },
       },
-      {},
       {
         $project: {
           _id: 0,

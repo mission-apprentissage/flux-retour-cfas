@@ -1,24 +1,30 @@
 import { Text, Container, HStack, Heading, VStack, List, ListItem, Grid, Box, GridItem, Flex } from "@chakra-ui/react";
-import router from "next/router";
+import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 
+import { _getBlob } from "@/common/httpClient";
+import { downloadObject } from "@/common/utils/browser";
+import { formatNumber } from "@/common/utils/stringUtils";
 import Button from "@/components/buttons/Button";
 import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import { useAffelnetCount } from "@/hooks/organismes";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
-import FiltreOrganismeDepartement from "../indicateurs/filters/FiltreOrganismeDepartement";
+import FiltreAffelnetDepartement from "../indicateurs/filters/FiltreAffelnetDepartement";
 import {
   EffectifsFiltersFullQuery,
   parseEffectifsFiltersFullFromQuery,
   TerritoireFilters,
 } from "../models/effectifs-filters";
 
-function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
-  const { voeuxFormules, apprenantVoeuxFormules, apprenantsNonContretise } = affelnetCount;
+function VoeuxAffelnetPage() {
+  const router = useRouter();
+  const { organisme_departements } = router.query;
+  const { affelnetCount, isLoading } = useAffelnetCount(organisme_departements);
 
   const effectifsFilters = useMemo(
     () => parseEffectifsFiltersFullFromQuery(router.query as unknown as EffectifsFiltersFullQuery),
@@ -26,7 +32,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
   );
 
   const updateState = useCallback(
-    (newDepartements: TerritoireFilters) => {
+    (newDepartements: Pick<TerritoireFilters, "organisme_departements">) => {
       const validDepartements = newDepartements.organisme_departements.filter((dept) => dept.trim() !== "");
 
       const updatedQuery = {
@@ -38,7 +44,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
         delete updatedQuery.organisme_departements;
       }
 
-      void router.push(
+      router.push(
         {
           pathname: router.pathname,
           query: updatedQuery,
@@ -60,8 +66,9 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
           <HStack spacing={8}>
             <VStack alignItems="start" w="100%">
               <Text>
-                Retrouvez ci-dessous les <strong>{isLoading ? "..." : voeuxFormules}</strong> vœux formulés en 2024 via
-                la plateforme Affelnet (offre post-3ème).
+                Retrouvez ci-dessous les{" "}
+                <strong>{isLoading ? "..." : formatNumber(affelnetCount?.voeuxFormules)}</strong> vœux formulés en 2024
+                via la plateforme Affelnet (offre post-3ème).
               </Text>
               <Text as="i">
                 Source :{" "}
@@ -94,7 +101,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
           </Heading>
           <HStack spacing={8}>
             <Text>Filtrer par</Text>
-            <FiltreOrganismeDepartement
+            <FiltreAffelnetDepartement
               value={effectifsFilters.organisme_departements}
               onChange={(departements) => updateState({ organisme_departements: departements })}
             />
@@ -104,7 +111,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
               <Box p={4}>
                 <Box className="ri-heart-fill ri-lg" color="#C2B24C" boxSize={6} />
                 <Text fontSize="2xl" fontWeight="bold">
-                  {isLoading ? "..." : voeuxFormules}
+                  {isLoading ? "..." : formatNumber(affelnetCount?.voeuxFormules)}
                 </Text>
                 <Flex alignItems="center" gap={3}>
                   <Text>
@@ -138,7 +145,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
               <Box p={4}>
                 <Box className="ri-user-fill ri-lg" color="#4F9D91" boxSize={6} />
                 <Text fontSize="2xl" fontWeight="bold">
-                  {isLoading ? "..." : apprenantVoeuxFormules}
+                  {isLoading ? "..." : formatNumber(affelnetCount?.apprenantVoeuxFormules)}
                 </Text>
                 <Text>jeunes ont formulé au moins un vœu en apprentissage</Text>
               </Box>
@@ -147,8 +154,8 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
               <Box p={4} height="full">
                 <Flex alignItems="center" gap={2}>
                   <Box className="ri-user-shared-fill ri-lg" color="#FA7659" />
-                  <Text fontSize="2xl" fontWeight="bold">
-                    {isLoading ? "..." : apprenantsNonContretise}
+                  <Text fontSize="xl" fontWeight="bold">
+                    {isLoading ? "..." : formatNumber(affelnetCount?.apprenantsNonContretise)}
                   </Text>
                 </Flex>
                 <Flex alignItems="center" gap={2}>
@@ -191,7 +198,17 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
                         scolaire ou si ses vœux en apprentissage ont été refusés.
                       </Text>
                       <Flex justifyContent="flex-end">
-                        <Button variant="primary" action={() => Promise.resolve()} isLoading={false}>
+                        <Button
+                          variant="primary"
+                          action={async () => {
+                            downloadObject(
+                              await _getBlob(`/api/v1/affelnet/export/non-concretise`),
+                              `voeux_affelnet_non_concretisee.csv`,
+                              "text/plain"
+                            );
+                          }}
+                          isLoading={false}
+                        >
                           Télécharger la liste
                           <DownloadSimple ml={2} />
                         </Button>
@@ -205,7 +222,7 @@ function VoeuxAffelnetPage({ affelnetCount, isLoading }) {
               <Box p={4} height="full">
                 <Flex alignItems="center" gap={2}>
                   <Box className="ri-user-heart-fill ri-lg" color="#FCC63A" />
-                  <Text fontSize="2xl" fontWeight="bold">
+                  <Text fontSize="xl" fontWeight="bold">
                     En cours
                   </Text>
                 </Flex>
