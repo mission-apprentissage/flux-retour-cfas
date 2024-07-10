@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
+import { SOURCE_APPRENANT } from "shared/constants";
 
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
@@ -183,7 +184,7 @@ describe("Dossiers Apprenants Route", () => {
       // Check Nb Items added
       assert.deepEqual(await effectifsQueueDb().countDocuments({}), nbItemsToTest);
       // Check source is set
-      assert.deepEqual((await effectifsQueueDb().findOne({}))?.source, "userApi");
+      assert.deepEqual((await effectifsQueueDb().findOne({}))?.source, "ERP");
     });
 
     it("Vérifie l'ajout via route /dossiers-apprenants de dossiers contenant des erreurs", async function () {
@@ -212,7 +213,8 @@ describe("Dossiers Apprenants Route", () => {
         data: [
           {
             ...dossier,
-            source: "userApi",
+            source: SOURCE_APPRENANT.ERP,
+            user_erp_id: response.data.data[0].user_erp_id,
             has_nir: false,
             validation_errors: [
               {

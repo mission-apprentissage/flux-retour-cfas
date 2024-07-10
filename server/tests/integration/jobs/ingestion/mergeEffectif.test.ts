@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { mergeEffectif } from "@/jobs/ingestion/process-ingestion";
@@ -7,7 +8,7 @@ describe("mergeEffectif", () => {
   it("should merge effectif", async () => {
     const previousEffectif: IEffectif = {
       _id: new ObjectId(),
-      source: "apiUser",
+      source: SOURCE_APPRENANT.FICHIER,
       apprenant: {
         nom: "FLEURY",
         prenom: "Fortuné",
