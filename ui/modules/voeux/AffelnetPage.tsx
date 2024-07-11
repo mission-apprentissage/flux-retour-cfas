@@ -121,7 +121,7 @@ function VoeuxAffelnetPage() {
                       contentComponent={() => (
                         <>
                           <Text>
-                            Il s’agit du nombre de vœux formulés sur l’année 2024, en cumulés sur les 3 fichiers globaux
+                            Il s’agit du nombre de vœux formulés sur l’année 2024, en cumulé sur les 3 fichiers globaux
                             :
                           </Text>
                           <List my={3} style={{ color: "black", listStyleType: "disc", paddingLeft: "1.5rem" }}>
@@ -165,7 +165,7 @@ function VoeuxAffelnetPage() {
                     contentComponent={() => (
                       <Text>
                         Ce chiffre expose le nombre de jeunes ayant formulé au moins un vœu mais qui n’en ont, à la date
-                        du jour, concrétisé aucun (pour différentes raisons : refus, retour en voie scolaire, etc...).
+                        du jour, concrétisé aucun (pour différentes raisons : refus, retour en voie scolaire, etc.).
                       </Text>
                     )}
                   />
@@ -190,7 +190,7 @@ function VoeuxAffelnetPage() {
                     <Flex flexDirection="column" gap={6}>
                       <Text>
                         La liste est nominative et au format Excel : elle contient les contacts des jeunes n’ayant pas
-                        concrétisé leur vœu en apprentissage. Une colonne est dédié au nombre de vœux exprimés pour
+                        concrétisé leur vœu en apprentissage. Une colonne est dédiée au nombre de vœux exprimés pour
                         chaque jeune.
                       </Text>
                       <Text>
@@ -229,7 +229,7 @@ function VoeuxAffelnetPage() {
                 <Flex alignItems="center" gap={2}>
                   <Text>d’entre eux sont déjà inscrits en CFA pour la rentrée</Text>
                   <InfoTooltip
-                    headerComponent={() => <Text>Calcul des jeunes déjà inscrits en CFA</Text>}
+                    headerComponent={() => <Text>Nombre de jeunes déjà inscrits en CFA</Text>}
                     contentComponent={() => (
                       <>
                         <Text>Ce chiffre se base à la fois sur :</Text>
@@ -250,7 +250,7 @@ function VoeuxAffelnetPage() {
                             (pour ceux ayant signé un contrat)
                           </ListItem>
                         </List>
-                        <Text>Ce chiffre n’est pas exhaustif.</Text>
+                        <Text>Ce relevé n’est pas exhaustif.</Text>
                         <Text>Retrouvez la liste des jeunes dans votre onglet “Mes indicateurs”.</Text>
                       </>
                     )}
