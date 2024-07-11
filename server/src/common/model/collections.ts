@@ -27,6 +27,7 @@ import telechargementListesNominativesLogsDescriptor, {
 } from "shared/models/data/telechargementListesNomLogs.model";
 import usersModelDescriptor, { IUser } from "shared/models/data/users.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
+import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 
 import { getDbCollection } from "@/common/mongodb";
 
@@ -54,6 +55,7 @@ export const modelDescriptors = [
   rncpModelDescriptor,
   effectifsDECAModelDescriptor,
   effectifsArchiveModelDescriptor,
+  voeuxAffelnetDescriptor,
   telechargementListesNominativesLogsDescriptor,
 ];
 
@@ -85,5 +87,6 @@ export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectio
 export const contratsDecaDb = () => getDbCollection<IContratDeca>(contratsDecaModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);
 export const decaRawDb = () => getDbCollection<IDecaRaw>(decaRawModelDescriptor.collectionName);
+export const voeuxAffelnetDb = () => getDbCollection<IVoeuAffelnet>(voeuxAffelnetDescriptor.collectionName);
 export const telechargementListesNominativesLogsDb = () =>
   getDbCollection<ITelechargementListeNomLogs>(telechargementListesNominativesLogsDescriptor.collectionName);

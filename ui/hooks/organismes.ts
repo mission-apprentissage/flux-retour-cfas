@@ -157,3 +157,48 @@ export function useOrganismesDuplicatsLists() {
 
   return { organismesDuplicats, isLoading };
 }
+
+export function useAffelnetCount(organisme_departements?: string | string[] | undefined) {
+  const normalizedDepartements = useMemo(() => {
+    if (typeof organisme_departements === "string") {
+      return organisme_departements
+        .split(",")
+        .map((dept) => dept.trim())
+        .filter((dept) => dept !== "");
+    }
+    return organisme_departements?.filter((dept) => dept.trim() !== "") ?? [];
+  }, [organisme_departements]);
+
+  const queryKey = useMemo(
+    () => ["affelnet/national/count", { organisme_departements: normalizedDepartements }],
+    [normalizedDepartements]
+  );
+
+  const queryFn = () => {
+    let url = `/api/v1/affelnet/national/count`;
+    if (normalizedDepartements.length > 0) {
+      url += `?organisme_departements=${normalizedDepartements.join(",")}`;
+    }
+    return _get(url);
+  };
+
+  const {
+    data: affelnetCount,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<{ voeuxFormules: number; apprenantVoeuxFormules: number; apprenantsNonContretise: number }, any>(
+    queryKey,
+    queryFn,
+    {
+      enabled: true,
+    }
+  );
+
+  return {
+    affelnetCount,
+    isLoading,
+    error,
+    refetch,
+  };
+}

@@ -12720,3 +12720,1419 @@ exports[`validation-schema should create validation schema for usersMigration: u
   ],
 }
 `;
+
+exports[`validation-schema should create validation schema for voeuxAffelnet: voeuxAffelnet 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "formation": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "cfd": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "libelle": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "rncp": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+        "organisme": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "academie": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "not": {},
+                        },
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "14",
+                            "15",
+                            "16",
+                            "17",
+                            "18",
+                            "19",
+                            "20",
+                            "22",
+                            "23",
+                            "24",
+                            "25",
+                            "27",
+                            "28",
+                            "31",
+                            "32",
+                            "33",
+                            "43",
+                            "44",
+                            "70",
+                            "77",
+                            "78",
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "bassinEmploi": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                },
+                "departement": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "not": {},
+                        },
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "14",
+                            "15",
+                            "16",
+                            "17",
+                            "18",
+                            "19",
+                            "21",
+                            "22",
+                            "23",
+                            "24",
+                            "25",
+                            "26",
+                            "27",
+                            "28",
+                            "29",
+                            "30",
+                            "31",
+                            "32",
+                            "33",
+                            "34",
+                            "35",
+                            "36",
+                            "37",
+                            "38",
+                            "39",
+                            "40",
+                            "41",
+                            "42",
+                            "43",
+                            "44",
+                            "45",
+                            "46",
+                            "47",
+                            "48",
+                            "49",
+                            "50",
+                            "51",
+                            "52",
+                            "53",
+                            "54",
+                            "55",
+                            "56",
+                            "57",
+                            "58",
+                            "59",
+                            "60",
+                            "61",
+                            "62",
+                            "63",
+                            "64",
+                            "65",
+                            "66",
+                            "67",
+                            "68",
+                            "69",
+                            "70",
+                            "71",
+                            "72",
+                            "73",
+                            "74",
+                            "75",
+                            "76",
+                            "77",
+                            "78",
+                            "79",
+                            "80",
+                            "81",
+                            "82",
+                            "83",
+                            "84",
+                            "85",
+                            "86",
+                            "87",
+                            "88",
+                            "89",
+                            "90",
+                            "91",
+                            "92",
+                            "93",
+                            "94",
+                            "95",
+                            "971",
+                            "972",
+                            "973",
+                            "974",
+                            "975",
+                            "976",
+                            "977",
+                            "978",
+                            "984",
+                            "986",
+                            "987",
+                            "988",
+                            "989",
+                            "01",
+                            "02",
+                            "03",
+                            "04",
+                            "05",
+                            "06",
+                            "07",
+                            "08",
+                            "09",
+                            "2A",
+                            "2B",
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "fiable": {
+                  "bsonType": [
+                    "bool",
+                    "null",
+                  ],
+                  "description": "organismes.fiabilisation_statut == "FIABLE" && ferme != false",
+                },
+                "region": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "not": {},
+                        },
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "11",
+                            "24",
+                            "27",
+                            "28",
+                            "32",
+                            "44",
+                            "52",
+                            "53",
+                            "75",
+                            "76",
+                            "84",
+                            "93",
+                            "94",
+                            "977",
+                            "978",
+                            "01",
+                            "02",
+                            "03",
+                            "04",
+                            "05",
+                            "06",
+                            "00",
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "reseaux": {
+                  "anyOf": [
+                    {
+                      "bsonType": "array",
+                      "description": "Réseaux du CFA, s'ils existent",
+                      "items": {
+                        "bsonType": "string",
+                        "enum": [
+                          "ADEN",
+                          "CMA",
+                          "AGRI",
+                          "AGRI_CNEAP",
+                          "AGRI_UNREP",
+                          "AGRI_UNMFREO",
+                          "ANASUP",
+                          "AMUE",
+                          "CCI",
+                          "CFA_EC",
+                          "COMP_DU_DEVOIR",
+                          "COMP_DU_TOUR_DE_FRANCE",
+                          "GRETA",
+                          "UIMM",
+                          "BTP_CFA",
+                          "MFR",
+                          "AFTRAL",
+                          "GRETA_VAUCLUSE",
+                          "CFA_SAT",
+                          "EN_HORS_MURS",
+                          "EN_CFA_ACADEMIQUE",
+                          "EN_EPLE",
+                          "EDUSERVICE",
+                          "AFPA",
+                        ],
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Réseaux du CFA, s'ils existent",
+                },
+                "siret": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "N° SIRET de l'établissement",
+                      "pattern": "^[0-9]{14}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "N° SIRET de l'établissement",
+                },
+                "uai": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Code UAI de l'établissement",
+                      "pattern": "^[0-9]{7}[a-zA-Z]$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Code UAI de l'établissement",
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+      "required": [
+        "formation",
+      ],
+    },
+    "_id": {
+      "bsonType": "objectId",
+      "description": "Identifiant unique MongoDB de l'instance voeu",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date d'ajout en base de données",
+    },
+    "deleted_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de suppresion du voeux",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de suppresion du voeux",
+    },
+    "formation_catalogue_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
+    },
+    "history": {
+      "bsonType": "array",
+      "items": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "created_at": {
+            "bsonType": "date",
+          },
+          "raw": {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "academie": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "adresse_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "adresse_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "adresse_3": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "adresse_4": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "bareme": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "candidature_internat": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "cle_ministere_educatif": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_enseignement": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_lv1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_lv2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_mef": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_mef_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_offre_formation": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_origine_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_origine_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_postal": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_specialite_offre_formation": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_uai_cio_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_uai_etab_accueil": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "code_uai_etab_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "demande_code_lv1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "demande_code_lv2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "demande_libelle_lv1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "demande_libelle_lv2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "ine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_cio_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_enseignement": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_etab_accueil": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_etab_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_formation": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_formation_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_lv1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_lv2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_option_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "libelle_option_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "mail_responsable_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "mail_responsable_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "mnemonique_mef_offre_formation": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "mnemonique_mef_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "nom": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "pays": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "prenom_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "prenom_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "prenom_3": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "rang": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "siret_uai_gestionnaire": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "telephone": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "telephone_portable": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "telephone_pro": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "telephone_responsable_1": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "telephone_responsable_2": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "type_etab_accueil": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "type_etab_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "uai_cio_etab_accueil": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "uai_etablissement_responsable": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "uai_etatblissement_formateur": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "ville": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "ville_etab_accueil": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "ville_etab_origine": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        "required": [
+          "created_at",
+          "raw",
+        ],
+      },
+    },
+    "is_contacted": {
+      "bsonType": "bool",
+      "description": "Indique si le jeune a été contacté",
+    },
+    "organisme_formateur_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'organisme formateur",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'organisme formateur",
+    },
+    "organisme_responsable_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'organisme responsable",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'organisme responsable",
+    },
+    "raw": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "academie": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "adresse_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "adresse_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "adresse_3": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "adresse_4": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "bareme": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "candidature_internat": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "cle_ministere_educatif": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_enseignement": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_lv1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_lv2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_mef": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_mef_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_offre_formation": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_origine_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_origine_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_postal": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_specialite_offre_formation": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_uai_cio_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_uai_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "code_uai_etab_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "demande_code_lv1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "demande_code_lv2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "demande_libelle_lv1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "demande_libelle_lv2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "ine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_cio_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_enseignement": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_etab_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_formation": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_formation_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_lv1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_lv2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_option_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_option_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "mail_responsable_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "mail_responsable_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "mnemonique_mef_offre_formation": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "mnemonique_mef_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "nom": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "pays": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "prenom_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "prenom_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "prenom_3": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "rang": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "siret_uai_gestionnaire": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone_portable": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone_pro": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone_responsable_1": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone_responsable_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "type_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "type_etab_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "uai_cio_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "uai_etablissement_responsable": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "uai_etatblissement_formateur": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "ville": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "ville_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "ville_etab_origine": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date de mise à jour",
+    },
+  },
+  "required": [
+    "_id",
+    "created_at",
+    "updated_at",
+    "is_contacted",
+    "raw",
+    "history",
+    "_computed",
+  ],
+}
+`;

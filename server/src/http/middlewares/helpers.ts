@@ -1,11 +1,11 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { IEffectif, PermissionOrganisme } from "shared";
+import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
-import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -85,4 +85,42 @@ export function requireEffectifOrganismePermission<TParams = any, TQuery = any, 
       next(err);
     }
   };
+}
+
+export function requireVoeuOrganismePermission<TParams = any, TQuery = any, TBody = any, TLocals = any>(
+  permission: PermissionOrganisme
+): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
+  return async (req, res, next) => {
+    try {
+      let voeu = await voeuxAffelnetDb().findOne({ _id: new ObjectId((req.params as any).id) });
+
+      if (!voeu) {
+        throw Boom.notFound("voeu non trouvé");
+      }
+
+      if (!voeu.organisme_formateur_id || !voeu.organisme_responsable_id) {
+        throw Boom.forbidden("voeu non compatible pour la mise à jour");
+      }
+      if (
+        !(await getOrganismePermission(req.user, voeu.organisme_formateur_id, permission)) &&
+        !(await getOrganismePermission(req.user, voeu.organisme_responsable_id, permission))
+      ) {
+        throw Boom.forbidden("Permissions invalides");
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export function requireOrganismeRegional(req: Request, _res: Response, next: NextFunction) {
+  ensureValidUser(req.user);
+  if (
+    req.user.organisation.type !== (ORGANISATION_TYPE.DREETS as "DREETS") &&
+    req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC")
+  ) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+  next();
 }
