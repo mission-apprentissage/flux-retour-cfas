@@ -68,8 +68,8 @@ const AFFELNET_HEADER = [
   "siret_uai_gestionnaire",
   "cle_ministere_educatif",
   "uai_cio_etab_accueil",
-  // "uai_etatblissement_formateur",
-  // "uai_etablissement_responsable",
+  "uai_etatblissement_formateur",
+  "uai_etablissement_responsable",
 ];
 
 const logger = parentLogger.child({
