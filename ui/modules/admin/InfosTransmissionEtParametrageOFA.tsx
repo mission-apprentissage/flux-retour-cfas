@@ -97,6 +97,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                 colorScheme="grey_tag"
                 primaryText={erp.toUpperCase()}
                 size="md"
+                borderRadius={0}
               />
             ))}
             <Text>
@@ -117,7 +118,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       </HStack>
       {parametrage?.organisme_transmetteur ? (
         <Box display="flex" alignItems="center">
-          <Text>Dernier organisme transmetteur des effectifs :</Text>
+          <Text>Dernier organisme transmetteur des effectifs : </Text>
           <Link
             key={parametrage?.organisme_transmetteur._id}
             href={`/organismes/${parametrage?.organisme_transmetteur._id}`}

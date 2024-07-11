@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Acl } from "shared";
+import { Acl, SourceApprenant } from "shared";
 import { IOrganisation } from "shared/models/data/organisations.model";
 
 export interface AuthContext<I = IOrganisation> {
@@ -17,7 +17,7 @@ export interface AuthContext<I = IOrganisation> {
   organisation: I;
 
   // field used for ERPs
-  source?: string;
+  source?: SourceApprenant;
   // source organisme id for V3 API
   source_organisme_id?: string;
   // legacy field used for ERPs

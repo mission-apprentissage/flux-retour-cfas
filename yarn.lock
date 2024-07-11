@@ -4989,6 +4989,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/stream-chain@npm:*, @types/stream-chain@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@types/stream-chain@npm:2.1.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 0cc764e01abb0d86725081206751f1dd1c52ba147c2d15b03698aa373ad06ff0085afd577b92927347d288539803af78166314a4f50c2d17d275cb911ee92a29
+  languageName: node
+  linkType: hard
+
+"@types/stream-json@npm:^1.7.7":
+  version: 1.7.7
+  resolution: "@types/stream-json@npm:1.7.7"
+  dependencies:
+    "@types/node": "*"
+    "@types/stream-chain": "*"
+  checksum: 5ab30cb5c478bec6969b788343293fb5d268a2164947617a8550b336f80a1e85d354e510e823e0a4b4dd21c932f921f7146ef426a87df8834a5984a1d943ed1e
+  languageName: node
+  linkType: hard
+
 "@types/tough-cookie@npm:*":
   version: 4.0.2
   resolution: "@types/tough-cookie@npm:4.0.2"
@@ -11849,18 +11868,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"job-processor@npm:^1.4.10":
-  version: 1.4.10
-  resolution: "job-processor@npm:1.4.10"
+"job-processor@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "job-processor@npm:1.5.0"
   dependencies:
     "@sentry/node": ^7.80.0
     cron-parser: ^4.9.0
     date-fns: ^2.30.0
+    type-fest: ^4.18.2
   peerDependencies:
+    "@codegouvfr/react-dsfr": ^1.9.11
+    "@mui/material": ^5.15.18
+    "@mui/x-data-grid": ^7.5.0
     mongodb: "*"
+    react: ^18.0.0
     zod: ^3.0.0
     zod-mongodb-schema: ^1.0.0
-  checksum: bc710873056c3f13c1bb99327ebfd29d8bc5b6e47f98b05098637508f788f4e6c0b02a62203c3011047f9df09031d2b49a57e23a414d958428216703ef6a811d
+  peerDependenciesMeta:
+    "@codegouvfr/react-dsfr":
+      optional: true
+    "@mui/material":
+      optional: true
+    "@mui/x-data-grid":
+      optional: true
+    react:
+      optional: true
+  checksum: e9e2238cd9e5b94e65c347372bf3fa396ad631cb0aebafc0f7ab20b4983a3d7850a96962e972a45eb3d993623d58b664df20de745c0705b6dcc4da586cd85de9
   languageName: node
   linkType: hard
 
@@ -17770,6 +17803,8 @@ __metadata:
     "@types/multer": ^1.4.11
     "@types/node": ^18.19.15
     "@types/sinon": ^10.0.20
+    "@types/stream-chain": ^2.1.0
+    "@types/stream-json": ^1.7.7
     JSONStream: ^1.3.5
     adm-zip: ^0.5.10
     axios: 0.27.2
@@ -17803,7 +17838,7 @@ __metadata:
     fs-extra: 10.1.0
     jest: ^29.7.0
     jest-date-mock: ^1.0.8
-    job-processor: ^1.4.10
+    job-processor: ^1.5.0
     joi: ^17.12.1
     joi-password: ^4.2.0
     json2csv: 5.0.7
@@ -17838,6 +17873,8 @@ __metadata:
     sha512crypt-node: 1.0.2
     shared: "workspace:*"
     sinon: 15.0.2
+    stream-chain: ^2.2.5
+    stream-json: ^1.8.0
     swagger-ui-express: 5.0.0
     ts-jest: ^29.1.2
     tsup: ^7.3.0
@@ -18355,6 +18392,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stream-chain@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "stream-chain@npm:2.2.5"
+  checksum: c83cbf504bd11e2bcbe761a92801295b3decac7ffa4092ceffca2eb1b5d0763bcc511fa22cd8044e8a18c21ca66794fd10c8d9cd1292a3e6c0d83a4194c6b8ed
+  languageName: node
+  linkType: hard
+
 "stream-combiner2@npm:~1.1.1":
   version: 1.1.1
   resolution: "stream-combiner2@npm:1.1.1"
@@ -18362,6 +18406,15 @@ __metadata:
     duplexer2: ~0.1.0
     readable-stream: ^2.0.2
   checksum: dd32d179fa8926619c65471a7396fc638ec8866616c0b8747c4e05563ccdb0b694dd4e83cd799f1c52789c965a40a88195942b82b8cea2ee7a5536f1954060f9
+  languageName: node
+  linkType: hard
+
+"stream-json@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "stream-json@npm:1.8.0"
+  dependencies:
+    stream-chain: ^2.2.5
+  checksum: c17ac72228815850fc5226d8c0a80afd6c2ffbfa71c572ad99ad2eac145dc836a3fc6f62a298b3df716f1726cc1ed8a448892ed9fb6123f46abf2f89c908749f
   languageName: node
   linkType: hard
 
@@ -19273,10 +19326,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.10.2, type-fest@npm:^4.11.1, type-fest@npm:^4.2.0":
-  version: 4.11.1
-  resolution: "type-fest@npm:4.11.1"
-  checksum: bbeebe45475f66b43d2b23af7cfc1b302fb5acca04e29f6e57dd2b198fb08f05275ea12a5337922961c1c059c8c1a7c4ea9967421c9d94aa5c950c86485c2e4b
+"type-fest@npm:^4.10.2, type-fest@npm:^4.11.1, type-fest@npm:^4.18.2, type-fest@npm:^4.2.0":
+  version: 4.21.0
+  resolution: "type-fest@npm:4.21.0"
+  checksum: 32d3536acac388cc32a3c0e31966d36e44124ffd6cb7d6f6c846602ffdeda68b723f5fdcd13d136f9d855b166e5c1d529bcdfac9d5d0ed4e96cff4867710adae
   languageName: node
   linkType: hard
 

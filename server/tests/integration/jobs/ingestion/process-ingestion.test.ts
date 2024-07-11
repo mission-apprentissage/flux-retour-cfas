@@ -1,5 +1,5 @@
 import { ObjectId, WithId, WithoutId } from "mongodb";
-import { CODES_STATUT_APPRENANT } from "shared";
+import { CODES_STATUT_APPRENANT, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 
@@ -91,7 +91,7 @@ describe("Processus d'ingestion", () => {
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
-          source: "apiUser",
+          source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: "9999999",
           created_at: new Date(),
           _id: new ObjectId(),
@@ -144,7 +144,7 @@ describe("Processus d'ingestion", () => {
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
-          source: "apiUser",
+          source: SOURCE_APPRENANT.ERP,
           source_organisme_id: "9999999",
           created_at: new Date(),
           _id: new ObjectId(),
@@ -178,7 +178,7 @@ describe("Processus d'ingestion", () => {
         const insertedDossier = await effectifsDb().findOne({});
 
         expect(insertedDossier).toStrictEqual({
-          source: "apiUser",
+          source: SOURCE_APPRENANT.ERP,
           apprenant: {
             nom: "FLEURY",
             prenom: "Fortuné",
@@ -294,7 +294,7 @@ describe("Processus d'ingestion", () => {
         annee_scolaire: "2024-2025",
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
-        source: "apiUser",
+        source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: "9999999",
         created_at: new Date(),
       };
@@ -468,7 +468,7 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_siret: SIRET,
         formation_cfd: "1234ABCD",
         created_at: new Date(),
-        source: "SOURCE_TEST",
+        source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: "9999999",
       };
 
@@ -494,7 +494,7 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_uai: UAI,
         etablissement_lieu_de_formation_siret: SIRET,
         created_at: new Date(),
-        source: "SOURCE_TEST",
+        source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: "9999999",
         _id: new ObjectId(),
       };
@@ -631,7 +631,7 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
-          source: "SOURCE_TEST",
+          source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: "9999999",
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
@@ -728,7 +728,7 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
-          source: "SOURCE_TEST",
+          source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: "9999999",
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
@@ -900,7 +900,7 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2022-2022",
-          source: "SOURCE_TEST",
+          source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: "9999999",
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
@@ -1037,7 +1037,7 @@ describe("Processus d'ingestion", () => {
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
-          source: "apiUser",
+          source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: "9999999",
           created_at: new Date(),
           _id: new ObjectId(),
@@ -1152,7 +1152,7 @@ describe("Processus d'ingestion", () => {
             id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
             tel_apprenant: "+33 534648662",
             code_commune_insee_apprenant: "05109",
-            source: "apiUser",
+            source: SOURCE_APPRENANT.FICHIER,
             source_organisme_id: "9999999",
             created_at: new Date(),
             _id: new ObjectId(),
@@ -1211,7 +1211,7 @@ describe("Processus d'ingestion", () => {
         annee_scolaire: "2024-2025",
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
-        source: "apiUser",
+        source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: "9999999",
         created_at: new Date(),
       };

@@ -3,6 +3,7 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
+import { SOURCE_APPRENANT } from "shared/constants";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { getUsersLinkedToOrganismeId } from "@/common/actions/users.actions";
@@ -416,7 +417,7 @@ describe("Routes administrateur", () => {
       const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
       const anneeScolaire = "2022-2023";
       const commonEffectifs = [
-        ...generate(3, () => createSampleEffectif({ annee_scolaire: anneeScolaire, source: "testDoublons" })),
+        ...generate(3, () => createSampleEffectif({ annee_scolaire: anneeScolaire, source: SOURCE_APPRENANT.ERP })),
       ];
       const duplicateRecentDate = addDays(new Date(), -1);
       const duplicateOldDate = addDays(new Date(), -20);
@@ -543,7 +544,7 @@ describe("Routes administrateur", () => {
 
       // Vérification du nombre d'effectifs avec la date la plus récente
       const effectifsExDoublons = await effectifsDb()
-        .find({ organisme_id: createdWithUai._id, source: "testDoublons" })
+        .find({ organisme_id: createdWithUai._id, source: SOURCE_APPRENANT.ERP })
         .toArray();
       expect(effectifsExDoublons.length).toBe(3);
       effectifsExDoublons

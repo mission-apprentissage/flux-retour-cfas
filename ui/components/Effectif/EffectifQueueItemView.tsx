@@ -1,6 +1,6 @@
 import { WarningTwoIcon, InfoIcon } from "@chakra-ui/icons";
 import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem, Link } from "@chakra-ui/react";
-import { TD_MANUEL_ELEMENT_LINK } from "shared";
+import { SOURCE_APPRENANT, TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import { InfoTooltip } from "../Tooltip/InfoTooltip";
 
@@ -102,7 +102,7 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
   return (
     <Box>
-      {effectifQueueItem.source !== "televersement" ? (
+      {effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER ? (
         <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
           <InfoIcon mr={2} />
           Veuillez corriger ces données directement dans votre ERP pour qu’elles soient correctement transmises.

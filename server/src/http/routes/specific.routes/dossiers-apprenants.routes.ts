@@ -31,7 +31,7 @@ export default () => {
     const v3Schema = dossierApprenantSchemaV3Input();
     const validationSchema = isV3 ? v3Schema : v2Schema;
 
-    const source = user.username || user.source;
+    const source = user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
       const result = validationSchema.safeParse({
         ...dossierApprenant,
@@ -47,6 +47,8 @@ export default () => {
       // Nous ne pouvons pas garder le `nir_apprenant` en base
       const { nir_apprenant, ...rest } = cleansedData;
 
+      const user_erp_id = isV3 ? undefined : user._id.toString();
+
       return {
         ...rest,
         has_nir: Boolean(nir_apprenant),
@@ -56,6 +58,7 @@ export default () => {
         source,
         ...(user.source_organisme_id ? { source_organisme_id: user.source_organisme_id } : {}),
         api_version: isV3 ? "v3" : "v2",
+        ...(user_erp_id ? { user_erp_id } : {}),
       };
     });
 

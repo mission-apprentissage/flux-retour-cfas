@@ -7,7 +7,7 @@ import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
-import { clear, clearUsers } from "./clear/clear-all";
+import { clear, clearOrganismesRuleIds, clearUsers } from "./clear/clear-all";
 import { purgeQueues } from "./clear/purge-queues";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
@@ -94,7 +94,8 @@ const dailyJobs = async () => {
   await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
 
   // # Mise à jour des organismes via APIs externes
-  await addJob({ name: "update:organismes-with-apis", queued: true });
+  // Désactivations temporaire car trop long à executer
+  // await addJob({ name: "update:organismes-with-apis", queued: true });
 
   // # Mise à jour des niveaux des formations des effectifs
   await addJob({ name: "effectifs-formation-niveaux", queued: true });
@@ -203,6 +204,11 @@ export async function setupJobProcessor() {
       "clear:users": {
         handler: async () => {
           return clearUsers();
+        },
+      },
+      "clear:organismes-rules-ids": {
+        handler: async () => {
+          return clearOrganismesRuleIds();
         },
       },
       "hydrate:bassins-emploi": {

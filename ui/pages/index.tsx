@@ -76,12 +76,6 @@ function DashboardPage() {
 function PublicLandingPage() {
   return (
     <SimplePage title="Tableau de bord de l’apprentissage">
-      <Center bg="#F5F5FE" color="plaininfo" fontWeight="bold" lineHeight="1.2em" p={2}>
-        <Image src="/images/landing-cards/info.svg" alt="" userSelect="none" mr="3" />
-        Informations actualisées ! Consultez les nouveaux effectifs d&apos;apprenants pour l&apos;année scolaire
-        démarrant en août, sur le tableau de bord de l&apos;apprentissage.
-      </Center>
-
       <Box
         borderTop="solid 1px"
         borderTopColor="grey.300"

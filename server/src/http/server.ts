@@ -380,6 +380,10 @@ function setupRoutes(app: Application) {
     ],
     requireJwtAuthenticationMiddleware(),
     legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    async (req, res, next) => {
+      req.user.source = SOURCE_APPRENANT.ERP;
+      next();
+    },
     dossierApprenantRouter()
   );
 

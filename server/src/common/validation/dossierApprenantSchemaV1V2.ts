@@ -37,6 +37,7 @@ const dossierApprenantSchemaV1V2 = () =>
     contrat_date_debut: primitivesV1.contrat.date_debut.optional(),
     contrat_date_fin: primitivesV1.contrat.date_fin.optional(),
     contrat_date_rupture: primitivesV1.contrat.date_rupture.optional(),
+    user_erp_id: primitivesV1.user_erp_id.optional(),
 
     // OPTIONAL V2 BUT REQUIRED V3
 

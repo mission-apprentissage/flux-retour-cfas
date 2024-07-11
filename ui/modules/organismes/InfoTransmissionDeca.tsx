@@ -1,4 +1,5 @@
 import { Text } from "@chakra-ui/react";
+import { IndicateursEffectifs } from "shared";
 
 import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -6,6 +7,7 @@ import { Checkbox } from "@/theme/components/icons";
 
 interface InfoTransmissionDecaProps {
   date?: Date;
+  indicateursEffectifs?: IndicateursEffectifs;
 }
 function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
   const Tooltip = () => (
@@ -20,7 +22,8 @@ function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
       </Text>
     </>
   );
-  return (
+
+  return props.indicateursEffectifs?.apprenants ? (
     <Tag
       leftIcon={Checkbox}
       primaryText="Données DECA"
@@ -29,7 +32,7 @@ function InfoTransmissionDeca(props: InfoTransmissionDecaProps) {
       colorScheme="blue_tag"
       rightIcon={() => <InfoTooltip contentComponent={() => <Tooltip />} />}
     />
-  );
+  ) : null;
 }
 
 export default InfoTransmissionDeca;

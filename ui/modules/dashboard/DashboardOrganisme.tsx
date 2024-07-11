@@ -361,7 +361,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
                   />
                 )}
-                {!organisme.is_transmission_target && <InfoTransmissionDeca />}
+                {!organisme.is_transmission_target && (
+                  <InfoTransmissionDeca indicateursEffectifs={indicateursEffectifs} />
+                )}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
@@ -398,6 +400,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       colorScheme="grey_tag"
                       size="lg"
                       fontSize="epsilon"
+                      borderRadius="0"
                       rightIcon={() =>
                         !organisme.uai ? (
                           <InfoTooltip

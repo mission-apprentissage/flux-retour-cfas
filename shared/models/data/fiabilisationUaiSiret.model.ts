@@ -16,6 +16,7 @@ export const zFiabilisationUaiSiret = z.object({
   siret: z.string({ description: "Le SIRET du couple à fiabiliser" }).nullish(),
   uai_fiable: z.string({ description: "L'UAI fiable lié au couple à fiabiliser" }).nullish(),
   siret_fiable: z.string({ description: "Le SIRET fiable lié au couple à fiabiliser" }).nullish(),
+  rule_ids: z.array(z.number()).nullish(),
 });
 
 export default { zod: zFiabilisationUaiSiret, collectionName, indexes: [] };
