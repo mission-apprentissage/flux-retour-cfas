@@ -76,6 +76,7 @@ const zVoeuAffelnetRaw = z.object({
   uai_cio_etab_accueil: z.any().nullish(),
   uai_etatblissement_formateur: z.any().nullish(),
   uai_etablissement_responsable: z.any().nullish(),
+  libelle_public_etablissement: z.any().nullish(),
 });
 export const zVoeuAffelnet = z.object({
   _id: zObjectId.describe("Identifiant unique MongoDB de l'instance voeu"),
