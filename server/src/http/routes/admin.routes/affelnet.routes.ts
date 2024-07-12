@@ -70,6 +70,7 @@ const AFFELNET_HEADER = [
   "uai_cio_etab_accueil",
   "uai_etatblissement_formateur",
   "uai_etablissement_responsable",
+  "libelle_public_etablissement",
 ];
 
 const logger = parentLogger.child({
