@@ -13405,6 +13405,14 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
                   },
                 ],
               },
+              "libelle_public_etablissement": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
               "mail_responsable_1": {
                 "anyOf": [
                   {},
@@ -13919,6 +13927,14 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
           ],
         },
         "libelle_option_2": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "libelle_public_etablissement": {
           "anyOf": [
             {},
             {
