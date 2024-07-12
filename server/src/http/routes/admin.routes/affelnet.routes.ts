@@ -240,6 +240,9 @@ const createVoeux = async (req, res) => {
       }
     });
 
+  logger.info("Voeux mis à jour");
+  logger.info("Lancement de la recherche des voeux supprimés");
   await findDeletedVoeux(currentDate);
+  logger.info("Fin de la recherche des voeux supprimés");
   return;
 };
