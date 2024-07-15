@@ -42,6 +42,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "aimaira",
     name: "Aimaira",
     apiV3: true,
+    helpFilePath: "/Aimaira-2024.pdf",
   },
   {
     id: "filiz",
