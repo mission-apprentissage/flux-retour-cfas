@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
 import { WithoutId } from "mongodb";
 import RandExp from "randexp";
-import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX } from "shared";
+import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { PartialDeep } from "type-fest";
@@ -106,7 +106,7 @@ export const createSampleEffectif = ({
     created_at: new Date(),
     updated_at: new Date(),
     id_erp_apprenant: faker.string.uuid(),
-    source: faker.lorem.word(),
+    source: SOURCE_APPRENANT.FICHIER,
     source_organisme_id: faker.string.uuid(),
     annee_scolaire,
     organisme_id: organisme?._id,
@@ -153,7 +153,7 @@ export const createRandomDossierApprenantApiInput = (
     id_erp_apprenant: faker.string.uuid(),
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
     code_commune_insee_apprenant: faker.location.zipCode(),
-    source: "userApi",
+    source: SOURCE_APPRENANT.ERP,
     api_version: "v2",
     ...params,
   };

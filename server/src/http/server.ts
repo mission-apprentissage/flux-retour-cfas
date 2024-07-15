@@ -132,12 +132,14 @@ import requireBearerAuthentication from "./middlewares/requireBearerAuthenticati
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
+import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
+import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
@@ -378,6 +380,10 @@ function setupRoutes(app: Application) {
     ],
     requireJwtAuthenticationMiddleware(),
     legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    async (req, res, next) => {
+      req.user.source = SOURCE_APPRENANT.ERP;
+      next();
+    },
     dossierApprenantRouter()
   );
 
@@ -867,6 +873,7 @@ function setupRoutes(app: Application) {
     })
   );
 
+  authRouter.use("/api/v1/affelnet", affelnetRoutes());
   authRouter.use(
     "/api/v1/admin",
     express
@@ -876,6 +883,7 @@ function setupRoutes(app: Application) {
       .use("/organismes", organismesAdmin())
       .use("/effectifs", effectifsAdmin())
       .use("/transmissions", transmissionRoutesAdmin())
+      .use("/affelnet", affelnetRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {

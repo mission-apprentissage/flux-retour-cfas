@@ -6,6 +6,7 @@ import {
   SIRET_REGEX,
   STATUT_APPRENANT,
   STATUT_APPRENANT_VALUES,
+  SourceApprenantEnum,
   TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
   YEAR_RANGE_REGEX,
@@ -111,9 +112,7 @@ export const zEffectif = z.object({
   id_erp_apprenant: z.string({
     description: "Identifiant de l'apprenant dans l'erp",
   }),
-  source: z.string({
-    description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
-  }),
+  source: SourceApprenantEnum,
   source_organisme_id: z
     .string({
       description: "Identifiant de l'organisme id source transmettant",

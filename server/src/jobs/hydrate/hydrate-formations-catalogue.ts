@@ -1,14 +1,20 @@
 import { IncomingMessage } from "node:http";
 
 import axios from "axios";
-import JSONStream from "JSONStream";
 import { ObjectId } from "mongodb";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import { default as StreamChain } from "stream-chain";
+import { default as StreamJson } from "stream-json";
+import { default as StreamArrayPick } from "stream-json/streamers/StreamArray.js";
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
 import config from "@/config";
+
+const { chain } = StreamChain;
+const { parser } = StreamJson;
+const { streamArray } = StreamArrayPick;
 
 const logger = parentLogger.child({
   module: "job:hydrate:formations-catalogue",
@@ -68,24 +74,24 @@ export const hydrateFormationsCatalogue = async () => {
   }
 
   return new Promise<void>((resolve, reject) => {
-    const parser = JSONStream.parse("*");
-    res.data.pipe(parser);
-    parser.on("data", (formation: WithStringId<IFormationCatalogue>) => {
+    const pipeline = chain([parser(), streamArray()]);
+    res.data.pipe(pipeline);
+    pipeline.on("data", ({ value }: { value: WithStringId<IFormationCatalogue> }) => {
       pendingFormations.push({
-        ...formation,
-        _id: new ObjectId(formation._id),
+        ...value,
+        _id: new ObjectId(value._id),
       });
       if (pendingFormations.length === INSERT_BATCH_SIZE) {
         flushPendingFormations();
       }
     });
 
-    parser.on("error", (err) => {
+    pipeline.on("error", (err) => {
       logger.error({ err }, "stream error");
       reject(err);
     });
 
-    parser.on("end", async () => {
+    pipeline.on("end", async () => {
       try {
         flushPendingFormations();
         await Promise.all(queriesInProgress);

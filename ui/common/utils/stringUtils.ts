@@ -2,7 +2,7 @@ import { validateSiret } from "@/common/domain/siret";
 
 export const formatNumber = (number) => {
   if (!number) return number;
-  return Number(number).toLocaleString();
+  return Number(number).toLocaleString("fr-FR");
 };
 
 export const formatSiretSplitted = (siret) => {

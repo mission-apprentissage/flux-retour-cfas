@@ -94,7 +94,8 @@ const dailyJobs = async () => {
   await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
 
   // # Mise à jour des organismes via APIs externes
-  await addJob({ name: "update:organismes-with-apis", queued: true });
+  // Désactivations temporaire car trop long à executer
+  // await addJob({ name: "update:organismes-with-apis", queued: true });
 
   // # Mise à jour des niveaux des formations des effectifs
   await addJob({ name: "effectifs-formation-niveaux", queued: true });
