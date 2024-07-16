@@ -11,3 +11,10 @@ location /api/admin/upload {
     set $upstream http://server:5000;
     include includes/proxy.conf;
 }
+
+location /api/v1/admin {
+    client_max_body_size    100M;
+
+    set $upstream http://server:5000;
+    include includes/proxy.conf;
+}
