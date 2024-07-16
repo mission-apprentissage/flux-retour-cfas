@@ -1,4 +1,10 @@
 fileignoreconfig:
+- filename: ui/modules/aide/AideCodeRncp.tsx
+  checksum: 9eef5c3608c09e91abcf400b96687782b0fc5598f875aac9d41f3bb19414f092
+- filename: ui/modules/aide/AideUai.tsx
+  checksum: ce81bb8b7b97a0ae7ba129be2cee66364f5f970669d2b4b0524c604d981d9318
+- filename: ui/modules/aide/AideNature.tsx
+  checksum: f4bd606392ac321df0d1de797a33a14cbc3fcfa76c6d3ac6bc3cf20339f76166
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 1c87719cbf9d12856f175d428c7e37db395840e094da5f807cd17c240389abc7
 - filename: ui/common/utils/televersement.ts

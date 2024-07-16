@@ -262,10 +262,8 @@ const MenuQuestions = () => {
           </MenuItem>
           <MenuItem
             as="a"
-            href={FAQ_PATH}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
+            href="/referencement-organisme"
+            onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
           >
             Référencement de votre organisme
           </MenuItem>

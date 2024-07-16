@@ -23,6 +23,7 @@ export const plausibleGoals = [
   // Menu
   "clic_homepage_questions",
   "clic_homepage_page_aide",
+  "clic_homepage_referencement_organisme",
   "clic_homepage_envoi_message",
 
   // Page SIFA
