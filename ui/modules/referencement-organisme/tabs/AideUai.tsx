@@ -1,7 +1,9 @@
 import { Text, Flex, Img, OrderedList, ListItem } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 
 const ModalUai = {
   title: "Exemple d'affichage de la donnée UAI",
@@ -25,7 +27,8 @@ const ModalUai = {
 };
 
 const AideUai = () => {
-  const [expandedIndex] = useState<number | number[]>(0);
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
 
   return (
     <AidePage>
@@ -63,6 +66,18 @@ const AideUai = () => {
           dataResponsibilityLink="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf"
           modificationText="Référentiel"
           modificationLink="mailto:referentiel-uai-siret@onisep.fr"
+          onDataResponsibilityClick={() =>
+            trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "rectorat_ramsese",
+            })
+          }
+          onModificationClick={() =>
+            trackPlausibleEvent("referencement_clic_modification_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "referentiel_uai_siret",
+            })
+          }
         />
 
         <AidePage.Ribbon
@@ -74,7 +89,7 @@ const AideUai = () => {
               <AidePage.Link href="https://referentiel.apprentissage.onisep.fr/organismes">
                 Référentiel UAI-SIRET
               </AidePage.Link>{" "}
-              de l’ONISEP .
+              de l’ONISEP.
             </>
           }
           modalTitle={ModalUai.title}
@@ -88,9 +103,14 @@ const AideUai = () => {
           fileType="PDF"
           fileSize="81 Ko"
           downloadLink="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf"
+          onClick={() =>
+            trackPlausibleEvent("referencement_telechargement_tuile_uai", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+            })
+          }
         />
 
-        <AidePage.Accordion defaultIndex={expandedIndex} allowToggle mt={12}>
+        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
           <AidePage.AccordionItem title='Mon numéro UAI est signalé "Inconnu" sur mon espace Tableau de bord mais j&apos;en possède un.'>
             <AidePage.ModalButton
               buttonText="Voir un exemple"
@@ -100,7 +120,9 @@ const AideUai = () => {
             <Text>
               Si votre numéro UAI est répertorié comme « Inconnu » alors que votre organisme en possède un, vous devez
               le communiquer en écrivant à{" "}
-              <AidePage.Link href="mailto:referentiel-uai-siret@onise.fr">referentiel-uai-siret@onise.fr</AidePage.Link>{" "}
+              <AidePage.Link href="mailto:referentiel-uai-siret@onisep.fr">
+                referentiel-uai-siret@onisep.fr
+              </AidePage.Link>{" "}
               avec la fiche UAI, afin qu&apos;il soit mis à jour. L&apos;absence de ce numéro bloque
               l&apos;enregistrement des contrats d&apos;apprentissage. N&apos;oubliez pas que votre UAI devra être
               reporté sur le CERFA.
@@ -112,7 +134,9 @@ const AideUai = () => {
               Sur votre espace Tableau de bord de l&apos;apprentissage, l&apos;UAI associé à votre SIRET et
               établissement provient du Référentiel UAI-SIRET de l&apos;ONISEP. Si l&apos;UAI vous semble erroné,
               veuillez écrire un email demandant la modification (et en la justifiant), à{" "}
-              <AidePage.Link href="mailto:referentiel-uai-siret@onise.fr">referentiel-uai-siret@onise.fr</AidePage.Link>{" "}
+              <AidePage.Link href="mailto:referentiel-uai-siret@onisep.fr">
+                referentiel-uai-siret@onisep.fr
+              </AidePage.Link>{" "}
               ou bien directement au service académique en charge de RAMSESE (répertoire académique et ministériel sur
               les établissements du système éducatif). Une expertise sera alors réalisée par le service.
             </Text>
@@ -122,6 +146,12 @@ const AideUai = () => {
               fileType="PDF"
               fileSize="81 Ko"
               isExternal
+              onClick={() =>
+                trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                  type_user: auth ? auth.organisation.type : "public",
+                  nom_fichier: "contact_rectorat_uai_ramsese",
+                })
+              }
             >
               Liste de contacts des services académiques
             </AidePage.DownloadLink>
@@ -138,8 +168,14 @@ const AideUai = () => {
               <AidePage.DownloadLink
                 href="/pdf/formulaire-immatriculation-uai-pour-of_cfa.pdf"
                 fileType="PDF"
-                fileSize="81 Ko"
+                fileSize="105 Ko"
                 isExternal
+                onClick={() =>
+                  trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                    type_user: auth ? auth.organisation.type : "public",
+                    nom_fichier: "formulaire_immatriculation_uai_of_cfa",
+                  })
+                }
               >
                 Formulaire UAI
               </AidePage.DownloadLink>{" "}
@@ -148,6 +184,12 @@ const AideUai = () => {
                 fileType="PDF"
                 fileSize="81 Ko"
                 isExternal
+                onClick={() =>
+                  trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                    type_user: auth ? auth.organisation.type : "public",
+                    nom_fichier: "contact_rectorat_uai_ramsese",
+                  })
+                }
               >
                 Liste des contacts des services académiques
               </AidePage.DownloadLink>
@@ -166,6 +208,12 @@ const AideUai = () => {
               fileType="PDF"
               fileSize="81 Ko"
               isExternal
+              onClick={() =>
+                trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                  type_user: auth ? auth.organisation.type : "public",
+                  nom_fichier: "contact_rectorat_uai_ramsese",
+                })
+              }
             >
               Liste de contacts des services académiques
             </AidePage.DownloadLink>
@@ -175,7 +223,9 @@ const AideUai = () => {
             <Text>
               Si un organisme ne devrait pas être présent dans le référentiel (par exemple s&apos;il s&apos;agit
               d&apos;une école maternelle ou élémentaire), merci de le signaler à l&apos;adresse mail suivante :{" "}
-              <AidePage.Link href="mailto:referentiel-uai-siret@onise.fr">referentiel-uai-siret@onise.fr</AidePage.Link>{" "}
+              <AidePage.Link href="mailto:referentiel-uai-siret@onisep.fr">
+                referentiel-uai-siret@onisep.fr
+              </AidePage.Link>{" "}
               pour demander le retrait des listes de cet organisme.
             </Text>
             <Text>

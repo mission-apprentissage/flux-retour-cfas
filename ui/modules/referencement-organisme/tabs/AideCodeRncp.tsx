@@ -1,10 +1,13 @@
 import { Text, UnorderedList, ListItem, Img, Flex } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 
 const AideCodeRncp = () => {
-  const [expandedIndex] = useState<number | number[]>(0);
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
 
   return (
     <AidePage>
@@ -12,9 +15,9 @@ const AideCodeRncp = () => {
 
       <AidePage.Header>
         <Text>
-          La donnée &quot;Nature&quot; est déduite des relations entre les organismes, déclarées lors du référencement
-          des formations d’un organisme (base des Carif-Oref). Trois natures d&apos;organismes peuvent être observées :
-          responsable, responsable et formateur, formateur.
+          Les informations d&apos;identification de votre établissement doivent être complètes et correctes pour
+          transmettre vos effectifs au Tableau de bord de l&apos;apprentissage. L&apos;équipe du Tableau de bord ne peut
+          pas les modifier directement. Voici les démarches que vous devez effectuer selon la donnée à modifier.
         </Text>
       </AidePage.Header>
 
@@ -32,6 +35,18 @@ const AideCodeRncp = () => {
           dataResponsibilityLink="https://www.francecompetences.fr/recherche-resultats/"
           modificationText="Carif-Oref"
           modificationLink="https://procedures.inpi.fr/?/"
+          onDataResponsibilityClick={() =>
+            trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "france_competences",
+            })
+          }
+          onModificationClick={() =>
+            trackPlausibleEvent("referencement_clic_modification_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "carif_oref",
+            })
+          }
         />
 
         <AidePage.Ribbon
@@ -39,7 +54,7 @@ const AideCodeRncp = () => {
           content="La donnée ‘Code RNCP’ affichée sur le Tableau de bord provient des Carif-Oref. Si cette information est erronée, merci de leur signaler."
         />
 
-        <AidePage.Accordion defaultIndex={expandedIndex} allowToggle mt={12}>
+        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
           <AidePage.AccordionItem title="À quoi sert une certification professionnelle ?">
             <Text>
               Une certification professionnelle permet d&apos;avoir une reconnaissance officielle des compétences et des
@@ -53,9 +68,23 @@ const AideCodeRncp = () => {
               <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={2} mt={1} />
               <Text>
                 <b>Bon à savoir :</b> Il revient aux CFA de se mettre à jour auprès de France Compétences :{" "}
+                <AidePage.Link href="mailto:certificationprofessionnelle@francecompetences.fr">
+                  certificationprofessionnelle@francecompetences.fr
+                </AidePage.Link>
               </Text>
             </Flex>
-            <AidePage.DownloadLink href="/pdf/Vadémécum-RNCP-V1.1-VF-.pdf" fileType="PDF" fileSize="958 Ko" isExternal>
+            <AidePage.DownloadLink
+              href="/pdf/Vadémécum-RNCP-V1.1-VF-.pdf"
+              fileType="PDF"
+              fileSize="958 Ko"
+              isExternal
+              onClick={() =>
+                trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                  type_user: auth ? auth.organisation.type : "public",
+                  nom_fichier: "vademecum_rncp",
+                })
+              }
+            >
               Vademecum RNCP
             </AidePage.DownloadLink>
           </AidePage.AccordionItem>
@@ -90,7 +119,7 @@ const AideCodeRncp = () => {
               <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/formation/018817P01213885594860007038855948600070-67118%23L01">
                 Catalogue
               </AidePage.Link>{" "}
-              (Réseau Carif Oref) est déduit par l&apos;indexation réalisée par les Carif-Oref suite aux données
+              (Réseau Carif Oref) est déduit par l&apos;indexation réalisée par les Carif-Oref suite aux données de
               déclarations sur la certification par l&apos;OFA. Veuillez contacter votre Carif-Oref pour signaler une
               erreur (fichier des contacts téléchargeable).
             </Text>
@@ -99,6 +128,12 @@ const AideCodeRncp = () => {
               fileType="PDF"
               fileSize="417 Ko"
               isExternal
+              onClick={() =>
+                trackPlausibleEvent("referencement_telechargement_fichier", undefined, {
+                  type_user: auth ? auth.organisation.type : "public",
+                  nom_fichier: "liste_contacts_carif_oref",
+                })
+              }
             >
               Liste de contacts Carif-Oref
             </AidePage.DownloadLink>

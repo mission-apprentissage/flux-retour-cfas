@@ -43,6 +43,8 @@ interface AidePageResponsibilityProps {
   dataResponsibilityLink: string;
   modificationText: string;
   modificationLink: string;
+  onDataResponsibilityClick?: () => void;
+  onModificationClick?: () => void;
 }
 
 interface AidePageRibbonProps {
@@ -64,6 +66,7 @@ interface AidePageFileCardProps {
   fileType: string;
   fileSize: string;
   downloadLink: string;
+  onClick?: () => void;
 }
 
 interface AidePageButtonProps {
@@ -88,6 +91,7 @@ interface AidePageDownloadLinkProps {
   href: string;
   fileType: string;
   fileSize: string;
+  onClick?: () => void;
   [key: string]: any;
 }
 
@@ -124,14 +128,14 @@ const AidePageAccordion = ({ children, allowToggle = true, ...props }: AidePageA
 
 const AidePageAccordionItem = ({ title, children }: { title: string; children: ReactNode }) => (
   <AccordionItem>
-    <h2>
-      <AccordionButton>
+    <Box>
+      <AccordionButton py={8}>
         <Box flex="1" textAlign="left" fontWeight="bold" fontSize="epsilon" pr={12}>
           {title}
         </Box>
         <AccordionIcon />
       </AccordionButton>
-    </h2>
+    </Box>
     <AccordionPanel pb={12} pt={4} fontSize="epsilon">
       <Flex direction="column" gap={4}>
         {children}
@@ -145,18 +149,25 @@ const AidePageDataResponsibility = ({
   dataResponsibilityLink,
   modificationText,
   modificationLink,
+  onDataResponsibilityClick,
+  onModificationClick,
 }: AidePageResponsibilityProps) => (
   <Flex justify="space-between" align="center" my={4}>
     <Flex align="center" gap={4}>
       Responsable de la donnée :
-      <Link href={dataResponsibilityLink} isExternal>
-        <Tag colorScheme="blue_tag" primaryText={dataResponsibilityText} rounded="full" />
+      <Link
+        href={dataResponsibilityLink}
+        isExternal
+        _hover={{ textDecoration: "none" }}
+        onClick={onDataResponsibilityClick}
+      >
+        <Tag colorScheme="bluelight_tag" primaryText={dataResponsibilityText} rounded="full" isLink />
       </Link>{" "}
     </Flex>
     <Flex align="center" gap={4}>
       Modification de la donnée :
-      <Link href={modificationLink} isExternal>
-        <Tag colorScheme="blue_tag" primaryText={modificationText} rounded="full" />
+      <Link href={modificationLink} isExternal _hover={{ textDecoration: "none" }} onClick={onModificationClick}>
+        <Tag colorScheme="bluelight_tag" primaryText={modificationText} rounded="full" isLink />
       </Link>
     </Flex>
   </Flex>
@@ -226,7 +237,7 @@ const AidePageLink = ({ href, children, ...props }: AideLinkProps) => {
   );
 };
 
-const AidePageDownloadLink = ({ href, children, fileType, fileSize, ...props }: AidePageDownloadLinkProps) => {
+const AidePageDownloadLink = ({ href, children, fileType, fileSize, onClick, ...props }: AidePageDownloadLinkProps) => {
   const isExternal = href.startsWith("https") || props.isExternal;
 
   return (
@@ -242,6 +253,7 @@ const AidePageDownloadLink = ({ href, children, fileType, fileSize, ...props }: 
         width="fit-content"
         _hover={{ textDecoration: "none" }}
         isExternal={isExternal}
+        onClick={onClick}
         {...props}
       >
         {children}
@@ -261,9 +273,10 @@ const AidePageFileCard = ({
   fileType,
   fileSize,
   downloadLink,
+  onClick,
 }: AidePageFileCardProps) => {
   return (
-    <Link href={downloadLink} isExternal width="37%" _hover={{ textDecoration: "none" }}>
+    <Link href={downloadLink} isExternal width="37%" _hover={{ textDecoration: "none" }} onClick={onClick}>
       <Flex
         borderWidth="1px"
         borderBottomWidth="3px"

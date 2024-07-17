@@ -12,9 +12,11 @@ import {
   Tr,
   UnorderedList,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 
 const ModalNature = {
   title: "Exemple d'affichage de la donnée Nature",
@@ -22,7 +24,7 @@ const ModalNature = {
     <>
       <Text>
         La nature de votre organisme est affichée sur le bandeau d’identité sur votre espace Tableau de bord, ainsi que
-        sur le Référentiel UAI-SIRET de l’ONISEP.
+        sur le Référentiel UAI-SIRET de l’ONISEP. Le Tableau de bord ne peut modifier directement cette donnée.
       </Text>
 
       <Img src="/images/aide/nature.png" alt="Exemple d'affichage de la donnée Nature" mt={6} />
@@ -153,7 +155,8 @@ const contactData = [
 ];
 
 const AideNature = () => {
-  const [expandedIndex] = useState<number | number[]>(0);
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
 
   return (
     <AidePage>
@@ -187,8 +190,20 @@ const AideNature = () => {
         <AidePage.DataResponsibility
           dataResponsibilityText="Carif-Oref"
           dataResponsibilityLink="https://www.intercariforef.org/referencer-son-offre-de-formation"
-          modificationText="SI régional du Carif-Oref"
+          modificationText="Plateforme régional du Carif-Oref"
           modificationLink="/pdf/Carif-Oref-contacts.pdf"
+          onDataResponsibilityClick={() =>
+            trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "carif_oref",
+            })
+          }
+          onModificationClick={() =>
+            trackPlausibleEvent("referencement_clic_modification_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "plateforme_regional_carif_oref",
+            })
+          }
         />
 
         <AidePage.Ribbon
@@ -205,9 +220,14 @@ const AideNature = () => {
           fileType="PDF"
           fileSize="417 Ko"
           downloadLink="/pdf/Carif-Oref-contacts.pdf"
+          onClick={() =>
+            trackPlausibleEvent("referencement_telechargement_tuile_nature", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+            })
+          }
         />
 
-        <AidePage.Accordion defaultIndex={expandedIndex} allowToggle mt={12}>
+        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
           <AidePage.AccordionItem title='Qu&apos;est-ce que la donnée "Nature" ?'>
             <AidePage.ModalButton
               buttonText="Voir un exemple"
@@ -219,10 +239,10 @@ const AideNature = () => {
               <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/">Catalogue</AidePage.Link> des
               formations en apprentissage identifie trois natures :
             </Text>
-            <OrderedList pl={4} mt={2} mb={4}>
+            <UnorderedList pl={4} mt={2} mb={4}>
               <ListItem>
                 Un organisme <strong>responsable</strong> (OFA &quot;classique&quot; ou &quot;hors les murs&quot;) :
-                <OrderedList pl={4}>
+                <UnorderedList styleType="'- '">
                   <ListItem>est signataire de la convention de formation en apprentissage ;</ListItem>
                   <ListItem>demande et reçoit l’accord de prise en charge de l’OPCO ;</ListItem>
                   <ListItem>
@@ -232,7 +252,7 @@ const AideNature = () => {
                   <ListItem>
                     délègue la formation à un autre organisme de formation dans le cadre d’une convention.
                   </ListItem>
-                </OrderedList>
+                </UnorderedList>
               </ListItem>
               <ListItem>
                 Un organisme <strong>responsable et formateur</strong> dispense également des actions de formation en
@@ -240,17 +260,19 @@ const AideNature = () => {
               </ListItem>
               <ListItem>
                 Un organisme <strong>formateur</strong>
-                <OrderedList pl={4}>
+                <UnorderedList styleType="'- '">
                   <ListItem>est garant du respect de la mise en œuvre pédagogique de la formation.</ListItem>
                   <ListItem>
                     il peut être appelé prestataire de formation, et peut également être connu sous le nom d’UFA.
                   </ListItem>
-                </OrderedList>
+                </UnorderedList>
               </ListItem>
-            </OrderedList>
+            </UnorderedList>
             <Text>
-              Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré son offre de formation
-              dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la corriger.
+              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={1} display="inline" />{" "}
+              <b>Bon à savoir :</b> Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré
+              son offre de formation dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la
+              corriger.
             </Text>
           </AidePage.AccordionItem>
 
@@ -272,7 +294,7 @@ const AideNature = () => {
             <Text>
               Si la cellule contient « inconnue », cela signifie que l’offre de formation n’est pas collectée par le
               Carif-Oref. Nous vous invitons à référencer vos formations en apprentissage auprès du{" "}
-              <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/">
+              <AidePage.Link href="https://www.intercariforef.org/referencer-son-offre-de-formation">
                 Carif-Oref régional
               </AidePage.Link>
               .
@@ -326,8 +348,22 @@ const AideNature = () => {
           <AidePage.AccordionItem title="La nature indiquée sur mon espace est incorrecte. Comment la corriger ?">
             <AidePage.ModalButton
               buttonText="Voir un exemple"
-              modalTitle={ModalNature.title}
-              modalContent={ModalNature.content}
+              modalTitle="Identifier ses formations déclarées au Carif-Oref"
+              modalContent={
+                <>
+                  <Text>
+                    Sur votre fiche établissement, disponible dans l’onglet ‘Liste des organismes’ du Catalogue des
+                    formations, cliquez sur les formations associées. Chaque fiche formation restitue l’information sur
+                    l’organisme responsable et formateur (Nature).
+                  </Text>
+
+                  <Img
+                    src="/images/aide/nature_formation.png"
+                    alt="Identifier ses formations déclarées au Carif-Oref"
+                    mt={6}
+                  />
+                </>
+              }
             />
             <Text>
               Pour comprendre son origine, allez dans l’onglet ‘

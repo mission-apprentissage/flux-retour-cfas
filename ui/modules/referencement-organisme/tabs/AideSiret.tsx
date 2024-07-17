@@ -2,8 +2,13 @@ import { Text, Link, UnorderedList, OrderedList, ListItem, Img } from "@chakra-u
 import React, { useState } from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 
 const AideSiret = () => {
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
+
   const [expandedIndex, setExpandedIndex] = useState<number | number[]>(0);
 
   return (
@@ -33,6 +38,18 @@ const AideSiret = () => {
           dataResponsibilityLink="https://www.insee.fr/"
           modificationText="Guichet unique des entreprises"
           modificationLink="https://procedures.inpi.fr/?/"
+          onDataResponsibilityClick={() =>
+            trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "insee",
+            })
+          }
+          onModificationClick={() =>
+            trackPlausibleEvent("referencement_clic_modification_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "guichet_unique_entreprises",
+            })
+          }
         />
 
         <AidePage.Ribbon
@@ -91,7 +108,7 @@ const AideSiret = () => {
               </ListItem>
               <ListItem>
                 et de le mettre à jour sur{" "}
-                <AidePage.Link href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https%3A%2F%2Fmesdemarches.emploi.gouv.fr%2Fportail%2Fservices%2F">
+                <AidePage.Link href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https://www.monactiviteformation.emploi.gouv.fr/mon-activite-formation/">
                   Mon Activité Formation
                 </AidePage.Link>
                 .
@@ -102,8 +119,7 @@ const AideSiret = () => {
               <AidePage.Link href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/14/create/52">
                 notre service support
               </AidePage.Link>{" "}
-              pour pouvoir en créer un nouveau sur votre nouveau SIRET en suivant ce{" "}
-              <AidePage.Link href="https://procedures.inpi.fr/?/">lien</AidePage.Link>.
+              pour pouvoir ensuite créer un nouveau sur votre dernier SIRET.
             </Text>
           </AidePage.AccordionItem>
 

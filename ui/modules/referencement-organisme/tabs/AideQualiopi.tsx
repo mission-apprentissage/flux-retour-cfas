@@ -1,10 +1,13 @@
 import { Text, UnorderedList, ListItem, Box, Flex, Img } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 
 const AideQualiopi = () => {
-  const [expandedIndex] = useState<number | number[]>(0);
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
 
   return (
     <AidePage>
@@ -39,6 +42,18 @@ const AideQualiopi = () => {
           dataResponsibilityLink="https://www.data.gouv.fr/fr/datasets/liste-publique-des-organismes-de-formation-l-6351-7-1-du-code-du-travail/"
           modificationText="Organismes certificateurs"
           modificationLink="https://travail-emploi.gouv.fr/formation-professionnelle/acteurs-cadre-et-qualite-de-la-formation-professionnelle/liste-organismes-certificateurs"
+          onDataResponsibilityClick={() =>
+            trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "liste_publique",
+            })
+          }
+          onModificationClick={() =>
+            trackPlausibleEvent("referencement_clic_modification_donnee", undefined, {
+              type_user: auth ? auth.organisation.type : "public",
+              nom_responsable: "organismes_certificateurs",
+            })
+          }
         />
 
         <AidePage.Ribbon
@@ -54,7 +69,7 @@ const AideQualiopi = () => {
           }
         />
 
-        <AidePage.Accordion defaultIndex={expandedIndex} allowToggle mt={12}>
+        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
           <AidePage.AccordionItem title="À quoi sert la Certification Qualiopi ?">
             <Text>
               La certification Qualiopi atteste de la qualité d&apos;une formation professionnelle. Plus globalement,

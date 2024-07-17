@@ -1,5 +1,3 @@
-// référence : https://www.notion.so/mission-apprentissage/Tracking-Plausible-TDB-86c1845affea4d759fc022093af95837
-
 export const plausibleGoals = [
   // Page Statistiques
   "clic_statistiques",
@@ -56,6 +54,18 @@ export const plausibleGoals = [
 
   // - Cerfa
   "clic_redirection_cerfa",
+
+  // - Page referencement-organisme
+  "referencement_clic_onglet_siret",
+  "referencement_clic_onglet_uai",
+  "referencement_clic_onglet_nature",
+  "referencement_clic_onglet_qualiopi",
+  "referencement_clic_onglet_code_rncp",
+  "referencement_telechargement_tuile_uai",
+  "referencement_telechargement_tuile_nature",
+  "referencement_telechargement_fichier",
+  "referencement_clic_responsable_donnee",
+  "referencement_clic_modification_donnee",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
