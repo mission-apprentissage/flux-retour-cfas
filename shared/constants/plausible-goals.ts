@@ -23,6 +23,7 @@ export const plausibleGoals = [
   "clic_homepage_page_aide",
   "clic_homepage_referencement_organisme",
   "clic_homepage_envoi_message",
+  "clic_homepage_voeux_affelnet",
 
   // Page SIFA
   "clic_depot_plateforme_sifa",

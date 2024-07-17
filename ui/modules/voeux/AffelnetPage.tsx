@@ -226,42 +226,40 @@ function VoeuxAffelnetPage() {
                 <Flex alignItems="center" gap={2}>
                   <Box className="ri-user-heart-fill ri-lg" color="#FCC63A" />
                   <Text fontSize="xl" fontWeight="bold">
-                    En cours
+                    {isLoading
+                      ? "..."
+                      : formatNumber(
+                          (affelnetCount?.apprenantVoeuxFormules ?? 0) - (affelnetCount?.apprenantsNonContretise ?? 0)
+                        )}
                   </Text>
                 </Flex>
                 <Flex alignItems="center" gap={2}>
                   <Text>d’entre eux sont déjà inscrits en CFA pour la rentrée</Text>
                   <InfoTooltip
-                    headerComponent={() => <Text>Nombre de jeunes déjà inscrits en CFA</Text>}
+                    headerComponent={() => <Text>Inscription théorique en CFA</Text>}
                     contentComponent={() => (
-                      <>
-                        <Text>Ce chiffre se base à la fois sur :</Text>
-                        <List my={3} style={{ color: "black", listStyleType: "disc", paddingLeft: "1.5rem" }}>
-                          <ListItem>
-                            les transmissions d’effectifs au Tableau de bord par les OFA qui ont des jeunes inscrits sur
-                            2024-2025
-                          </ListItem>
-                          <ListItem>
-                            la{" "}
-                            <Link
-                              variant="link"
-                              href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
-                              isExternal
-                            >
-                              base DECA
-                            </Link>{" "}
-                            (pour ceux ayant signé un contrat)
-                          </ListItem>
-                        </List>
-                        <Text>Ce relevé n’est pas exhaustif.</Text>
-                        <Text>Retrouvez la liste des jeunes dans votre onglet “Mes indicateurs”.</Text>
-                      </>
+                      <Text>
+                        À partir de Septembre, vous pourrez retrouver ces jeunes sur votre espace Tableau de bord, en
+                        tant que jeunes sans contrat, ou apprentis.
+                      </Text>
                     )}
                   />
                 </Flex>
               </Box>
             </GridItem>
           </Grid>
+          <Flex gap={3}>
+            <Text>Vous avez une question / remarque ?</Text>
+            <Link
+              variant="link"
+              display="inline-flex"
+              href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/10/create/80"
+              isExternal
+            >
+              Écrivez-nous
+              <Box className="ri-arrow-right-line" />
+            </Link>
+          </Flex>
         </VStack>
       </Container>
     </SimplePage>

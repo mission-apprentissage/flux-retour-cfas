@@ -108,7 +108,8 @@ const NavBarPublic = () => {
 
 // pour tous les utilisateurs transverses (pour le moment)
 function NavBarTransverse(): React.ReactElement {
-  const { organisationType } = useAuth();
+  const { organisationType, organisation } = useAuth();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <>
@@ -118,7 +119,17 @@ function NavBarTransverse(): React.ReactElement {
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       {(organisationType === "DREETS" || organisationType === "DRAFPIC") && (
-        <NavItem to="/voeux-affelnet">Voeux Affelnet</NavItem>
+        <NavItem
+          to="/voeux-affelnet"
+          onClick={() =>
+            trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
+              organisation_type: organisation ? organisation.type : "",
+              organisation_code_region: organisation && "code_region" in organisation ? organisation.code_region : "",
+            })
+          }
+        >
+          Voeux Affelnet
+        </NavItem>
       )}
       <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
       <MenuQuestions />
