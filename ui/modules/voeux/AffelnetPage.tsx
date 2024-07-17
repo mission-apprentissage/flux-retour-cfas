@@ -201,8 +201,11 @@ function VoeuxAffelnetPage() {
                         <Button
                           variant="primary"
                           action={async () => {
+                            const params = organisme_departements
+                              ? `?organisme_departements=${organisme_departements}`
+                              : "";
                             downloadObject(
-                              await _getBlob(`/api/v1/affelnet/export/non-concretise`),
+                              await _getBlob(`/api/v1/affelnet/export/non-concretise${params}`),
                               `voeux_affelnet_non_concretisee.csv`,
                               "text/plain"
                             );
