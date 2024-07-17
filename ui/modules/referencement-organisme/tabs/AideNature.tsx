@@ -190,7 +190,7 @@ const AideNature = () => {
         <AidePage.DataResponsibility
           dataResponsibilityText="Carif-Oref"
           dataResponsibilityLink="https://www.intercariforef.org/referencer-son-offre-de-formation"
-          modificationText="Plateforme régional du Carif-Oref"
+          modificationText="Plateforme régionale du Carif-Oref"
           modificationLink="/pdf/Carif-Oref-contacts.pdf"
           onDataResponsibilityClick={() =>
             trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
