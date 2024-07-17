@@ -3,7 +3,7 @@ import { Parser } from "json2csv";
 import { IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
-import { getAffelnetCountVoeuxNational, getAffelnetVoeux } from "@/common/actions/affelnet.actions";
+import { getAffelnetCountVoeuxNational, getAffelnetVoeuxNonConcretise } from "@/common/actions/affelnet.actions";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -20,6 +20,7 @@ const AFFELNET_FIELDS = [
   { label: "Ville Etab Origine", value: "ville_etab_origine" },
   { label: "Type Etab Origine", value: "type_etab_origine" },
   { label: "Libelle Etab Origine", value: "libelle_etab_origine" },
+  { label: "Nombre Voeux", value: "nombre_voeux" },
 ];
 
 export default () => {
@@ -67,7 +68,7 @@ const exportNonConretisee = async (req) => {
   const orga = user.organisation as IOrganisationOperateurPublicRegion;
   const organismes_regions = orga.code_region ? [orga.code_region] : [];
   const { organisme_departements } = req.query;
-  const listVoeux = await getAffelnetVoeux(organisme_departements, organismes_regions);
+  const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
 
   const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
   const csv = await json2csvParser.parse(listVoeux);

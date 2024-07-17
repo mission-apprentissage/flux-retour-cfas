@@ -68,8 +68,9 @@ const AFFELNET_HEADER = [
   "siret_uai_gestionnaire",
   "cle_ministere_educatif",
   "uai_cio_etab_accueil",
-  // "uai_etatblissement_formateur",
-  // "uai_etablissement_responsable",
+  "uai_etatblissement_formateur",
+  "uai_etablissement_responsable",
+  "libelle_public_etablissement",
 ];
 
 const logger = parentLogger.child({
@@ -239,6 +240,9 @@ const createVoeux = async (req, res) => {
       }
     });
 
+  logger.info("Voeux mis à jour");
+  logger.info("Lancement de la recherche des voeux supprimés");
   await findDeletedVoeux(currentDate);
+  logger.info("Fin de la recherche des voeux supprimés");
   return;
 };

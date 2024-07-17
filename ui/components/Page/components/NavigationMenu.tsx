@@ -247,7 +247,7 @@ const MenuQuestions = () => {
           onClick={() => trackPlausibleEvent("clic_homepage_questions")}
         >
           <Text display="block">
-            Question ? <ChevronDownIcon />
+            Aide et ressources <ChevronDownIcon />
           </Text>
         </MenuButton>
         <MenuList>
@@ -259,6 +259,13 @@ const MenuQuestions = () => {
             onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
           >
             Page d’aide
+          </MenuItem>
+          <MenuItem
+            as="a"
+            href="/referencement-organisme"
+            onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
+          >
+            Référencement de votre organisme
           </MenuItem>
           <MenuItem as="a" href="/glossaire">
             Glossaire
