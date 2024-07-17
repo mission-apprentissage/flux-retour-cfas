@@ -11,13 +11,14 @@ const AideCodeRncp = () => {
 
   return (
     <AidePage>
-      <AidePage.Title>Certification Professionnelle</AidePage.Title>
+      <AidePage.Title>Code RNCP et formations</AidePage.Title>
 
       <AidePage.Header>
         <Text>
-          Les informations d&apos;identification de votre établissement doivent être complètes et correctes pour
-          transmettre vos effectifs au Tableau de bord de l&apos;apprentissage. L&apos;équipe du Tableau de bord ne peut
-          pas les modifier directement. Voici les démarches que vous devez effectuer selon la donnée à modifier.
+          Le Répertoire national des certifications professionnelles (RNCP) regroupe les certifications qui conduisent à
+          un métier (attestant de toutes les compétences nécessaires à l&apos;exercice d&apos;un métier particulier) et
+          les titres à finalité professionnelle (niveau 1 à 8) et certains CQP (certificats de qualification
+          professionnelle). France Compétences assure la tenue de ce Répertoire.
         </Text>
       </AidePage.Header>
 
@@ -34,7 +35,7 @@ const AideCodeRncp = () => {
           dataResponsibilityText="France Compétences"
           dataResponsibilityLink="https://www.francecompetences.fr/recherche-resultats/"
           modificationText="Carif-Oref"
-          modificationLink="https://procedures.inpi.fr/?/"
+          modificationLink="/pdf/Carif-Oref-contacts.pdf"
           onDataResponsibilityClick={() =>
             trackPlausibleEvent("referencement_clic_responsable_donnee", undefined, {
               type_user: auth ? auth.organisation.type : "public",
