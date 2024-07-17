@@ -1,9 +1,11 @@
 import express from "express";
 import { Parser } from "json2csv";
+import { ObjectId } from "mongodb";
 import { IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
 import { getAffelnetCountVoeuxNational, getAffelnetVoeuxNonConcretise } from "@/common/actions/affelnet.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -69,6 +71,9 @@ const exportNonConretisee = async (req) => {
   const organismes_regions = orga.code_region ? [orga.code_region] : [];
   const { organisme_departements } = req.query;
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
+
+  const ids = listVoeux.map((voeu) => voeu._id);
+  await createTelechargementListeNomLog("affelnet", ids, new Date(), req.user._id, undefined, new ObjectId(orga._id));
 
   const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
   const csv = await json2csvParser.parse(listVoeux);

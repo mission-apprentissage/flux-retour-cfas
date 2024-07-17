@@ -12409,9 +12409,22 @@ exports[`validation-schema should create validation schema for telechargementLis
       "description": "Identifiant MongoDB du log",
     },
     "effectifs": {
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "objectId",
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "elementList": {
       "bsonType": "array",
       "items": {
-        "bsonType": "objectId",
+        "bsonType": "string",
       },
     },
     "organisation_id": {
@@ -12448,6 +12461,7 @@ exports[`validation-schema should create validation schema for telechargementLis
         "rupturant",
         "abandon",
         "inconnu",
+        "affelnet",
       ],
     },
     "user_id": {
@@ -12457,7 +12471,7 @@ exports[`validation-schema should create validation schema for telechargementLis
   "required": [
     "_id",
     "type",
-    "effectifs",
+    "elementList",
     "telechargement_date",
     "user_id",
   ],

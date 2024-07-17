@@ -507,7 +507,13 @@ function setupRoutes(app: Application) {
             type,
             res.locals.organismeId
           );
-          await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, res.locals.organismeId);
+          await createTelechargementListeNomLog(
+            type,
+            ids.map((id) => id.toString()),
+            new Date(),
+            req.user._id,
+            res.locals.organismeId
+          );
           return effectifsWithoutIds;
         })
       )
@@ -690,7 +696,14 @@ function setupRoutes(app: Application) {
         }
 
         const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
-        await createTelechargementListeNomLog(type, ids, new Date(), req.user._id, undefined, req.user.organisation_id);
+        await createTelechargementListeNomLog(
+          type,
+          ids.map((id) => id.toString()),
+          new Date(),
+          req.user._id,
+          undefined,
+          new ObjectId(req.user.organisation_id)
+        );
         return effectifsWithoutIds;
       })
     )
