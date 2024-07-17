@@ -5,20 +5,20 @@ export function DocumentFile(props) {
   return (
     <Icon width="40" height="40" viewBox="0 0 40 40" fill="none" {...props}>
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M37.5 31C37.2243 31 37 30.7757 37 30.5C37 30.2243 37.2243 30 37.5 30C37.7757 30 38 30.2243 38 30.5C38 30.7757 37.7757 31 37.5 31Z"
         fill="#CACAFB"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M27.5 2C27.2243 2 27 1.7757 27 1.5C27 1.22428 27.2243 1 27.5 1C27.7757 1 28 1.22428 28 1.5C28 1.7757 27.7757 2 27.5 2Z"
         fill="#CACAFB"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M1.5 27C1.2243 27 1 26.7757 1 26.5C1 26.2243 1.2243 26 1.5 26C1.7757 26 2 26.2243 2 26.5C2 26.7757 1.7757 27 1.5 27Z"
         fill="#CACAFB"
       />
@@ -55,8 +55,8 @@ export function DocumentFile(props) {
         fill="#000091"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M9.5 6H28.5C28.7761 6 29 6.22386 29 6.5V33.5C29 33.7761 28.7761 34 28.5 34H9.5C9.22386 34 9 33.7761 9 33.5V6.5C9 6.22386 9.22386 6 9.5 6ZM28 33V7H10V33H28Z"
         fill="#000091"
       />

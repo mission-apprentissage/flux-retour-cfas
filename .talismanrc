@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/modules/referencement-organisme/ReferencementOrganisme.tsx
+  checksum: 6e755a406ed7a6901f59e3581ea5485d6f42b02b3d062d2fe6a50b044ea8c392
 - filename: ui/modules/aide/AideCodeRncp.tsx
   checksum: 9eef5c3608c09e91abcf400b96687782b0fc5598f875aac9d41f3bb19414f092
 - filename: ui/modules/aide/AideUai.tsx
