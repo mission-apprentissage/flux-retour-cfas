@@ -8,10 +8,13 @@ const collectionName = "telechargementListeNomLogs";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
+const extendedTypesEffectifNominatif = [...typesEffectifNominatif, "affelnet"] as const;
+
 export const zTelechargementListeNomLogs = z.object({
   _id: zObjectId.describe("Identifiant MongoDB du log"),
-  type: z.enum(typesEffectifNominatif),
-  effectifs: z.array(zObjectId),
+  type: z.enum(extendedTypesEffectifNominatif),
+  effectifs: z.array(zObjectId).nullish(),
+  elementList: z.array(z.string()),
   telechargement_date: z.date(),
   user_id: zObjectId,
   organisme_id: zObjectId.nullish(),

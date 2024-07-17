@@ -116,7 +116,7 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string>, region
       },
       {
         $project: {
-          _id: 0,
+          _id: "$_id",
           nom: "$apprenant.raw.nom",
           prenom_1: "$apprenant.raw.prenom_1",
           prenom_2: "$apprenant.raw.prenom_2",
