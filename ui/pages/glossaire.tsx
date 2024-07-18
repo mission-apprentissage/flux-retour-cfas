@@ -76,8 +76,16 @@ export default function Glossaire() {
               <Td>
                 <Flex gap="2" flexDirection="column" alignItems="left">
                   <Text as="p">
-                    Codification qui concerne l’ensemble des diplômes technologiques et professionnels des ministères
-                    certificateurs (Éducation Nationale).
+                    Le{" "}
+                    <Link
+                      href="https://catalogue-apprentissage.intercariforef.org"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Code Formation Diplôme
+                    </Link>{" "}
+                    est une codification qui concerne l’ensemble des diplômes technologiques et professionnels des
+                    ministères certificateurs (Éducation Nationale).
                   </Text>
                   <Text as="p">
                     Y sont ajoutés, en tant que de besoin et à la demande des centres de formation par l’apprentissage,
@@ -144,7 +152,7 @@ export default function Glossaire() {
                     à un organisme de formation.
                   </Text>
                   <Text as="p">
-                    La donnée “lieu de formation” provient des Carif-Oref. Si cette donnée est inconnue ou incorrecte,
+                    La donnée “lieu de formation” provient des Carif-Oref. Si cette donnée est inconnue ou incorrecte,{" "}
                     <Link
                       target="_blank"
                       rel="noopener noreferrer"
@@ -293,7 +301,7 @@ export default function Glossaire() {
                       <Link
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                        href="https://catalogue-apprentissage.intercariforef.org"
                       >
                         Catalogue des formations en apprentissage
                       </Link>{" "}
@@ -317,7 +325,7 @@ export default function Glossaire() {
                   </Text>
                   <Text as="p">
                     Ce nombre inclut : les OFA « historiques », les OFA académiques et d’entreprise, les lycées avec une
-                    section apprentissage, les prépa-apprentissage.
+                    section apprentissage.
                   </Text>
                 </Flex>
               </Td>
@@ -396,9 +404,9 @@ export default function Glossaire() {
                     <Link
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://www.francecompetences.fr/recherche_certificationprofessionnelle/"
+                      href="https://www.francecompetences.fr/reguler-le-marche/certification-professionnelle/"
                     >
-                      www.francecompetences.fr/recherche_certificationprofessionnelle
+                      www.francecompetences.fr/reguler-le-marche/certification-professionnelle
                     </Link>
                     ).
                   </Text>
@@ -464,11 +472,11 @@ export default function Glossaire() {
                 >
                   Référentiel UAI-SIRET
                 </Link>{" "}
-                des OFA-CFA (ONISEP) et de la base de données RAMSESE et notamment exploité par la{" "}
+                des OFA-CFA (ONISEP) et de la base de données{" "}
                 <Link target="_blank" rel="noopener noreferrer" href="https://dep.adc.education.fr/acce/index.php">
-                  DEC
+                  RAMSESE
                 </Link>{" "}
-                avant d’être validée au niveau de chaque territoire.
+                et notamment exploité par la DEC avant d’être validée au niveau de chaque territoire.
               </Td>
             </Tr>
             <Tr>
