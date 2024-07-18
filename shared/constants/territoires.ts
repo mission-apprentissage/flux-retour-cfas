@@ -1596,6 +1596,17 @@ export const ACADEMIES = [
   { nom: "Saint-Barthélemy", code: "77" },
   { nom: "Saint-Martin", code: "78" },
 ] as const;
+
+export const ACADEMIES_DEPARTEMENT_MAP: Record<any, Array<any>> = DEPARTEMENTS.reduce(
+  (acc, curr) => {
+    return {
+      ...acc,
+      [curr.academie.code]: [...(acc[curr.academie.code] || []), curr.code],
+    };
+  },
+  {} as Record<IAcademieCode, Array<IDepartmentCode>>
+);
+
 type IAcademies = typeof ACADEMIES;
 export type IAcademie = IAcademies[number];
 export type IAcademieCode = IAcademie["code"];
