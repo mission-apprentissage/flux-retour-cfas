@@ -1,7 +1,8 @@
 import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
-import { IOrganisationOperateurPublicRegion } from "shared/models";
+import { ACADEMIES_DEPARTEMENT_MAP, ORGANISATION_TYPE } from "shared/constants";
+import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
 import { getAffelnetCountVoeuxNational, getAffelnetVoeuxNonConcretise } from "@/common/actions/affelnet.actions";
@@ -24,6 +25,32 @@ const AFFELNET_FIELDS = [
   { label: "Libelle Etab Origine", value: "libelle_etab_origine" },
   { label: "Nombre Voeux", value: "nombre_voeux" },
 ];
+
+const getRegionAndDepartementFromOrganisation = (
+  orga: IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie,
+  organisme_departements
+) => {
+  const handleDreetsAndDrafpic = (organisation: IOrganisationOperateurPublicRegion) => {
+    return { organismes_regions: organisation.code_region ? [organisation.code_region] : [], organisme_departements };
+  };
+
+  const handleAcademie = (organisation: IOrganisationOperateurPublicAcademie) => {
+    return {
+      organismes_regions: null,
+      organisme_departements: organisme_departements ?? ACADEMIES_DEPARTEMENT_MAP[organisation.code_academie],
+    };
+  };
+
+  switch (orga.type) {
+    case ORGANISATION_TYPE.DREETS:
+    case ORGANISATION_TYPE.DRAFPIC:
+      return handleDreetsAndDrafpic(orga as IOrganisationOperateurPublicRegion);
+    case ORGANISATION_TYPE.ACADEMIE:
+      return handleAcademie(orga as IOrganisationOperateurPublicAcademie);
+    default:
+      return { organismes_regions: null, organisme_departements: null };
+  }
+};
 
 export default () => {
   const router = express.Router();
@@ -59,17 +86,21 @@ export default () => {
 
 const getNationalCount = async (req) => {
   const user = req.user as AuthContext;
-  const orga = user.organisation as IOrganisationOperateurPublicRegion;
-  const organismes_regions = orga.code_region ? [orga.code_region] : [];
-  const { organisme_departements } = req.query;
+  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
+    orga,
+    req.query.organisme_departements
+  );
   return await getAffelnetCountVoeuxNational(organisme_departements, organismes_regions);
 };
 
 const exportNonConretisee = async (req) => {
   const user = req.user as AuthContext;
-  const orga = user.organisation as IOrganisationOperateurPublicRegion;
-  const organismes_regions = orga.code_region ? [orga.code_region] : [];
-  const { organisme_departements } = req.query;
+  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
+    orga,
+    req.query.organisme_departements
+  );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
 
   const ids = listVoeux.map((voeu) => voeu._id);

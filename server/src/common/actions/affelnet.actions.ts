@@ -1,6 +1,6 @@
 import { voeuxAffelnetDb } from "../model/collections";
 
-const computeFilter = (departement: Array<string>, region: Array<string>) => {
+const computeFilter = (departement: Array<string> | null, region: Array<string> | null) => {
   return {
     ...(departement ? { "_computed.organisme.departement": { $in: departement } } : {}),
     ...(region ? { "_computed.organisme.region": { $in: region } } : {}),
@@ -8,7 +8,10 @@ const computeFilter = (departement: Array<string>, region: Array<string>) => {
 };
 
 // Write indexes for this
-export const getAffelnetCountVoeuxNational = async (departement: Array<string>, regions: Array<string>) => {
+export const getAffelnetCountVoeuxNational = async (
+  departement: Array<string> | null,
+  regions: Array<string> | null
+) => {
   const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
@@ -91,7 +94,7 @@ export const getAffelnetCountVoeuxNational = async (departement: Array<string>, 
   };
 };
 
-export const getAffelnetVoeuxNonConcretise = (departement: Array<string>, regions: Array<string>) =>
+export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null, regions: Array<string> | null) =>
   voeuxAffelnetDb()
     .aggregate([
       {

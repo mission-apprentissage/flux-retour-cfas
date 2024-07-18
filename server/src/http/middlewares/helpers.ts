@@ -118,7 +118,8 @@ export function requireOrganismeRegional(req: Request, _res: Response, next: Nex
   ensureValidUser(req.user);
   if (
     req.user.organisation.type !== (ORGANISATION_TYPE.DREETS as "DREETS") &&
-    req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC")
+    req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC") &&
+    req.user.organisation.type !== (ORGANISATION_TYPE.ACADEMIE as "ACADEMIE")
   ) {
     throw Boom.forbidden("Accès non autorisé");
   }

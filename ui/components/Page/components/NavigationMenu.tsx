@@ -2,7 +2,7 @@ import { ChevronDownIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
-import { IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
+import { IOrganisationType, ORGANISATION_TYPE, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { FAQ_PATH } from "@/common/constants/faq";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -118,7 +118,7 @@ function NavBarTransverse(): React.ReactElement {
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
-      {(organisationType === "DREETS" || organisationType === "DRAFPIC") && (
+      {(organisationType === ORGANISATION_TYPE.DREETS || ORGANISATION_TYPE.DRAFPIC || ORGANISATION_TYPE.ACADEMIE) && (
         <NavItem
           to="/voeux-affelnet"
           onClick={() =>
