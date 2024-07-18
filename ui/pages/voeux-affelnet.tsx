@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { ORGANISATION_TYPE } from "shared";
 
 import useAuth from "@/hooks/useAuth";
 import VoeuxAffelnetPage from "@/modules/voeux/AffelnetPage";
@@ -8,7 +9,10 @@ const PageVoeuxAffelnet = () => {
   const { organisationType } = useAuth();
   const router = useRouter();
 
-  const isUnauthorized = organisationType !== "DREETS" && organisationType !== "DRAFPIC";
+  const isUnauthorized =
+    organisationType !== ORGANISATION_TYPE.DREETS &&
+    organisationType !== ORGANISATION_TYPE.DRAFPIC &&
+    organisationType !== ORGANISATION_TYPE.ACADEMIE;
 
   useEffect(() => {
     if (isUnauthorized) {

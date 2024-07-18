@@ -1,7 +1,7 @@
 import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
-import { ACADEMIES_REGIONS_MAP, ORGANISATION_TYPE } from "shared/constants";
+import { ACADEMIES_DEPARTEMENT_MAP, ORGANISATION_TYPE } from "shared/constants";
 import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
@@ -37,7 +37,7 @@ const getRegionAndDepartementFromOrganisation = (
   const handleAcademie = (organisation: IOrganisationOperateurPublicAcademie) => {
     return {
       organismes_regions: null,
-      organisme_departements: organisme_departements ?? ACADEMIES_REGIONS_MAP[organisation.code_academie],
+      organisme_departements: organisme_departements ?? ACADEMIES_DEPARTEMENT_MAP[organisation.code_academie],
     };
   };
 
@@ -91,7 +91,6 @@ const getNationalCount = async (req) => {
     orga,
     req.query.organisme_departements
   );
-  console.log(organisme_departements, organismes_regions);
   return await getAffelnetCountVoeuxNational(organisme_departements, organismes_regions);
 };
 
