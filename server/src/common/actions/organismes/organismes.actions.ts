@@ -1002,3 +1002,18 @@ export async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<Ob
 
   return res.map((doc) => doc._id);
 }
+
+export const generateOrganismeComputed = (orga: IOrganisme) => {
+  const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = orga;
+
+  return {
+    ...(adresse?.region && { region: adresse?.region }),
+    ...(adresse?.departement && { departement: adresse?.departement }),
+    ...(adresse?.academie && { academie: adresse?.academie }),
+    ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
+    ...(uai && { uai }),
+    ...(siret && { siret }),
+    ...(reseaux && { reseaux }),
+    fiable: fiabilisation_statut === "FIABLE" && !ferme,
+  };
+};
