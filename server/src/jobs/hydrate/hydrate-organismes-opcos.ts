@@ -92,8 +92,7 @@ export const hydrateOrganismesOPCOs = async () => {
           }
         );
         if (upsertedId) {
-          const organisme = await organismesDb().findOne({ _id: upsertedId });
-          organisme && (await updateEffectifComputedFromOrganisme(organisme));
+          organisme && (await updateEffectifComputedFromOrganisme(upsertedId));
         }
       });
 
@@ -120,8 +119,7 @@ export const hydrateOrganismesOPCOs = async () => {
         );
 
         if (upsertedId) {
-          const organisme = await organismesDb().findOne({ _id: upsertedId });
-          organisme && (await updateEffectifComputedFromOrganisme(organisme));
+          organisme && (await updateEffectifComputedFromOrganisme(upsertedId));
         }
       });
   }
