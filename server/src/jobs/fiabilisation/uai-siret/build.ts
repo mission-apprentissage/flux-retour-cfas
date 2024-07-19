@@ -117,7 +117,10 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   organismesFromReferentiel
 ) => {
   // Règle n°1 on vérifie si on a un couple fiable
-  if (await checkCoupleFiable(coupleUaiSiretTdbToCheck, organismesFromReferentiel)) return;
+  if (await checkCoupleFiable(coupleUaiSiretTdbToCheck, organismesFromReferentiel)) {
+    console.log("Règle n°1 on vérifie si on a un couple fiable:", coupleUaiSiretTdbToCheck);
+    return;
+  }
 
   // Règle n°2 on vérifie si on a un match sur l'UAI unique dans le référentiel mais avec un SIRET différent
   if (
@@ -126,8 +129,13 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       organismesFromReferentiel,
       allCouplesUaiSiretTdb
     )
-  )
+  ) {
+    console.log(
+      "Règle n°2 on vérifie si on a un match sur l'UAI unique dans le référentiel mais avec un SIRET différent",
+      coupleUaiSiretTdbToCheck
+    );
     return;
+  }
 
   // Règle n°3 on vérifie si on a un match sur le SIRET dans le référentiel mais avec un UAI différent
   if (
@@ -136,14 +144,21 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       organismesFromReferentiel,
       allCouplesUaiSiretTdb
     )
-  )
+  ) {
+    console.log(
+      "Règle n°3 on vérifie si on a un match sur le SIRET dans le référentiel mais avec un UAI différent",
+      coupleUaiSiretTdbToCheck
+    );
     return;
+  }
 
   // Règle n°4 on vérifie pour les UAI multiples via les relations et les lieux
   if (
     await checkUaiMultiplesRelationsAndLieux(coupleUaiSiretTdbToCheck, allCouplesUaiSiretTdb, organismesFromReferentiel)
-  )
+  ) {
+    console.log("Règle n°4 on vérifie pour les UAI multiples via les relations et les lieux", coupleUaiSiretTdbToCheck);
     return;
+  }
 
   // Règle n°5 on vérifie pour les SIRET multiples via les relations et les lieux
   if (
@@ -152,20 +167,37 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       allCouplesUaiSiretTdb,
       organismesFromReferentiel
     )
-  )
+  ) {
+    console.log(
+      "Règle n°5 on vérifie pour les SIRET multiples via les relations et les lieux",
+      coupleUaiSiretTdbToCheck
+    );
     return;
+  }
 
   // Règle n°6 on vérifie les organismes inexistants
   // Cette règle n'existe plus parce qu'on ne regarde plus dans la base ACCE
 
   // Règle n°7 on vérifie les UAI non trouvées dans les lieux du référentiel
-  if (await checkUaiAucunLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
+  if (await checkUaiAucunLieuReferentiel(coupleUaiSiretTdbToCheck)) {
+    console.log("Règle n°7 on vérifie les UAI non trouvées dans les lieux du référentiel", coupleUaiSiretTdbToCheck);
+    return;
+  }
 
   // Règle n°8 on vérifie les UAI trouvées dans les lieux du référentiel
-  if (await checkUaiLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
+  if (await checkUaiLieuReferentiel(coupleUaiSiretTdbToCheck)) {
+    console.log("Règle n°8 on vérifie les UAI trouvées dans les lieux du référentiel", coupleUaiSiretTdbToCheck);
+    return;
+  }
 
   // Règle n°9 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
-  if (await checkCoupleNonFiabilisable(coupleUaiSiretTdbToCheck)) return;
+  if (await checkCoupleNonFiabilisable(coupleUaiSiretTdbToCheck)) {
+    console.log(
+      "Règle n°9 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel",
+      coupleUaiSiretTdbToCheck
+    );
+    return;
+  }
 };
 
 /**
