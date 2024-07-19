@@ -404,3 +404,14 @@ const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+
+export const updateEffectifComputedFromOrganisme = (organisme: IOrganisme) => {
+  return effectifsDb().updateMany(
+    { organisme_id: new ObjectId(organisme._id) },
+    {
+      $set: {
+        "_computed.organisme": generateOrganismeComputed(organisme),
+      },
+    }
+  );
+};
