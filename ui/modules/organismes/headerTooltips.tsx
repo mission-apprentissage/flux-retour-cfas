@@ -173,7 +173,7 @@ const headerTooltips = {
     <>
       Vous pouvez trouver le Code Diplôme de la formation sur le{" "}
       <Link
-        href={"https://formulaire.defenseurdesdroits.fr/"}
+        href={"https://catalogue-apprentissage.intercariforef.org/recherche/formations"}
         display="inline"
         textDecoration={"underline"}
         color="bluefrance"
