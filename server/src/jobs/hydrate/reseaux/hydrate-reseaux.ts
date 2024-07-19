@@ -139,7 +139,7 @@ const hydrateReseauFile = async (filename: string) => {
                 }
               );
 
-              await updateEffectifComputedFromOrganisme(currentOrganismeFound);
+              await updateEffectifComputedFromOrganisme(currentOrganismeFound._id);
               organismeUpdatedCount++;
             } catch (err) {
               const msg = `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
