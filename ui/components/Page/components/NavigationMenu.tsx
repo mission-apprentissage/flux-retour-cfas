@@ -118,7 +118,9 @@ function NavBarTransverse(): React.ReactElement {
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
-      {(organisationType === ORGANISATION_TYPE.DREETS || ORGANISATION_TYPE.DRAFPIC || ORGANISATION_TYPE.ACADEMIE) && (
+      {(organisationType === ORGANISATION_TYPE.DREETS ||
+        organisationType === ORGANISATION_TYPE.DRAFPIC ||
+        organisationType === ORGANISATION_TYPE.ACADEMIE) && (
         <NavItem
           to="/voeux-affelnet"
           onClick={() =>
