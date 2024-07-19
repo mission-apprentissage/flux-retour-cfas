@@ -3,7 +3,7 @@ import React from "react";
 
 export default function Edition(props) {
   return (
-    <Icon width="16px" height="16px" viewBox="0 0 16px 16px" {...props}>
+    <Icon width="16px" height="16px" viewBox="0 0 16 16" {...props}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
