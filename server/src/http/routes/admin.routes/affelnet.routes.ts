@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import multer from "multer";
 import { IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
+import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -191,18 +192,8 @@ const createVoeux = async (req, res) => {
         );
         return;
       }
-      const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = orgaFormateur;
 
-      voeu._computed.organisme = {
-        ...(adresse?.region && { region: adresse?.region }),
-        ...(adresse?.departement && { departement: adresse?.departement }),
-        ...(adresse?.academie && { academie: adresse?.academie }),
-        ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
-        ...(uai && { uai }),
-        ...(siret && { siret }),
-        ...(reseaux && { reseaux }),
-        fiable: fiabilisation_statut === "FIABLE" && !ferme,
-      };
+      voeu._computed.organisme = generateOrganismeComputed(orgaFormateur);
 
       voeu.organisme_formateur_id = orgaFormateur._id;
       voeu.organisme_responsable_id = orgaResponsable._id;

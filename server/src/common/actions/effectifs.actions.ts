@@ -13,6 +13,7 @@ import { stripEmptyFields } from "../utils/miscUtils";
 
 import { legacySchema } from "./effectif.legacy_schema";
 import { createComputedStatutObject } from "./effectifs.statut.actions";
+import { generateOrganismeComputed } from "./organismes/organismes.actions";
 
 /**
  * Méthode de build d'un effectif
@@ -134,17 +135,7 @@ export const addComputedFields = ({
   const computedFields: Partial<IEffectif["_computed"]> = {};
 
   if (organisme) {
-    const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = organisme;
-    computedFields.organisme = {
-      ...(adresse?.region && { region: adresse?.region }),
-      ...(adresse?.departement && { departement: adresse?.departement }),
-      ...(adresse?.academie && { academie: adresse?.academie }),
-      ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
-      ...(uai && { uai }),
-      ...(siret && { siret }),
-      ...(reseaux && { reseaux }),
-      fiable: fiabilisation_statut === "FIABLE" && !ferme,
-    };
+    computedFields.organisme = generateOrganismeComputed(organisme);
   }
 
   if (effectif) {
@@ -413,3 +404,14 @@ const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+
+export const updateEffectifComputedFromOrganisme = (organisme: IOrganisme) => {
+  return effectifsDb().updateMany(
+    { organisme_id: new ObjectId(organisme._id) },
+    {
+      $set: {
+        "_computed.organisme": generateOrganismeComputed(organisme),
+      },
+    }
+  );
+};
