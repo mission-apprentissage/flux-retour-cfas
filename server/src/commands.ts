@@ -545,6 +545,18 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:ofa-inconnus"));
 
+program
+  .command("hydrate:effectifs-computed-organismes-reseaux")
+  .description("Mise a jour des valeurs computed des effectifs pour les organismes appartennant à un réseau")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:effectifs-computed-organismes-reseaux"));
+
+program
+  .command("hydrate:effectifs-computed-organismes-opcos")
+  .description("Mise a jour des valeurs computed des effectifs pour les organismes appartennant à un opco")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:effectifs-computed-organismes-opcos"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**

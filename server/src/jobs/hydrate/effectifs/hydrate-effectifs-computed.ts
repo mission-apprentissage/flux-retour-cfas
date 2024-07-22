@@ -1,5 +1,10 @@
+import { TETE_DE_RESEAUX } from "shared/constants";
+
+import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+
+import { OPCOS } from "../hydrate-organismes-opcos";
 
 export async function hydrateEffectifsComputed() {
   logger.info("Hydrating effectifs._computed...");
@@ -67,3 +72,49 @@ export async function hydrateEffectifsComputed() {
     //
   }
 }
+
+export const hydrateEffectifsComputedOpcos = async () => {
+  logger.info("Starting: hydrateEffectifsComputedOpcos");
+  for (const opco of OPCOS) {
+    logger.info("Updating computed for opcos : ", opco);
+    const organismes = await organismesDb()
+      .find(
+        { opcos: opco },
+        {
+          projection: {
+            _id: 1,
+          },
+        }
+      )
+      .toArray();
+
+    for (let i = 0; i < organismes.length; i++) {
+      const organisme = organismes[i];
+      await updateEffectifComputedFromOrganisme(organisme._id);
+    }
+  }
+  logger.info("Leaving: hydrateEffectifsComputedOpcos");
+};
+
+export const hydrateEffectifsComputedReseaux = async () => {
+  logger.info("Starting: hydrateEffectifsComputedReseaux");
+  for (const { key } of TETE_DE_RESEAUX) {
+    logger.info("Updating computed for reseau : ", key);
+    const organismes = await organismesDb()
+      .find(
+        { reseaux: key },
+        {
+          projection: {
+            _id: 1,
+          },
+        }
+      )
+      .toArray();
+
+    for (let i = 0; i < organismes.length; i++) {
+      const organisme = organismes[i];
+      await updateEffectifComputedFromOrganisme(organisme._id);
+    }
+  }
+  logger.info("Leaving: hydrateEffectifsComputedReseaux");
+};
