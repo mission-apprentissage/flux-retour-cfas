@@ -253,6 +253,7 @@ const SIFAPage = (props: SIFAPageProps) => {
                     href={"https://mission-apprentissage.notion.site/Enqu-te-SIFA-a546590b47764051bf1c486b1d57d227"}
                     textDecoration={"underline"}
                     isExternal
+                    plausibleGoal="clic_sifa_faq"
                   >
                     FAQ dédiée
                   </Link>

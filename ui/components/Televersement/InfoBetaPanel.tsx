@@ -2,11 +2,17 @@ import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { Collapse, UnorderedList, ListItem, Text, Link } from "@chakra-ui/react";
 import { useState } from "react";
 
+import { usePlausibleTracking } from "@/hooks/plausible";
+
 import Ribbons from "../Ribbons/Ribbons";
 
 export default function InfoBetaPanel() {
   const [show, setShow] = useState(false);
-  const handleToggle = () => setShow(!show);
+  const handleToggle = () => {
+    setShow(!show);
+    trackPlausibleEvent("televersement_clic_excel_conseils");
+  };
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   const linkStyle = {
     color: "#000091",

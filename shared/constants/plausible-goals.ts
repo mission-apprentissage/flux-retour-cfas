@@ -28,6 +28,7 @@ export const plausibleGoals = [
   // Page SIFA
   "clic_depot_plateforme_sifa",
   "clic_toggle_sifa_données_manquantes",
+  "clic_sifa_faq",
 
   // Téléchargements
   // - Page indicateurs
@@ -67,6 +68,14 @@ export const plausibleGoals = [
   "referencement_telechargement_fichier",
   "referencement_clic_responsable_donnee",
   "referencement_clic_modification_donnee",
+
+  // - Page téléversement
+  "televersement_clic_telechargement_excel",
+  "televersement_clic_modale_donnees_obligatoires",
+  "televersement_clic_guide_donnees",
+  "televersement_clic_tutoriel_video",
+  "televersement_clic_excel_conseils",
+  "televersement_clic_rapport_transmission",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
