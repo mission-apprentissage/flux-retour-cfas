@@ -682,6 +682,12 @@ program
   .action(createJobAction("tmp:patches:update-effectifs-queue-source"));
 
 program
+  .command("tmp:patches:clean-extra-source-in-effectifs")
+  .description("Suppression des sources en trop dans les effectifs (scform et fcamanager) ")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:clean-extra-source-in-effectifs"));
+
+program
   .command("tmp:patches:update-effectifs-source")
   .description("Mise a jour du chanps source dans les effectifs queue")
   .option("-q, --queued", "Run job asynchronously", false)

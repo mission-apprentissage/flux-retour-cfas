@@ -29,7 +29,7 @@ import {
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
-import { hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
+import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
 import { hydrateEffectifsQueueSource } from "./hydrate/effectifs-queue/update-effectifs-queue-source";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
@@ -462,6 +462,11 @@ export async function setupJobProcessor() {
       "tmp:patches:update-effectifs-queue-source": {
         handler: async () => {
           return hydrateEffectifsQueueSource();
+        },
+      },
+      "tmp:patches:clean-extra-source-in-effectifs": {
+        handler: async () => {
+          return cleanEffectifsSource();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
