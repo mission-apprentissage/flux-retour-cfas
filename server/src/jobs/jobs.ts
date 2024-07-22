@@ -22,7 +22,11 @@ import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
-import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
+import {
+  hydrateEffectifsComputed,
+  hydrateEffectifsComputedOpcos,
+  hydrateEffectifsComputedReseaux,
+} from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
@@ -341,6 +345,16 @@ export async function setupJobProcessor() {
       "hydrate:ofa-inconnus": {
         handler: async () => {
           return hydrateRaisonSocialeEtEnseigneOFAInconnus();
+        },
+      },
+      "hydrate:effectifs-computed-organismes-reseaux": {
+        handler: async () => {
+          return hydrateEffectifsComputedReseaux();
+        },
+      },
+      "hydrate:effectifs-computed-organismes-opcos": {
+        handler: async () => {
+          return hydrateEffectifsComputedOpcos();
         },
       },
       "purge:queues": {

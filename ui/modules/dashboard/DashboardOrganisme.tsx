@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import {
@@ -706,10 +707,25 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             {indicateursEffectifsPartielsMessage && (
               <Ribbons variant="warning" mt="0.5rem">
                 <Text color="grey.800">
-                  <>
-                    Veuillez noter que certaines formations gérées par cet organisme se situent en dehors de votre{" "}
-                    {indicateursEffectifsPartielsMessage}, ce qui peut expliquer l’affichage partiel de données.
-                  </>
+                  Veuillez noter que certaines formations gérées par cet organisme se situent en dehors de votre{" "}
+                  {indicateursEffectifsPartielsMessage}, ce qui peut expliquer l’affichage partiel de données.
+                </Text>
+              </Ribbons>
+            )}
+
+            {!modePublique && !organisme.is_transmission_target && (
+              <Ribbons variant="warning" mt="0.5rem">
+                <Text color="grey.800">
+                  Votre établissement ne transmet pas encore ses effectifs. Les indicateurs ci-dessous sont issus de
+                  DECA (DEpôts des Contrats d’Alternance) et peuvent ne pas refléter la réalité actuelle. Pour afficher
+                  des effectifs à jour, veuillez{" "}
+                  <Link as={NextLink} href="/parametres" variant="link" ml="auto">
+                    paramétrer
+                  </Link>{" "}
+                  votre moyen de transmission. Lire la FAQ{" "}
+                  <Link href={FAQ_PATH} variant="link" ml="auto" isExternal>
+                    “Comment transmettre ?”
+                  </Link>
                 </Text>
               </Ribbons>
             )}
