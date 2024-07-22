@@ -2,7 +2,7 @@ import { captureException } from "@sentry/node";
 import { SOURCE_APPRENANT, SourceApprenant } from "shared/constants";
 
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsSource() {
   let nbEffectifsMisAJour = 0;
@@ -38,3 +38,18 @@ export async function hydrateEffectifsSource() {
     captureException(err);
   }
 }
+
+export const cleanEffectifsSource = async () => {
+  logger.info("Mise à jour des sources des effectifs");
+  const effectifsUpdated = await effectifsDb().updateMany(
+    { source: { $in: ["scform", "fcamanager"] } },
+    { $set: { source: SOURCE_APPRENANT.ERP } }
+  );
+  logger.info("Effectif mis à jour :", effectifsUpdated.modifiedCount);
+  logger.info("Mise à jour des sources des effectifs queue");
+  const effectifsQueueUpdated = await effectifsQueueDb().updateMany(
+    { source: { $in: ["scform", "fcamanager"] } },
+    { $set: { source: SOURCE_APPRENANT.ERP } }
+  );
+  logger.info("Effectif mis à jour :", effectifsQueueUpdated.modifiedCount);
+};
