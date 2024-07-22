@@ -19,4 +19,5 @@ export * from "./rncp.model";
 export * from "./rome.model";
 export * from "./users.model";
 export * from "./usersMigration.model";
+export * from "./v2";
 export { zodToMongoSchema } from "zod-mongodb-schema";

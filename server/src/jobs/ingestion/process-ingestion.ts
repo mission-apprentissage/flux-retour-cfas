@@ -42,6 +42,8 @@ import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
 
+import { handleEffectifTransmission } from "./process-ingestion.v2";
+
 const logger = parentLogger.child({
   module: "processor",
 });
@@ -158,6 +160,8 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   let itemLogger = logger.child(ctx);
   const start = Date.now();
   try {
+    //Process du nouveau schéma de données
+    handleEffectifTransmission(effectifQueue);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await (effectifQueue.api_version === "v3"
       ? transformEffectifQueueV3ToEffectif(effectifQueue)
