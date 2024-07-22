@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 
 import { _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import { usePlausibleTracking } from "@/hooks/plausible";
 
 import Ribbons from "../Ribbons/Ribbons";
 
 const NotificationTransmissionError = ({ organisme }: { organisme: Organisme }) => {
   const [hasTransmissionError, setHasTransmissionError] = useState<boolean>(false);
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   useEffect(() => {
     if (organisme?.has_transmission_errors) {
@@ -35,7 +37,12 @@ const NotificationTransmissionError = ({ organisme }: { organisme: Organisme }) 
                 }`}
               </strong>
               . Consultez le{" "}
-              <Link href="/transmissions" display="inline" textDecoration="underline">
+              <Link
+                href="/transmissions"
+                display="inline"
+                textDecoration="underline"
+                onClick={() => trackPlausibleEvent("televersement_clic_rapport_transmission")}
+              >
                 rapport de transmission
               </Link>{" "}
               pour les identifier et les corriger. Une fois la correction effectuée, vous pouvez fermer ce bandeau et

@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/components/Televersement/DocumentsActionButtons.tsx
+  checksum: f3598ec013dca8f849c41c42cd8c0c75457ece9166b36717e8d1db84cfde12fa
 - filename: ui/modules/referencement-organisme/ReferencementOrganisme.tsx
   checksum: 6e755a406ed7a6901f59e3581ea5485d6f42b02b3d062d2fe6a50b044ea8c392
 - filename: ui/modules/aide/AideCodeRncp.tsx
