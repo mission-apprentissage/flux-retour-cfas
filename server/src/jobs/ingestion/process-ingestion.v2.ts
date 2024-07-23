@@ -2,7 +2,10 @@ import { ObjectId, WithId } from "mongodb";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 
 import { insertEffectifV2 } from "@/common/actions/v2/effectif.v2.actions";
-import { effectifV2Db, formationV2Db, organismeV2Db, personV2Db } from "@/common/model/collections";
+import { insertFormationV2 } from "@/common/actions/v2/formation.v2.actions";
+import { getPersonV2, insertPersonV2 } from "@/common/actions/v2/person.v2.actions";
+import { insertTransmissionV2 } from "@/common/actions/v2/transmission.v2.actions";
+import { effectifV2Db, formationV2Db, organismeV2Db } from "@/common/model/collections";
 
 export const getOrCreateOrganisme = async (uai: string, siret: string) => {
   const organisme = await organismeV2Db().findOne({
@@ -40,17 +43,7 @@ export const getOrCreateFormation = async (
   });
 
   if (!formation) {
-    const { insertedId } = await formationV2Db().insertOne({
-      _id: new ObjectId(),
-      draft: true,
-      created_at: new Date(),
-      updated_at: new Date(),
-      cfd: cfd,
-      rncp: rncp,
-      organisme_responsable_id,
-      organisme_formateur_id,
-    });
-
+    const { insertedId } = await insertFormationV2(cfd, rncp, organisme_responsable_id, organisme_formateur_id);
     return insertedId;
   }
 
@@ -58,21 +51,10 @@ export const getOrCreateFormation = async (
 };
 
 export const getOrCreatePerson = async (nom: string, prenom: string, date_de_naissance: Date) => {
-  const person = await personV2Db().findOne({
-    nom: nom,
-    prenom: prenom,
-    date_de_naissance: date_de_naissance,
-  });
+  const person = await getPersonV2(nom, prenom, date_de_naissance);
 
   if (!person) {
-    const { insertedId } = await personV2Db().insertOne({
-      _id: new ObjectId(),
-      created_at: new Date(),
-      updated_at: new Date(),
-      nom: nom,
-      prenom: prenom,
-      date_de_naissance: date_de_naissance,
-    });
+    const { insertedId } = await insertPersonV2(nom, prenom, date_de_naissance);
 
     return insertedId;
   }
@@ -104,32 +86,38 @@ export const getOrCreateEffectif = async (
 
 export const handleEffectifTransmission = async (effectifQueue: WithId<IEffectifQueue>) => {
   // 1. Récupération de l'organisme
-  const { etablissement_formateur_siret, etablissement_formateur_uai } = effectifQueue;
-  const { etablissement_responsable_siret, etablissement_responsable_uai } = effectifQueue;
+  try {
+    const { etablissement_formateur_siret, etablissement_formateur_uai } = effectifQueue;
+    const { etablissement_responsable_siret, etablissement_responsable_uai } = effectifQueue;
 
-  const organismeFormateurId = await getOrCreateOrganisme(etablissement_formateur_uai, etablissement_formateur_siret);
-  const organismeResponsableId = await getOrCreateOrganisme(
-    etablissement_responsable_uai,
-    etablissement_responsable_siret
-  );
+    const organismeFormateurId = await getOrCreateOrganisme(etablissement_formateur_uai, etablissement_formateur_siret);
+    const organismeResponsableId = await getOrCreateOrganisme(
+      etablissement_responsable_uai,
+      etablissement_responsable_siret
+    );
 
-  // 2. Récupération de la formation
-  const { formation_cfd, formation_rncp } = effectifQueue;
-  const formationId = await getOrCreateFormation(
-    formation_cfd,
-    formation_rncp,
-    organismeResponsableId,
-    organismeFormateurId
-  );
+    // 2. Récupération de la formation
+    const { formation_cfd, formation_rncp } = effectifQueue;
+    const formationId = await getOrCreateFormation(
+      formation_cfd,
+      formation_rncp,
+      organismeResponsableId,
+      organismeFormateurId
+    );
 
-  // 3. Insertion de l'effectif
+    // 3. Insertion de l'effectif
 
-  const effectifId = await getOrCreateEffectif(
-    formationId,
-    effectifQueue.nom_apprenant,
-    effectifQueue.prenom_apprenant,
-    effectifQueue.date_de_naissance_apprenant
-  );
+    const effectifId = await getOrCreateEffectif(
+      formationId,
+      effectifQueue.nom_apprenant,
+      effectifQueue.prenom_apprenant,
+      effectifQueue.date_de_naissance_apprenant
+    );
 
-  console.log(effectifId);
+    await insertTransmissionV2(effectifQueue.source_organisme_id, formationId);
+
+    console.log(effectifId);
+  } catch (e) {
+    console.log(e);
+  }
 };
