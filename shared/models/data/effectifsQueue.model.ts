@@ -24,6 +24,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
+  [{ processed_at: 1, created_at: 1 }, {}],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;
