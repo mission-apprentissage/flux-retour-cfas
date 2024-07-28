@@ -108,6 +108,9 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
           deleted_list: {
             $push: "$deleted_at",
           },
+          formations: {
+            $push: { $concat: ["$_computed.formation.libelle", " - ", "$_computed.formation.rncp"] },
+          },
           count: { $sum: 1 },
           apprenant: { $first: "$$ROOT" },
         },
@@ -132,6 +135,7 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
           type_etab_origine: "$apprenant.raw.type_etab_origine",
           libelle_etab_origine: "$apprenant.raw.libelle_etab_origine",
           nombre_voeux: "$count",
+          formations_demandees: "$formations",
         },
       },
       {

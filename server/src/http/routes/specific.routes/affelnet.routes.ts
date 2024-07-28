@@ -24,6 +24,7 @@ const AFFELNET_FIELDS = [
   { label: "Type Etab Origine", value: "type_etab_origine" },
   { label: "Libelle Etab Origine", value: "libelle_etab_origine" },
   { label: "Nombre Voeux", value: "nombre_voeux" },
+  { label: "Formation(s) demandée(s)", value: "formations_demandees" },
 ];
 
 const getRegionAndDepartementFromOrganisation = (
