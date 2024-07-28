@@ -103,12 +103,16 @@ const exportNonConretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
+  const transformedVoeux = listVoeux.map(({ formations_demandees, ...voeu }) => ({
+    ...voeu,
+    formations_demandees: formations_demandees.join(", "),
+  }));
 
   const ids = listVoeux.map((voeu) => voeu._id);
   await createTelechargementListeNomLog("affelnet", ids, new Date(), req.user._id, undefined, new ObjectId(orga._id));
 
   const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(listVoeux);
+  const csv = await json2csvParser.parse(transformedVoeux);
 
   return csv;
 };
