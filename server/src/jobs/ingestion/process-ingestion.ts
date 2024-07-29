@@ -73,7 +73,7 @@ export const startEffectifQueueProcessor = async (signal: AbortSignal) => {
   while (true) {
     const processingResult = await processEffectifsQueue();
     if (processingResult.totalProcessed === 0) {
-      await sleep(5_000, signal);
+      await sleep(2_000, signal);
     }
     if (signal.aborted) {
       return;
