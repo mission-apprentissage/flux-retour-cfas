@@ -208,7 +208,7 @@ export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
 export type IEffectifApprenant = z.infer<typeof zApprenant>;
 
-export const ORGANISME_NOT_FOUND = "organisme non trouvé";
+export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
 export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";
 export const ORGANISME_RESPONSABLE_NOT_FOUND = "organisme responsable non trouvé";
 

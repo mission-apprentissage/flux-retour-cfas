@@ -1,6 +1,6 @@
 import { Link } from "@chakra-ui/react";
 import React from "react";
-import { ORGANISME_NOT_FOUND, ORGANISME_FORMATEUR_NOT_FOUND, ORGANISME_RESPONSABLE_NOT_FOUND } from "shared";
+import { ORGANISME_LIEU_NOT_FOUND, ORGANISME_FORMATEUR_NOT_FOUND, ORGANISME_RESPONSABLE_NOT_FOUND } from "shared";
 
 const organismeNotFound = (type: string) => (
   <>
@@ -31,8 +31,8 @@ const organismeNotFound = (type: string) => (
 );
 
 export const ErrorMessages = {
-  [`${ORGANISME_NOT_FOUND}:etablissement_lieu_de_formation_siret`]: organismeNotFound("lieu de formation"),
-  [`${ORGANISME_NOT_FOUND}:etablissement_lieu_de_formation_uai`]: organismeNotFound("lieu de formation"),
+  [`${ORGANISME_LIEU_NOT_FOUND}:etablissement_lieu_de_formation_siret`]: organismeNotFound("lieu de formation"),
+  [`${ORGANISME_LIEU_NOT_FOUND}:etablissement_lieu_de_formation_uai`]: organismeNotFound("lieu de formation"),
   [`${ORGANISME_FORMATEUR_NOT_FOUND}:etablissement_formateur_siret`]: organismeNotFound("formateur"),
   [`${ORGANISME_FORMATEUR_NOT_FOUND}:etablissement_formateur_uai`]: organismeNotFound("formateur"),
   [`${ORGANISME_RESPONSABLE_NOT_FOUND}:etablissement_responsable_uai`]: organismeNotFound("responsable"),

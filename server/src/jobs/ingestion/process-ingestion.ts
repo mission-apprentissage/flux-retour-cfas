@@ -7,7 +7,7 @@ import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import {
   IEffectif,
   ORGANISME_FORMATEUR_NOT_FOUND,
-  ORGANISME_NOT_FOUND,
+  ORGANISME_LIEU_NOT_FOUND,
   ORGANISME_RESPONSABLE_NOT_FOUND,
   createCustomEffectifIssue,
 } from "shared/models/data/effectifs.model";
@@ -322,7 +322,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       if (!organismeLieu) {
         ctx.addIssue(
           createCustomEffectifIssue(
-            ORGANISME_NOT_FOUND,
+            ORGANISME_LIEU_NOT_FOUND,
             ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
             {
               uai: effectifQueued.etablissement_lieu_de_formation_uai,
