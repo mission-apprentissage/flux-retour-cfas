@@ -4,6 +4,8 @@ import { SOURCE_APPRENANT, TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import { InfoTooltip } from "../Tooltip/InfoTooltip";
 
+import { ErrorMessages } from "./EffectifErrorsMessage";
+
 const attributes = [
   { label: "Nom de naissance", value: "nom_apprenant" },
   { label: "Prénom", value: "prenom_apprenant" },
@@ -74,14 +76,17 @@ interface EffectifQueueItemViewProps {
   effectifQueueItem: any; // use zod typings
 }
 
-const buildValidationError = (validation_errors: Array<any>) => {
-  return validation_errors.reduce((acc: object, { message, path }) => {
+const buildValidationError = (validation_errors) => {
+  return validation_errors.reduce((acc, { message, path }) => {
     return {
       ...acc,
       ...path.reduce((acc2, pathValue) => {
+        const key = `${message}:${pathValue}`;
+        const specialMessage = ErrorMessages[key];
+        const errorMessage = specialMessage || message;
         return {
           ...acc2,
-          [pathValue]: acc[pathValue] ? [...acc[pathValue], message] : [message],
+          [pathValue]: acc2[pathValue] ? [...acc2[pathValue], errorMessage] : [errorMessage],
         };
       }, {}),
     };
@@ -90,16 +95,15 @@ const buildValidationError = (validation_errors: Array<any>) => {
 
 const DescriptionErrorListComponent = ({ errorList }) => (
   <UnorderedList>
-    {errorList.map((err: string, index) => (
-      <ListItem key={index}>
-        <Text>{err}</Text>
-      </ListItem>
+    {errorList.map((err, index) => (
+      <ListItem key={index}>{err}</ListItem>
     ))}
   </UnorderedList>
 );
 
 const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps) => {
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
+
   return (
     <Box>
       {effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER ? (

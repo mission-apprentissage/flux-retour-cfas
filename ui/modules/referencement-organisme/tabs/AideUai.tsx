@@ -236,10 +236,13 @@ const AideUai = () => {
               <ListItem>identifiés par un SIRET</ListItem>
               <ListItem>
                 trouvés dans la{" "}
-                <AidePage.Link href="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf" isExternal>
+                <AidePage.Link
+                  href="https://www.data.gouv.fr/fr/datasets/liste-publique-des-organismes-de-formation-l-6351-7-1-du-code-du-travail/"
+                  isExternal
+                >
                   Liste publique des Organismes de Formation
                 </AidePage.Link>{" "}
-                (Data.gouv), la base
+                (Data.gouv), la base{" "}
                 <AidePage.Link href="https://www.education.gouv.fr/acce_public/index.php">ACCE</AidePage.Link> et le{" "}
                 <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/recherche/etablissements">
                   Catalogue des formations en apprentissage
