@@ -1,16 +1,11 @@
 import { writeFileSync } from "fs";
 
-import { MongoClient } from "mongodb";
 import { write, utils } from "xlsx";
 
+import { effectifsQueueDb } from "../model/collections";
+
 async function fetchOrganismesData() {
-  const client = new MongoClient(process.env.MNA_TDB_MONGODB_URI ?? "");
-
   try {
-    await client.connect();
-    const db = client.db("flux-retour-cfas");
-    const effectifsQueueCollection = db.collection("effectifsQueue");
-
     const pipeline = [
       {
         $lookup: {
@@ -171,11 +166,12 @@ async function fetchOrganismesData() {
       },
     ];
 
-    const results = await effectifsQueueCollection.aggregate(pipeline).toArray();
+    const results = await effectifsQueueDb().aggregate(pipeline).toArray();
     console.log("Pipeline results:", JSON.stringify(results, null, 2));
     return results;
-  } finally {
-    await client.close();
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return [];
   }
 }
 
