@@ -2,6 +2,8 @@ import { ObjectId } from "mongodb";
 
 import { effectifV2Db, personV2Db } from "@/common/model/collections";
 
+import { getOrCreatePersonV2 } from "./person.v2.actions";
+
 const createComputed = async (person_id: ObjectId) => {
   const person = await personV2Db().findOne({ _id: person_id });
   if (!person) {
@@ -16,6 +18,29 @@ const createComputed = async (person_id: ObjectId) => {
     prenom: person.prenom,
     date_de_naissance: person.date_de_naissance,
   };
+};
+
+export const getOrCreateEffectifV2 = async (
+  formation_id: ObjectId,
+  nom: string,
+  prenom: string,
+  date_de_naissance: Date /*or string to not become crazy with timezones ? */
+) => {
+  const effectif = await effectifV2Db().findOne({
+    formation_id: formation_id,
+    "_computed.nom": nom,
+    "_computed.prenom": prenom,
+    "_computed.date_de_naissance": date_de_naissance,
+  });
+
+  if (!effectif) {
+    const personId = await getOrCreatePersonV2(nom, prenom, date_de_naissance);
+    const { insertedId } = await insertEffectifV2(formation_id, personId);
+
+    return insertedId;
+  }
+
+  return effectif._id;
 };
 
 export const insertEffectifV2 = async (formation_id: ObjectId, person_id: ObjectId) => {

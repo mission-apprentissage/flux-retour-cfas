@@ -2,6 +2,36 @@ import { ObjectId } from "mongodb";
 
 import { formationV2Db } from "@/common/model/collections";
 
+export const getOrCreateFormationV2 = async (
+  cfd: string,
+  rncp: string,
+  organisme_responsable_id: ObjectId,
+  organisme_formateur_id: ObjectId
+) => {
+  const formation = await getFormationV2(cfd, rncp, organisme_responsable_id, organisme_formateur_id);
+
+  if (!formation) {
+    const { insertedId } = await insertFormationV2(cfd, rncp, organisme_responsable_id, organisme_formateur_id);
+    return insertedId;
+  }
+
+  return formation._id;
+};
+
+export const getFormationV2 = async (
+  cfd: string,
+  rncp: string,
+  organisme_responsable_id: ObjectId,
+  organisme_formateur_id: ObjectId
+) => {
+  return formationV2Db().findOne({
+    cfd: cfd.replace(/\s/g, "").toLowerCase(),
+    rncp: rncp.replace(/\s/g, "").toLowerCase(),
+    organisme_responsable_id,
+    organisme_formateur_id,
+  });
+};
+
 export const insertFormationV2 = async (
   cfd: string,
   rncp: string,
@@ -13,8 +43,8 @@ export const insertFormationV2 = async (
     draft: true,
     created_at: new Date(),
     updated_at: new Date(),
-    cfd: cfd,
-    rncp: rncp,
+    cfd: cfd.replace(/\s/g, "").toLowerCase(),
+    rncp: rncp.replace(/\s/g, "").toLowerCase(),
     organisme_responsable_id,
     organisme_formateur_id,
   });
