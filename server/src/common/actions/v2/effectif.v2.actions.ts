@@ -28,8 +28,8 @@ export const getOrCreateEffectifV2 = async (
 ) => {
   const effectif = await effectifV2Db().findOne({
     formation_id: formation_id,
-    "_computed.nom": nom,
-    "_computed.prenom": prenom,
+    "_computed.nom": nom.toLowerCase(),
+    "_computed.prenom": prenom.toLowerCase(),
     "_computed.date_de_naissance": date_de_naissance,
   });
 
