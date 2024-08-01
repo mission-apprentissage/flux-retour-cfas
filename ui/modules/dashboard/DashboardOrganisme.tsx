@@ -429,14 +429,14 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   <ListItem>
                                     Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
                                     services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans
-                                    la page d’
+                                    l’article{" "}
                                     <Link
                                       isExternal
                                       href={FAQ_REFERENCER_ETABLISSEMENT}
                                       textDecoration="underline"
                                       display="inline"
                                     >
-                                      Aide et FAQ
+                                      “Comment bien référencer un établissement ?”
                                     </Link>
                                     .
                                   </ListItem>
@@ -458,6 +458,34 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       size="lg"
                       fontSize="epsilon"
                       borderRadius="0"
+                      rightIcon={() =>
+                        organisme.ferme ? (
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                <Text>
+                                  <strong>État du SIRET “fermé”</strong>
+                                </Text>
+                                <Text my={2}>
+                                  Un établissement est affiché “fermé” suite à une cessation d’activité ou un
+                                  déménagement. Aucun effectif en apprentissage ne devrait être transmis sur un
+                                  établissement considéré “Fermé”. Si votre établissement a déménagé et possède un
+                                  nouveau SIRET, veuillez le signaler aux acteurs publics de l’apprentissage.
+                                </Text>
+                                <Link
+                                  isExternal
+                                  href={FAQ_REFERENCER_ETABLISSEMENT}
+                                  textDecoration="underline"
+                                  display="inline"
+                                  mt={6}
+                                >
+                                  En savoir plus sur la démarche à suivre
+                                </Link>
+                              </Box>
+                            )}
+                          />
+                        ) : null
+                      }
                     />
                   </HStack>
 
