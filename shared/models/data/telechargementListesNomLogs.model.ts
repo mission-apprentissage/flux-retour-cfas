@@ -14,7 +14,7 @@ export const zTelechargementListeNomLogs = z.object({
   _id: zObjectId.describe("Identifiant MongoDB du log"),
   type: z.enum(extendedTypesEffectifNominatif),
   effectifs: z.array(zObjectId).nullish(),
-  elementList: z.array(z.string()),
+  elementList: z.array(z.string()).nullish(),
   telechargement_date: z.date(),
   user_id: zObjectId,
   organisme_id: zObjectId.nullish(),
