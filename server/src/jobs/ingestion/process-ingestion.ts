@@ -4,7 +4,13 @@ import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { FiabilisationUaiSiret } from "shared/models/data/@types";
-import { IEffectif } from "shared/models/data/effectifs.model";
+import {
+  IEffectif,
+  ORGANISME_FORMATEUR_NOT_FOUND,
+  ORGANISME_LIEU_NOT_FOUND,
+  ORGANISME_RESPONSABLE_NOT_FOUND,
+  createCustomEffectifIssue,
+} from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
@@ -41,6 +47,8 @@ import dossierApprenantSchemaV1V2, {
 import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
+
+import { handleEffectifTransmission } from "./process-ingestion.v2";
 
 const logger = parentLogger.child({
   module: "processor",
@@ -158,6 +166,8 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   let itemLogger = logger.child(ctx);
   const start = Date.now();
   try {
+    //Process du nouveau schéma de données
+    handleEffectifTransmission(effectifQueue);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await (effectifQueue.api_version === "v3"
       ? transformEffectifQueueV3ToEffectif(effectifQueue)
@@ -314,37 +324,40 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       ]);
 
       if (!organismeLieu) {
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          message: "organisme non trouvé",
-          path: ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
-          params: {
-            uai: effectifQueued.etablissement_lieu_de_formation_uai,
-            siret: effectifQueued.etablissement_lieu_de_formation_siret,
-          },
-        });
+        ctx.addIssue(
+          createCustomEffectifIssue(
+            ORGANISME_LIEU_NOT_FOUND,
+            ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
+            {
+              uai: effectifQueued.etablissement_lieu_de_formation_uai,
+              siret: effectifQueued.etablissement_lieu_de_formation_siret,
+            }
+          )
+        );
       }
       if (!organismeFormateur) {
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          message: "organisme formateur non trouvé",
-          path: ["etablissement_formateur_uai", "etablissement_formateur_siret"],
-          params: {
-            uai: effectifQueued.etablissement_formateur_uai,
-            siret: effectifQueued.etablissement_formateur_siret,
-          },
-        });
+        ctx.addIssue(
+          createCustomEffectifIssue(
+            ORGANISME_FORMATEUR_NOT_FOUND,
+            ["etablissement_formateur_uai", "etablissement_formateur_siret"],
+            {
+              uai: effectifQueued.etablissement_formateur_uai,
+              siret: effectifQueued.etablissement_formateur_siret,
+            }
+          )
+        );
       }
       if (!organismeResponsable) {
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          message: "organisme responsable non trouvé",
-          path: ["etablissement_responsable_uai", "etablissement_responsable_siret"],
-          params: {
-            uai: effectifQueued.etablissement_responsable_uai,
-            siret: effectifQueued.etablissement_responsable_siret,
-          },
-        });
+        ctx.addIssue(
+          createCustomEffectifIssue(
+            ORGANISME_RESPONSABLE_NOT_FOUND,
+            ["etablissement_formateur_uai", "etablissement_formateur_siret"],
+            {
+              uai: effectifQueued.etablissement_responsable_uai,
+              siret: effectifQueued.etablissement_responsable_siret,
+            }
+          )
+        );
       }
       validateContrat(effectifQueued, "", ctx);
       validateContrat(effectifQueued, "_2", ctx);

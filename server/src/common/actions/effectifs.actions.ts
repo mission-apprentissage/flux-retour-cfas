@@ -6,7 +6,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsArchiveDb, effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDECADb, effectifsDb, organismesDb, rncpDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -415,6 +415,25 @@ export const updateEffectifComputedFromOrganisme = async (organismeId: ObjectId)
       {
         $set: {
           "_computed.organisme": generateOrganismeComputed(organisme),
+        },
+      }
+    )
+  );
+};
+
+export const updateEffectifComputedFromRNCP = async (rncpId: ObjectId) => {
+  const rncp = await rncpDb().findOne({ _id: rncpId });
+  return (
+    rncp &&
+    rncp.rncp &&
+    effectifsDb().updateMany(
+      {
+        "formation.rncp": rncp.rncp,
+      },
+      {
+        $set: {
+          "_computed.formation.codes_rome": rncp.romes,
+          "_computed.formation.opcos": rncp.opcos,
         },
       }
     )

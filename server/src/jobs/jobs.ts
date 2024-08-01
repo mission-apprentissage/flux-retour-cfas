@@ -354,6 +354,7 @@ export async function setupJobProcessor() {
       },
       "hydrate:effectifs-computed-organismes-opcos": {
         handler: async () => {
+          await hydrateRNCP();
           return hydrateEffectifsComputedOpcos();
         },
       },
