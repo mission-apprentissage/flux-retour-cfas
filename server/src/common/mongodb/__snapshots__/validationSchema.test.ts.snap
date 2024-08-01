@@ -12422,10 +12422,17 @@ exports[`validation-schema should create validation schema for telechargementLis
       ],
     },
     "elementList": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "organisation_id": {
       "anyOf": [
@@ -12471,7 +12478,6 @@ exports[`validation-schema should create validation schema for telechargementLis
   "required": [
     "_id",
     "type",
-    "elementList",
     "telechargement_date",
     "user_id",
   ],
