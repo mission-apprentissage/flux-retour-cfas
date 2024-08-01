@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import {
   deleteOldestDuplicates,
@@ -13,7 +14,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 const TEST_SIREN = "190404921";
-const ANNEE_SCOLAIRE = "2023-2024";
+const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 
 const sampleOrganismeId = new ObjectId(id(1));
 const sampleOrganisme: IOrganisme = {
