@@ -1,5 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { z } from "zod";
+import { ZodIssueCode, z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import {
@@ -207,5 +207,16 @@ export const zEffectif = z.object({
 export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
 export type IEffectifApprenant = z.infer<typeof zApprenant>;
+
+export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
+export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";
+export const ORGANISME_RESPONSABLE_NOT_FOUND = "organisme responsable non trouvé";
+
+export const createCustomEffectifIssue = (message: string, paths: string[], params: { [key: string]: string }) => ({
+  code: ZodIssueCode.custom,
+  message,
+  path: paths,
+  params,
+});
 
 export default { zod: zEffectif, indexes, collectionName };
