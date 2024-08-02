@@ -13,7 +13,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 const TEST_SIREN = "190404921";
-const ANNEE_SCOLAIRE = "2023-2024";
+const ANNEE_SCOLAIRE = "2024-2025";
 
 const sampleOrganismeId = new ObjectId(id(1));
 const sampleOrganisme: IOrganisme = {
