@@ -23,11 +23,12 @@ export const getIndicateursEffectifsParDepartement = async (
   acl: Acl,
   organisation?: IOrganisation
 ) => {
-  const indicateurs = [
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false, organisation)),
-    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true, organisation)),
-  ];
+  const [indicateursEffectifs, indicateursEffectifsDeca] = await Promise.all([
+    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false, organisation),
+    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true, organisation),
+  ]);
 
+  const indicateurs = [...indicateursEffectifs, ...indicateursEffectifsDeca];
   const mapDepartement = indicateurs.reduce((acc, { departement, ...rest }) => {
     return acc[departement]
       ? {
@@ -49,6 +50,7 @@ export const getIndicateursEffectifsParDepartement = async (
           },
         };
   }, {});
+
   return Object.values(mapDepartement);
 };
 
