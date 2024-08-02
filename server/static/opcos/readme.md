@@ -6,5 +6,6 @@
 - `atlas.csv` : provient du fichier Liste_RNCP_OPCO_Atlas.xlsx - Feuil2.xlsx transmis par l'OPCO avec la première colonne extraite à la main
 - `ocapiat.csv` : provient du fichier 20240731-RNCP-Ocapiat.xlsx - Feuil2.xlsx transmis par l’opco ocapiat
 - `uniformation.csv` : provient du fichier rncp_opco_uniformation.csv transmis par l’opco uniformation
+- `afdas.csv` : provient du fichier Top 45 des certifications Capp 2023.xlsx transmis par l’opco AFDAS
 
 Les fichiers ont été transformés avec la commande `cat server/static/opcos/<fichier_a_transformer>.csv | sort | uniq` pour éliminer les doublons
