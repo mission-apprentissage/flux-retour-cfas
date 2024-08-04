@@ -1,10 +1,11 @@
 import { TETE_DE_RESEAUX } from "shared/constants";
 
-import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
+import {
+  updateEffectifComputedFromOrganisme,
+  updateEffectifComputedFromRNCP,
+} from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
-
-import { OPCOS } from "../hydrate-organismes-opcos";
+import { effectifsDb, organismesDb, rncpDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsComputed() {
   logger.info("Hydrating effectifs._computed...");
@@ -75,22 +76,15 @@ export async function hydrateEffectifsComputed() {
 
 export const hydrateEffectifsComputedOpcos = async () => {
   logger.info("Starting: hydrateEffectifsComputedOpcos");
-  for (const opco of OPCOS) {
-    logger.info("Updating computed for opcos : ", opco);
-    const organismes = await organismesDb()
-      .find(
-        { opcos: opco },
-        {
-          projection: {
-            _id: 1,
-          },
-        }
-      )
-      .toArray();
-
-    for (let i = 0; i < organismes.length; i++) {
-      const organisme = organismes[i];
-      await updateEffectifComputedFromOrganisme(organisme._id);
+  const rncps = await rncpDb().find().toArray();
+  let percent = 0;
+  for (let i = 0; i < rncps.length; i++) {
+    const rncp = rncps[i];
+    await updateEffectifComputedFromRNCP(rncp._id);
+    const newPercent = Math.floor((i / rncps.length) * 100);
+    if (percent !== newPercent) {
+      percent = newPercent;
+      logger.info(`Progress: ${percent}%`);
     }
   }
   logger.info("Leaving: hydrateEffectifsComputedOpcos");
