@@ -107,7 +107,7 @@ export const handleEffectifTransmission = async (effectifQueue: WithId<IEffectif
 
     // 3. Insertion de l'effectif
 
-    const effectifId = await getOrCreateEffectif(
+    await getOrCreateEffectif(
       formationId,
       effectifQueue.nom_apprenant,
       effectifQueue.prenom_apprenant,
@@ -115,8 +115,6 @@ export const handleEffectifTransmission = async (effectifQueue: WithId<IEffectif
     );
 
     await insertTransmissionV2(effectifQueue.source_organisme_id, formationId);
-
-    console.log(effectifId);
   } catch (e) {
     console.log(e);
   }
