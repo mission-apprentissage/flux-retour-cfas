@@ -10,6 +10,7 @@ import {
   removeRNCPByOpcos,
 } from "@/common/actions/opcos/opcos.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
+import logger from "@/common/logger";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -57,8 +58,10 @@ const postRNCPByOpcosId = async (req) => {
     throw Boom.notFound(`Opco with id ${id} not found`);
   }
 
+  logger.info(`Adding ${rncp.length} rncp to opco ${opco.name}`);
   for (let i = 0; i < rncp.length; i++) {
     const rncpFiche = await getFicheRNCP(rncp[i]);
+    logger.info(`Adding rncp ${rncp[i]} to opco ${opco.name}`, `${i + 1}/${rncp.length}`);
     if (!rncpFiche) {
       errors.push(rncp[i]);
       continue;
