@@ -39,7 +39,7 @@ export const createRNCPByOpcos = async (opco: IOpcos, rncp: IRncp) => {
       _computed,
     });
 
-    updateEffectifComputedFromRNCP(rncp, opco);
+    await updateEffectifComputedFromRNCP(rncp, opco);
   }
 };
 

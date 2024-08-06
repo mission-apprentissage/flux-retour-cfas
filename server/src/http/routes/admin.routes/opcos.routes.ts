@@ -66,8 +66,11 @@ const postRNCPByOpcosId = async (req) => {
       errors.push(rncp[i]);
       continue;
     }
-
-    await createRNCPByOpcos(opco, rncpFiche);
+    try {
+      await createRNCPByOpcos(opco, rncpFiche);
+    } catch (e) {
+      logger.error(`Error while adding rncp ${rncp[i]} to opco ${opco.name}`, e);
+    }
   }
   return { errors };
 };
