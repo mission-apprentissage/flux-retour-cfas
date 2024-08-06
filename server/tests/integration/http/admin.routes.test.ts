@@ -267,10 +267,10 @@ describe("Routes administrateur", () => {
         ]),
         effectifsDb().insertMany([
           // effectifs sur le non fiable
-          ...generate(5, () => ({
+          ...(await generate(5, async () => ({
             _id: new ObjectId(),
-            ...createSampleEffectif({ organisme_id: createdWithoutUai._id }),
-          })),
+            ...(await createSampleEffectif({ organisme_id: createdWithoutUai._id })),
+          }))),
         ]),
       ]);
 
@@ -360,22 +360,22 @@ describe("Routes administrateur", () => {
         ]),
         effectifsDb().insertMany([
           // 5 apprentis sur le non fiable
-          ...generate(5, () => ({
+          ...(await generate(5, async () => ({
             _id: new ObjectId(),
-            ...createSampleEffectif({
+            ...(await createSampleEffectif({
               organisme_id: createdWithoutUai._id,
               annee_scolaire: anneeScolaire,
-            }),
-          })),
+            })),
+          }))),
 
           // 10 Inscrit sur le fiable
-          ...generate(10, () => ({
+          ...(await generate(10, async () => ({
             _id: new ObjectId(),
-            ...createSampleEffectif({
+            ...(await createSampleEffectif({
               organisme_id: createdWithUai._id,
               annee_scolaire: anneeScolaire,
-            }),
-          })),
+            })),
+          }))),
         ]),
       ]);
 
@@ -417,7 +417,10 @@ describe("Routes administrateur", () => {
       const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
       const anneeScolaire = "2022-2023";
       const commonEffectifs = [
-        ...generate(3, () => createSampleEffectif({ annee_scolaire: anneeScolaire, source: SOURCE_APPRENANT.ERP })),
+        ...(await generate(
+          3,
+          async () => await createSampleEffectif({ annee_scolaire: anneeScolaire, source: SOURCE_APPRENANT.ERP })
+        )),
       ];
       const duplicateRecentDate = addDays(new Date(), -1);
       const duplicateOldDate = addDays(new Date(), -20);
@@ -488,22 +491,22 @@ describe("Routes administrateur", () => {
         ),
         // Insertion d'effectifs distincts sur les 2 organismes
         effectifsDb().insertMany([
-          ...generate(6, () => ({
+          ...(await generate(6, async () => ({
             _id: new ObjectId(),
-            ...createSampleEffectif({
+            ...(await createSampleEffectif({
               annee_scolaire: anneeScolaire,
               organisme_id: createdWithUai._id,
               created_at: new Date(),
-            }),
-          })),
-          ...generate(4, () => ({
+            })),
+          }))),
+          ...(await generate(4, async () => ({
             _id: new ObjectId(),
-            ...createSampleEffectif({
+            ...(await createSampleEffectif({
               annee_scolaire: anneeScolaire,
               organisme_id: createdWithoutUai._id,
               created_at: new Date(),
-            }),
-          })),
+            })),
+          }))),
         ]),
       ]);
 

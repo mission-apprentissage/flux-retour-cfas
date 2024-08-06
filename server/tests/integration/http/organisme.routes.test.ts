@@ -479,11 +479,11 @@ describe("Routes /organismes/:id", () => {
       beforeEach(async () => {
         effectifsDb().insertMany([
           // 5 apprentis
-          ...generate(5, () => {
+          ...(await generate(5, async () => {
             const effectif = {
               _id: new ObjectId(),
-              ...createSampleEffectif({
-                ...commonEffectifsAttributes,
+              ...(await createSampleEffectif({
+                ...(await commonEffectifsAttributes()),
                 formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
                 annee_scolaire: ANNEE_SCOLAIRE,
                 contrats: [
@@ -491,7 +491,7 @@ describe("Routes /organismes/:id", () => {
                     date_debut: new Date(date),
                   },
                 ],
-              }),
+              })),
             };
 
             const effectifGenerated = {
@@ -503,32 +503,32 @@ describe("Routes /organismes/:id", () => {
             };
 
             return effectifGenerated;
-          }),
+          })),
 
           // 10 Inscrit
-          ...generate(10, () => {
+          ...(await generate(10, async () => {
             const moinsDe90Jours = new Date(new Date(date).getTime());
             moinsDe90Jours.setDate(moinsDe90Jours.getDate() + 89);
 
             return {
               _id: new ObjectId(),
-              ...createSampleEffectif({
-                ...commonEffectifsAttributes,
+              ...(await createSampleEffectif({
+                ...(await commonEffectifsAttributes()),
                 formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
                 annee_scolaire: ANNEE_SCOLAIRE,
-              }),
+              })),
             };
-          }),
+          })),
 
           // // 15 ApprentiToAbandon
-          ...generate(15, () => {
+          ...(await generate(15, async () => {
             const plusDe180Jours = new Date(new Date(date).getTime());
             plusDe180Jours.setDate(plusDe180Jours.getDate() - 191);
 
             const effectif = {
               _id: new ObjectId(),
-              ...createSampleEffectif({
-                ...commonEffectifsAttributes,
+              ...(await createSampleEffectif({
+                ...(await commonEffectifsAttributes()),
                 formation: createRandomFormation(ANNEE_SCOLAIRE, plusDe180Jours),
                 annee_scolaire: ANNEE_SCOLAIRE,
                 contrats: [
@@ -538,7 +538,7 @@ describe("Routes /organismes/:id", () => {
                     date_rupture: plusDe180Jours,
                   },
                 ],
-              }),
+              })),
             };
 
             const effectifGenerated = {
@@ -550,14 +550,14 @@ describe("Routes /organismes/:id", () => {
             };
 
             return effectifGenerated;
-          }),
+          })),
 
           // 20 ApprentiToInscrit
-          ...generate(20, () => {
+          ...(await generate(20, async () => {
             const effectif = {
               _id: new ObjectId(),
-              ...createSampleEffectif({
-                ...commonEffectifsAttributes,
+              ...(await createSampleEffectif({
+                ...(await commonEffectifsAttributes()),
                 formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
                 annee_scolaire: ANNEE_SCOLAIRE,
                 contrats: [
@@ -567,7 +567,7 @@ describe("Routes /organismes/:id", () => {
                     date_rupture: new Date(date),
                   },
                 ],
-              }),
+              })),
             };
 
             const effectifGenerated = {
@@ -579,7 +579,7 @@ describe("Routes /organismes/:id", () => {
             };
 
             return effectifGenerated;
-          }),
+          })),
         ]);
       });
 
@@ -710,8 +710,8 @@ describe("Routes /organismes/:id", () => {
       await Promise.all([
         effectifsDb().insertOne({
           _id: new ObjectId(),
-          ...createSampleEffectif({
-            ...commonEffectifsAttributes,
+          ...(await createSampleEffectif({
+            ...(await commonEffectifsAttributes()),
             formation: { ...createRandomFormation(anneeScolaire, new Date(date)), rncp: ficheRNCP.rncp },
             annee_scolaire: anneeScolaire,
             contrats: [
@@ -719,7 +719,7 @@ describe("Routes /organismes/:id", () => {
                 date_debut: new Date(date),
               },
             ],
-          }),
+          })),
         }),
         rncpDb().insertOne({ _id: new ObjectId(), ...ficheRNCP }),
       ]);

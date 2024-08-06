@@ -58,11 +58,11 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
       ]),
       effectifsDb().insertMany([
         // 5 apprentis
-        ...generate(5, () => {
+        ...(await generate(5, async () => {
           const effectif = {
             _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
+            ...(await createSampleEffectif({
+              ...(await commonEffectifsAttributes()),
               formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
               annee_scolaire: ANNEE_SCOLAIRE,
               contrats: [
@@ -70,7 +70,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
                   date_debut: new Date(date),
                 },
               ],
-            }),
+            })),
           };
 
           const effectifGenerated = {
@@ -82,32 +82,32 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           };
 
           return effectifGenerated;
-        }),
+        })),
 
         // 10 Inscrit
-        ...generate(10, () => {
+        ...(await generate(10, async () => {
           const moinsDe90Jours = new Date(new Date(date).getTime());
           moinsDe90Jours.setDate(moinsDe90Jours.getDate() + 89);
 
           return {
             _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
+            ...(await createSampleEffectif({
+              ...(await commonEffectifsAttributes()),
               formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
               annee_scolaire: ANNEE_SCOLAIRE,
-            }),
+            })),
           };
-        }),
+        })),
 
         // // 15 ApprentiToAbandon
-        ...generate(15, () => {
+        ...(await generate(15, async () => {
           const plusDe180Jours = new Date(new Date(date).getTime());
           plusDe180Jours.setDate(plusDe180Jours.getDate() - 191);
 
           const effectif = {
             _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
+            ...(await createSampleEffectif({
+              ...(await commonEffectifsAttributes()),
               formation: createRandomFormation(ANNEE_SCOLAIRE, plusDe180Jours),
               annee_scolaire: ANNEE_SCOLAIRE,
               contrats: [
@@ -117,7 +117,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
                   date_rupture: plusDe180Jours,
                 },
               ],
-            }),
+            })),
           };
 
           const effectifGenerated = {
@@ -129,14 +129,14 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           };
 
           return effectifGenerated;
-        }),
+        })),
 
         // 20 ApprentiToInscrit
-        ...generate(20, () => {
+        ...(await generate(20, async () => {
           const effectif = {
             _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
+            ...(await createSampleEffectif({
+              ...(await commonEffectifsAttributes()),
               formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
               annee_scolaire: ANNEE_SCOLAIRE,
               contrats: [
@@ -146,7 +146,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
                   date_rupture: new Date(date),
                 },
               ],
-            }),
+            })),
           };
 
           const effectifGenerated = {
@@ -158,7 +158,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           };
 
           return effectifGenerated;
-        }),
+        })),
       ]),
     ]);
   });
