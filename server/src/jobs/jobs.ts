@@ -34,6 +34,7 @@ import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalog
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateROME } from "./hydrate/hydrate-rome";
+import { initOpcos } from "./hydrate/opcos/opcos";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import {
   hydrateOrganismesEffectifsCountWithHierarchy,
@@ -461,6 +462,12 @@ export async function setupJobProcessor() {
       "tmp:patches:clean-extra-source-in-effectifs": {
         handler: async () => {
           return cleanEffectifsSource();
+        },
+      },
+      "tmp:patches:init_opco_rncp": {
+        handler: async (job) => {
+          const { name, rncpList } = job.payload as any;
+          return initOpcos(name, rncpList);
         },
       },
       "process:effectifs-queue:remove-duplicates": {
