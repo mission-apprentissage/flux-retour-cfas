@@ -77,7 +77,7 @@ function getTdbEtat(organisme) {
 }
 
 function getEtablissementInfoData(row: OrganismeSupportInfoJson) {
-  const catalogueInfo = getCatalogueEtablissementInfo(row.siret, row.formations);
+  const catalogueInfo = getCatalogueEtablissementInfo(row.siret, row.formations as OffreFormation[]);
 
   return [
     {

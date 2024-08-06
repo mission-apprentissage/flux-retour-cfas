@@ -9113,16 +9113,30 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "date_debut": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "date_fin": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "diplome": {
       "bsonType": "string",
@@ -9437,9 +9451,11 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "france_competence_infos": {
-      "bsonType": [
-        "string",
-        "null",
+      "anyOf": [
+        {},
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "geo_coordonnees_etablissement_formateur": {
@@ -9504,10 +9520,16 @@ exports[`validation-schema should create validation schema for formationsCatalog
       },
     },
     "intitule_court": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "intitule_long": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "intitule_rco": {
       "bsonType": [
@@ -9555,7 +9577,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "localite": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "modalites_entrees_sorties": {
       "bsonType": "array",
@@ -9583,7 +9608,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "niveau_formation_diplome": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "nom": {
       "bsonType": [
@@ -9592,16 +9620,28 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "nom_academie": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "nom_departement": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "num_academie": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "num_departement": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "onisep_discipline": {
       "bsonType": [
@@ -9640,20 +9680,27 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "periode": {
-      "bsonType": "array",
-      "items": {
-        "anyOf": [
-          {
-            "not": {},
-          },
-          {
-            "bsonType": [
-              "string",
-              "null",
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "anyOf": [
+              {
+                "not": {},
+              },
+              {
+                "bsonType": [
+                  "string",
+                  "null",
+                ],
+              },
             ],
           },
-        ],
-      },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "published": {
       "bsonType": [
@@ -9662,7 +9709,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "region": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "rncp_code": {
       "bsonType": [
@@ -9994,20 +10044,27 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "rome_codes": {
-      "bsonType": "array",
-      "items": {
-        "anyOf": [
-          {
-            "not": {},
-          },
-          {
-            "bsonType": [
-              "string",
-              "null",
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "anyOf": [
+              {
+                "not": {},
+              },
+              {
+                "bsonType": [
+                  "string",
+                  "null",
+                ],
+              },
             ],
           },
-        ],
-      },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "tags": {
       "bsonType": "array",
@@ -10031,21 +10088,11 @@ exports[`validation-schema should create validation schema for formationsCatalog
     "cle_ministere_educatif",
     "cfd",
     "cfd_outdated",
-    "nom_academie",
-    "num_academie",
     "code_postal",
     "code_commune_insee",
-    "num_departement",
-    "nom_departement",
-    "region",
-    "localite",
-    "intitule_long",
-    "intitule_court",
     "diplome",
     "niveau",
     "rncp_code",
-    "rome_codes",
-    "periode",
     "duree",
     "duree_incoherente",
     "annee",
@@ -10054,11 +10101,8 @@ exports[`validation-schema should create validation schema for formationsCatalog
     "id_formation",
     "ids_action",
     "tags",
-    "niveau_formation_diplome",
     "niveau_entree_obligatoire",
     "entierement_a_distance",
-    "date_debut",
-    "date_fin",
     "modalites_entrees_sorties",
     "etablissement_gestionnaire_siret",
     "etablissement_gestionnaire_uai",

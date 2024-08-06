@@ -49,6 +49,11 @@ function getOnisep(formationCatalogue: IFormationCatalogue): OffreFormation["oni
 
 function getSessions(formationCatalogue: IFormationCatalogue): OffreFormation["sessions"] {
   const sessions: OffreFormation["sessions"] = [];
+
+  if (!formationCatalogue.date_debut || !formationCatalogue.date_fin) {
+    return sessions;
+  }
+
   for (let i = 0; i < formationCatalogue.date_debut.length; i++) {
     sessions.push({
       debut: formationCatalogue.date_debut[i],
