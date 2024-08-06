@@ -160,7 +160,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
 
   return {
     ...effectif,
-    _computed: addComputedFields({ organisme, effectif: effectif as IEffectif }),
+    _computed: await addComputedFields({ organisme, effectif: effectif as IEffectif }),
     is_deca_compatible: !organisme.is_transmission_target,
   };
 }

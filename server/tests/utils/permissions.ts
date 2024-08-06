@@ -281,7 +281,7 @@ export const userOrganisme = organismesByLabel["OF cible"];
 export const commonEffectifsAttributes: Pick<IEffectif, "organisme_id" | "_computed"> = {
   organisme_id: userOrganisme._id,
 
-  _computed: addComputedFields({ organisme: userOrganisme }),
+  _computed: await addComputedFields({ organisme: userOrganisme }),
 };
 
 type TestFunc<ExpectedResult> = (

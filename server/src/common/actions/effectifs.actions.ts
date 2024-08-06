@@ -1,12 +1,13 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
+import { IOpcos, IRncp } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsArchiveDb, effectifsDECADb, effectifsDb, organismesDb, rncpDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -125,13 +126,13 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addComputedFields = ({
+export const addComputedFields = async ({
   organisme,
   effectif,
 }: {
   organisme?: IOrganisme;
   effectif?: IEffectif;
-}): Partial<IEffectif["_computed"]> => {
+}): Promise<Partial<IEffectif["_computed"]>> => {
   const computedFields: Partial<IEffectif["_computed"]> = {};
 
   if (organisme) {
@@ -421,10 +422,8 @@ export const updateEffectifComputedFromOrganisme = async (organismeId: ObjectId)
   );
 };
 
-export const updateEffectifComputedFromRNCP = async (rncpId: ObjectId) => {
-  const rncp = await rncpDb().findOne({ _id: rncpId });
+export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) => {
   return (
-    rncp &&
     rncp.rncp &&
     effectifsDb().updateMany(
       {
@@ -433,7 +432,9 @@ export const updateEffectifComputedFromRNCP = async (rncpId: ObjectId) => {
       {
         $set: {
           "_computed.formation.codes_rome": rncp.romes,
-          "_computed.formation.opcos": rncp.opcos,
+        },
+        $addToSet: {
+          "_computed.formation.opcos": opco.name,
         },
       }
     )

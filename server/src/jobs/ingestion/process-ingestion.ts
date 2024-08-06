@@ -393,7 +393,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           organisme_id: organismeLieu?._id,
           organisme_formateur_id: organismeFormateur?._id,
           organisme_responsable_id: organismeResponsable?._id,
-          _computed: addComputedFields({ organisme: organismeLieu, effectif }),
+          _computed: await addComputedFields({ organisme: organismeLieu, effectif }),
         },
         organisme: organismeLieu,
       };
@@ -460,7 +460,7 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
         effectif: {
           ...effectif,
           organisme_id: organisme?._id,
-          _computed: addComputedFields({ organisme, effectif }),
+          _computed: await addComputedFields({ organisme, effectif }),
         },
         organisme: organisme,
       };

@@ -135,6 +135,7 @@ import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
+import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
@@ -897,6 +898,7 @@ function setupRoutes(app: Application) {
       .use("/effectifs", effectifsAdmin())
       .use("/transmissions", transmissionRoutesAdmin())
       .use("/affelnet", affelnetRoutesAdmin())
+      .use("/opcos", opcosRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {
