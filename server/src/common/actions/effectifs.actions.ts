@@ -7,7 +7,13 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsArchiveDb, effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsArchiveDb,
+  effectifsDECADb,
+  effectifsDb,
+  opcosRncpDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -142,6 +148,17 @@ export const addComputedFields = async ({
   if (effectif) {
     const statut = createComputedStatutObject(effectif, new Date());
     computedFields.statut = statut;
+  }
+
+  if (effectif?.formation?.rncp) {
+    const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": effectif.formation.rncp }).toArray();
+
+    if (rncpList) {
+      computedFields.formation = {
+        // codes_rome: rncp.romes,  TODO LATER
+        opcos: rncpList.map(({ _computed }) => _computed.opco.nom),
+      };
+    }
   }
 
   return computedFields;
