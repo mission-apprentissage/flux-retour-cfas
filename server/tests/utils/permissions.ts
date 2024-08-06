@@ -1,7 +1,6 @@
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
-import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
@@ -278,11 +277,11 @@ export const organismes: WithId<IOrganisme>[] = Object.values(organismesByLabel)
 
 export const userOrganisme = organismesByLabel["OF cible"];
 
-export const commonEffectifsAttributes: Pick<IEffectif, "organisme_id" | "_computed"> = {
+export const commonEffectifsAttributes = async () => ({
   organisme_id: userOrganisme._id,
 
-  _computed: addComputedFields({ organisme: userOrganisme }),
-};
+  _computed: await addComputedFields({ organisme: userOrganisme }),
+});
 
 type TestFunc<ExpectedResult> = (
   organisation: IOrganisationCreate,

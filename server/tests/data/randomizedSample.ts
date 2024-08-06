@@ -84,10 +84,10 @@ export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): Without
   };
 };
 
-export const createSampleEffectif = ({
+export const createSampleEffectif = async ({
   organisme,
   ...params
-}: PartialDeep<IEffectif & { organisme: IOrganisme }> = {}): WithoutId<IEffectif> => {
+}: PartialDeep<IEffectif & { organisme: IOrganisme }> = {}): Promise<WithoutId<IEffectif>> => {
   const annee_scolaire = getRandomAnneeScolaire();
   const formation = createRandomFormation(annee_scolaire);
 
@@ -112,7 +112,7 @@ export const createSampleEffectif = ({
     organisme_id: organisme?._id,
   };
 
-  let computedFields = addComputedFields({
+  let computedFields = await addComputedFields({
     organisme: organisme as IOrganisme,
     effectif: merge({}, baseEffectif, params) as IEffectif,
   });

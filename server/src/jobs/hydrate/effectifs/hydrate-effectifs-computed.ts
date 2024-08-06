@@ -1,11 +1,8 @@
 import { TETE_DE_RESEAUX } from "shared/constants";
 
-import {
-  updateEffectifComputedFromOrganisme,
-  updateEffectifComputedFromRNCP,
-} from "@/common/actions/effectifs.actions";
+import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb, organismesDb, rncpDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsComputed() {
   logger.info("Hydrating effectifs._computed...");
@@ -73,22 +70,6 @@ export async function hydrateEffectifsComputed() {
     //
   }
 }
-
-export const hydrateEffectifsComputedOpcos = async () => {
-  logger.info("Starting: hydrateEffectifsComputedOpcos");
-  const rncps = await rncpDb().find().toArray();
-  let percent = 0;
-  for (let i = 0; i < rncps.length; i++) {
-    const rncp = rncps[i];
-    await updateEffectifComputedFromRNCP(rncp._id);
-    const newPercent = Math.floor((i / rncps.length) * 100);
-    if (percent !== newPercent) {
-      percent = newPercent;
-      logger.info(`Progress: ${percent}%`);
-    }
-  }
-  logger.info("Leaving: hydrateEffectifsComputedOpcos");
-};
 
 export const hydrateEffectifsComputedReseaux = async () => {
   logger.info("Starting: hydrateEffectifsComputedReseaux");

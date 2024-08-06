@@ -125,8 +125,10 @@ export function stringifyMongoFields<T extends object>(object: T): T {
   return JSON.parse(JSON.stringify(object));
 }
 
-export function generate<T>(amount: number, callback: () => T): T[] {
-  return Array(amount)
-    .fill(1)
-    .map(() => callback());
+export async function generate<T>(amount: number, callback: () => Promise<T>): Promise<T[]> {
+  return Promise.all(
+    Array(amount)
+      .fill(1)
+      .map(async () => await callback())
+  );
 }

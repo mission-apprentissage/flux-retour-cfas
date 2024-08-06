@@ -617,7 +617,9 @@ describe("Processus d'ingestion", () => {
               reseaux: [],
               fiable: false,
             },
-
+            formation: {
+              opcos: [],
+            },
             statut: {
               en_cours: "FIN_DE_FORMATION",
               parcours: [
@@ -710,6 +712,9 @@ describe("Processus d'ingestion", () => {
               siret: "77937827200016",
               reseaux: [],
               fiable: false,
+            },
+            formation: {
+              opcos: [],
             },
             statut: {
               en_cours: "ABANDON",
@@ -882,7 +887,9 @@ describe("Processus d'ingestion", () => {
               reseaux: [],
               fiable: false,
             },
-
+            formation: {
+              opcos: [],
+            },
             statut: {
               en_cours: "ABANDON",
               parcours: [

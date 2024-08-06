@@ -39,7 +39,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       const moinsDe90Jours = new Date(formationDateEntree.getTime());
       moinsDe90Jours.setDate(moinsDe90Jours.getDate() + 89);
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [],
         formation,
@@ -57,7 +57,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       const plusDe90Jours = new Date(formationDateEntree.getTime());
       plusDe90Jours.setDate(plusDe90Jours.getDate() + 91);
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [],
         formation,
@@ -74,7 +74,7 @@ describe("hydrateEffectifsComputedTypes", () => {
 
   describe("apprenent en formation avec contrat", () => {
     it("doit avoir le statut apprenti", async () => {
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
@@ -99,7 +99,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       const ruptureDate = new Date(evaluationDate.getTime());
       ruptureDate.setDate(ruptureDate.getDate() - 179);
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
@@ -123,7 +123,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       const ruptureDate = new Date(evaluationDate.getTime());
       ruptureDate.setDate(ruptureDate.getDate() - 181);
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
@@ -155,7 +155,7 @@ describe("hydrateEffectifsComputedTypes", () => {
         obtention_diplome: true,
       };
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
@@ -181,7 +181,7 @@ describe("hydrateEffectifsComputedTypes", () => {
     it("doit générer l'historique du statut de l'apprenant", async () => {
       const ruptureFirstContratDate = addDaysUTC(evaluationDate, -250);
 
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
@@ -216,7 +216,7 @@ describe("hydrateEffectifsComputedTypes", () => {
 
   describe("apprenent sans date de formation", () => {
     it("doit gérer un statut à partir de l'historique_statut", async () => {
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         apprenant: {
           historique_statut: [
             {
@@ -260,7 +260,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
     });
     it("ne doit pas gérer de statut sans l'historique_statut", async () => {
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         apprenant: {
           historique_statut: [],
         },
@@ -280,7 +280,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
     it("ne doit pas gérer de statut sans periode de formation", async () => {
-      const effectif = createSampleEffectif({
+      const effectif = await createSampleEffectif({
         apprenant: {
           historique_statut: [
             {

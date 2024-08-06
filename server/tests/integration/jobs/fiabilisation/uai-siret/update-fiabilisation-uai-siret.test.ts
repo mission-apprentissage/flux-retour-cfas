@@ -44,8 +44,8 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
       organisme2Id = organisme2Created.insertedId;
 
       // Ajout de doublons : 2 effectifs sur les 2 mêmes organismes
-      sampleEffectif1 = createSampleEffectif({ formation: { cfd: "01022103" } });
-      sampleEffectif2 = createSampleEffectif({ formation: { cfd: "01022999" } });
+      sampleEffectif1 = await createSampleEffectif({ formation: { cfd: "01022103" } });
+      sampleEffectif2 = await createSampleEffectif({ formation: { cfd: "01022999" } });
     });
 
     afterEach(async () => {

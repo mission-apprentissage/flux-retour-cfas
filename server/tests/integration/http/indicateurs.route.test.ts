@@ -40,27 +40,31 @@ describe("Route indicateurs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        formation: createRandomFormation(anneeScolaire, new Date(date)),
-        annee_scolaire: anneeScolaire,
-        contrats: [
-          {
-            date_debut: new Date(date),
-          },
-        ],
-      }),
-    };
+    let effectifGenerated;
 
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
+    beforeAll(async () => {
+      const effectif = {
+        _id: new ObjectId(),
+        ...(await createSampleEffectif({
+          ...(await commonEffectifsAttributes()),
+          formation: createRandomFormation(anneeScolaire, new Date(date)),
+          annee_scolaire: anneeScolaire,
+          contrats: [
+            {
+              date_debut: new Date(date),
+            },
+          ],
+        })),
+      };
+
+      effectifGenerated = {
+        ...effectif,
+        _computed: {
+          ...effectif._computed,
+          statut: createComputedStatutObject(effectif, new Date(date)),
+        },
+      };
+    });
 
     beforeEach(async () => {
       await effectifsDb().insertOne(effectifGenerated);
@@ -216,28 +220,31 @@ describe("Route indicateurs", () => {
   describe("GET /api/v1/indicateurs/effectifs/par-organisme - indicateurs sur les effectifs par organisme", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
+    let effectifGenerated;
 
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        formation: createRandomFormation(anneeScolaire, new Date(date)),
-        annee_scolaire: anneeScolaire,
-        contrats: [
-          {
-            date_debut: new Date(date),
-          },
-        ],
-      }),
-    };
+    beforeAll(async () => {
+      const effectif = {
+        _id: new ObjectId(),
+        ...(await createSampleEffectif({
+          ...(await commonEffectifsAttributes()),
+          formation: createRandomFormation(anneeScolaire, new Date(date)),
+          annee_scolaire: anneeScolaire,
+          contrats: [
+            {
+              date_debut: new Date(date),
+            },
+          ],
+        })),
+      };
 
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
+      effectifGenerated = {
+        ...effectif,
+        _computed: {
+          ...effectif._computed,
+          statut: createComputedStatutObject(effectif, new Date(date)),
+        },
+      };
+    });
 
     beforeEach(async () => {
       await effectifsDb().insertOne(effectifGenerated);
@@ -312,33 +319,36 @@ describe("Route indicateurs", () => {
   describe("GET /api/v1/indicateurs/effectifs/:type - effectifs nominatifs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
+    let effectif;
+    let effectifGenerated;
 
+    beforeAll(async () => {
+      effectif = {
+        _id: new ObjectId(),
+        ...(await createSampleEffectif({
+          ...(await commonEffectifsAttributes()),
+          annee_scolaire: anneeScolaire,
+          formation: {
+            date_entree: new Date("2020-11-15T00:00:00.00"),
+            date_fin: new Date(),
+          },
+          apprenant: {
+            historique_statut: historySequenceApprentiToAbandon,
+          },
+        })),
+      };
+
+      effectifGenerated = {
+        ...effectif,
+        _computed: {
+          ...effectif._computed,
+          statut: createComputedStatutObject(effectif, new Date(date)),
+        },
+      };
+    });
     let effectifResult: any[] = [];
     let effectifResultWithContact: any[] = [];
     const emptyResult = [];
-
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        annee_scolaire: anneeScolaire,
-        formation: {
-          date_entree: new Date("2020-11-15T00:00:00.00"),
-          date_fin: new Date(),
-        },
-        apprenant: {
-          historique_statut: historySequenceApprentiToAbandon,
-        },
-      }),
-    };
-
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
 
     beforeEach(async () => {
       await effectifsDb().insertOne(effectifGenerated);

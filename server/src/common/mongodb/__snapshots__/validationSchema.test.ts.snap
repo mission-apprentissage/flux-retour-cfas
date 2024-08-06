@@ -10224,6 +10224,83 @@ exports[`validation-schema should create validation schema for maintenanceMessag
 }
 `;
 
+exports[`validation-schema should create validation schema for opcoRncp: opcoRncp 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "opco": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "nom": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "nom",
+          ],
+        },
+        "rncp": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "code": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "code",
+          ],
+        },
+      },
+      "required": [
+        "opco",
+        "rncp",
+      ],
+    },
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "opco_id": {
+      "bsonType": "objectId",
+    },
+    "rncp_id": {
+      "bsonType": "objectId",
+    },
+  },
+  "required": [
+    "_id",
+    "opco_id",
+    "rncp_id",
+    "_computed",
+  ],
+}
+`;
+
+exports[`validation-schema should create validation schema for opcos: opcos 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "name": {
+      "bsonType": "string",
+    },
+  },
+  "required": [
+    "_id",
+    "name",
+  ],
+}
+`;
+
 exports[`validation-schema should create validation schema for organisations: organisations 1`] = `
 {
   "anyOf": [

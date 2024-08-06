@@ -14,6 +14,8 @@ import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invi
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
+import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
+import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
 import OrganismesReferentielModelDescriptor, {
@@ -62,6 +64,8 @@ export const modelDescriptors = [
   effectifsArchiveModelDescriptor,
   voeuxAffelnetDescriptor,
   telechargementListesNominativesLogsDescriptor,
+  opcosDescriptor,
+  opcosRncpDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -96,6 +100,8 @@ export const voeuxAffelnetDb = () => getDbCollection<IVoeuAffelnet>(voeuxAffelne
 export const telechargementListesNominativesLogsDb = () =>
   getDbCollection<ITelechargementListeNomLogs>(telechargementListesNominativesLogsDescriptor.collectionName);
 
+export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
+export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
