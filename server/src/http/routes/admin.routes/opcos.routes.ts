@@ -48,7 +48,7 @@ const getRNCPByOpcosId = async (req) => {
   return findRNCPByOpcosId(id);
 };
 
-const postRNCPByOpcosId = async (req) => {
+export const postRNCPByOpcosId = async (req) => {
   const { id } = req.params;
   const { rncp }: { rncp: Array<string> } = req.body;
   const errors: Array<string> = [];
