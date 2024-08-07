@@ -4,12 +4,14 @@ import { format } from "date-fns";
 import React from "react";
 import { DuplicateEffectifGroup, DuplicateEffectifGroupTransformer } from "shared";
 
-import { toPascalCase } from "@/common/utils/stringUtils";
 import CustomTable from "@/components/Table/CustomTable";
 
 import EffectifsDoublonsDetailTable from "./EffectifsDoublonsDetailTable";
 
-const transformNomPrenomToPascalCase = (nom: string, prenom: string) => `${toPascalCase(nom)} ${toPascalCase(prenom)}`;
+const transformNomPrenomToPascalCase = (nom: string, prenom: string) => {
+  const formatName = (str: string) => `${str.charAt(0).toUpperCase()}${str.slice(1).toLowerCase()}`;
+  return `${formatName(nom)} ${formatName(prenom)}`;
+};
 
 interface EffectifsDoublonsListProps {
   data: any[];
