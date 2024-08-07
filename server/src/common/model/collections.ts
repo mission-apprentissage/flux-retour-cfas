@@ -66,6 +66,11 @@ export const modelDescriptors = [
   telechargementListesNominativesLogsDescriptor,
   opcosDescriptor,
   opcosRncpDescriptor,
+  effectifsV2ModelDescriptor,
+  formationV2ModelDescriptor,
+  organismesV2ModelDescriptor,
+  personV2ModelDescriptor,
+  transmissionV2Descriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
