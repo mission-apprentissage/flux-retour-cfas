@@ -130,7 +130,7 @@ function NavBarTransverse(): React.ReactElement {
             })
           }
         >
-          Voeux Affelnet
+          Vœux Affelnet
         </NavItem>
       )}
       <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>

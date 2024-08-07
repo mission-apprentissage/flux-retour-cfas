@@ -131,7 +131,7 @@ function VoeuxAffelnetPage() {
                               temps de se déclarer
                             </ListItem>
                             <ListItem>
-                              Début juillet : fin de validation des vœux. Source : Plateforme des voeux (DNE)
+                              Début juillet : fin de validation des vœux. Source : Plateforme des vœux (DNE)
                             </ListItem>
                           </List>
                         </>
