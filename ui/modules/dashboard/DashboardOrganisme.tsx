@@ -726,7 +726,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               Aperçu de {modePublique ? "ses" : "vos"} indicateurs
               {hasOrganismesFormateurs && " et établissements"}
               <Text fontSize="gamma" as="span" ml="2">
-                (année scolaire 2023-2024)
+                (année scolaire 2024-2025)
               </Text>
             </Heading>
 
