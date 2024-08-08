@@ -29,7 +29,7 @@ const zOrganismeReferentiel = z.object({
   siret: z.string(),
   uai: z.string().optional(),
   raison_sociale: z.string().optional(),
-  enseigne: z.string().optional(),
+  enseigne: z.string().nullish(),
   siege_social: z.boolean().optional(),
   numero_declaration_activite: z.string().optional(),
   etat_administratif: z.enum(["actif", "fermé"]).optional(),

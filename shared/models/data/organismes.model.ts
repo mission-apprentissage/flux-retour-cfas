@@ -28,7 +28,7 @@ const relationOrganismeSchema = z
 
     // infos TDB
     _id: zObjectId.nullable().optional(),
-    enseigne: z.string().optional(),
+    enseigne: z.string().nullish(),
     raison_sociale: z.string().optional(),
     commune: z.string().optional(),
     region: z.string().optional(),
