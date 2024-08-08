@@ -1,4 +1,4 @@
-import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -34,6 +34,8 @@ import {
   STATUT_FIABILISATION_ORGANISME,
   LIST_PUBIC_ORGANISMES_DE_FORMATIONS,
   FAQ_REFERENCER_ETABLISSEMENT,
+  UAI_INCONNUE_TAG_FORMAT,
+  UAI_INCONNUE,
 } from "shared";
 
 import { FAQ_PATH } from "@/common/constants/faq";
@@ -396,7 +398,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <HStack>
                     <Text>UAI&nbsp;:</Text>
                     <Tag
-                      primaryText={organisme.uai || "Inconnue"}
+                      leftIcon={!organisme.uai ? WarningTwoIcon : undefined}
+                      leftIconColor="#FF732C"
+                      primaryText={organisme.uai || UAI_INCONNUE_TAG_FORMAT}
                       variant="badge"
                       colorScheme="grey_tag"
                       size="lg"
@@ -408,12 +412,13 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                             contentComponent={() => (
                               <Box>
                                 <Text>
-                                  <strong>Votre UAI est inconnue</strong>
+                                  <strong>Votre UAI est {UAI_INCONNUE}</strong>
                                 </Text>
                                 <UnorderedList mt={4}>
                                   <ListItem>
-                                    Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme « Inconnue »
-                                    alors que votre organisme en possède une, veuillez la communiquer en écrivant à{" "}
+                                    Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme «{" "}
+                                    {UAI_INCONNUE_TAG_FORMAT} » alors que votre organisme en possède une, veuillez la
+                                    communiquer en écrivant à{" "}
                                     <Link
                                       isExternal
                                       href="mailto:referentiel-uai-siret@onisep.fr"

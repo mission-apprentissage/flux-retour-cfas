@@ -17,6 +17,9 @@ import {
 } from "../../constants";
 import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
 
+export const UAI_INCONNUE = "non déterminée";
+export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
+
 const relationOrganismeSchema = z
   .object({
     // infos référentiel
