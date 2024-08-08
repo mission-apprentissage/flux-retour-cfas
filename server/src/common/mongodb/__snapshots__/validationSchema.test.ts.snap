@@ -11538,7 +11538,10 @@ exports[`validation-schema should create validation schema for organismes: organ
             "bsonType": "string",
           },
           "enseigne": {
-            "bsonType": "string",
+            "bsonType": [
+              "string",
+              "null",
+            ],
           },
           "label": {
             "bsonType": "string",
@@ -11609,7 +11612,10 @@ exports[`validation-schema should create validation schema for organismes: organ
             "bsonType": "string",
           },
           "enseigne": {
-            "bsonType": "string",
+            "bsonType": [
+              "string",
+              "null",
+            ],
           },
           "label": {
             "bsonType": "string",
@@ -12366,7 +12372,10 @@ exports[`validation-schema should create validation schema for organismesReferen
       },
     },
     "enseigne": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "etat_administratif": {
       "bsonType": "string",
