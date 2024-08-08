@@ -101,7 +101,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       ...organismeInTdb,
       ...(raison_sociale ? { nom: raison_sociale } : {}),
       ...(raison_sociale ? { raison_sociale } : {}),
-      ...(enseigne ? { enseigne } : {}),
+      enseigne: enseigne,
       nature: nature,
       adresse: adresseFormatted,
       ferme: isFerme,
