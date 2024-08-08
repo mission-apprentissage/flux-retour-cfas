@@ -12,7 +12,7 @@ const logger = parentLogger.child({
 
 interface OrganismeInfos {
   _id?: ObjectId;
-  enseigne?: string;
+  enseigne?: string | null;
   raison_sociale?: string;
   commune?: string;
   region?: string;

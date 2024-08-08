@@ -28,7 +28,7 @@ const relationOrganismeSchema = z
 
     // infos TDB
     _id: zObjectId.nullable().optional(),
-    enseigne: z.string().optional(),
+    enseigne: z.string().nullish(),
     raison_sociale: z.string().optional(),
     commune: z.string().optional(),
     region: z.string().optional(),
@@ -114,7 +114,7 @@ const zOrganisme = z
       .describe("Nature de l'organisme de formation")
       .optional(),
     nom: z.string({ description: "Nom de l'organisme de formation" }).optional(),
-    enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).optional(),
+    enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).nullish(),
     raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
     adresse: zAdresse.describe("Adresse de l'établissement").optional(),
     relatedFormations: z
