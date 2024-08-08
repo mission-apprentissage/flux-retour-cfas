@@ -10,10 +10,12 @@ interface TagProps extends SystemProps {
   colorScheme?: string;
   size?: "sm" | "md" | "lg";
   isLink?: boolean;
+  leftIconColor?: string;
 }
 
 function Tag({
   leftIcon,
+  leftIconColor,
   rightIcon,
   primaryText,
   secondaryText,
@@ -38,7 +40,7 @@ function Tag({
       _hover={isLink ? { bg: hoverBg } : undefined}
       {...props}
     >
-      {leftIcon && <TagLeftIcon as={leftIcon} boxSize={4} />}
+      {leftIcon && <TagLeftIcon as={leftIcon} boxSize={4} color={leftIconColor} />}
       <TagLabel display="flex" flexDirection="column" alignItems="flex-start" justifyContent="center">
         <Box>{primaryText}</Box>
         {secondaryText && (

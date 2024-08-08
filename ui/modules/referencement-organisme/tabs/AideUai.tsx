@@ -1,5 +1,6 @@
 import { Text, Flex, Img, OrderedList, ListItem } from "@chakra-ui/react";
 import React from "react";
+import { UAI_INCONNUE_TAG_FORMAT } from "shared";
 
 import AidePage from "@/components/Page/AidePage";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -118,8 +119,8 @@ const AideUai = () => {
               modalContent={ModalUai.content}
             />
             <Text>
-              Si votre numéro UAI est répertorié comme « Inconnu » alors que votre organisme en possède un, vous devez
-              le communiquer en écrivant à{" "}
+              Si votre numéro UAI est répertorié comme « {UAI_INCONNUE_TAG_FORMAT} » alors que votre organisme en
+              possède un, vous devez le communiquer en écrivant à{" "}
               <AidePage.Link href="mailto:referentiel-uai-siret@onisep.fr">
                 referentiel-uai-siret@onisep.fr
               </AidePage.Link>{" "}

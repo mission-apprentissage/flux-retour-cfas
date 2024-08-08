@@ -29,7 +29,7 @@ import { useFormik } from "formik";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo } from "react";
-import { OrganismeSupportInfoJson } from "shared";
+import { OrganismeSupportInfoJson, UAI_INCONNUE_TAG_FORMAT } from "shared";
 import { z } from "zod";
 
 import { _get, _post } from "@/common/httpClient";
@@ -174,7 +174,7 @@ const Organisme = () => {
                       UAI&nbsp;:{" "}
                       {(row.original as any).uai ?? (
                         <Text as="span" color="error">
-                          INCONNUE
+                          {UAI_INCONNUE_TAG_FORMAT}
                         </Text>
                       )}{" "}
                       - SIRET&nbsp;: {row.original.siret}

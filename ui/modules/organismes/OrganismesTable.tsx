@@ -14,7 +14,7 @@ import {
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { normalize } from "shared";
+import { normalize, UAI_INCONNUE_TAG_FORMAT } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -59,7 +59,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           UAI&nbsp;:{" "}
           {(row.original as any).uai ?? (
             <Text as="span" color="error">
-              INCONNUE
+              {UAI_INCONNUE_TAG_FORMAT}
             </Text>
           )}{" "}
           - SIRET&nbsp;: {(row.original as any).siret}
