@@ -246,6 +246,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 }
 
 const MenuQuestions = () => {
+  const { organisationType } = useAuth();
   const { trackPlausibleEvent } = usePlausibleTracking();
   return (
     <>
@@ -264,6 +265,17 @@ const MenuQuestions = () => {
           </Text>
         </MenuButton>
         <MenuList>
+          {(organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) && (
+            <MenuItem
+              as="a"
+              href="https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackPlausibleEvent("clic_homepage_kit_deploiement")}
+            >
+              Kit de déploiement DREETS/DDETS
+            </MenuItem>
+          )}
           <MenuItem
             as="a"
             href={FAQ_PATH}
