@@ -76,6 +76,10 @@ export const plausibleGoals = [
   "televersement_clic_tutoriel_video",
   "televersement_clic_excel_conseils",
   "televersement_clic_rapport_transmission",
+
+  // Kit déploiement
+
+  "clic_homepage_kit_deploiement",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
