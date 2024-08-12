@@ -7,6 +7,7 @@ import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectif
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
+import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
@@ -104,7 +105,7 @@ export const decaRawDb = () => getDbCollection<IDecaRaw>(decaRawModelDescriptor.
 export const voeuxAffelnetDb = () => getDbCollection<IVoeuAffelnet>(voeuxAffelnetDescriptor.collectionName);
 export const telechargementListesNominativesLogsDb = () =>
   getDbCollection<ITelechargementListeNomLogs>(telechargementListesNominativesLogsDescriptor.collectionName);
-
+export const erpDb = () => getDbCollection<IErp>(erpModelDescriptor.collectionName);
 export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
 export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
 // v2

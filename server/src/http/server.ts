@@ -134,6 +134,7 @@ import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
+import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
@@ -142,6 +143,7 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import erpRoutes from "./routes/specific.routes/erps.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
@@ -448,7 +450,8 @@ function setupRoutes(app: Application) {
           has_accept_cgu_version: req.params.version,
         });
       })
-    );
+    )
+    .use("/api/v1/erps", erpRoutes());
 
   /********************************
    * API pour un organisme   *
@@ -899,6 +902,7 @@ function setupRoutes(app: Application) {
       .use("/transmissions", transmissionRoutesAdmin())
       .use("/affelnet", affelnetRoutesAdmin())
       .use("/opcos", opcosRoutesAdmin())
+      .use("/erps", erpsRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {
