@@ -21,6 +21,13 @@ import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper"
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 
+export const ORGANISME_INDICATEURS_TYPE = {
+  SANS_EFFECTIFS: "SANS_EFFECTIFS",
+  NATURE_INCONNUE: "NATURE_INCONNUE",
+  SIRET_FERME: "SIRET_FERME",
+  UAI_NON_DETERMINE: "UAI_NON_DETERMINE",
+};
+
 const relationOrganismeSchema = z
   .object({
     // infos référentiel
@@ -280,6 +287,9 @@ export function defaultValuesOrganisme(): Pick<
   };
 }
 
+export const hasRecentTransmissions = (last_transmission_date: Date | null | undefined) =>
+  last_transmission_date && !isBefore(new Date(last_transmission_date), subMonths(new Date(), 3));
+
 export const withOrganismeListSummary = (organisme: IOrganisme) => {
   const init = {
     organismes: 0,
@@ -297,11 +307,7 @@ export const withOrganismeListSummary = (organisme: IOrganisme) => {
       natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
       uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
       siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
-      sansTransmissions:
-        acc.sansTransmissions +
-        (curr.last_transmission_date && !isBefore(new Date(curr.last_transmission_date), subMonths(new Date(), 3))
-          ? 0
-          : 1),
+      sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
     };
   }, init);
 

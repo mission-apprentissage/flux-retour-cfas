@@ -43,6 +43,7 @@ import {
   getOrganismeIndicateursEffectifsParFormation,
 } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
 import {
+  getIndicateursForRelatedOrganismes,
   getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
@@ -525,6 +526,12 @@ function setupRoutes(app: Application) {
         "/indicateurs/organismes",
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
+        })
+      )
+      .get(
+        "/indicateurs/organismes/:id",
+        returnResult(async (req, res) => {
+          return await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.id);
         })
       )
       .get(
