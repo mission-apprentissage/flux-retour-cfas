@@ -58,8 +58,19 @@ const relationOrganismeSchema = z
   })
   .strict();
 
+const organismesCountSchema = z.object({
+  organismes: z.number(),
+  fiables: z.number(),
+  sansTransmissions: z.number(),
+  siretFerme: z.number(),
+  natureInconnue: z.number(),
+  uaiNonDeterminee: z.number(),
+});
+
 export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
+
+export type IOrganismesCount = z.output<typeof organismesCountSchema>;
 
 const collectionName = "organismes";
 
