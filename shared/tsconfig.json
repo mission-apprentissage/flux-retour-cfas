@@ -1,4 +1,5 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "include": ["**/*.ts"],
   "exclude": ["**/node_modules"],
   "paths": {
@@ -12,7 +13,6 @@
     "listFiles": false,
     "pretty": true,
     "isolatedModules": true,
-    "lib": ["ES2023"] /* Emit ECMAScript-standard-compliant class fields. */,
     "module": "ESNext" /* Specify what module code is generated. */,
     "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
     "resolveJsonModule": true,
@@ -25,5 +25,9 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": false
+  },
+  "typeAcquisition": {
+    "enable": true,
+    "include": ["@types/node"]
   }
 }

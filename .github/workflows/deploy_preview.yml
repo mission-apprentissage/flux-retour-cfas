@@ -28,14 +28,14 @@ jobs:
           pr_number: ${{ github.event.issue.number }}
 
       - name: React to comment
-        uses: dkershner6/reaction-action@v1
+        uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commentId: ${{ github.event.comment.id }}
           reaction: "+1"
 
       - id: "get-branch"
-        run: echo "branch=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> $GITHUB_OUTPUT
+        run: echo "branch=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> "$GITHUB_OUTPUT"
         env:
           REPO: ${{ github.repository }}
           PR_NO: ${{ github.event.issue.number }}
@@ -50,7 +50,7 @@ jobs:
         run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
 
       - name: LFS Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .git/lfs/objects
           key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}

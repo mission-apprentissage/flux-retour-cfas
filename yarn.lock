@@ -3827,52 +3827,53 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/feedback@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry-internal/feedback@npm:7.101.0"
+"@sentry-internal/feedback@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry-internal/feedback@npm:7.118.0"
   dependencies:
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: 793bae02384dbdd22c2c9c9fe7d6cb02c91b8532ea7ce96960ef972f99b8a86ce61f462583aa072b40dfc10b07c2d4e64ab4bb7761e55448d97bea5ad33cec71
+    "@sentry/core": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: 7e32ce6f6be8f7ee8974393d0127af30c1e043631704ca980bdbef4d4b6b47409013bed7d0c22827fee9f96f53a73a9e9d6aaa42e0eff751d7e92ec97a0dc9f3
   languageName: node
   linkType: hard
 
-"@sentry-internal/replay-canvas@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry-internal/replay-canvas@npm:7.101.0"
+"@sentry-internal/replay-canvas@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry-internal/replay-canvas@npm:7.118.0"
   dependencies:
-    "@sentry/core": 7.101.0
-    "@sentry/replay": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: e44998114cde4c688a620579b329641f92a9049877c5250f72307870f17c16484fdbc866bf33295d0071235d9ca12e9d534d504f845706bff61b25da17ede64e
+    "@sentry/core": 7.118.0
+    "@sentry/replay": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: ef10d18f644746fcf63cef576b88d423f19bc70b06c8a71a63109ff14ba26eeb9ef146b00abcfcb32260953513c799b27312eaf7c69bf59f25db053cbaeb02d7
   languageName: node
   linkType: hard
 
-"@sentry-internal/tracing@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry-internal/tracing@npm:7.101.0"
+"@sentry-internal/tracing@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry-internal/tracing@npm:7.118.0"
   dependencies:
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: f9167a590f36caa333df256646039e61bb1fc25f57fa9fed1c2a6893df0ca31bf90e40a6ed94769af3b501e07b7070c8402ab4a69fa070d71d184884e2a9a164
+    "@sentry/core": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: 068fc688ce16bfc78e032c3e3aad7ad50e50d832144aaefcff4326c9b33be23845cbca162a49f6f33e167de3ca42cf95797bc346c193cc28bfc00f8663792e13
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/browser@npm:7.101.0"
+"@sentry/browser@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/browser@npm:7.118.0"
   dependencies:
-    "@sentry-internal/feedback": 7.101.0
-    "@sentry-internal/replay-canvas": 7.101.0
-    "@sentry-internal/tracing": 7.101.0
-    "@sentry/core": 7.101.0
-    "@sentry/replay": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: 7ed82fe9e5a4c85aa4a669e4ab400c907dd99ceeff57a604cd113e44d21c9e4fb5b5aa0fd91aba53b67e09a60fa20953ff2411526cc041407288cdd862eeb135
+    "@sentry-internal/feedback": 7.118.0
+    "@sentry-internal/replay-canvas": 7.118.0
+    "@sentry-internal/tracing": 7.118.0
+    "@sentry/core": 7.118.0
+    "@sentry/integrations": 7.118.0
+    "@sentry/replay": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: f4cfdd96efebd773fec99d167288dc6e13fb161cac16d9f1ec78dbf13800b479fe1d3d3b64c41f073558b1e5c81a82a5e7984660212096d88855e1f551eddca5
   languageName: node
   linkType: hard
 
@@ -3883,9 +3884,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-darwin@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-darwin@npm:2.28.6"
+"@sentry/cli-darwin@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-darwin@npm:2.33.1"
   conditions: os=darwin
   languageName: node
   linkType: hard
@@ -3897,9 +3898,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-linux-arm64@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-linux-arm64@npm:2.28.6"
+"@sentry/cli-linux-arm64@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-linux-arm64@npm:2.33.1"
   conditions: (os=linux | os=freebsd) & cpu=arm64
   languageName: node
   linkType: hard
@@ -3911,9 +3912,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-linux-arm@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-linux-arm@npm:2.28.6"
+"@sentry/cli-linux-arm@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-linux-arm@npm:2.33.1"
   conditions: (os=linux | os=freebsd) & cpu=arm
   languageName: node
   linkType: hard
@@ -3925,9 +3926,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-linux-i686@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-linux-i686@npm:2.28.6"
+"@sentry/cli-linux-i686@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-linux-i686@npm:2.33.1"
   conditions: (os=linux | os=freebsd) & (cpu=x86 | cpu=ia32)
   languageName: node
   linkType: hard
@@ -3939,9 +3940,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-linux-x64@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-linux-x64@npm:2.28.6"
+"@sentry/cli-linux-x64@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-linux-x64@npm:2.33.1"
   conditions: (os=linux | os=freebsd) & cpu=x64
   languageName: node
   linkType: hard
@@ -3953,9 +3954,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-win32-i686@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-win32-i686@npm:2.28.6"
+"@sentry/cli-win32-i686@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-win32-i686@npm:2.33.1"
   conditions: os=win32 & (cpu=x86 | cpu=ia32)
   languageName: node
   linkType: hard
@@ -3967,9 +3968,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli-win32-x64@npm:2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli-win32-x64@npm:2.28.6"
+"@sentry/cli-win32-x64@npm:2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli-win32-x64@npm:2.33.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -4011,17 +4012,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli@npm:^2.28.6":
-  version: 2.28.6
-  resolution: "@sentry/cli@npm:2.28.6"
+"@sentry/cli@npm:^2.33.1":
+  version: 2.33.1
+  resolution: "@sentry/cli@npm:2.33.1"
   dependencies:
-    "@sentry/cli-darwin": 2.28.6
-    "@sentry/cli-linux-arm": 2.28.6
-    "@sentry/cli-linux-arm64": 2.28.6
-    "@sentry/cli-linux-i686": 2.28.6
-    "@sentry/cli-linux-x64": 2.28.6
-    "@sentry/cli-win32-i686": 2.28.6
-    "@sentry/cli-win32-x64": 2.28.6
+    "@sentry/cli-darwin": 2.33.1
+    "@sentry/cli-linux-arm": 2.33.1
+    "@sentry/cli-linux-arm64": 2.33.1
+    "@sentry/cli-linux-i686": 2.33.1
+    "@sentry/cli-linux-x64": 2.33.1
+    "@sentry/cli-win32-i686": 2.33.1
+    "@sentry/cli-win32-x64": 2.33.1
     https-proxy-agent: ^5.0.0
     node-fetch: ^2.6.7
     progress: ^2.0.3
@@ -4044,44 +4045,44 @@ __metadata:
       optional: true
   bin:
     sentry-cli: bin/sentry-cli
-  checksum: a7b46f216e079eb47eae9baaff3c1d070cbbaa82fb8fc6496821dd557bef3c4ab92363be71bdc5ac0c0eea8f6e76f93817a62461cf43a2d6fbd30e1255ab0c73
+  checksum: e46a00898f1d965f427fcce98072ede4d0f70af53f35e200a7d1281e60c848d3a498a080e9ae92d7ffc542e85f4674a7fa64e3dc0dd3942af0bae86078b53673
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/core@npm:7.101.0"
+"@sentry/core@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/core@npm:7.118.0"
   dependencies:
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: 9fc73ec92d434969f6e2dfa8459fe39d3bfb7734053542b632a9d165d5878cc3c8c7512aba25201d93cfae4fb68a25d9eeba16450e078e8f934b85e981a2ed07
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: c92d4fe25787877ed3907d279b2fb786a1142997582036b07593d92b23873037475a696dc3213749e9ab95742c82621002322a88f6f73ed7ce6c553d82684b69
   languageName: node
   linkType: hard
 
-"@sentry/integrations@npm:7.101.0, @sentry/integrations@npm:^7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/integrations@npm:7.101.0"
+"@sentry/integrations@npm:7.118.0, @sentry/integrations@npm:^7.114.0":
+  version: 7.118.0
+  resolution: "@sentry/integrations@npm:7.118.0"
   dependencies:
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
+    "@sentry/core": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
     localforage: ^1.8.1
-  checksum: 194f3b51d16ca0d378154ebcbe9c86f88f4056929973d1955fe6811d852e7f4248452e106b90e714544aec5c7b06f3f41d83c4b643100b82a1dcf9989fd519c9
+  checksum: 21b3a045c4c97425695b94d08c9423cb88f716ee05182ed82c1bf6804b281c89e7f2dcf854723ac18fdeeb1fa7c6f4eec29ee89c51a92a93122666d7138850c2
   languageName: node
   linkType: hard
 
-"@sentry/nextjs@npm:^7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/nextjs@npm:7.101.0"
+"@sentry/nextjs@npm:^7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/nextjs@npm:7.118.0"
   dependencies:
     "@rollup/plugin-commonjs": 24.0.0
-    "@sentry/core": 7.101.0
-    "@sentry/integrations": 7.101.0
-    "@sentry/node": 7.101.0
-    "@sentry/react": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-    "@sentry/vercel-edge": 7.101.0
+    "@sentry/core": 7.118.0
+    "@sentry/integrations": 7.118.0
+    "@sentry/node": 7.118.0
+    "@sentry/react": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+    "@sentry/vercel-edge": 7.118.0
     "@sentry/webpack-plugin": 1.21.0
     chalk: 3.0.0
     resolve: 1.22.8
@@ -4094,83 +4095,85 @@ __metadata:
   peerDependenciesMeta:
     webpack:
       optional: true
-  checksum: e982d75da25fee73bcf774a308e8e03080785c2707442779502711ee69215bd192853e02d4a4cc827ad592e6f264183207ae1c8313c8d165b1f344730e99a96e
+  checksum: 44e3b57476083e6babb883298c4072e655503243190735ddb6eb769ea043dd1d971ca60872ce838badc652393594b218588c3c04f9aae0e351487e1323ea8f16
   languageName: node
   linkType: hard
 
-"@sentry/node@npm:7.101.0, @sentry/node@npm:^7.101.0, @sentry/node@npm:^7.80.0":
-  version: 7.101.0
-  resolution: "@sentry/node@npm:7.101.0"
+"@sentry/node@npm:7.118.0, @sentry/node@npm:^7.118.0, @sentry/node@npm:^7.80.0":
+  version: 7.118.0
+  resolution: "@sentry/node@npm:7.118.0"
   dependencies:
-    "@sentry-internal/tracing": 7.101.0
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: 08cdcbab90179bb9dd3dd1ec6d8cd36473b3cae61f244e76200cdeaa82cdb0b1c03b267d88af88820dcf20323fe8c3d666fca87e4f8a6c68130faa47166f2cc0
+    "@sentry-internal/tracing": 7.118.0
+    "@sentry/core": 7.118.0
+    "@sentry/integrations": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: 5521250d28ab3edcace86909b884d9a10ea3703857e314e633129a8c4eb30f769b97ea49bfd978593c43b03c8720739201a33a87492cc8e35deca54dd39e3e9f
   languageName: node
   linkType: hard
 
-"@sentry/react@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/react@npm:7.101.0"
+"@sentry/react@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/react@npm:7.118.0"
   dependencies:
-    "@sentry/browser": 7.101.0
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
+    "@sentry/browser": 7.118.0
+    "@sentry/core": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
     hoist-non-react-statics: ^3.3.2
   peerDependencies:
     react: 15.x || 16.x || 17.x || 18.x
-  checksum: 2d60c294301c2c11124c538db65c10696dc43480bcf84ae1d61d0ee586ce0e51f3cdee517d4ac7d8b9607fa5a9cb30b151d126b5aaed2f94258d3480b7223f69
+  checksum: 03d560f51a9a45b878b4a67195c9784c3e442f8c25c3bd864ecf42d395f0a78dbef6e22bccd51985dcb3c7369b23ef03d9f3921d835a8eebebde998b88fbcafd
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/replay@npm:7.101.0"
+"@sentry/replay@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/replay@npm:7.118.0"
   dependencies:
-    "@sentry-internal/tracing": 7.101.0
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: 39db82d58d173491bf1894b0dea455a3d4751cb635bbdd15269b4fe39e219a85a4db4a4ba96630462469f78ca919b1248d3985a5c10c181a259750a4daf84040
+    "@sentry-internal/tracing": 7.118.0
+    "@sentry/core": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: 0b1ea8a65d878166ee8958d8269fef2ceb3b3b820da6df5c67b4749f1952448313dfebc1666429da1c20f4cc681dc28371c919ba805cc2770e9d18f250fc89be
   languageName: node
   linkType: hard
 
-"@sentry/tracing@npm:^7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/tracing@npm:7.101.0"
+"@sentry/tracing@npm:^7.114.0":
+  version: 7.118.0
+  resolution: "@sentry/tracing@npm:7.118.0"
   dependencies:
-    "@sentry-internal/tracing": 7.101.0
-  checksum: 45886e88aaee5cdf2675d0510dfed3c9b30424c5f715be4ca6c846c272144ec8a7a3f20e871f3877784168970a5938ab425c511a1dbf570c743f9d4164750740
+    "@sentry-internal/tracing": 7.118.0
+  checksum: a3c1a6b426b460912f67682e18ab7a3e88091b58fe42dce3803a5c12b4888031112464b7e23b064f3c3e4e9d3c03eee2635dc908f9dc873551c06627b7e142fa
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/types@npm:7.101.0"
-  checksum: 7dfed2fb8b17d0bad966ef92cb4c4f165284e100308c8d1224df47b85a009025d4ce38e9870e89464997ab6495617f6bc6d5da420d56c8c4feb306d8f83dda58
+"@sentry/types@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/types@npm:7.118.0"
+  checksum: 6ba32b729a0fc6f3c99d79adb1052784cee50ee28d2e45faf75c27e9833c8208fdce1e913d835b717b97903570ed08518045017c1a81610298766c295f4d3546
   languageName: node
   linkType: hard
 
-"@sentry/utils@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/utils@npm:7.101.0"
+"@sentry/utils@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/utils@npm:7.118.0"
   dependencies:
-    "@sentry/types": 7.101.0
-  checksum: 3508751cc116f136e4fd119c3cefe6ea9494b8656f8c4a83deed4d61896d0fa315566c225c8e23b9cc4736146662e5bc8a3f0aa92bb8a2f148f015bf4853bf99
+    "@sentry/types": 7.118.0
+  checksum: 3f05a8de3486e57378f3ba40286dd2e4a883f0dee35ac4d4479840b4b0c8135aa42848a5e6196c98d6415114ccfc11ddcda565fb0a84f44c7ce9eda51837aa9d
   languageName: node
   linkType: hard
 
-"@sentry/vercel-edge@npm:7.101.0":
-  version: 7.101.0
-  resolution: "@sentry/vercel-edge@npm:7.101.0"
+"@sentry/vercel-edge@npm:7.118.0":
+  version: 7.118.0
+  resolution: "@sentry/vercel-edge@npm:7.118.0"
   dependencies:
-    "@sentry-internal/tracing": 7.101.0
-    "@sentry/core": 7.101.0
-    "@sentry/types": 7.101.0
-    "@sentry/utils": 7.101.0
-  checksum: c4260fe2f6552ae509bf29dc9b16905c4809d209f7435f3459832934425f44e6a800827a21426efc4041d08228049fabf6164a2b8ea2e65030151f892af2a0d7
+    "@sentry-internal/tracing": 7.118.0
+    "@sentry/core": 7.118.0
+    "@sentry/integrations": 7.118.0
+    "@sentry/types": 7.118.0
+    "@sentry/utils": 7.118.0
+  checksum: 44158a63b79bb8b09088899b7752de7bf9770f78d880e6be99e87d7f6bb484eb6c29d76383861da67799712f35e00c41b085a35340638c80a563f0c5424a241a
   languageName: node
   linkType: hard
 
@@ -4459,6 +4462,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsconfig/next@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@tsconfig/next@npm:2.0.3"
+  checksum: 35a004bfca70e21f536aa7ef910d4ed0a09316ecc012952b0ba9ceb11ae333eb38f4c613fba79d91341a36db5af1b494dcadb0e35da0841ad47d08d65934f778
+  languageName: node
+  linkType: hard
+
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.9
   resolution: "@tsconfig/node10@npm:1.0.9"
@@ -4484,6 +4494,13 @@ __metadata:
   version: 1.0.3
   resolution: "@tsconfig/node16@npm:1.0.3"
   checksum: 3a8b657dd047495b7ad23437d6afd20297ce90380ff0bdee93fc7d39a900dbd8d9e26e53ff6b465e7967ce2adf0b218782590ce9013285121e6a5928fbd6819f
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node22@npm:^22.0.0":
+  version: 22.0.0
+  resolution: "@tsconfig/node22@npm:22.0.0"
+  checksum: 9fc45789304640e1e37e1f1e04c02dca593c290d4f1cb55af7e9cab799fb2c6356e1cc15ee9f140185591a81f491a4c7f2d6c08c1e5a3d758658ba69f1afee6d
   languageName: node
   linkType: hard
 
@@ -4844,10 +4861,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=10.13.0":
-  version: 20.5.6
-  resolution: "@types/node@npm:20.5.6"
-  checksum: d2ce44f1cfa3fd00fe7426f7cf9a46d680cd57802b874ed5618e7d9101a9c6b8de37f08c0e7185ee06fb363ad492549c3ea69665c7e8e31c7813210ed8e89005
+"@types/node@npm:*, @types/node@npm:>=10.13.0, @types/node@npm:^22.2.0":
+  version: 22.2.0
+  resolution: "@types/node@npm:22.2.0"
+  dependencies:
+    undici-types: ~6.13.0
+  checksum: 63724799337bfb57719a1992690e738341d824e1744a2ac52c5278a008fbfadf99765519c19858feb80418cc7da0d5c8bdf7ea4d82973869b3882bd602c48ade
   languageName: node
   linkType: hard
 
@@ -4902,12 +4921,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.0.0":
-  version: 18.2.7
-  resolution: "@types/react-dom@npm:18.2.7"
+"@types/react-dom@npm:^18.0.0, @types/react-dom@npm:^18.2.55":
+  version: 18.3.0
+  resolution: "@types/react-dom@npm:18.3.0"
   dependencies:
     "@types/react": "*"
-  checksum: e02ea908289a7ad26053308248d2b87f6aeafd73d0e2de2a3d435947bcea0422599016ffd1c3e38ff36c42f5e1c87c7417f05b0a157e48649e4a02f21727d54f
+  checksum: a0cd9b1b815a6abd2a367a9eabdd8df8dd8f13f95897b2f9e1359ea3ac6619f957c1432ece004af7d95e2a7caddbba19faa045f831f32d6263483fc5404a7596
   languageName: node
   linkType: hard
 
@@ -14507,6 +14526,7 @@ __metadata:
     "@commitlint/config-conventional": ^17.8.1
     "@semantic-release/changelog": ^6.0.3
     "@semantic-release/exec": ^6.0.3
+    "@types/node": ^22.2.0
     "@typescript-eslint/eslint-plugin": ^6.21.0
     "@typescript-eslint/parser": ^6.21.0
     cross-env: ^7.0.3
@@ -17790,10 +17810,10 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^6.3.1
     "@faker-js/faker": ^8.4.1
     "@jest/globals": ^29.7.0
-    "@sentry/cli": ^2.28.6
-    "@sentry/integrations": ^7.101.0
-    "@sentry/node": ^7.101.0
-    "@sentry/tracing": ^7.101.0
+    "@sentry/cli": ^2.33.1
+    "@sentry/integrations": ^7.114.0
+    "@sentry/node": ^7.118.0
+    "@sentry/tracing": ^7.114.0
     "@supercharge/promise-pool": ^2.4.0
     "@types/boom": ^7.3.5
     "@types/bunyan": ^1.8.11
@@ -17950,6 +17970,8 @@ __metadata:
   resolution: "shared@workspace:shared"
   dependencies:
     "@asteasolutions/zod-to-openapi": ^6.4.0
+    "@tsconfig/node22": ^22.0.0
+    "@types/node": ^22.2.0
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1
@@ -19439,8 +19461,8 @@ __metadata:
     "@nivo/bar": ^0.80.0
     "@nivo/core": ^0.80.0
     "@nivo/pie": ^0.80.0
-    "@sentry/integrations": ^7.101.0
-    "@sentry/nextjs": ^7.101.0
+    "@sentry/integrations": ^7.114.0
+    "@sentry/nextjs": ^7.118.0
     "@socialgouv/matomo-next": ^1.8.0
     "@tanstack/match-sorter-utils": 8.11.8
     "@tanstack/react-query": 4.26.1
@@ -19449,8 +19471,11 @@ __metadata:
     "@testing-library/react": ^14.2.1
     "@testing-library/react-hooks": ^8.0.1
     "@testing-library/user-event": ^14.5.2
+    "@tsconfig/next": ^2.0.3
     "@types/jsonwebtoken": ^9.0.5
+    "@types/node": ^22.2.0
     "@types/react": ^18.2.55
+    "@types/react-dom": ^18.2.55
     axios: ^1.6.7
     babel-loader: ^9.1.3
     case-sensitive-paths-webpack-plugin: 2.4.0
@@ -19509,6 +19534,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.13.0":
+  version: 6.13.0
+  resolution: "undici-types@npm:6.13.0"
+  checksum: 9d0ef6bf58994bebbea6a4ab75f381c69a89a7ed151bfbae0d4ef95450d56502c9eccb323abf17b7d099c1d9c1cbae62e909e4dfeb8d204612d2f1fdada24707
   languageName: node
   linkType: hard
 

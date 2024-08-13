@@ -24,7 +24,7 @@
       "name": "Cli: Debug",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run cli ${input:command}",
+      "command": "npm run cli -- ${input:command}",
       "cwd": "${workspaceFolder}/server",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**", "**/$KNOWN_TOOLS$/**"],
       "preLaunchTask": {

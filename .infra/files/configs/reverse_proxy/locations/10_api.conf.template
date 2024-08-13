@@ -2,6 +2,7 @@ location /api {
     client_max_body_size    10M;
 
     set $upstream http://server:5000;
+    include includes/error_page_json.conf;
     include includes/proxy.conf;
 }
 
@@ -9,6 +10,7 @@ location /api/admin/upload {
     client_max_body_size    100M;
 
     set $upstream http://server:5000;
+    include includes/error_page_json.conf;
     include includes/proxy.conf;
 }
 
@@ -16,5 +18,6 @@ location /api/v1/admin {
     client_max_body_size    100M;
 
     set $upstream http://server:5000;
+    include includes/error_page_json.conf;
     include includes/proxy.conf;
 }

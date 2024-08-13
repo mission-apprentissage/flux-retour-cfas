@@ -1,18 +1,21 @@
 #compdef -d mna-tdb
 
-_mna-tdb_completion() {
+_mna_completion() {
   local curcontext="$curcontext" state line
   typeset -A opt_args
   local -a commands=(
+    "help:'Show help message'"
    "bin\:setup:'Installs mna-tdb binary with zsh completion on system'"
    "init\:env:'Update local env files using values from vault file'"
    "release\:app:'Build & Push Docker image releases'"
+   "docker\:login:'Login to ghcr.io'"
    "release\:interactive:'Interactivelly Build & Push Docker image releases'"
    "deploy:'Deploy application to <env>'"
    "preview\:build:'Build preview from open pull-requests'"
    "preview\:cleanup:'Remove preview from close pull-requests'"
+   "vault\:init:'Fetch initial vault-password from template-apprentissage'"
    "vault\:edit:'Edit vault file'"
-   "vault\:password:'Get vault password'"
+   "vault\:password:'Show vault password'"
    "seed\:update:'Update seed using a database'"
    "seed\:apply:'Apply seed to a database'"
    "deploy\:log\:encrypt:'Encrypt Github ansible logs'"
@@ -34,4 +37,4 @@ _mna-tdb_completion() {
   # _describe 'command' commands
 }
 
-_mna-tdb_completion "$@"
+_mna_completion "$@"
