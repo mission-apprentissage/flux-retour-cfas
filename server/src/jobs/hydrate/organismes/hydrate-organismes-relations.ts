@@ -130,7 +130,6 @@ export const hydrateOrganismesRelations = async () => {
     .toArray();
 
   const organismeInfosBySIRETAndUAI = organismes.reduce<{ [organismeId: string]: OrganismeInfos }>((acc, organisme) => {
-    console.log(organisme.nature, organisme.last_transmission_date);
     acc[getOrganismeKey(organisme)] = {
       _id: organisme._id,
       enseigne: organisme.enseigne,
