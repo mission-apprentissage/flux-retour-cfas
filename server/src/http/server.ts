@@ -529,9 +529,9 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/indicateurs/organismes/:id",
+        "/indicateurs/organismes/:type",
         returnResult(async (req, res) => {
-          return await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.id);
+          return await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
         })
       )
       .get(
