@@ -3,7 +3,7 @@ import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import { IOrganisme, defaultValuesOrganisme } from "shared/models/data/organismes.model";
+import { IOrganisme, defaultValuesOrganisme, withOrganismeListSummary } from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -568,9 +568,10 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
   if (!organisme) {
     throw Boom.notFound(`IOrganisme ${organismeId} not found`);
   }
+  const organismesWithAdditionalData = withOrganismeListSummary(organisme);
 
   return {
-    ...organisme,
+    ...organismesWithAdditionalData,
     permissions: permissionsOrganisme,
   } as OrganismeWithPermissions;
 }
@@ -1016,4 +1017,8 @@ export const generateOrganismeComputed = (orga: IOrganisme) => {
     ...(reseaux && { reseaux }),
     fiable: fiabilisation_statut === "FIABLE" && !ferme,
   };
+};
+
+export const isOrganismeFiable = (orga: IOrganisme) => {
+  return orga.fiabilisation_statut === "FIABLE" && !orga.ferme && orga.nature !== "inconnue";
 };

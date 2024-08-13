@@ -1,3 +1,4 @@
+import { isBefore, subMonths } from "date-fns";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
 import { z } from "zod";
@@ -39,6 +40,10 @@ const relationOrganismeSchema = z
     academie: z.string().optional(),
     reseaux: z.array(z.string()).optional(),
     date_collecte: z.string().optional(),
+    fiable: z.boolean().optional(),
+    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
+    last_transmission_date: z.date().nullish(),
+    ferme: z.boolean().optional(),
 
     // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
     responsabilitePartielle: z.boolean().optional(),
@@ -274,5 +279,36 @@ export function defaultValuesOrganisme(): Pick<
     updated_at: new Date(),
   };
 }
+
+export const withOrganismeListSummary = (organisme: IOrganisme) => {
+  const init = {
+    organismes: 0,
+    fiables: 0,
+    sansTransmissions: 0,
+    siretFerme: 0,
+    natureInconnue: 0,
+    uaiNonDeterminee: 0,
+  };
+  const organismesCount = organisme.organismesFormateurs?.reduce((acc, curr) => {
+    return {
+      ...acc,
+      fiables: acc.fiables + (curr.fiable ? 1 : 0),
+      organismes: acc.organismes + 1,
+      natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
+      uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
+      siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
+      sansTransmissions:
+        acc.sansTransmissions +
+        (curr.last_transmission_date && !isBefore(new Date(curr.last_transmission_date), subMonths(new Date(), 3))
+          ? 0
+          : 1),
+    };
+  }, init);
+
+  return {
+    ...organisme,
+    organismesCount,
+  };
+};
 
 export default { zod: zOrganisme, indexes, collectionName };
