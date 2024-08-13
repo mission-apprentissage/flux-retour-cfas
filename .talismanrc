@@ -5,8 +5,6 @@ fileignoreconfig:
   checksum: 3b48fcb116e6f8e02a9201503142834b10d06ad0d796f26ccf747547d23c9968
 - filename: .bin/zsh-completion
   checksum: 939b0b205ac2abd3608c8fc00ff7954ac64dcf472b614327b46f1d61d58a24ac
-- filename: yarn.lock
-  checksum: 57db03a14588b2472e58d06eec09fd89fb3eba36999e65d42cc42f5b07376f0c
 - filename: .github/workflows/deploy_preview.yml
   checksum: 461208e3c293062c405f4dacdda6bf3b87153cb43da80698f7c97a4be76375f0
 - filename: .github/workflows/gitguardian.yml
@@ -18,9 +16,7 @@ fileignoreconfig:
 - filename: .github/workflows/release.yml
   checksum: 36a0bede4fd3d782a86697a77f379bafedf77373313d736ac601548d63eee188
 - filename: .infra/.env_server
-  checksum: 3dc90eab8771c5e9af5dcde034b26e28be4d5b6b4821c1e455fa7c2bb22ae17c
-  ignore_detectors:
-  - filename
+  checksum: 58de2e6db4119c23e0c5cc2917b4a8ae3d2ed07539482dd63e8235cb06f2ca59
 - filename: .infra/.env_ui
   checksum: 64ba1d64ce623e03641cc53a99931405e83feab2be0b479328b5c6e1456261fe
 - filename: .infra/docker-compose.production.yml
@@ -52,7 +48,7 @@ fileignoreconfig:
 - filename: README.md
   checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
-  checksum: c54009c7da990622a94d3d71cfb2384167c2d09ed4e2260c135193668ebd03fd
+  checksum: aa704fdc0739a4d6f08bd45bd52b797d0980790b5fdc87714df9731a376d9884
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/common/actions/effectifs.actions.ts
@@ -143,6 +139,8 @@ fileignoreconfig:
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
+- filename: yarn.lock
+  checksum: 57db03a14588b2472e58d06eec09fd89fb3eba36999e65d42cc42f5b07376f0c
 scopeconfig:
 - scope: node
 custom_patterns:
@@ -158,5 +156,4 @@ allowed_patterns:
 - apiKey
 - ApiKey
 - api_key
-- tableau-de-bord@apprentissage\.beta\.gouv.fr
 version: "1.0"

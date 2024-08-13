@@ -33,6 +33,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@asteasolutions/zod-to-openapi@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "@asteasolutions/zod-to-openapi@npm:7.1.1"
+  dependencies:
+    openapi3-ts: ^4.1.2
+  peerDependencies:
+    zod: ^3.20.2
+  checksum: 7d0d444f1e8721040d2ce08f1b1108a60be93e10c54eb806823490b3e2e3b41347f15fa9bb41b9754a0cdc844a1fad42267b0a9af5668efac09a762baad0801f
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.21.4, @babel/code-frame@npm:^7.23.5":
   version: 7.23.5
   resolution: "@babel/code-frame@npm:7.23.5"
@@ -5551,6 +5562,18 @@ __metadata:
     normalize-path: ^3.0.0
     picomatch: ^2.0.4
   checksum: 3e044fd6d1d26545f235a9fe4d7a534e2029d8e59fa7fd9f2a6eb21230f6b5380ea1eaf55136e60cbf8e613544b3b766e7a6fa2102e2a3a117505466e3025dc2
+  languageName: node
+  linkType: hard
+
+"api-alternance-sdk@npm:^0.0.1-rc.10":
+  version: 0.0.1-rc.10
+  resolution: "api-alternance-sdk@npm:0.0.1-rc.10"
+  dependencies:
+    "@asteasolutions/zod-to-openapi": ^7.1.1
+    luxon: ^3.5.0
+    openapi3-ts: ^4.3.3
+    zod: ^3.23.8
+  checksum: 80c2383bbfc14a82bd1f1f4b27f174b73d831ddd35404a2704108ca89ed2a51e32cbf5216044b49213c15981c4c62fb26f9db35f80bf2e88ee87fb1d8541db75
   languageName: node
   linkType: hard
 
@@ -13117,6 +13140,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"luxon@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "luxon@npm:3.5.0"
+  checksum: f290fe5788c8e51e748744f05092160d4be12150dca70f9fadc0d233e53d60ce86acd82e7d909a114730a136a77e56f0d3ebac6141bbb82fd310969a4704825b
+  languageName: node
+  linkType: hard
+
 "lz-string@npm:^1.5.0":
   version: 1.5.0
   resolution: "lz-string@npm:1.5.0"
@@ -15537,6 +15567,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi3-ts@npm:^4.3.3":
+  version: 4.3.3
+  resolution: "openapi3-ts@npm:4.3.3"
+  dependencies:
+    yaml: ^2.4.5
+  checksum: 6620742dbf57e22a1de47b43149ddbcc7c63d270cd2f796ccd7ab3ca9c1712c19259516f827e541c7d57c21a56eaa03d9d8b9fe07ec968d1c47493d60b02f209
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.9.3":
   version: 0.9.3
   resolution: "optionator@npm:0.9.3"
@@ -17827,6 +17866,7 @@ __metadata:
     "@types/stream-json": ^1.7.7
     JSONStream: ^1.3.5
     adm-zip: ^0.5.10
+    api-alternance-sdk: ^0.0.1-rc.10
     axios: 0.27.2
     axios-cache-interceptor: ^0.10.7
     axios-retry: 3.3.1
@@ -20381,6 +20421,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yaml@npm:^2.4.5":
+  version: 2.5.0
+  resolution: "yaml@npm:2.5.0"
+  bin:
+    yaml: bin.mjs
+  checksum: a116dca5c61641d9bf1f1016c6e71daeb1ed4915f5930ed237d45ab7a605aa5d92c332ff64879a6cd088cabede008c778774e3060ffeb4cd617d28088e4b2d83
+  languageName: node
+  linkType: hard
+
 "yargs-parser@npm:20.2.4":
   version: 20.2.4
   resolution: "yargs-parser@npm:20.2.4"
@@ -20534,6 +20583,13 @@ __metadata:
   version: 3.21.4
   resolution: "zod@npm:3.21.4"
   checksum: f185ba87342ff16f7a06686767c2b2a7af41110c7edf7c1974095d8db7a73792696bcb4a00853de0d2edeb34a5b2ea6a55871bc864227dace682a0a28de33e1f
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.23.8":
+  version: 3.23.8
+  resolution: "zod@npm:3.23.8"
+  checksum: 15949ff82118f59c893dacd9d3c766d02b6fa2e71cf474d5aa888570c469dbf5446ac5ad562bb035bf7ac9650da94f290655c194f4a6de3e766f43febd432c5c
   languageName: node
   linkType: hard
 
