@@ -1,3 +1,4 @@
+import { isBefore, subMonths } from "date-fns";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
 import { z } from "zod";
@@ -21,6 +22,13 @@ export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
 
+export const ORGANISME_INDICATEURS_TYPE = {
+  SANS_EFFECTIFS: "SANS_EFFECTIFS",
+  NATURE_INCONNUE: "NATURE_INCONNUE",
+  SIRET_FERME: "SIRET_FERME",
+  UAI_NON_DETERMINE: "UAI_NON_DETERMINE",
+};
+
 const relationOrganismeSchema = z
   .object({
     // infos référentiel
@@ -40,14 +48,29 @@ const relationOrganismeSchema = z
     academie: z.string().optional(),
     reseaux: z.array(z.string()).optional(),
     date_collecte: z.string().optional(),
+    fiable: z.boolean().optional(),
+    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
+    last_transmission_date: z.date().nullish(),
+    ferme: z.boolean().optional(),
 
     // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
     responsabilitePartielle: z.boolean().optional(),
   })
   .strict();
 
+const organismesCountSchema = z.object({
+  organismes: z.number(),
+  fiables: z.number(),
+  sansTransmissions: z.number(),
+  siretFerme: z.number(),
+  natureInconnue: z.number(),
+  uaiNonDeterminee: z.number(),
+});
+
 export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
+
+export type IOrganismesCount = z.output<typeof organismesCountSchema>;
 
 const collectionName = "organismes";
 
@@ -275,5 +298,35 @@ export function defaultValuesOrganisme(): Pick<
     updated_at: new Date(),
   };
 }
+
+export const hasRecentTransmissions = (last_transmission_date: Date | null | undefined) =>
+  last_transmission_date && !isBefore(new Date(last_transmission_date), subMonths(new Date(), 3));
+
+export const withOrganismeListSummary = (organisme: IOrganisme) => {
+  const init = {
+    organismes: 0,
+    fiables: 0,
+    sansTransmissions: 0,
+    siretFerme: 0,
+    natureInconnue: 0,
+    uaiNonDeterminee: 0,
+  };
+  const organismesCount = organisme.organismesFormateurs?.reduce((acc, curr) => {
+    return {
+      ...acc,
+      fiables: acc.fiables + (curr.fiable ? 1 : 0),
+      organismes: acc.organismes + 1,
+      natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
+      uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
+      siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
+      sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
+    };
+  }, init);
+
+  return {
+    ...organisme,
+    organismesCount,
+  };
+};
 
 export default { zod: zOrganisme, indexes, collectionName };

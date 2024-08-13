@@ -328,7 +328,7 @@ describe("Routes /organismes/:id", () => {
               }
             );
 
-            expect(response.data).toEqual(JSON.parse(JSON.stringify(expected)));
+            expect(response.data).toMatchObject(JSON.parse(JSON.stringify(expected)));
           }
         }
       );

@@ -1,7 +1,9 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ArrayElement, ObjectId } from "mongodb";
+import { IOrganisme } from "shared/models";
 import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
+import { isOrganismeFiable } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
@@ -19,6 +21,10 @@ interface OrganismeInfos {
   departement?: string;
   academie?: string;
   reseaux?: string[];
+  fiable: boolean;
+  nature: IOrganisme["nature"];
+  last_transmission_date: Date | null | undefined;
+  ferme: boolean | undefined;
 }
 
 /**
@@ -114,6 +120,10 @@ export const hydrateOrganismesRelations = async () => {
           "adresse.departement": 1,
           "adresse.academie": 1,
           reseaux: 1,
+          nature: 1,
+          last_transmission_date: 1,
+          fiabilisation_statut: 1,
+          ferme: 1,
         },
       }
     )
@@ -129,6 +139,10 @@ export const hydrateOrganismesRelations = async () => {
       departement: organisme.adresse?.departement,
       academie: organisme.adresse?.academie,
       reseaux: organisme.reseaux,
+      fiable: isOrganismeFiable(organisme),
+      nature: organisme.nature,
+      last_transmission_date: organisme.last_transmission_date,
+      ferme: organisme.ferme,
     };
     return acc;
   }, {});
@@ -171,8 +185,20 @@ export const hydrateOrganismesRelations = async () => {
         ...relatedOrganismeData
       }: ArrayElement<IOrganismeReferentiel["relations"]>): ArrayElement<IOrganismeReferentiel["relations"]> &
         OrganismeInfos & { responsabilitePartielle: boolean } {
-        const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
-          organismeInfosBySIRETAndUAI[getOrganismeKey(relatedOrganismeData)] ?? {};
+        const {
+          _id,
+          enseigne,
+          raison_sociale,
+          commune,
+          region,
+          departement,
+          academie,
+          reseaux,
+          fiable,
+          nature,
+          last_transmission_date,
+          ferme,
+        } = organismeInfosBySIRETAndUAI[getOrganismeKey(relatedOrganismeData)] ?? {};
 
         // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
         let responsabilitePartielle = false;
@@ -201,6 +227,10 @@ export const hydrateOrganismesRelations = async () => {
           academie,
           reseaux,
           responsabilitePartielle,
+          fiable,
+          nature,
+          last_transmission_date,
+          ferme,
         });
       }
 

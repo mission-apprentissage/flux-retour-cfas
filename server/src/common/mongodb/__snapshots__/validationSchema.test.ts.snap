@@ -11543,8 +11543,34 @@ exports[`validation-schema should create validation schema for organismes: organ
               "null",
             ],
           },
+          "ferme": {
+            "bsonType": "bool",
+          },
+          "fiable": {
+            "bsonType": "bool",
+          },
           "label": {
             "bsonType": "string",
+          },
+          "last_transmission_date": {
+            "anyOf": [
+              {
+                "bsonType": "date",
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+          "nature": {
+            "bsonType": "string",
+            "enum": [
+              "responsable",
+              "formateur",
+              "responsable_formateur",
+              "lieu_formation",
+              "inconnue",
+            ],
           },
           "raison_sociale": {
             "bsonType": "string",
@@ -11617,8 +11643,34 @@ exports[`validation-schema should create validation schema for organismes: organ
               "null",
             ],
           },
+          "ferme": {
+            "bsonType": "bool",
+          },
+          "fiable": {
+            "bsonType": "bool",
+          },
           "label": {
             "bsonType": "string",
+          },
+          "last_transmission_date": {
+            "anyOf": [
+              {
+                "bsonType": "date",
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+          "nature": {
+            "bsonType": "string",
+            "enum": [
+              "responsable",
+              "formateur",
+              "responsable_formateur",
+              "lieu_formation",
+              "inconnue",
+            ],
           },
           "raison_sociale": {
             "bsonType": "string",
