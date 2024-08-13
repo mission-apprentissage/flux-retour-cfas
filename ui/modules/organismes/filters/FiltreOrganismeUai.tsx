@@ -1,5 +1,6 @@
 import { CheckboxGroup, Stack, Checkbox } from "@chakra-ui/react";
 import { useState } from "react";
+import { UAI_INCONNUE_CAPITALIZE } from "shared";
 
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
@@ -25,10 +26,10 @@ function FiltreOrganismeUai(props: FiltreOrganismeUaiProps) {
           >
             <Stack>
               <Checkbox value="true" key="connu" fontSize="mini" size="sm">
-                Connu
+                Connue
               </Checkbox>
               <Checkbox value="false" key="inconnu" fontSize="mini" size="sm">
-                Inconnu
+                {UAI_INCONNUE_CAPITALIZE}
               </Checkbox>
             </Stack>
           </CheckboxGroup>
