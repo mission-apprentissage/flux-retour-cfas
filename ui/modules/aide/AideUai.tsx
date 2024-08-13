@@ -1,5 +1,6 @@
 import { Text, Flex, Img, OrderedList, ListItem } from "@chakra-ui/react";
 import React, { useState } from "react";
+import { UAI_INCONNUE_CAPITALIZE } from "shared";
 
 import AidePage from "@/components/Page/AidePage";
 
@@ -50,7 +51,7 @@ const AideUai = () => {
               s’obtient auprès des services du rectorat de l’académie (RAMSESE) où se situe le CFA. L’absence de ce
               numéro bloque l’enregistrement des contrats d’apprentissage.
             </AidePage.SidebarInfos>
-            <AidePage.SidebarTips title="Astuce : chercher un UAI">
+            <AidePage.SidebarTips title="Astuce : chercher une UAI">
               Pour rechercher votre numéro UAI, consultez le site{" "}
               <AidePage.Link href="https://www.education.gouv.fr/acce_public/index.php">ACCE</AidePage.Link> (Éducation
               Nationale).
@@ -91,7 +92,9 @@ const AideUai = () => {
         />
 
         <AidePage.Accordion defaultIndex={expandedIndex} allowToggle mt={12}>
-          <AidePage.AccordionItem title='Mon numéro UAI est signalé "Inconnu" sur mon espace Tableau de bord mais j&apos;en possède un.'>
+          <AidePage.AccordionItem
+            title={`Mon UAI est signalée "${UAI_INCONNUE_CAPITALIZE}" sur mon espace Tableau de bord mais j'en possède une.`}
+          >
             <AidePage.ModalButton
               buttonText="Voir un exemple"
               modalTitle={ModalUai.title}

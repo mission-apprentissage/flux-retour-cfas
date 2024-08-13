@@ -20,6 +20,7 @@ import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper"
 
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
+export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
 
 export const ORGANISME_INDICATEURS_TYPE = {
   SANS_EFFECTIFS: "SANS_EFFECTIFS",
