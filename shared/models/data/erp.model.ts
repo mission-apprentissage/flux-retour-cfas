@@ -13,6 +13,7 @@ const zErp = z.object({
   apiV3: z.boolean().nullish(),
   helpFilePath: z.string().nullish(),
   helpFileSize: z.string().nullish(),
+  unique_id: z.string().nullish(),
 });
 
 export type IErp = z.output<typeof zErp>;
