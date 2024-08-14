@@ -783,18 +783,22 @@ async function getOrganismeRestriction(organismeId?: ObjectId) {
 
 export const getIndicateursForRelatedOrganismes = async (organismeId: ObjectId, indicateurType: string) => {
   const org = await organismesDb().findOne({ _id: organismeId });
+  const organismesFormateurs = org?.organismesFormateurs;
 
+  if (!organismesFormateurs) {
+    return [];
+  }
   switch (indicateurType) {
     case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS:
-      return org?.organismesFormateurs?.filter(
+      return organismesFormateurs.filter(
         ({ last_transmission_date }) => !hasRecentTransmissions(last_transmission_date)
       );
     case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE:
-      return org?.organismesFormateurs?.filter(({ nature }) => nature === "inconnue");
+      return organismesFormateurs.filter(({ nature }) => nature === "inconnue");
     case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
-      return org?.organismesFormateurs?.filter(({ ferme }) => !!ferme);
+      return organismesFormateurs.filter(({ ferme }) => !!ferme);
     case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
-      return org?.organismesFormateurs?.filter(({ uai }) => !uai);
+      return organismesFormateurs.filter(({ uai }) => !uai);
     default:
       return [];
   }

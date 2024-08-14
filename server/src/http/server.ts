@@ -9,7 +9,13 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive, SOURCE_APPRENANT } from "shared";
+import {
+  typesEffectifNominatif,
+  CODE_POSTAL_REGEX,
+  zEffectifArchive,
+  SOURCE_APPRENANT,
+  typesOrganismesIndicateurs,
+} from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -531,7 +537,16 @@ function setupRoutes(app: Application) {
       .get(
         "/indicateurs/organismes/:type",
         returnResult(async (req, res) => {
-          return await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
+          const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
+          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
+          await createTelechargementListeNomLog(
+            `organismes_${type}`,
+            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
+            new Date(),
+            req.user._id,
+            res.locals.organismeId
+          );
+          return indicateurs;
         })
       )
       .get(

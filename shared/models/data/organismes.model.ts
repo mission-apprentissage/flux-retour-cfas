@@ -22,13 +22,6 @@ export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
 
-export const ORGANISME_INDICATEURS_TYPE = {
-  SANS_EFFECTIFS: "SANS_EFFECTIFS",
-  NATURE_INCONNUE: "NATURE_INCONNUE",
-  SIRET_FERME: "SIRET_FERME",
-  UAI_NON_DETERMINE: "UAI_NON_DETERMINE",
-};
-
 const relationOrganismeSchema = z
   .object({
     // infos référentiel
