@@ -2,13 +2,17 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { typesEffectifNominatif } from "../../constants";
+import { typesEffectifNominatif, typesOrganismesIndicateurs } from "../../constants";
 
 const collectionName = "telechargementListeNomLogs";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
-const extendedTypesEffectifNominatif = [...typesEffectifNominatif, "affelnet"] as const;
+export const extendedTypesEffectifNominatif = [
+  ...typesEffectifNominatif,
+  ...typesOrganismesIndicateurs.map((type) => `organismes_${type}`),
+  "affelnet",
+] as const;
 
 export const zTelechargementListeNomLogs = z.object({
   _id: zObjectId.describe("Identifiant MongoDB du log"),
