@@ -334,7 +334,14 @@ exports[`validation-schema should create validation schema for effectifV2: effec
             "date_de_naissance": {
               "anyOf": [
                 {
-                  "bsonType": "date",
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                    },
+                    {
+                      "bsonType": "string",
+                    },
+                  ],
                 },
                 {
                   "bsonType": "null",
