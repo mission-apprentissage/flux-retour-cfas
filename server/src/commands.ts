@@ -158,8 +158,9 @@ program
     await startJobProcessor(signal);
   });
 
-function createJobAction(name) {
-  return async (options) => {
+function createJobAction(name: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return async (options: any) => {
     try {
       const { queued = false, ...payload } = options;
       const exitCode = await addJob({
@@ -173,7 +174,6 @@ function createJobAction(name) {
       }
     } catch (err) {
       logger.error(err);
-      captureException(err);
       program.error("Command failed", { exitCode: 2 });
     }
   };
@@ -701,6 +701,15 @@ program
     listEndpoints(server).map(({ path, methods }: { path: string; methods: string[] }) =>
       console.info(`${methods.join(", ").padStart(20)} ${path}`)
     );
+  });
+
+program
+  .command("job:run")
+  .description("Run a job")
+  .requiredOption("-n, --name <string>", "Job name")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(({ name, ...options }) => {
+    return createJobAction(name)(options);
   });
 
 export async function startCLI() {

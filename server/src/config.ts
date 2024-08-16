@@ -81,6 +81,9 @@ const config = {
     object: "Consolidation des données",
     context: "MNA",
   },
+  apiAlternance: {
+    key: env.get("API_ALTERNANCE_KEY").required().asString(),
+  },
   decaApi: {
     endpoint: env.get("MNA_TDB_API_DECA_URL").asString(),
     login: env.get("MNA_TDB_API_DECA_LOGIN").asString(),
