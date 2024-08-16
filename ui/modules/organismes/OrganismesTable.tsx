@@ -115,6 +115,42 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     ),
   },
   {
+    accessorKey: "formationsCount",
+    header: () => (
+      <>
+        Formations
+        <InfoTooltip
+          contentComponent={() => (
+            <Box>
+              <b>Formations de l’établissement</b>
+              <Text>
+                ILe nombre de formations associées à cet organisme provient du Catalogue des offres de formations en
+                apprentissage (Carif-Oref) dont votre établissement à la gestion. Si une erreur est constatée, écrivez à
+                pole-apprentissage@intercariforef.org avec les informations suivantes :
+              </Text>
+              <UnorderedList mt={4} mb={4}>
+                <ListItem>votre SIRET ;</ListItem>
+                <ListItem>RNCP et/ou le code diplôme ;</ListItem>
+                <ListItem>
+                  la période d&apos;inscription telle que mentionnée dans le catalogue Carif-Oref (exprimée en AAAA-MM)
+                  ;
+                </ListItem>
+                <ListItem>le lieu de la formation (code commune INSEE ou à défaut code postal) ;</ListItem>
+                <ListItem>mail de la personne signalant l’erreur ;</ListItem>
+              </UnorderedList>
+              <Text>
+                Une investigation sera menée par le Réseau des Carif-Oref pour le traitement de cette anomalie.
+              </Text>
+            </Box>
+          )}
+          aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
+    sur l’INSEE."
+        />
+      </>
+    ),
+    cell: ({ getValue }) => <Text> {getValue()}</Text>,
+  },
+  {
     accessorKey: "ferme",
     header: () => (
       <>
@@ -197,6 +233,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
 interface OrganismesTableProps extends OrganismeFiltersListVisibilityProps {
   organismes: OrganismeNormalized[];
   modeNonFiable?: boolean;
+  withFormations?: boolean;
 }
 
 function OrganismesTable(props: OrganismesTableProps) {
@@ -242,6 +279,10 @@ function OrganismesTable(props: OrganismesTableProps) {
         organisme.normalizedCommune.startsWith(normalizedSearchValue)
     );
   }, [props.organismes, searchValue]);
+
+  const countFormations = useMemo(() => {
+    return props.organismes.reduce((acc, organisme) => acc + (organisme.formationsCount ?? 0), 0);
+  }, [props.organismes]);
 
   return (
     <>
@@ -289,7 +330,9 @@ function OrganismesTable(props: OrganismesTableProps) {
       </Box>
 
       <Text>
-        <strong>{filteredOrganismes.length} organismes</strong>
+        <strong>
+          {filteredOrganismes.length} organismes et {countFormations} formations associées
+        </strong>
       </Text>
 
       <NewTable

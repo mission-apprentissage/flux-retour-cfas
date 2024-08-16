@@ -19,8 +19,9 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { findOrganismeFormateursIds } from "./permissions";
 
-export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme };
-
+export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme } & {
+  formationsCount?: number;
+};
 export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
