@@ -8932,7 +8932,10 @@ exports[`validation-schema should create validation schema for formationV2: form
       "bsonType": "objectId",
     },
     "cfd": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "created_at": {
       "bsonType": "date",
@@ -8947,7 +8950,10 @@ exports[`validation-schema should create validation schema for formationV2: form
       "bsonType": "objectId",
     },
     "rncp": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "updated_at": {
       "bsonType": "date",
@@ -8960,8 +8966,6 @@ exports[`validation-schema should create validation schema for formationV2: form
     "updated_at",
     "organisme_responsable_id",
     "organisme_formateur_id",
-    "rncp",
-    "cfd",
   ],
 }
 `;
@@ -10892,10 +10896,16 @@ exports[`validation-schema should create validation schema for organismeV2: orga
       "bsonType": "bool",
     },
     "siret": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "uai": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "updated_at": {
       "bsonType": "date",
@@ -10906,8 +10916,6 @@ exports[`validation-schema should create validation schema for organismeV2: orga
     "draft",
     "created_at",
     "updated_at",
-    "uai",
-    "siret",
   ],
 }
 `;
