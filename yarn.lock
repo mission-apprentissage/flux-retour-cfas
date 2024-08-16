@@ -13133,14 +13133,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.2.1, luxon@npm:^3.4.4":
-  version: 3.4.4
-  resolution: "luxon@npm:3.4.4"
-  checksum: 36c1f99c4796ee4bfddf7dc94fa87815add43ebc44c8934c924946260a58512f0fd2743a629302885df7f35ccbd2d13f178c15df046d0e3b6eb71db178f1c60c
-  languageName: node
-  linkType: hard
-
-"luxon@npm:^3.5.0":
+"luxon@npm:^3.2.1, luxon@npm:^3.4.4, luxon@npm:^3.5.0":
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
   checksum: f290fe5788c8e51e748744f05092160d4be12150dca70f9fadc0d233e53d60ce86acd82e7d909a114730a136a77e56f0d3ebac6141bbb82fd310969a4704825b
@@ -15558,16 +15551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openapi3-ts@npm:^4.1.2":
-  version: 4.2.1
-  resolution: "openapi3-ts@npm:4.2.1"
-  dependencies:
-    yaml: ^2.3.4
-  checksum: ba6fbaa11521879e825679ddd748d59d7927bd36ab50dd4cb44eb450cd04df159da26859e132d2c19503351451d3d4a100506a74eeca7441afa5b9ef9b87ab5b
-  languageName: node
-  linkType: hard
-
-"openapi3-ts@npm:^4.3.3":
+"openapi3-ts@npm:^4.1.2, openapi3-ts@npm:^4.3.3":
   version: 4.3.3
   resolution: "openapi3-ts@npm:4.3.3"
   dependencies:
@@ -20407,7 +20391,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:2.3.4, yaml@npm:^2.1.1, yaml@npm:^2.3.4":
+"yaml@npm:2.3.4":
   version: 2.3.4
   resolution: "yaml@npm:2.3.4"
   checksum: e6d1dae1c6383bcc8ba11796eef3b8c02d5082911c6723efeeb5ba50fc8e881df18d645e64de68e421b577296000bea9c75d6d9097c2f6699da3ae0406c030d8
@@ -20421,7 +20405,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.4.5":
+"yaml@npm:^2.1.1, yaml@npm:^2.4.5":
   version: 2.5.0
   resolution: "yaml@npm:2.5.0"
   bin:
