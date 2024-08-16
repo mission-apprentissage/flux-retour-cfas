@@ -16,7 +16,7 @@ export const getPersonV2 = async (nom: string, prenom: string, date_de_naissance
   return personV2Db().findOne({
     nom: nom.toLowerCase(),
     prenom: prenom.toLowerCase(),
-    date_de_naissance: date_de_naissance,
+    date_de_naissance: new Date(date_de_naissance),
   });
 };
 export const insertPersonV2 = async (nom: string, prenom: string, date_de_naissance: Date) => {
@@ -26,6 +26,6 @@ export const insertPersonV2 = async (nom: string, prenom: string, date_de_naissa
     updated_at: new Date(),
     nom: nom.toLowerCase(),
     prenom: prenom.toLowerCase(),
-    date_de_naissance: date_de_naissance,
+    date_de_naissance: new Date(date_de_naissance),
   });
 };

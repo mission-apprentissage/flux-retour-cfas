@@ -11,8 +11,8 @@ export const zOrganismeV2 = z.object({
   draft: z.boolean(),
   created_at: z.date(),
   updated_at: z.date(),
-  uai: z.string(),
-  siret: z.string(),
+  uai: z.string().nullish(),
+  siret: z.string().nullish(),
   current_organisme_id: zObjectId.nullish(),
 });
 

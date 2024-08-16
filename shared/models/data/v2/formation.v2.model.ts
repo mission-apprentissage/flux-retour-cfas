@@ -13,8 +13,8 @@ export const zFormationV2 = z.object({
   updated_at: z.date(),
   organisme_responsable_id: zObjectId,
   organisme_formateur_id: zObjectId,
-  rncp: z.string(),
-  cfd: z.string(),
+  rncp: z.string().nullish(),
+  cfd: z.string().nullish(),
 });
 
 export type IFormationV2 = z.output<typeof zFormationV2>;
