@@ -334,7 +334,14 @@ exports[`validation-schema should create validation schema for effectifV2: effec
             "date_de_naissance": {
               "anyOf": [
                 {
-                  "bsonType": "date",
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                    },
+                    {
+                      "bsonType": "string",
+                    },
+                  ],
                 },
                 {
                   "bsonType": "null",
@@ -12803,6 +12810,10 @@ exports[`validation-schema should create validation schema for telechargementLis
         "rupturant",
         "abandon",
         "inconnu",
+        "organismes_sans_effectifs",
+        "organismes_nature_inconnue",
+        "organismes_siret_ferme",
+        "organismes_uai_non_determine",
         "affelnet",
       ],
     },

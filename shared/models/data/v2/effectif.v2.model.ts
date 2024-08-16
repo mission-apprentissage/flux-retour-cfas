@@ -12,7 +12,7 @@ export const zEffectifV2Computed = z
   .object({
     nom: z.string().nullish(),
     prenom: z.string().nullish(),
-    date_de_naissance: z.date().nullish(),
+    date_de_naissance: z.union([z.date(), z.string()]).nullish(),
   })
   .nullish();
 export const zEffectifV2 = z.object({
