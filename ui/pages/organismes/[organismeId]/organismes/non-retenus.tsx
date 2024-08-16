@@ -36,7 +36,7 @@ function OrganismesNonRetenus() {
     (prominentOrganisme as any).prominent = true;
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="non-retenus" modePublique={true} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={true} />;
 }
 
 export default withAuth(OrganismesNonRetenus);

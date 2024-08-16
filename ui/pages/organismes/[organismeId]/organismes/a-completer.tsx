@@ -36,7 +36,7 @@ function SesOrganismesACompleter() {
     (prominentOrganisme as any).prominent = true;
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={true} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={true} />;
 }
 
 export default withAuth(SesOrganismesACompleter);
