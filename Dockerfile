@@ -35,7 +35,7 @@ RUN mkdir -p /app/shared/node_modules && mkdir -p /app/server/node_modules
 FROM node:22-slim AS server
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates && apt-get clean
+RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
 ENV NODE_ENV production
 ARG PUBLIC_VERSION
@@ -81,7 +81,7 @@ RUN yarn workspace ui build
 FROM node:22-slim AS ui
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates && apt-get clean
+RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -101,7 +101,7 @@ COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/next.config.js /app/
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/public /app/ui/public
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/package.json /app/ui/package.json
 
-# Automatically leverage output traces to reduce image size 
+# Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/.next/standalone /app/
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/.next/static /app/ui/.next/static
