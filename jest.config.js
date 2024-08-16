@@ -49,7 +49,7 @@ const config = async () => {
             {
               tsconfig: "<rootDir>/server/tsconfig.json",
               useESM: true,
-              isolatedModules: true,
+              isolatedModules: false,
             },
           ],
         },
