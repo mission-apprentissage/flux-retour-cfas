@@ -1,7 +1,8 @@
-import { Text, UnorderedList, ListItem, Box, Flex, Img } from "@chakra-ui/react";
+import { Text, UnorderedList, ListItem, Box } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import TextHighlight from "@/components/Text/Highlight";
 
 const AideQualiopi = () => {
   const [expandedIndex] = useState<number | number[]>(0);
@@ -126,13 +127,9 @@ const AideQualiopi = () => {
               d&apos;accréditation (Cofrac) ou par France Compétences.
             </Text>
             <Text>La liste des organismes certificateurs accrédités est consultable en ligne (voir ci-dessus).</Text>
-            <Flex align="center">
-              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={2} mt={1} />
-              <Text>
-                <b>Bon à savoir :</b> un organisme qui n&apos;est pas accrédité ne peut pas délivrer de certification
-                Qualiopi.
-              </Text>
-            </Flex>
+            <TextHighlight>
+              un organisme qui n&apos;est pas accrédité ne peut pas délivrer de certification Qualiopi.
+            </TextHighlight>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Comment obtenir la certification Qualiopi ?">

@@ -1,7 +1,9 @@
-import { Text, UnorderedList, ListItem, Img, Flex } from "@chakra-ui/react";
+import { Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import React, { useState } from "react";
 
+import DownloadLink from "@/components/Links/DownloadLink";
 import AidePage from "@/components/Page/AidePage";
+import TextHighlight from "@/components/Text/Highlight";
 
 const AideCodeRncp = () => {
   const [expandedIndex] = useState<number | number[]>(0);
@@ -49,15 +51,11 @@ const AideCodeRncp = () => {
               également constituées de blocs de compétences, ensembles homogènes et cohérents de compétences contribuant
               à l&apos;exercice autonome d&apos;une activité professionnelle et pouvant être évaluées et validées.
             </Text>
-            <Flex align="center">
-              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={2} mt={1} />
-              <Text>
-                <b>Bon à savoir :</b> Il revient aux CFA de se mettre à jour auprès de France Compétences :{" "}
-              </Text>
-            </Flex>
-            <AidePage.DownloadLink href="/pdf/Vadémécum-RNCP-V1.1-VF-.pdf" fileType="PDF" fileSize="958 Ko" isExternal>
+            <TextHighlight>Il revient aux CFA de se mettre à jour auprès de France Compétences : </TextHighlight>
+
+            <DownloadLink href="/pdf/Vadémécum-RNCP-V1.1-VF-.pdf" fileType="PDF" fileSize="958 Ko" isExternal>
               Vademecum RNCP
-            </AidePage.DownloadLink>
+            </DownloadLink>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Comment vérifier ou rechercher mes certifications ?">
@@ -94,14 +92,14 @@ const AideCodeRncp = () => {
               déclarations sur la certification par l&apos;OFA. Veuillez contacter votre Carif-Oref pour signaler une
               erreur (fichier des contacts téléchargeable).
             </Text>
-            <AidePage.DownloadLink
+            <DownloadLink
               href="https://drive.google.com/file/d/1xjshlQqxl3UKhoU7xrEhziCUqVsPAxCU/view?usp=drive_link"
               fileType="PDF"
               fileSize="417 Ko"
               isExternal
             >
               Liste de contacts Carif-Oref
-            </AidePage.DownloadLink>
+            </DownloadLink>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Quelle est la période de validité d'un code RNCP ?">

@@ -86,15 +86,6 @@ interface AideLinkProps {
   [key: string]: any;
 }
 
-interface AidePageDownloadLinkProps {
-  children: ReactNode;
-  href: string;
-  fileType: string;
-  fileSize: string;
-  onClick?: () => void;
-  [key: string]: any;
-}
-
 const AidePage = ({ children }: AidePageProps) => <Flex flexDirection="column">{children}</Flex>;
 
 const AidePageTitle = ({ children }: { children: ReactNode }) => (
@@ -237,35 +228,6 @@ const AidePageLink = ({ href, children, ...props }: AideLinkProps) => {
   );
 };
 
-const AidePageDownloadLink = ({ href, children, fileType, fileSize, onClick, ...props }: AidePageDownloadLinkProps) => {
-  const isExternal = href.startsWith("https") || props.isExternal;
-
-  return (
-    <Flex direction="column" gap={1}>
-      <Button
-        as={Link}
-        variant="link"
-        href={href}
-        fontSize="md"
-        borderBottom="1px"
-        borderRadius="0"
-        p="0"
-        width="fit-content"
-        _hover={{ textDecoration: "none" }}
-        isExternal={isExternal}
-        onClick={onClick}
-        {...props}
-      >
-        {children}
-        <Box as="i" className="ri-download-line" color="bluefrance" ml={2} />
-      </Button>
-      <Text color="grey.600" fontSize="sm">
-        {fileType} - {fileSize}
-      </Text>
-    </Flex>
-  );
-};
-
 const AidePageFileCard = ({
   category,
   title,
@@ -322,7 +284,6 @@ AidePageFileCard.displayName = "AidePage.FileCard";
 AidePageButton.displayName = "AidePage.Button";
 AidePageModalButton.displayName = "AidePage.ModalButton";
 AidePageLink.displayName = "AidePage.Link";
-AidePageDownloadLink.displayName = "AidePage.DownloadLink";
 
 AidePage.Title = AidePageTitle;
 AidePage.Header = AidePageHeader;
@@ -337,6 +298,5 @@ AidePage.FileCard = AidePageFileCard;
 AidePage.Button = AidePageButton;
 AidePage.ModalButton = AidePageModalButton;
 AidePage.Link = AidePageLink;
-AidePage.DownloadLink = AidePageDownloadLink;
 
 export default AidePage;

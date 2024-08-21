@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: ui/modules/organismes/ListeOrganismesPage.tsx
+  checksum: 9cb75a32b1fb7c42d111aa642b679d8506be96df46a6f80b5a748abd128472d8
+- filename: ui/modules/referencement-organisme/tabs/AideCodeRncp.tsx
+  checksum: 7f69cdfe1cd6fa9ee3332171656f6961156690a5aa5392c1dd239681f3878bea
 - filename: ui/components/Televersement/DocumentsActionButtons.tsx
   checksum: f3598ec013dca8f849c41c42cd8c0c75457ece9166b36717e8d1db84cfde12fa
 - filename: ui/modules/referencement-organisme/ReferencementOrganisme.tsx

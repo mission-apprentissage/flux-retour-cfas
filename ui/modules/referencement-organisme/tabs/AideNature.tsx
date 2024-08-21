@@ -15,6 +15,7 @@ import {
 import React from "react";
 
 import AidePage from "@/components/Page/AidePage";
+import TextHighlight from "@/components/Text/Highlight";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 
@@ -268,12 +269,10 @@ const AideNature = () => {
                 </UnorderedList>
               </ListItem>
             </UnorderedList>
-            <Text>
-              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={1} display="inline" />{" "}
-              <b>Bon à savoir :</b> Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré
-              son offre de formation dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la
-              corriger.
-            </Text>
+            <TextHighlight>
+              Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré son offre de formation
+              dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la corriger.
+            </TextHighlight>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Si ma nature est indiquée “Inconnue”, comment la corriger ?">

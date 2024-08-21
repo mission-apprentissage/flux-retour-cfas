@@ -2,6 +2,7 @@ import { Text, Flex, Img, OrderedList, ListItem } from "@chakra-ui/react";
 import React from "react";
 import { UAI_INCONNUE_CAPITALIZE, UAI_INCONNUE_TAG_FORMAT } from "shared";
 
+import DownloadLink from "@/components/Links/DownloadLink";
 import AidePage from "@/components/Page/AidePage";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
@@ -144,7 +145,7 @@ const AideUai = () => {
               les établissements du système éducatif). Une expertise sera alors réalisée par le service.
             </Text>
 
-            <AidePage.DownloadLink
+            <DownloadLink
               href="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf"
               fileType="PDF"
               fileSize="81 Ko"
@@ -157,7 +158,7 @@ const AideUai = () => {
               }
             >
               Liste de contacts des services académiques
-            </AidePage.DownloadLink>
+            </DownloadLink>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Mon établissement ne possède pas d'UAI. Où et comment en faire la demande ?">
@@ -168,7 +169,7 @@ const AideUai = () => {
               Éducatif (RAMSESE).
             </Text>
             <Flex gap={6}>
-              <AidePage.DownloadLink
+              <DownloadLink
                 href="/pdf/formulaire-immatriculation-uai-pour-of_cfa.pdf"
                 fileType="PDF"
                 fileSize="105 Ko"
@@ -181,8 +182,8 @@ const AideUai = () => {
                 }
               >
                 Formulaire UAI
-              </AidePage.DownloadLink>{" "}
-              <AidePage.DownloadLink
+              </DownloadLink>{" "}
+              <DownloadLink
                 href="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf"
                 fileType="PDF"
                 fileSize="81 Ko"
@@ -195,7 +196,7 @@ const AideUai = () => {
                 }
               >
                 Liste des contacts des services académiques
-              </AidePage.DownloadLink>
+              </DownloadLink>
             </Flex>
           </AidePage.AccordionItem>
 
@@ -206,7 +207,7 @@ const AideUai = () => {
               UAI (Unité Administrative Immatriculée) pour identifier spécifiquement votre établissement de formation.
               Veuillez prendre contact avec le Rectorat (RAMSESE) de votre Académie.
             </Text>
-            <AidePage.DownloadLink
+            <DownloadLink
               href="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf"
               fileType="PDF"
               fileSize="81 Ko"
@@ -219,7 +220,7 @@ const AideUai = () => {
               }
             >
               Liste de contacts des services académiques
-            </AidePage.DownloadLink>
+            </DownloadLink>
           </AidePage.AccordionItem>
 
           <AidePage.AccordionItem title="Un organisme ne devrait pas apparaître dans le Tableau de bord et le Référentiel.">
