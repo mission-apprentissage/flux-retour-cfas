@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder_root
+FROM node:22-slim AS builder_root
 WORKDIR /app
 RUN yarn set version 3.3.1
 COPY .yarn /app/.yarn
@@ -25,16 +25,17 @@ WORKDIR /app
 COPY ./server ./server
 COPY ./shared ./shared
 
-RUN yarn --cwd server build
+RUN yarn workspace server build
 # Removing dev dependencies
 RUN --mount=type=cache,target=/app/.yarn/cache yarn workspaces focus --all --production
 
+RUN mkdir -p /app/shared/node_modules && mkdir -p /app/server/node_modules
+
 # Production image, copy all the files and run next
-FROM node:20-alpine AS server
+FROM node:22-slim AS server
 WORKDIR /app
-RUN --mount=type=cache,target=/var/cache/apk apk add --update \
-  curl \
-  && rm -rf /var/cache/apk/*
+
+RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
 ENV NODE_ENV production
 ARG PUBLIC_VERSION
@@ -43,6 +44,8 @@ ENV PUBLIC_VERSION=$PUBLIC_VERSION
 COPY --from=builder_server /app/server ./server
 COPY --from=builder_server /app/shared ./shared
 COPY --from=builder_server /app/node_modules ./node_modules
+COPY --from=builder_server /app/server/node_modules ./server/node_modules
+COPY --from=builder_server /app/shared/node_modules ./shared/node_modules
 
 EXPOSE 5000
 WORKDIR /app/server
@@ -71,12 +74,14 @@ ENV NEXT_PUBLIC_VERSION=$PUBLIC_VERSION
 ARG PUBLIC_ENV
 ENV NEXT_PUBLIC_ENV=$PUBLIC_ENV
 
-RUN yarn --cwd ui build
+RUN yarn workspace ui build
 # RUN --mount=type=cache,target=/app/ui/.next/cache yarn --cwd ui build
 
 # Production image, copy all the files and run next
-FROM node:20-alpine AS ui
+FROM node:22-slim AS ui
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -96,7 +101,7 @@ COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/next.config.js /app/
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/public /app/ui/public
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/package.json /app/ui/package.json
 
-# Automatically leverage output traces to reduce image size 
+# Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/.next/standalone /app/
 COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/.next/static /app/ui/.next/static

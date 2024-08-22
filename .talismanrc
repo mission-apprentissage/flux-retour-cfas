@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: .infra/vault/vault.yml
+  checksum: f0b1527c7c2e79cf9eb1253813d2b94fd0e3f76f8cf5deb22882f26ce5c3dc49
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx
   checksum: 9cb75a32b1fb7c42d111aa642b679d8506be96df46a6f80b5a748abd128472d8
 - filename: ui/modules/referencement-organisme/tabs/AideCodeRncp.tsx
@@ -43,6 +45,12 @@ fileignoreconfig:
   checksum: 7f31b52856bb49b25da7d4bf4aea3492cce9aec2ef4c30e9968f605006062592
 - filename: .github/workflows/ci.yml
   checksum: 9e279ec421f82277240a958eec081cdb098a7e602bfd41e023013362ad365cfb
+- filename: .bin/commands.sh
+  checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
+- filename: .bin/scripts/get-vault-password-client.sh
+  checksum: 3b48fcb116e6f8e02a9201503142834b10d06ad0d796f26ccf747547d23c9968
+- filename: .bin/zsh-completion
+  checksum: 939b0b205ac2abd3608c8fc00ff7954ac64dcf472b614327b46f1d61d58a24ac
 - filename: .github/workflows/deploy_preview.yml
   checksum: 461208e3c293062c405f4dacdda6bf3b87153cb43da80698f7c97a4be76375f0
 - filename: .github/workflows/gitguardian.yml
@@ -54,9 +62,7 @@ fileignoreconfig:
 - filename: .github/workflows/release.yml
   checksum: 36a0bede4fd3d782a86697a77f379bafedf77373313d736ac601548d63eee188
 - filename: .infra/.env_server
-  checksum: 3dc90eab8771c5e9af5dcde034b26e28be4d5b6b4821c1e455fa7c2bb22ae17c
-  ignore_detectors:
-  - filename
+  checksum: 58de2e6db4119c23e0c5cc2917b4a8ae3d2ed07539482dd63e8235cb06f2ca59
 - filename: .infra/.env_ui
   checksum: 64ba1d64ce623e03641cc53a99931405e83feab2be0b479328b5c6e1456261fe
 - filename: .infra/docker-compose.production.yml
@@ -72,7 +78,7 @@ fileignoreconfig:
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
-  checksum: 0a47929f0aa53717f31e2aa38528132cad22b78335255e56aafacd350797ec01
+  checksum: 447ce1ab2f5d3ac4a87430419e4d5c8df09cfc80fedaf2ee3ef15fc6716f75b0
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
@@ -88,7 +94,7 @@ fileignoreconfig:
 - filename: README.md
   checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
-  checksum: c54009c7da990622a94d3d71cfb2384167c2d09ed4e2260c135193668ebd03fd
+  checksum: aa704fdc0739a4d6f08bd45bd52b797d0980790b5fdc87714df9731a376d9884
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/common/actions/effectifs.actions.ts
@@ -141,16 +147,32 @@ fileignoreconfig:
   checksum: e77a9f86790a10fe8193f4e945228e7435308d4eb1d7769888b690ba234a66c5
 - filename: shared/models/data/organismes.model.ts
   checksum: 5804acc02f3f2db4be7f218f725cf29286978d29319299a286d2337786a68c10
+- filename: ui/common/utils/televersement.ts
+  checksum: a6097b52f42a834065f03b2852bcd9f90c48ea18c0757d473ca80f5c838240a2
 - filename: ui/components/Page/components/Footer.tsx
   checksum: 736fbc34e70cc8d948a03094fc0f85be607359367aa748eb8d6daaeb75e38382
+- filename: ui/components/Televersement/DocumentsActionButtons.tsx
+  checksum: 05d8d57ce39a5cfd5d18235640a82aeccbf4105c7339f2191f94ce8b77d6c402
 - filename: ui/config.public.ts
   checksum: d948f62fa366a82e511d61a75043108e9caa195bd6f2cdb543e9ea56f0b7345c
+- filename: ui/hooks/useExcelFileProcessor.ts
+  checksum: 0055dc0681ebee52fd44596ba15523aaf82d9ee2f04574cc6cd65718f38e6082
+- filename: ui/modules/aide/AideCodeRncp.tsx
+  checksum: 9eef5c3608c09e91abcf400b96687782b0fc5598f875aac9d41f3bb19414f092
+- filename: ui/modules/aide/AideNature.tsx
+  checksum: f4bd606392ac321df0d1de797a33a14cbc3fcfa76c6d3ac6bc3cf20339f76166
+- filename: ui/modules/aide/AideUai.tsx
+  checksum: ce81bb8b7b97a0ae7ba129be2cee66364f5f970669d2b4b0524c604d981d9318
 - filename: ui/modules/auth/inscription/InscriptionTeteDeReseau.tsx
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 20dbe13a8a82dc7394ff87b0c469f5f45e8e0a9582dc12065c4664d5a65e37cc
+- filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
+  checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
+- filename: ui/modules/referencement-organisme/ReferencementOrganisme.tsx
+  checksum: 6e755a406ed7a6901f59e3581ea5485d6f42b02b3d062d2fe6a50b044ea8c392
 - filename: ui/next.config.js
   checksum: e68b7b2b7828b9c665c02503b0505821e2b0ea41c91ae440fbce422c781ef07b
 - filename: ui/pages/auth/inscription/profil.tsx
@@ -163,6 +185,8 @@ fileignoreconfig:
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
+- filename: yarn.lock
+  checksum: 57db03a14588b2472e58d06eec09fd89fb3eba36999e65d42cc42f5b07376f0c
 scopeconfig:
 - scope: node
 custom_patterns:
@@ -178,5 +202,4 @@ allowed_patterns:
 - apiKey
 - ApiKey
 - api_key
-- tableau-de-bord@apprentissage\.beta\.gouv.fr
 version: "1.0"

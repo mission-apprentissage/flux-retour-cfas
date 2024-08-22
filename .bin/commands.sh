@@ -48,6 +48,10 @@ function build:image() {
   "${SCRIPT_DIR}/build-images.sh" "$@"
 }
 
+function docker:login() {
+  "${SCRIPT_DIR}/docker-login.sh" "$@"
+}
+
 function sentry:release() {
   "${SCRIPT_DIR}/sentry-release.sh" "$@"
 }
@@ -66,6 +70,12 @@ function preview:build() {
 
 function preview:cleanup() {
   "${SCRIPT_DIR}/run-playbook.sh" "preview_cleanup.yml" "preview"
+}
+
+function vault:init() {
+  # Ensure Op is connected
+  op account get > /dev/null
+  op document get ".vault-password-tmpl" --vault "mna-vault-passwords-common" > "${ROOT_DIR}/.infra/vault/.vault-password.gpg"
 }
 
 function vault:edit() {

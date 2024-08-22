@@ -8,7 +8,7 @@
   "private": true,
   "packageManager": "yarn@3.6.1",
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "npm": "please-use-yarn"
   },
   "workspaces": [
@@ -58,6 +58,7 @@
     "@commitlint/config-conventional": "^17.8.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
+    "@types/node": "^22.2.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "cross-env": "^7.0.3",
@@ -95,6 +96,9 @@
     ],
     "*": [
       "prettier --write -u"
+    ],
+    "yarn.lock": [
+      "yarn dedupe"
     ]
   },
   "resolutions": {
