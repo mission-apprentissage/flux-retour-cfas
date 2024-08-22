@@ -2,6 +2,7 @@ import { Text, Flex, Img, OrderedList, ListItem } from "@chakra-ui/react";
 import React from "react";
 import { UAI_INCONNUE_CAPITALIZE, UAI_INCONNUE_TAG_FORMAT } from "shared";
 
+import Accordion from "@/components/Accordion/Accordion";
 import DownloadLink from "@/components/Links/DownloadLink";
 import AidePage from "@/components/Page/AidePage";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -112,8 +113,8 @@ const AideUai = () => {
           }
         />
 
-        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
-          <AidePage.AccordionItem
+        <Accordion defaultIndex={0} allowToggle mt={12}>
+          <Accordion.Item
             title={`Mon UAI est signalée "${UAI_INCONNUE_CAPITALIZE}" sur mon espace Tableau de bord mais j'en possède une.`}
           >
             <AidePage.ModalButton
@@ -131,9 +132,9 @@ const AideUai = () => {
               l&apos;enregistrement des contrats d&apos;apprentissage. N&apos;oubliez pas que votre UAI devra être
               reporté sur le CERFA.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Le numéro UAI indiqué sur mon espace me semble erroné. Comment le corriger ?">
+          <Accordion.Item title="Le numéro UAI indiqué sur mon espace me semble erroné. Comment le corriger ?">
             <Text>
               Sur votre espace Tableau de bord de l&apos;apprentissage, l&apos;UAI associé à votre SIRET et
               établissement provient du Référentiel UAI-SIRET de l&apos;ONISEP. Si l&apos;UAI vous semble erroné,
@@ -159,9 +160,9 @@ const AideUai = () => {
             >
               Liste de contacts des services académiques
             </DownloadLink>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Mon établissement ne possède pas d'UAI. Où et comment en faire la demande ?">
+          <Accordion.Item title="Mon établissement ne possède pas d'UAI. Où et comment en faire la demande ?">
             <Text>
               Votre numéro UAI s&apos;obtient auprès des services du rectorat de votre académie. Téléchargez, remplissez
               le formulaire ci-dessous, et retournez-le complété au service académique pour l&apos;immatriculation
@@ -198,9 +199,9 @@ const AideUai = () => {
                 Liste des contacts des services académiques
               </DownloadLink>
             </Flex>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Mon établissement délègue la gestion des contrats à un CFA et je n'ai pas d'UAI.">
+          <Accordion.Item title="Mon établissement délègue la gestion des contrats à un CFA et je n'ai pas d'UAI.">
             <Text>
               Dans le cadre de la formation en apprentissage en France, si votre établissement formateur est distinct de
               l&apos;établissement gestionnaire / responsable qui porte les contrats, vous avez besoin d&apos;un numéro
@@ -221,9 +222,9 @@ const AideUai = () => {
             >
               Liste de contacts des services académiques
             </DownloadLink>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Un organisme ne devrait pas apparaître dans le Tableau de bord et le Référentiel.">
+          <Accordion.Item title="Un organisme ne devrait pas apparaître dans le Tableau de bord et le Référentiel.">
             <Text>
               Si un organisme ne devrait pas être présent dans le référentiel (par exemple s&apos;il s&apos;agit
               d&apos;une école maternelle ou élémentaire), merci de le signaler à l&apos;adresse mail suivante :{" "}
@@ -255,9 +256,9 @@ const AideUai = () => {
               </ListItem>
               <ListItem>en lien avec des formations en apprentissage à un moment donné</ListItem>
             </OrderedList>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Qu'est-ce que le Référentiel UAI-SIRET de l'ONISEP ?">
+          <Accordion.Item title="Qu'est-ce que le Référentiel UAI-SIRET de l'ONISEP ?">
             <Text>Le Référentiel contient 97% d&apos;OFA-CFA validés sur le territoire national. Ils sont :</Text>
             <OrderedList pl={2}>
               <ListItem>identifiés par un SIRET</ListItem>
@@ -280,8 +281,8 @@ const AideUai = () => {
               identifié. Toutes les administrations et parties prenantes concernées (Rectorats, DREETS, etc...) doivent
               s&apos;y référer.
             </Text>
-          </AidePage.AccordionItem>
-        </AidePage.Accordion>
+          </Accordion.Item>
+        </Accordion>
       </AidePage.Container>
     </AidePage>
   );

@@ -2,8 +2,9 @@ import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 import {
   Accordion as ChakraAccordion,
   AccordionItem as ChakraAccordionItem,
-  AccordionButton,
-  AccordionPanel,
+  AccordionButton as ChakraAccordionButton,
+  AccordionPanel as ChakraAccordionPanel,
+  AccordionIcon as ChakraAccordionIcon,
   Box,
   Flex,
   AccordionIcon,
@@ -62,7 +63,7 @@ const AccordionItem = ({ title, children, useCustomIcons = false, ...props }: Cu
       {({ isExpanded }) => (
         <>
           <Box>
-            <AccordionButton py={4}>
+            <ChakraAccordionButton py={4}>
               <Box flex="1" textAlign="left" fontWeight="bold" fontSize="epsilon" pr={12}>
                 {title}
               </Box>
@@ -75,13 +76,13 @@ const AccordionItem = ({ title, children, useCustomIcons = false, ...props }: Cu
               ) : (
                 <AccordionIcon />
               )}
-            </AccordionButton>
+            </ChakraAccordionButton>
           </Box>
-          <AccordionPanel pb={12} pt={4} fontSize="epsilon">
+          <ChakraAccordionPanel pb={12} pt={4} fontSize="epsilon">
             <Flex direction="column" gap={4}>
               {children}
             </Flex>
-          </AccordionPanel>
+          </ChakraAccordionPanel>
         </>
       )}
     </ChakraAccordionItem>
@@ -89,5 +90,8 @@ const AccordionItem = ({ title, children, useCustomIcons = false, ...props }: Cu
 };
 
 Accordion.Item = AccordionItem;
+Accordion.Button = ChakraAccordionButton;
+Accordion.Panel = ChakraAccordionPanel;
+Accordion.Icon = ChakraAccordionIcon;
 
 export default Accordion;

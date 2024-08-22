@@ -1,17 +1,4 @@
-import {
-  Box,
-  Heading,
-  Flex,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Divider,
-  Link,
-  Button,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, Flex, Divider, Link, Button, Text } from "@chakra-ui/react";
 import React, { ReactNode } from "react";
 
 import { BonusAvatar, DocumentFile, InformationAvatar } from "@/theme/components/icons";
@@ -29,13 +16,6 @@ interface AidePageProps {
 interface AidePageContainerProps {
   children: ReactNode;
   sidebarContent?: ReactNode;
-}
-
-interface AidePageAccordionProps {
-  children: ReactNode;
-  defaultIndex?: number | number[];
-  allowToggle?: boolean;
-  [key: string]: any;
 }
 
 interface AidePageResponsibilityProps {
@@ -109,30 +89,6 @@ const AidePageContainer = ({ children, sidebarContent }: AidePageContainerProps)
     <Box flex="3">{children}</Box>
     <Box flex="1">{sidebarContent}</Box>
   </Flex>
-);
-
-const AidePageAccordion = ({ children, allowToggle = true, ...props }: AidePageAccordionProps) => (
-  <Accordion my={6} allowToggle={allowToggle} {...props}>
-    {children}
-  </Accordion>
-);
-
-const AidePageAccordionItem = ({ title, children }: { title: string; children: ReactNode }) => (
-  <AccordionItem>
-    <Box>
-      <AccordionButton py={8}>
-        <Box flex="1" textAlign="left" fontWeight="bold" fontSize="epsilon" pr={12}>
-          {title}
-        </Box>
-        <AccordionIcon />
-      </AccordionButton>
-    </Box>
-    <AccordionPanel pb={12} pt={4} fontSize="epsilon">
-      <Flex direction="column" gap={4}>
-        {children}
-      </Flex>
-    </AccordionPanel>
-  </AccordionItem>
 );
 
 const AidePageDataResponsibility = ({
@@ -274,8 +230,6 @@ AidePage.displayName = "AidePage";
 AidePageTitle.displayName = "AidePage.Title";
 AidePageHeader.displayName = "AidePage.Header";
 AidePageContainer.displayName = "AidePage.Container";
-AidePageAccordion.displayName = "AidePage.Accordion";
-AidePageAccordionItem.displayName = "AidePage.AccordionItem";
 AidePageDataResponsibility.displayName = "AidePage.DataResponsibility";
 AidePageRibbon.displayName = "AidePage.Ribbon";
 AidePageSidebarInfos.displayName = "AidePage.SidebarInfos";
@@ -288,8 +242,6 @@ AidePageLink.displayName = "AidePage.Link";
 AidePage.Title = AidePageTitle;
 AidePage.Header = AidePageHeader;
 AidePage.Container = AidePageContainer;
-AidePage.Accordion = AidePageAccordion;
-AidePage.AccordionItem = AidePageAccordionItem;
 AidePage.DataResponsibility = AidePageDataResponsibility;
 AidePage.Ribbon = AidePageRibbon;
 AidePage.SidebarInfos = AidePageSidebarInfos;

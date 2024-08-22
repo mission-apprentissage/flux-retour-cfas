@@ -1,6 +1,7 @@
 import { Text, UnorderedList, ListItem, Box } from "@chakra-ui/react";
 import React from "react";
 
+import Accordion from "@/components/Accordion/Accordion";
 import AidePage from "@/components/Page/AidePage";
 import TextHighlight from "@/components/Text/Highlight";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -70,8 +71,8 @@ const AideQualiopi = () => {
           }
         />
 
-        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
-          <AidePage.AccordionItem title="À quoi sert la Certification Qualiopi ?">
+        <Accordion defaultIndex={0} allowToggle mt={12}>
+          <Accordion.Item title="À quoi sert la Certification Qualiopi ?">
             <Text>
               La certification Qualiopi atteste de la qualité d&apos;une formation professionnelle. Plus globalement,
               elle offre une plus grande lisibilité à la formation professionnelle auprès des entreprises et des
@@ -83,9 +84,9 @@ const AideQualiopi = () => {
               obligatoire afin d&apos;obtenir des financements publics ou mutualisés pour les organismes de formation
               pré-cités.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Quels sont les critères à respecter ?">
+          <Accordion.Item title="Quels sont les critères à respecter ?">
             <Text>
               Les critères à respecter pour être accrédité Qualiopi sont référencés dans un{" "}
               <AidePage.Link href="https://travail-emploi.gouv.fr/IMG/pdf/guide-lecture-referentiel-qualite.pdf">
@@ -108,9 +109,9 @@ const AideQualiopi = () => {
               <ListItem>La place de l&apos;organisme dans son environnement professionnel</ListItem>
               <ListItem>Le recueil et la prise en compte des appréciations et des réclamations</ListItem>
             </UnorderedList>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Sur mon espace Tableau de bord, il est indiqué que mon CFA n'est pas certifié Qualiopi. Comment corriger cette donnée ?">
+          <Accordion.Item title="Sur mon espace Tableau de bord, il est indiqué que mon CFA n'est pas certifié Qualiopi. Comment corriger cette donnée ?">
             <Text>
               Les organismes de formation certifiés (action de formation, bilan de compétences, VAE, action de formation
               par apprentissage) sont identifiés sur la liste publique des organismes de formation, disponible sur la{" "}
@@ -134,9 +135,9 @@ const AideQualiopi = () => {
                 Contacts des organismes certificateurs <Box as="i" className="ri-arrow-right-line" color="bluefrance" />
               </AidePage.Link>
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Qui accorde la certification Qualiopi ?">
+          <Accordion.Item title="Qui accorde la certification Qualiopi ?">
             <Text>
               La certification Qualiopi est délivrée par des organismes certificateurs accrédités par le Comité français
               d&apos;accréditation (Cofrac) ou par France Compétences.
@@ -145,9 +146,9 @@ const AideQualiopi = () => {
             <TextHighlight>
               un organisme qui n&apos;est pas accrédité ne peut pas délivrer de certification Qualiopi.
             </TextHighlight>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment obtenir la certification Qualiopi ?">
+          <Accordion.Item title="Comment obtenir la certification Qualiopi ?">
             <Text>
               Si vous dirigez un organisme de formation et que vous souhaitez obtenir la certification Qualiopi, <br />
               vous devrez :
@@ -162,8 +163,8 @@ const AideQualiopi = () => {
               </ListItem>
               <ListItem>Accepter un audit initial, puis un audit de surveillance au bout de 18 mois</ListItem>
             </UnorderedList>
-          </AidePage.AccordionItem>
-        </AidePage.Accordion>
+          </Accordion.Item>
+        </Accordion>
       </AidePage.Container>
     </AidePage>
   );
