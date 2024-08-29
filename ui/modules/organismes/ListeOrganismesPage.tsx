@@ -1,16 +1,29 @@
-import { Box, Container, Flex, Heading, ListItem, Stack, Text, UnorderedList } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Image,
+  ListItem,
+  Stack,
+  Text,
+  UnorderedList,
+} from "@chakra-ui/react";
 import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import Accordion from "@/components/Accordion/Accordion";
+import InformationMessage from "@/components/InformationMessage/InformationMessage";
 import DownloadLink from "@/components/Links/DownloadLink";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import TextHighlight from "@/components/Text/Highlight";
 import { useOrganisationOrganisme, useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import { ExternalLinkLine } from "@/theme/components/icons";
+import { BonusAvatar, ExternalLinkLine } from "@/theme/components/icons";
 
 import IndicateursOrganisme from "../dashboard/IndicateursOrganisme";
 
@@ -28,6 +41,7 @@ interface ListeOrganismesPageProps {
 }
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
+  console.log("CONSOLE LOG ~ ListeOrganismesPage ~ props:", props);
   const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
 
@@ -65,7 +79,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           organismeId={organisme?._id}
           organismesCount={organisme?.organismesCount}
           loading={false} // TODO add loader
-        ></IndicateursOrganisme>
+        />
         {/* Si pas d&apos;organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         <Stack spacing="4w">
           <OrganismesTable
@@ -73,14 +87,15 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             showFilterNature
             showFilterTransmission
             showFilterQualiopi
-            showFilterPrepaApprentissage
             showFilterLocalisation
+            showFilterEtat
+            showFilterUai
             withFormations={true}
           />
         </Stack>
-        <Flex gap={12}>
+        <Flex gap={12} mt={16} mb={6}>
           <Box flex="3">
-            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mt={16} mb={6}>
+            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
               Des anomalies ? Voici les démarches à suivre.
             </Heading>
             <Flex>
@@ -276,8 +291,44 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                 </DownloadLink>
               </Accordion.Item>
             </Accordion>
+            <Grid templateColumns="repeat(3, 1fr)" gap={4} bg="galt" mt={6} p={16} borderRadius="md">
+              <GridItem>
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <Image src="/images/contact.svg" alt="France relance" width="100%" userSelect="none" />
+                </Box>
+              </GridItem>
+              <GridItem colSpan={2}>
+                <Flex flexDirection="column" justifyContent="center" height="100%" px={12} gap={4}>
+                  <Text color="#2F4077" fontSize="beta" fontWeight="700" lineHeight={1.4}>
+                    Vous ne trouvez pas la réponse à vos questions ?
+                  </Text>
+                  <Link
+                    variant="link"
+                    display="inline-flex"
+                    href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/10/create/80"
+                    isExternal
+                    width={"fit-content"}
+                  >
+                    Contactez-nous
+                    <Box className="ri-arrow-right-line" />
+                  </Link>
+                </Flex>
+              </GridItem>
+            </Grid>
           </Box>
-          <Box flex="1"></Box>
+          <Box flex="1">
+            <InformationMessage
+              title="Le saviez-vous ?"
+              titleColor="#6E445A"
+              backgroundColor="#FEE7FC"
+              icon={<BonusAvatar width={10} height={10} />}
+            >
+              <Text>
+                Notre équipe vous accompagne dans le déploiement du Tableau de bord de l’apprentissage. Nous organisons
+                des webinaires réguliers avec les CFA de votre territoire. Contactez-nous !
+              </Text>
+            </InformationMessage>
+          </Box>
         </Flex>
       </Container>
     </SimplePage>
