@@ -35,5 +35,5 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.json.{{product_name}}.{{env_type}}.smtp
+        tag: docker.json.tdb.{{env_type}}.smtp
         fluentd-async: "true"
