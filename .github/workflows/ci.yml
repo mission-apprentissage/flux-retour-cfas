@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongodb:
-        image: mongo:6.0.2-focal
+        image: mongo:7
         ports:
           - "27017:27017"
     steps:
@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.6
 
       - uses: actions/cache@v4
         with:
