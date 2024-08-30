@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   smtp:
-    image: axllent/mailpit:v1.5.5
+    image: axllent/mailpit:latest
     deploy:
       resources:
         limits:
@@ -16,10 +16,12 @@ services:
         delay: 10s
       restart_policy:
         window: 360s
+        delay: 30s
         # Max 24hours
         max_attempts: 240
     ports:
       - 1025:1025
+      - 8025:8025
     networks:
       - mna_network
     volumes:
@@ -28,6 +30,7 @@ services:
     environment:
       - MP_DATA_FILE=/data/mailpit.db
       - MP_UI_AUTH_FILE=/auth
+      - MP_WEBROOT=/smtp/
     logging:
       driver: "fluentd"
       options:
