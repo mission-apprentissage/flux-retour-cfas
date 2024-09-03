@@ -7,19 +7,88 @@ const computeFilter = (departement: Array<string> | null, region: Array<string> 
   };
 };
 
-// Write indexes for this
 export const getAffelnetCountVoeuxNational = async (
   departement: Array<string> | null,
   regions: Array<string> | null
 ) => {
-  const voeuxCount = await voeuxAffelnetDb()
+  const counts = await voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
           ...computeFilter(departement, regions),
         },
       },
-
+      {
+        $lookup: {
+          from: "effectifs",
+          let: {
+            affelnet_nom: {
+              $toLower: {
+                $trim: {
+                  input: "$raw.nom",
+                },
+              },
+            },
+            affelnet_prenom: {
+              $toLower: {
+                $trim: {
+                  input: "$raw.prenom_1",
+                },
+              },
+            },
+            affelnet_uai: "$raw.code_uai_etab_accueil",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $in: ["$annee_scolaire", ["2024-2025", "2024-2024", "2025-2025"]],
+                    },
+                    {
+                      $eq: [
+                        {
+                          $toLower: {
+                            $trim: {
+                              input: "$apprenant.nom",
+                            },
+                          },
+                        },
+                        "$$affelnet_nom",
+                      ],
+                    },
+                    {
+                      $eq: [
+                        {
+                          $toLower: {
+                            $trim: {
+                              input: "$apprenant.prenom",
+                            },
+                          },
+                        },
+                        "$$affelnet_prenom",
+                      ],
+                    },
+                    {
+                      $eq: ["$_computed.organisme.uai", "$$affelnet_uai"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "tdb_effectifs",
+        },
+      },
+      {
+        $lookup: {
+          from: "effectifs_contrats",
+          localField: "tdb_effectifs._id",
+          foreignField: "effectif_id",
+          as: "tdb_contrats",
+        },
+      },
       {
         $facet: {
           voeuxFormules: [
@@ -57,40 +126,76 @@ export const getAffelnetCountVoeuxNational = async (
               $count: "total",
             },
           ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$voeuxFormules",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: "$apprenantVoeuxFormules",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: "$apprenantsNonContretise",
-          preserveNullAndEmptyArrays: true,
+          inscritEnCfa: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    {
+                      $gt: [{ $size: "$tdb_effectifs" }, 0],
+                    },
+                    {
+                      $gt: [{ $size: "$tdb_contrats" }, 0],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          voeuxNonConcretise: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: [{ $size: "$tdb_effectifs" }, 0],
+                    },
+                    {
+                      $eq: [{ $size: "$tdb_contrats" }, 0],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
         },
       },
       {
         $project: {
-          voeuxFormules: "$voeuxFormules.total",
-          apprenantVoeuxFormules: "$apprenantVoeuxFormules.total",
-          apprenantsNonContretise: "$apprenantsNonContretise.total",
+          voeuxFormules: {
+            $ifNull: [{ $arrayElemAt: ["$voeuxFormules.total", 0] }, 0],
+          },
+          apprenantVoeuxFormules: {
+            $ifNull: [{ $arrayElemAt: ["$apprenantVoeuxFormules.total", 0] }, 0],
+          },
+          apprenantsNonContretise: {
+            $ifNull: [{ $arrayElemAt: ["$apprenantsNonContretise.total", 0] }, 0],
+          },
+          inscritEnCfa: {
+            $ifNull: [{ $arrayElemAt: ["$inscritEnCfa.count", 0] }, 0],
+          },
+          voeuxNonConcretise: {
+            $ifNull: [{ $arrayElemAt: ["$voeuxNonConcretise.count", 0] }, 0],
+          },
         },
       },
     ])
     .toArray();
-  const result = voeuxCount[0];
+
+  const result = counts[0];
+
   return {
-    voeuxFormules: result?.voeuxFormules ?? 0,
-    apprenantVoeuxFormules: result?.apprenantVoeuxFormules ?? 0,
-    apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
+    voeuxFormules: result.voeuxFormules,
+    apprenantVoeuxFormules: result.apprenantVoeuxFormules,
+    apprenantsNonContretise: result.apprenantsNonContretise,
+    inscritEnCfa: result.inscritEnCfa,
+    voeuxNonConcretise: result.voeuxNonConcretise,
   };
 };
 
