@@ -1,10 +1,10 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { ObjectId, WithoutId } from "mongodb";
+import { MongoClient, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisme } from "shared/models";
-import { IDecaRaw } from "shared/models/data/decaRaw.model";
+import { IAirbyteRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -14,24 +14,30 @@ import { cyrb53Hash, getYearFromDate } from "shared/utils";
 import { addComputedFields } from "@/common/actions/effectifs.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { decaRawDb, effectifsDECADb } from "@/common/model/collections";
+import { effectifsDECADb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
+
+const client = new MongoClient(process.env.MNA_TDB_MONGODB_URI ?? "");
 
 export async function hydrateDecaRaw() {
   let count = 0;
 
   try {
-    await effectifsDECADb().drop();
+    await client.connect();
 
-    const cursor = decaRawDb().find({
-      dispositif: "APPR",
-      "organisme_formation.uai_cfa": { $exists: true },
-      "organisme_formation.siret": { $exists: true },
-      "formation.date_debut_formation": { $exists: true },
-      "formation.date_fin_formation": { $exists: true },
-    });
+    const query = {
+      "_airbyte_data.dispositif": "APPR",
+      "_airbyte_data.organisme_formation.uai_cfa": { $exists: true },
+      "_airbyte_data.organisme_formation.siret": { $exists: true },
+      "_airbyte_data.formation.date_debut_formation": { $exists: true },
+      "_airbyte_data.formation.date_fin_formation": { $exists: true },
+    };
+
+    const cursor = client.db("airbyte").collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
+
+    await effectifsDECADb().drop();
 
     for await (const document of cursor) {
       try {
@@ -53,14 +59,14 @@ export async function hydrateDecaRaw() {
   }
 }
 
-async function updateEffectifDeca(document: IDecaRaw) {
+async function updateEffectifDeca(document: IAirbyteRawBalDeca) {
   const newDocument = await transformDocument(document);
 
   return await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
 }
-
-async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffectifDECA>> {
+async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
   const {
+    _id,
     alternant,
     formation,
     employeur,
@@ -69,7 +75,8 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     date_fin_contrat,
     date_effet_rupture,
     type_contrat,
-  } = document;
+  } = document._airbyte_data;
+
   const {
     nom,
     prenom,
@@ -82,12 +89,22 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     adresse: adresseAlternant,
     derniere_classe,
   } = alternant;
+
   const { date_debut_formation, date_fin_formation, code_diplome, rncp, intitule_ou_qualification } = formation;
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
-  const startYear = getYearFromDate(date_debut_formation);
-  const endYear = getYearFromDate(date_fin_formation);
+  const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
+  const dateFinContrat = date_fin_contrat ? new Date(date_fin_contrat) : null;
+  const dateEffetRupture = date_effet_rupture ? new Date(date_effet_rupture) : null;
+
+  const dateDebutFormation = date_debut_formation ? new Date(date_debut_formation) : null;
+  const dateFinFormation = date_fin_formation ? new Date(date_fin_formation) : null;
+
+  const dateNaissance = date_naissance ? new Date(date_naissance) : null;
+
+  const startYear = getYearFromDate(dateDebutFormation);
+  const endYear = getYearFromDate(dateFinFormation);
 
   const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
 
@@ -99,7 +116,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
-  if (!date_debut_contrat || !date_fin_contrat) {
+  if (!dateDebutContrat || !dateFinContrat) {
     throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
@@ -109,12 +126,12 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     apprenant: {
       nom,
       prenom,
-      date_de_naissance: date_naissance,
+      date_de_naissance: dateNaissance,
       nationalite: nationalite as zodOpenApi.TypeOf<typeof zApprenant>["nationalite"],
       historique_statut: [],
       has_nir: false,
       rqth: handicap,
-      sexe: sexe === 1 ? "M" : sexe === 0 ? "F" : null,
+      sexe: sexe === "H" ? "M" : sexe === "F" ? "F" : null,
       telephone,
       courriel,
       adresse: {
@@ -131,9 +148,9 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
         type_employeur: parseInt(type_contrat, 10) as zodOpenApi.TypeOf<typeof zContrat>["type_employeur"],
         naf,
         adresse: { code_postal: adresse.code_postal },
-        date_debut: date_debut_contrat,
-        date_fin: date_fin_contrat,
-        date_rupture: date_effet_rupture,
+        date_debut: dateDebutContrat,
+        date_fin: dateFinContrat,
+        date_rupture: dateEffetRupture,
         nombre_de_salaries,
       },
     ],
@@ -143,9 +160,9 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
       periode: [startYear, endYear],
       libelle_court: intitule_ou_qualification,
       libelle_long: intitule_ou_qualification,
-      date_inscription: date_debut_formation,
-      date_entree: date_debut_formation,
-      date_fin: date_fin_formation,
+      date_inscription: dateDebutFormation,
+      date_entree: dateDebutFormation,
+      date_fin: dateFinFormation,
     },
     organisme_id: organisme._id,
     organisme_responsable_id: organisme._id,
@@ -153,7 +170,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     validation_errors: [],
     created_at: new Date(),
     updated_at: new Date(),
-    id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
+    id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
     source: SOURCE_APPRENANT.DECA,
     annee_scolaire: startYear <= 2023 && endYear >= 2024 ? "2023-2024" : `${startYear}-${endYear}`,
   };
