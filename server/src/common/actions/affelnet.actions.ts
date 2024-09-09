@@ -1,3 +1,6 @@
+import { ObjectId } from "bson";
+import { IEffectif } from "shared/models";
+
 import { voeuxAffelnetDb } from "../model/collections";
 
 const computeFilter = (departement: Array<string> | null, region: Array<string> | null) => {
@@ -7,189 +10,91 @@ const computeFilter = (departement: Array<string> | null, region: Array<string> 
   };
 };
 
+// Write indexes for this
 export const getAffelnetCountVoeuxNational = async (
   departement: Array<string> | null,
   regions: Array<string> | null
 ) => {
-  const counts = await voeuxAffelnetDb()
+  const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
-          "_computed.organisme.region": {
-            $in: regions,
-          },
+          ...computeFilter(departement, regions),
         },
       },
+
       {
-        $sort: {
-          "_computed.organisme.region": 1,
-          "raw.ine": 1,
-        },
-      },
-      {
-        $group: {
-          _id: "$raw.ine",
-          voeux_count: {
-            $sum: 1,
-          },
-          affelnet_nom: {
-            $first: {
-              $toLower: {
-                $trim: {
-                  input: "$raw.nom",
-                },
-              },
-            },
-          },
-          affelnet_prenom: {
-            $first: {
-              $toLower: {
-                $trim: {
-                  input: "$raw.prenom_1",
-                },
-              },
-            },
-          },
-          affelnet_uai: {
-            $first: "$raw.code_uai_etab_accueil",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "effectifs",
-          let: {
-            affelnet_nom: "$affelnet_nom",
-            affelnet_prenom: "$affelnet_prenom",
-            affelnet_uai: "$affelnet_uai",
-          },
-          pipeline: [
+        $facet: {
+          voeuxFormules: [
             {
-              $match: {
-                $expr: {
-                  $and: [
-                    {
-                      $in: ["$annee_scolaire", ["2024-2025", "2024-2024", "2025-2025"]],
-                    },
-                    {
-                      $eq: [
-                        {
-                          $toLower: {
-                            $trim: {
-                              input: "$apprenant.nom",
-                            },
-                          },
-                        },
-                        "$$affelnet_nom",
-                      ],
-                    },
-                    {
-                      $eq: [
-                        {
-                          $toLower: {
-                            $trim: {
-                              input: "$apprenant.prenom",
-                            },
-                          },
-                        },
-                        "$$affelnet_prenom",
-                      ],
-                    },
-                    {
-                      $eq: ["$_computed.organisme.uai", "$$affelnet_uai"],
-                    },
-                  ],
-                },
-              },
+              $count: "total",
             },
           ],
-          as: "tdb_effectifs",
+          apprenantVoeuxFormules: [
+            {
+              $group: {
+                _id: "$raw.ine",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $count: "total",
+            },
+          ],
+          apprenantsNonContretise: [
+            {
+              $group: {
+                _id: "$raw.ine",
+                deleted_list: {
+                  $push: "$deleted_at",
+                },
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $match: {
+                $expr: { $eq: [{ $size: "$deleted_list" }, "$count"] },
+              },
+            },
+            {
+              $count: "total",
+            },
+          ],
+          inscrits: [],
         },
       },
       {
-        $addFields: {
-          effectifs_count: {
-            $size: "$tdb_effectifs",
-          },
-          contrats_count: {
-            $sum: {
-              $map: {
-                input: "$tdb_effectifs.contrats",
-                as: "contrat",
-                in: {
-                  $cond: {
-                    if: {
-                      $ne: ["$$contrat.date_debut", null],
-                    },
-                    then: 1,
-                    else: 0,
-                  },
-                },
-              },
-            },
-          },
-          status: {
-            $cond: {
-              if: {
-                $or: [
-                  {
-                    $gt: ["$effectifs_count", 0],
-                  },
-                  {
-                    $gt: ["$contrats_count", 0],
-                  },
-                ],
-              },
-              then: "inscrit",
-              else: "non inscrit",
-            },
-          },
+        $unwind: {
+          path: "$voeuxFormules",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$apprenantVoeuxFormules",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$apprenantsNonContretise",
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
         $project: {
-          status: 1,
-          voeux_count: 1,
+          voeuxFormules: "$voeuxFormules.total",
+          apprenantVoeuxFormules: "$apprenantVoeuxFormules.total",
+          apprenantsNonContretise: "$apprenantsNonContretise.total",
         },
       },
-      // {
-      //   $group: {
-      //     _id: null,
-      //     inscrits_count: {
-      //       $sum: {
-      //         $cond: [
-      //           {
-      //             $eq: ["$status", "inscrit"]
-      //           },
-      //           1,
-      //           0
-      //         ]
-      //       }
-      //     },
-      //     non_inscrits_count: {
-      //       $sum: {
-      //         $cond: [
-      //           {
-      //             $eq: ["$status", "non inscrit"]
-      //           },
-      //           1,
-      //           0
-      //         ]
-      //       }
-      //     }
-      //   }
-      // }
     ])
     .toArray();
-
-  const result = counts[0];
-
+  const result = voeuxCount[0];
   return {
-    voeuxFormules: result.voeuxFormules,
-    apprenantVoeuxFormules: result.apprenantVoeuxFormules,
-    apprenantsNonContretise: result.apprenantsNonContretise,
-    inscritEnCfa: result.inscritEnCfa,
-    voeuxNonConcretise: result.voeuxNonConcretise,
+    voeuxFormules: result?.voeuxFormules ?? 0,
+    apprenantVoeuxFormules: result?.apprenantVoeuxFormules ?? 0,
+    apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
   };
 };
 
@@ -245,3 +150,20 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
       },
     ])
     .toArray();
+
+export const updateVoeuxAffelnetEffectif = async (effectif_id: ObjectId, effectif: IEffectif) => {
+  const { apprenant, annee_scolaire } = effectif;
+  const { nom, prenom, ine } = apprenant;
+  const voeux = await voeuxAffelnetDb()
+    .find({
+      "raw.ine": ine,
+      "raw.prenom_1": { $regex: `^${prenom}$` },
+      "raw.nom": { $regex: `^${nom}$` },
+      annee_scolaire_rentree: annee_scolaire.substring(0, 4),
+    })
+    .toArray();
+  const voeuxId = voeux.map((v) => v._id);
+  if (voeuxId.length) {
+    return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_id: effectif_id } });
+  }
+};

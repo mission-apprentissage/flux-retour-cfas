@@ -15,6 +15,7 @@ import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
+import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
 import { lockEffectif, addComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
@@ -543,7 +544,8 @@ const createOrUpdateEffectif = async (
       );
     } else {
       effectifDb = { ...effectifWithComputedFields, _id: new ObjectId() };
-      await effectifsDb().insertOne(effectifDb);
+      const { insertedId } = await effectifsDb().insertOne(effectifDb);
+      await updateVoeuxAffelnetEffectif(insertedId, effectifDb);
     }
 
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
