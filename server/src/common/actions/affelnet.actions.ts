@@ -15,28 +15,53 @@ export const getAffelnetCountVoeuxNational = async (
     .aggregate([
       {
         $match: {
-          ...computeFilter(departement, regions),
+          "_computed.organisme.region": {
+            $in: regions,
+          },
         },
       },
       {
-        $lookup: {
-          from: "effectifs",
-          let: {
-            affelnet_nom: {
+        $sort: {
+          "_computed.organisme.region": 1,
+          "raw.ine": 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$raw.ine",
+          voeux_count: {
+            $sum: 1,
+          },
+          affelnet_nom: {
+            $first: {
               $toLower: {
                 $trim: {
                   input: "$raw.nom",
                 },
               },
             },
-            affelnet_prenom: {
+          },
+          affelnet_prenom: {
+            $first: {
               $toLower: {
                 $trim: {
                   input: "$raw.prenom_1",
                 },
               },
             },
-            affelnet_uai: "$raw.code_uai_etab_accueil",
+          },
+          affelnet_uai: {
+            $first: "$raw.code_uai_etab_accueil",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "effectifs",
+          let: {
+            affelnet_nom: "$affelnet_nom",
+            affelnet_prenom: "$affelnet_prenom",
+            affelnet_uai: "$affelnet_uai",
           },
           pipeline: [
             {
@@ -82,109 +107,78 @@ export const getAffelnetCountVoeuxNational = async (
         },
       },
       {
-        $lookup: {
-          from: "effectifs_contrats",
-          localField: "tdb_effectifs._id",
-          foreignField: "effectif_id",
-          as: "tdb_contrats",
-        },
-      },
-      {
-        $facet: {
-          voeuxFormules: [
-            {
-              $count: "total",
-            },
-          ],
-          apprenantVoeuxFormules: [
-            {
-              $group: {
-                _id: "$raw.ine",
-                count: { $sum: 1 },
-              },
-            },
-            {
-              $count: "total",
-            },
-          ],
-          apprenantsNonContretise: [
-            {
-              $group: {
-                _id: "$raw.ine",
-                deleted_list: {
-                  $push: "$deleted_at",
-                },
-                count: { $sum: 1 },
-              },
-            },
-            {
-              $match: {
-                $expr: { $eq: [{ $size: "$deleted_list" }, "$count"] },
-              },
-            },
-            {
-              $count: "total",
-            },
-          ],
-          inscritEnCfa: [
-            {
-              $match: {
-                $expr: {
-                  $or: [
-                    {
-                      $gt: [{ $size: "$tdb_effectifs" }, 0],
+        $addFields: {
+          effectifs_count: {
+            $size: "$tdb_effectifs",
+          },
+          contrats_count: {
+            $sum: {
+              $map: {
+                input: "$tdb_effectifs.contrats",
+                as: "contrat",
+                in: {
+                  $cond: {
+                    if: {
+                      $ne: ["$$contrat.date_debut", null],
                     },
-                    {
-                      $gt: [{ $size: "$tdb_contrats" }, 0],
-                    },
-                  ],
+                    then: 1,
+                    else: 0,
+                  },
                 },
               },
             },
-            {
-              $count: "count",
-            },
-          ],
-          voeuxNonConcretise: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {
-                      $eq: [{ $size: "$tdb_effectifs" }, 0],
-                    },
-                    {
-                      $eq: [{ $size: "$tdb_contrats" }, 0],
-                    },
-                  ],
-                },
+          },
+          status: {
+            $cond: {
+              if: {
+                $or: [
+                  {
+                    $gt: ["$effectifs_count", 0],
+                  },
+                  {
+                    $gt: ["$contrats_count", 0],
+                  },
+                ],
               },
+              then: "inscrit",
+              else: "non inscrit",
             },
-            {
-              $count: "count",
-            },
-          ],
+          },
         },
       },
       {
         $project: {
-          voeuxFormules: {
-            $ifNull: [{ $arrayElemAt: ["$voeuxFormules.total", 0] }, 0],
-          },
-          apprenantVoeuxFormules: {
-            $ifNull: [{ $arrayElemAt: ["$apprenantVoeuxFormules.total", 0] }, 0],
-          },
-          apprenantsNonContretise: {
-            $ifNull: [{ $arrayElemAt: ["$apprenantsNonContretise.total", 0] }, 0],
-          },
-          inscritEnCfa: {
-            $ifNull: [{ $arrayElemAt: ["$inscritEnCfa.count", 0] }, 0],
-          },
-          voeuxNonConcretise: {
-            $ifNull: [{ $arrayElemAt: ["$voeuxNonConcretise.count", 0] }, 0],
-          },
+          status: 1,
+          voeux_count: 1,
         },
       },
+      // {
+      //   $group: {
+      //     _id: null,
+      //     inscrits_count: {
+      //       $sum: {
+      //         $cond: [
+      //           {
+      //             $eq: ["$status", "inscrit"]
+      //           },
+      //           1,
+      //           0
+      //         ]
+      //       }
+      //     },
+      //     non_inscrits_count: {
+      //       $sum: {
+      //         $cond: [
+      //           {
+      //             $eq: ["$status", "non inscrit"]
+      //           },
+      //           1,
+      //           0
+      //         ]
+      //       }
+      //     }
+      //   }
+      // }
     ])
     .toArray();
 
