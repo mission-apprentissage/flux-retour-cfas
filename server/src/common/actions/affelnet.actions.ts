@@ -151,17 +151,16 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
     ])
     .toArray();
 
-export const updateVoeuxAffelnetEffectif = async (effectif_id: ObjectId, effectif: IEffectif) => {
+export const updateVoeuxAffelnetEffectif = async (effectif_id: ObjectId, effectif: IEffectif, uai: string) => {
   const { apprenant, annee_scolaire } = effectif;
-  const { nom, prenom, ine } = apprenant;
-  const voeux = await voeuxAffelnetDb()
-    .find({
-      "raw.ine": ine,
-      "raw.prenom_1": { $regex: `^${prenom}$` },
-      "raw.nom": { $regex: `^${nom}$` },
-      annee_scolaire_rentree: annee_scolaire.substring(0, 4),
-    })
-    .toArray();
+  const { nom, prenom } = apprenant;
+  const filter = {
+    "raw.uai_etatblissement_formateur": uai,
+    "raw.prenom_1": { $regex: `^${prenom.toLowerCase()}$`, $options: "i" },
+    "raw.nom": { $regex: `^${nom.toLowerCase()}$`, $options: "i" },
+    annee_scolaire_rentree: annee_scolaire.substring(0, 4),
+  };
+  const voeux = await voeuxAffelnetDb().find(filter).toArray();
   const voeuxId = voeux.map((v) => v._id);
   if (voeuxId.length) {
     return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_id: effectif_id } });

@@ -12,7 +12,7 @@ export const zPersonV2 = z.object({
   updated_at: z.date(),
   nom: z.string(),
   prenom: z.string(),
-  date_de_naissance: z.date(),
+  date_de_naissance: z.union([z.date(), z.string()]).nullish(),
   // Todo: add more fields for apprenant
   // Todo: add arrays of change ?
 });
