@@ -60,7 +60,20 @@ export const getAffelnetCountVoeuxNational = async (
               $count: "total",
             },
           ],
-          inscrits: [],
+          apprenantsRetrouves: [
+            {
+              $match: { effectif_id: { $exists: true } },
+            },
+            {
+              $group: {
+                _id: "$raw.ine",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $count: "total",
+            },
+          ],
         },
       },
       {
@@ -82,10 +95,17 @@ export const getAffelnetCountVoeuxNational = async (
         },
       },
       {
+        $unwind: {
+          path: "$apprenantsRetrouves",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           voeuxFormules: "$voeuxFormules.total",
           apprenantVoeuxFormules: "$apprenantVoeuxFormules.total",
           apprenantsNonContretise: "$apprenantsNonContretise.total",
+          apprenantsRetrouves: "$apprenantsRetrouves.total",
         },
       },
     ])
@@ -95,6 +115,7 @@ export const getAffelnetCountVoeuxNational = async (
     voeuxFormules: result?.voeuxFormules ?? 0,
     apprenantVoeuxFormules: result?.apprenantVoeuxFormules ?? 0,
     apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
+    apprenantsRetrouves: result?.apprenantsRetrouves ?? 0,
   };
 };
 
