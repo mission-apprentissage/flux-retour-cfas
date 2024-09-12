@@ -15,7 +15,7 @@ export interface OrganismesFiltersQuery {
 
 export interface OrganismesFilters {
   qualiopi: boolean[];
-  transmission: boolean[];
+  transmission: string[];
   prepa_apprentissage: boolean[];
   nature: string[];
   ferme: boolean[];
@@ -25,10 +25,12 @@ export interface OrganismesFilters {
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
+  console.log("CONSOLE LOG ~ parseOrganismesFiltersFromQuery ~ query:", query);
   return {
     qualiopi: query.qualiopi?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     prepa_apprentissage: query.prepa_apprentissage?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
-    transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
+    transmission:
+      query.transmission?.split(",").filter((item) => ["recent", "1_3_mois", "arrete", "jamais"].includes(item)) ?? [],
     nature: query.nature?.split(",") ?? [],
     ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     regions: query.regions?.split(",") ?? [],
@@ -90,12 +92,33 @@ export function filterOrganismesArrayFromOrganismesFilters(
         return organismesFilters.departements?.includes(item.adresse.departement);
     });
 
-  if (organismesFilters.transmission?.length && organismesFilters.transmission?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter((item) =>
-      organismesFilters.transmission?.some(
-        (filter) => (!!filter && !!item.last_transmission_date) || (!filter && !item.last_transmission_date)
-      )
-    );
+  if (organismesFilters.transmission?.length && organismesFilters.transmission.length > 0) {
+    const now = new Date();
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const threeMonthsAgo = new Date(now);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    filteredOrganismes = filteredOrganismes?.filter((item) => {
+      const lastTransmissionDate = item.last_transmission_date ? new Date(item.last_transmission_date) : undefined;
+
+      return organismesFilters.transmission?.some((filter) => {
+        switch (filter) {
+          case "recent":
+            return lastTransmissionDate && lastTransmissionDate >= oneMonthAgo;
+          case "1_3_mois":
+            return lastTransmissionDate && lastTransmissionDate >= threeMonthsAgo && lastTransmissionDate < oneMonthAgo;
+          case "arrete":
+            return lastTransmissionDate && lastTransmissionDate < threeMonthsAgo;
+          case "jamais":
+            return !lastTransmissionDate;
+          default:
+            return false;
+        }
+      });
+    });
+  }
 
   if (organismesFilters.etatUAI?.length && organismesFilters.etatUAI?.length > 0)
     filteredOrganismes = filteredOrganismes?.filter((item) =>

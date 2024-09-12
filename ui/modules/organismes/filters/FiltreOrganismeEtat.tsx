@@ -25,7 +25,7 @@ function FiltreOrganismesEtat(props: FiltreOrganismesEtatProps) {
           >
             <Stack>
               <Checkbox value="false" key="ouvert" fontSize="mini" size="sm">
-                Ouvert
+                En activité
               </Checkbox>
               <Checkbox value="true" key="ferme" fontSize="mini" size="sm">
                 Fermé

@@ -2,6 +2,7 @@ import { WarningTwoIcon } from "@chakra-ui/icons";
 import { SystemProps } from "@chakra-ui/react";
 import { isBefore, subMonths, subWeeks } from "date-fns";
 
+import { TRANSMISSION_ORGANISME } from "@/common/constants/organismes";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox } from "@/theme/components/icons";
@@ -25,7 +26,7 @@ function InfoTransmissionDonnees({
       return (
         <Tag
           leftIcon={CloseCircle}
-          primaryText={modeBadge ? "Données non disponibles" : "Non disponible"}
+          primaryText={modeBadge ? "Données non disponibles" : TRANSMISSION_ORGANISME.non_disponible}
           colorScheme="grey_tag"
           variant={modeBadge ? "badge" : "text"}
           {...props}
@@ -35,7 +36,7 @@ function InfoTransmissionDonnees({
       return (
         <Tag
           leftIcon={CloseCircle}
-          primaryText={modeBadge ? "Données non transmises" : "Ne transmet pas"}
+          primaryText={modeBadge ? "Données non transmises" : TRANSMISSION_ORGANISME.aucune_transmission}
           variant={modeBadge ? "badge" : "text"}
           colorScheme="red_tag"
           {...props}
@@ -45,7 +46,7 @@ function InfoTransmissionDonnees({
       return (
         <Tag
           leftIcon={WarningTwoIcon}
-          primaryText={modeBadge ? "Données obsolètes" : "Ne transmet plus"}
+          primaryText={modeBadge ? "Données obsolètes" : TRANSMISSION_ORGANISME.arret_transmission}
           secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
           colorScheme="redlight_tag"
           variant={modeBadge ? "badge" : "text"}
@@ -56,7 +57,7 @@ function InfoTransmissionDonnees({
       return (
         <Tag
           leftIcon={Checkbox}
-          primaryText={modeBadge ? "Données transmises" : "Transmet"}
+          primaryText={modeBadge ? "Données transmises" : TRANSMISSION_ORGANISME.transmission}
           secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
           colorScheme="orange_tag"
           variant={modeBadge ? "badge" : "text"}
@@ -67,7 +68,7 @@ function InfoTransmissionDonnees({
       return (
         <Tag
           leftIcon={Checkbox}
-          primaryText={modeBadge ? "Données transmises" : "Transmet"}
+          primaryText={modeBadge ? "Données transmises" : TRANSMISSION_ORGANISME.transmission}
           secondaryText={`${modeBadge ? "Dernière " : ""}MAJ : ${formatDateNumericDayMonthYear(lastTransmissionDate as string)}`}
           colorScheme="green_tag"
           variant={modeBadge ? "badge" : "text"}

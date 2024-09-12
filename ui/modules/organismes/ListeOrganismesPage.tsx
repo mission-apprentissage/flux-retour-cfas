@@ -21,7 +21,7 @@ import DownloadLink from "@/components/Links/DownloadLink";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import TextHighlight from "@/components/Text/Highlight";
-import { useOrganisationOrganisme, useOrganismesNormalizedLists } from "@/hooks/organismes";
+import { useOrganisationOrganisme, useOrganismesFiltered, useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { BonusAvatar, ExternalLinkLine } from "@/theme/components/icons";
 
@@ -41,13 +41,12 @@ interface ListeOrganismesPageProps {
 }
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
-  console.log("CONSOLE LOG ~ ListeOrganismesPage ~ props:", props);
   const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
+  const organismesNormalized = useOrganismesNormalizedLists(props.organismes);
+  const { organismesFiltered } = useOrganismesFiltered(organismesNormalized.allOrganismes);
 
   const title = `${props.modePublique ? "Ses" : "Mes"} organismes`;
-
-  const { allOrganismes } = useOrganismesNormalizedLists(props.organismes);
 
   return (
     <SimplePage title={title}>
@@ -57,7 +56,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </Heading>
 
         <Text>
-          Retrouvez ci-dessous les {allOrganismes.length} établissements sous votre gestion et la nature de chacun.
+          Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements sous votre gestion
+          et la nature de chacun.
         </Text>
 
         <Text fontStyle="italic" mb={8}>
@@ -83,7 +83,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         {/* Si pas d&apos;organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         <Stack spacing="4w">
           <OrganismesTable
-            organismes={allOrganismes || []}
+            organismes={organismesFiltered || []}
             showFilterNature
             showFilterTransmission
             showFilterQualiopi

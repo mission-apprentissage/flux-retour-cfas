@@ -148,7 +148,20 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
         />
       </>
     ),
-    cell: ({ getValue }) => <Text> {getValue()}</Text>,
+    cell: ({ getValue, row: { original } }) => (
+      <Text>
+        <Link
+          variant="link"
+          display="inline-flex"
+          href={`https://catalogue-apprentissage.intercariforef.org/etablissement/${original?.siret || ""}`}
+          isExternal
+          width={"fit-content"}
+        >
+          {getValue()}
+          <Box className="ri-arrow-right-line" />
+        </Link>{" "}
+      </Text>
+    ),
   },
   {
     accessorKey: "ferme",
