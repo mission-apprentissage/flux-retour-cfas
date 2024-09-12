@@ -16,9 +16,9 @@ export default function NatureOrganismeTooltip() {
               textDecoration="underLine"
               display="inline"
             >
-              Catalogue
+              Catalogue des offres de formations en apprentissage{" "}
             </Link>{" "}
-            des formations en apprentissage identifie trois natures :
+            identifie trois natures :
           </Text>
           <UnorderedList my={3}>
             <ListItem>Les organismes responsables</ListItem>

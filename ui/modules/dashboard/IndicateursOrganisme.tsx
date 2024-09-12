@@ -12,16 +12,15 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { PlausibleGoalType, IOrganismesCount, TypeOrganismesIndicateurs, ORGANISME_INDICATEURS_TYPE } from "shared";
+import { ORGANISME_INDICATEURS_TYPE, PlausibleGoalType, TypeOrganismesIndicateurs } from "shared";
 
-import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import Link from "@/components/Links/Link";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import { useOrganisationIndicateursOrganismes } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
-import { EffectifsFiltersFull } from "@/modules/models/effectifs-filters";
 
 import { BlueBuilding, GreenCheck, RedFlashingLight } from "./icons";
 
@@ -83,22 +82,22 @@ function CardWithSubCard({
           </Text>
         </Box>
         <Flex border="1px solid #DDDDDD" h="1px" w="100%"></Flex>
-        <HStack>
+        <HStack alignItems={"center"}>
           <Box>{subIcon}</Box>
-          <Text fontSize={12} mx={1}>
+          <Text fontSize={12}>
             dont
-          </Text>
-          <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
-            {formatNumber(subCount)}
-          </Text>
-          <Text fontSize={"16px"} fontWeight="400" color="#3A3A3A">
-            {subLabel}
-            {subTooltipHeader && subTooltipLabel ? (
-              <InfoTooltip
-                headerComponent={() => subTooltipHeader}
-                contentComponent={() => <Box>{subTooltipLabel}</Box>}
-              />
-            ) : null}
+            <Text as="span" fontSize={big ? "28px" : "28px"} fontWeight="700" mx={2}>
+              {formatNumber(subCount)}
+            </Text>
+            <Text as="span" fontSize={"16px"} fontWeight="400" color="#3A3A3A">
+              {subLabel}
+              {subTooltipHeader && subTooltipLabel ? (
+                <InfoTooltip
+                  headerComponent={() => subTooltipHeader}
+                  contentComponent={() => <Box>{subTooltipLabel}</Box>}
+                />
+              ) : null}
+            </Text>
           </Text>
         </HStack>
       </VStack>
@@ -114,15 +113,11 @@ function Card({ label, count, tooltipHeader, tooltipLabel, icon, big = false, ch
           {icon}
         </Box>
         <Box>
-          <Flex>
-            <Center>
-              <Text fontSize={12} mx={1}>
-                dont
-              </Text>
-              <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
-                {formatNumber(count)}
-              </Text>
-            </Center>
+          <Flex justify={"start"} alignItems={"center"} gap={2}>
+            <Text fontSize={12}>dont</Text>
+            <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
+              {formatNumber(count)}
+            </Text>
           </Flex>
 
           <Text fontSize={"16px"} fontWeight="400" color="#3A3A3A">
@@ -145,21 +140,9 @@ const typeToGoalPlausible: { [key: string]: PlausibleGoalType } = {
   [ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE]: "telechargement_liste_organismes_uai_non_determine",
 };
 
-interface IndicateursGridPropsLoading {
-  loading: true;
-}
-
-interface IndicateursGridPropsReady {
-  loading: false;
-  effectifsFilters?: EffectifsFiltersFull;
-  organismeId?: string;
-  organismesCount?: IOrganismesCount;
-}
-
-type IndicateursGridProps = IndicateursGridPropsReady | IndicateursGridPropsLoading;
-
-function IndicateursOrganisme(props: IndicateursGridProps) {
+function IndicateursOrganisme() {
   const { trackPlausibleEvent } = usePlausibleTracking();
+  const { data, isLoading, error } = useOrganisationIndicateursOrganismes();
 
   const getIcon = (count?: number) => {
     return count ? <RedFlashingLight /> : <GreenCheck />;
@@ -167,15 +150,25 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
 
   const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
     trackPlausibleEvent(typeToGoalPlausible[type]);
-    const organismes = await _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes/${type}`);
-    exportDataAsXlsx(
-      `tdb-organismes-${type}.xlsx`,
-      organismes.map((organisme) => convertOrganismeToExport(organisme)),
-      organismesExportColumns
-    );
+    // const organismes = await _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes/${type}`);
+    // exportDataAsXlsx(
+    //   `tdb-organismes-${type}.xlsx`,
+    //   organismes.map((organisme) => convertOrganismeToExport(organisme)),
+    //   organismesExportColumns
+    // );
   };
 
-  if (props.loading) {
+  if (error) {
+    return (
+      <Flex justifyContent="center" alignItems="center">
+        <Text fontSize="zeta" color="redfrance">
+          Une erreur est survenue
+        </Text>
+      </Flex>
+    );
+  }
+
+  if (isLoading) {
     return (
       <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
         <GridItem colSpan={2} rowSpan={2}>
@@ -197,18 +190,16 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
     );
   }
 
-  const { organismeId } = props;
-
   return (
     <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
         <CardWithSubCard
           label="organismes de formation en apprentissage"
-          count={props.organismesCount?.organismes ?? 0}
+          count={data?.organismes ?? 0}
           icon={<BlueBuilding />}
           big={true}
           subLabel="organismes fiables"
-          subCount={props.organismesCount?.fiables ?? 0}
+          subCount={data?.fiables ?? 0}
           subIcon={<GreenCheck />}
           subTooltipHeader="Organisme fiable"
           subTooltipLabel={
@@ -218,7 +209,7 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
                 <ListItem>qui correspond à un couple UAI-SIRET validé dans le Référentiel UAI-SIRET (ONISEP).</ListItem>
                 <ListItem>
                   dont l’état administratif du SIRET de l&apos;établissement, tel qu&apos;il est renseigné sur l’INSEE,
-                  est ouvert
+                  est en activité.
                 </ListItem>
               </UnorderedList>
             </>
@@ -228,12 +219,11 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="sans effectifs transmis (ou arrêt)"
-          count={props.organismesCount?.sansTransmissions ?? 0}
-          icon={getIcon(props.organismesCount?.sansTransmissions)}
+          count={data?.sansTransmissions ?? 0}
+          icon={getIcon(data?.sansTransmissions)}
         >
           <DownloadButton
             variant="link"
-            borderBottom={0}
             action={() => {
               downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS as "sans_effectifs");
             }}
@@ -245,31 +235,60 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec une nature “inconnue”"
-          count={props.organismesCount?.natureInconnue ?? 0}
+          count={data?.natureInconnue ?? 0}
           tooltipHeader="Nature de l’organisme de formation"
           tooltipLabel={
-            <>
-              <Text>
-                La donnée « Nature » est déduite des relations entre les organismes (base des Carif-Oref). Le Catalogue
-                des formations en apprentissage identifie trois natures :
-              </Text>{" "}
-              <UnorderedList mt={6} mb={6}>
+            <Box>
+              <Text as="p">
+                La donnée «&nbsp;Nature&nbsp;» est déduite des relations entre les organismes (base des Carif-Oref). Le{" "}
+                <Link
+                  isExternal
+                  href="https://catalogue-apprentissage.intercariforef.org/"
+                  textDecoration="underLine"
+                  display="inline"
+                >
+                  Catalogue des offres de formations en apprentissage
+                </Link>{" "}
+                identifie trois natures :
+              </Text>
+              <UnorderedList my={3}>
                 <ListItem>Les organismes responsables</ListItem>
                 <ListItem>Les organismes responsables et formateur</ListItem>
                 <ListItem>Les organismes formateurs</ListItem>
               </UnorderedList>
-              <Text>
-                Une nature “inconnue” signifie que l&apos;organisme n&apos;a pas déclaré (ou de manière incomplète) son
-                offre de formation dans la base de son Carif-Oref : l&apos;organisme doit se référencer ses formations
-                en apprentissage auprès du, Carif-Oref régional ou se rapprocher du service dédié aux formations.
+              <Text as="p">
+                Une nature “inconnue” signifie que l’organisme n’a pas déclaré (ou de manière incomplète) son offre de
+                formation dans la base de son Carif-Oref : l’organisme doit référencer ses formations en apprentissage
+                auprès du{" "}
+                <Link
+                  isExternal
+                  href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                  textDecoration="underLine"
+                  display="inline"
+                >
+                  Carif-Oref régional{" "}
+                </Link>{" "}
+                ou se rapprocher du{" "}
+                <Link
+                  isExternal
+                  href="http://localhost:3000/pdf/Carif-Oref-contacts.pdf"
+                  textDecoration="underLine"
+                  display="inline"
+                >
+                  service dédié aux formations
+                </Link>
+                .
               </Text>
-            </>
+            </Box>
           }
-          icon={getIcon(props.organismesCount?.natureInconnue)}
+          icon={getIcon(data?.natureInconnue)}
         >
           <DownloadButton
             variant="link"
             borderBottom={0}
+            _active={{
+              color: "bluefrance",
+            }}
             action={async () => {
               downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE as "nature_inconnue");
             }}
@@ -281,23 +300,26 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec un Siret fermé"
-          count={props.organismesCount?.siretFerme ?? 0}
+          count={data?.siretFerme ?? 0}
           tooltipHeader="État du Siret de l’établissement"
           tooltipLabel={
             <>
               <Text>
-                Cette information est tirée de la base INSEE. Indication de l’état administratif (ouvert ou fermé) du
-                Siret de l’établissement, tel qu’il est renseigné sur l’INSEE. Un établissement est affiché
+                Cette information est tirée de la base INSEE. Indication de l’état administratif (en activité ou fermé)
+                du Siret de l’établissement, tel qu’il est renseigné sur l’INSEE. Un établissement est affiché
                 &quot;Fermé&quot; suite à une cessation d&apos;activité ou un déménagement.
               </Text>
               <Text>
-                En cas de déménagement, une demande d’un nouveau Siret (via le Guichet Unique) doit être réalisée et ce
-                dernier doit être communiqué aux différents acteurs publics.
+                En cas de déménagement, une demande d’un nouveau Siret (via le{" "}
+                <Link isExternal href="https://procedures.inpi.fr/?/" textDecoration="underLine" display="inline">
+                  Guichet Unique
+                </Link>
+                ) doit être réalisée et ce dernier doit être communiqué aux différents acteurs publics.
               </Text>
               <Text>En savoir plus sur les démarches à suivre sur la page de Référencement.</Text>
             </>
           }
-          icon={getIcon(props.organismesCount?.siretFerme)}
+          icon={getIcon(data?.siretFerme)}
         >
           <DownloadButton
             variant="link"
@@ -313,13 +335,22 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec une UAI “non déterminée”"
-          count={props.organismesCount?.uaiNonDeterminee ?? 0}
+          count={data?.uaiNonDeterminee ?? 0}
           tooltipHeader="UAI non déterminée"
           tooltipLabel={
             <UnorderedList mt={6} mb={6}>
               <ListItem>
                 Si l&apos;Unité Administrative Immatriculée (UAI) est répertoriée comme « Non déterminée » alors que
-                l&apos;organisme en possède une, veuillez la communiquer en écrivant à referentiel-uai-siret@onisep.fr
+                l&apos;organisme en possède une, veuillez la communiquer en écrivant à{" "}
+                <Link
+                  href="mailto:referentiel-uai-siret@onisep.fr"
+                  target="_blank"
+                  textDecoration="underline"
+                  isExternal
+                  whiteSpace="nowrap"
+                >
+                  referentiel-uai-siret@onisep.fr
+                </Link>{" "}
                 avec la fiche UAI, afin qu&apos;elle soit mise à jour. L&apos;absence de ce numéro bloque
                 l&apos;enregistrement des contrats d&apos;apprentissage. L&apos;UAI est recommandée pour être reconnu
                 OFA
@@ -330,7 +361,7 @@ function IndicateursOrganisme(props: IndicateursGridProps) {
               </ListItem>
             </UnorderedList>
           }
-          icon={getIcon(props.organismesCount?.uaiNonDeterminee)}
+          icon={getIcon(data?.uaiNonDeterminee)}
         >
           <DownloadButton
             variant="link"

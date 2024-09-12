@@ -87,6 +87,7 @@ import {
   getInvalidUaisFromDossierApprenant,
   resetConfigurationERP,
   getStatOrganismes,
+  getOrganisationIndicateursOrganismes,
 } from "@/common/actions/organismes/organismes.actions";
 import {
   getDuplicatesOrganismes,
@@ -838,6 +839,12 @@ function setupRoutes(app: Application) {
         "/organismes",
         returnResult(async (req) => {
           return await listOrganisationOrganismes(req.user.acl);
+        })
+      )
+      .get(
+        "/organismes/indicateurs",
+        returnResult(async (req) => {
+          return await getOrganisationIndicateursOrganismes(req.user.acl);
         })
       )
       .get(

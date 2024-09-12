@@ -1,4 +1,10 @@
 fileignoreconfig:
+- filename: ui/modules/organismes/ListeOrganismesPage.tsx
+  checksum: e285f15ddbe8dd5fcde340845aae461cfaafc7b053154112f058586e30faf19d
+- filename: ui/modules/organismes/OrganismesTable.tsx
+  checksum: c7ff0a828fc1a5e11d8aba340333231ecb9ad5a58a1dcbfeb055ca7c45c03902
+- filename: ui/modules/dashboard/IndicateursOrganisme.tsx
+  checksum: 7be002672d4416488c495035efee32ace010bf48346f0b1562487db6d84f2c9c
 - filename: .infra/vault/vault.yml
   checksum: f0b1527c7c2e79cf9eb1253813d2b94fd0e3f76f8cf5deb22882f26ce5c3dc49
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx

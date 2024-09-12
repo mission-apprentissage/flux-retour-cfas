@@ -168,7 +168,7 @@ export function BlueBuilding(props?: SystemProps) {
 
 export function GreenCheck(props?: SystemProps) {
   return (
-    <Icon viewBox="0 0 22 22" w="32px" h="32px" {...props}>
+    <Icon viewBox="0 0 22 22" w="20px" h="20px" {...props}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"

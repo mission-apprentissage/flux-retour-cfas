@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { IOrganismesCount, normalize } from "shared";
+import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -87,6 +87,24 @@ export function useOrganisationOrganismes() {
 
   return {
     organismes,
+    isLoading,
+    error,
+  };
+}
+
+export function useOrganisationIndicateursOrganismes() {
+  const router = useRouter();
+
+  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>(
+    ["organisation/organismes/indicateurs"],
+    () => _get("/api/v1/organisation/organismes/indicateurs"),
+    {
+      enabled: router.isReady,
+    }
+  );
+
+  return {
+    data,
     isLoading,
     error,
   };

@@ -1,9 +1,14 @@
 import Boom from "boom";
 import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
+import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme, IOrganisationIndicateursOrganismes } from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import { IOrganisme, defaultValuesOrganisme, withOrganismeListSummary } from "shared/models/data/organismes.model";
+import {
+  IOrganisme,
+  defaultValuesOrganisme,
+  hasRecentTransmissions,
+  withOrganismeListSummary,
+} from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -765,6 +770,36 @@ export async function listOrganisationOrganismes(acl: Acl): Promise<WithId<Organ
     .toArray()) as WithId<OrganismeWithPermissions>[];
 
   return organismes;
+}
+
+export async function getOrganisationIndicateursOrganismes(acl: Acl): Promise<IOrganisationIndicateursOrganismes> {
+  const organismes = (await organismesDb()
+    .find(buildOrganismePerimetreMongoFilters(acl.viewContacts), {
+      projection: getOrganismeListProjection(true),
+    })
+    .toArray()) as WithId<OrganismeWithPermissions>[];
+
+  return organismes?.reduce(
+    (acc, curr) => {
+      return {
+        ...acc,
+        fiables: acc.fiables + (curr.fiabilisation_statut === "FIABLE" ? 1 : 0),
+        organismes: acc.organismes + 1,
+        natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
+        uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
+        siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
+        sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
+      };
+    },
+    {
+      organismes: 0,
+      fiables: 0,
+      sansTransmissions: 0,
+      siretFerme: 0,
+      natureInconnue: 0,
+      uaiNonDeterminee: 0,
+    }
+  );
 }
 
 export async function listOrganismesFormateurs(
