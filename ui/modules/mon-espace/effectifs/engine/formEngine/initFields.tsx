@@ -80,29 +80,7 @@ export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme 
       name: "apprenant.nouveau_contrat",
       data: "",
     });
-    contrats = [
-      {
-        siret: "",
-        denomination: "",
-        naf: "",
-        nombre_de_salaries: "",
-        type_employeur: "",
-        date_debut: "",
-        date_fin: "",
-        date_rupture: "",
-        adresse: {
-          numero: "",
-          repetition_voie: "",
-          voie: "",
-          complement: "",
-          code_postal: "",
-          commune: "",
-          departement: "",
-          region: "",
-        },
-      },
-      ...effectifForm.contrats.value,
-    ];
+    contrats = [...effectifForm.contrats.value];
   }
   contrats.forEach((contrat, i) => {
     const prefix = `contrats[${i}]`;

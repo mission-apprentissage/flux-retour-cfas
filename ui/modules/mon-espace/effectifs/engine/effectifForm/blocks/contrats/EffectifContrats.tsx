@@ -1,16 +1,11 @@
-import { Box, Button, Flex, FormLabel, HStack } from "@chakra-ui/react";
+import { Box, Center, Flex, FormLabel, HStack, Text } from "@chakra-ui/react";
 import React, { memo } from "react";
-import { useRecoilValue } from "recoil";
 
-import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
 import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
-import { useEffectifFormController } from "@/modules/mon-espace/effectifs/engine/formEngine/EffectifFormControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
-  const nouveaContratField = useRecoilValue<any>(fieldSelector("apprenant.nouveau_contrat"));
-  const effectifFormController = useEffectifFormController();
-  return (
+  return contrats && contrats.length > 0 ? (
     <>
       {contrats?.map((contrat, i) => {
         return (
@@ -43,25 +38,15 @@ export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
                 <InputController name={`contrats[${i}].naf`} fieldType="text" />
                 <InputController name={`contrats[${i}].nombre_de_salaries`} fieldType="number" />
                 <InputController name={`contrats[${i}].type_employeur`} fieldType="select" />
-                {i === 0 && nouveaContratField && (
-                  <Button
-                    size="lg"
-                    onClick={async () => {
-                      effectifFormController.setField("apprenant.nouveau_contrat", "trigger", {
-                        triggerSave: false,
-                      });
-                    }}
-                    variant="primary"
-                    mt={4}
-                  >
-                    + Ajouter le nouveau contrat
-                  </Button>
-                )}
               </Box>
             </Flex>
           </Box>
         );
       })}
     </>
+  ) : (
+    <Center>
+      <Text>Pas de contrats</Text>
+    </Center>
   );
 });
