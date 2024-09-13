@@ -1,7 +1,16 @@
 import Boom from "boom";
+import { subMonths } from "date-fns";
 import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme, IOrganisationIndicateursOrganismes } from "shared";
+import {
+  getAnneesScolaireListFromDate,
+  Acl,
+  PermissionsOrganisme,
+  IOrganisationIndicateursOrganismes,
+  ORGANISME_INDICATEURS_TYPE,
+  IOrganisation,
+  IUsersMigration,
+} from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import {
   IOrganisme,
@@ -800,6 +809,147 @@ export async function getOrganisationIndicateursOrganismes(acl: Acl): Promise<IO
       uaiNonDeterminee: 0,
     }
   );
+}
+
+export async function getOrganisationIndicateursForRelatedOrganismes(acl: Acl, indicateurType: string) {
+  const matchIndicateurType: any = {};
+
+  switch (indicateurType) {
+    case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS: {
+      const threeMonthsAgo = subMonths(new Date(), 3);
+      matchIndicateurType.$or = [
+        { last_transmission_date: { $eq: null } },
+        {
+          $expr: {
+            $lt: ["$last_transmission_date", threeMonthsAgo],
+          },
+        },
+      ];
+      break;
+    }
+    case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE: {
+      matchIndicateurType.$or = [
+        { nature: { $eq: "inconnue" } },
+        { nature: { $eq: null } },
+        { nature: { $exists: false } },
+      ];
+      break;
+    }
+    case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
+      matchIndicateurType.ferme = { $eq: true };
+      break;
+    case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
+      matchIndicateurType.uai = { $eq: null };
+      break;
+    default:
+      return [];
+  }
+
+  const organismes = (await organismesDb()
+    .aggregate([
+      {
+        $match: buildOrganismePerimetreMongoFilters(acl.viewContacts),
+      },
+      {
+        $match: matchIndicateurType,
+      },
+      {
+        $project: getOrganismeListProjection(true),
+      },
+      {
+        $lookup: {
+          from: "organisations",
+          let: { uai: "$uai", siret: "$siret" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                },
+              },
+            },
+            {
+              $limit: 1,
+            },
+          ],
+          as: "relatedOrganisation",
+        },
+      },
+      {
+        $unwind: {
+          path: "$relatedOrganisation",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "usersMigration",
+          let: { orgId: "$relatedOrganisation._id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$organisation_id", "$$orgId"] },
+                    { $eq: ["$account_status", "CONFIRMED"] },
+                    { $ne: ["$has_accept_cgu_version", ""] },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                account_status: 1,
+                nom: 1,
+                prenom: 1,
+                telephone: 1,
+              },
+            },
+            {
+              $limit: 1,
+            },
+          ],
+          as: "relatedUser",
+        },
+      },
+      {
+        $unwind: {
+          path: "$relatedUser",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          relatedOrganisation: { $first: "$relatedOrganisation" },
+          relatedUser: { $first: "$relatedUser" },
+          organism: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: "$organism._id",
+          siret: "$organism.siret",
+          uai: "$organism.uai",
+          ferme: "$organism.ferme",
+          nature: "$organism.nature",
+          qualiopi: "$organism.qualiopi",
+          enseigne: "$organism.enseigne",
+          raison_sociale: "$organism.raison_sociale",
+          adresse: "$organism.adresse",
+          formationsCount: "$organism.formationsCount",
+          relatedOrganisation: "$relatedOrganisation",
+          relatedUser: "$relatedUser",
+        },
+      },
+    ])
+    .toArray()) as WithId<
+    OrganismeWithPermissions & { relatedOrganisation?: IOrganisation; relatedUser?: IUsersMigration }
+  >[];
+
+  return organismes;
 }
 
 export async function listOrganismesFormateurs(

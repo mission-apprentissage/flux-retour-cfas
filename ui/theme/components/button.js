@@ -93,12 +93,10 @@ const Button = {
       ...baseStyle,
       color: "bluefrance",
       border: "none",
-      paddingBottom: "3v",
-      textDecoration: "underline",
-      textUnderlineOffset: "0.4em",
-      textDecorationThickness: "1px",
+      padding: "3v",
       _hover: {
-        textDecorationThickness: "2px",
+        textDecoration: null,
+        background: "grey.100",
       },
     },
     badge: {

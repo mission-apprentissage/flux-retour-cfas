@@ -42,7 +42,6 @@ interface ListeOrganismesPageProps {
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const { organisationType } = useAuth();
-  // const { organisme } = useOrganisationOrganisme();
   const organismesNormalized = useOrganismesNormalizedLists(props.organismes);
   const { organismesFiltered } = useOrganismesFiltered(organismesNormalized.allOrganismes);
 
@@ -76,7 +75,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         <Text>Si des informations vous semblent erronées, veuillez suivre les démarches ci-dessous.</Text>
 
         <IndicateursOrganisme />
-        {/* Si pas d&apos;organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         <Stack spacing="4w">
           <OrganismesTable
             organismes={organismesFiltered || []}
@@ -91,7 +89,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </Stack>
         <Flex gap={12} mt={16} mb={6}>
           <Box flex="3">
-            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
+            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
               Des anomalies ? Voici les démarches à suivre.
             </Heading>
             <Flex>
@@ -102,7 +100,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               </Box>
               <Box flex="1"></Box>
             </Flex>
-
             {organisationType === "ORGANISME_FORMATION" ? (
               <Accordion defaultIndex={0} useCustomIcons={true}>
                 <Accordion.Item title='Si des établissements ont une UAI "non déterminée", que cela signifie-t-il et que faire ?'>
@@ -154,7 +151,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     >
                       Carif-Oref régional
                     </Link>{" "}
-                    pour référencer ses offres et obtenir un ID formation, que l&apos;on retrouve notamment dans le
+                    pour référencer ses offres et obtenir un ID formation, que l&apos;on retrouve notamment dans le{" "}
                     <Link
                       href="https://catalogue-apprentissage.intercariforef.org/recherche/etablissements"
                       target="_blank"
@@ -162,7 +159,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       isExternal
                       whiteSpace="nowrap"
                     >
-                      Catalogue des formations en apprentissage
+                      Catalogue des offres de formations en apprentissage
                     </Link>
                     . Veuillez noter que la modification de la nature d&apos;un organisme impacte ses relations avec les
                     autres organismes.
@@ -237,8 +234,9 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     chaque Carif-Oref.
                   </Text>
                   <Text mt={2}>
-                    Concernant les formations, chaque offre de chaque établissement devrait figurer dans le catalogue.
-                    Si ce n&apos;est pas le cas, merci de signaler la situation par mail :
+                    Concernant les formations, chaque offre de chaque établissement devrait figurer dans le Catalogue
+                    des offres de formations en apprentissage. Si ce n&apos;est pas le cas, merci de signaler la
+                    situation par mail :
                     <Link
                       href={`mailto:pole-apprentissage@intercariforef.org`}
                       target="_blank"
@@ -292,7 +290,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               </Accordion>
             ) : (
               <Accordion defaultIndex={0} useCustomIcons={true}>
-                <Accordion.Item title="Des établissements dans la liste ne transmettent pas (ou plus). Que faire ?">
+                <Accordion.Item title="Si des établissements dans la liste ne transmettent pas (ou plus), que faire ?">
                   <p>
                     Si des établissements n&apos;affichent pas d’effectifs transmis (ou ont arrêté la transmission), il
                     faut :
@@ -333,7 +331,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   </TextHighlight>
                 </Accordion.Item>
 
-                <Accordion.Item title="Des établissements ont une nature 'inconnue'. Que cela signifie-t-il et que faire ?">
+                <Accordion.Item title="Si des établissements ont une nature 'inconnue', que cela signifie-t-il et que faire ?">
                   <p>
                     Si un organisme a pour nature « Inconnue », cela signifie que l’offre de formation en apprentissage
                     n&apos;est pas collectée ou mal référencée par le Carif-Oref. L’organisme doit s’adresser auprès de
@@ -367,7 +365,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   </TextHighlight>
                 </Accordion.Item>
 
-                <Accordion.Item title="Des établissements ont un Siret 'fermé'. Que cela signifie-t-il et que faire ?">
+                <Accordion.Item title="Si des établissements ont un Siret 'fermé', que cela signifie-t-il et que faire ?">
                   <p>
                     Cette information est tirée de la base INSEE. Un établissement est affiché &quot;Fermé&quot; suite à
                     une cessation d&apos;activité ou un déménagement. Si un changement d&apos;adresse a été déclaré (via
@@ -421,7 +419,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                 </Accordion.Item>
               </Accordion>
             )}
-            <Grid templateColumns="repeat(3, 1fr)" gap={4} bg="galt" mt={6} p={16} borderRadius="md">
+            <Grid templateColumns="repeat(3, 1fr)" gap={3} bg="galt" mt={6} p={12} borderRadius="md">
               <GridItem>
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Image src="/images/contact.svg" alt="France relance" width="100%" userSelect="none" />
@@ -432,16 +430,28 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <Text color="#2F4077" fontSize="beta" fontWeight="700" lineHeight={1.4}>
                     Vous ne trouvez pas la réponse à vos questions ?
                   </Text>
-                  <Link
-                    variant="link"
-                    display="inline-flex"
-                    href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/10/create/80"
-                    isExternal
-                    width={"fit-content"}
-                  >
-                    Contactez-nous
-                    <Box className="ri-arrow-right-line" />
-                  </Link>
+                  <Flex gap={6}>
+                    <Link
+                      variant="link"
+                      display="inline-flex"
+                      href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3"
+                      isExternal
+                      width={"fit-content"}
+                    >
+                      Contactez-nous
+                      <Box className="ri-arrow-right-line" />
+                    </Link>
+                    <Link
+                      variant="link"
+                      display="inline-flex"
+                      href="/referencement-organisme"
+                      isExternal
+                      width={"fit-content"}
+                    >
+                      Voir la page de référencement
+                      <Box className="ri-arrow-right-line" />
+                    </Link>
+                  </Flex>
                 </Flex>
               </GridItem>
             </Grid>
@@ -505,30 +515,3 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
       throw new Error(`Type ’${type}’ inconnu`);
   }
 }
-
-// function getTextContextFromOrganisationType(type: IOrganisationType) {
-//   switch (type) {
-//     case "ORGANISME_FORMATION":
-//       return "rattachés à votre organisme";
-
-//     case "TETE_DE_RESEAU":
-//       return "de votre réseau";
-
-//     case "DREETS":
-//     case "DRAAF":
-//     case "CONSEIL_REGIONAL":
-//     case "CARIF_OREF_REGIONAL":
-//     case "DRAFPIC":
-//     case "DDETS":
-//     case "ACADEMIE":
-//       return "de votre territoire";
-
-//     case "OPERATEUR_PUBLIC_NATIONAL":
-//     case "CARIF_OREF_NATIONAL":
-//     case "ADMINISTRATEUR":
-//       return "de l&apos;ensemble du territoire";
-
-//     default:
-//       throw new Error(`Type ’${type}’ inconnu`);
-//   }
-// }

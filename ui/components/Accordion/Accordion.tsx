@@ -63,7 +63,7 @@ const AccordionItem = ({ title, children, useCustomIcons = false, ...props }: Cu
       {({ isExpanded }) => (
         <>
           <Box>
-            <ChakraAccordionButton py={4}>
+            <ChakraAccordionButton py={9}>
               <Box flex="1" textAlign="left" fontWeight="bold" fontSize="epsilon" pr={12}>
                 {title}
               </Box>

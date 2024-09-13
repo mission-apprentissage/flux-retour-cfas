@@ -148,7 +148,7 @@ const AideCodeRncp = () => {
             </Text>
             <Text>
               La date de fin de validité du RNCP est contrôlée pour les titres inscrits sur demande au RNCP. Si le RNCP
-              n&apos;est plus valide, la formation est exclue du Catalogue des formations en apprentissage.
+              n&apos;est plus valide, la formation est exclue du Catalogue des ofrres de formations en apprentissage.
             </Text>
           </Accordion.Item>
 

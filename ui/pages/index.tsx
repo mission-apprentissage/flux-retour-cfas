@@ -442,7 +442,7 @@ function SectionApercuChiffresCles() {
                           <ListItem>
                             trouvés dans le{" "}
                             <Link href="https://catalogue-apprentissage.intercariforef.org/" textDecoration="underLine">
-                              Catalogue des formations en apprentissage
+                              Catalogue des ofrres de formations en apprentissage
                             </Link>{" "}
                             (base des Carif-Oref)&nbsp;;
                           </ListItem>

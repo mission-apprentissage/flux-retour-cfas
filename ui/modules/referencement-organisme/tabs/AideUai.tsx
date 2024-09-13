@@ -250,7 +250,7 @@ const AideUai = () => {
                 (Data.gouv), la base{" "}
                 <AidePage.Link href="https://www.education.gouv.fr/acce_public/index.php">ACCE</AidePage.Link> et le{" "}
                 <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/recherche/etablissements">
-                  Catalogue des formations en apprentissage
+                  Catalogue des ofrres de formations en apprentissage
                 </AidePage.Link>{" "}
                 (base des Carif-Oref)
               </ListItem>
@@ -270,7 +270,7 @@ const AideUai = () => {
                 (Data.gouv), la base{" "}
                 <AidePage.Link href="https://www.education.gouv.fr/acce_public/index.php">ACCE</AidePage.Link> et le{" "}
                 <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/recherche/etablissements">
-                  Catalogue des formations en apprentissage
+                  Catalogue de ofrres de formations en apprentissage
                 </AidePage.Link>{" "}
                 (base des Carif-Oref)
               </ListItem>

@@ -14,7 +14,9 @@ import {
 import { ReactNode } from "react";
 import { ORGANISME_INDICATEURS_TYPE, PlausibleGoalType, TypeOrganismesIndicateurs } from "shared";
 
+import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -150,12 +152,12 @@ function IndicateursOrganisme() {
 
   const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
     trackPlausibleEvent(typeToGoalPlausible[type]);
-    // const organismes = await _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes/${type}`);
-    // exportDataAsXlsx(
-    //   `tdb-organismes-${type}.xlsx`,
-    //   organismes.map((organisme) => convertOrganismeToExport(organisme)),
-    //   organismesExportColumns
-    // );
+    const organismes = await _get(`/api/v1/organisation/organismes/indicateurs/${type}`);
+    exportDataAsXlsx(
+      `tdb-organismes-${type}.xlsx`,
+      organismes.map((organisme) => convertOrganismeToExport(organisme)),
+      organismesExportColumns
+    );
   };
 
   if (error) {
@@ -190,6 +192,11 @@ function IndicateursOrganisme() {
     );
   }
 
+  const countSiretFerme = data?.siretFerme || 0;
+  const countNatureInconnue = data?.natureInconnue || 0;
+  const countSansTransmissions = data?.sansTransmissions || 0;
+  const countUaiNonDetermine = data?.uaiNonDeterminee || 0;
+
   return (
     <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
@@ -219,23 +226,28 @@ function IndicateursOrganisme() {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="sans effectifs transmis (ou arrêt)"
-          count={data?.sansTransmissions ?? 0}
-          icon={getIcon(data?.sansTransmissions)}
+          count={countSansTransmissions}
+          icon={getIcon(countSansTransmissions)}
         >
-          <DownloadButton
-            variant="link"
-            action={() => {
-              downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS as "sans_effectifs");
-            }}
-          >
-            Télécharger la liste
-          </DownloadButton>
+          {countSansTransmissions > 0 && (
+            <DownloadButton
+              variant="link"
+              p={0}
+              pb={1}
+              mt={2}
+              action={() => {
+                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS as "sans_effectifs");
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec une nature “inconnue”"
-          count={data?.natureInconnue ?? 0}
+          count={countNatureInconnue}
           tooltipHeader="Nature de l’organisme de formation"
           tooltipLabel={
             <Box>
@@ -281,26 +293,27 @@ function IndicateursOrganisme() {
               </Text>
             </Box>
           }
-          icon={getIcon(data?.natureInconnue)}
+          icon={getIcon(countNatureInconnue)}
         >
-          <DownloadButton
-            variant="link"
-            borderBottom={0}
-            _active={{
-              color: "bluefrance",
-            }}
-            action={async () => {
-              downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE as "nature_inconnue");
-            }}
-          >
-            Télécharger la liste
-          </DownloadButton>
+          {countNatureInconnue > 0 && (
+            <DownloadButton
+              variant="link"
+              p={0}
+              pb={1}
+              mt={2}
+              action={async () => {
+                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE as "nature_inconnue");
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec un Siret fermé"
-          count={data?.siretFerme ?? 0}
+          count={countSiretFerme}
           tooltipHeader="État du Siret de l’établissement"
           tooltipLabel={
             <>
@@ -319,23 +332,27 @@ function IndicateursOrganisme() {
               <Text>En savoir plus sur les démarches à suivre sur la page de Référencement.</Text>
             </>
           }
-          icon={getIcon(data?.siretFerme)}
+          icon={getIcon(countSiretFerme)}
         >
-          <DownloadButton
-            variant="link"
-            borderBottom={0}
-            action={async () => {
-              downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SIRET_FERME as "siret_ferme");
-            }}
-          >
-            Télécharger la liste
-          </DownloadButton>
+          {countSiretFerme > 0 && (
+            <DownloadButton
+              variant="link"
+              p={0}
+              pb={1}
+              mt={2}
+              action={async () => {
+                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SIRET_FERME as "siret_ferme");
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="avec une UAI “non déterminée”"
-          count={data?.uaiNonDeterminee ?? 0}
+          count={countUaiNonDetermine}
           tooltipHeader="UAI non déterminée"
           tooltipLabel={
             <UnorderedList mt={6} mb={6}>
@@ -361,17 +378,21 @@ function IndicateursOrganisme() {
               </ListItem>
             </UnorderedList>
           }
-          icon={getIcon(data?.uaiNonDeterminee)}
+          icon={getIcon(countUaiNonDetermine)}
         >
-          <DownloadButton
-            variant="link"
-            borderBottom={0}
-            action={async () => {
-              downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE as "uai_non_determine");
-            }}
-          >
-            Télécharger la liste
-          </DownloadButton>
+          {countUaiNonDetermine > 0 && (
+            <DownloadButton
+              variant="link"
+              p={0}
+              pb={1}
+              mt={2}
+              action={async () => {
+                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE as "uai_non_determine");
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
     </Grid>

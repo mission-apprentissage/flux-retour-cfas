@@ -25,7 +25,6 @@ export interface OrganismesFilters {
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
-  console.log("CONSOLE LOG ~ parseOrganismesFiltersFromQuery ~ query:", query);
   return {
     qualiopi: query.qualiopi?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     prepa_apprentissage: query.prepa_apprentissage?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
