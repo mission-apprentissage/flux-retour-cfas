@@ -8,6 +8,7 @@ export const SIRET_REGEX_PATTERN = "^[0-9]{14}$";
 export const CODE_NAF_REGEX_PATTERN = "^[0-9]{4}[A-Z]$";
 export const UAI_REGEX_PATTERN = "^[0-9]{7}[a-zA-Z]$";
 export const YEAR_RANGE_PATTERN = "^[12][0-9]{3}-[12][0-9]{3}$";
+export const YEAR_PATTERN = "^[12][0-9]{3}$";
 export const NIR_REGEX_PATTERN = "^[0-9]{13}$";
 // Le NIR peut contenir 15 caractères (13 chiffres + 2 chiffres de contrôle)
 export const NIR_LOOSE_REGEX_PATTERN = "^[0-9]{13}([0-9]{2})?$";
@@ -38,7 +39,7 @@ export const YEAR_RANGE_REGEX = new RegExp(YEAR_RANGE_PATTERN);
 export const NIR_REGEX = new RegExp(NIR_REGEX_PATTERN);
 export const NIR_LOOSE_REGEX = new RegExp(NIR_LOOSE_REGEX_PATTERN);
 export const DERNIER_ORGANISME_UAI_REGEX = new RegExp(DERNIER_ORGANISME_UAI_PATTERN);
-
+export const YEAR_REGEX = new RegExp(YEAR_PATTERN);
 // TODO: create proper CFD type
 export const isValidCFD = (cfd: unknown): cfd is string => typeof cfd === "string" && CFD_REGEX.test(cfd);
 // TODO: create proper INE type

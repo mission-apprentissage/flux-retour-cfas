@@ -557,6 +557,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:effectifs-computed-organismes-opcos"));
 
+program
+  .command("hydrate:voeux-effectifs-relations")
+  .description("Mise a jour des liens entre les voeux et les effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:voeux-effectifs-relations"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**

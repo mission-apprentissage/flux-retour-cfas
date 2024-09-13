@@ -1,3 +1,6 @@
+import { ObjectId } from "bson";
+import { IEffectif } from "shared/models";
+
 import { voeuxAffelnetDb } from "../model/collections";
 
 const computeFilter = (departement: Array<string> | null, region: Array<string> | null) => {
@@ -57,6 +60,20 @@ export const getAffelnetCountVoeuxNational = async (
               $count: "total",
             },
           ],
+          apprenantsRetrouves: [
+            {
+              $match: { effectif_id: { $exists: true } },
+            },
+            {
+              $group: {
+                _id: "$raw.ine",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $count: "total",
+            },
+          ],
         },
       },
       {
@@ -78,10 +95,17 @@ export const getAffelnetCountVoeuxNational = async (
         },
       },
       {
+        $unwind: {
+          path: "$apprenantsRetrouves",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           voeuxFormules: "$voeuxFormules.total",
           apprenantVoeuxFormules: "$apprenantVoeuxFormules.total",
           apprenantsNonContretise: "$apprenantsNonContretise.total",
+          apprenantsRetrouves: "$apprenantsRetrouves.total",
         },
       },
     ])
@@ -91,6 +115,7 @@ export const getAffelnetCountVoeuxNational = async (
     voeuxFormules: result?.voeuxFormules ?? 0,
     apprenantVoeuxFormules: result?.apprenantVoeuxFormules ?? 0,
     apprenantsNonContretise: result?.apprenantsNonContretise ?? 0,
+    apprenantsRetrouves: result?.apprenantsRetrouves ?? 0,
   };
 };
 
@@ -146,3 +171,19 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
       },
     ])
     .toArray();
+
+export const updateVoeuxAffelnetEffectif = async (effectif_id: ObjectId, effectif: IEffectif, uai: string) => {
+  const { apprenant, annee_scolaire } = effectif;
+  const { nom, prenom } = apprenant;
+  const filter = {
+    "raw.uai_etatblissement_formateur": uai,
+    "raw.prenom_1": { $regex: `^${prenom.toLowerCase()}$`, $options: "i" },
+    "raw.nom": { $regex: `^${nom.toLowerCase()}$`, $options: "i" },
+    annee_scolaire_rentree: annee_scolaire.substring(0, 4),
+  };
+  const voeux = await voeuxAffelnetDb().find(filter).toArray();
+  const voeuxId = voeux.map((v) => v._id);
+  if (voeuxId.length) {
+    return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_id: effectif_id } });
+  }
+};

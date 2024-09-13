@@ -2,7 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX } from "../../constants";
+import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX, YEAR_REGEX } from "../../constants";
 import { zodEnumFromObjKeys } from "../../utils/zodHelper";
 import { zAdresse } from "../parts/adresseSchema";
 
@@ -77,6 +77,7 @@ const zVoeuAffelnetRaw = z.object({
   uai_etatblissement_formateur: z.any().nullish(),
   uai_etablissement_responsable: z.any().nullish(),
   libelle_public_etablissement: z.any().nullish(),
+  annee_scolaire_rentree: z.any().nullish(),
 });
 export const zVoeuAffelnet = z.object({
   _id: zObjectId.describe("Identifiant unique MongoDB de l'instance voeu"),
@@ -84,11 +85,18 @@ export const zVoeuAffelnet = z.object({
   //revision: z.number({ description: "Numéro de révision du voeu" }),
   organisme_formateur_id: zObjectId.describe("Identifiant de l'organisme formateur").nullish(),
   organisme_responsable_id: zObjectId.describe("Identifiant de l'organisme responsable").nullish(),
+  effectif_id: zObjectId.describe("Identifiant de l'effectif").nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),
   updated_at: z.date({ description: "Date de mise à jour" }),
   deleted_at: z.date({ description: "Date de suppresion du voeux" }).nullish(),
   is_contacted: z.boolean({ description: "Indique si le jeune a été contacté" }),
   formation_catalogue_id: zObjectId.nullish(),
+  annee_scolaire_rentree: z
+    .string({
+      description: `Année scolaire du voeux`,
+    })
+    .regex(YEAR_REGEX)
+    .nullish(),
   raw: zVoeuAffelnetRaw,
   history: z.array(
     z.object({
