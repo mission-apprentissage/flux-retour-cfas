@@ -15,6 +15,7 @@ import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
+import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
 import { lockEffectif, addComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
@@ -180,7 +181,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
       // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
-        createOrUpdateEffectif(effectif),
+        createOrUpdateEffectif(effectif, 0, organismeTarget.uai),
         updateOrganismeTransmission(
           organisme,
           effectif.source,
@@ -516,7 +517,8 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffe
  */
 const createOrUpdateEffectif = async (
   effectif: IEffectif,
-  retryCount = 0
+  retryCount = 0,
+  uai: string
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
   const effectifWithComputedFields = {
     ...effectif,
@@ -543,7 +545,8 @@ const createOrUpdateEffectif = async (
       );
     } else {
       effectifDb = { ...effectifWithComputedFields, _id: new ObjectId() };
-      await effectifsDb().insertOne(effectifDb);
+      const { insertedId } = await effectifsDb().insertOne(effectifDb);
+      await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
     }
 
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
@@ -560,7 +563,7 @@ const createOrUpdateEffectif = async (
     // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
     if (typeof err === "object" && err !== null && "code" in err && err.code === 11000) {
       // On ré-essaie une fois maximum
-      if (retryCount === 0) return createOrUpdateEffectif(effectif, retryCount + 1);
+      if (retryCount === 0) return createOrUpdateEffectif(effectif, retryCount + 1, uai);
     }
 
     throw err;
