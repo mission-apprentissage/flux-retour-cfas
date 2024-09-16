@@ -55,8 +55,14 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </Heading>
 
         <Text>
-          Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements sous votre gestion
-          et la nature de chacun.
+          Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements{" "}
+          {organisationType === "ORGANISME_FORMATION" ? (
+            <>sous votre gestion et la nature de chacun.</>
+          ) : organisationType === "TETE_DE_RESEAU" ? (
+            <>de votre réseau, ainsi que le nombre de formations dispensées par chacun.</>
+          ) : (
+            <>de votre territoire.</>
+          )}
         </Text>
 
         <Text fontStyle="italic" mb={8}>
@@ -71,8 +77,18 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
           </Link>
         </Text>
-        <Text>Cliquez sur un organisme pour voir en détails les formations dont vous avez la gestion.</Text>
-        <Text>Si des informations vous semblent erronées, veuillez suivre les démarches ci-dessous.</Text>
+        {organisationType === "ORGANISME_FORMATION" && (
+          <>
+            <Text>Cliquez sur un organisme pour voir en détails les formations dont vous avez la gestion.</Text>
+            <Text>Si des informations vous semblent erronées, veuillez suivre les démarches ci-dessous.</Text>
+          </>
+        )}
+        {organisationType === "TETE_DE_RESEAU" && (
+          <>
+            <Text>Cliquez sur un organisme pour voir en détails les formations dont il a la gestion.</Text>
+            <Text>Si des informations vous semblent erronées, veuillez suivre les démarches ci-dessous.</Text>
+          </>
+        )}
 
         <IndicateursOrganisme />
         <Stack spacing="4w">
@@ -100,7 +116,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               </Box>
               <Box flex="1"></Box>
             </Flex>
-            {organisationType === "ORGANISME_FORMATION" ? (
+            {organisationType === "ORGANISME_FORMATION" && (
               <Accordion defaultIndex={0} useCustomIcons={true}>
                 <Accordion.Item title='Si des établissements ont une UAI "non déterminée", que cela signifie-t-il et que faire ?'>
                   <Text>
@@ -288,7 +304,163 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   </DownloadLink>
                 </Accordion.Item>
               </Accordion>
-            ) : (
+            )}
+
+            {organisationType === "TETE_DE_RESEAU" && (
+              <Accordion defaultIndex={0} useCustomIcons={true}>
+                <Accordion.Item title="Il manque un ou plusieurs établissements, ou certains ne font plus partie de mon réseau. Comment mettre à jour la liste ?">
+                  <p>
+                    L&apos;onglet ”Mon réseau” affiche tous les établissements identifiés de votre réseau. Nous les
+                    mettons à jour manuellement et régulièrement sur le Tableau de bord.
+                  </p>
+                  <p>
+                    Si la liste des organismes de votre réseau ci-dessus est incomplète ou erronée ,{" "}
+                    <Link
+                      href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
+                      target="_blank"
+                      textDecoration="underline"
+                      isExternal
+                      whiteSpace="nowrap"
+                    >
+                      contactez-nous
+                    </Link>{" "}
+                    en indiquant la liste des établissements à rattacher à votre réseau, et en précisant pour chacun sa
+                    raison sociale, UAI, SIRET, domiciliation.
+                  </p>
+                  <p>
+                    L&apos;idéal est de nous envoyer un tableau Excel complet de votre réseau avec ces informations.
+                  </p>
+                </Accordion.Item>
+
+                <Accordion.Item title="Si des établissements ont une UAI “non déterminée”, que cela signifie-t-il et que faire ?">
+                  <p>
+                    L’UAI (Unité Administrative Immatriculée) est un code attribué par le Ministère de l’Éducation
+                    nationale, dans le répertoire académique et ministériel sur les établissements du système éducatif
+                    (RAMSESE) aux établissements du système éducatif (écoles, collèges, lycées, CFA, établissements
+                    d’enseignement supérieur, public ou privé). Il est utilisé pour les identifier dans différentes
+                    bases de données et systèmes administratifs. L’UAI s’obtient auprès des services du rectorat de
+                    l’académie où se situe le CFA.
+                  </p>
+                  <p>
+                    Si l&apos;UAI est répertoriée comme « Non déterminée » alors que l’organisme en possède une, il doit
+                    la communiquer en écrivant à{" "}
+                    <Link
+                      href="mailto:referentiel-uai-siret@onisep.fr"
+                      target="_blank"
+                      textDecoration="underline"
+                      isExternal
+                      whiteSpace="nowrap"
+                    >
+                      referentiel-uai-siret@onisep.fr
+                    </Link>{" "}
+                    avec la fiche descriptive UAI, pour mise à jour. L&apos;absence de ce numéro bloque
+                    l&apos;enregistrement des contrats d&apos;apprentissage.
+                  </p>
+                  <p>
+                    Si l’UAI est répertoriée comme « Non déterminée » alors que l’organisme en possède un, il doit la
+                    communiquer en écrivant à referentiel-uai-siret@onisep.fr avec la fiche UAI, pour mise à jour.
+                    L&apos;absence de ce numéro bloque l’enregistrement des contrats d’apprentissage.
+                  </p>
+                  <p>
+                    En cas de questions, contactez le service RAMSESE de votre Rectorat en leur communiquant les
+                    informations nécessaires à l’expertise de votre problématique (raison sociale, Siret, UAI, etc...).
+                  </p>
+                  <DownloadLink href="/pdf/Contact-Rectorat-UAI-RAMSESE.pdf" fileType="PDF" fileSize="81 Ko" isExternal>
+                    Liste des contacts des services académiques
+                  </DownloadLink>
+                </Accordion.Item>
+
+                <Accordion.Item title="Si des établissements ont une nature 'inconnue', que cela signifie-t-il et que faire ?">
+                  <p>
+                    Si un organisme a pour nature « Inconnue », cela signifie que l’offre de formation en apprentissage
+                    n&apos;est pas collectée ou mal référencée par le Carif-Oref. L’organisme doit s’adresser auprès de
+                    son{" "}
+                    <Link
+                      href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                      target="_blank"
+                      textDecoration="underline"
+                      isExternal
+                      whiteSpace="nowrap"
+                    >
+                      Carif-Oref régional
+                    </Link>{" "}
+                    pour référencer ses offres et obtenir un ID formation, que l’on retrouve notamment dans le
+                    <Link
+                      href="https://catalogue-apprentissage.intercariforef.org/"
+                      target="_blank"
+                      textDecoration="underline"
+                      isExternal
+                      whiteSpace="nowrap"
+                    >
+                      {" "}
+                      Catalogue des offres de formations en apprentissage
+                    </Link>
+                    . Veuillez noter que la modification de la nature d’un organisme impacte ses relations avec les
+                    autres organismes.
+                  </p>
+                  <p>En cas de questions, contactez votre Carif-Oref régional ou connectez-vous à votre espace.</p>
+                  <DownloadLink
+                    href="https://drive.google.com/file/d/1xjshlQqxl3UKhoU7xrEhziCUqVsPAxCU/view?usp=drive_link"
+                    fileType="PDF"
+                    fileSize="417 Ko"
+                    isExternal
+                  >
+                    Liste de contacts Carif-Oref
+                  </DownloadLink>
+                </Accordion.Item>
+
+                <Accordion.Item title="Si des établissements ont un Siret 'fermé', que cela signifie-t-il et que faire ?">
+                  <p>
+                    Cette information est tirée de la base INSEE. Un établissement est affiché &quot;Fermé&quot; suite à
+                    une cessation d&apos;activité ou un déménagement. Si un changement d&apos;adresse a été déclaré (via
+                    <Link
+                      href="https://procedures.inpi.fr/?/"
+                      target="_blank"
+                      textDecoration="underline"
+                      isExternal
+                      whiteSpace="nowrap"
+                    >
+                      Guichet unique des entreprises
+                    </Link>
+                    ), un nouveau Siret a été délivré par l’INSEE. L&apos;ancien Siret est alors fermé.
+                  </p>
+                  <p>
+                    Pour garantir la mise à jour correcte des informations administratives et légales, il faut signaler
+                    le nouveau Siret :
+                  </p>
+                  <UnorderedList pl={2}>
+                    <ListItem>au Carif-Oref régional,</ListItem>
+                    <ListItem>
+                      à la DREETS (Direction Régionale de l&apos;Économie, de l&apos;Emploi, du Travail et des
+                      Solidarités),
+                    </ListItem>
+                    <ListItem>
+                      au Rectorat de votre Académie (voir les contacts dans l&apos;onglet dédié à l&apos;UAI),
+                    </ListItem>
+                    <ListItem>à l&apos;OPCO (Opérateur de Compétences) concerné(s),</ListItem>
+                    <ListItem>
+                      au contact national ou régional, si le CFA appartient à un réseau (ex : Chambre de Commerce et
+                      d&apos;Industrie (CCI), Chambre de Métiers et de l&apos;Artisanat (CMA), MFR, etc.),
+                    </ListItem>
+                    <ListItem>
+                      et le mettre à jour sur{" "}
+                      <Link
+                        href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https://www.monactiviteformation.emploi.gouv.fr/mon-activite-formation/"
+                        target="_blank"
+                        textDecoration="underline"
+                        isExternal
+                        whiteSpace="nowrap"
+                      >
+                        Mon Activité Formation
+                      </Link>
+                      .
+                    </ListItem>
+                  </UnorderedList>
+                </Accordion.Item>
+              </Accordion>
+            )}
+
+            {organisationType !== "ORGANISME_FORMATION" && organisationType !== "TETE_DE_RESEAU" && (
               <Accordion defaultIndex={0} useCustomIcons={true}>
                 <Accordion.Item title="Si des établissements dans la liste ne transmettent pas (ou plus), que faire ?">
                   <p>
@@ -354,7 +526,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       whiteSpace="nowrap"
                     >
                       {" "}
-                      Catalogue de l&apos;apprentissage
+                      Catalogue des offres de formations en apprentissage
                     </Link>
                     . Veuillez noter que la modification de la nature d’un organisme impacte ses relations avec les
                     autres organismes.
@@ -466,9 +638,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               >
                 <Text>
                   Notre équipe vous accompagne dans le déploiement du Tableau de bord de l’apprentissage. Nous
-                  organisons des webinaires réguliers avec les CFA de votre territoire.{" "}
+                  organisons des webinaires réguliers avec les CFA de votre{" "}
+                  {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire.</>}.{" "}
                   <Link
-                    href="https://app.calendso.incubateur.net/paulborisbouzinbeta/webinaires-dreets-ddets"
+                    href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
                     target="_blank"
                     textDecoration="underline"
                     isExternal

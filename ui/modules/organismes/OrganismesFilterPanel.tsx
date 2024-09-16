@@ -118,6 +118,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       case "OPERATEUR_PUBLIC_NATIONAL":
       case "CARIF_OREF_NATIONAL":
       case "ADMINISTRATEUR":
+      case "ORGANISME_FORMATION":
         return true;
 
       default:

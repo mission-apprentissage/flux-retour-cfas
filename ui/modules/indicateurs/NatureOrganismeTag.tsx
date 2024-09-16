@@ -46,12 +46,7 @@ function NatureOrganismeTag({ nature, ...props }: NatureOrganismeTagProps) {
                         Carif-Oref régional{" "}
                       </Link>{" "}
                       ou se rapprocher du{" "}
-                      <Link
-                        isExternal
-                        href="http://localhost:3000/pdf/Carif-Oref-contacts.pdf"
-                        textDecoration="underLine"
-                        display="inline"
-                      >
+                      <Link isExternal href="/pdf/Carif-Oref-contacts.pdf" textDecoration="underLine" display="inline">
                         service dédié aux formations
                       </Link>
                       .

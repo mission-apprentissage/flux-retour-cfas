@@ -281,12 +281,7 @@ function IndicateursOrganisme() {
                   Carif-Oref régional{" "}
                 </Link>{" "}
                 ou se rapprocher du{" "}
-                <Link
-                  isExternal
-                  href="http://localhost:3000/pdf/Carif-Oref-contacts.pdf"
-                  textDecoration="underLine"
-                  display="inline"
-                >
+                <Link isExternal href="/pdf/Carif-Oref-contacts.pdf" textDecoration="underLine" display="inline">
                   service dédié aux formations
                 </Link>
                 .
@@ -329,7 +324,18 @@ function IndicateursOrganisme() {
                 </Link>
                 ) doit être réalisée et ce dernier doit être communiqué aux différents acteurs publics.
               </Text>
-              <Text>En savoir plus sur les démarches à suivre sur la page de Référencement.</Text>
+              <Text>
+                En savoir plus sur les démarches à suivre sur la{" "}
+                <Link
+                  isExternal
+                  href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organismez"
+                  textDecoration="underLine"
+                  display="inline"
+                >
+                  page de Référencement
+                </Link>
+                .
+              </Text>
             </>
           }
           icon={getIcon(countSiretFerme)}
@@ -374,7 +380,17 @@ function IndicateursOrganisme() {
               </ListItem>
               <ListItem>
                 Si l&apos;organisme ne possède pas encore d&apos;UAI, il doit s&apos;adresser aux services du rectorat
-                de l&apos;académie où se situe le CFA. Plus d&apos;informations dans la page de Référencement.
+                de l&apos;académie où se situe le CFA. Plus d&apos;informations dans la{" "}
+                <Link
+                  href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organisme"
+                  target="_blank"
+                  textDecoration="underline"
+                  isExternal
+                  whiteSpace="nowrap"
+                >
+                  page de Référencement
+                </Link>
+                .
               </ListItem>
             </UnorderedList>
           }

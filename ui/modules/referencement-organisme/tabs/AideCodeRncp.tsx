@@ -157,7 +157,7 @@ const AideCodeRncp = () => {
               Si toutes vos formations ne sont pas visibles sur votre espace Tableau de bord, cela signifie
               qu&apos;elles ne sont pas toutes correctement référencées sur le{" "}
               <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/">
-                Catalogue de l&apos;offre de formation en apprentissage
+                Catalogue des offres de formations en apprentissage
               </AidePage.Link>
               . Veuillez les déclarer ou les modifier auprès du Carif-Oref de votre région. Les modifications seront
               ensuite visibles sur le Catalogue et le Tableau de bord.
