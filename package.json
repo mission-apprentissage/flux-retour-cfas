@@ -51,7 +51,9 @@
     "foreach:ci": "yarn foreach:seq -p"
   },
   "dependencies": {
-    "husky": "^8.0.3"
+    "chart.js": "^4.4.4",
+    "husky": "^8.0.3",
+    "react-chartjs-2": "^5.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
