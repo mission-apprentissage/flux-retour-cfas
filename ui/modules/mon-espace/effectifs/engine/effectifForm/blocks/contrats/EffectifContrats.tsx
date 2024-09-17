@@ -46,7 +46,7 @@ export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
     </>
   ) : (
     <Center>
-      <Text>Pas de contrats</Text>
+      <Text>Pas de contrat</Text>
     </Center>
   );
 });
