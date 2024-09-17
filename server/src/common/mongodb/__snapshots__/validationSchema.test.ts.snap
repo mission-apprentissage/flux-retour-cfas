@@ -9116,7 +9116,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       "bsonType": "string",
     },
     "annee_incoherente": {
-      "bsonType": "bool",
+      "bsonType": [
+        "bool",
+        "null",
+      ],
     },
     "bcn_mefs_10": {
       "anyOf": [
@@ -9263,7 +9266,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "diplome": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "distance": {
       "bsonType": [
@@ -9281,7 +9287,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       "bsonType": "string",
     },
     "duree_incoherente": {
-      "bsonType": "bool",
+      "bsonType": [
+        "bool",
+        "null",
+      ],
     },
     "entierement_a_distance": {
       "bsonType": "bool",
@@ -9452,7 +9461,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "etablissement_gestionnaire_date_creation": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "etablissement_gestionnaire_enseigne": {
       "bsonType": [
@@ -9461,7 +9473,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "etablissement_gestionnaire_entreprise_raison_sociale": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "etablissement_gestionnaire_habilite_rncp": {
       "bsonType": [
@@ -9723,7 +9738,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       },
     },
     "niveau": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "niveau_entree_obligatoire": {
       "bsonType": [
@@ -10214,13 +10232,9 @@ exports[`validation-schema should create validation schema for formationsCatalog
     "cfd_outdated",
     "code_postal",
     "code_commune_insee",
-    "diplome",
-    "niveau",
     "rncp_code",
     "duree",
-    "duree_incoherente",
     "annee",
-    "annee_incoherente",
     "lieu_formation_adresse",
     "id_formation",
     "ids_action",
@@ -10230,8 +10244,6 @@ exports[`validation-schema should create validation schema for formationsCatalog
     "modalites_entrees_sorties",
     "etablissement_gestionnaire_siret",
     "etablissement_gestionnaire_uai",
-    "etablissement_gestionnaire_entreprise_raison_sociale",
-    "etablissement_gestionnaire_date_creation",
     "etablissement_formateur_siret",
     "etablissement_formateur_uai",
   ],
@@ -11795,7 +11807,15 @@ exports[`validation-schema should create validation schema for organismes: organ
             "description": "Clé unique de la formation",
           },
           "duree_formation_theorique": {
-            "bsonType": "int",
+            "anyOf": [
+              {
+                "bsonType": "int",
+                "description": "Durée théorique de la formation en mois pour cet organisme",
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
             "description": "Durée théorique de la formation en mois pour cet organisme",
           },
           "formation_id": {

@@ -181,7 +181,7 @@ const zOrganisme = z
                 description: "Durée théorique de la formation en mois pour cet organisme",
               })
               .int()
-              .optional(),
+              .nullish(),
           })
           .strict(),
         {

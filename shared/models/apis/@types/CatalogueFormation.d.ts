@@ -56,8 +56,8 @@ type CatalogueFormation = {
   nom: any;
   intitule_long: string;
   intitule_court: string;
-  diplome: string;
-  niveau: string;
+  diplome: string | null | undefined;
+  niveau: string | null | undefined;
   onisep_url: string;
   onisep_intitule: string;
   onisep_libelle_poursuite: string;
@@ -138,8 +138,8 @@ type CatalogueFormation = {
   france_competence_infos: any;
   lieu_formation_geo_coordonnees_computed: string;
   intitule_rco: string;
-  annee_incoherente: boolean;
-  duree_incoherente: boolean;
+  annee_incoherente: boolean | null | undefined;
+  duree_incoherente: boolean | null | undefined;
   catalogue_published: boolean;
   etablissement_gestionnaire_certifie_qualite: boolean;
   etablissement_formateur_certifie_qualite: boolean;

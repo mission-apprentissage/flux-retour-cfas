@@ -84,14 +84,19 @@ function CardWithSubCard({
           </Text>
         </Box>
         <Flex border="1px solid #DDDDDD" h="1px" w="100%"></Flex>
-        <HStack alignItems={"center"}>
-          <Box>{subIcon}</Box>
-          <Text fontSize={12}>
-            dont
-            <Text as="span" fontSize={big ? "28px" : "28px"} fontWeight="700" mx={2}>
-              {formatNumber(subCount)}
-            </Text>
-            <Text as="span" fontSize={"16px"} fontWeight="400" color="#3A3A3A">
+        <HStack justify={"start"} w="100%" alignItems="center" gap={3}>
+          <Box alignSelf={"center"} pt="3">
+            {subIcon}
+          </Box>
+          <Box>
+            <Flex justify={"start"} alignItems={"center"} gap={2}>
+              <Text fontSize={12}>dont</Text>
+              <Text fontSize="28px" fontWeight="700">
+                {formatNumber(subCount)}
+              </Text>
+            </Flex>
+
+            <Text fontSize={"16px"} fontWeight="400" color="#3A3A3A">
               {subLabel}
               {subTooltipHeader && subTooltipLabel ? (
                 <InfoTooltip
@@ -100,7 +105,7 @@ function CardWithSubCard({
                 />
               ) : null}
             </Text>
-          </Text>
+          </Box>
         </HStack>
       </VStack>
     </Center>
@@ -111,18 +116,18 @@ function Card({ label, count, tooltipHeader, tooltipLabel, icon, big = false, ch
   return (
     <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
       <HStack gap={3}>
-        <Box alignSelf={"center"} pt="3">
+        <Box alignSelf="center" pt="3">
           {icon}
         </Box>
         <Box>
-          <Flex justify={"start"} alignItems={"center"} gap={2}>
+          <Flex justify="start" alignItems="center" gap={2}>
             <Text fontSize={12}>dont</Text>
             <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
               {formatNumber(count)}
             </Text>
           </Flex>
 
-          <Text fontSize={"16px"} fontWeight="400" color="#3A3A3A">
+          <Text fontSize="16px" fontWeight="400" color="#3A3A3A">
             {label}
             {tooltipHeader && tooltipLabel ? (
               <InfoTooltip headerComponent={() => tooltipHeader} contentComponent={() => <Box>{tooltipLabel}</Box>} />

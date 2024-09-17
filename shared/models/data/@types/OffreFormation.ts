@@ -21,8 +21,8 @@ interface Etablissement {
   habilite_rncp: boolean | null;
   certifie_qualite: boolean | null;
   adresse: OptionalAdresse;
-  raison_sociale: string;
-  date_creation: string;
+  raison_sociale: string | null | undefined;
+  date_creation: string | null | undefined;
   reference: boolean;
 }
 
@@ -37,23 +37,23 @@ export interface OffreFormation {
   };
 
   niveau: {
-    libelle: string;
+    libelle: string | null | undefined;
     entree_obligatoire: number | null;
   };
 
   nature: {
-    libelle: string;
+    libelle: string | null | undefined;
     code: string | null | undefined;
   };
 
   duree: {
     theorique: string;
-    incoherente: boolean;
+    incoherente: boolean | null | undefined;
   };
 
   annee: {
     num: string;
-    incoherente: boolean;
+    incoherente: boolean | null | undefined;
   };
 
   intitule_long: string | null | undefined;

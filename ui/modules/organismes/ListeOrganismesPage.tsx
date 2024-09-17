@@ -639,7 +639,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                 <Text>
                   Notre équipe vous accompagne dans le déploiement du Tableau de bord de l’apprentissage. Nous
                   organisons des webinaires réguliers avec les CFA de votre{" "}
-                  {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire.</>}.{" "}
+                  {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire</>}.{" "}
                   <Link
                     href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
                     target="_blank"

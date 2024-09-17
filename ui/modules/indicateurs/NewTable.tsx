@@ -34,6 +34,7 @@ interface NewTableProps<T> extends SystemProps {
 }
 
 function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
+  console.log("CONSOLE LOG ~ props:", props);
   const [pagination, setPagination] = useState<PaginationState>(
     props.paginationState ?? {
       pageIndex: 0,
@@ -90,7 +91,7 @@ function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
                     bg="white"
                   >
                     {header.isPlaceholder ? null : (
-                      <Flex justify="space-between" align="center">
+                      <Flex justify="space-between" align="center" width="100%">
                         <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
                         <Box
                           ml={2}

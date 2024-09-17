@@ -21,7 +21,7 @@ export const hydrateOrganismesFormations = async () => {
 
   while (await organismesCursor.hasNext()) {
     const organisme = (await organismesCursor.next()) as IOrganisme;
-    const formations = await getFormationsByUAIAndSIRET(organisme.siret, organisme.uai ?? null);
+    const formations = await getFormationsBySIRET(organisme.siret);
     logger.info(
       { uai: organisme.uai, siret: organisme.siret, formations: formations.length },
       "updating organisme related formations"
@@ -45,63 +45,27 @@ export const hydrateOrganismesFormations = async () => {
  * - (siret) gestionnaire ou formateur
  * - (uai) gestionnaire ou formateur
  */
-async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Promise<IFormationCatalogue[]> {
-  {
-    const formations = await formationsCatalogueDb()
-      .find({
-        $or: [
-          {
-            etablissement_formateur_uai: uai,
-            etablissement_formateur_siret: siret,
-          },
-          {
-            etablissement_gestionnaire_uai: uai,
-            etablissement_gestionnaire_siret: siret,
-          },
-        ],
-      })
-      .toArray();
-    if (formations.length > 0) {
-      return formations;
-    }
-  }
-  {
-    const formations = await formationsCatalogueDb()
-      .find({
-        $or: [
-          {
-            etablissement_formateur_siret: siret,
-          },
-          {
-            etablissement_gestionnaire_siret: siret,
-          },
-        ],
-      })
-      .toArray();
-    if (formations.length > 0) {
-      return formations;
-    }
-  }
-  {
-    if (uai) {
-      const formations = await formationsCatalogueDb()
-        .find({
+async function getFormationsBySIRET(siret: string): Promise<IFormationCatalogue[]> {
+  const formations = await formationsCatalogueDb()
+    .find({
+      $and: [
+        { published: true },
+        {
           $or: [
             {
-              etablissement_formateur_uai: uai,
+              etablissement_formateur_siret: siret,
             },
             {
-              etablissement_gestionnaire_uai: uai,
+              etablissement_gestionnaire_siret: siret,
             },
           ],
-        })
-        .toArray();
-      if (formations.length > 0) {
-        return formations;
-      }
-    }
+        },
+      ],
+    })
+    .toArray();
+  if (formations.length > 0) {
+    return formations;
   }
-
   return [];
 }
 
@@ -113,7 +77,7 @@ async function formatFormation(formationCatalogue: WithId<IFormationCatalogue>):
     formation_id: formationCatalogue._id,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
     annee_formation: parseInt(formationCatalogue.annee, 10) || -1, // parfois annee === "X"
-    duree_formation_theorique: parseInt(formationCatalogue.duree, 10),
+    duree_formation_theorique: parseInt(formationCatalogue.duree, 10) || -1,
     organismes: await buildOrganismesListFromFormationCatalogue(formationCatalogue),
   };
 }

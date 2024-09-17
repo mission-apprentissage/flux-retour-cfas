@@ -174,8 +174,8 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
         num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
-      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
-      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
+      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale ?? null,
+      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation ?? null,
       reference: formationCatalogue.etablissement_reference === "gestionnaire",
     },
     formateur: {
@@ -195,8 +195,8 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
         num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
-      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
-      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
+      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale ?? null,
+      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation ?? null,
       reference: formationCatalogue.etablissement_reference === "formateur",
     },
   };
