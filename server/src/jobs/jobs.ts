@@ -20,6 +20,7 @@ import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
+import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
@@ -351,6 +352,11 @@ export async function setupJobProcessor() {
       "hydrate:effectifs-computed-organismes-reseaux": {
         handler: async () => {
           return hydrateEffectifsComputedReseaux();
+        },
+      },
+      "hydrate:voeux-effectifs-relations": {
+        handler: async () => {
+          return hydrateVoeuxEffectifsRelations();
         },
       },
       "purge:queues": {

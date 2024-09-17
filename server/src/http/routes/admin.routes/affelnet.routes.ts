@@ -72,6 +72,7 @@ const AFFELNET_HEADER = [
   "uai_etatblissement_formateur",
   "uai_etablissement_responsable",
   "libelle_public_etablissement",
+  "annee_scolaire_rentree",
 ];
 
 const logger = parentLogger.child({
@@ -132,6 +133,7 @@ const createVoeux = async (req, res) => {
         updated_at: currentDate,
         is_contacted: false,
         history: [],
+        annee_scolaire: voeuRaw.annee_scolaire_rentree,
         raw: voeuRaw,
         _computed: {
           formation: {},

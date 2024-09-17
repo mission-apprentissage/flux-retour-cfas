@@ -12637,7 +12637,21 @@ exports[`validation-schema should create validation schema for personV2: personV
       "bsonType": "date",
     },
     "date_de_naissance": {
-      "bsonType": "date",
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "string",
+            },
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "nom": {
       "bsonType": "string",
@@ -12655,7 +12669,6 @@ exports[`validation-schema should create validation schema for personV2: personV
     "updated_at",
     "nom",
     "prenom",
-    "date_de_naissance",
   ],
 }
 `;
@@ -13485,6 +13498,19 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
       "bsonType": "objectId",
       "description": "Identifiant unique MongoDB de l'instance voeu",
     },
+    "annee_scolaire_rentree": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "description": "Année scolaire du voeux",
+          "pattern": "^[12][0-9]{3}$",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Année scolaire du voeux",
+    },
     "created_at": {
       "bsonType": "date",
       "description": "Date d'ajout en base de données",
@@ -13500,6 +13526,18 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
         },
       ],
       "description": "Date de suppresion du voeux",
+    },
+    "effectif_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'effectif",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'effectif",
     },
     "formation_catalogue_id": {
       "anyOf": [
@@ -13558,6 +13596,14 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
                 ],
               },
               "adresse_4": {
+                "anyOf": [
+                  {},
+                  {
+                    "bsonType": "null",
+                  },
+                ],
+              },
+              "annee_scolaire_rentree": {
                 "anyOf": [
                   {},
                   {
@@ -14087,6 +14133,14 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
           ],
         },
         "adresse_4": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "annee_scolaire_rentree": {
           "anyOf": [
             {},
             {

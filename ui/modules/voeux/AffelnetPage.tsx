@@ -1,4 +1,18 @@
-import { Text, Container, HStack, Heading, VStack, List, ListItem, Grid, Box, GridItem, Flex } from "@chakra-ui/react";
+import {
+  Text,
+  Container,
+  HStack,
+  Heading,
+  VStack,
+  List,
+  ListItem,
+  Grid,
+  Box,
+  GridItem,
+  Flex,
+  UnorderedList,
+  Link,
+} from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 
@@ -6,7 +20,6 @@ import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
 import { formatNumber } from "@/common/utils/stringUtils";
 import Button from "@/components/buttons/Button";
-import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -20,6 +33,8 @@ import {
   parseEffectifsFiltersFullFromQuery,
   TerritoireFilters,
 } from "../models/effectifs-filters";
+
+import AffelnetChart from "./AffelnetChart";
 
 function VoeuxAffelnetPage() {
   const router = useRouter();
@@ -106,7 +121,7 @@ function VoeuxAffelnetPage() {
               onChange={(departements) => updateState({ organisme_departements: departements })}
             />
           </HStack>
-          <Grid templateColumns="repeat(4, 1fr)" templateRows="repeat(2, 1fr)" height="250px" gap={4} mx="auto">
+          <Grid templateColumns="repeat(4, 1fr)" templateRows="repeat(3, 1fr)" gap={4} height="290px" mx="auto">
             <GridItem colSpan={1} rowSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#C2B24C" p={4}>
               <Box p={4}>
                 <Box className="ri-heart-fill ri-lg" color="#C2B24C" boxSize={6} />
@@ -164,14 +179,18 @@ function VoeuxAffelnetPage() {
                     headerComponent={() => <Text>Calcul des vœux en apprentissage non concrétisés</Text>}
                     contentComponent={() => (
                       <Text>
-                        Ce chiffre expose le nombre de jeunes ayant formulé au moins un vœu mais qui n’en ont, à la date
-                        du jour, concrétisé aucun (pour différentes raisons : refus, retour en voie scolaire, etc.).
+                        Ce chiffre expose le nombre de jeunes ayant formulé un vœu non concrétisé à ce jour (pour
+                        différentes raisons : en recherche de CFA , et/ou en recherche d&apos;un contrat pour valider
+                        son inscription).
                       </Text>
                     )}
                   />
+                </Flex>
+                <Flex>
                   <BasicModal
                     renderTrigger={(onOpen) => (
                       <Button
+                        mt="5px"
                         variant="link"
                         action={() => Promise.resolve()}
                         onClick={(e) => {
@@ -189,9 +208,14 @@ function VoeuxAffelnetPage() {
                   >
                     <Flex flexDirection="column" gap={6}>
                       <Text>
-                        La liste est nominative et au format Excel : elle contient les contacts des jeunes n’ayant pas
-                        concrétisé leur vœu en apprentissage. Une colonne est dédiée au nombre de vœux exprimés pour
-                        chaque jeune.
+                        La liste est nominative et au format Excel : elle contient 2 onglets avec les contacts des
+                        jeunes n’ayant pas concrétisé leur vœu en apprentissage.
+                      </Text>
+                      <Text>
+                        Le premier onglet est dédié aux jeunes qui n’étaient plus présents dans le dernier fichier des
+                        vœux Affelnet (transmis le 8 juillet 2024) et le deuxième onglet est dédié aux jeunes que l’on
+                        ne retrouve pas inscrits en CFA sur le Tableau de bord de l’apprentissage. Dans chaque onglet,
+                        une colonne est dédiée au nombre de vœux exprimés pour chaque jeune.
                       </Text>
                       <Text>
                         Veuillez noter qu’il est impossible de restituer, pour chaque jeune, si il est retourné en voie
@@ -236,16 +260,66 @@ function VoeuxAffelnetPage() {
                 <Flex alignItems="center" gap={2}>
                   <Text>d’entre eux sont déjà inscrits en CFA pour la rentrée</Text>
                   <InfoTooltip
-                    headerComponent={() => <Text>Inscription théorique en CFA</Text>}
+                    headerComponent={() => (
+                      <Text>Calcul des jeunes, avec ou sans contrat d’apprentissage, déjà inscrits en CFA</Text>
+                    )}
                     contentComponent={() => (
-                      <Text>
-                        À partir de Septembre, vous pourrez retrouver ces jeunes sur votre espace Tableau de bord, en
-                        tant que jeunes sans contrat, ou apprentis.
-                      </Text>
+                      <Flex flexDirection="column" gap={6}>
+                        <Text>Ce chiffre se base à la fois sur :</Text>
+                        <UnorderedList>
+                          <ListItem>
+                            les transmissions d’effectifs au Tableau de bord par les OFA qui ont des jeunes inscrits sur
+                            2024-2025 (avec ou sans contrat d’apprentissage)
+                          </ListItem>
+                          <ListItem>
+                            la base{" "}
+                            <Link
+                              variant="link"
+                              display="inline-flex"
+                              href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
+                              isExternal
+                            >
+                              DECA
+                            </Link>{" "}
+                            (pour ceux ayant signé un contrat)
+                          </ListItem>
+                        </UnorderedList>
+                        <Text>
+                          Ce chiffre n’est pas exhaustif. Il est mis à jour toutes les semaines (chaque lundi).
+                          Retrouvez la liste des jeunes dans votre onglet “Mes indicateurs” (fichier Excel de listes
+                          nominatives).
+                        </Text>
+                      </Flex>
                     )}
                   />
                 </Flex>
+                <Flex>
+                  <Button
+                    mt="5px"
+                    variant="link"
+                    action={async () => {
+                      const params = organisme_departements ? `?organisme_departements=${organisme_departements}` : "";
+                      downloadObject(
+                        await _getBlob(`/api/v1/affelnet/export/concretise${params}`),
+                        `voeux_affelnet_non_concretisee.csv`,
+                        "text/plain"
+                      );
+                    }}
+                    p={0}
+                  >
+                    Télécharger la liste
+                    <DownloadSimple ml={2} />
+                  </Button>
+                </Flex>
               </Box>
+            </GridItem>
+          </Grid>
+          <Grid templateColumns="repeat(2, 1fr)" templateRows="repeat(1, 1fr)" gap={4}>
+            <GridItem colSpan={1}>
+              <AffelnetChart
+                totalApprenants={affelnetCount?.apprenantVoeuxFormules}
+                apprenantsConcretises={affelnetCount?.apprenantsRetrouves}
+              ></AffelnetChart>
             </GridItem>
           </Grid>
           <Flex gap={3}>
