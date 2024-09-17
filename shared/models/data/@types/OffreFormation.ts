@@ -1,12 +1,12 @@
 interface Adresse {
   code_postal: string;
   code_commune_insee: string;
-  num_departement: string;
-  region: string;
-  localite: string;
+  num_departement?: string | null | undefined;
+  region?: string | null | undefined;
+  localite?: string | null | undefined;
   adresse: string | null;
-  nom_academie: string;
-  num_academie: string;
+  nom_academie?: string | null | undefined;
+  num_academie?: string | null | undefined;
 }
 
 type OptionalAdresse = {
@@ -43,7 +43,7 @@ export interface OffreFormation {
 
   nature: {
     libelle: string;
-    code: string;
+    code: string | null | undefined;
   };
 
   duree: {
@@ -56,8 +56,8 @@ export interface OffreFormation {
     incoherente: boolean;
   };
 
-  intitule_long: string;
-  intitule_court: string;
+  intitule_long: string | null | undefined;
+  intitule_court: string | null | undefined;
 
   onisep: {
     url: string;

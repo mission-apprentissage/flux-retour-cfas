@@ -83,7 +83,7 @@ export function FormationsDetails({ organisme, formation }: FormationsDetailsPro
             <>
               <Label value={formation.nature.libelle} />
               <Text fontSize="omega">Code</Text>
-              <Label value={formation.nature.code} />
+              <Label value={formation.nature.code ?? ""} />
             </>
           ) : (
             <Label level="error" value={"inconnu"} />

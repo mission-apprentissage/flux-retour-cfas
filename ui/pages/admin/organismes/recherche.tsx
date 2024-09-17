@@ -30,6 +30,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo } from "react";
 import { OrganismeSupportInfoJson, UAI_INCONNUE_TAG_FORMAT } from "shared";
+import { OffreFormation } from "shared/models/data/@types/OffreFormation";
 import { z } from "zod";
 
 import { _get, _post } from "@/common/httpClient";
@@ -308,7 +309,10 @@ const Organisme = () => {
                             organisation={row.original.organisation}
                           />
                           <ReferentielInfo organisme={row.original.referentiel} />
-                          <FormationsInfo organisme={row.original.tdb} formations={row.original.formations} />
+                          <FormationsInfo
+                            organisme={row.original.tdb}
+                            formations={row.original.formations as OffreFormation[]}
+                          />
                         </SimpleGrid>
                       </TabPanel>
                       <TabPanel>
@@ -318,18 +322,21 @@ const Organisme = () => {
                         <RelatedOrganismePanel
                           type="responsables"
                           organisme={row.original.tdb}
-                          formations={row.original.formations}
+                          formations={row.original.formations as OffreFormation[]}
                         />
                       </TabPanel>
                       <TabPanel>
                         <RelatedOrganismePanel
                           type="formateurs"
                           organisme={row.original.tdb}
-                          formations={row.original.formations}
+                          formations={row.original.formations as OffreFormation[]}
                         />
                       </TabPanel>
                       <TabPanel>
-                        <FormationsPanel organisme={row.original.tdb} formations={row.original.formations} />
+                        <FormationsPanel
+                          organisme={row.original.tdb}
+                          formations={row.original.formations as OffreFormation[]}
+                        />
                       </TabPanel>
                       <TabPanel>
                         <TransmissionsPanel organisme={row.original.tdb} transmissions={row.original.transmissions} />
