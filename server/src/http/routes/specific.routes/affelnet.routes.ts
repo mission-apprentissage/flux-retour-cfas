@@ -5,7 +5,11 @@ import { ACADEMIES_DEPARTEMENT_MAP, ORGANISATION_TYPE } from "shared/constants";
 import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
-import { getAffelnetCountVoeuxNational, getAffelnetVoeuxNonConcretise } from "@/common/actions/affelnet.actions";
+import {
+  getAffelnetCountVoeuxNational,
+  getAffelnetVoeuxConcretise,
+  getAffelnetVoeuxNonConcretise,
+} from "@/common/actions/affelnet.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
@@ -68,6 +72,21 @@ export default () => {
   );
 
   router.get(
+    "/export/concretise",
+    requireOrganismeRegional,
+    validateRequestMiddleware({
+      query: z.object({
+        organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+      }),
+    }),
+    returnResult(async (req, res) => {
+      const affelnetCsv = await exportConcretisee(req);
+      res.attachment(`voeux_affelnet_concretisee.csv`);
+      return affelnetCsv;
+    })
+  );
+
+  router.get(
     "/export/non-concretise",
     requireOrganismeRegional,
     validateRequestMiddleware({
@@ -103,6 +122,28 @@ const exportNonConretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
+  const transformedVoeux = listVoeux.map(({ formations_demandees, ...voeu }) => ({
+    ...voeu,
+    formations_demandees: formations_demandees.join(", "),
+  }));
+
+  const ids = listVoeux.map((voeu) => voeu._id);
+  await createTelechargementListeNomLog("affelnet", ids, new Date(), req.user._id, undefined, new ObjectId(orga._id));
+
+  const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
+  const csv = await json2csvParser.parse(transformedVoeux);
+
+  return csv;
+};
+
+const exportConcretisee = async (req) => {
+  const user = req.user as AuthContext;
+  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
+    orga,
+    req.query.organisme_departements
+  );
+  const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
   const transformedVoeux = listVoeux.map(({ formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),

@@ -213,13 +213,17 @@ export function useAffelnetCount(organisme_departements?: string | string[] | un
     isLoading,
     error,
     refetch,
-  } = useQuery<{ voeuxFormules: number; apprenantVoeuxFormules: number; apprenantsNonContretise: number }, any>(
-    queryKey,
-    queryFn,
+  } = useQuery<
     {
-      enabled: true,
-    }
-  );
+      voeuxFormules: number;
+      apprenantVoeuxFormules: number;
+      apprenantsNonContretise: number;
+      apprenantsRetrouves: number;
+    },
+    any
+  >(queryKey, queryFn, {
+    enabled: true,
+  });
 
   return {
     affelnetCount,
