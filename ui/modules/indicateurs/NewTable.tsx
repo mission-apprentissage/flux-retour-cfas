@@ -34,7 +34,6 @@ interface NewTableProps<T> extends SystemProps {
 }
 
 function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
-  console.log("CONSOLE LOG ~ props:", props);
   const [pagination, setPagination] = useState<PaginationState>(
     props.paginationState ?? {
       pageIndex: 0,

@@ -8,8 +8,10 @@ import {
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
+  ORGANISME_INDICATEURS_TYPE,
   STATUT_APPRENANT,
   TypeEffectifNominatif,
+  hasRecentTransmissions,
   shouldDisplayContactInEffectifNominatif,
 } from "shared";
 
@@ -778,3 +780,26 @@ async function getOrganismeRestriction(organismeId?: ObjectId) {
     ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))] } }
     : {};
 }
+
+export const getIndicateursForRelatedOrganismes = async (organismeId: ObjectId, indicateurType: string) => {
+  const org = await organismesDb().findOne({ _id: organismeId });
+  const organismesFormateurs = org?.organismesFormateurs;
+
+  if (!organismesFormateurs) {
+    return [];
+  }
+  switch (indicateurType) {
+    case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS:
+      return organismesFormateurs.filter(
+        ({ last_transmission_date }) => !hasRecentTransmissions(last_transmission_date)
+      );
+    case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE:
+      return organismesFormateurs.filter(({ nature }) => nature === "inconnue");
+    case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
+      return organismesFormateurs.filter(({ ferme }) => !!ferme);
+    case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
+      return organismesFormateurs.filter(({ uai }) => !uai);
+    default:
+      return [];
+  }
+};

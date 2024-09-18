@@ -12,16 +12,17 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { ORGANISME_INDICATEURS_TYPE, PlausibleGoalType, TypeOrganismesIndicateurs } from "shared";
+import { IOrganismesCount, ORGANISME_INDICATEURS_TYPE, PlausibleGoalType, TypeOrganismesIndicateurs } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
-import { useOrganisationIndicateursOrganismes } from "@/hooks/organismes";
+import { useOrganisationIndicateursOrganismes, useOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 
 import { BlueBuilding, GreenCheck, RedFlashingLight } from "./icons";
@@ -147,13 +148,13 @@ const typeToGoalPlausible: { [key: string]: PlausibleGoalType } = {
   [ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE]: "telechargement_liste_organismes_uai_non_determine",
 };
 
-function IndicateursOrganisme() {
+export const IndicateursOrganisationsOrganismes = () => {
   const { trackPlausibleEvent } = usePlausibleTracking();
-  const { data, isLoading, error } = useOrganisationIndicateursOrganismes();
+  const organisationData = useOrganisationIndicateursOrganismes();
 
-  const getIcon = (count?: number) => {
-    return count ? <RedFlashingLight /> : <GreenCheck />;
-  };
+  const data = organisationData.data || {};
+  const isLoading = organisationData.isLoading;
+  const error = organisationData.error;
 
   const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
     trackPlausibleEvent(typeToGoalPlausible[type]);
@@ -163,6 +164,59 @@ function IndicateursOrganisme() {
       organismes.map((organisme) => convertOrganismeToExport(organisme)),
       organismesExportColumns
     );
+  };
+
+  return (
+    <Indicateurs
+      data={data}
+      isLoading={isLoading}
+      error={error}
+      downloadOrganismesIndicateurs={downloadOrganismesIndicateurs}
+    />
+  );
+};
+
+export const IndicateursOrganisme = ({ organismeId }: { organismeId: string }) => {
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const organismeData = useOrganisme(organismeId);
+
+  const data = (organismeData.organisme as Organisme & { organismesCount?: IOrganismesCount })?.organismesCount || {};
+  const isLoading = organismeData.isLoading;
+  const error = organismeData.error;
+
+  const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
+    trackPlausibleEvent(typeToGoalPlausible[type]);
+    const organismes = await _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes/${type}`);
+    exportDataAsXlsx(
+      `tdb-organismes-${type}.xlsx`,
+      organismes.map((organisme) => convertOrganismeToExport(organisme)),
+      organismesExportColumns
+    );
+  };
+
+  return (
+    <Indicateurs
+      data={data}
+      isLoading={isLoading}
+      error={error}
+      downloadOrganismesIndicateurs={downloadOrganismesIndicateurs}
+    />
+  );
+};
+
+function Indicateurs({
+  data,
+  isLoading,
+  error,
+  downloadOrganismesIndicateurs,
+}: {
+  data: any;
+  isLoading: boolean;
+  error: any;
+  downloadOrganismesIndicateurs: (type: TypeOrganismesIndicateurs) => Promise<void>;
+}) {
+  const getIcon = (count?: number) => {
+    return count ? <RedFlashingLight /> : <GreenCheck />;
   };
 
   if (error) {
@@ -419,5 +473,3 @@ function IndicateursOrganisme() {
     </Grid>
   );
 }
-
-export default IndicateursOrganisme;

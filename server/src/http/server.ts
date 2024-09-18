@@ -49,6 +49,7 @@ import {
   getOrganismeIndicateursEffectifsParFormation,
 } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
 import {
+  getIndicateursForRelatedOrganismes,
   getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
@@ -533,6 +534,21 @@ function setupRoutes(app: Application) {
         "/indicateurs/organismes",
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
+        })
+      )
+      .get(
+        "/indicateurs/organismes/:type",
+        returnResult(async (req, res) => {
+          const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
+          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
+          await createTelechargementListeNomLog(
+            `organismes_${type}`,
+            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
+            new Date(),
+            req.user._id,
+            res.locals.organismeId
+          );
+          return indicateurs;
         })
       )
       .get(

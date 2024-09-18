@@ -25,7 +25,7 @@ import { useOrganismesFiltered, useOrganismesNormalizedLists } from "@/hooks/org
 import useAuth from "@/hooks/useAuth";
 import { BonusAvatar, ExternalLinkLine } from "@/theme/components/icons";
 
-import IndicateursOrganisme from "../dashboard/IndicateursOrganisme";
+import { IndicateursOrganisme, IndicateursOrganisationsOrganismes } from "../dashboard/IndicateursOrganisme";
 
 import OrganismesTable from "./OrganismesTable";
 
@@ -37,7 +37,8 @@ export type OrganismeNormalized = Organisme & {
 
 interface ListeOrganismesPageProps {
   organismes: Organisme[];
-  modePublique: boolean;
+  modePublique?: boolean;
+  organismeId?: string;
 }
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
@@ -53,7 +54,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
           {props.modePublique ? "Ses organismes" : getHeaderTitleFromOrganisationType(organisationType)}
         </Heading>
-
         <Text>
           Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements{" "}
           {organisationType === "ORGANISME_FORMATION" ? (
@@ -64,7 +64,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             <>de votre territoire.</>
           )}
         </Text>
-
         <Text fontStyle="italic" mb={8}>
           Sources :{" "}
           <Link href="https://catalogue-apprentissage.intercariforef.org/" isExternal color="action-high-blue-france">
@@ -90,7 +89,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           </>
         )}
 
-        <IndicateursOrganisme />
+        {props.organismeId ? (
+          <IndicateursOrganisme organismeId={props.organismeId} />
+        ) : (
+          <IndicateursOrganisationsOrganismes />
+        )}
+
         <Stack spacing="4w">
           <OrganismesTable
             organismes={organismesFiltered || []}
@@ -303,6 +307,119 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     Liste de contacts Carif-Oref
                   </DownloadLink>
                 </Accordion.Item>
+                <Accordion.Item title="Si des établissements sont manquants, que faire ?">
+                  <p>Si des établissements n’apparaissent pas dans la liste :</p>
+                  <UnorderedList pl={2}>
+                    <ListItem>
+                      soit ils ne sont pas référencés sur le{" "}
+                      <Link
+                        href="https://referentiel.apprentissage.onisep.fr/"
+                        target="_blank"
+                        textDecoration="underline"
+                        isExternal
+                        whiteSpace="nowrap"
+                      >
+                        Référentiel UAI-SIRET des OFA-CFA
+                      </Link>
+                    </ListItem>
+                    <ListItem>
+                      soit leurs formations déclarées aux Carif Oref n’indiquent pas le bon établissement responsable
+                      sur le{" "}
+                      <Link
+                        href="https://catalogue-apprentissage.intercariforef.org/"
+                        target="_blank"
+                        textDecoration="underline"
+                        isExternal
+                        whiteSpace="nowrap"
+                      >
+                        Catalogue des offres de formations en apprentissage
+                      </Link>
+                    </ListItem>
+                  </UnorderedList>
+                  <TextHighlight highlightText={<b>Démarche :</b>}>
+                    <UnorderedList pl={2}>
+                      <ListItem>
+                        L’établissement est absent du{" "}
+                        <Link
+                          href="https://referentiel.apprentissage.onisep.fr/"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          Référentiel UAI-SIRET des OFA-CFA
+                        </Link>{" "}
+                        : référencez-le via{" "}
+                        <Link
+                          href="https://info.monactiviteformation.emploi.gouv.fr/"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          MAF
+                        </Link>
+                      </ListItem>
+                      <ListItem>
+                        L’établissement est absent du{" "}
+                        <Link
+                          href="https://catalogue-apprentissage.intercariforef.org/"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          Catalogue des offres de formations en apprentissage
+                        </Link>{" "}
+                        : référencez-le via votre{" "}
+                        <Link
+                          href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          plateforme Carif Oref
+                        </Link>
+                        .
+                      </ListItem>
+                      <ListItem>
+                        L’établissement est présent sur le{" "}
+                        <Link
+                          href="https://catalogue-apprentissage.intercariforef.org/"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          Catalogue des offres de formations en apprentissage
+                        </Link>{" "}
+                        : vérifiez que ses formations indiquent bien comme “responsable” l’établissement gestionnaire
+                        des contrats sur votre{" "}
+                        <Link
+                          href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          plateforme Carif Oref
+                        </Link>
+                        . Pour plus d’informations consultez{" "}
+                        <Link
+                          href="https://tba-faq.crisp.help/fr/article/mes-etablissements-sont-introuvables-ou-manquants-sur-le-tableau-de-bord-que-faire-u3izm0/"
+                          target="_blank"
+                          textDecoration="underline"
+                          isExternal
+                          whiteSpace="nowrap"
+                        >
+                          cet article
+                        </Link>
+                        .
+                      </ListItem>
+                    </UnorderedList>
+                  </TextHighlight>
+                </Accordion.Item>
               </Accordion>
             )}
 
@@ -465,12 +582,11 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                 <Accordion.Item title="Si des établissements dans la liste ne transmettent pas (ou plus), que faire ?">
                   <p>
                     Si des établissements n&apos;affichent pas d’effectifs transmis (ou ont arrêté la transmission), il
-                    faut :
+                    faut les encourager à :
                   </p>
                   <UnorderedList pl={2}>
                     <ListItem>
-                      encourager les CFA à se créer un compte sur le Tableau de bord de l&apos;apprentissage et
-                      transmettre les effectifs.
+                      se créer un compte sur le Tableau de bord de l&apos;apprentissage et transmettre les effectifs.
                     </ListItem>
                     <ListItem>mettre à jour leurs effectifs si la transmission s’est arrêtée.</ListItem>
                   </UnorderedList>

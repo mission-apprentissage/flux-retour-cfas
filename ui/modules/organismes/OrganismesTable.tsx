@@ -115,7 +115,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
                 <ListItem>
                   aucune donnée transmise{" "}
                   <Box as="span" color="#B60000">
-                    (rouge alerte)
+                    (rouge foncé)
                   </Box>
                 </ListItem>
                 <ListItem>Non-disponible&nbsp;: les droits d’accès à cette information sont restreints.</ListItem>
