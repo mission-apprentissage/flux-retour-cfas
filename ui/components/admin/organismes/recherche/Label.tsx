@@ -4,7 +4,7 @@ type Level = "success" | "error" | "warning" | "info";
 
 type LabelProps = {
   level?: Level;
-  value: string | boolean | number;
+  value: string | boolean | number | null | undefined;
 };
 
 function getLabelColorScheme(level: Level) {
