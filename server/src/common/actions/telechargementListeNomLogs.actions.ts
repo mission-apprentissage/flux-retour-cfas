@@ -11,6 +11,8 @@ export const createTelechargementListeNomLog = async (
     | "abandon"
     | "inconnu"
     | "affelnet"
+    | "affelnet_concretise"
+    | "affelnet_non_concretise"
     | "organismes_sans_effectifs"
     | "organismes_nature_inconnue"
     | "organismes_siret_ferme"
