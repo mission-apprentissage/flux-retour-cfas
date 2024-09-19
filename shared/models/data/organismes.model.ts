@@ -296,23 +296,25 @@ export const hasRecentTransmissions = (last_transmission_date: Date | null | und
   last_transmission_date && !isBefore(new Date(last_transmission_date), subMonths(new Date(), 3));
 
 export const withOrganismeListSummary = (organisme: IOrganisme) => {
+  // Initialisation avec les organises formateurs et son propre organisme
   const init = {
-    organismes: 0,
-    fiables: 0,
-    sansTransmissions: 0,
-    siretFerme: 0,
-    natureInconnue: 0,
-    uaiNonDeterminee: 0,
+    organismes: 1,
+    fiables: organisme.fiabilisation_statut === "FIABLE" ? 1 : 0,
+    sansTransmissions: hasRecentTransmissions(organisme.last_transmission_date) ? 0 : 1,
+    siretFerme: organisme.ferme ? 1 : 0,
+    natureInconnue: organisme.nature === "inconnue" ? 1 : 0,
+    uaiNonDeterminee: organisme.uai ? 0 : 1,
   };
+
   const organismesCount = organisme.organismesFormateurs?.reduce((acc, curr) => {
     return {
       ...acc,
-      fiables: acc.fiables + (curr.fiable ? 1 : 0),
       organismes: acc.organismes + 1,
+      fiables: acc.fiables + (curr.fiable ? 1 : 0),
+      sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
+      siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
       natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
       uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
-      siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
-      sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
     };
   }, init);
 

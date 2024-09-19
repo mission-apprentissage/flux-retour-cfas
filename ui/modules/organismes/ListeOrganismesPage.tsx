@@ -292,26 +292,14 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   </DownloadLink>
                 </Accordion.Item>
 
-                <Accordion.Item title="Comment déclarer un organisme afin qu'il apparaisse dans la liste ci-dessus ?">
-                  <Text>
-                    Si un organisme, dont la gestion de ses formations est confiée à votre CFA, n&apos;apparaît pas dans
-                    la liste, veuillez vous rapprocher de votre Carif-Oref afin de déclarer ou modifier la collecte.
-                    Cela doit se faire en concertation avec l&apos;organisme concerné.
-                  </Text>
-                  <DownloadLink
-                    href="https://drive.google.com/file/d/1xjshlQqxl3UKhoU7xrEhziCUqVsPAxCU/view?usp=drive_link"
-                    fileType="PDF"
-                    fileSize="417 Ko"
-                    isExternal
-                  >
-                    Liste de contacts Carif-Oref
-                  </DownloadLink>
-                </Accordion.Item>
                 <Accordion.Item title="Si des établissements sont manquants, que faire ?">
-                  <p>Si des établissements n’apparaissent pas dans la liste :</p>
+                  <p>
+                    Si un organisme, dont la gestion de ses formations en apprentissage est confiée à votre CFA,
+                    n’apparaît pas dans la liste :
+                  </p>
                   <UnorderedList pl={2}>
                     <ListItem>
-                      soit ils ne sont pas référencés sur le{" "}
+                      soit il n’est pas référencé sur le{" "}
                       <Link
                         href="https://referentiel.apprentissage.onisep.fr/"
                         target="_blank"
@@ -323,8 +311,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       </Link>
                     </ListItem>
                     <ListItem>
-                      soit leurs formations déclarées aux Carif Oref n’indiquent pas le bon établissement responsable
-                      sur le{" "}
+                      soit ses formations déclarées auprès de son Carif-Oref régional ne sont pas référencées ou
+                      n’indiquent pas le bon établissement responsable sur le{" "}
                       <Link
                         href="https://catalogue-apprentissage.intercariforef.org/"
                         target="_blank"
@@ -337,19 +325,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     </ListItem>
                   </UnorderedList>
                   <TextHighlight highlightText={<b>Démarche :</b>}>
-                    <UnorderedList pl={2}>
+                    <UnorderedList pl={2} mb={6}>
                       <ListItem>
-                        L’établissement est absent du{" "}
-                        <Link
-                          href="https://referentiel.apprentissage.onisep.fr/"
-                          target="_blank"
-                          textDecoration="underline"
-                          isExternal
-                          whiteSpace="nowrap"
-                        >
-                          Référentiel UAI-SIRET des OFA-CFA
-                        </Link>{" "}
-                        : référencez-le via{" "}
+                        Si l’organisme en apprentissage est absent du Référentiel UAI-SIRET des OFA-CFA : il doit se
+                        référencer via son compte{" "}
                         <Link
                           href="https://info.monactiviteformation.emploi.gouv.fr/"
                           target="_blank"
@@ -359,43 +338,17 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                         >
                           MAF
                         </Link>
-                      </ListItem>
-                      <ListItem>
-                        L’établissement est absent du{" "}
-                        <Link
-                          href="https://catalogue-apprentissage.intercariforef.org/"
-                          target="_blank"
-                          textDecoration="underline"
-                          isExternal
-                          whiteSpace="nowrap"
-                        >
-                          Catalogue des offres de formations en apprentissage
-                        </Link>{" "}
-                        : référencez-le via votre{" "}
-                        <Link
-                          href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                          target="_blank"
-                          textDecoration="underline"
-                          isExternal
-                          whiteSpace="nowrap"
-                        >
-                          plateforme Carif Oref
-                        </Link>
                         .
                       </ListItem>
                       <ListItem>
-                        L’établissement est présent sur le{" "}
-                        <Link
-                          href="https://catalogue-apprentissage.intercariforef.org/"
-                          target="_blank"
-                          textDecoration="underline"
-                          isExternal
-                          whiteSpace="nowrap"
-                        >
-                          Catalogue des offres de formations en apprentissage
-                        </Link>{" "}
-                        : vérifiez que ses formations indiquent bien comme “responsable” l’établissement gestionnaire
-                        des contrats sur votre{" "}
+                        Si l’organisme est absent du Catalogue des offres de formations en apprentissage : ses
+                        formations doivent être référencées sur la plateforme de son Carif Oref (voir document
+                        téléchargeable ci-dessous).
+                      </ListItem>
+                      <ListItem>
+                        Si l’organisme est présent sur le Catalogue des offres de formations en apprentissage : vérifiez
+                        que ses formations indiquent bien comme “Responsable” l’établissement gestionnaire des contrats
+                        sur votre
                         <Link
                           href="https://www.intercariforef.org/referencer-son-offre-de-formation"
                           target="_blank"
@@ -404,20 +357,19 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                           whiteSpace="nowrap"
                         >
                           plateforme Carif Oref
-                        </Link>
-                        . Pour plus d’informations consultez{" "}
-                        <Link
-                          href="https://tba-faq.crisp.help/fr/article/mes-etablissements-sont-introuvables-ou-manquants-sur-le-tableau-de-bord-que-faire-u3izm0/"
-                          target="_blank"
-                          textDecoration="underline"
-                          isExternal
-                          whiteSpace="nowrap"
-                        >
-                          cet article
                         </Link>
                         .
                       </ListItem>
                     </UnorderedList>
+                    <Box mb={4}>Ces démarches doivent s’effectuer en concertation avec l’organisme concerné.</Box>
+                    <DownloadLink
+                      href="https://drive.google.com/file/d/1xjshlQqxl3UKhoU7xrEhziCUqVsPAxCU/view?usp=drive_link"
+                      fileType="PDF"
+                      fileSize="417 Ko"
+                      isExternal
+                    >
+                      Liste de contacts Carif-Oref
+                    </DownloadLink>
                   </TextHighlight>
                 </Accordion.Item>
               </Accordion>
