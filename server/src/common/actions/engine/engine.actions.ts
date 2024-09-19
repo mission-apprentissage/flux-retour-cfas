@@ -1,13 +1,14 @@
 import { isEqual } from "date-fns";
 import { cloneDeep, get } from "lodash-es";
+import { Collection } from "mongodb";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { PartialDeep } from "type-fest";
 
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 /**
@@ -103,14 +104,12 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
  * formation.cfd : Code formation diplôme de la formation suivie par le jeune
  * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
  */
-export const checkIfEffectifExists = async (
-  effectif: IEffectif,
-  queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"]
-) => {
+export const checkIfEffectifExists = async (effectif: IEffectif | IEffectifDECA, db: Collection<any>) => {
+  const queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"];
   // Recherche de l'effectif via sa clé d'unicité
   const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
 
-  return await effectifsDb().findOne(query);
+  return await db.findOne(query);
 };
 
 /**

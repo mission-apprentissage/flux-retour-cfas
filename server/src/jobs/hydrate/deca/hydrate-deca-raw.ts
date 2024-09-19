@@ -1,7 +1,7 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { MongoClient, ObjectId, WithoutId } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisme } from "shared/models";
 import { IAirbyteRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
@@ -12,6 +12,7 @@ import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
+import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
@@ -37,7 +38,7 @@ export async function hydrateDecaRaw() {
 
     const cursor = client.db("airbyte").collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
 
-    await effectifsDECADb().drop();
+    // await effectifsDECADb().drop();
 
     for await (const document of cursor) {
       try {
@@ -60,11 +61,17 @@ export async function hydrateDecaRaw() {
 }
 
 async function updateEffectifDeca(document: IAirbyteRawBalDeca) {
-  const newDocument = await transformDocument(document);
+  const newDocument: IEffectifDECA = await transformDocument(document);
 
-  return await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
+  const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
+
+  if (effectifFound) {
+    return await effectifsDECADb().insertOne(newDocument);
+  } else {
+    return await effectifsDECADb().updateOne({ _id: effectifFound._id }, newDocument);
+  }
 }
-async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
+async function transformDocument(document: IAirbyteRawBalDeca): Promise<IEffectifDECA> {
   const {
     _id,
     alternant,
