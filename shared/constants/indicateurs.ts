@@ -24,3 +24,5 @@ export const typesOrganismesIndicateurs = [
 ] as const;
 
 export type TypeOrganismesIndicateurs = (typeof typesOrganismesIndicateurs)[number];
+
+export const typesAffelnet = ["affelnet_concretise", "affelnet", "affelnet_non_concretise"];

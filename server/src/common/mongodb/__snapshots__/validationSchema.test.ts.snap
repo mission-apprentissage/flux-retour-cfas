@@ -12835,7 +12835,9 @@ exports[`validation-schema should create validation schema for telechargementLis
         "organismes_nature_inconnue",
         "organismes_siret_ferme",
         "organismes_uai_non_determine",
+        "affelnet_concretise",
         "affelnet",
+        "affelnet_non_concretise",
       ],
     },
     "user_id": {

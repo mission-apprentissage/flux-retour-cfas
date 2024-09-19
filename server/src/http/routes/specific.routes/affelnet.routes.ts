@@ -128,7 +128,14 @@ const exportNonConretisee = async (req) => {
   }));
 
   const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog("affelnet", ids, new Date(), req.user._id, undefined, new ObjectId(orga._id));
+  await createTelechargementListeNomLog(
+    "affelnet_non_concretise",
+    ids,
+    new Date(),
+    req.user._id,
+    undefined,
+    new ObjectId(orga._id)
+  );
 
   const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
   const csv = await json2csvParser.parse(transformedVoeux);
@@ -150,7 +157,14 @@ const exportConcretisee = async (req) => {
   }));
 
   const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog("affelnet", ids, new Date(), req.user._id, undefined, new ObjectId(orga._id));
+  await createTelechargementListeNomLog(
+    "affelnet_concretise",
+    ids,
+    new Date(),
+    req.user._id,
+    undefined,
+    new ObjectId(orga._id)
+  );
 
   const json2csvParser = new Parser({ fields: AFFELNET_FIELDS, delimiter: ";", withBOM: true });
   const csv = await json2csvParser.parse(transformedVoeux);
