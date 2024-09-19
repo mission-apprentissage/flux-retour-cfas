@@ -527,7 +527,7 @@ const createOrUpdateEffectif = async (
     },
   };
   const itemProcessingInfos: ItemProcessingInfos = {};
-  let effectifDb = await checkIfEffectifExists(effectifWithComputedFields);
+  let effectifDb = await checkIfEffectifExists(effectifWithComputedFields, effectifsDb());
   itemProcessingInfos.effectif_new = !effectifDb;
 
   try {
