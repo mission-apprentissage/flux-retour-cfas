@@ -139,3 +139,42 @@ export function VerbatimFrQuoteIcon(props?: SystemProps) {
     </Icon>
   );
 }
+
+export function RedFlashingLight(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 32 32" w="32px" h="32px" {...props}>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.0001 4C14.4184 4 18.0001 7.58172 18.0001 12V18H19.0001V20H1.00011V18H2.00011V12C2.00011 7.58172 5.58183 4 10.0001 4ZM10.0001 6C6.6864 6 4.00011 8.68629 4.00011 12H6.00011C6.00011 9.79086 7.79097 8 10.0001 8V6ZM2.22211 2.808L4.34311 4.928L2.93011 6.344L0.808105 4.222L2.22211 2.808ZM17.7781 2.808L19.1921 4.222L17.0721 6.343L15.6571 4.929L17.7781 2.808ZM11.0001 0V3H9.0001V0H11.0001Z"
+        fill="#C9191E"
+      />
+    </Icon>
+  );
+}
+
+export function BlueBuilding(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 32 32" w="32px" h="32px" {...props}>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M19 0.5C19.5523 0.5 20 0.947715 20 1.5V17.5C20 18.0523 19.5523 18.5 19 18.5H1C0.447715 18.5 0 18.0523 0 17.5V9.987C0 9.6979 0.125052 9.42294 0.343 9.233L4 6.044V1.5C4 0.947715 4.44772 0.5 5 0.5H19ZM6 6.954L2 10.442V16.5H5V12.5H7V16.5H10V10.442L6 6.954ZM16 12.5H14V14.5H16V12.5ZM16 8.5H14V10.5H16V8.5ZM16 4.5H14V6.5H16V4.5ZM12 4.5H10V6.5H12V4.5Z"
+        fill="#000091"
+      />
+    </Icon>
+  );
+}
+
+export function GreenCheck(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 22 22" w="20px" h="20px" {...props}>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10 20.5C4.477 20.5 0 16.023 0 10.5C0 4.977 4.477 0.5 10 0.5C15.523 0.5 20 4.977 20 10.5C20 16.023 15.523 20.5 10 20.5ZM9.003 14.5L16.073 7.429L14.659 6.015L9.003 11.672L6.174 8.843L4.76 10.257L9.003 14.5Z"
+        fill="#56C8B6"
+      />
+    </Icon>
+  );
+}

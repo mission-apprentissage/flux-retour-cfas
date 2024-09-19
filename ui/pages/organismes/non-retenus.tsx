@@ -20,7 +20,7 @@ function OrganismesNonRetenus() {
     );
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="non-retenus" modePublique={false} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={false} />;
 }
 
 export default withAuth(OrganismesNonRetenus);

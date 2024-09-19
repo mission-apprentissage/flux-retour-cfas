@@ -1,7 +1,10 @@
-import { Text, UnorderedList, ListItem, Img, Flex } from "@chakra-ui/react";
+import { Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import React from "react";
 
+import Accordion from "@/components/Accordion/Accordion";
+import DownloadLink from "@/components/Links/DownloadLink";
 import AidePage from "@/components/Page/AidePage";
+import TextHighlight from "@/components/Text/Highlight";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 
@@ -55,8 +58,8 @@ const AideCodeRncp = () => {
           content="La donnée ‘Code RNCP’ affichée sur le Tableau de bord provient des Carif-Oref. Si cette information est erronée, merci de leur signaler."
         />
 
-        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
-          <AidePage.AccordionItem title="À quoi sert une certification professionnelle ?">
+        <Accordion defaultIndex={0} allowToggle mt={12}>
+          <Accordion.Item title="À quoi sert une certification professionnelle ?">
             <Text>
               Une certification professionnelle permet d&apos;avoir une reconnaissance officielle des compétences et des
               connaissances professionnelles. Également, elle garantit une reconnaissance sur le marché du travail en
@@ -65,16 +68,14 @@ const AideCodeRncp = () => {
               également constituées de blocs de compétences, ensembles homogènes et cohérents de compétences contribuant
               à l&apos;exercice autonome d&apos;une activité professionnelle et pouvant être évaluées et validées.
             </Text>
-            <Flex align="center">
-              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={2} mt={1} />
-              <Text>
-                <b>Bon à savoir :</b> Il revient aux CFA de se mettre à jour auprès de France Compétences :{" "}
-                <AidePage.Link href="mailto:certificationprofessionnelle@francecompetences.fr">
-                  certificationprofessionnelle@francecompetences.fr
-                </AidePage.Link>
-              </Text>
-            </Flex>
-            <AidePage.DownloadLink
+            <TextHighlight>
+              Il revient aux CFA de se mettre à jour auprès de France Compétences :{" "}
+              <AidePage.Link href="mailto:certificationprofessionnelle@francecompetences.fr">
+                certificationprofessionnelle@francecompetences.fr
+              </AidePage.Link>{" "}
+            </TextHighlight>
+
+            <DownloadLink
               href="/pdf/Vadémécum-RNCP-V1.1-VF-.pdf"
               fileType="PDF"
               fileSize="958 Ko"
@@ -87,10 +88,10 @@ const AideCodeRncp = () => {
               }
             >
               Vademecum RNCP
-            </AidePage.DownloadLink>
-          </AidePage.AccordionItem>
+            </DownloadLink>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment vérifier ou rechercher mes certifications ?">
+          <Accordion.Item title="Comment vérifier ou rechercher mes certifications ?">
             <Text>
               Pour vérifier que le diplôme ou la certification est bien reconnu par l&apos;État, effectuez une recherche
               en cliquant sur{" "}
@@ -112,9 +113,9 @@ const AideCodeRncp = () => {
               préparer, les compétences visées et pour le RNCP, le niveau de qualification et la structuration des blocs
               de compétences.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Un code RNCP me semble erroné. Comment vérifier ou le corriger ?">
+          <Accordion.Item title="Un code RNCP me semble erroné. Comment vérifier ou le corriger ?">
             <Text>
               Le code RNCP d&apos;une fiche formation issue du{" "}
               <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/formation/018817P01213885594860007038855948600070-67118%23L01">
@@ -124,7 +125,7 @@ const AideCodeRncp = () => {
               déclarations sur la certification par l&apos;OFA. Veuillez contacter votre Carif-Oref pour signaler une
               erreur (fichier des contacts téléchargeable).
             </Text>
-            <AidePage.DownloadLink
+            <DownloadLink
               href="https://drive.google.com/file/d/1xjshlQqxl3UKhoU7xrEhziCUqVsPAxCU/view?usp=drive_link"
               fileType="PDF"
               fileSize="417 Ko"
@@ -137,32 +138,32 @@ const AideCodeRncp = () => {
               }
             >
               Liste de contacts Carif-Oref
-            </AidePage.DownloadLink>
-          </AidePage.AccordionItem>
+            </DownloadLink>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Quelle est la période de validité d'un code RNCP ?">
+          <Accordion.Item title="Quelle est la période de validité d'un code RNCP ?">
             <Text>
               Un enregistrement au RNCP est de maximum 5 ans, dépassé ce délai toute fiche doit faire l&apos;objet
               d&apos;une demande de renouvellement.
             </Text>
             <Text>
               La date de fin de validité du RNCP est contrôlée pour les titres inscrits sur demande au RNCP. Si le RNCP
-              n&apos;est plus valide, la formation est exclue du Catalogue des formations en apprentissage.
+              n&apos;est plus valide, la formation est exclue du Catalogue des ofrres de formations en apprentissage.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Mes formations n'apparaissent pas toutes sur le Tableau de bord : comment corriger ?">
+          <Accordion.Item title="Mes formations n'apparaissent pas toutes sur le Tableau de bord : comment corriger ?">
             <Text>
               Si toutes vos formations ne sont pas visibles sur votre espace Tableau de bord, cela signifie
               qu&apos;elles ne sont pas toutes correctement référencées sur le{" "}
               <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/">
-                Catalogue de l&apos;offre de formation en apprentissage
+                Catalogue des offres de formations en apprentissage
               </AidePage.Link>
               . Veuillez les déclarer ou les modifier auprès du Carif-Oref de votre région. Les modifications seront
               ensuite visibles sur le Catalogue et le Tableau de bord.
             </Text>
-          </AidePage.AccordionItem>
-        </AidePage.Accordion>
+          </Accordion.Item>
+        </Accordion>
       </AidePage.Container>
     </AidePage>
   );

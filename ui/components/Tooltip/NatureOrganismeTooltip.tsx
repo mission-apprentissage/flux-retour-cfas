@@ -16,26 +16,30 @@ export default function NatureOrganismeTooltip() {
               textDecoration="underLine"
               display="inline"
             >
-              Catalogue
+              Catalogue des offres de formations en apprentissage{" "}
             </Link>{" "}
-            des formations en apprentissage identifie trois natures :
+            identifie trois natures :
           </Text>
-          <UnorderedList>
+          <UnorderedList my={3}>
             <ListItem>Les organismes responsables</ListItem>
             <ListItem>Les organismes responsables et formateur</ListItem>
             <ListItem>Les organismes formateurs</ListItem>
           </UnorderedList>
           <Text as="p">
-            Si la cellule contient «&nbsp;inconnue&nbsp;», cela signifie que l’organisme n’a pas déclaré son offre de
-            formation dans la base de son Carif-Oref : Inviter l’organisme à référencer ses formations en apprentissage
+            Une nature “inconnue” signifie que l’organisme n’a pas déclaré (ou de manière incomplète) son offre de
+            formation dans la base de son Carif-Oref : l’organisme doit référencer ses formations en apprentissage
             auprès du{" "}
             <Link
               isExternal
-              href="https://catalogue-apprentissage.intercariforef.org/"
+              href="https://www.intercariforef.org/referencer-son-offre-de-formation"
               textDecoration="underLine"
               display="inline"
             >
-              Carif-Oref régional
+              Carif-Oref régional{" "}
+            </Link>{" "}
+            ou se rapprocher du{" "}
+            <Link isExternal href="/pdf/Carif-Oref-contacts.pdf" textDecoration="underLine" display="inline">
+              service dédié aux formations
             </Link>
             .
           </Text>

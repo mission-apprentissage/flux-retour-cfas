@@ -4,7 +4,7 @@ import AppButton, { AppButtonProps } from "./Button";
 
 function DownloadButton({ children, ...props }: AppButtonProps) {
   return (
-    <AppButton leftIcon={<DownloadLine />} {...props}>
+    <AppButton rightIcon={<DownloadLine />} {...props}>
       {children}
     </AppButton>
   );

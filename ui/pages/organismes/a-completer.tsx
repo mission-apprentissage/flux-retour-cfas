@@ -29,7 +29,7 @@ function MesOrganismesACompleter() {
     (prominentOrganisme as any).prominent = true;
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={false} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={false} />;
 }
 
 export default withAuth(MesOrganismesACompleter);

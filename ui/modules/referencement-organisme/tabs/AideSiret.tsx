@@ -1,6 +1,7 @@
 import { Text, Link, UnorderedList, OrderedList, ListItem, Img } from "@chakra-ui/react";
 import React, { useState } from "react";
 
+import Accordion from "@/components/Accordion/Accordion";
 import AidePage from "@/components/Page/AidePage";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
@@ -80,8 +81,8 @@ const AideSiret = () => {
           }
         />
 
-        <AidePage.Accordion index={expandedIndex} onChange={setExpandedIndex} allowToggle mt={12}>
-          <AidePage.AccordionItem title="Mon établissement a déménagé. Que dois-je faire ?">
+        <Accordion index={expandedIndex} onChange={setExpandedIndex} allowToggle mt={12}>
+          <Accordion.Item title="Mon établissement a déménagé. Que dois-je faire ?">
             <Text>
               Lors d&apos;un changement d&apos;adresse, vous obtenez un nouveau Siret (dans cette situation, seuls les 5
               derniers chiffres de votre Siret changent). L&apos;ancien Siret est alors fermé. Vous devez déclarer le
@@ -121,9 +122,9 @@ const AideSiret = () => {
               </AidePage.Link>{" "}
               pour pouvoir ensuite créer un nouveau sur votre dernier SIRET.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Le Siret indiqué sur mon espace me semble erroné. Comment le corriger ?">
+          <Accordion.Item title="Le Siret indiqué sur mon espace me semble erroné. Comment le corriger ?">
             <Text>
               La donnée &quot;Siret&quot; et l&apos;état administratif de l&apos;organisme &quot;en activité&quot; ou
               &quot;fermé&quot; provient de l&apos;INSEE dont l&apos;une des missions est la charge du Système National
@@ -151,9 +152,9 @@ const AideSiret = () => {
               Note : pour transmettre vos effectifs au Tableau de bord, l’état administratif du Siret de
               l’établissement, tel qu&apos;il est enregistré auprès de l’INSEE, doit être ouvert.
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment obtenir un Siret ? Mon établissement peut-il en avoir plusieurs ?">
+          <Accordion.Item title="Comment obtenir un Siret ? Mon établissement peut-il en avoir plusieurs ?">
             <Text>
               Le numéro Siret, composé de 14 chiffres, est délivré automatiquement après la demande
               d&apos;immatriculation de l&apos;entreprise sur le site internet des{" "}
@@ -165,9 +166,9 @@ const AideSiret = () => {
               Une entreprise peut avoir plusieurs SIRET même si la majorité n&apos;en possède qu&apos;un seul
               (établissement unique).
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Sur mon espace, il est indiqué que mon établissement est 'Fermé'. Que dois-je faire ?">
+          <Accordion.Item title="Sur mon espace, il est indiqué que mon établissement est 'Fermé'. Que dois-je faire ?">
             <Text>
               Cette information est tirée de la base INSEE. Un établissement est affiché &quot;Fermé&quot; suite à une
               cessation d&apos;activité ou un déménagement. Si vous avez créé un compte Tableau de bord sur un
@@ -179,9 +180,9 @@ const AideSiret = () => {
               </Link>
               ).
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment modifier l'adresse de mon établissement ?">
+          <Accordion.Item title="Comment modifier l'adresse de mon établissement ?">
             <Text>
               Si la structure dont vous souhaitez modifier l&apos;adresse est une entreprise, son/sa dirigeant(e) peut
               modifier l&apos;adresse sur le{" "}
@@ -198,8 +199,8 @@ const AideSiret = () => {
               Une fois le changement d&apos;adresse validé, le Tableau de bord affichera automatiquement la nouvelle
               domiciliation.
             </Text>
-          </AidePage.AccordionItem>
-        </AidePage.Accordion>
+          </Accordion.Item>
+        </Accordion>
       </AidePage.Container>
     </AidePage>
   );

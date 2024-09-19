@@ -49,6 +49,11 @@ function getOnisep(formationCatalogue: IFormationCatalogue): OffreFormation["oni
 
 function getSessions(formationCatalogue: IFormationCatalogue): OffreFormation["sessions"] {
   const sessions: OffreFormation["sessions"] = [];
+
+  if (!formationCatalogue.date_debut || !formationCatalogue.date_fin) {
+    return sessions;
+  }
+
   for (let i = 0; i < formationCatalogue.date_debut.length; i++) {
     sessions.push({
       debut: formationCatalogue.date_debut[i],
@@ -169,8 +174,8 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
         num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
-      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
-      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
+      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale ?? null,
+      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation ?? null,
       reference: formationCatalogue.etablissement_reference === "gestionnaire",
     },
     formateur: {
@@ -190,8 +195,8 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
         num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
-      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
-      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
+      raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale ?? null,
+      date_creation: formationCatalogue.etablissement_gestionnaire_date_creation ?? null,
       reference: formationCatalogue.etablissement_reference === "formateur",
     },
   };

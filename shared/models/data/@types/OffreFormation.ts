@@ -1,12 +1,12 @@
 interface Adresse {
   code_postal: string;
   code_commune_insee: string;
-  num_departement: string;
-  region: string;
-  localite: string;
+  num_departement?: string | null | undefined;
+  region?: string | null | undefined;
+  localite?: string | null | undefined;
   adresse: string | null;
-  nom_academie: string;
-  num_academie: string;
+  nom_academie?: string | null | undefined;
+  num_academie?: string | null | undefined;
 }
 
 type OptionalAdresse = {
@@ -21,8 +21,8 @@ interface Etablissement {
   habilite_rncp: boolean | null;
   certifie_qualite: boolean | null;
   adresse: OptionalAdresse;
-  raison_sociale: string;
-  date_creation: string;
+  raison_sociale: string | null | undefined;
+  date_creation: string | null | undefined;
   reference: boolean;
 }
 
@@ -37,27 +37,27 @@ export interface OffreFormation {
   };
 
   niveau: {
-    libelle: string;
+    libelle: string | null | undefined;
     entree_obligatoire: number | null;
   };
 
   nature: {
-    libelle: string;
-    code: string;
+    libelle: string | null | undefined;
+    code: string | null | undefined;
   };
 
   duree: {
     theorique: string;
-    incoherente: boolean;
+    incoherente: boolean | null | undefined;
   };
 
   annee: {
     num: string;
-    incoherente: boolean;
+    incoherente: boolean | null | undefined;
   };
 
-  intitule_long: string;
-  intitule_court: string;
+  intitule_long: string | null | undefined;
+  intitule_court: string | null | undefined;
 
   onisep: {
     url: string;

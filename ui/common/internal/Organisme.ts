@@ -982,6 +982,7 @@ export interface Organisme {
 
   is_transmission_target?: boolean;
 
+  formationsCount?: number;
   permissions?: {
     viewContacts: boolean;
     infoTransmissionEffectifs: boolean;

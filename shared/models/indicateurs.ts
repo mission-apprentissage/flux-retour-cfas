@@ -58,3 +58,12 @@ export interface IndicateursOrganismes {
 }
 
 export type IndicateursOrganismesAvecDepartement = IndicateursOrganismes & { departement: string };
+
+export interface IOrganisationIndicateursOrganismes {
+  organismes: number;
+  fiables: number;
+  sansTransmissions: number;
+  siretFerme: number;
+  natureInconnue: number;
+  uaiNonDeterminee: number;
+}

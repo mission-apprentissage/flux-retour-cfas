@@ -303,7 +303,7 @@ export default function Glossaire() {
                         rel="noopener noreferrer"
                         href="https://catalogue-apprentissage.intercariforef.org"
                       >
-                        Catalogue des formations en apprentissage
+                        Catalogue des ofrres de formations en apprentissage
                       </Link>{" "}
                       (base des Carif-Oref) et{" "}
                       <Link

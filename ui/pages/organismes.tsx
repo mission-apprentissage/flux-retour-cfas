@@ -29,7 +29,7 @@ function MesOrganismesFiables() {
     (prominentOrganisme as any).prominent = true;
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="fiables" modePublique={false} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={false} />;
 }
 
 export default withAuth(MesOrganismesFiables);

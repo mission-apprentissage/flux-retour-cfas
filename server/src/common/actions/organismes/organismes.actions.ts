@@ -1,9 +1,23 @@
 import Boom from "boom";
+import { subMonths } from "date-fns";
 import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
+import {
+  getAnneesScolaireListFromDate,
+  Acl,
+  PermissionsOrganisme,
+  IOrganisationIndicateursOrganismes,
+  ORGANISME_INDICATEURS_TYPE,
+  IOrganisation,
+  IUsersMigration,
+} from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import { IOrganisme, defaultValuesOrganisme, withOrganismeListSummary } from "shared/models/data/organismes.model";
+import {
+  IOrganisme,
+  defaultValuesOrganisme,
+  hasRecentTransmissions,
+  withOrganismeListSummary,
+} from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -767,6 +781,177 @@ export async function listOrganisationOrganismes(acl: Acl): Promise<WithId<Organ
   return organismes;
 }
 
+export async function getOrganisationIndicateursOrganismes(acl: Acl): Promise<IOrganisationIndicateursOrganismes> {
+  const organismes = (await organismesDb()
+    .find(buildOrganismePerimetreMongoFilters(acl.viewContacts), {
+      projection: getOrganismeListProjection(true),
+    })
+    .toArray()) as WithId<OrganismeWithPermissions>[];
+
+  return organismes?.reduce(
+    (acc, curr) => {
+      return {
+        ...acc,
+        fiables: acc.fiables + (curr.fiabilisation_statut === "FIABLE" ? 1 : 0),
+        organismes: acc.organismes + 1,
+        natureInconnue: acc.natureInconnue + (curr.nature === "inconnue" ? 1 : 0),
+        uaiNonDeterminee: acc.uaiNonDeterminee + (!curr.uai ? 1 : 0),
+        siretFerme: acc.siretFerme + (curr.ferme ? 1 : 0),
+        sansTransmissions: acc.sansTransmissions + (hasRecentTransmissions(curr.last_transmission_date) ? 0 : 1),
+      };
+    },
+    {
+      organismes: 0,
+      fiables: 0,
+      sansTransmissions: 0,
+      siretFerme: 0,
+      natureInconnue: 0,
+      uaiNonDeterminee: 0,
+    }
+  );
+}
+
+export async function getOrganisationIndicateursForRelatedOrganismes(acl: Acl, indicateurType: string) {
+  const matchIndicateurType: any = {};
+
+  switch (indicateurType) {
+    case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS: {
+      const threeMonthsAgo = subMonths(new Date(), 3);
+      matchIndicateurType.$or = [
+        { last_transmission_date: { $eq: null } },
+        {
+          $expr: {
+            $lt: ["$last_transmission_date", threeMonthsAgo],
+          },
+        },
+      ];
+      break;
+    }
+    case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE: {
+      matchIndicateurType.$or = [
+        { nature: { $eq: "inconnue" } },
+        { nature: { $eq: null } },
+        { nature: { $exists: false } },
+      ];
+      break;
+    }
+    case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
+      matchIndicateurType.ferme = { $eq: true };
+      break;
+    case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
+      matchIndicateurType.uai = { $eq: null };
+      break;
+    default:
+      return [];
+  }
+
+  const organismes = (await organismesDb()
+    .aggregate([
+      {
+        $match: buildOrganismePerimetreMongoFilters(acl.viewContacts),
+      },
+      {
+        $match: matchIndicateurType,
+      },
+      {
+        $project: getOrganismeListProjection(true),
+      },
+      {
+        $lookup: {
+          from: "organisations",
+          let: { uai: "$uai", siret: "$siret" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                },
+              },
+            },
+            {
+              $limit: 1,
+            },
+          ],
+          as: "relatedOrganisation",
+        },
+      },
+      {
+        $unwind: {
+          path: "$relatedOrganisation",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "usersMigration",
+          let: { orgId: "$relatedOrganisation._id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$organisation_id", "$$orgId"] },
+                    { $eq: ["$account_status", "CONFIRMED"] },
+                    { $ne: ["$has_accept_cgu_version", ""] },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                account_status: 1,
+                nom: 1,
+                prenom: 1,
+                telephone: 1,
+              },
+            },
+            {
+              $limit: 1,
+            },
+          ],
+          as: "relatedUser",
+        },
+      },
+      {
+        $unwind: {
+          path: "$relatedUser",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          relatedOrganisation: { $first: "$relatedOrganisation" },
+          relatedUser: { $first: "$relatedUser" },
+          organism: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: "$organism._id",
+          siret: "$organism.siret",
+          uai: "$organism.uai",
+          ferme: "$organism.ferme",
+          nature: "$organism.nature",
+          qualiopi: "$organism.qualiopi",
+          enseigne: "$organism.enseigne",
+          raison_sociale: "$organism.raison_sociale",
+          adresse: "$organism.adresse",
+          formationsCount: "$organism.formationsCount",
+          relatedOrganisation: "$relatedOrganisation",
+          relatedUser: "$relatedUser",
+        },
+      },
+    ])
+    .toArray()) as WithId<
+    OrganismeWithPermissions & { relatedOrganisation?: IOrganisation; relatedUser?: IUsersMigration }
+  >[];
+
+  return organismes;
+}
+
 export async function listOrganismesFormateurs(
   ctx: AuthContext,
   organismeId: ObjectId
@@ -879,6 +1064,9 @@ export function getOrganismeListProjection(
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
+    formationsCount: {
+      $cond: { if: { $isArray: "$relatedFormations" }, then: { $size: "$relatedFormations" }, else: 0 },
+    },
     erps: {
       $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
     },

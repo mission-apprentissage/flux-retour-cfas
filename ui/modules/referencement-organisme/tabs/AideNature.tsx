@@ -14,7 +14,9 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
+import Accordion from "@/components/Accordion/Accordion";
 import AidePage from "@/components/Page/AidePage";
+import TextHighlight from "@/components/Text/Highlight";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 
@@ -227,8 +229,8 @@ const AideNature = () => {
           }
         />
 
-        <AidePage.Accordion defaultIndex={0} allowToggle mt={12}>
-          <AidePage.AccordionItem title='Qu&apos;est-ce que la donnée "Nature" ?'>
+        <Accordion defaultIndex={0} allowToggle mt={12}>
+          <Accordion.Item title='Qu&apos;est-ce que la donnée "Nature" ?'>
             <AidePage.ModalButton
               buttonText="Voir un exemple"
               modalTitle={ModalNature.title}
@@ -268,15 +270,13 @@ const AideNature = () => {
                 </UnorderedList>
               </ListItem>
             </UnorderedList>
-            <Text>
-              <Img src="/images/ampoule.png" alt="Bon à savoir" height={5} width="auto" mr={1} display="inline" />{" "}
-              <b>Bon à savoir :</b> Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré
-              son offre de formation dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la
-              corriger.
-            </Text>
-          </AidePage.AccordionItem>
+            <TextHighlight>
+              Si la cellule contient « inconnue », cela signifie que l’organisme n’a pas déclaré son offre de formation
+              dans la base de son Carif-Oref. Voici ci-dessous comment la déclarer ou la corriger.
+            </TextHighlight>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Si ma nature est indiquée “Inconnue”, comment la corriger ?">
+          <Accordion.Item title="Si ma nature est indiquée “Inconnue”, comment la corriger ?">
             <AidePage.ModalButton
               buttonText="Voir un exemple"
               modalTitle="Affichage d’une nature ‘Inconnue’"
@@ -299,9 +299,9 @@ const AideNature = () => {
               </AidePage.Link>
               .
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment déclarer une formation en apprentissage à mon Carif-Oref, ou en ajouter une ?">
+          <Accordion.Item title="Comment déclarer une formation en apprentissage à mon Carif-Oref, ou en ajouter une ?">
             <OrderedList pl={4}>
               <ListItem>
                 Si votre CFA n’a jamais déclaré ses formations auprès de son Carif-Oref :
@@ -343,9 +343,9 @@ const AideNature = () => {
                 </UnorderedList>
               </ListItem>
             </OrderedList>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="La nature indiquée sur mon espace est incorrecte. Comment la corriger ?">
+          <Accordion.Item title="La nature indiquée sur mon espace est incorrecte. Comment la corriger ?">
             <AidePage.ModalButton
               buttonText="Voir un exemple"
               modalTitle="Identifier ses formations déclarées au Carif-Oref"
@@ -380,9 +380,9 @@ const AideNature = () => {
               régionaux téléchargeables ci-dessus).
             </Text>
             <Text>La modification de la nature d’un organisme impacte ses relations avec les autres organismes.</Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Pourquoi déclarer mon offre de formation ?">
+          <Accordion.Item title="Pourquoi déclarer mon offre de formation ?">
             <Text>
               Vous assurez la visibilité de votre catalogue de formations auprès d’un panel de visiteurs variés :
               <UnorderedList pl={4} mt={2} mb={4}>
@@ -428,9 +428,9 @@ const AideNature = () => {
                 </ListItem>
               </UnorderedList>
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Je suis CFA Responsable (classique ou hors-les-murs) : dois-je référencer l’offre de formation au Carif-Oref ?">
+          <Accordion.Item title="Je suis CFA Responsable (classique ou hors-les-murs) : dois-je référencer l’offre de formation au Carif-Oref ?">
             <Text>
               L’organisme responsable doit déclarer toutes ses formations auprès des différents Carif-Oref. S’il délègue
               la déclaration à un ou à ses organismes formateurs, il devra veiller à l’exhaustivité de l’offre de
@@ -443,9 +443,9 @@ const AideNature = () => {
               </AidePage.Link>{" "}
               de la collecte (page 3)
             </Text>
-          </AidePage.AccordionItem>
+          </Accordion.Item>
 
-          <AidePage.AccordionItem title="Comment contacter mon Carif-Oref régional et référencer mon offre de formation ?">
+          <Accordion.Item title="Comment contacter mon Carif-Oref régional et référencer mon offre de formation ?">
             <Text>
               En tant que CFA, vous devez déclarer votre offre de formation sur le site institutionnel de la plateforme
               SI, tels que Ofeli, Formanoo, Rafael, SOFI… En cas de difficultés, veuillez contacter votre Carif-Oref.
@@ -482,8 +482,8 @@ const AideNature = () => {
                 ))}
               </Tbody>
             </Table>
-          </AidePage.AccordionItem>
-        </AidePage.Accordion>
+          </Accordion.Item>
+        </Accordion>
       </AidePage.Container>
     </AidePage>
   );

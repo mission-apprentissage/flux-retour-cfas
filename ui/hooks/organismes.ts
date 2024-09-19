@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { normalize } from "shared";
+import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -57,9 +57,13 @@ export function useOrganisationOrganisme(enabled?: boolean) {
     isLoading,
     refetch,
     error,
-  } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {
-    enabled: enabled ?? true,
-  });
+  } = useQuery<Organisme & { organismesCount: IOrganismesCount }, any>(
+    ["organisation/organisme"],
+    () => _get("/api/v1/organisation/organisme"),
+    {
+      enabled: enabled ?? true,
+    }
+  );
 
   return {
     organisme,
@@ -88,6 +92,24 @@ export function useOrganisationOrganismes() {
   };
 }
 
+export function useOrganisationIndicateursOrganismes() {
+  const router = useRouter();
+
+  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>(
+    ["organisation/organismes/indicateurs"],
+    () => _get("/api/v1/organisation/organismes/indicateurs"),
+    {
+      enabled: router.isReady,
+    }
+  );
+
+  return {
+    data,
+    isLoading,
+    error,
+  };
+}
+
 export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
   const router = useRouter();
 
@@ -106,11 +128,11 @@ export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
 }
 
 export function useOrganismesNormalizedLists(organismes: Organisme[]) {
-  const { organismesFiables, organismesACompleter, organismesNonRetenus } = useMemo(() => {
+  const { organismesFiables, organismesACompleter, organismesNonRetenus, allOrganismes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
     const organismesNonRetenus: OrganismeNormalized[] = [];
-
+    const allOrganismes: OrganismeNormalized[] = [];
     (organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
@@ -130,16 +152,20 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
       } else {
         organismesACompleter.push(organisme);
       }
+
+      allOrganismes.push(organisme);
     });
 
     return {
       organismesFiables,
       organismesACompleter,
       organismesNonRetenus,
+      allOrganismes,
     };
   }, [organismes]);
 
   return {
+    allOrganismes,
     organismesFiables,
     organismesACompleter,
     organismesNonRetenus,

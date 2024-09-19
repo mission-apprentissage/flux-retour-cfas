@@ -30,14 +30,8 @@ export const hydrateFormationsCatalogue = async () => {
   logger.info("récupération des formations depuis le catalogue");
   const res = await axios.get<IncomingMessage>(`${config.mnaCatalogApi.endpoint}/v1/entity/formations.json`, {
     responseType: "stream",
-    // headers: {
-    //   "accept-encoding": "gzip", // malheureusement inutile car pas géré par l'API catalogue...
-    // },
     params: {
-      limit: 150_000, // 150k pour tout avoir (91k total, 62k formations publiées)
-      query: {
-        catalogue_published: true,
-      },
+      limit: 200_000, // 150k pour tout avoir (91k total, 62k formations publiées)
     },
   });
 
@@ -65,6 +59,7 @@ export const hydrateFormationsCatalogue = async () => {
               }
             )
             .catch((err) => {
+              console.error(JSON.stringify(err));
               logger.error({ err: err }, "insertion formation échouée", formation.cle_ministere_educatif);
             })
         )

@@ -36,7 +36,7 @@ function SesOrganismesFiables() {
     (prominentOrganisme as any).prominent = true;
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="fiables" modePublique={true} />;
+  return <ListeOrganismesPage organismes={organismes} modePublique={true} organismeId={organismeId} />;
 }
 
 export default withAuth(SesOrganismesFiables);

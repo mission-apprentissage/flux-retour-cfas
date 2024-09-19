@@ -26,7 +26,7 @@ function createProcessExitSignal() {
 
   let shutdownInProgress = false;
   ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
-    (process as NodeJS.EventEmitter).on(signal, async () => {
+    (process as unknown as NodeJS.EventEmitter).on(signal, async () => {
       try {
         if (shutdownInProgress) {
           const message = `Server shut down (FORCED) (signal=${signal})`;

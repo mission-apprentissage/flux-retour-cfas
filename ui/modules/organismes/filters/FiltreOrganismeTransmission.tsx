@@ -7,10 +7,9 @@ import { FilterButton } from "../../../components/FilterButton/FilterButton";
 
 interface FiltreOrganismeTransmissionProps {
   fieldName: string;
-  value: boolean[];
-  onChange: (value: boolean[]) => void;
+  value: string[];
+  onChange: (value: string[]) => void;
 }
-
 function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const transmissions = props.value;
@@ -20,16 +19,19 @@ function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
       <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Transmission" badge={transmissions?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
-          <CheckboxGroup
-            value={props.value?.map((item) => item.toString())}
-            onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
-          >
+          <CheckboxGroup value={props.value} onChange={(value) => props.onChange(value.map((v: string) => v))}>
             <Stack>
-              <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="mini" size="sm">
-                Transmet ou a déja transmis
+              <Checkbox value="recent" key={`${props.fieldName}_recent`} fontSize="mini" size="sm">
+                Effectifs récemment transmis (&lt; 1 mois)
               </Checkbox>
-              <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="mini" size="sm">
-                Ne transmet pas
+              <Checkbox value="1_3_mois" key={`${props.fieldName}_1_3_mois`} fontSize="mini" size="sm">
+                Effectifs transmis (entre 1 et 3 mois)
+              </Checkbox>
+              <Checkbox value="arrete" key={`${props.fieldName}_arrete`} fontSize="mini" size="sm">
+                Arrêt des transmissions (&gt; 3 mois)
+              </Checkbox>
+              <Checkbox value="jamais" key={`${props.fieldName}_jamais`} fontSize="mini" size="sm">
+                Effectifs jamais transmis
               </Checkbox>
             </Stack>
           </CheckboxGroup>

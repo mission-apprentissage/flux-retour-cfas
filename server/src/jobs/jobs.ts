@@ -87,6 +87,9 @@ const dailyJobs = async () => {
   // # Mise a jour des bassin d'emploi
   await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
 
+  // # Remplissage des formations des organismes
+  await addJob({ name: "hydrate:organismes-formations", queued: true });
+
   // # Remplissage des OPCOs
   await addJob({ name: "hydrate:opcos", queued: true });
 

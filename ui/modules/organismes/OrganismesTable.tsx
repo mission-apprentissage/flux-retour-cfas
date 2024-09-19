@@ -93,12 +93,32 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           contentComponent={() => (
             <Box>
               <Text as="p">5 états concernant la donnée sont identifiés&nbsp;:</Text>
-              <UnorderedList>
-                <ListItem>l’OFA transmet des données depuis moins d’1 semaine (vert)</ListItem>
-                <ListItem>l’OFA transmet des données depuis moins de 3 mois (orange)</ListItem>
-                <ListItem>l’OFA transmet des données considérées obsolètes (depuis plus de 3 mois - rouge)</ListItem>
-                <ListItem>l’OFA ne transmet aucune donnée</ListItem>
-                <ListItem>Non-disponible&nbsp;: Les droits d’accès à cette information sont restreints.</ListItem>
+              <UnorderedList my={3}>
+                <ListItem>
+                  transmission de données depuis moins d’1 mois{" "}
+                  <Box as="span" color="#22967E">
+                    (vert)
+                  </Box>
+                </ListItem>
+                <ListItem>
+                  transmission de données depuis moins de 3 mois{" "}
+                  <Box as="span" color="#FF732C">
+                    (orange)
+                  </Box>
+                </ListItem>
+                <ListItem>
+                  transmission de données considérées obsolètes depuis plus de 3 mois{" "}
+                  <Box as="span" color="#E63122">
+                    (rouge)
+                  </Box>
+                </ListItem>
+                <ListItem>
+                  aucune donnée transmise{" "}
+                  <Box as="span" color="#B60000">
+                    (rouge foncé)
+                  </Box>
+                </ListItem>
+                <ListItem>Non-disponible&nbsp;: les droits d’accès à cette information sont restreints.</ListItem>
               </UnorderedList>
             </Box>
           )}
@@ -112,6 +132,71 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
         lastTransmissionDate={row.original.last_transmission_date}
         permissionInfoTransmissionEffectifs={row.original.permissions?.infoTransmissionEffectifs}
       />
+    ),
+  },
+  {
+    accessorKey: "formationsCount",
+    header: () => (
+      <>
+        Formations
+        <InfoTooltip
+          contentComponent={() => (
+            <Box>
+              <b>Formations de l’établissement</b>
+              <Text>
+                Le nombre de formations associées à cet organisme provient du{" "}
+                <Link
+                  href="https://catalogue-apprentissage.intercariforef.org/"
+                  isExternal
+                  textDecoration="underline"
+                  display="inline"
+                >
+                  Catalogue des offres de formations en apprentissage
+                </Link>{" "}
+                (Carif-Oref) dont votre établissement à la gestion. Si une erreur est constatée, écrivez à{" "}
+                <Link
+                  href="mailto:pole-apprentissage@intercariforef.org"
+                  isExternal
+                  textDecoration="underline"
+                  display="inline"
+                >
+                  pole-apprentissage@intercariforef.org
+                </Link>{" "}
+                avec les informations suivantes :
+              </Text>
+              <UnorderedList mt={4} mb={4}>
+                <ListItem>votre SIRET ;</ListItem>
+                <ListItem>RNCP et/ou le code diplôme ;</ListItem>
+                <ListItem>
+                  la période d&apos;inscription telle que mentionnée dans le catalogue Carif-Oref (exprimée en AAAA-MM)
+                  ;
+                </ListItem>
+                <ListItem>le lieu de la formation (code commune INSEE ou à défaut code postal) ;</ListItem>
+                <ListItem>mail de la personne signalant l’erreur ;</ListItem>
+              </UnorderedList>
+              <Text>
+                Une investigation sera menée par le Réseau des Carif-Oref pour le traitement de cette anomalie.
+              </Text>
+            </Box>
+          )}
+          aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
+    sur l’INSEE."
+        />
+      </>
+    ),
+    cell: ({ getValue, row: { original } }) => (
+      <Text>
+        <Link
+          variant="link"
+          display="inline-flex"
+          href={`https://catalogue-apprentissage.intercariforef.org/etablissement/${original?.siret || ""}`}
+          isExternal
+          width={"fit-content"}
+        >
+          {getValue()}
+          <Box className="ri-arrow-right-line" ml={1} />
+        </Link>{" "}
+      </Text>
     ),
   },
   {
@@ -187,7 +272,15 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     enableSorting: false,
     header: () => "Voir",
     cell: ({ row }) => (
-      <Link href={`/organismes/${(row.original as any)?._id}`} flexGrow={1}>
+      <Link
+        bg="#F5F5FE"
+        p={2}
+        rounded="lg"
+        color="bluefrance"
+        href={`/organismes/${(row.original as any)?._id}`}
+        flexGrow={1}
+        _hover={{ bg: "bluefrance", color: "white" }}
+      >
         <ArrowDropRightLine />
       </Link>
     ),
@@ -197,6 +290,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
 interface OrganismesTableProps extends OrganismeFiltersListVisibilityProps {
   organismes: OrganismeNormalized[];
   modeNonFiable?: boolean;
+  withFormations?: boolean;
 }
 
 function OrganismesTable(props: OrganismesTableProps) {
@@ -242,6 +336,10 @@ function OrganismesTable(props: OrganismesTableProps) {
         organisme.normalizedCommune.startsWith(normalizedSearchValue)
     );
   }, [props.organismes, searchValue]);
+
+  const countFormations = useMemo(() => {
+    return props.organismes.reduce((acc, organisme) => acc + (organisme.formationsCount ?? 0), 0);
+  }, [props.organismes]);
 
   return (
     <>
@@ -289,7 +387,9 @@ function OrganismesTable(props: OrganismesTableProps) {
       </Box>
 
       <Text>
-        <strong>{filteredOrganismes.length} organismes</strong>
+        <strong>
+          {filteredOrganismes.length} organismes et {countFormations} formations associées
+        </strong>
       </Text>
 
       <NewTable

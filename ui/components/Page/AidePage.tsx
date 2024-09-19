@@ -1,17 +1,4 @@
-import {
-  Box,
-  Heading,
-  Flex,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Divider,
-  Link,
-  Button,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, Flex, Divider, Link, Button, Text } from "@chakra-ui/react";
 import React, { ReactNode } from "react";
 
 import { BonusAvatar, DocumentFile, InformationAvatar } from "@/theme/components/icons";
@@ -29,13 +16,6 @@ interface AidePageProps {
 interface AidePageContainerProps {
   children: ReactNode;
   sidebarContent?: ReactNode;
-}
-
-interface AidePageAccordionProps {
-  children: ReactNode;
-  defaultIndex?: number | number[];
-  allowToggle?: boolean;
-  [key: string]: any;
 }
 
 interface AidePageResponsibilityProps {
@@ -86,15 +66,6 @@ interface AideLinkProps {
   [key: string]: any;
 }
 
-interface AidePageDownloadLinkProps {
-  children: ReactNode;
-  href: string;
-  fileType: string;
-  fileSize: string;
-  onClick?: () => void;
-  [key: string]: any;
-}
-
 const AidePage = ({ children }: AidePageProps) => <Flex flexDirection="column">{children}</Flex>;
 
 const AidePageTitle = ({ children }: { children: ReactNode }) => (
@@ -118,30 +89,6 @@ const AidePageContainer = ({ children, sidebarContent }: AidePageContainerProps)
     <Box flex="3">{children}</Box>
     <Box flex="1">{sidebarContent}</Box>
   </Flex>
-);
-
-const AidePageAccordion = ({ children, allowToggle = true, ...props }: AidePageAccordionProps) => (
-  <Accordion my={6} allowToggle={allowToggle} {...props}>
-    {children}
-  </Accordion>
-);
-
-const AidePageAccordionItem = ({ title, children }: { title: string; children: ReactNode }) => (
-  <AccordionItem>
-    <Box>
-      <AccordionButton py={8}>
-        <Box flex="1" textAlign="left" fontWeight="bold" fontSize="epsilon" pr={12}>
-          {title}
-        </Box>
-        <AccordionIcon />
-      </AccordionButton>
-    </Box>
-    <AccordionPanel pb={12} pt={4} fontSize="epsilon">
-      <Flex direction="column" gap={4}>
-        {children}
-      </Flex>
-    </AccordionPanel>
-  </AccordionItem>
 );
 
 const AidePageDataResponsibility = ({
@@ -237,35 +184,6 @@ const AidePageLink = ({ href, children, ...props }: AideLinkProps) => {
   );
 };
 
-const AidePageDownloadLink = ({ href, children, fileType, fileSize, onClick, ...props }: AidePageDownloadLinkProps) => {
-  const isExternal = href.startsWith("https") || props.isExternal;
-
-  return (
-    <Flex direction="column" gap={1}>
-      <Button
-        as={Link}
-        variant="link"
-        href={href}
-        fontSize="md"
-        borderBottom="1px"
-        borderRadius="0"
-        p="0"
-        width="fit-content"
-        _hover={{ textDecoration: "none" }}
-        isExternal={isExternal}
-        onClick={onClick}
-        {...props}
-      >
-        {children}
-        <Box as="i" className="ri-download-line" color="bluefrance" ml={2} />
-      </Button>
-      <Text color="grey.600" fontSize="sm">
-        {fileType} - {fileSize}
-      </Text>
-    </Flex>
-  );
-};
-
 const AidePageFileCard = ({
   category,
   title,
@@ -312,8 +230,6 @@ AidePage.displayName = "AidePage";
 AidePageTitle.displayName = "AidePage.Title";
 AidePageHeader.displayName = "AidePage.Header";
 AidePageContainer.displayName = "AidePage.Container";
-AidePageAccordion.displayName = "AidePage.Accordion";
-AidePageAccordionItem.displayName = "AidePage.AccordionItem";
 AidePageDataResponsibility.displayName = "AidePage.DataResponsibility";
 AidePageRibbon.displayName = "AidePage.Ribbon";
 AidePageSidebarInfos.displayName = "AidePage.SidebarInfos";
@@ -322,13 +238,10 @@ AidePageFileCard.displayName = "AidePage.FileCard";
 AidePageButton.displayName = "AidePage.Button";
 AidePageModalButton.displayName = "AidePage.ModalButton";
 AidePageLink.displayName = "AidePage.Link";
-AidePageDownloadLink.displayName = "AidePage.DownloadLink";
 
 AidePage.Title = AidePageTitle;
 AidePage.Header = AidePageHeader;
 AidePage.Container = AidePageContainer;
-AidePage.Accordion = AidePageAccordion;
-AidePage.AccordionItem = AidePageAccordionItem;
 AidePage.DataResponsibility = AidePageDataResponsibility;
 AidePage.Ribbon = AidePageRibbon;
 AidePage.SidebarInfos = AidePageSidebarInfos;
@@ -337,6 +250,5 @@ AidePage.FileCard = AidePageFileCard;
 AidePage.Button = AidePageButton;
 AidePage.ModalButton = AidePageModalButton;
 AidePage.Link = AidePageLink;
-AidePage.DownloadLink = AidePageDownloadLink;
 
 export default AidePage;

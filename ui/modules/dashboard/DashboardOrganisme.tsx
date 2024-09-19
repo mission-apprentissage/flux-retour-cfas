@@ -123,7 +123,7 @@ const FiabilisationInfo = () => {
               </Link>
               . (voir également{" "}
               <Link isExternal href={CATALOGUE_APPRENTISSAGE} textDecoration="underline">
-                Catalogue de l’apprentissage
+                Catalogue des offres de formations en apprentissage
               </Link>
               )
             </ListItem>

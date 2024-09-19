@@ -1,3 +1,5 @@
+import { IOrganisation, IUsersMigration } from "shared";
+
 import { Organisme } from "./internal/Organisme";
 import { ExportColumn } from "./utils/exportUtils";
 
@@ -188,6 +190,16 @@ export const organismesExportColumns = [
     xlsxType: "date",
     width: 120,
   },
+  {
+    label: "email de contact",
+    key: "email",
+    width: 60,
+  },
+  {
+    label: "téléphone de contact",
+    key: "telephone",
+    width: 60,
+  },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
 export const usersExportColumns = [
@@ -215,7 +227,7 @@ export const usersExportColumns = [
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
 export function convertOrganismeToExport(
-  organisme: Organisme
+  organisme: Organisme & { relatedOrganisation?: IOrganisation; relatedUser?: IUsersMigration }
 ): Record<(typeof organismesExportColumns)[number]["key"], string> {
   return {
     uai: organisme.uai ?? "",
@@ -227,5 +239,7 @@ export function convertOrganismeToExport(
     commune: organisme.adresse?.commune ?? "",
     adresse: organisme.adresse?.complete ?? "",
     last_transmission_date: organisme.last_transmission_date ?? "",
+    email: organisme.relatedUser?.email ?? "",
+    telephone: organisme.relatedUser?.telephone ?? "",
   };
 }

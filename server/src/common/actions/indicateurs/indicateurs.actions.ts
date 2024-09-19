@@ -788,17 +788,19 @@ export const getIndicateursForRelatedOrganismes = async (organismeId: ObjectId, 
   if (!organismesFormateurs) {
     return [];
   }
+
+  // Initialise les indicateurs pour tous les organismes formateurs avec son propre organisme
+  const allOrganismes = [org, ...organismesFormateurs];
+
   switch (indicateurType) {
     case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS:
-      return organismesFormateurs.filter(
-        ({ last_transmission_date }) => !hasRecentTransmissions(last_transmission_date)
-      );
+      return allOrganismes.filter(({ last_transmission_date }) => !hasRecentTransmissions(last_transmission_date));
     case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE:
-      return organismesFormateurs.filter(({ nature }) => nature === "inconnue");
+      return allOrganismes.filter(({ nature }) => nature === "inconnue");
     case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
-      return organismesFormateurs.filter(({ ferme }) => !!ferme);
+      return allOrganismes.filter(({ ferme }) => !!ferme);
     case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
-      return organismesFormateurs.filter(({ uai }) => !uai);
+      return allOrganismes.filter(({ uai }) => !uai);
     default:
       return [];
   }

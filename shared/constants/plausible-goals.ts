@@ -80,6 +80,12 @@ export const plausibleGoals = [
   // Kit déploiement
 
   "clic_homepage_kit_deploiement",
+
+  // Indicateurs organismes
+  "telechargement_liste_organismes_sans_effectifs",
+  "telechargement_liste_organismes_nature_inconnue",
+  "telechargement_liste_organismes_siret_ferme",
+  "telechargement_liste_organismes_uai_non_determine",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];

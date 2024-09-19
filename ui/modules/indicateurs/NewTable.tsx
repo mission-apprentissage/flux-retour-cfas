@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
   PaginationState,
@@ -67,39 +67,46 @@ function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
         <Thead>
           {table.getHeaderGroups().map((headerGroup, index) => (
             <Tr key={`headerGroup_${index}`}>
-              {headerGroup.headers.map((header, index) => {
+              {headerGroup.headers.map((header, headerIndex) => {
                 return (
                   <Th
-                    key={`header${index}`}
+                    key={`header_${headerIndex}`}
                     colSpan={header.colSpan}
                     cursor={header.column.getCanSort() ? "pointer" : "default"}
                     userSelect={header.column.getCanSort() ? "none" : "initial"}
                     onClick={header.column.getToggleSortingHandler()}
                     _hover={
-                      header.column.getCanSort() && !header.column.getIsSorted()
+                      header.column.getCanSort()
                         ? {
                             backgroundColor: "grey.100",
-                            "::after": {
-                              color: "grey.500",
-                              content: '"▼"',
-                              marginLeft: "-14px", // Negative margin to pull icon to the left, based on following Box
+                            "> div > .sort-icon": {
+                              display: "inline-block",
+                              color: "black",
                             },
                           }
                         : undefined
                     }
-                    w={header.getSize()}
+                    paddingBottom={3}
+                    bg="white"
                   >
                     {header.isPlaceholder ? null : (
-                      <>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-
-                        <Box as="span" display="inline-block" w="14px">
-                          {{
-                            asc: "▲",
-                            desc: "▼",
-                          }[header.column.getIsSorted() as string] ?? null}
+                      <Flex justify="space-between" align="center" width="100%">
+                        <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
+                        <Box
+                          ml={2}
+                          className="sort-icon"
+                          display={header.column.getCanSort() ? "inline-block" : "none"}
+                          w="14px"
+                        >
+                          {header.column.getIsSorted() === "desc" && <Box as="span">▼</Box>}
+                          {header.column.getIsSorted() === "asc" && <Box as="span">▲</Box>}
+                          {header.column.getIsSorted() === false && (
+                            <Box as="span" color="grey.400">
+                              ▼
+                            </Box>
+                          )}
                         </Box>
-                      </>
+                      </Flex>
                     )}
                   </Th>
                 );

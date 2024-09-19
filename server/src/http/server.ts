@@ -1,3 +1,6 @@
+// catch all unhandled promise rejections and call the error middleware
+import "express-async-errors";
+
 import fs from "fs";
 
 import * as Sentry from "@sentry/node";
@@ -10,17 +13,14 @@ import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import {
-  typesEffectifNominatif,
   CODE_POSTAL_REGEX,
-  zEffectifArchive,
   SOURCE_APPRENANT,
+  typesEffectifNominatif,
   typesOrganismesIndicateurs,
+  zEffectifArchive,
 } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
-
-// catch all unhandled promise rejections and call the error middleware
-import "express-async-errors";
 
 import {
   activateUser,
@@ -74,19 +74,21 @@ import {
   configureOrganismeERP,
   findOrganismesBySIRET,
   findOrganismesByUAI,
-  listOrganisationOrganismes,
   generateApiKeyForOrg,
-  getOrganismeByAPIKey,
-  getOrganismeById,
-  getOrganismeDetails,
-  listContactsOrganisme,
-  listOrganismesFormateurs,
-  verifyOrganismeAPIKeyToUser,
-  getOrganismeByUAIAndSIRET,
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
-  resetConfigurationERP,
+  getOrganisationIndicateursForRelatedOrganismes,
+  getOrganisationIndicateursOrganismes,
+  getOrganismeByAPIKey,
+  getOrganismeById,
+  getOrganismeByUAIAndSIRET,
+  getOrganismeDetails,
   getStatOrganismes,
+  listContactsOrganisme,
+  listOrganisationOrganismes,
+  listOrganismesFormateurs,
+  resetConfigurationERP,
+  verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
 import {
   getDuplicatesOrganismes,
@@ -838,6 +840,27 @@ function setupRoutes(app: Application) {
         "/organismes",
         returnResult(async (req) => {
           return await listOrganisationOrganismes(req.user.acl);
+        })
+      )
+      .get(
+        "/organismes/indicateurs",
+        returnResult(async (req) => {
+          return await getOrganisationIndicateursOrganismes(req.user.acl);
+        })
+      )
+      .get(
+        "/organismes/indicateurs/:type",
+        returnResult(async (req, res) => {
+          const indicateurs = await getOrganisationIndicateursForRelatedOrganismes(req.user.acl, req.params.type);
+          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
+          await createTelechargementListeNomLog(
+            `organismes_${type}`,
+            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
+            new Date(),
+            req.user._id,
+            res.locals.organismeId
+          );
+          return indicateurs;
         })
       )
       .get(

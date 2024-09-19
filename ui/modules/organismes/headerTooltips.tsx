@@ -179,7 +179,7 @@ const headerTooltips = {
         color="bluefrance"
         isExternal
       >
-        Catalogue de l’apprentissage
+        Catalogue des offres de formations en apprentissage
       </Link>
       , en indiquant le SIRET de votre établissement (donnée obligatoire).
     </>
