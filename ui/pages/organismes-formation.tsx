@@ -3,6 +3,7 @@ import {
   Box,
   Container,
   Divider,
+  Flex,
   HStack,
   Heading,
   Image,
@@ -14,6 +15,7 @@ import {
   VStack,
   Wrap,
 } from "@chakra-ui/react";
+import { ERPS } from "shared";
 
 import { FAQ_PATH } from "@/common/constants/faq";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
@@ -38,8 +40,8 @@ const OrganismesFormationPage = () => {
           </Heading>
 
           <Text fontSize="xl" mt={5}>
-            Transmettez vos effectifs au tableau de bord pour les opérateurs publics et contribuez à l’accompagnement
-            des apprenants.
+            Simplifiez vos démarches administratives, rendez vos formations visibles, soutenez les parcours de vos
+            apprenants.
           </Text>
 
           <HStack gap={5} mt={5}>
@@ -55,18 +57,89 @@ const OrganismesFormationPage = () => {
         <Image src="/images/landing-ofa-designer.svg" alt="" flex="1" userSelect="none" />
       </Container>
 
+      <Box bg="#F5F5FE">
+        <Container maxW="xl" py="14" display="flex" alignItems="center" gap="16">
+          <Flex gap={12}>
+            <Box flex="75">
+              <Heading as="h3" fontSize="32px" color="blue_cumulus_main">
+                Connexion simple, transmission automatique, services immédiats
+              </Heading>
+
+              <UnorderedList fontSize="delta" mt="30px">
+                <ListItem>
+                  <b>Suivez efficacement vos sites formateurs et effectifs</b> grâce au suivi des jeunes, des taux de
+                  rupture des contrats, des taux de succès, une analyse par formations...
+                </ListItem>
+                <ListItem>
+                  <b>Augmentez la visibilité de vos formations</b> et attirez plus d&apos;apprenants grâce à un meilleur
+                  référencement !
+                </ListItem>
+                <ListItem>
+                  <b>Multipliez les candidatures</b> à vos formations grâce à notre service voisin{" "}
+                  <Link
+                    href="https://4x1qe.r.sp1-brevo.net/mk/cl/f/sh/WCPzyXJTZ72ikBe3C3exQ4Q3wTKxxzF4/hjk9O0lvGjQW"
+                    target="_blank"
+                    textDecoration="underline"
+                    isExternal
+                    whiteSpace="nowrap"
+                  >
+                    La bonne alternance
+                  </Link>
+                </ListItem>
+
+                <ListItem>
+                  <b>Simplifiez vos démarches administratives</b> et générez en un clic votre fichier SIFA et vos
+                  contrats d&apos;apprentissage CERFA
+                </ListItem>
+
+                <ListItem>
+                  <b>Facilitez votre relation avec les services publics</b> en offrant une visibilité claire de votre
+                  activité et des parcours de vos apprentis
+                </ListItem>
+              </UnorderedList>
+            </Box>
+            <Box flex="25">
+              <Box backgroundColor="#FFFFFF" height="100%" p="30px">
+                <Image
+                  src="/images/landing-operateurs-publics-beta-testeurs.svg"
+                  alt=""
+                  userSelect="none"
+                  width="50%"
+                />
+                <Text fontWeight="700" fontSize="24px" mt="10px">
+                  Des webinaires pour vous accompagner
+                </Text>
+                <Text fontWeight="400" fontSize="omega" lineHeight="25px" mt="10px">
+                  Nous vous proposons des webinaires réguliers pour vous aider à vous connecter au Tableau de bord.
+                </Text>
+                <Link
+                  mt="20px"
+                  isExternal={true}
+                  variant="blueBg"
+                  href="https://4x1qe.r.bh.d.sendibt3.com/mk/cl/f/sh/28xHLtxZQ0KqQgjLXw96JKt9fapCvHahkI/v9qRkDFsfh-U"
+                >
+                  Je participe
+                </Link>
+              </Box>
+            </Box>
+          </Flex>
+        </Container>
+      </Box>
       <Container maxW="xl">
         <Divider size="md" mb={16} borderBottomWidth="2px" opacity="1" />
 
         <Heading as="h3" fontSize="32px" color="blue_cumulus_main" mt={16}>
-          Transmettez facilement vos effectifs
+          Transmettez facilement vos effectifs{" "}
+          <Text fontSize="sm" color="#666666" mt={2}>
+            (Temps estimé : 15min)
+          </Text>
         </Heading>
         <Image src="/images/landing-ofa-timeline.svg" alt="Etapes clés usage" userSelect="none" w="100%" mt={8} />
 
         <Divider size="md" my={16} borderBottomWidth="2px" opacity="1" />
 
-        <Heading as="h3" fontSize="28px" color="blue_cumulus_main">
-          Le tableau de bord est interfacé avec votre outil de gestion
+        <Heading as="h3" fontSize="beta" color="blue_cumulus_main">
+          Le Tableau de bord est compatible avec votre outil de gestion
         </Heading>
         <HStack gap={24}>
           <VStack gap={6} alignItems="start">
@@ -74,12 +147,11 @@ const OrganismesFormationPage = () => {
               Aujourd’hui, il est connecté avec ces ERP&nbsp;:
             </Text>
             <Wrap>
-              <ERPTag>Gesti</ERPTag>
-              <ERPTag>Ymag</ERPTag>
-              <ERPTag>FCA Manager</ERPTag>
-              <ERPTag>SC Form</ERPTag>
-              <ERPTag>Formasup</ERPTag>
-              <ERPTag>Auriga</ERPTag>
+              {ERPS.filter((erp) => !erp.disabled)
+                .reverse()
+                .map(({ name, id }) => (
+                  <ERPTag key={id}>{name}</ERPTag>
+                ))}
             </Wrap>
             <Text fontSize="sm" color="#666666" mt={5}>
               Un outil de gestion / ERP (Enterprise Ressource Planning ou PGI pour Progiciel de Gestion Intégré) est une
