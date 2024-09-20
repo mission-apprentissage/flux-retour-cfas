@@ -16,11 +16,12 @@ import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
+import { getMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(process.env.MNA_TDB_MONGODB_URI ?? "");
+const client = new MongoClient(getMongodbUri() ?? "");
 
 export async function hydrateDecaRaw() {
   let count = 0;
