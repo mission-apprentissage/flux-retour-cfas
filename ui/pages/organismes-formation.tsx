@@ -65,7 +65,7 @@ const OrganismesFormationPage = () => {
                 Connexion simple, transmission automatique, services immédiats
               </Heading>
 
-              <UnorderedList fontSize="18px" mt="30px">
+              <UnorderedList fontSize="delta" mt="30px">
                 <ListItem>
                   <b>Suivez efficacement vos sites formateurs et effectifs</b> grâce au suivi des jeunes, des taux de
                   rupture des contrats, des taux de succès, une analyse par formations...
@@ -109,7 +109,7 @@ const OrganismesFormationPage = () => {
                 <Text fontWeight="700" fontSize="24px" mt="10px">
                   Des webinaires pour vous accompagner
                 </Text>
-                <Text fontWeight="400" fontSize="12px" lineHeight="25px" mt="10px">
+                <Text fontWeight="400" fontSize="omega" lineHeight="25px" mt="10px">
                   Nous vous proposons des webinaires réguliers pour vous aider à vous connecter au Tableau de bord.
                 </Text>
                 <Link
@@ -138,7 +138,7 @@ const OrganismesFormationPage = () => {
 
         <Divider size="md" my={16} borderBottomWidth="2px" opacity="1" />
 
-        <Heading as="h3" fontSize="28px" color="blue_cumulus_main">
+        <Heading as="h3" fontSize="beta" color="blue_cumulus_main">
           Le Tableau de bord est compatible avec votre outil de gestion
         </Heading>
         <HStack gap={24}>
