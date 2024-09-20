@@ -197,6 +197,8 @@ fileignoreconfig:
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 - filename: yarn.lock
   checksum: 57db03a14588b2472e58d06eec09fd89fb3eba36999e65d42cc42f5b07376f0c
+- filename: ui/pages/organismes-formation.tsx
+  checksum: 28f69e86f6b5ab6147c6d1cfc95c64c0ec6625f844114b3cfca1d47acb8e5ae0
 scopeconfig:
 - scope: node
 custom_patterns:
