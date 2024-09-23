@@ -11497,6 +11497,14 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "bool",
       "description": "Le siret est fermé",
     },
+    "fiabilisation_api_statut": {
+      "bsonType": "string",
+      "description": "Statut de fiabilisation venant de l'API de l'organisme",
+      "enum": [
+        "FIABLE",
+        "NON_FIABLE",
+      ],
+    },
     "fiabilisation_statut": {
       "bsonType": "string",
       "description": "Statut de fiabilisation de l'organisme",

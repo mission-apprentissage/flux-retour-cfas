@@ -1,12 +1,16 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { AnyBulkWriteOperation } from "mongodb";
 import {
+  IOrganisme,
   STATUT_CREATION_ORGANISME,
+  STATUT_FIABILISATION_API_ORGANISME,
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
   STATUT_PRESENCE_REFERENTIEL,
 } from "shared";
 
 import { createOrganisme, findOrganismeById } from "@/common/actions/organismes/organismes.actions";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance";
 import logger from "@/common/logger";
 import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
@@ -138,4 +142,57 @@ export const updateOrganismesFiablesFermes = async () => {
       nbOrganismesFermesAFiabiliser++;
     }
   });
+};
+
+export const updateOrganismesFiabilisationApiUaiSiret = async () => {
+  const organismsToUpdate = await organismesDb().find({}).toArray();
+
+  const bulkOperations: AnyBulkWriteOperation<IOrganisme>[] = [];
+
+  for (const organism of organismsToUpdate) {
+    const { _id, siret, uai } = organism;
+
+    if (siret && uai) {
+      try {
+        const apiData = await apiAlternanceClient.organisme.recherche({ siret, uai });
+
+        if (apiData?.resultat?.status) {
+          const { ouvert, declaration_catalogue, validation_uai } = apiData.resultat.status;
+          const fiabilisationStatus =
+            ouvert && declaration_catalogue && validation_uai
+              ? STATUT_FIABILISATION_API_ORGANISME.FIABLE
+              : STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE;
+
+          bulkOperations.push({
+            updateOne: {
+              filter: { _id },
+              update: { $set: { fiabilisation_api_statut: fiabilisationStatus } },
+            },
+          });
+        } else {
+          logger.warn(`Données API non valides pour le SIRET : ${siret}, UAI : ${uai}`);
+        }
+      } catch (error) {
+        console.error(`Échec de l'appel API pour le SIRET : ${siret}, UAI : ${uai}`, error);
+      }
+    } else {
+      bulkOperations.push({
+        updateOne: {
+          filter: { _id },
+          update: { $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE } },
+        },
+      });
+
+      logger.warn(`SIRET ou UAI manquant pour l'organisme avec l'ID : ${_id}`);
+    }
+  }
+
+  if (bulkOperations.length > 0) {
+    const bulkResult = await organismesDb().bulkWrite(bulkOperations);
+    logger.info(`Résultat de la mise à jour de la fiabilisation de l'API :`, bulkResult);
+  } else {
+    logger.info("Aucun organisme à mettre à jour.");
+  }
+
+  return { status: "Mise à jour terminée", total: organismsToUpdate.length, updated: bulkOperations.length };
 };
