@@ -150,7 +150,7 @@ const AideSiret = () => {
             </OrderedList>
             <Text>
               Note : pour transmettre vos effectifs au Tableau de bord, l’état administratif du Siret de
-              l’établissement, tel qu&apos;il est enregistré auprès de l’INSEE, doit être ouvert.
+              l’établissement, tel qu&apos;il est enregistré auprès de l’INSEE, doit être en activité.
             </Text>
           </Accordion.Item>
 
