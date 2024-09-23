@@ -77,9 +77,9 @@ export const ERPS = sortAlphabeticallyBy("name", [
   },
   {
     id: "formasup-paca",
-    name: "Formasup PACA",
+    name: "Cactus",
     apiV3: true,
-    disabled: true,
+    disabled: false,
   },
 ] satisfies ERP[]);
 
