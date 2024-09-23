@@ -14,8 +14,8 @@ const ensureInitialization = (client: MongoClient | null): MongoClient => {
   return client;
 };
 
-export const getMongodbUri = () => {
-  return `${config.mongodb.uri}${config.mongodb.dbName}?${config.mongodb.options}`;
+export const getMongodbUri = (dbName = config.mongodb.dbName) => {
+  return `${config.mongodb.uri}${dbName}?${config.mongodb.options}`;
 };
 /**
  * @param  {string} uri

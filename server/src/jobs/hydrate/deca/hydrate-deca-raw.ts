@@ -21,7 +21,7 @@ import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(getMongodbUri() ?? "");
+const client = new MongoClient(getMongodbUri("airbyte") ?? "");
 
 export async function hydrateDecaRaw() {
   let count = 0;
@@ -37,7 +37,7 @@ export async function hydrateDecaRaw() {
       "_airbyte_data.formation.date_fin_formation": { $exists: true },
     };
 
-    const cursor = client.db("airbyte").collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
+    const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
 
     // await effectifsDECADb().drop();
 
