@@ -237,7 +237,7 @@ export const EffectifForm = memo(
                 requiredSifa={requiredSifaByBlock.statuts}
               >
                 <VStack align="stretch" spacing={4} px={2} py={3}>
-                  {parcours.length > 1 ? (
+                  {parcours.length > 0 ? (
                     <>
                       <HStack justifyContent="space-between">
                         <Text fontSize={14}>Statut actuel</Text>
