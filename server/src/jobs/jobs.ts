@@ -19,7 +19,10 @@ import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-i
 import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
-import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
+import {
+  updateOrganismesFiabilisationApiUaiSiret,
+  updateOrganismesFiabilisationUaiSiret,
+} from "./fiabilisation/uai-siret/update";
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
@@ -397,6 +400,9 @@ export async function setupJobProcessor() {
           await updateOrganismesFiabilisationUaiSiret();
           const buildResults = await buildFiabilisationUaiSiret();
           const updateResults = await updateOrganismesFiabilisationUaiSiret();
+
+          // Mise à jour des données de fiabilisation des couples UAI - SIRET à partir de l'API apprentissage
+          await updateOrganismesFiabilisationApiUaiSiret();
 
           return { buildResults, updateResults };
         },
