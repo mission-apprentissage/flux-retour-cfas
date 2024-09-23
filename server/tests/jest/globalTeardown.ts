@@ -1,13 +1,12 @@
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
 
-import { getMongodbUri } from "@/common/mongodb";
-
 export default async () => {
   dotenv.config({ path: "./server/.env.test" });
 
+  const mongoUri = `${process.env.MNA_TDB_MONGODB_URI}${process.env.MNA_TDB_MONGODB_DB_NAME}?${process.env.MNA_TDB_MONGODB_OPTIONS}`;
   const workerId = `${process.env.JEST_WORKER_ID ?? ""}`;
-  const client = new MongoClient(getMongodbUri()?.replace("{{JEST_WORKER_ID}}", workerId) ?? "");
+  const client = new MongoClient(mongoUri.replace("{{JEST_WORKER_ID}}", workerId) ?? "");
   try {
     if (process.env.CI) {
       return;
