@@ -21,7 +21,7 @@ import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(getMongodbUri("airbyte") ?? "");
+const client = new MongoClient(getMongodbUri("airbyte", true));
 
 export async function hydrateDecaRaw() {
   let count = 0;
