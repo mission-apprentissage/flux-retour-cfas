@@ -11,6 +11,8 @@ const config = {
   bodyParserLimit: env.get("MNA_TDB_BODY_PARSER_LIMIT").default("10mb").asString(),
   mongodb: {
     uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
+    dbName: env.get("MNA_TDB_MONGODB_DB_NAME").required().asString(),
+    options: env.get("MNA_TDB_MONGODB_OPTIONS").required().asString(),
   },
   auth: {
     passwordHashRounds: 10000,

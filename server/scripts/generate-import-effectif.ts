@@ -8,6 +8,8 @@ import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.mode
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { write, utils } from "xlsx";
 
+import { getMongodbUri } from "@/common/mongodb";
+
 config({ path: ".env" });
 config({ path: ".env.local", override: true });
 
@@ -128,7 +130,7 @@ program
   })
   .showSuggestionAfterError()
   .hook("preAction", async () => {
-    client = new MongoClient(process.env.MNA_TDB_MONGODB_URI ?? "");
+    client = new MongoClient(getMongodbUri() ?? "");
     await client.connect();
   })
   .hook("postAction", async () => {

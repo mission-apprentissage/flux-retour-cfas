@@ -1,9 +1,8 @@
 import logger from "@/common/logger";
 import { modelDescriptors } from "@/common/model/collections";
-import config from "@/config";
 
 import { startCLI } from "./commands";
-import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb";
+import { connectToMongodb, configureDbSchemaValidation, getMongodbUri } from "./common/mongodb";
 import { setupJobProcessor } from "./jobs/jobs";
 import createGlobalServices from "./services";
 
@@ -12,7 +11,7 @@ process.on("uncaughtException", (err) => logger.error(err, "uncaughtException"))
 
 try {
   logger.warn("starting application");
-  await connectToMongodb(config.mongodb.uri);
+  await connectToMongodb(getMongodbUri());
   await configureDbSchemaValidation(modelDescriptors); // à supprimer d'ici et mettre dans une commande distincte
 
   // We need to setup even for server to be able to call addJob

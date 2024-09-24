@@ -16,11 +16,12 @@ import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
+import { getMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(process.env.MNA_TDB_MONGODB_URI ?? "");
+const client = new MongoClient(getMongodbUri("airbyte") ?? "");
 
 export async function hydrateDecaRaw() {
   let count = 0;
@@ -36,7 +37,7 @@ export async function hydrateDecaRaw() {
       "_airbyte_data.formation.date_fin_formation": { $exists: true },
     };
 
-    const cursor = client.db("airbyte").collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
+    const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
 
     // await effectifsDECADb().drop();
 
