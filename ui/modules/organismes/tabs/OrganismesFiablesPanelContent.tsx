@@ -30,7 +30,7 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
             </ListItem>
             <ListItem>
               dont l’état administratif du SIRET de l’établissement, tel qu’il est renseigné sur l’INSEE, est{" "}
-              <strong>ouvert</strong>.
+              <strong>en activité</strong>.
             </ListItem>
           </UnorderedList>
         </Box>

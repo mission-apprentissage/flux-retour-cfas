@@ -315,7 +315,7 @@ export default function Glossaire() {
                       </Link>
                     </ListItem>
                     <ListItem>
-                      identifiés avec les détails suivants : UAI, SIREN, SIRET (ouvert), Nature (Responsable,
+                      identifiés avec les détails suivants : UAI, SIREN, SIRET (en activité), Nature (Responsable,
                       Responsable et formateur, Formateur)
                     </ListItem>
                   </UnorderedList>
