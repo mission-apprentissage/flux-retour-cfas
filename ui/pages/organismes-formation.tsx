@@ -4,8 +4,8 @@ import {
   Container,
   Divider,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Image,
   ListItem,
   Tag,
@@ -15,7 +15,6 @@ import {
   VStack,
   Wrap,
 } from "@chakra-ui/react";
-import { ERPS } from "shared";
 
 import { FAQ_PATH } from "@/common/constants/faq";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
@@ -62,13 +61,13 @@ const OrganismesFormationPage = () => {
           <Flex gap={12}>
             <Box flex="75">
               <Heading as="h3" fontSize="32px" color="blue_cumulus_main">
-                Connexion simple, transmission automatique, services immédiats
+                Une connexion simple pour des services immédiats
               </Heading>
 
-              <UnorderedList fontSize="delta" mt="30px">
+              <UnorderedList my={8} spacing={3}>
                 <ListItem>
                   <b>Suivez efficacement vos sites formateurs et effectifs</b> grâce au suivi des jeunes, des taux de
-                  rupture des contrats, des taux de succès, une analyse par formations...
+                  rupture des contrats, des taux de succès, une analyse par formation...
                 </ListItem>
                 <ListItem>
                   <b>Augmentez la visibilité de vos formations</b> et attirez plus d&apos;apprenants grâce à un meilleur
@@ -77,7 +76,7 @@ const OrganismesFormationPage = () => {
                 <ListItem>
                   <b>Multipliez les candidatures</b> à vos formations grâce à notre service voisin{" "}
                   <Link
-                    href="https://4x1qe.r.sp1-brevo.net/mk/cl/f/sh/WCPzyXJTZ72ikBe3C3exQ4Q3wTKxxzF4/hjk9O0lvGjQW"
+                    href="https://labonnealternance.apprentissage.beta.gouv.fr/"
                     target="_blank"
                     textDecoration="underline"
                     isExternal
@@ -106,17 +105,15 @@ const OrganismesFormationPage = () => {
                   userSelect="none"
                   width="50%"
                 />
-                <Text fontWeight="700" fontSize="24px" mt="10px">
+                <Text fontSize="gamma" fontWeight="bold" mt={4}>
                   Des webinaires pour vous accompagner
                 </Text>
-                <Text fontWeight="400" fontSize="omega" lineHeight="25px" mt="10px">
-                  Nous vous proposons des webinaires réguliers pour vous aider à vous connecter au Tableau de bord.
-                </Text>
+                <Text my={3}>Nous vous aidons à vous connecter au Tableau de bord.</Text>
                 <Link
-                  mt="20px"
+                  mt={4}
                   isExternal={true}
                   variant="blueBg"
-                  href="https://4x1qe.r.bh.d.sendibt3.com/mk/cl/f/sh/28xHLtxZQ0KqQgjLXw96JKt9fapCvHahkI/v9qRkDFsfh-U"
+                  href="https://app.calendso.incubateur.net/paulborisbouzinbeta/webinaires-organismes-de-formation-en-apprentissage"
                 >
                   Je participe
                 </Link>
@@ -147,20 +144,31 @@ const OrganismesFormationPage = () => {
               Aujourd’hui, il est connecté avec ces ERP&nbsp;:
             </Text>
             <Wrap>
-              {ERPS.filter((erp) => !erp.disabled)
-                .reverse()
-                .map(({ name, id }) => (
-                  <ERPTag key={id}>{name}</ERPTag>
-                ))}
+              {["Yparéo", "FCA Manager", "SC Form", "Gesti", "Aimaira", "Cactus"].map((erp) => (
+                <ERPTag key={erp}>{erp}</ERPTag>
+              ))}
             </Wrap>
             <Text fontSize="sm" color="#666666" mt={5}>
               Un outil de gestion / ERP (Enterprise Ressource Planning ou PGI pour Progiciel de Gestion Intégré) est une
               solution logicielle permettant d’unifier le système d’information d’une entreprise autour d’une base de
               données unique.
             </Text>
-            <Text fontSize="lg" mt={5}>
-              Nous collaborons avec d’autres éditeurs d’ERP pour faciliter le taux de transmission.
-            </Text>
+            <Flex direction="column" gap={2} mt={4}>
+              <Text>
+                Vous utilisez un autre ERP ?{" "}
+                <Link
+                  href={`mailto:tableau-de-bord@apprentissage.beta.gouv.fr`}
+                  target="_blank"
+                  textDecoration="underline"
+                  isExternal
+                  whiteSpace="nowrap"
+                  color="action-high-blue-france"
+                >
+                  Signalez le nous
+                </Link>
+              </Text>
+              <Text>Vous n’utilisez pas d’ERP ? Transmettez sans logiciel avec un fichier Excel</Text>
+            </Flex>
           </VStack>
           <Box borderLeft="4px solid #6A6AF4" pl={8} maxW="264px">
             <Text fontWeight="bold">Vous n’utilisez pas ces ERP ?</Text>
@@ -198,7 +206,7 @@ const OrganismesFormationPage = () => {
         <Container maxW="xl" py="14" display="flex" alignItems="center" gap="16">
           <Box>
             <Heading as="h3" fontSize="32px" color="blue_cumulus_main">
-              Protection de vos données et effectifs
+              Protection de vos données et vos effectifs
             </Heading>
             <Text fontSize="lg" mt={5}>
               Le tableau de bord de l’apprentissage est construit dans le{" "}
