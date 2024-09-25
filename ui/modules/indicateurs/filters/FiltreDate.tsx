@@ -39,6 +39,7 @@ function FiltreDate(props: Props) {
         showFullMonthYearPicker
         showFourColumnMonthYearPicker
         locale="fr"
+        maxDate={new Date()}
         onCalendarClose={() => setIsOpen(false)}
         onCalendarOpen={() => setIsOpen(true)}
         customInput={props.button({ setIsOpen, isOpen, buttonLabel: formatDate(props.value, "dd MMMM yyyy") })}
