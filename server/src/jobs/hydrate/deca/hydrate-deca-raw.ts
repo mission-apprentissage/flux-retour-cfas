@@ -37,9 +37,7 @@ export async function hydrateDecaRaw() {
       "_airbyte_data.formation.date_fin_formation": { $exists: true },
     };
 
-    const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_bal_deca").find(query);
-
-    // await effectifsDECADb().drop();
+    const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_airbyte_deca").find(query);
 
     for await (const document of cursor) {
       try {
