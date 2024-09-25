@@ -14,7 +14,10 @@ const ensureInitialization = (client: MongoClient | null): MongoClient => {
   return client;
 };
 
-export const getMongodbUri = (dbName = config.mongodb.dbName) => {
+export const getMongodbUri = (dbName: string = config.mongodb.dbName, withMainDbAuthent: boolean = false) => {
+  if (withMainDbAuthent) {
+    return `${config.mongodb.uri}${dbName}?${config.mongodb.options}&authSource=${config.mongodb.dbName}`;
+  }
   return `${config.mongodb.uri}${dbName}?${config.mongodb.options}`;
 };
 /**
