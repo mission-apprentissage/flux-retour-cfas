@@ -1,24 +1,29 @@
 export const telephoneConverter = (telephone: string | null) => {
-  if (!telephone) return telephone;
+  if (telephone === null || telephone === undefined) return "";
+
   let phone = String(telephone)
     .trim()
-    .replaceAll("-", "")
-    .replaceAll(".", "")
-    .replaceAll(" ", "")
-    .replaceAll("(+)", "+");
+    .replace(/[-.()\s]/g, "");
 
-  if (phone.length === 9) {
-    return `+33${phone}`;
+  if (phone.startsWith("033")) {
+    phone = `+33${phone.slice(3)}`;
   }
 
-  if (phone.length === 10 && phone[0] === "0") {
-    return `+33${phone.substr(1, 9)}`;
+  if (phone.startsWith("06") && phone.length === 10) {
+    return phone;
   }
 
-  // Gestion des téléphones au format 033xxxxxxxxx
-  if (phone.length === 12 && phone[0] === "0") {
-    return `+33${phone.substr(3, 12)}`;
+  if (phone.startsWith("+33") && phone.length === 12) {
+    return phone;
   }
 
-  return phone;
+  if (phone.startsWith("33") && phone.length === 11) {
+    return `+${phone}`;
+  }
+
+  if (phone.length === 10 && phone.startsWith("0")) {
+    return `+33${phone.slice(1)}`;
+  }
+
+  return telephone;
 };
