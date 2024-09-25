@@ -206,7 +206,7 @@ const OrganismesFormationPage = () => {
         <Container maxW="xl" py="14" display="flex" alignItems="center" gap="16">
           <Box>
             <Heading as="h3" fontSize="32px" color="blue_cumulus_main">
-              Protection de vos données et effectifs
+              Protection de vos données et vos effectifs
             </Heading>
             <Text fontSize="lg" mt={5}>
               Le tableau de bord de l’apprentissage est construit dans le{" "}
