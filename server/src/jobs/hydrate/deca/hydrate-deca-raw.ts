@@ -39,8 +39,6 @@ export async function hydrateDecaRaw() {
 
     const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_airbyte_deca").find(query);
 
-    // await effectifsDECADb().drop();
-
     for await (const document of cursor) {
       try {
         await updateEffectifDeca(document);
