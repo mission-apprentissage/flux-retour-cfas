@@ -64,7 +64,7 @@ async function updateEffectifDeca(document: IAirbyteRawBalDeca) {
 
   const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
 
-  if (effectifFound) {
+  if (!effectifFound) {
     return await effectifsDECADb().insertOne(newDocument);
   } else {
     return await effectifsDECADb().updateOne({ _id: effectifFound._id }, newDocument);
