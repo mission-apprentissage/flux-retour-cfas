@@ -146,7 +146,7 @@ export const addComputedFields = async ({
   }
 
   if (effectif) {
-    const statut = createComputedStatutObject(effectif, new Date());
+    const statut = createComputedStatutObject(effectif as IEffectif, new Date());
     computedFields.statut = statut;
   }
 
