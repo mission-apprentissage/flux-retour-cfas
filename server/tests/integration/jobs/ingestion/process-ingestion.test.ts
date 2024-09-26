@@ -549,7 +549,7 @@ describe("Processus d'ingestion", () => {
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
             code_postal_de_naissance: "44000",
             courriel: "johndoe@example.org",
-            telephone: "+33123456789",
+            telephone: "0123456789",
             adresse: {
               code_postal: "75000",
               complete: "1 rue de la paix",
