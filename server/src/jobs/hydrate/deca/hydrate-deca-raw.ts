@@ -69,7 +69,7 @@ async function updateEffectifDeca(document: IAirbyteRawBalDeca, count: { created
 
   if (!effectifFound) {
     await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
-    return { created: count.created + 1, updated: count.updated };
+    return { updated: count.updated, created: count.created + 1 };
   } else {
     await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: newDocument });
     return { created: count.created, updated: count.updated + 1 };
