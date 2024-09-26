@@ -11,6 +11,7 @@ import {
   UAI_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
+  PHONE_REGEX_PATTERN,
 } from "shared";
 import { z } from "zod";
 
@@ -37,10 +38,16 @@ export const extensions = {
   phone: () =>
     z.coerce
       .string()
-      // On va vérifier que ça contient au moins un chiffre (ou que c'est une chaine vide, car on les accepte aussi)
-      .regex(/^$|.*[0-9].*/, "Format invalide")
-      // On passe à null en cas de chaine vide
       .transform((v: string) => (v ? telephoneConverter(v) : null))
+      .refine(
+        (v: string | null | undefined) => {
+          const phoneRegex = new RegExp(PHONE_REGEX_PATTERN, "g");
+          return v === null || v === undefined || phoneRegex.test(v);
+        },
+        {
+          message: "Format invalide",
+        }
+      )
       .openapi({
         example: "0628000000",
       }),
