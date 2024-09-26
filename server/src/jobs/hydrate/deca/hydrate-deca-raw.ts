@@ -1,7 +1,7 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisme } from "shared/models";
 import { IAirbyteRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
@@ -24,7 +24,8 @@ const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 const client = new MongoClient(getMongodbUri("airbyte", true));
 
 export async function hydrateDecaRaw() {
-  let count = 0;
+  let count = { created: 0, updated: 0 };
+  let totalCount = 0;
 
   try {
     await client.connect();
@@ -40,37 +41,41 @@ export async function hydrateDecaRaw() {
     const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_airbyte_deca").find(query);
 
     for await (const document of cursor) {
+      totalCount++;
       try {
-        await updateEffectifDeca(document);
-        count++;
+        count = await updateEffectifDeca(document, count);
       } catch (docError) {
         logger.error(`Error updating document ${document._id}: ${docError}`);
       }
     }
 
-    if (count === 0) {
+    if (totalCount === 0) {
       console.log("No documents found matching the criteria.");
     }
   } catch (err) {
     logger.error(`Échec de la mise à jour des effectifs: ${err}`);
     captureException(err);
   } finally {
-    logger.info(`Collection contratsDeca initialized successfully. Processed count: ${count}`);
+    logger.info(
+      `Mise à jour des effectifs deca terminée. Sur ${totalCount}, ${count.created} créés, ${count.updated} mis à jour.`
+    );
   }
 }
 
-async function updateEffectifDeca(document: IAirbyteRawBalDeca) {
-  const newDocument: IEffectifDECA = await transformDocument(document);
+async function updateEffectifDeca(document: IAirbyteRawBalDeca, count: { created: number; updated: number }) {
+  const newDocument: WithoutId<IEffectifDECA> = await transformDocument(document);
 
   const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
 
   if (!effectifFound) {
-    return await effectifsDECADb().insertOne(newDocument);
+    await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
+    return { updated: count.updated, created: count.created + 1 };
   } else {
-    return await effectifsDECADb().updateOne({ _id: effectifFound._id }, newDocument);
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: newDocument });
+    return { created: count.created, updated: count.updated + 1 };
   }
 }
-async function transformDocument(document: IAirbyteRawBalDeca): Promise<IEffectifDECA> {
+async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
   const {
     _id,
     alternant,
@@ -126,8 +131,7 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<IEffecti
     throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
-  const effectif: IEffectifDECA = {
-    _id: new ObjectId(),
+  const effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: document._id,
     apprenant: {
       nom,
@@ -178,12 +182,12 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<IEffecti
     updated_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
     source: SOURCE_APPRENANT.DECA,
-    annee_scolaire: startYear <= 2023 && endYear >= 2024 ? "2023-2024" : `${startYear}-${endYear}`,
+    annee_scolaire: startYear <= 2024 && endYear >= 2025 ? "2024-2025" : `${startYear}-${endYear}`,
   };
 
   return {
     ...effectif,
-    _computed: await addComputedFields({ organisme, effectif: effectif as IEffectif }),
+    _computed: await addComputedFields({ organisme, effectif: effectif as WithoutId<IEffectif> }),
     is_deca_compatible: !organisme.is_transmission_target,
   };
 }

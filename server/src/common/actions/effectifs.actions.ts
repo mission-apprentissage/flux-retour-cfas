@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithoutId } from "mongodb";
 import { IOpcos, IRncp } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -137,7 +137,7 @@ export const addComputedFields = async ({
   effectif,
 }: {
   organisme?: IOrganisme;
-  effectif?: IEffectif;
+  effectif?: IEffectif | WithoutId<IEffectif>;
 }): Promise<Partial<IEffectif["_computed"]>> => {
   const computedFields: Partial<IEffectif["_computed"]> = {};
 
@@ -146,7 +146,7 @@ export const addComputedFields = async ({
   }
 
   if (effectif) {
-    const statut = createComputedStatutObject(effectif, new Date());
+    const statut = createComputedStatutObject(effectif as IEffectif, new Date());
     computedFields.statut = statut;
   }
 
