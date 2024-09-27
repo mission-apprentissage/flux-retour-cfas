@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
@@ -95,7 +96,7 @@ export default () => {
       }),
     }),
     returnResult(async (req, res) => {
-      const affelnetCsv = await exportNonConretisee(req);
+      const affelnetCsv = await exportNonConcretisee(req);
       res.attachment(`voeux_affelnet_non_concretisee.csv`);
       return affelnetCsv;
     })
@@ -114,7 +115,7 @@ const getNationalCount = async (req) => {
   return await getAffelnetCountVoeuxNational(organisme_departements, organismes_regions);
 };
 
-const exportNonConretisee = async (req) => {
+const exportNonConcretisee = async (req) => {
   const user = req.user as AuthContext;
   const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
   const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
@@ -122,9 +123,17 @@ const exportNonConretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
-  const transformedVoeux = listVoeux.map(({ formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats, formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
+    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+    ...contrats.reduce((acc, curr, index) => {
+      return {
+        ...acc,
+        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+      };
+    }, {}),
   }));
 
   const ids = listVoeux.map((voeu) => voeu._id);
@@ -151,9 +160,17 @@ const exportConcretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
-  const transformedVoeux = listVoeux.map(({ formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats, formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
+    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+    ...contrats.reduce((acc, curr, index) => {
+      return {
+        ...acc,
+        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+      };
+    }, {}),
   }));
 
   const ids = listVoeux.map((voeu) => voeu._id);

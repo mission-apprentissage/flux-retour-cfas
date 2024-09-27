@@ -118,6 +118,76 @@ export const getAffelnetCountVoeuxNational = async (
   };
 };
 
+const AFFELNET_VOEUX_AGGREGATION = [
+  {
+    $group: {
+      _id: "$raw.ine",
+      formations: {
+        $push: {
+          $concat: ["$_computed.formation.libelle", " - ", "$_computed.formation.rncp"],
+        },
+      },
+      count: {
+        $sum: 1,
+      },
+      apprenant: {
+        $first: "$$ROOT",
+      },
+    },
+  },
+  {
+    $lookup: {
+      from: "effectifs",
+      localField: "apprenant.effectif_id",
+      foreignField: "_id",
+      as: "effectif",
+      pipeline: [
+        {
+          $project: {
+            contrats: 1,
+          },
+        },
+      ],
+    },
+  },
+  {
+    $unwind: {
+      path: "$effectif",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $project: {
+      _id: "$_id",
+      nom: "$apprenant.raw.nom",
+      prenom_1: "$apprenant.raw.prenom_1",
+      prenom_2: "$apprenant.raw.prenom_2",
+      prenom_3: "$apprenant.raw.prenom_3",
+      mail_responsable_1: "$apprenant.raw.mail_responsable_1",
+      mail_responsable_2: "$apprenant.raw.mail_responsable_2",
+      telephone_responsable_1: "$apprenant.raw.telephone_responsable_1",
+      telephone_responsable_2: "$apprenant.raw.telephone_responsable_2",
+      ville_etab_origine: "$apprenant.raw.ville_etab_origine",
+      type_etab_origine: "$apprenant.raw.type_etab_origine",
+      libelle_etab_origine: "$apprenant.raw.libelle_etab_origine",
+      nombre_voeux: "$count",
+      formations_demandees: "$formations",
+      uai_etablissement_formateur: "$apprenant.raw.uai_etatblissement_formateur",
+      uai_etablissement_responsable: "$apprenant.raw.uai_etablissement_responsable",
+      uai_cio_etablissement_accueil: "$apprenant.raw.uai_cio_etab_accueil",
+      type_etablissement_accueil: "$apprenant.raw.type_etab_accueil",
+      libelle_pulic_etablissement_accueil: "$apprenant.raw.libelle_etab_accueil",
+      contrats: "$effectif.contrats",
+    },
+  },
+  {
+    $sort: {
+      nom: 1,
+      prenom_1: 1,
+    },
+  },
+];
+
 export const getAffelnetVoeuxConcretise = (departement: Array<string> | null, regions: Array<string> | null) =>
   voeuxAffelnetDb()
     .aggregate([
@@ -131,40 +201,7 @@ export const getAffelnetVoeuxConcretise = (departement: Array<string> | null, re
           effectif_id: { $exists: true },
         },
       },
-      {
-        $group: {
-          _id: "$raw.ine",
-          formations: {
-            $push: { $concat: ["$_computed.formation.libelle", " - ", "$_computed.formation.rncp"] },
-          },
-          count: { $sum: 1 },
-          apprenant: { $first: "$$ROOT" },
-        },
-      },
-      {
-        $project: {
-          _id: "$_id",
-          nom: "$apprenant.raw.nom",
-          prenom_1: "$apprenant.raw.prenom_1",
-          prenom_2: "$apprenant.raw.prenom_2",
-          prenom_3: "$apprenant.raw.prenom_3",
-          mail_responsable_1: "$apprenant.raw.mail_responsable_1",
-          mail_responsable_2: "$apprenant.raw.mail_responsable_2",
-          telephone_responsable_1: "$apprenant.raw.telephone_responsable_1",
-          telephone_responsable_2: "$apprenant.raw.telephone_responsable_2",
-          ville_etab_origine: "$apprenant.raw.ville_etab_origine",
-          type_etab_origine: "$apprenant.raw.type_etab_origine",
-          libelle_etab_origine: "$apprenant.raw.libelle_etab_origine",
-          nombre_voeux: "$count",
-          formations_demandees: "$formations",
-        },
-      },
-      {
-        $sort: {
-          nom: 1,
-          prenom_1: 1,
-        },
-      },
+      ...AFFELNET_VOEUX_AGGREGATION,
     ])
     .toArray();
 
@@ -178,43 +215,12 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
       },
       {
         $match: {
-          effectif_id: { $exists: false },
-        },
-      },
-      {
-        $group: {
-          _id: "$raw.ine",
-          formations: {
-            $push: { $concat: ["$_computed.formation.libelle", " - ", "$_computed.formation.rncp"] },
+          effectif_id: {
+            $exists: false,
           },
-          count: { $sum: 1 },
-          apprenant: { $first: "$$ROOT" },
         },
       },
-      {
-        $project: {
-          _id: "$_id",
-          nom: "$apprenant.raw.nom",
-          prenom_1: "$apprenant.raw.prenom_1",
-          prenom_2: "$apprenant.raw.prenom_2",
-          prenom_3: "$apprenant.raw.prenom_3",
-          mail_responsable_1: "$apprenant.raw.mail_responsable_1",
-          mail_responsable_2: "$apprenant.raw.mail_responsable_2",
-          telephone_responsable_1: "$apprenant.raw.telephone_responsable_1",
-          telephone_responsable_2: "$apprenant.raw.telephone_responsable_2",
-          ville_etab_origine: "$apprenant.raw.ville_etab_origine",
-          type_etab_origine: "$apprenant.raw.type_etab_origine",
-          libelle_etab_origine: "$apprenant.raw.libelle_etab_origine",
-          nombre_voeux: "$count",
-          formations_demandees: "$formations",
-        },
-      },
-      {
-        $sort: {
-          nom: 1,
-          prenom_1: 1,
-        },
-      },
+      ...AFFELNET_VOEUX_AGGREGATION,
     ])
     .toArray();
 
