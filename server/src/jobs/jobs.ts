@@ -166,6 +166,13 @@ export async function setupJobProcessor() {
                 return 0;
               },
             },
+            "Mettre à jour les effectifs DECA tous les dimanches matin à 6h": {
+              cron_string: "0 6 * * 0",
+              handler: async () => {
+                await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
+                return 0;
+              },
+            },
 
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
