@@ -138,10 +138,10 @@ export async function getIndicateursOrganismesParDepartement(
 ): Promise<IndicateursOrganismesAvecDepartement[]> {
   const { date, ...restFilters } = filters;
 
-  const currentDate = date ? new Date(date) : new Date();
-
   // On ne prend pas en compte la date dans le match car des organismes n'ont pas de date de transmission
   const filtersWithoutDate = buildOrganismeMongoFilters(restFilters, acl.infoTransmissionEffectifs);
+
+  const dateFilterCondition = date ? [{ $lte: ["$first_transmission_date", new Date(date)] }] : [];
 
   const indicateurs = (await organismesDb()
     .aggregate([
@@ -188,10 +188,7 @@ export async function getIndicateursOrganismesParDepartement(
             $sum: {
               $cond: {
                 if: {
-                  $and: [
-                    { $ne: [null, { $ifNull: ["$first_transmission_date", null] }] },
-                    { $lte: ["$first_transmission_date", currentDate] },
-                  ],
+                  $and: [{ $ne: [null, { $ifNull: ["$first_transmission_date", null] }] }, ...dateFilterCondition],
                 },
                 then: 1,
                 else: 0,
@@ -204,7 +201,7 @@ export async function getIndicateursOrganismesParDepartement(
                 if: {
                   $and: [
                     { $ne: [null, { $ifNull: ["$first_transmission_date", null] }] },
-                    { $lte: ["$first_transmission_date", currentDate] },
+                    ...dateFilterCondition,
                     { $eq: ["$nature", "responsable"] },
                   ],
                 },
@@ -219,7 +216,7 @@ export async function getIndicateursOrganismesParDepartement(
                 if: {
                   $and: [
                     { $ne: [null, { $ifNull: ["$first_transmission_date", null] }] },
-                    { $lte: ["$first_transmission_date", currentDate] },
+                    ...dateFilterCondition,
                     { $eq: ["$nature", "responsable_formateur"] },
                   ],
                 },
@@ -234,7 +231,7 @@ export async function getIndicateursOrganismesParDepartement(
                 if: {
                   $and: [
                     { $ne: [null, { $ifNull: ["$first_transmission_date", null] }] },
-                    { $lte: ["$first_transmission_date", currentDate] },
+                    ...dateFilterCondition,
                     { $eq: ["$nature", "formateur"] },
                   ],
                 },
@@ -289,7 +286,7 @@ export async function getIndicateursOrganismesParDepartement(
             total: {
               $cond: {
                 if: { $eq: ["$totalOrganismes.total", 0] },
-                then: 0,
+                then: 100,
                 else: {
                   $multiply: [100, { $divide: ["$organismesTransmetteurs.total", "$totalOrganismes.total"] }],
                 },
@@ -298,7 +295,7 @@ export async function getIndicateursOrganismesParDepartement(
             responsables: {
               $cond: {
                 if: { $eq: ["$totalOrganismes.responsables", 0] },
-                then: 0,
+                then: 100,
                 else: {
                   $multiply: [
                     100,
@@ -310,7 +307,7 @@ export async function getIndicateursOrganismesParDepartement(
             responsablesFormateurs: {
               $cond: {
                 if: { $eq: ["$totalOrganismes.responsablesFormateurs", 0] },
-                then: 0,
+                then: 100,
                 else: {
                   $multiply: [
                     100,
@@ -327,7 +324,7 @@ export async function getIndicateursOrganismesParDepartement(
             formateurs: {
               $cond: {
                 if: { $eq: ["$totalOrganismes.formateurs", 0] },
-                then: 0,
+                then: 100,
                 else: {
                   $multiply: [100, { $divide: ["$organismesTransmetteurs.formateurs", "$totalOrganismes.formateurs"] }],
                 },
@@ -336,7 +333,7 @@ export async function getIndicateursOrganismesParDepartement(
             inconnues: {
               $cond: {
                 if: { $eq: ["$totalOrganismes.inconnues", 0] },
-                then: 0,
+                then: 100,
                 else: {
                   $multiply: [100, { $divide: ["$organismesTransmetteurs.inconnues", "$totalOrganismes.inconnues"] }],
                 },
