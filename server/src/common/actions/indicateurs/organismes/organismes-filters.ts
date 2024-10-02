@@ -1,10 +1,9 @@
 import Boom from "boom";
-import { isToday } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries } from "shared";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
-import { DateFilters, TerritoireFilters } from "../../helpers/filters";
+import { TerritoireFilters } from "../../helpers/filters";
 
 export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<IOrganisme> {
   if (perimetre === false) {
@@ -40,19 +39,13 @@ export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope |
   }, {});
 }
 export function buildOrganismeMongoFilters(
-  filters: TerritoireFilters & Partial<DateFilters>,
+  filters: TerritoireFilters,
   perimetre: PermissionScope | boolean
 ): Filter<IOrganisme>[] {
   const perimetreFilter = buildOrganismePerimetreMongoFilters(perimetre);
 
   const requestedFilter = entries(filters).reduce((acc: Filter<IOrganisme>, [key, value]) => {
     switch (key) {
-      case "date": {
-        if (!isToday(value)) {
-          acc["first_transmission_date"] = { $lte: value };
-        }
-        break;
-      }
       case "organisme_regions":
         acc["adresse.region"] = { $in: value };
         break;
