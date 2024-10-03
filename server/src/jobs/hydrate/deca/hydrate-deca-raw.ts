@@ -18,10 +18,11 @@ import parentLogger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
 import { getMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
+import config from "@/config";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(getMongodbUri("airbyte", true));
+const client = new MongoClient(getMongodbUri(config.mongodb.decaDbName, true));
 
 export async function hydrateDecaRaw() {
   let count = { created: 0, updated: 0 };
@@ -38,7 +39,7 @@ export async function hydrateDecaRaw() {
       "_airbyte_data.formation.date_fin_formation": { $exists: true },
     };
 
-    const cursor = client.db().collection<IAirbyteRawBalDeca>("airbyte_raw_airbyte_deca").find(query);
+    const cursor = client.db().collection<IAirbyteRawBalDeca>(config.mongodb.decaDbCollection).find(query);
 
     for await (const document of cursor) {
       totalCount++;
