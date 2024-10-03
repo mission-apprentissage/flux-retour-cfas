@@ -147,19 +147,17 @@ const exportNonConcretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
-  const transformedVoeux = listVoeux.map(({ contrats, formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
     contrat_signe: contrats && contrats.length ? "Oui" : "Non",
-    ...(contrats
-      ? contrats.reduce((acc, curr, index) => {
-          return {
-            ...acc,
-            [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-            [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
-          };
-        }, {})
-      : []),
+    ...contrats.reduce((acc, curr, index) => {
+      return {
+        ...acc,
+        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+      };
+    }, {}),
   }));
 
   const ids = listVoeux.map((voeu) => voeu._id);
@@ -186,7 +184,7 @@ const exportConcretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
-  const transformedVoeux = listVoeux.map(({ contrats, formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
     contrat_signe: contrats && contrats.length ? "Oui" : "Non",
