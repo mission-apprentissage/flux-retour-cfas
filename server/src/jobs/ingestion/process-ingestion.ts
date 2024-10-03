@@ -352,7 +352,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         ctx.addIssue(
           createCustomEffectifIssue(
             ORGANISME_RESPONSABLE_NOT_FOUND,
-            ["etablissement_formateur_uai", "etablissement_formateur_siret"],
+            ["etablissement_responsable_uai", "etablissement_responsable_siret"],
             {
               uai: effectifQueued.etablissement_responsable_uai,
               siret: effectifQueued.etablissement_responsable_siret,

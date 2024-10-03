@@ -13,6 +13,8 @@ const config = {
     uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
     dbName: env.get("MNA_TDB_MONGODB_DB_NAME").required().asString(),
     options: env.get("MNA_TDB_MONGODB_OPTIONS").required().asString(),
+    decaDbName: env.get("MNA_TDB_DECA_DB_NAME").required().asString(),
+    decaDbCollection: env.get("MNA_TDB_DECA_COLLECTION_NAME").required().asString(),
   },
   auth: {
     passwordHashRounds: 10000,

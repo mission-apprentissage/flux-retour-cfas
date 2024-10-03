@@ -147,6 +147,7 @@ const exportNonConcretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
+
   const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
@@ -184,6 +185,7 @@ const exportConcretisee = async (req) => {
     req.query.organisme_departements
   );
   const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
+
   const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
