@@ -7,23 +7,46 @@ import config from "@/config";
 
 import { tryCachedExecution } from "../utils/cacheUtils";
 
+import { apiAlternanceClient } from "./apiAlternance";
 import getApiClient from "./client";
-
-// Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 
 export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
 const client = getApiClient({ baseURL: API_ENDPOINT });
 
-/**
- *
- * @param {string} cfd
- * @returns {Promise<(import("./@types/TabCoCfdInfo.js").default)['result']|null>}
- */
 export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
   try {
-    const { data } = await client.post("/cfd", { cfd });
-    return data.result;
+    const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
+
+    if (certifications.length === 0) {
+      return null;
+    }
+
+    // All certifications have CFD, so each `.cfd` property is not null (that's just a type refinement issue).
+    const data: TabCoCfdInfo = {
+      date_fermeture: certifications[0].periode_validite.cfd!.fermeture,
+      date_ouverture: certifications[0].periode_validite.cfd!.ouverture,
+      niveau: certifications[0].intitule.niveau.cfd!.europeen,
+      intitule_long: certifications[0].intitule.cfd!.long,
+      rncps: [],
+    };
+
+    for (const certification of certifications) {
+      if (certification.identifiant.rncp === null) {
+        continue;
+      }
+
+      data.rncps.push({
+        code_rncp: certification.identifiant.rncp,
+        intitule_diplome: certification.intitule.rncp!,
+        date_fin_validite_enregistrement: certification.periode_validite.rncp!.fin_enregistrement,
+        active_inactive: certification.periode_validite.rncp!.actif ? "ACTIVE" : "INACTIVE",
+        eligible_apprentissage: certification.type.voie_acces.rncp!.apprentissage,
+        eligible_professionnalisation: certification.type.voie_acces.rncp!.contrat_professionnalisation,
+      });
+    }
+
+    return data;
   } catch (error: any) {
     logger.error(
       `getCfdInfo: something went wrong while requesting CFD "${cfd}"`,
