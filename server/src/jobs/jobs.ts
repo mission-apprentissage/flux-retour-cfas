@@ -29,6 +29,7 @@ import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
 import {
   hydrateEffectifsComputed,
+  hydrateEffectifsComputedOpcos,
   hydrateEffectifsComputedReseaux,
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -350,6 +351,11 @@ export async function setupJobProcessor() {
       "hydrate:opcos": {
         handler: async () => {
           return hydrateOrganismesOPCOs();
+        },
+      },
+      "hydrate:computed-effectifs-by-opcos": {
+        handler: async (job) => {
+          return hydrateEffectifsComputedOpcos((job.payload as any)?.opco);
         },
       },
       "hydrate:reseaux": {
