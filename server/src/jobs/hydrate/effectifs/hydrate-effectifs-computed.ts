@@ -1,6 +1,12 @@
 import { TETE_DE_RESEAUX } from "shared/constants";
+import { IRncp } from "shared/models";
 
-import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
+import {
+  updateEffectifComputedFromOrganisme,
+  updateEffectifComputedFromRNCP,
+} from "@/common/actions/effectifs.actions";
+import { findOpcoByName, findRNCPByOpcosId } from "@/common/actions/opcos/opcos.actions";
+import { getFicheRNCPById } from "@/common/actions/rncp.actions";
 import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
@@ -92,4 +98,26 @@ export const hydrateEffectifsComputedReseaux = async () => {
     }
   }
   logger.info("Leaving: hydrateEffectifsComputedReseaux");
+};
+
+export const hydrateEffectifsComputedOpcos = async (opcoName: string) => {
+  const opco = await findOpcoByName(opcoName);
+
+  if (!opco) {
+    logger.error(`Opco with name ${opcoName} not found`);
+    return;
+  }
+  const opcos = await findRNCPByOpcosId(opco._id.toString());
+
+  for (let i = 0; i < opcos.length; i++) {
+    const { rncp_id } = opcos[i];
+    const rncp: IRncp | null = await getFicheRNCPById(rncp_id);
+
+    if (!rncp) {
+      logger.error(`RNCP with id ${rncp_id} not found`);
+      continue;
+    }
+    logger.info(`Updating computed for rncp : ${rncp.rncp}, ${i + 1}/${opcos.length}`);
+    await updateEffectifComputedFromRNCP(rncp, opco);
+  }
 };

@@ -14,6 +14,10 @@ export const findOpco = async (id: string) => {
   return opcosDb().findOne({ _id: new ObjectId(id) });
 };
 
+export const findOpcoByName = async (name: string) => {
+  return opcosDb().findOne({ name });
+};
+
 export const findRNCPByOpcosId = async (id: string) => {
   const opco = await findOpco(id);
   if (!opco) {
