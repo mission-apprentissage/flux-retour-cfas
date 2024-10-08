@@ -17,6 +17,7 @@ import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpe
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const AFFELNET_FIELDS = [
+  { label: "INE", value: "ine" },
   { label: "Nom", value: "nom" },
   { label: "Prenom 1", value: "prenom_1" },
   { label: "Prenom 2", value: "prenom_2" },
