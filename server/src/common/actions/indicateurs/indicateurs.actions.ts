@@ -516,6 +516,7 @@ export async function getEffectifsNominatifsGenerique(
         return [t];
     }
   };
+
   const indicateurs = (await db
     .aggregate([
       {
@@ -547,13 +548,11 @@ export async function getEffectifsNominatifsGenerique(
         },
       },
       {
-        $match: { "_computed.statut.parcours": { $not: { $size: 0 } } },
+        $match: { "_computed.statut.parcours": { $ne: [] } },
       },
       {
         $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$_computed.statut.parcours",
-          },
+          statut_apprenant_at_date: { $last: "$_computed.statut.parcours" },
         },
       },
       {
@@ -577,9 +576,7 @@ export async function getEffectifsNominatifsGenerique(
               $project: {
                 uai: 1,
                 siret: 1,
-                nom: {
-                  $ifNull: ["$enseigne", "$raison_sociale"],
-                },
+                nom: { $ifNull: ["$enseigne", "$raison_sociale"] },
                 nature: {
                   $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
                 },
@@ -595,6 +592,84 @@ export async function getEffectifsNominatifsGenerique(
         },
       },
       {
+        $lookup: {
+          from: "formations",
+          let: { localCfd: "$formation.cfd", localRncp: "$formation.rncp" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$cfd", "$$localCfd"] }, { $in: ["$$localRncp", "$rncps"] }],
+                },
+              },
+            },
+          ],
+          as: "formation_details",
+        },
+      },
+      {
+        $unwind: {
+          path: "$formation_details",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          formation_date_debut_formation: {
+            $cond: {
+              if: { $gt: [{ $size: { $ifNull: ["$formation.periode", []] } }, 0] },
+              then: { $arrayElemAt: ["$formation.periode", 0] },
+              else: {
+                $min: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$_computed.statut.parcours",
+                        as: "parcours",
+                        cond: { $eq: ["$$parcours.valeur", "INSCRIT"] },
+                      },
+                    },
+                    as: "inscrit",
+                    in: { $toDate: "$$inscrit.date" },
+                  },
+                },
+              },
+            },
+          },
+          formation_date_fin_formation: {
+            $cond: {
+              if: { $gt: [{ $size: { $ifNull: ["$formation.periode", []] } }, 0] },
+              then: { $arrayElemAt: ["$formation.periode", 1] },
+              else: {
+                $max: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$_computed.statut.parcours",
+                        as: "parcours",
+                        cond: { $eq: ["$$parcours.valeur", "FIN_DE_FORMATION"] },
+                      },
+                    },
+                    as: "fin_formation",
+                    in: { $toDate: "$$fin_formation.date" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          formation_date_debut_formation: {
+            $dateToString: { format: "%Y-%m", date: "$formation_date_debut_formation" },
+          },
+          formation_date_fin_formation: {
+            $dateToString: { format: "%Y-%m", date: "$formation_date_fin_formation" },
+          },
+        },
+      },
+      {
         $project: {
           _id: 1,
           organisme_uai: "$organisme.uai",
@@ -607,11 +682,13 @@ export async function getEffectifsNominatifsGenerique(
           apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
           formation_cfd: "$formation.cfd",
           formation_rncp: "$formation.rncp",
-          formation_libelle_long: "$formation.libelle_long",
+          formation_libelle_long: {
+            $ifNull: ["$formation_details.libelle", "$formation.libelle_long"],
+          },
           formation_annee: "$formation.annee",
           formation_niveau: "$formation.niveau",
-          formation_date_debut_formation: { $arrayElemAt: ["$formation.periode", 0] },
-          formation_date_fin_formation: { $arrayElemAt: ["$formation.periode", 1] },
+          formation_date_debut_formation: "$formation_date_debut_formation",
+          formation_date_fin_formation: "$formation_date_fin_formation",
           ...(shouldDisplayContactInEffectifNominatif(ctx.organisation.type)
             ? {
                 apprenant_courriel: "$apprenant.courriel",
@@ -622,6 +699,7 @@ export async function getEffectifsNominatifsGenerique(
       },
     ])
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
+
   return indicateurs;
 }
 
