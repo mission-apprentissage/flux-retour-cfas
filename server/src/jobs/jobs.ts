@@ -126,6 +126,8 @@ const dailyJobs = async () => {
   });
   await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 
+  await addJob({ name: "hydrate:rncp", queued: true });
+
   return 0;
 };
 
