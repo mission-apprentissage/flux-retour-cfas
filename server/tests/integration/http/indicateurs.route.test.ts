@@ -386,6 +386,7 @@ describe("Route indicateurs", () => {
     });
 
     describe("Permissions abandon", () => {
+      console.log("CONSOLE LOG ~ describe ~ effectifResult:", effectifResult);
       // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
       const accesOrganisme: PermissionsTestConfig<false | any[], "Tête de réseau Responsable"> = {
         "OF cible": effectifResult,

@@ -525,7 +525,7 @@ export async function getEffectifsNominatifsGenerique(
           buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.effectifsNominatifs[type]),
           {
-            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+            "_computed.organisme.fiable": true,
           }
         ),
       },
@@ -578,7 +578,7 @@ export async function getEffectifsNominatifsGenerique(
                 siret: 1,
                 nom: { $ifNull: ["$enseigne", "$raison_sociale"] },
                 nature: {
-                  $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+                  $ifNull: ["$nature", "inconnue"],
                 },
               },
             },
@@ -630,7 +630,7 @@ export async function getEffectifsNominatifsGenerique(
                       },
                     },
                     as: "inscrit",
-                    in: { $toDate: "$$inscrit.date" },
+                    in: { $toInt: { $substr: [{ $toString: "$$inscrit.date" }, 0, 4] } },
                   },
                 },
               },
@@ -651,21 +651,11 @@ export async function getEffectifsNominatifsGenerique(
                       },
                     },
                     as: "fin_formation",
-                    in: { $toDate: "$$fin_formation.date" },
+                    in: { $toInt: { $substr: [{ $toString: "$$fin_formation.date" }, 0, 4] } },
                   },
                 },
               },
             },
-          },
-        },
-      },
-      {
-        $addFields: {
-          formation_date_debut_formation: {
-            $dateToString: { format: "%Y-%m", date: "$formation_date_debut_formation" },
-          },
-          formation_date_fin_formation: {
-            $dateToString: { format: "%Y-%m", date: "$formation_date_fin_formation" },
           },
         },
       },
@@ -682,9 +672,7 @@ export async function getEffectifsNominatifsGenerique(
           apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
           formation_cfd: "$formation.cfd",
           formation_rncp: "$formation.rncp",
-          formation_libelle_long: {
-            $ifNull: ["$formation_details.libelle", "$formation.libelle_long"],
-          },
+          formation_libelle_long: { $ifNull: ["$formation_details.libelle", "$formation.libelle_long"] },
           formation_annee: "$formation.annee",
           formation_niveau: "$formation.niveau",
           formation_date_debut_formation: "$formation_date_debut_formation",
