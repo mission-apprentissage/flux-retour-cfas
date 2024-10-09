@@ -13,7 +13,6 @@ interface BandeauTransmissionProps {
   organisme: Organisme;
   modePublique?: boolean;
   modeIndicateurs?: boolean;
-  erpsById: Array<IErp>;
 }
 
 /**
@@ -42,7 +41,7 @@ function getContenuBandeauTransmission({
   modePublique,
   modeIndicateurs,
   erpsById,
-}: BandeauTransmissionProps): JSX.Element {
+}: BandeauTransmissionProps & { erpsById: Array<IErp> }): JSX.Element {
   const erpName = organisme.erps?.map((erpId) => erpsById[erpId]?.name).join(", "); // généralement 1 seul ERP
 
   if (modePublique) {
