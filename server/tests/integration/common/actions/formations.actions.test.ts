@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
 
+import { jest } from "@jest/globals";
 import omit from "lodash.omit";
 import { ObjectId } from "mongodb";
 import nock from "nock";
@@ -8,12 +9,23 @@ import {
   createFormation,
   getFormationWithCfd,
   getNiveauFormationFromLibelle,
+  getNiveauFormationLibelle,
 } from "@/common/actions/formations.actions";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance";
 import { formationsDb } from "@/common/model/collections";
-import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
+import { apiAlternanceCertifFixture } from "@tests/data/apiTablesDeCorrespondances";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
-import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
+
+// jest.mock doesn't work with ES6 modules... we need to move to vitest
+const originalCertificationFn = apiAlternanceClient.certification.index;
+beforeEach(() => {
+  // @ts-ignore
+  apiAlternanceClient.certification.index = jest.fn();
+});
+afterEach(() => {
+  apiAlternanceClient.certification.index = originalCertificationFn;
+});
 
 describe("Tests des actions Formations", () => {
   useNock();
@@ -54,19 +66,10 @@ describe("Tests des actions Formations", () => {
       await expect(createFormation({ cfd })).rejects.toThrowError("A Formation with CFD 2502000D already exists");
     });
 
-    it("throws when formation data is not valid", async () => {
-      nock.cleanAll();
-      nockGetCfdInfo(() => ({
-        ...dataForGetCfdInfo.withIntituleLong,
-        date_ouverture: "invalid",
-      }));
-
-      const cfd = "25020000D";
-      await expect(createFormation({ cfd })).rejects.toThrowError();
-    });
-
-    it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
-      nockGetCfdInfo(() => dataForGetCfdInfo.withIntituleLong);
+    it("returns created formation when cfd was found in API Alternance", async () => {
+      (
+        apiAlternanceClient.certification.index as jest.MockedFunction<typeof apiAlternanceClient.certification.index>
+      ).mockResolvedValueOnce(apiAlternanceCertifFixture);
 
       const cfd = "13534005";
       const insertedId = await createFormation({ cfd });
@@ -74,10 +77,10 @@ describe("Tests des actions Formations", () => {
 
       assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
-        cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
-        cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
+        cfd_start_date: apiAlternanceCertifFixture[0].periode_validite.cfd.ouverture,
+        cfd_end_date: apiAlternanceCertifFixture[0].periode_validite.cfd.fermeture,
         rncps: ["RNCP34945"],
-        libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
+        libelle: "MANAGER HYGIENE SECURITE ENVIRONNEMENT HCE (CNAM)",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
         metiers: [], // previously dataForGetMetiersByCfd.metiers, // using Call LBA Api // TODO Removed not useful now
@@ -87,11 +90,11 @@ describe("Tests des actions Formations", () => {
       });
     });
 
-    it("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
+    it("returns created formation when cfd was found in Tables de Correspondances without rncps", async () => {
       nock.cleanAll();
-      nockGetCfdInfo(() => {
-        return dataForGetCfdInfo.withoutIntituleLong;
-      });
+      (apiAlternanceClient.certification.index as any).mockResolvedValueOnce(
+        apiAlternanceCertifFixture.filter((certif) => certif.identifiant.rncp === null)
+      );
 
       const cfd = "13534005";
       const insertedId = await createFormation({ cfd });
@@ -99,10 +102,10 @@ describe("Tests des actions Formations", () => {
 
       assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
-        cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
-        cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
+        cfd_start_date: apiAlternanceCertifFixture[0].periode_validite.cfd.ouverture,
+        cfd_end_date: apiAlternanceCertifFixture[0].periode_validite.cfd.fermeture,
         rncps: [],
-        libelle: "",
+        libelle: "MANAGER HYGIENE SECURITE ENVIRONNEMENT HCE (CNAM)",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
         metiers: [], // previously dataForGetMetiersByCfd.metiers, // using Call LBA Api // TODO Removed not useful now
@@ -136,6 +139,29 @@ describe("Tests des actions Formations", () => {
 
     it("should return parsed niveau when passed a string", () => {
       assert.equal(getNiveauFormationFromLibelle("3 (BTS, DUT...)"), "3");
+    });
+  });
+
+  describe("getNiveauFormationFromLibelle", () => {
+    it("should return null when passed null", () => {
+      assert.equal(getNiveauFormationLibelle(null), null);
+    });
+
+    it("should return null when passed empty undefined", () => {
+      assert.equal(getNiveauFormationLibelle(undefined), null);
+    });
+
+    it.each([
+      ["1", null],
+      ["2", null],
+      ["3", "3 (CAP...)"],
+      ["4", "4 (BAC...)"],
+      ["5", "5 (BTS, DEUST...)"],
+      ["6", "6 (Licence, BUT...)"],
+      ["7", "7 (Master, titre ingénieur...)"],
+      ["8", "8 (Doctorat...)"],
+    ])("should return %s when passed %s", (niveau, expected) => {
+      assert.equal(getNiveauFormationLibelle(niveau), expected);
     });
   });
 });

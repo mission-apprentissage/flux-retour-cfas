@@ -78,11 +78,9 @@ async function getRncps(formationCatalogue: IFormationCatalogue): Promise<OffreF
         // Toujours présent lorsque le code est présent
         intitule: formationCatalogue.rncp_intitule ?? "",
         eligible_apprentissage: formationCatalogue.rncp_eligible_apprentissage ?? null,
+        eligible_professionnalisation: null,
         date_fin_validite_enregistrement: formationCatalogue.rncp_details?.date_fin_validite_enregistrement ?? "",
         active_inactive: formationCatalogue.rncp_details?.active_inactive ?? "",
-        etat_fiche_rncp: formationCatalogue.rncp_details?.etat_fiche_rncp ?? "",
-        rncp_outdated: formationCatalogue.rncp_details?.rncp_outdated ?? false,
-        code_type_certif: formationCatalogue.rncp_details?.code_type_certif ?? "",
       },
     ];
   }
@@ -92,11 +90,9 @@ async function getRncps(formationCatalogue: IFormationCatalogue): Promise<OffreF
       code: r.code_rncp,
       intitule: r.intitule_diplome,
       eligible_apprentissage: r.eligible_apprentissage ?? null,
-      date_fin_validite_enregistrement: r?.date_fin_validite_enregistrement ?? "",
+      eligible_professionnalisation: r.eligible_professionnalisation ?? null,
+      date_fin_validite_enregistrement: r?.date_fin_validite_enregistrement?.toJSON() ?? "",
       active_inactive: r?.active_inactive ?? "",
-      etat_fiche_rncp: r?.etat_fiche_rncp ?? "",
-      rncp_outdated: r?.rncp_outdated ?? false,
-      code_type_certif: r?.code_type_certif ?? "",
     };
   });
 }
