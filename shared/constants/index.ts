@@ -1,6 +1,5 @@
 export * from "./dossierApprenant";
 export * from "./effectifs";
-export * from "./erps";
 export * from "./fiabilisation";
 export * from "./indicateurs";
 export * from "./networks";
