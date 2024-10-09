@@ -28,6 +28,7 @@ import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
 import {
   hydrateEffectifsComputed,
+  hydrateEffectifsComputedOpcos,
   hydrateEffectifsComputedReseaux,
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -124,6 +125,8 @@ const dailyJobs = async () => {
   });
   await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 
+  await addJob({ name: "hydrate:rncp", queued: true });
+
   return 0;
 };
 
@@ -162,6 +165,13 @@ export async function setupJobProcessor() {
               cron_string: "45 0 1 * *",
               handler: async () => {
                 await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
+                return 0;
+              },
+            },
+            "Mettre à jour les effectifs DECA tous les dimanches matin à 6h": {
+              cron_string: "0 6 * * 0",
+              handler: async () => {
+                await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
                 return 0;
               },
             },
@@ -342,6 +352,11 @@ export async function setupJobProcessor() {
       "hydrate:opcos": {
         handler: async () => {
           return hydrateOrganismesOPCOs();
+        },
+      },
+      "hydrate:computed-effectifs-by-opcos": {
+        handler: async (job) => {
+          return hydrateEffectifsComputedOpcos((job.payload as any)?.opco);
         },
       },
       "hydrate:reseaux": {
