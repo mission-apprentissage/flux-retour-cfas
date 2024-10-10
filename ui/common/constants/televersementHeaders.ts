@@ -21,6 +21,7 @@ export const televersementHeaders: Record<string, FieldConfig> = {
   dernier_organisme_uai: { type: "string", mandatory: false },
   derniere_situation: { type: "string", mandatory: false },
   type_cfa: { type: "string", mandatory: false },
+  dernier_organisme_departement: { type: "string", mandatory: false },
   etablissement_responsable_uai: { type: "string", mandatory: false },
   etablissement_responsable_siret: { type: "string", mandatory: false },
   etablissement_formateur_uai: { type: "string", mandatory: false },
