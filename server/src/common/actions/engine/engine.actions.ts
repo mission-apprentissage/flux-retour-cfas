@@ -194,6 +194,7 @@ export const mapEffectifQueueToEffectif = (
         derniere_situation: dossierApprenant.derniere_situation,
         dernier_organisme_uai: dossierApprenant.dernier_organisme_uai,
         type_cfa: dossierApprenant.type_cfa,
+        dernier_organisme_departement: dossierApprenant.dernier_organisme_departement,
       }),
     },
     contrats,
