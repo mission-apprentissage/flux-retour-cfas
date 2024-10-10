@@ -21,7 +21,7 @@ import {
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { ERPS, ERPS_BY_ID } from "shared";
+import { IErp } from "shared";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _delete, _post, _put } from "@/common/httpClient";
@@ -34,6 +34,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
+import { useErp } from "@/hooks/useErp";
 import useToaster from "@/hooks/useToaster";
 import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import NewTable from "@/modules/indicateurs/NewTable";
@@ -51,14 +52,18 @@ const ParametresPage = () => {
     "none" | "choix_erp" | "unsupported_erp" | "v2" | "v3"
   >("none");
   const [selectedERPId, setSelectedERPId] = useState("");
+  const [selectedERP, setSelectedERP] = useState({} as IErp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
 
-  const erp = ERPS_BY_ID[selectedERPId];
+  const { erps, erpsById } = useErp();
 
   const { organisme, refetch: refetchOrganisme } = useOrganisationOrganisme();
 
   const erpV3 = (router.query.erpV3 as string | undefined)?.toLowerCase();
 
+  useEffect(() => {
+    setSelectedERP(erpsById[selectedERPId]);
+  }, [selectedERPId]);
   // redirige vers la finalisation API v3 si le paramètre est présent (= on vient de connexion-api)
   useEffect(() => {
     if (!erpV3) {
@@ -91,7 +96,7 @@ const ParametresPage = () => {
                     <>
                       <Text fontSize="gamma" fontWeight="bold">
                         Votre moyen de transmission est paramétré avec{" "}
-                        {organisme.erps?.map((erpId) => ERPS_BY_ID[erpId]?.name).join(", ")}.
+                        {organisme.erps?.map((erpId) => erpsById[erpId]?.name).join(", ")}.
                       </Text>
                       {organisme.mode_de_transmission_configuration_date && (
                         <Text>
@@ -242,11 +247,13 @@ const ParametresPage = () => {
                 <option selected hidden disabled value="">
                   ERP...
                 </option>
-                {ERPS.filter(({ disabled }) => !disabled).map((erp) => (
-                  <option value={erp.id} key={erp.id}>
-                    {erp.name}
-                  </option>
-                ))}
+                {erps
+                  .filter(({ disabled }) => !disabled)
+                  .map((erp) => (
+                    <option value={erp.unique_id} key={erp.unique_id}>
+                      {erp.name}
+                    </option>
+                  ))}
 
                 <option value="other" key="other">
                   J’utilise un autre ERP
@@ -271,7 +278,9 @@ const ParametresPage = () => {
                 px={6}
                 isDisabled={!selectedERPId}
                 onClick={() => {
-                  setStepConfigurationERP(selectedERPId === "other" ? "unsupported_erp" : erp.apiV3 ? "v3" : "v2");
+                  setStepConfigurationERP(
+                    selectedERPId === "other" ? "unsupported_erp" : selectedERP.apiV3 ? "v3" : "v2"
+                  );
                 }}
               >
                 Confirmer
@@ -325,6 +334,7 @@ const ParametresPage = () => {
         )}
         {stepConfigurationERP === "v2" && (
           <ConfigurationERPV2
+            erpsById={erpsById}
             erpId={selectedERPId}
             onBack={() => {
               setStepConfigurationERP("choix_erp");
@@ -344,6 +354,7 @@ const ParametresPage = () => {
 
         {stepConfigurationERP === "v3" && (
           <ConfigurationERPV3
+            erpsById={erpsById}
             organisme={organisme}
             erpId={selectedERPId}
             onGenerateKey={async () => {
@@ -381,10 +392,11 @@ interface ConfigurationERPV2Props {
   erpId: string;
   onBack: () => any;
   onSubmit: () => any;
+  erpsById: Array<IErp>;
 }
 function ConfigurationERPV2(props: ConfigurationERPV2Props) {
   const [configurationFinished, setConfigurationFinished] = useState(false);
-  const erp = ERPS_BY_ID[props.erpId];
+  const erp = props.erpsById[props.erpId];
 
   return (
     <VStack alignItems="start" gap={8}>
@@ -449,12 +461,13 @@ interface ConfigurationERPV3Props {
   onConfigurationMismatch: () => any;
   onBack: () => any;
   onSubmit: () => any;
+  erpsById: Array<IErp>;
 }
 function ConfigurationERPV3(props: ConfigurationERPV3Props) {
   const { toastSuccess } = useToaster();
   const [copied, setCopied] = useState(false);
 
-  const erp = ERPS_BY_ID[props.erpId];
+  const erp = props.erpsById[props.erpId];
   const verified = !!props.organisme.api_siret && !!props.organisme.api_uai;
 
   if (!erp) {
