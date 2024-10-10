@@ -5572,6 +5572,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"api-alternance-sdk@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "api-alternance-sdk@npm:0.0.1"
+  dependencies:
+    "@asteasolutions/zod-to-openapi": ^7.1.1
+    jsonwebtoken: ^9.0.2
+    luhn: ^2.4.1
+    luxon: ^3.5.0
+    openapi3-ts: ^4.4.0
+    zod: ^3.23.8
+  checksum: 7985fcb1cd6bbd0edfb25ec02199321c8b62ecbc0eba2a5f87ec6115c32358311adc952386c236e720d5e5f3f186315c1f0b72d05a5c89fe7379b3fb5ef0b10c
+  languageName: node
+  linkType: hard
+
 "api-alternance-sdk@npm:^0.0.2":
   version: 0.0.2
   resolution: "api-alternance-sdk@npm:0.0.2"
@@ -17970,7 +17984,7 @@ __metadata:
     typescript: ^5.3.3
     uuid: 8.3.2
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
-    zod: 3.21.4
+    zod: ^3.23.8
     zod-express-middleware: 1.4.0
   languageName: unknown
   linkType: soft
@@ -18039,6 +18053,7 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^6.4.0
     "@tsconfig/node22": ^22.0.0
     "@types/node": ^22.2.0
+    api-alternance-sdk: ^0.0.1
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1
@@ -18048,7 +18063,7 @@ __metadata:
     react: 18.2.0
     type-fest: ^4.11.1
     typescript: ^5.3.3
-    zod: 3.21.4
+    zod: ^3.23.8
     zod-mongodb-schema: ^1.0.2
   languageName: unknown
   linkType: soft
@@ -19586,7 +19601,7 @@ __metadata:
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
     yup: 0.32.11
     yup-password: 0.2.2
-    zod: 3.21.4
+    zod: ^3.23.8
     zod-formik-adapter: 1.2.0
   languageName: unknown
   linkType: soft
@@ -20612,24 +20627,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.21.4":
-  version: 3.21.4
-  resolution: "zod@npm:3.21.4"
-  checksum: f185ba87342ff16f7a06686767c2b2a7af41110c7edf7c1974095d8db7a73792696bcb4a00853de0d2edeb34a5b2ea6a55871bc864227dace682a0a28de33e1f
-  languageName: node
-  linkType: hard
-
 "zod@npm:^3.23.8":
   version: 3.23.8
   resolution: "zod@npm:3.23.8"
   checksum: 15949ff82118f59c893dacd9d3c766d02b6fa2e71cf474d5aa888570c469dbf5446ac5ad562bb035bf7ac9650da94f290655c194f4a6de3e766f43febd432c5c
-  languageName: node
-  linkType: hard
-
-"zod@patch:zod@npm%3A3.21.4#./.yarn/patches/zod-npm-3.21.4-9f570b215c.patch::locator=mna-tdb%40workspace%3A.":
-  version: 3.21.4
-  resolution: "zod@patch:zod@npm%3A3.21.4#./.yarn/patches/zod-npm-3.21.4-9f570b215c.patch::version=3.21.4&hash=45704f&locator=mna-tdb%40workspace%3A."
-  checksum: 8ac3afb02adff75a1d562c3479f39331548f94cd1d7f5d52623834ec75007db83c35edd8789d47d96ccb4994eec0c0a8e0bfd17130cd1db5013fd4900e0181f5
   languageName: node
   linkType: hard
 

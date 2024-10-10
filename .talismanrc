@@ -9,6 +9,8 @@ fileignoreconfig:
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
   ignore_detectors:
   - filename
+- filename: .infra/vault/vault.yml
+  checksum: 0a12992a1cebf8e2693b986aa8f8b7bf7b8fb4f5b629bb43511958489ec7a2c8
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 scopeconfig:
