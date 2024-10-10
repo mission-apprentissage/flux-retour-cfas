@@ -1,7 +1,7 @@
 import { Box, Container, Flex, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { PlausibleGoalType, plausibleGoals } from "shared/constants/plausible-goals";
+import { plausibleGoals, PlausibleGoalType } from "shared/constants/plausible-goals";
 
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
@@ -9,10 +9,11 @@ import useAuth from "@/hooks/useAuth";
 import AideCodeRncp from "./tabs/AideCodeRncp";
 import AideNature from "./tabs/AideNature";
 import AideQualiopi from "./tabs/AideQualiopi";
+import AideRelationsOrganismes from "./tabs/AideRelationsOrganismes";
 import AideSiret from "./tabs/AideSiret";
 import AideUai from "./tabs/AideUai";
 
-const tabNames = ["Siret", "UAI", "Nature", "Qualiopi", "Code RNCP"];
+const tabNames = ["Siret", "UAI", "Nature", "Relations entre organismes", "Qualiopi", "Code RNCP"];
 
 export default function ReferencementOrganisme() {
   const router = useRouter();
@@ -80,6 +81,9 @@ export default function ReferencementOrganisme() {
             </TabPanel>
             <TabPanel>
               <AideNature />
+            </TabPanel>
+            <TabPanel>
+              <AideRelationsOrganismes />
             </TabPanel>
             <TabPanel>
               <AideQualiopi />

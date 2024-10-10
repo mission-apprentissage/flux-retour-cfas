@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: shared/constants/aide.ts
+  checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
+- filename: ui/modules/referencement-organisme/tabs/AideRelationsOrganismes.tsx
+  checksum: 7174dc73718c7b2fb9c175d783c7ca5e0d02dd85db8c7c1453a2a23d9c171461
 - filename: ui/pages/organismes-formation.tsx
   checksum: 10ba3e10dc58d0b882a87038c57b632173d3428e8a3c3ceee514deff720fdf67
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx
