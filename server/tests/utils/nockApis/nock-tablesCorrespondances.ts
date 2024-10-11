@@ -2,17 +2,7 @@ import nock from "nock";
 import { DEPARTEMENTS } from "shared";
 
 import { API_ENDPOINT } from "@/common/apis/apiTablesCorrespondances";
-import { dataForGetCfdInfo, dataForGetSiretInfo } from "@tests/data/apiTablesDeCorrespondances";
-
-export const nockGetCfdInfo = (callback?: any) => {
-  nock(API_ENDPOINT)
-    .persist()
-    .post("/cfd")
-    .reply(200, (_uri, requestBody) => ({
-      // @ts-expect-error
-      result: callback ? callback(requestBody.cfd) : dataForGetCfdInfo.withIntituleLong,
-    }));
-};
+import { dataForGetSiretInfo } from "@tests/data/apiTablesDeCorrespondances";
 
 export const nockGetSiretInfo = (data = dataForGetSiretInfo) => {
   nock(API_ENDPOINT).persist().post("/siret").reply(200, {

@@ -1,3 +1,4 @@
+import { zApiOrganismesRoutes } from "api-alternance-sdk";
 import { isBefore, subMonths } from "date-fns";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
@@ -214,6 +215,9 @@ const zOrganisme = z
       .optional(),
     fiabilisation_api_statut: zodEnumFromObjValues(STATUT_FIABILISATION_API_ORGANISME)
       .describe("Statut de fiabilisation venant de l'API de l'organisme")
+      .optional(),
+    fiabilisation_api_response: zApiOrganismesRoutes.get["/organisme/v1/recherche"].response["200"]
+      .describe("Statut du siret et uai venant de l'API de l'organisme")
       .optional(),
     mode_de_transmission: z.enum(["API", "MANUEL"]).describe("Mode de transmission des effectifs").optional(),
     mode_de_transmission_configuration_date: z

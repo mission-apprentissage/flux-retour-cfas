@@ -6,4 +6,14 @@ module.exports = {
     },
     "import/internal-regex": "^shared",
   },
+  parserOptions: {
+    project: "shared/tsconfig.json",
+  },
+  settings: {
+    "import/resolver": {
+      typescript: {
+        project: "shared/tsconfig.json",
+      },
+    },
+  },
 };

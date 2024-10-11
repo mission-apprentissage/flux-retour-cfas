@@ -159,6 +159,7 @@ const AFFELNET_VOEUX_AGGREGATION = [
   {
     $project: {
       _id: "$_id",
+      ine: "$apprenant.raw.ine",
       nom: "$apprenant.raw.nom",
       prenom_1: "$apprenant.raw.prenom_1",
       prenom_2: "$apprenant.raw.prenom_2",
