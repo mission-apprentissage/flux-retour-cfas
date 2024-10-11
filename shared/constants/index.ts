@@ -1,3 +1,4 @@
+export * from "./aide";
 export * from "./dossierApprenant";
 export * from "./effectifs";
 export * from "./erps";
