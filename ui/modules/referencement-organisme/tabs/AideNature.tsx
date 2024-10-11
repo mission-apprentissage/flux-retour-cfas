@@ -13,6 +13,7 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import React from "react";
+import { CONTACT_CARIF_OREF } from "shared";
 
 import Accordion from "@/components/Accordion/Accordion";
 import AidePage from "@/components/Page/AidePage";
@@ -33,128 +34,6 @@ const ModalNature = {
     </>
   ),
 };
-
-const contactData = [
-  {
-    region: "Auvergne-Rhône-Alpes",
-    platform: "Via Compétences Ofeli",
-    phone: "-",
-    email: "formation.apprentissage@via-competences.fr",
-    link: "https://ofeli.via-competences.fr/",
-  },
-  {
-    region: "Bourgogne-Franche-Comté",
-    platform: "Emfor Ofeli",
-    phone: "03 81 25 52 16",
-    email: "offre@emfor-bfc.org",
-    link: "https://ofeli.emfor-bfc.org/",
-  },
-  {
-    region: "Bretagne",
-    platform: "GREF Bretagne Ofeli",
-    phone: "02 99 54 79 17",
-    email: "ofeli@gref-bretagne.com",
-    link: "https://ofeli.gref-bretagne.com/",
-  },
-  {
-    region: "Centre-Val de Loire",
-    platform: "GIP Alfa CVL Ofeli",
-    phone: "02 38 77 04 90",
-    email: "offre@alfacentre.org",
-    link: "https://ofeli.alfacentre.org/",
-  },
-  {
-    region: "Corse",
-    platform: "Corsica Orientazione",
-    phone: "-",
-    email: "-",
-    link: "https://intranet.orientazione.isula.corsica/",
-  },
-  {
-    region: "Grand-Est",
-    platform: "Base Carif-Oref",
-    phone: "03 87 33 63 66",
-    email: "formation@grandest.fr",
-    link: "https://formation.grandest.fr/contenu/detail/AreYouOf",
-  },
-  {
-    region: "Guadeloupe",
-    platform: "Formanoo Guadeloupe",
-    phone: "05 90 60 48 48",
-    email: "contact.cariforef@guadeloupeformation.com",
-    link: "https://betapros.formanoo.org/",
-  },
-  {
-    region: "Guyane",
-    platform: "Formanoo",
-    phone: "0594 20 40 69",
-    email: "pefi.orientation@ctguyane.fr",
-    link: "https://betapros12.formanoo.org/",
-  },
-  {
-    region: "Hauts-de-France",
-    platform: "C2RP Ofeli",
-    phone: "03 20 90 73 04",
-    email: "offreformation@c2rp.fr",
-    link: "https://www.c2rp.fr/referencer-son-offre-de-formation/ofeli",
-  },
-  {
-    region: "Île-de-France",
-    platform: "Dokelio",
-    phone: "-",
-    email: "apprentissage.dokelio@iledefrance.fr",
-    link: "https://dokelio-idf.fr/",
-  },
-  {
-    region: "Martinique",
-    platform: "AGEFMA Sofia",
-    phone: "-",
-    email: "carif-referencement@agefma.fr",
-    link: "https://sofia.mq/",
-  },
-  {
-    region: "Normandie",
-    platform: "Ofeli",
-    phone: "-",
-    email: "serviceoffre@cariforefnormandie.fr",
-    link: "https://ofeli.cariforefnormandie.fr/login",
-  },
-  {
-    region: "Nouvelle-Aquitaine",
-    platform: "Cap Métiers Rafael",
-    phone: "-",
-    email: "offre@cap-metiers.pro",
-    link: "https://www.cap-metiers.pro/pages/412/Connectez-vous-aux-comptes-des-services-Cap-Metiers-Nouvelle-Aquitaine.aspx",
-  },
-  {
-    region: "Occitanie",
-    platform: "Carif-Oref Occitanie",
-    phone: "05 62 24 85 83",
-    email: "offre@cariforefoccitanie.fr",
-    link: "https://organismes.cariforefoccitanie.fr/Account/Login?ReturnUrl=%2F&AspxAutoDetectCookieSupport=1",
-  },
-  {
-    region: "Pays de la Loire",
-    platform: "SOFI",
-    phone: "-",
-    email: "offre@cariforef-pdl.org",
-    link: "https://pro.choisirmonmetier-paysdelaloire.fr/formation/Sofi-Organismes-de-formation/Onglet/Sofi",
-  },
-  {
-    region: "Provence-Alpes-Côte d'Azur",
-    platform: "Carif-Oref PACA",
-    phone: "04 42 82 43 23",
-    email: "brof@cariforef.fr",
-    link: "https://extranet-formation.cariforef.fr/",
-  },
-  {
-    region: "Réunion",
-    platform: "Formanoo",
-    phone: "-",
-    email: "Support",
-    link: "https://pros.formanoo.org/",
-  },
-];
 
 const AideNature = () => {
   const { trackPlausibleEvent } = usePlausibleTracking();
@@ -460,7 +339,7 @@ const AideNature = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {contactData.map((contact, index) => (
+                {CONTACT_CARIF_OREF.map((contact, index) => (
                   <Tr key={index}>
                     <Td fontWeight="bold">{contact.region}</Td>
                     <Td>
