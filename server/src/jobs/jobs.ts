@@ -1,7 +1,6 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
@@ -560,19 +559,6 @@ export async function setupJobProcessor() {
         handler: async (job) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
-        },
-      },
-      "test:organisme:validate": {
-        handler: async () => {
-          const r = await apiAlternanceClient.organisme
-            .recherche({
-              siret: "51400512300062",
-              uai: "0333326L",
-            })
-            .catch((e) => {
-              console.error(e);
-            });
-          console.log(r);
         },
       },
     },

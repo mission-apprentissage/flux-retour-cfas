@@ -1,12 +1,13 @@
 import { SystemProps, Text } from "@chakra-ui/react";
 import { differenceInDays } from "date-fns";
-import { ERPS_BY_ID, TRANSMISSION_DONNEES_GROUP } from "shared";
+import { IErp, TRANSMISSION_DONNEES_GROUP } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { useErp } from "@/hooks/useErp";
 
 interface BandeauTransmissionProps {
   organisme: Organisme;
@@ -23,9 +24,12 @@ function BandeauTransmission({
   modeIndicateurs,
   ...props
 }: BandeauTransmissionProps & SystemProps) {
+  const { erpsById } = useErp();
   return (
     <Ribbons variant="alert" {...props}>
-      <Text color="grey.800">{getContenuBandeauTransmission({ organisme, modePublique, modeIndicateurs })}</Text>
+      <Text color="grey.800">
+        {getContenuBandeauTransmission({ organisme, modePublique, modeIndicateurs, erpsById })}
+      </Text>
     </Ribbons>
   );
 }
@@ -36,8 +40,9 @@ function getContenuBandeauTransmission({
   organisme,
   modePublique,
   modeIndicateurs,
-}: BandeauTransmissionProps): JSX.Element {
-  const erpName = organisme.erps?.map((erpId) => ERPS_BY_ID[erpId]?.name).join(", "); // généralement 1 seul ERP
+  erpsById,
+}: BandeauTransmissionProps & { erpsById: Array<IErp> }): JSX.Element {
+  const erpName = organisme.erps?.map((erpId) => erpsById[erpId]?.name).join(", "); // généralement 1 seul ERP
 
   if (modePublique) {
     return <>Cet établissement ne transmet pas encore ses effectifs au tableau de bord.</>;

@@ -181,6 +181,16 @@ export function FormationsDetails({ organisme, formation }: FormationsDetailsPro
                   ),
                 },
                 {
+                  header: "Éligible Professionnalisation",
+                  accessorKey: "eligible_professionnalisation",
+                  cell: ({ row }) => (
+                    <Label
+                      level={row.original.eligible_professionnalisation === false ? "error" : "info"}
+                      value={row.original.eligible_professionnalisation ?? "inconnu"}
+                    />
+                  ),
+                },
+                {
                   header: "Fin validité",
                   accessorKey: "date_fin_validite_enregistrement",
                   cell: ({ row }) => <Label value={row.original.date_fin_validite_enregistrement} />,

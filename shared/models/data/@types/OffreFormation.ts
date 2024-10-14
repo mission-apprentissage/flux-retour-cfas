@@ -73,10 +73,8 @@ export interface OffreFormation {
     intitule: string;
     date_fin_validite_enregistrement: string;
     active_inactive: string;
-    etat_fiche_rncp: string;
-    rncp_outdated: boolean;
-    code_type_certif: string;
     eligible_apprentissage: boolean | null;
+    eligible_professionnalisation: boolean | null;
   }[];
 
   lieu_formation: {
