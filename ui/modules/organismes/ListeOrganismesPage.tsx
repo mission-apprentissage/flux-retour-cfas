@@ -11,7 +11,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
-import { IOrganisationType } from "shared";
+import { IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -674,7 +674,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     <Link
                       variant="link"
                       display="inline-flex"
-                      href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3"
+                      href={SUPPORT_PAGE_ACCUEIL}
                       isExternal
                       width={"fit-content"}
                     >

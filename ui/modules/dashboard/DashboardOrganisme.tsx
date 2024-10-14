@@ -37,6 +37,7 @@ import {
   UAI_INCONNUE_TAG_FORMAT,
   UAI_INCONNUE,
   UAI_INCONNUE_CAPITALIZE,
+  GO_MODIFICATION_RELATION_ELEMENT_LINK,
 } from "shared";
 
 import { FAQ_PATH } from "@/common/constants/faq";
@@ -310,7 +311,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 .
                 <br />
                 <Link
-                  href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/8/create/64"
+                  href={GO_MODIFICATION_RELATION_ELEMENT_LINK}
                   target="_blank"
                   borderBottom="1px"
                   _hover={{ textDecoration: "none" }}

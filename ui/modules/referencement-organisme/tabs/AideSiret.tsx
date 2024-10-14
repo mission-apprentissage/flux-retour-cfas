@@ -1,5 +1,6 @@
 import { Text, Link, UnorderedList, OrderedList, ListItem, Img } from "@chakra-ui/react";
 import React, { useState } from "react";
+import { GC_SUPPRESSION_COMPTE_ELEMENT_LINK } from "shared";
 
 import Accordion from "@/components/Accordion/Accordion";
 import AidePage from "@/components/Page/AidePage";
@@ -117,10 +118,8 @@ const AideSiret = () => {
             </UnorderedList>
             <Text>
               Concernant le Tableau de bord, demandez la suppression de votre compte utilisateur à{" "}
-              <AidePage.Link href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/14/create/52">
-                notre service support
-              </AidePage.Link>{" "}
-              pour pouvoir ensuite créer un nouveau sur votre dernier SIRET.
+              <AidePage.Link href={GC_SUPPRESSION_COMPTE_ELEMENT_LINK}>notre service support</AidePage.Link> pour
+              pouvoir ensuite créer un nouveau sur votre dernier SIRET.
             </Text>
           </Accordion.Item>
 
