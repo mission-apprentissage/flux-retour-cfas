@@ -159,10 +159,18 @@ const AFFELNET_VOEUX_AGGREGATION = [
   {
     $project: {
       _id: "$_id",
+      ine: "$apprenant.raw.ine",
       nom: "$apprenant.raw.nom",
       prenom_1: "$apprenant.raw.prenom_1",
       prenom_2: "$apprenant.raw.prenom_2",
       prenom_3: "$apprenant.raw.prenom_3",
+      adresse_1: "$apprenant.raw.adresse_1",
+      adresse_2: "$apprenant.raw.adresse_2",
+      adresse_3: "$apprenant.raw.adresse_3",
+      adresse_4: "$apprenant.raw.adresse_4",
+      code_postal: "$apprenant.raw.code_postal",
+      ville: "$apprenant.raw.ville",
+      pays: "$apprenant.raw.pays",
       mail_responsable_1: "$apprenant.raw.mail_responsable_1",
       mail_responsable_2: "$apprenant.raw.mail_responsable_2",
       telephone_responsable_1: "$apprenant.raw.telephone_responsable_1",

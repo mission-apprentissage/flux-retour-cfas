@@ -1,10 +1,9 @@
 import { nockGetEtablissement } from "./nock-apiEntreprise";
-import { nockGetCfdInfo, nockGetCodePostalInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
+import { nockGetCodePostalInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
 
 export const nockExternalApis = () => {
   // nok API tablesCorrespondances
   // aka https://tables-correspondances.apprentissage.beta.gouv.fr/api
-  nockGetCfdInfo();
   nockGetSiretInfo();
   nockGetCodePostalInfo();
 

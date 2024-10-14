@@ -55,6 +55,26 @@ export const getNiveauFormationFromLibelle = (niveauFormationLibelle?: string | 
   return isNaN(parseInt(niveau, 10)) ? null : niveau;
 };
 
+// Rétrocompatibilité https://github.com/mission-apprentissage/tables-correspondances/blob/5cb4497165c9ed3e0433ef2f9fd52c38e98d606c/server/src/logic/controllers/bcn/Constants.js#L47-L54
+export const getNiveauFormationLibelle = (niveauFormation?: string | null) => {
+  switch (niveauFormation) {
+    case "3":
+      return "3 (CAP...)";
+    case "4":
+      return "4 (BAC...)";
+    case "5":
+      return "5 (BTS, DEUST...)";
+    case "6":
+      return "6 (Licence, BUT...)";
+    case "7":
+      return "7 (Master, titre ingénieur...)";
+    case "8":
+      return "8 (Doctorat...)";
+    default:
+      return null;
+  }
+};
+
 /**
  * Création d'une formation à partir du cfd / durée & année optionnelles provenant du catalogue
  * Va faire un appel API aux TCO puis à LBA pour remplir les données de la formation
@@ -91,12 +111,12 @@ export const createFormation = async ({
   const { insertedId } = await formationsDb().insertOne({
     _id: new ObjectId(),
     cfd,
-    cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
-    cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
+    cfd_start_date: formationInfo?.date_ouverture ?? null,
+    cfd_end_date: formationInfo?.date_fermeture ?? null,
     rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
     libelle: libelleFormationBuilt,
-    niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
-    niveau_libelle: formationInfo?.niveau,
+    niveau: formationInfo?.niveau,
+    niveau_libelle: getNiveauFormationLibelle(formationInfo?.niveau),
     metiers: [],
     duree,
     annee,

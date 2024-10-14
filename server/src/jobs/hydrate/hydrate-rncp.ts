@@ -11,11 +11,7 @@ import { IRncp } from "shared/models/data/rncp.model";
 
 import parentLogger from "@/common/logger";
 import { rncpDb } from "@/common/model/collections";
-import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
-import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-
-import { OPCOS } from "./hydrate-organismes-opcos";
 
 const logger = parentLogger.child({
   module: "job:hydrate:rncp",
@@ -94,8 +90,6 @@ export async function hydrateRNCP() {
 
   logger.info({ count: fichesRNCP.length }, "import des fiches rncp");
 
-  const opcosByRNCP = getOpcosByRNCP();
-
   await PromisePool.for(fichesRNCP)
     .withConcurrency(50)
     .handleError(async (error) => {
@@ -109,7 +103,6 @@ export async function hydrateRNCP() {
         {
           $set: stripEmptyFields({
             ...fiche,
-            opcos: opcosByRNCP[rncp] ?? [],
           }),
         },
         {
@@ -117,23 +110,4 @@ export async function hydrateRNCP() {
         }
       );
     });
-}
-
-function getOpcosByRNCP(): Record<string, string[]> {
-  return OPCOS.reduce((opcosByRNCP, opco) => {
-    const codes_rncp = (
-      readJsonFromCsvFile(getStaticFilePath(`opcos/${opco}.csv`), ";") as { code_rncp: string }[]
-    ).map((row) => row.code_rncp);
-    logger.info({ opco, count: codes_rncp.length }, "rncp chargés");
-
-    codes_rncp.forEach((rncp) => {
-      let existingItem = opcosByRNCP[rncp];
-      if (!existingItem) {
-        existingItem = opcosByRNCP[rncp] = [];
-      }
-      existingItem.push(opco);
-    });
-
-    return opcosByRNCP;
-  }, {});
 }
