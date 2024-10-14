@@ -1,4 +1,6 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import Boom from "boom";
 import { AnyBulkWriteOperation } from "mongodb";
 import {
   IOrganisme,
@@ -145,35 +147,40 @@ export const updateOrganismesFiablesFermes = async () => {
 };
 
 export const updateOrganismesFiabilisationApiUaiSiret = async () => {
-  const organismsToUpdate = await organismesDb().find({}).toArray();
+  const cursor = organismesDb().find({});
 
   const bulkOperations: AnyBulkWriteOperation<IOrganisme>[] = [];
 
-  for (const organism of organismsToUpdate) {
+  let count = 0;
+  for await (const organism of cursor) {
+    count++;
     const { _id, siret, uai } = organism;
 
     if (siret && uai) {
       try {
         const apiData = await apiAlternanceClient.organisme.recherche({ siret, uai });
 
-        if (apiData?.resultat?.status) {
-          const { ouvert, declaration_catalogue, validation_uai } = apiData.resultat.status;
-          const fiabilisationStatus =
-            ouvert && declaration_catalogue && validation_uai
-              ? STATUT_FIABILISATION_API_ORGANISME.FIABLE
-              : STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE;
+        const fiabilisation_api_response: IOrganisme["fiabilisation_api_response"] = apiData;
 
-          bulkOperations.push({
-            updateOne: {
-              filter: { _id },
-              update: { $set: { fiabilisation_api_statut: fiabilisationStatus } },
+        bulkOperations.push({
+          updateOne: {
+            filter: { _id },
+            update: {
+              $set: {
+                fiabilisation_api_statut:
+                  apiData.resultat == null
+                    ? STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE
+                    : STATUT_FIABILISATION_API_ORGANISME.FIABLE,
+                fiabilisation_api_response,
+              },
             },
-          });
-        } else {
-          logger.warn(`Données API non valides pour le SIRET : ${siret}, UAI : ${uai}`);
-        }
+          },
+        });
       } catch (error) {
         console.error(`Échec de l'appel API pour le SIRET : ${siret}, UAI : ${uai}`, error);
+        const err = Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret });
+        err.cause = error;
+        captureException(err);
       }
     } else {
       bulkOperations.push({
@@ -194,5 +201,5 @@ export const updateOrganismesFiabilisationApiUaiSiret = async () => {
     logger.info("Aucun organisme à mettre à jour.");
   }
 
-  return { status: "Mise à jour terminée", total: organismsToUpdate.length, updated: bulkOperations.length };
+  return { status: "Mise à jour terminée", total: count, updated: bulkOperations.length };
 };
