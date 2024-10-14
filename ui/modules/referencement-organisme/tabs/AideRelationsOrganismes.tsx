@@ -14,7 +14,11 @@ const ModalRelationsOrganismes = {
   title: "Affichage de la donnée 'Relations entre organismes'",
   content: (
     <>
-      <Text>Les CFA responsables (ou gestionnaires) des formations d’un établissement sont indiqués.</Text>
+      <Text>
+        Les CFA responsables (ou gestionnaires) des formations d’un établissement sont restitués sur votre espace, dans
+        le cas où une relation existe. Le Tableau de bord ne peut modifier cette donnée. Si vous constatez une erreur,
+        veuillez contacter votre Carif-Oref régional.
+      </Text>
 
       <Img src="/images/aide/relations_organismes.png" alt="Exemple d'affichage de la donnée Nature" mt={6} />
     </>
@@ -31,7 +35,22 @@ const ModalVerifierFormation = {
         et formateur (Nature).
       </Text>
 
-      <Img src="/images/aide/relations_organismes.png" alt="Exemple d'affichage de la donnée Nature" mt={6} />
+      <Img src="/images/aide/verifier_formation.png" alt="Exemple d'affichage de la donnée Nature" mt={6} />
+    </>
+  ),
+};
+
+const ModalCorrectionInformation = {
+  title: "Corriger des informations sur la page “Mes organismes”",
+  content: (
+    <>
+      <Text>
+        Sur la page “Mes organismes”, est affichée la liste des établissements dont votre CFA est gestionnaire. Si un
+        site est manquant ou, au contraire, ne devrait pas (ou plus) apparaître, contactez votre Carif-Oref régional
+        pour faire modifier la collecte de l’offre de formation.
+      </Text>
+
+      <Img src="/images/aide/correction_informations.png" alt="Exemple d'affichage de la donnée Nature" mt={6} />
     </>
   ),
 };
@@ -168,8 +187,8 @@ const AideRelationsOrganismes = () => {
           <Accordion.Item title="Dans la page “Mes organismes”, une information (UAI, Siret, adresse, etc.) sur un établissement doit être corrigée. Comment faire ?">
             <AidePage.ModalButton
               buttonText="Voir un exemple"
-              modalTitle={ModalRelationsOrganismes.title}
-              modalContent={ModalRelationsOrganismes.content}
+              modalTitle={ModalCorrectionInformation.title}
+              modalContent={ModalCorrectionInformation.content}
             />
             <UnorderedList>
               <ListItem>
@@ -198,7 +217,11 @@ const AideRelationsOrganismes = () => {
             </Text>
 
             <TextHighlight>
-              Sur le Catalogue des formations en apprentissage, vérifiez les{" "}
+              Sur le{" "}
+              <AidePage.Link href="https://catalogue-apprentissage.intercariforef.org/">
+                Catalogue des offres de formations en apprentissage
+              </AidePage.Link>{" "}
+              en apprentissage, vérifiez les{" "}
               <BasicModal
                 renderTrigger={(onOpen) => (
                   <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={onOpen}>
