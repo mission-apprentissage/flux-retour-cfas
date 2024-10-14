@@ -1,4 +1,4 @@
-export const SUPPORT_PAGE_ACCUEIL = "https://aide.cfas.apprentissage.beta.gouv.fr/fr/";
+export const SUPPORT_PAGE_ACCUEIL = "/centre-d-aide";
 
 export const GESTION_COMPTE_GROUP = `${SUPPORT_PAGE_ACCUEIL}`;
 export const GESTION_ORGANISME_GROUP = `${SUPPORT_PAGE_ACCUEIL}`;

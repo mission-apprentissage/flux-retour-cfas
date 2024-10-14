@@ -1,5 +1,6 @@
 import { Box, Container, Flex, Heading, Text } from "@chakra-ui/react";
 
+import { FAQ_PATH } from "@/common/constants/faq";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
@@ -21,7 +22,7 @@ export default function CentreDAidePage() {
               pour lequel vous souhaitez nous contacter.
             </p>
             <Link
-              href={"https://mission-apprentissage.notion.site/Enqu-te-SIFA-a546590b47764051bf1c486b1d57d227"}
+              href={FAQ_PATH}
               textDecoration={"underline"}
               isExternal
               plausibleGoal="clic_sifa_faq"
