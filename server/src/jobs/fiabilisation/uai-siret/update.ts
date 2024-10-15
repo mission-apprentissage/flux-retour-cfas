@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import { ApiError } from "api-alternance-sdk/internal";
 import Boom from "boom";
 import { AnyBulkWriteOperation } from "mongodb";
 import {
@@ -146,6 +147,67 @@ export const updateOrganismesFiablesFermes = async () => {
   });
 };
 
+const updateOrganismeFiabilisationApiUaiSiret = async (
+  organism: IOrganisme
+): Promise<AnyBulkWriteOperation<IOrganisme> | null> => {
+  const { _id, siret, uai } = organism;
+
+  if (!uai || !siret) {
+    return {
+      updateOne: {
+        filter: { _id },
+        update: { $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE } },
+      },
+    };
+  }
+
+  try {
+    const apiData = await apiAlternanceClient.organisme.recherche({ siret, uai });
+
+    const fiabilisation_api_response: IOrganisme["fiabilisation_api_response"] = apiData;
+
+    return {
+      updateOne: {
+        filter: { _id },
+        update: {
+          $set: {
+            fiabilisation_api_statut:
+              apiData.resultat == null
+                ? STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE
+                : STATUT_FIABILISATION_API_ORGANISME.FIABLE,
+            fiabilisation_api_response,
+          },
+        },
+      },
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.context.statusCode === 400) {
+        const siretError = (error.context.errorData as any)?.validationError?.siret?._errors?.[0] ?? null;
+        const uaiError = (error.context.errorData as any)?.validationError?.uai?._errors?.[0] ?? null;
+
+        if (siretError || uaiError) {
+          return {
+            updateOne: {
+              filter: { _id },
+              update: {
+                $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE },
+              },
+            },
+          };
+        }
+      }
+    }
+
+    console.error(`Échec de l'appel API pour le SIRET : ${siret}, UAI : ${uai}`, error);
+    const err = Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret });
+    err.cause = error;
+    captureException(err);
+
+    return null;
+  }
+};
+
 export const updateOrganismesFiabilisationApiUaiSiret = async () => {
   const cursor = organismesDb().find({});
 
@@ -154,43 +216,9 @@ export const updateOrganismesFiabilisationApiUaiSiret = async () => {
   let count = 0;
   for await (const organism of cursor) {
     count++;
-    const { _id, siret, uai } = organism;
-
-    if (siret && uai) {
-      try {
-        const apiData = await apiAlternanceClient.organisme.recherche({ siret, uai });
-
-        const fiabilisation_api_response: IOrganisme["fiabilisation_api_response"] = apiData;
-
-        bulkOperations.push({
-          updateOne: {
-            filter: { _id },
-            update: {
-              $set: {
-                fiabilisation_api_statut:
-                  apiData.resultat == null
-                    ? STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE
-                    : STATUT_FIABILISATION_API_ORGANISME.FIABLE,
-                fiabilisation_api_response,
-              },
-            },
-          },
-        });
-      } catch (error) {
-        console.error(`Échec de l'appel API pour le SIRET : ${siret}, UAI : ${uai}`, error);
-        const err = Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret });
-        err.cause = error;
-        captureException(err);
-      }
-    } else {
-      bulkOperations.push({
-        updateOne: {
-          filter: { _id },
-          update: { $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE } },
-        },
-      });
-
-      logger.warn(`SIRET ou UAI manquant pour l'organisme avec l'ID : ${_id}`);
+    const op = await updateOrganismeFiabilisationApiUaiSiret(organism);
+    if (op) {
+      bulkOperations.push(op);
     }
   }
 
