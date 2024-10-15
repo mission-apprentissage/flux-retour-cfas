@@ -2,10 +2,6 @@ import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 
-import { FAQ_PATH } from "@/common/constants/faq";
-import Link from "@/components/Links/Link";
-import { Interrogation } from "@/theme/components/icons";
-
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
@@ -26,19 +22,6 @@ function SimplePage({ title, children }: Props) {
       <Box minH={"40vh"} flexGrow="1" pb={8}>
         {children}
       </Box>
-      <Link
-        isExternal
-        href={FAQ_PATH}
-        position="fixed"
-        width="60px"
-        height="60px"
-        bottom="40px"
-        right="40px"
-        bg="bluefrance"
-        borderRadius="200px"
-      >
-        <Interrogation color="white" pr="0.1em" pb="0.2em" />
-      </Link>
       <Footer />
     </Container>
   );
