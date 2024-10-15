@@ -1,6 +1,6 @@
 import { Box, Container, Flex, Heading, Text } from "@chakra-ui/react";
+import { CRISP_FAQ } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
@@ -22,7 +22,7 @@ export default function CentreDAidePage() {
               pour lequel vous souhaitez nous contacter.
             </p>
             <Link
-              href={FAQ_PATH}
+              href={CRISP_FAQ}
               textDecoration={"underline"}
               isExternal
               plausibleGoal="clic_sifa_faq"

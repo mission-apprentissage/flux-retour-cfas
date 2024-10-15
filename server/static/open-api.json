@@ -5,7 +5,7 @@
     "title": "API mission apprentissage",
     "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
     "contact": {
-      "url": "https://cfas.apprentissage.beta.gouv.fr/centre-d-aide",
+      "url": "https://cfas.apprentissage.beta.gouv.fr/contact",
       "name": "API Support"
     }
   },

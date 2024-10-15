@@ -1,3 +1,4 @@
+export const CRISP_FAQ = "https://aide.cfas.apprentissage.beta.gouv.fr/fr/";
 export const SUPPORT_PAGE_ACCUEIL = "/contact";
 
 export const GESTION_COMPTE_GROUP = `${SUPPORT_PAGE_ACCUEIL}`;
