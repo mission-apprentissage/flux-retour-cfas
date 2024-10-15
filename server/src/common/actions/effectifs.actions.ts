@@ -11,7 +11,6 @@ import {
   effectifsArchiveDb,
   effectifsDECADb,
   effectifsDb,
-  formationsDb,
   opcosRncpDb,
   organismesDb,
 } from "@/common/model/collections";
@@ -151,25 +150,17 @@ export const addComputedFields = async ({
     computedFields.statut = statut;
   }
 
-  if (effectif?.formation?.rncp && effectif?.formation?.cfd) {
-    const cfd = effectif.formation.cfd;
-    const rncp = effectif.formation.rncp;
+  if (effectif?.formation?.rncp) {
+    const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": effectif.formation.rncp }).toArray();
 
-    if (cfd && rncp) {
-      const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": rncp }).toArray();
-      const formation = await formationsDb().findOne({
-        cfd: cfd,
-        rncps: rncp,
-      });
-
-      if (rncpList) {
-        computedFields.formation = {
-          ...formation,
-          opcos: rncpList.map(({ _computed }) => _computed.opco.nom),
-        };
-      }
+    if (rncpList) {
+      computedFields.formation = {
+        // codes_rome: rncp.romes,  TODO LATER
+        opcos: rncpList.map(({ _computed }) => _computed.opco.nom),
+      };
     }
   }
+
   return computedFields;
 };
 
