@@ -38,7 +38,7 @@ export default function CentreDAidePage() {
               referrerPolicy="origin"
               sandbox="allow-forms allow-popups allow-scripts allow-same-origin"
               width="100%"
-              height="600px"
+              height="1000px"
             />
           </Box>
           <Box flex="1"></Box>
