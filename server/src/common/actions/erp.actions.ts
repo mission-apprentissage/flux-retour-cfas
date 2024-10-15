@@ -4,7 +4,13 @@ import { ObjectId } from "mongodb";
 import { erpDb } from "../model/collections";
 
 export const createERP = async (name: string) => {
-  return erpDb().insertOne({ _id: new ObjectId(), name, created_at: new Date() });
+  return erpDb().insertOne({
+    _id: new ObjectId(),
+    name,
+    created_at: new Date(),
+    apiV3: true,
+    unique_id: name.toLowerCase(),
+  });
 };
 
 export const deleteERPById = async (id: string) => {
