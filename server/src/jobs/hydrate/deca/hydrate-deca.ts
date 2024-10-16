@@ -30,7 +30,7 @@ export const hydrateDeca = async ({ drop, full } = { drop: false, full: false })
   const dateFinToFetch = addDays(new Date(), -1);
   const dateDebutToFetch: Date = full
     ? DATE_DEBUT_CONTRATS_DISPONIBLES
-    : (await getLastDecaCreatedDateInDb()) ?? DATE_DEBUT_CONTRATS_DISPONIBLES;
+    : ((await getLastDecaCreatedDateInDb()) ?? DATE_DEBUT_CONTRATS_DISPONIBLES);
 
   logger.info(
     `Récupération des contrats depuis l'API Deca du ${dateDebutToFetch.toLocaleDateString()} au ${dateFinToFetch.toLocaleDateString()} ...`
