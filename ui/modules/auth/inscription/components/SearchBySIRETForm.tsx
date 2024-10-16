@@ -16,9 +16,9 @@ import {
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import { useState } from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 import * as Yup from "yup";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { siretRegex } from "@/common/domain/siret";
 import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
@@ -85,15 +85,15 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                       </Link>
                       .
                       <br />
-                      Si vous pensez que c’est une erreur, veuillez nous contacter à{" "}
+                      Si vous pensez que c’est une erreur, veuillez nous contacter :{" "}
                       <Link
-                        href={`mailto:${CONTACT_ADDRESS}`}
+                        href={SUPPORT_PAGE_ACCUEIL}
                         target="_blank"
                         textDecoration="underline"
                         isExternal
                         whiteSpace="nowrap"
                       >
-                        {CONTACT_ADDRESS}
+                        contactez-nous
                       </Link>
                       .
                     </div>

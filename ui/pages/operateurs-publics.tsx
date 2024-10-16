@@ -219,7 +219,7 @@ const OperateursPublicsPage = () => {
 
                     <Text>
                       Aidez-nous à améliorer le tableau de bord et ses données en nous faisant part des erreurs que vous
-                      constatez.
+                      constatez :{" "}
                       <Link
                         href={SUPPORT_PAGE_ACCUEIL}
                         target="_blank"
@@ -229,8 +229,9 @@ const OperateursPublicsPage = () => {
                         borderBottom="1px"
                         _hover={{ textDecoration: "none" }}
                       >
-                        Contactez-nous
+                        contactez-nous
                       </Link>
+                      .
                     </Text>
                   </>
                 ),
@@ -250,7 +251,7 @@ const OperateursPublicsPage = () => {
                     Chaque opérateur public peut, sur son espace, visualiser les organismes de son territoire qui ne
                     transmettent pas et les contacter pour les encourager.
                     <br />
-                    L’équipe du tableau de bord vous accompagne dans ces démarches&nbsp;: pour cela,
+                    L’équipe du tableau de bord vous accompagne dans ces démarches :{" "}
                     <Link
                       href={SUPPORT_PAGE_ACCUEIL}
                       target="_blank"

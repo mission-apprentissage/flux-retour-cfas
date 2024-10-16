@@ -1,8 +1,8 @@
 import { Box, Container, Heading, Text } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
@@ -45,10 +45,11 @@ export default function ContacterLequipeDuTdb() {
                     <Box>
                       <Text>
                         Si vous êtes un organisme de formation, vérifiez le paramétrage du logiciel de gestion que vous
-                        utilisez, si celui-ci est correct ou si vous avez un doute contactez nous par courriel :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        utilisez, si celui-ci est correct ou si vous avez un doute contactez nous :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -61,9 +62,10 @@ export default function ContacterLequipeDuTdb() {
                       <Text>
                         Merci de votre implication, nous avons régulièrement des tests en cours afin d’améliorer notre
                         produit, n’hésitez pas à nous écrire :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -75,10 +77,11 @@ export default function ContacterLequipeDuTdb() {
                       <Text>
                         Cette page d’aide n’est pas exhaustive et sera enrichie grâce à vos questions et vos retours.
                         Vous pouvez nous contacter via le chat lorsqu’il est disponible (en bas à gauche de votre écran)
-                        ou par courriel :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        ou nous contacter :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -89,10 +92,11 @@ export default function ContacterLequipeDuTdb() {
                     <Box>
                       <Text>
                         Vous pouvez nous contacter via le chat lorsqu’il est disponible (en bas à gauche de votre écran)
-                        ou par courriel :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        ou nous contacter :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
