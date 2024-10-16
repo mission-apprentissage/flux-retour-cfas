@@ -209,20 +209,20 @@ export const formatStringForSIFA = (str: string | undefined) => {
   if (typeof str !== "string" || str.length === 0) return undefined;
 
   const accentsMap = {
-    A: /[\300-\306]/g,
-    a: /[\340-\346]/g,
-    E: /[\310-\313]/g,
-    e: /[\350-\353]/g,
-    I: /[\314-\317]/g,
-    i: /[\354-\357]/g,
-    O: /[\322-\330]/g,
-    o: /[\362-\370]/g,
-    U: /[\331-\334]/g,
-    u: /[\371-\374]/g,
-    N: /[\321]/g,
-    n: /[\361]/g,
-    C: /[\307]/g,
-    c: /[\347]/g,
+    A: /[\xc0-\xc6]/g,
+    a: /[\xe0-\xe6]/g,
+    E: /[\xc8-\xcb]/g,
+    e: /[\xe8-\xeb]/g,
+    I: /[\xcc-\xcf]/g,
+    i: /[\xec-\xef]/g,
+    O: /[\xd2-\xd8]/g,
+    o: /[\xf2-\xf8]/g,
+    U: /[\xd9-\xdc]/g,
+    u: /[\xf9-\xfc]/g,
+    N: /[\xd1]/g,
+    n: /[\xf1]/g,
+    C: /[\xc7]/g,
+    c: /[\xe7]/g,
   };
 
   // Remplace chaque accent par son homologue non accentué

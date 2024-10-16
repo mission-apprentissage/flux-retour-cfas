@@ -148,7 +148,7 @@ function getInfoItemLevel(infoItem, type) {
     )
   );
 
-  const valueType = type !== "catalogue" ? infoItem[type] : infoItem.catalogue[0] ?? null;
+  const valueType = type !== "catalogue" ? infoItem[type] : (infoItem.catalogue[0] ?? null);
 
   if (valueType === "n/a") return "info";
 

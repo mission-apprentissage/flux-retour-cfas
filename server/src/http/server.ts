@@ -4,6 +4,7 @@ import "express-async-errors";
 import fs from "fs";
 
 import * as Sentry from "@sentry/node";
+import { zUai } from "api-alternance-sdk/internal";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
@@ -111,7 +112,6 @@ import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -779,7 +779,7 @@ function setupRoutes(app: Application) {
 
         return stripEmptyFields({
           uai,
-          error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
+          error: zUai.safeParse(uai).success ? null : `L'UAI ${uai} n'est pas valide`,
         });
       })
     )
