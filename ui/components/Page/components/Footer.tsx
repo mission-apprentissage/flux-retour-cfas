@@ -106,7 +106,7 @@ const Footer = () => {
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link target="_blank" rel="noopener noreferrer" href={CRISP_FAQ}>
-                  Page d’aide
+                  Centre d’aide
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>

@@ -11,7 +11,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
-import { IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
+import { CRISP_FAQ, IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -671,14 +671,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     Vous ne trouvez pas la réponse à vos questions ?
                   </Text>
                   <Flex gap={6}>
-                    <Link
-                      variant="link"
-                      display="inline-flex"
-                      href={SUPPORT_PAGE_ACCUEIL}
-                      isExternal
-                      width={"fit-content"}
-                    >
-                      Contactez-nous
+                    <Link variant="link" display="inline-flex" href={CRISP_FAQ} isExternal width={"fit-content"}>
+                      Aide
                       <Box className="ri-arrow-right-line" />
                     </Link>
                     <Link

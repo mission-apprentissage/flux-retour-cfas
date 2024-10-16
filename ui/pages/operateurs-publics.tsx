@@ -15,9 +15,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { CRISP_FAQ } from "shared";
+import { CRISP_FAQ, SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Link from "@/components/Links/Link";
@@ -220,9 +219,9 @@ const OperateursPublicsPage = () => {
 
                     <Text>
                       Aidez-nous à améliorer le tableau de bord et ses données en nous faisant part des erreurs que vous
-                      constatez. Contactez-nous par courriel&nbsp;:{" "}
+                      constatez.
                       <Link
-                        href={`mailto:${CONTACT_ADDRESS}`}
+                        href={SUPPORT_PAGE_ACCUEIL}
                         target="_blank"
                         rel="noopener noreferrer"
                         whiteSpace="nowrap"
@@ -230,7 +229,7 @@ const OperateursPublicsPage = () => {
                         borderBottom="1px"
                         _hover={{ textDecoration: "none" }}
                       >
-                        {CONTACT_ADDRESS}
+                        Contactez-nous
                       </Link>
                     </Text>
                   </>
@@ -251,10 +250,9 @@ const OperateursPublicsPage = () => {
                     Chaque opérateur public peut, sur son espace, visualiser les organismes de son territoire qui ne
                     transmettent pas et les contacter pour les encourager.
                     <br />
-                    L’équipe du tableau de bord vous accompagne dans ces démarches&nbsp;: pour cela, veuillez nous
-                    écrire à{" "}
+                    L’équipe du tableau de bord vous accompagne dans ces démarches&nbsp;: pour cela,
                     <Link
-                      href={`mailto:${CONTACT_ADDRESS}`}
+                      href={SUPPORT_PAGE_ACCUEIL}
                       target="_blank"
                       rel="noopener noreferrer"
                       whiteSpace="nowrap"
@@ -262,7 +260,7 @@ const OperateursPublicsPage = () => {
                       borderBottom="1px"
                       _hover={{ textDecoration: "none" }}
                     >
-                      {CONTACT_ADDRESS}
+                      contactez-nous
                     </Link>
                     .
                   </Text>
@@ -300,13 +298,7 @@ const OperateursPublicsPage = () => {
             Rejoignez la communauté des bêta-testeurs et contribuez en participant à des échanges sur les pratiques, des
             tests...
           </Text>
-          <Link
-            variant="blueBg"
-            href={`mailto:${CONTACT_ADDRESS}?subject=Rejoindre la communauté des beta-testeurs`}
-            target="_blank"
-            rel="noopener noreferrer"
-            mt={4}
-          >
+          <Link variant="blueBg" href={SUPPORT_PAGE_ACCUEIL} target="_blank" rel="noopener noreferrer" mt={4}>
             Rejoindre la communauté
           </Link>
         </Box>

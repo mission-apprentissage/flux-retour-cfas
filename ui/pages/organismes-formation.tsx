@@ -289,7 +289,7 @@ const OrganismesFormationPage = () => {
                   <br />
                   L’équipe du tableau de bord reste également à vos côtés pour vous accompagner&nbsp;:{" "}
                   <Link
-                    href={`mailto:${CONTACT_ADDRESS}`}
+                    href={SUPPORT_PAGE_ACCUEIL}
                     target="_blank"
                     rel="noopener noreferrer"
                     whiteSpace="nowrap"
@@ -297,7 +297,7 @@ const OrganismesFormationPage = () => {
                     borderBottom="1px"
                     _hover={{ textDecoration: "none" }}
                   >
-                    {CONTACT_ADDRESS}
+                    Nous contacter
                   </Link>
                 </Text>
               ),
