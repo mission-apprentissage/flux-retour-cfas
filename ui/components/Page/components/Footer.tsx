@@ -1,6 +1,6 @@
 import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } from "@chakra-ui/react";
+import { CRISP_FAQ } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import Link from "@/components/Links/Link";
 import { ExternalLinkLine } from "@/theme/components/icons";
 
@@ -105,7 +105,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link target="_blank" rel="noopener noreferrer" href={FAQ_PATH}>
+                <Link target="_blank" rel="noopener noreferrer" href={CRISP_FAQ}>
                   Page d’aide
                 </Link>
               </ListItem>

@@ -15,8 +15,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { CRISP_FAQ } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
@@ -272,7 +272,7 @@ const OperateursPublicsPage = () => {
           />
 
           <Link
-            href={FAQ_PATH}
+            href={CRISP_FAQ}
             color="action-high-blue-france"
             borderBottom="1px"
             textDecoration="none"

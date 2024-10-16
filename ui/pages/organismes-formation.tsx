@@ -15,8 +15,8 @@ import {
   VStack,
   Wrap,
 } from "@chakra-ui/react";
+import { CRISP_FAQ, SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
@@ -157,7 +157,7 @@ const OrganismesFormationPage = () => {
               <Text>
                 Vous utilisez un autre ERP ?{" "}
                 <Link
-                  href={`mailto:tableau-de-bord@apprentissage.beta.gouv.fr`}
+                  href={SUPPORT_PAGE_ACCUEIL}
                   target="_blank"
                   textDecoration="underline"
                   isExternal
@@ -244,7 +244,7 @@ const OrganismesFormationPage = () => {
                   transmettre vos données en quelques clics à l’aide des tutoriels qui vous seront proposés sur l’écran
                   de paramétrage et{" "}
                   <Link
-                    href={FAQ_PATH}
+                    href={CRISP_FAQ}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="action-high-blue-france"
@@ -454,7 +454,7 @@ const OrganismesFormationPage = () => {
         />
 
         <Link
-          href={FAQ_PATH}
+          href={CRISP_FAQ}
           color="action-high-blue-france"
           borderBottom="1px"
           textDecoration="none"

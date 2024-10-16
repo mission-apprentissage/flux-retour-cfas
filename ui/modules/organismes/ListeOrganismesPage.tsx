@@ -385,7 +385,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <p>
                     Si la liste des organismes de votre réseau ci-dessus est incomplète ou erronée ,{" "}
                     <Link
-                      href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
+                      href={SUPPORT_PAGE_ACCUEIL}
                       target="_blank"
                       textDecoration="underline"
                       isExternal
@@ -709,7 +709,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   organisons des webinaires réguliers avec les CFA de votre{" "}
                   {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire</>}.{" "}
                   <Link
-                    href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
+                    href={SUPPORT_PAGE_ACCUEIL}
                     target="_blank"
                     textDecoration="underline"
                     isExternal

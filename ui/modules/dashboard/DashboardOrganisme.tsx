@@ -38,9 +38,9 @@ import {
   UAI_INCONNUE,
   UAI_INCONNUE_CAPITALIZE,
   GO_MODIFICATION_RELATION_ELEMENT_LINK,
+  CRISP_FAQ,
 } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -758,7 +758,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     paramétrer
                   </Link>{" "}
                   votre moyen de transmission. Lire la FAQ{" "}
-                  <Link href={FAQ_PATH} variant="link" ml="auto" isExternal>
+                  <Link href={CRISP_FAQ} variant="link" ml="auto" isExternal>
                     “Comment transmettre ?”
                   </Link>
                 </Text>
@@ -906,7 +906,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href={FAQ_PATH}
+                      href={CRISP_FAQ}
                       target="_blank"
                       rel="noopener noreferrer"
                       borderBottom="1px"
