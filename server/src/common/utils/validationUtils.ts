@@ -30,7 +30,3 @@ export async function validateFullZodObjectSchema<Shape extends z.ZodRawShape>(
 ): Promise<z.infer<z.ZodObject<Shape>>> {
   return await z.strictObject(schemaShape).parseAsync(object);
 }
-
-export async function validateFullObjectSchemaUnknown<T = any>(object, schema): Promise<T> {
-  return await Joi.object(schema).validateAsync(object, { abortEarly: false, allowUnknown: true });
-}

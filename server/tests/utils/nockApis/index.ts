@@ -10,9 +10,4 @@ export const nockExternalApis = () => {
   // nock API entreprise
   // aka https://entreprise.api.gouv.fr
   nockGetEtablissement();
-
-  // nok API catalogue
-  // aka https://catalogue.apprentissage.beta.gouv.fr/api
-  // pas assez précis, c'est mieux de mocker précisément dans chaque test.
-  // nockGetFormations();
 };

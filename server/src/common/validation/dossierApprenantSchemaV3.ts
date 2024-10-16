@@ -155,7 +155,7 @@ export const dossierApprenantSchemaV3Input = () => {
 // Utilisé par le téléversement manuel. Le but côté métier est d'obliger les utilisateurs à remplir des champs dont
 // ils pourraient avoir besoin dans SIFA alors que ce n'est pas toujours présent côté ERPs.
 // Source de la décision: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693232432865229
-export const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
+const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
   return dossierApprenantSchemaV3Base().merge(
     z.object({
       email_contact: primitivesV1.apprenant.email,

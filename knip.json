@@ -1,0 +1,9 @@
+{
+  "workspaces": {
+    "server": {
+      "entry": ["src/main.ts!", "src/dev.ts", "src/db/migrations/*.ts!", "scripts/**/*.ts"],
+      "project": ["src/**/*.ts!", "tests/**/*.ts", "scripts/**/*.ts", "!src/**/*.test.ts!"],
+      "ignoreDependencies": ["@sentry/cli", "tsx"]
+    }
+  }
+}

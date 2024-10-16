@@ -7,7 +7,7 @@ import config from "@/config";
 
 import getApiClient from "./client";
 
-export const API_ENDPOINT = config.decaApi.endpoint;
+const API_ENDPOINT = config.decaApi.endpoint;
 
 const axiosClient = getApiClient({
   baseURL: API_ENDPOINT,
@@ -27,7 +27,7 @@ const executeWithRateLimiting = apiRateLimiter("apiDeca", {
  * @param page
  * @returns
  */
-export const getContratsDeca = async (dateDebut: string, dateFin: string, page: number): Promise<ApiDeca> => {
+const getContratsDeca = async (dateDebut: string, dateFin: string, page: number): Promise<ApiDeca> => {
   return executeWithRateLimiting(async (client: any) => {
     axiosRetry(client, { retries: 3 });
 
