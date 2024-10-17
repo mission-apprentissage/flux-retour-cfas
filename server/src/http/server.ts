@@ -403,21 +403,24 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
+      try {
+        const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
-      (req.user as any) = {
-        source: SOURCE_APPRENANT.ERP,
-        source_organisme_id: organisme._id.toString(),
-      };
+        (req.user as any) = {
+          source: SOURCE_APPRENANT.ERP,
+          source_organisme_id: organisme._id.toString(),
+        };
 
-      Sentry.setUser({
-        segment: "bearer",
-        ip_address: req.ip,
-        id: `organisme-${organisme._id.toString()}`,
-        username: `organisme: ${organisme.siret} / ${organisme.uai}`,
-      });
-
-      next();
+        Sentry.setUser({
+          segment: "bearer",
+          ip_address: req.ip,
+          id: `organisme-${organisme._id.toString()}`,
+          username: `organisme: ${organisme.siret} / ${organisme.uai}`,
+        });
+        next();
+      } catch (err) {
+        next(err);
+      }
     },
     dossierApprenantRouter()
   );
