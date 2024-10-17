@@ -1,48 +1,9 @@
 import { find } from "lodash-es";
-import { ACADEMIES, DEPARTEMENTS, IDepartmentCode } from "shared";
-import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
-
-import * as apiEntreprise from "@/common/apis/ApiEntreprise";
+import { DEPARTEMENTS, IDepartmentCode } from "shared";
 
 export const getDepartementCodeFromCodeInsee = (codeInsee) => {
   let code_dept = codeInsee.substring(0, 2);
   return ["97", "98"].includes(code_dept) ? codeInsee.substring(0, 3) : code_dept;
-};
-
-export const buildAdresseFromApiEntreprise = async (siret) => {
-  const etablissementApiInfo: ApiEntEtablissement = await apiEntreprise.getEtablissement(siret);
-  if (!etablissementApiInfo) return {};
-
-  // Handle departement
-  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_commune);
-
-  // Handle academie
-  const { nom_academie } = findDataByDepartementNum(code_dept);
-  const academieKeyMatching = ACADEMIES.find((academie) => academie.nom === nom_academie);
-  if (!academieKeyMatching) throw new Error(`Academie not found for code ${code_dept}`);
-  const academie = `${academieKeyMatching.code}`;
-
-  return {
-    adresse: {
-      ...(parseInt(etablissementApiInfo.adresse.numero_voie)
-        ? { numero: parseInt(etablissementApiInfo.adresse.numero_voie) }
-        : {}),
-      ...(etablissementApiInfo.adresse.libelle_voie ? { voie: etablissementApiInfo.adresse.libelle_voie } : {}),
-      ...(etablissementApiInfo.adresse.complement_adresse
-        ? { complement: etablissementApiInfo.adresse.complement_adresse }
-        : {}),
-      ...(etablissementApiInfo.adresse.code_postal ? { code_postal: etablissementApiInfo.adresse.code_postal } : {}),
-      ...(etablissementApiInfo.adresse.code_commune ? { code_insee: etablissementApiInfo.adresse.code_commune } : {}),
-      ...(etablissementApiInfo.adresse.libelle_commune
-        ? { commune: etablissementApiInfo.adresse.libelle_commune }
-        : {}),
-      ...(code_dept ? { departement: code_dept } : {}),
-      ...(academie ? { academie: academie } : {}),
-      ...(buildAdresse(etablissementApiInfo.adresse)
-        ? { complete: buildAdresse(etablissementApiInfo.adresse.acheminement_postal) }
-        : {}),
-    },
-  };
 };
 
 export const findDataByDepartementNum = (code_dept: IDepartmentCode) => {

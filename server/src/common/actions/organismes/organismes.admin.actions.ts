@@ -211,7 +211,7 @@ async function getOffreFormations(siret: string): Promise<OffreFormation[]> {
   return Promise.all(formationsCatalogue.map(buildOffreDeFormation));
 }
 
-export async function findOrganismesSupportInfoBySiret(siret: string): Promise<OrganismeSupportInfo[]> {
+async function findOrganismesSupportInfoBySiret(siret: string): Promise<OrganismeSupportInfo[]> {
   const [apiEntreprise, tdb, referentiel, formations, fiabilisation, organisations] = await Promise.all([
     // Silent Error: c'est du support
     getEtablissement(siret).catch((err) => {

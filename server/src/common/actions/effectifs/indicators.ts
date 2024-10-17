@@ -9,18 +9,6 @@ import {
 import { mapMongoObjectToCSVObject } from "./export";
 import { Indicator } from "./indicator";
 
-export const apprentisIndicator = new Indicator({
-  preStages: [
-    {
-      $match: { "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.apprenti },
-    },
-  ],
-  postStages: [{ $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti } }],
-  formatRow(item) {
-    return mapMongoObjectToCSVObject(item);
-  },
-});
-
 export const abandonsIndicator = new Indicator({
   preStages: [{ $match: { "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.abandon } }],
   postStages: [{ $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon } }],
