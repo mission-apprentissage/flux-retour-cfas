@@ -26,7 +26,7 @@ export default defineConfig((options) => {
     target: "es2022",
     platform: "node",
     format: ["esm"],
-    splitting: false,
+    splitting: true,
     shims: false,
     minify: false,
     sourcemap: true,
