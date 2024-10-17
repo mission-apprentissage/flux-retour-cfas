@@ -1,13 +1,19 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
-import { STATUT_FIABILISATION_ORGANISME, STATUT_PRESENCE_REFERENTIEL } from "shared";
+import {
+  STATUT_FIABILISATION_ORGANISME,
+  STATUT_PRESENCE_REFERENTIEL,
+  type IOrganisme,
+  type IOrganismeReferentiel,
+} from "shared";
 
 import {
   createOrganisme,
   findOrganismeByUaiAndSiret,
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance";
 import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
@@ -53,11 +59,11 @@ export const hydrateOrganismesFromReferentiel = async () => {
  * Fonction d'insertion ou de maj d'un organisme dans la collection
  * @param {*} organismeFromReferentiel
  */
-const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
+const insertOrUpdateOrganisme = async (organismeFromReferentiel: IOrganismeReferentiel) => {
   const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi, enseigne } =
     organismeFromReferentiel;
 
-  const adresseFormatted = mapAdresseReferentielToAdresseTdb(adresse);
+  const adresseFormatted = await mapAdresseReferentielToAdresseTdb(adresse);
   const isFerme = etat_administratif ? (etat_administratif === "fermé" ? true : false) : false;
 
   // Recherche de l'organisme via le couple UAI - SIRET
@@ -132,18 +138,24 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
  * @param {*} adresseReferentiel
  * @returns
  */
-const mapAdresseReferentielToAdresseTdb = (adresseReferentiel) => {
+const mapAdresseReferentielToAdresseTdb = async (
+  adresseReferentiel: IOrganismeReferentiel["adresse"]
+): Promise<IOrganisme["adresse"]> => {
   if (!adresseReferentiel) return {};
 
-  const { code_insee, code_postal, localite, departement, region, academie, label } = adresseReferentiel;
+  const { code_insee, label } = adresseReferentiel;
+
+  const communes = await apiAlternanceClient.geographie.rechercheCommune({
+    code: code_insee,
+  });
 
   return {
-    code_postal,
+    code_postal: communes[0]?.code.postaux[0],
     code_insee,
-    commune: localite,
-    departement: departement?.code,
-    region: region?.code,
-    academie: academie?.code.replace(/^0+/, ""), // Mapping pour coller à notre constante ACADEMIES
+    commune: communes[0]?.nom,
+    departement: communes[0]?.departement?.codeInsee,
+    region: communes[0]?.region?.codeInsee,
+    academie: communes[0]?.academie?.code,
     complete: label,
   };
 };

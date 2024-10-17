@@ -2,7 +2,6 @@ import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
 
-import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -139,7 +138,6 @@ const hydrateReseauFile = async (filename: string) => {
                 }
               );
 
-              await updateEffectifComputedFromOrganisme(currentOrganismeFound._id);
               organismeUpdatedCount++;
             } catch (err) {
               const msg = `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${

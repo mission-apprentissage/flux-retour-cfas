@@ -3,8 +3,9 @@ import { SIRET_REGEX } from "shared";
 import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
-import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
+import { buildAdresse } from "@/common/utils/adresseUtils";
 
+import { apiAlternanceClient } from "../apis/apiAlternance";
 import logger from "../logger";
 
 import { InfoSiret } from "./infoSiret.actions-struct";
@@ -64,8 +65,9 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
   }
 
   // Récupération des informations de localisation
-  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_commune);
-  const { code_region, num_academie } = findDataByDepartementNum(code_dept);
+  const communes = await apiAlternanceClient.geographie.rechercheCommune({
+    code: etablissementApiInfo.adresse.code_commune,
+  });
 
   return {
     result: {
@@ -82,12 +84,12 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
       voie_complete: (etablissementApiInfo.adresse.type_voie ?? "") + (etablissementApiInfo.adresse.libelle_voie ?? ""),
       complement_adresse: etablissementApiInfo.adresse.complement_adresse,
       code_postal: etablissementApiInfo.adresse.code_postal,
-      num_departement: code_dept,
-      num_academie: num_academie,
+      num_departement: communes[0]?.departement?.codeInsee,
+      num_academie: communes[0]?.academie?.code,
       localite: etablissementApiInfo.adresse.libelle_commune,
       code_insee_localite: etablissementApiInfo.adresse.code_commune,
       ferme: etablissementApiInfo.etat_administratif !== "A",
-      num_region: code_region,
+      num_region: communes[0]?.region?.codeInsee,
     },
     messages: {
       api_entreprise_status: "OK",

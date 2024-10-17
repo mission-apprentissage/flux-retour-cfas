@@ -439,6 +439,15 @@ export const updateEffectifComputedFromOrganisme = async (organismeId: ObjectId)
   );
 };
 
+// Adresse des apprenants
+// Daily run
+
+export const updateComputed = async () => {
+  // Voeux
+  // Effectifs
+  // EffectifsDECA
+};
+
 export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) => {
   return (
     rncp.rncp &&

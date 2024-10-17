@@ -9,6 +9,7 @@ export const up = async () => {
       $unset: {
         errors: 1,
       },
-    }
+    },
+    { bypassDocumentValidation: true }
   );
 };

@@ -1,18 +1,11 @@
 import { captureException } from "@sentry/node";
+import type { ICommune } from "api-alternance-sdk";
+import Boom from "boom";
 import TabCoCfdInfo from "shared/models/apis/@types/TabCoCfdInfo";
-import TabCoCodePostalInfo from "shared/models/apis/@types/TabCoCodePostalInfo";
 
 import logger from "@/common/logger";
-import config from "@/config";
-
-import { tryCachedExecution } from "../utils/cacheUtils";
 
 import { apiAlternanceClient } from "./apiAlternance";
-import getApiClient from "./client";
-
-export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
-
-const client = getApiClient({ baseURL: API_ENDPOINT });
 
 export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
   try {
@@ -57,26 +50,22 @@ export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
   }
 };
 
-export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<TabCoCodePostalInfo | null> => {
+export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<ICommune | null> => {
   if (!codePostal) return null;
 
-  const serviceFunc = async () => {
-    try {
-      const { data } = await client.post("/code-postal", { codePostal }, { cache: { methods: ["post"] } });
-      return data;
-    } catch (error: any) {
-      logger.error(
-        `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
-        error.code || error.response?.status
-      );
-      captureException(
-        new Error(`getCodePostalInfo: something went wrong while requesting code postal "${codePostal}"`, {
-          cause: error,
-        })
-      );
-      return null;
-    }
-  };
+  const result = await apiAlternanceClient.geographie.rechercheCommune({ code: codePostal }).catch((error) => {
+    logger.error(
+      `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
+      { error, codePostal }
+    );
 
-  return tryCachedExecution(`codePostalInfo-${codePostal}`, 3600_000, serviceFunc);
+    const err = Boom.internal("Échec de l'appel API pour la recherche de code postal", { codePostal });
+    err.cause = error;
+    captureException(err);
+
+    return [];
+  });
+
+  // Returns the first commune
+  return result[0] ?? null;
 };

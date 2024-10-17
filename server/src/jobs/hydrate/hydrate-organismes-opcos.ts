@@ -1,6 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
-import { updateEffectifComputedFromOrganisme } from "@/common/actions/effectifs.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -80,7 +79,7 @@ export const hydrateOrganismesOPCOs = async () => {
         throw err;
       })
       .process(async (organisme) => {
-        const { upsertedId } = await organismesDb().updateOne(
+        await organismesDb().updateOne(
           {
             siret: organisme.siret,
             uai: organisme.uai as any,
@@ -91,9 +90,6 @@ export const hydrateOrganismesOPCOs = async () => {
             },
           }
         );
-        if (upsertedId) {
-          organisme && (await updateEffectifComputedFromOrganisme(upsertedId));
-        }
       });
 
     const ancienOrganismes = organismes.filter(
@@ -106,7 +102,7 @@ export const hydrateOrganismesOPCOs = async () => {
         throw err;
       })
       .process(async (organisme) => {
-        const { upsertedId } = await organismesDb().updateOne(
+        await organismesDb().updateOne(
           {
             siret: organisme.siret,
             uai: organisme.uai as any,
@@ -117,10 +113,6 @@ export const hydrateOrganismesOPCOs = async () => {
             },
           }
         );
-
-        if (upsertedId) {
-          organisme && (await updateEffectifComputedFromOrganisme(upsertedId));
-        }
       });
   }
 };

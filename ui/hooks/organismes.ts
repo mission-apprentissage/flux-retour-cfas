@@ -132,15 +132,21 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
     const organismesNonRetenus: OrganismeNormalized[] = [];
-    const allOrganismes: OrganismeNormalized[] = [];
-    (organismes || []).forEach((organisme: OrganismeNormalized) => {
+    const allOrganismes: OrganismeNormalized[] = (organismes || []).map((organisme: Organisme) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
-      organisme.normalizedUai = normalize(organisme.uai ?? "");
-      organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
+      const normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
+      const normalizedUai = normalize(organisme.uai ?? "");
+      const normalizedCommune = normalize(organisme.adresse?.commune ?? "");
+
+      const normaliszed: OrganismeNormalized = {
+        ...organisme,
+        normalizedName,
+        normalizedUai,
+        normalizedCommune,
+      };
 
       if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
-        organismesFiables.push(organisme);
+        organismesFiables.push(normaliszed);
       } else if (
         // Organismes à masquer :
         // organismes fermés et ne transmettant pas
@@ -148,12 +154,12 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
         (organisme.ferme && !organisme.last_transmission_date) ||
         (!organisme.enseigne && !organisme.raison_sociale)
       ) {
-        organismesNonRetenus.push(organisme);
+        organismesNonRetenus.push(normaliszed);
       } else {
-        organismesACompleter.push(organisme);
+        organismesACompleter.push(normaliszed);
       }
 
-      allOrganismes.push(organisme);
+      return normaliszed;
     });
 
     return {

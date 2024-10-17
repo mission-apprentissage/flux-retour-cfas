@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
-import { ApiError } from "api-alternance-sdk/internal";
+import { ApiError } from "api-alternance-sdk";
 import Boom from "boom";
 import { AnyBulkWriteOperation } from "mongodb";
 import {
