@@ -1,7 +1,7 @@
 import { Box, Container, ContainerProps } from "@chakra-ui/react";
 import React from "react";
+import { CRISP_FAQ } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import Link from "@/components/Links/Link";
 import Section from "@/components/Section/Section";
 import { Interrogation } from "@/theme/components/icons";
@@ -27,7 +27,7 @@ function Page({ children, childrenContainer, ...rest }: PageProps) {
       </Box>
       <Link
         isExternal
-        href={FAQ_PATH}
+        href={CRISP_FAQ}
         position="fixed"
         width="60px"
         height="60px"

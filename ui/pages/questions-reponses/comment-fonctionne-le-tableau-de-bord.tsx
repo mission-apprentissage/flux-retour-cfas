@@ -1,8 +1,9 @@
 import { Box, Container, Heading, ListItem, Text, UnorderedList, Link as ChakraLink } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS, PRODUCT_NAME } from "@/common/constants/product";
+import { PRODUCT_NAME } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
@@ -109,9 +110,10 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         L’AIPD (Analyse d’Impact Relative à la Protection des Données) est disponible sur simple demande
                         à l’équipe du tableau de bord :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -188,9 +190,10 @@ export default function CommentFonctionneLeTdb() {
                         {PRODUCT_NAME} , l’équipe est à votre écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -222,9 +225,10 @@ export default function CommentFonctionneLeTdb() {
                           Valsoftware, Agate Les travaux de développement sont en cours, vous pourrez prochainement
                           transmettre directement via votre ERP, n’hésitez pas à nous transmettre vos coordonnées pour
                           que nous vous tenions informés dès que cette fonctionnalité sera disponible :{" "}
-                          <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                            {CONTACT_ADDRESS}
+                          <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                            contactez-nous
                           </Link>
+                          .
                         </ListItem>
                         <ListItem>
                           Si vous n’utilisez aucun de ces logiciels, nous travaillons à une solution gratuite et simple
@@ -232,8 +236,8 @@ export default function CommentFonctionneLeTdb() {
                           acteurs publics, celle-ci vous sera proposée dès le quatrième trimestre 2022. Nous avons
                           besoin d’organismes pour tester cette solution, pour vous inscrire ou simplement pour être
                           informé de l’ouverture de ce service, n’hésitez pas à nous contacter :{" "}
-                          <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                            {CONTACT_ADDRESS}
+                          <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                            contactez-nous
                           </Link>
                         </ListItem>
                       </UnorderedList>
@@ -400,9 +404,9 @@ export default function CommentFonctionneLeTdb() {
                       <Text>
                         Nous avons actuellement plusieurs travaux et recherches en cours afin d’améliorer le tableau de
                         bord et les fonctionnalités à disposition. Si vous souhaitez y participer ou nous faire un
-                        retour, vous pouvez nous écrire à{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        retour, vous pouvez nous contacter :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
                       </Text>
                     </Box>
@@ -442,9 +446,9 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Si toutefois vous n’aviez pas reçu ou n’aviez pas accès à cette URL, vous pouvez en faire la
-                        demande en contactant l’équipe du tableau de bord par courriel :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        demande en contactant l’équipe du tableau de bord :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>{" "}
                         en précisant l’UAI de votre établissement et l’adresse courriel enregistrée auprès de nos
                         services.

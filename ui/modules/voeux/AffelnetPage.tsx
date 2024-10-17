@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
+import { AUTRE_AFFELNET_LINK } from "shared";
 
 import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
@@ -324,12 +325,7 @@ function VoeuxAffelnetPage() {
           </Grid>
           <Flex gap={3}>
             <Text>Vous avez une question / remarque ?</Text>
-            <Link
-              variant="link"
-              display="inline-flex"
-              href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/10/create/80"
-              isExternal
-            >
+            <Link variant="link" display="inline-flex" href={AUTRE_AFFELNET_LINK} isExternal>
               Écrivez-nous
               <Box className="ri-arrow-right-line" />
             </Link>

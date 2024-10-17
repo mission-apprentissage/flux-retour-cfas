@@ -2,9 +2,8 @@ import { ChevronDownIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
-import { IOrganisationType, ORGANISATION_TYPE, SUPPORT_PAGE_ACCUEIL } from "shared";
+import { CRISP_FAQ, IOrganisationType, ORGANISATION_TYPE } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { AuthContext } from "@/common/internal/AuthContext";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -278,12 +277,12 @@ const MenuQuestions = () => {
           )}
           <MenuItem
             as="a"
-            href={FAQ_PATH}
+            href={CRISP_FAQ}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
           >
-            Page d’aide
+            Centre d’aide
           </MenuItem>
           <MenuItem
             as="a"
@@ -294,15 +293,6 @@ const MenuQuestions = () => {
           </MenuItem>
           <MenuItem as="a" href="/glossaire">
             Glossaire
-          </MenuItem>
-          <MenuItem
-            as="a"
-            href={SUPPORT_PAGE_ACCUEIL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackPlausibleEvent("clic_homepage_envoi_message")}
-          >
-            Nous envoyer un message
           </MenuItem>
         </MenuList>
       </Menu>

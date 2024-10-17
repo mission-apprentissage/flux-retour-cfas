@@ -15,9 +15,8 @@ import {
   VStack,
   Wrap,
 } from "@chakra-ui/react";
+import { CRISP_FAQ, SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Link from "@/components/Links/Link";
@@ -157,7 +156,7 @@ const OrganismesFormationPage = () => {
               <Text>
                 Vous utilisez un autre ERP ?{" "}
                 <Link
-                  href={`mailto:tableau-de-bord@apprentissage.beta.gouv.fr`}
+                  href={SUPPORT_PAGE_ACCUEIL}
                   target="_blank"
                   textDecoration="underline"
                   isExternal
@@ -244,7 +243,7 @@ const OrganismesFormationPage = () => {
                   transmettre vos données en quelques clics à l’aide des tutoriels qui vous seront proposés sur l’écran
                   de paramétrage et{" "}
                   <Link
-                    href={FAQ_PATH}
+                    href={CRISP_FAQ}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="action-high-blue-france"
@@ -253,6 +252,7 @@ const OrganismesFormationPage = () => {
                   >
                     dans notre FAQ
                   </Link>
+                  .
                   <br />
                   <br />
                   Situation 2 : vous utilisez un autre logiciel de gestion (ERP) qui n’est pas encore branché, demandez
@@ -284,12 +284,12 @@ const OrganismesFormationPage = () => {
                     _hover={{ textDecoration: "none" }}
                   >
                     documentation API ERP
-                  </Link>{" "}
-                  <br />
+                  </Link>
+                  . <br />
                   <br />
                   L’équipe du tableau de bord reste également à vos côtés pour vous accompagner&nbsp;:{" "}
                   <Link
-                    href={`mailto:${CONTACT_ADDRESS}`}
+                    href={SUPPORT_PAGE_ACCUEIL}
                     target="_blank"
                     rel="noopener noreferrer"
                     whiteSpace="nowrap"
@@ -297,8 +297,9 @@ const OrganismesFormationPage = () => {
                     borderBottom="1px"
                     _hover={{ textDecoration: "none" }}
                   >
-                    {CONTACT_ADDRESS}
+                    contactez-nous
                   </Link>
+                  .
                 </Text>
               ),
             },
@@ -332,7 +333,7 @@ const OrganismesFormationPage = () => {
                     <ListItem>
                       Vous transmettiez déjà vos données et vous avez changé d’ERP ou alors vous venez juste de mettre
                       en place un ERP&nbsp;: paramétrez votre nouvel ERP à l’aide des documents que vous retrouvez dans
-                      la question “Comment configurer mon ERP ?”
+                      la question “Comment configurer mon ERP ?”.
                     </ListItem>
                     <ListItem>
                       Vous transmettiez déjà vos données automatiquement via votre ERP mais vous n’en utilisez
@@ -406,6 +407,7 @@ const OrganismesFormationPage = () => {
                     >
                       https://referentiel.apprentissage.onisep.fr
                     </Link>
+                    .
                   </Text>
                 </>
               ),
@@ -434,9 +436,9 @@ const OrganismesFormationPage = () => {
 
                   <Text mt="1em">
                     Aidez-nous à contribuer à l’amélioration du tableau de bord et de ses données en nous faisant part
-                    des erreurs que vous constatez, contactez-nous par courriel&nbsp;:{" "}
+                    des erreurs que vous constatez :{" "}
                     <Link
-                      href={`mailto:${CONTACT_ADDRESS}`}
+                      href={SUPPORT_PAGE_ACCUEIL}
                       target="_blank"
                       rel="noopener noreferrer"
                       whiteSpace="nowrap"
@@ -444,8 +446,9 @@ const OrganismesFormationPage = () => {
                       borderBottom="1px"
                       _hover={{ textDecoration: "none" }}
                     >
-                      {CONTACT_ADDRESS}
+                      contactez-nous
                     </Link>
+                    .
                   </Text>
                 </>
               ),
@@ -454,7 +457,7 @@ const OrganismesFormationPage = () => {
         />
 
         <Link
-          href={FAQ_PATH}
+          href={CRISP_FAQ}
           color="action-high-blue-france"
           borderBottom="1px"
           textDecoration="none"

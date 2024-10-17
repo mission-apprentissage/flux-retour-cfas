@@ -37,9 +37,10 @@ import {
   UAI_INCONNUE_TAG_FORMAT,
   UAI_INCONNUE,
   UAI_INCONNUE_CAPITALIZE,
+  GO_MODIFICATION_RELATION_ELEMENT_LINK,
+  CRISP_FAQ,
 } from "shared";
 
-import { FAQ_PATH } from "@/common/constants/faq";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -310,7 +311,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 .
                 <br />
                 <Link
-                  href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/8/create/64"
+                  href={GO_MODIFICATION_RELATION_ELEMENT_LINK}
                   target="_blank"
                   borderBottom="1px"
                   _hover={{ textDecoration: "none" }}
@@ -757,7 +758,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     paramétrer
                   </Link>{" "}
                   votre moyen de transmission. Lire la FAQ{" "}
-                  <Link href={FAQ_PATH} variant="link" ml="auto" isExternal>
+                  <Link href={CRISP_FAQ} variant="link" ml="auto" isExternal>
                     “Comment transmettre ?”
                   </Link>
                 </Text>
@@ -905,7 +906,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href={FAQ_PATH}
+                      href={CRISP_FAQ}
                       target="_blank"
                       rel="noopener noreferrer"
                       borderBottom="1px"

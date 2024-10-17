@@ -1,8 +1,8 @@
 import { Box, Heading, HStack, Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
@@ -120,8 +120,8 @@ export default function QuestionsReponses() {
                         Agate Les travaux de développement sont en cours, vous pourrez prochainement transmettre
                         directement via votre ERP, n’hésitez pas à nous transmettre vos coordonnées pour que nous vous
                         tenions informés dès que cette fonctionnalité sera disponible :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          tableau-de-bord@apprentissage.beta.gouv.fr
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
                       </ListItem>
                       <ListItem marginTop="1v">
@@ -130,8 +130,8 @@ export default function QuestionsReponses() {
                         acteurs publics, celle-ci vous sera proposée dès le quatrième trimestre 2022. Nous avons besoin
                         d’organismes pour tester cette solution, pour vous inscrire ou simplement pour être informé de
                         l’ouverture de ce service, n’hésitez pas à nous contacter :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          tableau-de-bord@apprentissage.beta.gouv.fr
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
                       </ListItem>
                     </UnorderedList>

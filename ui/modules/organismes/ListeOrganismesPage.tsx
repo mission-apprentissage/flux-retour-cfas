@@ -11,7 +11,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
-import { IOrganisationType } from "shared";
+import { CRISP_FAQ, IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -385,7 +385,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <p>
                     Si la liste des organismes de votre réseau ci-dessus est incomplète ou erronée ,{" "}
                     <Link
-                      href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
+                      href={SUPPORT_PAGE_ACCUEIL}
                       target="_blank"
                       textDecoration="underline"
                       isExternal
@@ -671,14 +671,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     Vous ne trouvez pas la réponse à vos questions ?
                   </Text>
                   <Flex gap={6}>
-                    <Link
-                      variant="link"
-                      display="inline-flex"
-                      href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3"
-                      isExternal
-                      width={"fit-content"}
-                    >
-                      Contactez-nous
+                    <Link variant="link" display="inline-flex" href={CRISP_FAQ} isExternal width={"fit-content"}>
+                      Aide
                       <Box className="ri-arrow-right-line" />
                     </Link>
                     <Link
@@ -709,7 +703,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   organisons des webinaires réguliers avec les CFA de votre{" "}
                   {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire</>}.{" "}
                   <Link
-                    href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr"
+                    href={SUPPORT_PAGE_ACCUEIL}
                     target="_blank"
                     textDecoration="underline"
                     isExternal

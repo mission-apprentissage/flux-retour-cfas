@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
@@ -77,8 +77,8 @@ const ConfirmationPage = () => {
               </Heading>
             </HStack>
             <Box p={4}>
-              <a href={`mailto:${CONTACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
-                {CONTACT_ADDRESS}
+              <a href={SUPPORT_PAGE_ACCUEIL} target="_blank" rel="noopener noreferrer">
+                Contactez-nous
               </a>
             </Box>
           </>
