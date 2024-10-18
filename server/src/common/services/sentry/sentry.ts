@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 
 import config from "../../../config";
 
-export function getSentryOptions() {
+function getSentryOptions() {
   return {
     tracesSampleRate: config.env === "production" ? 0.1 : 1.0,
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],

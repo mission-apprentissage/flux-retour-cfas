@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { jest } from "@jest/globals";
-import omit from "lodash.omit";
+import { omit } from "lodash-es";
 import { ObjectId } from "mongodb";
 import nock from "nock";
 

@@ -70,9 +70,7 @@ const getBasePipeline = (organisme_id) => [
  *
  * @param organisme_id L'identifiant unique de l'organisme pour laquelle rechercher des doublons.
  */
-export const getDuplicatesEffectifsForOrganismeId = async (
-  organisme_id: ObjectId
-): Promise<DuplicateEffectifGroup[]> => {
+const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectId): Promise<DuplicateEffectifGroup[]> => {
   const basePipeline = getBasePipeline(organisme_id);
 
   const duplicates = (await effectifsDb().aggregate(basePipeline).toArray()) as DuplicateEffectifGroup[];

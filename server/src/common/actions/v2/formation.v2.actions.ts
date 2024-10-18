@@ -18,7 +18,7 @@ export const getOrCreateFormationV2 = async (
   return formation._id;
 };
 
-export const getFormationV2 = async (
+const getFormationV2 = async (
   cfd: string,
   rncp: string,
   organisme_responsable_id: ObjectId,
@@ -32,7 +32,7 @@ export const getFormationV2 = async (
   });
 };
 
-export const insertFormationV2 = async (
+const insertFormationV2 = async (
   cfd: string,
   rncp: string,
   organisme_responsable_id: ObjectId,

@@ -2,7 +2,7 @@ import axios from "axios";
 
 import config from "@/config";
 
-import { createRequestStream, createUploadStream } from "./httpUtils";
+import { createRequestStream } from "./httpUtils";
 
 async function authenticate(uri) {
   let regExp = new RegExp(/^(https:\/\/)(.+):(.+):(.+)@(.*)$/);
@@ -51,28 +51,6 @@ export const getFromStorage = async (path, options: any = {}) => {
   let { url, token } = await requestObjectAccess(path, options);
   return createRequestStream(url, {
     method: "GET",
-    headers: {
-      "X-Auth-Token": token,
-      Accept: "application/json",
-    },
-  });
-};
-
-export const uploadToStorage = async (path, options: any = {}) => {
-  let { url, token } = await requestObjectAccess(path, options);
-  return createUploadStream(url, {
-    headers: {
-      "X-Auth-Token": token,
-      Accept: "application/json",
-      "Content-Type": options.contentType || "application/octet-stream",
-    },
-  });
-};
-
-export const deleteFromStorage = async (path, options: any = {}) => {
-  let { url, token } = await requestObjectAccess(path, options);
-  return createRequestStream(url, {
-    method: "DELETE",
     headers: {
       "X-Auth-Token": token,
       Accept: "application/json",
