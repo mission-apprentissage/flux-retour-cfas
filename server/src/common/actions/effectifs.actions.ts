@@ -11,6 +11,7 @@ import {
   effectifsArchiveDb,
   effectifsDECADb,
   effectifsDb,
+  formationsCatalogueDb,
   opcosRncpDb,
   organismesDb,
 } from "@/common/model/collections";
@@ -150,15 +151,22 @@ export const addComputedFields = async ({
     computedFields.statut = statut;
   }
 
-  if (effectif?.formation?.rncp) {
-    const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": effectif.formation.rncp }).toArray();
+  const { rncp, cfd } = effectif?.formation || {};
 
-    if (rncpList) {
-      computedFields.formation = {
-        // codes_rome: rncp.romes,  TODO LATER
-        opcos: rncpList.map(({ _computed }) => _computed.opco.nom),
-      };
-    }
+  if (rncp) {
+    const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": rncp }).toArray();
+
+    const formationFilter = { rncp_code: rncp, ...(cfd ? { cfd } : {}) };
+    const formation = await formationsCatalogueDb().findOne(formationFilter, {
+      projection: { _id: 1, cle_ministere_educatif: 1, intitule_long: 1 },
+    });
+
+    computedFields.formation = {
+      _id: formation?._id && new ObjectId(formation._id),
+      cle_ministere_educatif: formation?.cle_ministere_educatif,
+      intitule_long: formation?.intitule_long,
+      opcos: rncpList?.length ? rncpList.map(({ _computed }) => _computed.opco.nom) : [],
+    };
   }
 
   return computedFields;
