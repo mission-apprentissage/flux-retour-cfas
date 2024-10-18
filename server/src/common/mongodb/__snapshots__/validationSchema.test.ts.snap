@@ -415,6 +415,23 @@ exports[`validation-schema should create validation schema for effectifs: effect
                   "additionalProperties": false,
                   "bsonType": "object",
                   "properties": {
+                    "_id": {
+                      "anyOf": [
+                        {
+                          "bsonType": "objectId",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Identifiant unique",
+                    },
+                    "cle_ministere_educatif": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
                     "codes_rome": {
                       "anyOf": [
                         {
@@ -422,6 +439,26 @@ exports[`validation-schema should create validation schema for effectifs: effect
                           "items": {
                             "bsonType": "string",
                           },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "intitule_long": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {},
+                            },
+                            {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                            },
+                          ],
                         },
                         {
                           "bsonType": "null",
@@ -3389,6 +3426,23 @@ exports[`validation-schema should create validation schema for effectifsArchive:
                   "additionalProperties": false,
                   "bsonType": "object",
                   "properties": {
+                    "_id": {
+                      "anyOf": [
+                        {
+                          "bsonType": "objectId",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Identifiant unique",
+                    },
+                    "cle_ministere_educatif": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
                     "codes_rome": {
                       "anyOf": [
                         {
@@ -3396,6 +3450,26 @@ exports[`validation-schema should create validation schema for effectifsArchive:
                           "items": {
                             "bsonType": "string",
                           },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "intitule_long": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {},
+                            },
+                            {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                            },
+                          ],
                         },
                         {
                           "bsonType": "null",

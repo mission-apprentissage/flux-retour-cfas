@@ -8,7 +8,7 @@ import {
 import { findOpcoByName, findRNCPByOpcosId } from "@/common/actions/opcos/opcos.actions";
 import { getFicheRNCPById } from "@/common/actions/rncp.actions";
 import logger from "@/common/logger";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsComputed() {
   logger.info("Hydrating effectifs._computed...");
@@ -120,4 +120,58 @@ export const hydrateEffectifsComputedOpcos = async (opcoName: string) => {
     logger.info(`Updating computed for rncp : ${rncp.rncp}, ${i + 1}/${opcos.length}`);
     await updateEffectifComputedFromRNCP(rncp, opco);
   }
+};
+
+export const hydrateEffectifsComputedFormation = async () => {
+  const cursor = effectifsDb().find({
+    "_computed.formation._id": { $exists: false },
+    "formation.cfd": { $exists: true, $ne: null },
+    "formation.rncp": { $exists: true, $ne: null },
+  });
+
+  let effectifsProcessed = 0;
+  const bulkOperations: Array<any> = [];
+  const batchSize = 1000;
+
+  for await (const effectif of cursor) {
+    const { rncp, cfd } = effectif.formation || {};
+    if (!rncp || !cfd) continue;
+
+    const formationFilter = { rncp_code: rncp, ...(cfd ? { cfd } : {}) };
+
+    const formation = await formationsCatalogueDb().findOne(formationFilter, {
+      projection: { _id: 1, cle_ministere_educatif: 1, intitule_long: 1 },
+    });
+
+    if (!formation) continue;
+
+    const computedFormation = {
+      ...effectif._computed?.formation,
+      ...(formation._id && { _id: formation._id }),
+      ...(formation.cle_ministere_educatif && { cle_ministere_educatif: formation.cle_ministere_educatif }),
+      ...(formation.intitule_long && { intitule_long: formation.intitule_long }),
+    };
+
+    bulkOperations.push({
+      updateOne: {
+        filter: { _id: effectif._id },
+        update: {
+          $set: { "_computed.formation": computedFormation },
+        },
+      },
+    });
+
+    if (bulkOperations.length >= batchSize) {
+      await effectifsDb().bulkWrite(bulkOperations);
+      effectifsProcessed += bulkOperations.length;
+      bulkOperations.length = 0;
+    }
+  }
+
+  if (bulkOperations.length > 0) {
+    await effectifsDb().bulkWrite(bulkOperations);
+    effectifsProcessed += bulkOperations.length;
+  }
+
+  logger.info(`Tous les effectifs ont été mis à jour. Nombre total d'effectifs traités : ${effectifsProcessed}.`);
 };

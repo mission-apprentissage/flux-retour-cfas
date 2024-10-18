@@ -567,8 +567,13 @@ program
   .command("hydrate:computed-effectifs-by-opcos")
   .description("Mise a jour des computed pour les effectifs d'un opco")
   .requiredOption("--opco <string>", "Nom de l'opco")
-  .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:computed-effectifs-by-opcos"));
+
+program
+  .command("hydrate:computed-effectifs-formation")
+  .description("Mise a jour du computed formation pour les effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:computed-effectifs-formation"));
 
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 

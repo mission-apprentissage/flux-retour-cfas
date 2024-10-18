@@ -618,6 +618,9 @@ describe("Processus d'ingestion", () => {
               fiable: false,
             },
             formation: {
+              _id: null,
+              cle_ministere_educatif: null,
+              intitule_long: null,
               opcos: [],
             },
             statut: {
@@ -714,6 +717,9 @@ describe("Processus d'ingestion", () => {
               fiable: false,
             },
             formation: {
+              _id: null,
+              cle_ministere_educatif: null,
+              intitule_long: null,
               opcos: [],
             },
             statut: {
@@ -888,6 +894,9 @@ describe("Processus d'ingestion", () => {
               fiable: false,
             },
             formation: {
+              _id: null,
+              cle_ministere_educatif: null,
+              intitule_long: null,
               opcos: [],
             },
             statut: {
