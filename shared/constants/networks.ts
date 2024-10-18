@@ -116,7 +116,7 @@ export const TETE_DE_RESEAUX = [
   },
   {
     nom: "EDUSERVICES",
-    key: "EDUSERVICE",
+    key: "EDUSERVICES",
     responsable: false,
   },
   {

@@ -2,9 +2,8 @@ import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { IOrganisationCreate } from "shared";
+import { IOrganisationCreate, SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 import { SetterOrganisation } from "@/modules/auth/inscription/common";
@@ -32,13 +31,13 @@ const RegisterConfigurationOrganisationPage = () => {
               <Text>Contacter l&apos;équipe :</Text>
               <Link
                 fontWeight={700}
-                href={`mailto:${CONTACT_ADDRESS}`}
+                href={SUPPORT_PAGE_ACCUEIL}
                 target="_blank"
                 rel="noopener noreferrer"
                 color="bluefrance"
                 whiteSpace="nowrap"
               >
-                {CONTACT_ADDRESS}
+                Contactez-nous
               </Link>{" "}
             </Box>
           </HStack>

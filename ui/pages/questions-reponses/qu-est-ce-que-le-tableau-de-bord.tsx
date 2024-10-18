@@ -1,8 +1,9 @@
 import { Box, Container, Heading, ListItem, Text, UnorderedList, Link as ChakraLink } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS, PRODUCT_NAME } from "@/common/constants/product";
+import { PRODUCT_NAME } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
@@ -168,9 +169,10 @@ export default function QuestCeQueLeTdb() {
                         {PRODUCT_NAME} , l’équipe est à votre écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
+                        .
                       </Text>
                     </Box>
                   ),
@@ -259,9 +261,9 @@ export default function QuestCeQueLeTdb() {
                         <Link href="/auth/connexion" color="bluefrance" textDecoration="underLine">
                           formulaire dédié <Box as="i" className="ri-links-line" />
                         </Link>{" "}
-                        ou envoyer un courriel à{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        ou nous contacter :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
                         <br />
                         <br />
@@ -282,9 +284,9 @@ export default function QuestCeQueLeTdb() {
                         de l’apprentissage de votre région en temps réel, sans avoir besoin de solliciter ces
                         établissements. <br />
                         Si vous avez des besoins spécifiques liés par exemple à la cellule apprentissage locale, vous
-                        pouvez nous contacter par courriel :{" "}
-                        <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
-                          {CONTACT_ADDRESS}
+                        pouvez nous contacter :{" "}
+                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          contactez-nous
                         </Link>
                       </Text>
                     </Box>
