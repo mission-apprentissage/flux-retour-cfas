@@ -106,6 +106,7 @@ export default () => {
         transmission_api_version: organisme.api_version,
         transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",
         api_key_active: !!organisme.api_key,
+        api_key: organisme.mode_de_transmission === "API" ? organisme.api_key : undefined,
         parametrage_erp_active: !!organisme.mode_de_transmission_configuration_date,
         parametrage_erp_date: organisme.mode_de_transmission_configuration_date,
         erps: organisme.erps,

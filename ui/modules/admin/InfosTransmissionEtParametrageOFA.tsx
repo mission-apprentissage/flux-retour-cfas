@@ -1,6 +1,7 @@
-import { Box, Stack, Text, Link, HStack } from "@chakra-ui/react";
+import { Box, Stack, Text, Link, HStack, useClipboard, Input, Button } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 import { _get } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
@@ -13,6 +14,7 @@ interface InfosTransmissionParametrageOFAProps {
   transmission_manuelle_active: boolean;
   parametrage_erp_active: boolean;
   api_key_active: boolean;
+  api_key: string;
   parametrage_erp_date: Date;
   erps: string[];
   organisme_transmetteur?: {
@@ -24,15 +26,24 @@ interface InfosTransmissionParametrageOFAProps {
 
 const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   const router = useRouter();
-
   const { data: parametrage } = useQuery<InfosTransmissionParametrageOFAProps, any>(
     ["admin/organismes/"],
     () => _get(`/api/v1/admin/organismes/${organisme?._id}/parametrage-transmission`),
     { enabled: router.isReady }
   );
+  const [showFullApiKey, setShowFullApiKey] = useState(false);
+  const { onCopy, hasCopied } = useClipboard(parametrage?.api_key ?? "");
+
+  const toggleApiKeyVisibility = () => setShowFullApiKey(!showFullApiKey);
+
+  const apiKeyDisplay = parametrage?.api_key
+    ? showFullApiKey
+      ? parametrage.api_key
+      : parametrage.api_key.replace(/(?<=.{3})[^-]/g, "•")
+    : "Aucune clé API disponible";
 
   return (
-    <Stack borderColor="#0063CB" borderWidth="2px" w="fit-content" p="2w" {...props}>
+    <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" {...props}>
       <Box color="#0063CB" display="flex" alignItems="center">
         <Box as="i" className="ri-eye-fill" />
         <Text fontSize="zeta" fontWeight="bold" ml="2">
@@ -84,6 +95,24 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
+      {parametrage?.api_key && (
+        <HStack spacing="1w">
+          <Text>Clé API :</Text>
+          <HStack spacing="1w">
+            <Input value={apiKeyDisplay} isReadOnly size="sm" width="330px" />
+            <Button size="sm" variant="primary" onClick={toggleApiKeyVisibility}>
+              {showFullApiKey ? (
+                <Box as="i" className="ri-eye-off-line" verticalAlign="middle" />
+              ) : (
+                <Box as="i" className="ri-eye-line" verticalAlign="middle" />
+              )}
+            </Button>
+            <Button size="sm" variant="primary" onClick={onCopy} ml="2">
+              {hasCopied ? "Copié !" : "Copier"}
+            </Button>
+          </HStack>
+        </HStack>
+      )}
       <HStack spacing="1w">
         <Text>Paramétrage :</Text>
         {parametrage?.parametrage_erp_active ? (
