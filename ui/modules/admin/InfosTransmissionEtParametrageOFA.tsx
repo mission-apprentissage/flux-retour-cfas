@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { _get } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
@@ -78,6 +78,24 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
+      {parametrage?.api_key && (
+        <HStack spacing="1w">
+          <Text>Clé API :</Text>
+          <HStack spacing="1w">
+            <Input value={apiKeyDisplay} isReadOnly size="sm" width="330px" />
+            <Button size="sm" variant="primary" onClick={toggleApiKeyVisibility}>
+              {showFullApiKey ? (
+                <Box as="i" className="ri-eye-off-line" verticalAlign="middle" />
+              ) : (
+                <Box as="i" className="ri-eye-line" verticalAlign="middle" />
+              )}
+            </Button>
+            <Button size="sm" variant="primary" onClick={onCopy} ml="2">
+              {hasCopied ? "Copié !" : "Copier"}
+            </Button>
+          </HStack>
+        </HStack>
+      )}
       <HStack spacing="1w">
         <Text>Transmission manuelle :</Text>
         {parametrage?.transmission_manuelle_active ? (
@@ -141,10 +159,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
-      <HStack spacing="1w">
-        <Text>Clé d’API présente :</Text>
-        {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
-      </HStack>
       {parametrage?.organisme_transmetteur ? (
         <Box display="flex" alignItems="center">
           <Text>Dernier organisme transmetteur des effectifs : </Text>
@@ -162,6 +176,17 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           </Link>
         </Box>
       ) : null}
+      <Button
+        variant="secondary"
+        w="fit-content"
+        bg="white"
+        onClick={async () => {
+          location.href = `/organismes/${organisme?._id}/transmissions`;
+        }}
+      >
+        <Box as="i" className="ri-eye-line" verticalAlign="middle" mr={2} />
+        Voir le rapport de transmission
+      </Button>
     </Stack>
   );
 };
