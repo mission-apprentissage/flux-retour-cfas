@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { _get } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
@@ -78,23 +78,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
-      <HStack spacing="1w">
-        <Text>Transmission manuelle :</Text>
-        {parametrage?.transmission_manuelle_active ? (
-          <Box display="flex" alignItems="center">
-            <BadgeYes />
-            <Text>
-              (
-              {parametrage.transmission_date
-                ? new Date(parametrage.transmission_date).toLocaleDateString()
-                : "Date non disponible"}
-              )
-            </Text>
-          </Box>
-        ) : (
-          <BadgeNo />
-        )}
-      </HStack>
       {parametrage?.api_key && (
         <HStack spacing="1w">
           <Text>Clé API :</Text>
@@ -113,6 +96,23 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           </HStack>
         </HStack>
       )}
+      <HStack spacing="1w">
+        <Text>Transmission manuelle :</Text>
+        {parametrage?.transmission_manuelle_active ? (
+          <Box display="flex" alignItems="center">
+            <BadgeYes />
+            <Text>
+              (
+              {parametrage.transmission_date
+                ? new Date(parametrage.transmission_date).toLocaleDateString()
+                : "Date non disponible"}
+              )
+            </Text>
+          </Box>
+        ) : (
+          <BadgeNo />
+        )}
+      </HStack>
       <HStack spacing="1w">
         <Text>Paramétrage :</Text>
         {parametrage?.parametrage_erp_active ? (
@@ -141,10 +141,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           <BadgeNo />
         )}
       </HStack>
-      <HStack spacing="1w">
-        <Text>Clé d’API présente :</Text>
-        {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
-      </HStack>
       {parametrage?.organisme_transmetteur ? (
         <Box display="flex" alignItems="center">
           <Text>Dernier organisme transmetteur des effectifs : </Text>
@@ -162,6 +158,17 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           </Link>
         </Box>
       ) : null}
+      <Button
+        variant="secondary"
+        w="fit-content"
+        bg="white"
+        onClick={async () => {
+          location.href = `/organismes/${organisme?._id}/transmissions`;
+        }}
+      >
+        <Box as="i" className="ri-eye-line" verticalAlign="middle" mr={2} />
+        Voir le rapport de transmission
+      </Button>
     </Stack>
   );
 };
