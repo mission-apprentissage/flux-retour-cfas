@@ -644,6 +644,7 @@ describe("Routes administrateur", () => {
         transmission_api_active: true,
         transmission_api_version: "V2",
         transmission_manuelle_active: false,
+        api_key: "SAMPLE_API_KEY",
         api_key_active: true,
         parametrage_erp_active: true,
         parametrage_erp_date: sampleConfigurationDate.toISOString(),
