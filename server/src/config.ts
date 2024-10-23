@@ -50,15 +50,6 @@ const config = {
       pass: env.get("MNA_TDB_SMTP_AUTH_PASS").asString(),
     },
   },
-  ovhStorage: {
-    username: env.get("MNA_TDB_OVH_STORAGE_USERNAME").required().asString(),
-    password: env.get("MNA_TDB_OVH_STORAGE_PASSWORD").required().asString(),
-    authURL: "https://auth.cloud.ovh.net/v3/auth",
-    tenantId: env.get("MNA_TDB_OVH_STORAGE_TENANT_ID").required().asString(),
-    region: "GRA",
-    containerName: env.get("MNA_TDB_OVH_STORAGE_CONTAINER_NAME").required().asString(),
-    encryptionKey: env.get("MNA_TDB_OVH_STORAGE_ENCRYPTION_KEY").required().asString(),
-  },
   ovh: {
     storage: {
       encryptionKey: env.get("MNA_TDB_OVH_STORAGE_ENCRYPTION_KEY").asString(),

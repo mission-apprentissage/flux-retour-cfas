@@ -14,14 +14,14 @@ export const getOrCreateOrganismeV2 = async (uai: string, siret: string) => {
   return organisme._id;
 };
 
-export const getOrganismeV2 = async (uai: string, siret: string) => {
+const getOrganismeV2 = async (uai: string, siret: string) => {
   return organismeV2Db().findOne({
     uai: uai.replace(/\s/g, "").toLowerCase(),
     siret: siret.replace(/\s/g, "").toLowerCase(),
   });
 };
 
-export const insertOrganismeV2 = async (uai: string, siret: string) => {
+const insertOrganismeV2 = async (uai: string, siret: string) => {
   return organismeV2Db().insertOne({
     _id: new ObjectId(),
     draft: true,

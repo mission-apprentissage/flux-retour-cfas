@@ -82,7 +82,7 @@ export const getEffectifsNominatifsWithoutId = async (
   );
 };
 
-export const getEffectifsNominatifs = async (
+const getEffectifsNominatifs = async (
   ctx: AuthContext,
   filters: FullEffectifsFilters,
   type: TypeEffectifNominatif,

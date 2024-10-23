@@ -151,7 +151,7 @@ const mapAdresseReferentielToAdresseTdb = (adresseReferentiel) => {
 /**
  * Reset du flag est_dans_le_referentiel pour tous les organismes
  */
-export const resetOrganismesReferentielPresence = async () => {
+const resetOrganismesReferentielPresence = async () => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
   await organismesDb().updateMany({}, { $set: { est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT } });
 };

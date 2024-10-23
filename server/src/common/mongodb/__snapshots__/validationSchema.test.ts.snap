@@ -318,8 +318,6 @@ exports[`validation-schema should create validation schema for contratsDeca: con
 }
 `;
 
-exports[`validation-schema should create validation schema for decaRaw: decaRaw 1`] = `{}`;
-
 exports[`validation-schema should create validation schema for effectifV2: effectifV2 1`] = `
 {
   "additionalProperties": false,

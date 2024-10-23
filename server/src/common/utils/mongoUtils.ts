@@ -1,4 +1,4 @@
-import { ObjectId, WithId } from "mongodb";
+import { WithId } from "mongodb";
 
 /**
  * Supprime toutes les attributs à false ou 0 pour éviter une erreur mongodb
@@ -14,15 +14,3 @@ export function cleanProjection<
     return acc;
   }, {} as Projection);
 }
-
-/**
- * Crée un type qui convertit tous les ObjectId en string.
- * Pour transformer un type de la BDD en type serialisé par exemple.
- */
-export type MapObjectIdToString<Type> = Type extends ObjectId
-  ? string
-  : Type extends Record<any, any>
-    ? {
-        [K in keyof Type]: MapObjectIdToString<Type[K]>;
-      }
-    : Type;

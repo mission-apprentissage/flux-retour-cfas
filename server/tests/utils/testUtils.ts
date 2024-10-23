@@ -98,12 +98,6 @@ export function id(i: number): string {
 }
 
 export type Method = "get" | "post" | "put" | "patch" | "delete";
-export type RequestAPIFunc = <T>(
-  method: Method,
-  url: string,
-  body?: T,
-  headers?: { [key: string]: string }
-) => Promise<AxiosResponse>;
 
 export function expectUnauthorizedError(response: any) {
   assert.strictEqual(response.status, 401);
@@ -119,10 +113,6 @@ export function expectForbiddenError(response: any) {
     error: "Forbidden",
     message: "Permissions invalides",
   });
-}
-
-export function stringifyMongoFields<T extends object>(object: T): T {
-  return JSON.parse(JSON.stringify(object));
 }
 
 export async function generate<T>(amount: number, callback: () => Promise<T>): Promise<T[]> {

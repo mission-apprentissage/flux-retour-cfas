@@ -3,8 +3,6 @@ import { ObjectId } from "mongodb";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 
-// import { getUsersLinkedToOrganismeId } from "../users.actions";
-
 /**
  * Fonction de récupération des organismes à fusionner = duplicats d'organismes
  * Organismes groupés par SIRET dont il existe au moins un organisme avec UAI vide
