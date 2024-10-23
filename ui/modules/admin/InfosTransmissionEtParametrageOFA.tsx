@@ -44,7 +44,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       : parametrage.api_key.replace(/(?<=.{3})./g, "*")
     : "Aucune clé API disponible";
 
-  console.log("CONSOLE LOG ~ InfosTransmissionEtParametrageOFA ~ parametrage:", parametrage);
   return (
     <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" gap={3} {...props}>
       <Box color="#0063CB" display="flex" alignItems="center">
