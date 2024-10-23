@@ -1,12 +1,12 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { ZodIssueCode, z } from "zod";
+import { z, ZodIssueCode } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import {
   SIRET_REGEX,
+  SourceApprenantEnum,
   STATUT_APPRENANT,
   STATUT_APPRENANT_VALUES,
-  SourceApprenantEnum,
   TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
   YEAR_RANGE_REGEX,
@@ -17,6 +17,7 @@ import { zAdresse } from "../parts/adresseSchema";
 import { zApprenant } from "./effectifs/apprenant.part";
 import { zContrat } from "./effectifs/contrat.part";
 import { zFormationEffectif } from "./effectifs/formation.part";
+import { zFormationCatalogue } from "./formationsCatalogue.model";
 
 const collectionName = "effectifs";
 
@@ -190,6 +191,9 @@ export const zEffectif = z.object({
           .nullish(),
         formation: z
           .object({
+            _id: zFormationCatalogue.shape._id.nullish(),
+            cle_ministere_educatif: zFormationCatalogue.shape.cle_ministere_educatif.nullish(),
+            intitule_long: zFormationCatalogue.shape.intitule_long.nullish(),
             codes_rome: z.array(z.string()).nullish(),
             opcos: z.array(z.string()).nullish(),
           })

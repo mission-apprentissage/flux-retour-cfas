@@ -570,6 +570,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:computed-effectifs-by-opcos"));
 
+program
+  .command("hydrate:computed-effectifs-formation")
+  .description("Mise a jour du computed formation pour les effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:computed-effectifs-formation"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
