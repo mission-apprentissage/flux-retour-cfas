@@ -117,6 +117,8 @@ export default () => {
                 _id: organismeTransmetteur._id,
                 enseigne: organismeTransmetteur.enseigne,
                 raison_sociale: organismeTransmetteur.raison_sociale,
+                uai: organismeTransmetteur.uai,
+                siret: organismeTransmetteur.siret,
               },
             }
           : {}),

@@ -21,6 +21,8 @@ interface InfosTransmissionParametrageOFAProps {
     _id: string;
     enseigne?: string;
     raison_sociale?: string;
+    uai: string;
+    siret: string;
   };
 }
 
@@ -42,7 +44,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       : parametrage.api_key.replace(/(?<=.{3})./g, "*")
     : "Aucune clé API disponible";
 
-  console.log("CONSOLE LOG ~ InfosTransmissionEtParametrageOFA ~ parametrage:", parametrage);
   return (
     <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" gap={3} {...props}>
       <Box color="#0063CB" display="flex" alignItems="center">
@@ -137,7 +138,8 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           >
             {parametrage?.organisme_transmetteur.enseigne ??
               parametrage?.organisme_transmetteur.raison_sociale ??
-              "Organisme inconnu"}
+              "Organisme inconnu"}{" "}
+            (UAI: {parametrage?.organisme_transmetteur.uai} - SIRET: {parametrage?.organisme_transmetteur.siret})
           </Link>
         </HStack>
       ) : null}
@@ -150,7 +152,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         }}
       >
         <Box as="i" className="ri-eye-line" verticalAlign="middle" mr={2} />
-        Voir le rapport de transmission
+        Voir les transmissions
       </Button>
     </Stack>
   );
