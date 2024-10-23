@@ -39,11 +39,12 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   const apiKeyDisplay = parametrage?.api_key
     ? showFullApiKey
       ? parametrage.api_key
-      : parametrage.api_key.replace(/(?<=.{3})[^-]/g, "•")
+      : parametrage.api_key.replace(/(?<=.{3})./g, "*")
     : "Aucune clé API disponible";
 
+  console.log("CONSOLE LOG ~ InfosTransmissionEtParametrageOFA ~ parametrage:", parametrage);
   return (
-    <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" {...props}>
+    <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" gap={3} {...props}>
       <Box color="#0063CB" display="flex" alignItems="center">
         <Box as="i" className="ri-eye-fill" />
         <Text fontSize="zeta" fontWeight="bold" ml="2">
@@ -51,19 +52,18 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         </Text>
       </Box>
       <HStack spacing="1w">
-        <Text>Transmission API :</Text>
-        {parametrage?.transmission_api_active ? (
-          <Box display="flex" alignItems="center">
+        <Text>Transmission :</Text>
+        {parametrage?.transmission_api_active || parametrage?.transmission_manuelle_active ? (
+          <Box display="flex" alignItems="center" gap={3}>
             <BadgeYes />
-            {parametrage.transmission_api_version && (
+            {(parametrage.transmission_api_version || parametrage.erps?.length > 0) && (
               <Tag
-                fontSize="epsilon"
-                textColor="grey.800"
                 textTransform="none"
-                paddingX="1w"
-                paddingY="2px"
-                backgroundColor="#ECEAE3"
-                primaryText={parametrage.transmission_api_version}
+                variant="badge"
+                colorScheme="grey_tag"
+                size="md"
+                borderRadius={0}
+                primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
               />
             )}
             <Text>
@@ -97,26 +97,9 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         </HStack>
       )}
       <HStack spacing="1w">
-        <Text>Transmission manuelle :</Text>
-        {parametrage?.transmission_manuelle_active ? (
-          <Box display="flex" alignItems="center">
-            <BadgeYes />
-            <Text>
-              (
-              {parametrage.transmission_date
-                ? new Date(parametrage.transmission_date).toLocaleDateString()
-                : "Date non disponible"}
-              )
-            </Text>
-          </Box>
-        ) : (
-          <BadgeNo />
-        )}
-      </HStack>
-      <HStack spacing="1w">
         <Text>Paramétrage :</Text>
         {parametrage?.parametrage_erp_active ? (
-          <HStack spacing="1w">
+          <HStack spacing="1w" gap={3}>
             <BadgeYes />
             {parametrage.erps?.map((erp, index) => (
               <Tag
@@ -142,7 +125,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         )}
       </HStack>
       {parametrage?.organisme_transmetteur ? (
-        <Box display="flex" alignItems="center">
+        <HStack alignItems="center" gap={3}>
           <Text>Dernier organisme transmetteur des effectifs : </Text>
           <Link
             key={parametrage?.organisme_transmetteur._id}
@@ -156,7 +139,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
               parametrage?.organisme_transmetteur.raison_sociale ??
               "Organisme inconnu"}
           </Link>
-        </Box>
+        </HStack>
       ) : null}
       <Button
         variant="secondary"
