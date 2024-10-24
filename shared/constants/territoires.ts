@@ -1444,6 +1444,24 @@ export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.red
   {} as Record<IAcademieCode, IAcademie>
 );
 
+function isAcademieCode(code: string | number): code is IAcademieCode {
+  return code in ACADEMIES_BY_CODE;
+}
+
+export function normalizeAcademieCode(code: string | number): IAcademieCode | null {
+  const normalizedCode = code.toString().padStart(2, "0");
+  if (isAcademieCode(normalizedCode)) {
+    return normalizedCode;
+  }
+
+  return null;
+}
+
+export function getAcademieByCode(code: string | number): IAcademie | null {
+  const normalizedCode = normalizeAcademieCode(code);
+  return normalizedCode === null ? null : ACADEMIES_BY_CODE[normalizedCode];
+}
+
 export const TERRITOIRE_TYPE = {
   REGION: "region",
   DEPARTEMENT: "departement",
