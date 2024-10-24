@@ -1,31 +1,16 @@
 {
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": ".",
-    "skipLibCheck": true,
-    "strict": false,
-    "strictNullChecks": true,
-    "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
     "paths": {
       "@/*": ["./*"],
       "shared": ["../shared"]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
+    "strictFunctionTypes": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "public", ".next"]
+  "exclude": ["**/node_modules", "public", ".next"]
 }
