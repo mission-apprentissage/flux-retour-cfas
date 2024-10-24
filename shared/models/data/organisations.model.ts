@@ -6,7 +6,7 @@ import { zObjectId } from "zod-mongodb-schema";
 import {
   ACADEMIES_BY_CODE,
   DEPARTEMENTS_BY_CODE,
-  IAcademieCode,
+  getAcademieByCode,
   IDepartmentCode,
   IRegionCode,
   ORGANISATIONS_NATIONALES,
@@ -203,9 +203,7 @@ export function getOrganisationLabel(organisation: IOrganisationCreate): string 
         DEPARTEMENTS_BY_CODE[organisation.code_departement as IDepartmentCode]?.nom || organisation.code_departement
       }`;
     case "ACADEMIE":
-      return `Académie ${
-        ACADEMIES_BY_CODE[organisation.code_academie as IAcademieCode]?.nom || organisation.code_academie
-      }`;
+      return `Académie ${getAcademieByCode(organisation.code_academie)?.nom ?? organisation.code_academie}`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
