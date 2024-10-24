@@ -56,6 +56,7 @@ import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organis
 import { removeMetiersFromOrganisme } from "./patches/removeMetiersFromOrganisme";
 import { updateFirstTransmissionDateForOrganismes } from "./patches/update-firstTransmissionDates";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
+import { validationTerritoires } from "./territoire/validationTerritoire";
 import { createErpUserLegacy } from "./users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
@@ -147,6 +148,10 @@ export async function setupJobProcessor() {
                 await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
                 return 0;
               },
+            },
+            "Validation des constantes de territoires": {
+              cron_string: "5 4 1 * *",
+              handler: validationTerritoires,
             },
 
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
@@ -447,6 +452,9 @@ export async function setupJobProcessor() {
         handler: async () => {
           return validateModels();
         },
+      },
+      "territoire:validate": {
+        handler: validationTerritoires,
       },
       "computed:update": {
         handler: updateComputedFields,

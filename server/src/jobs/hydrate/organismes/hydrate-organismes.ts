@@ -143,7 +143,7 @@ const mapAdresseReferentielToAdresseTdb = (adresseReferentiel) => {
     commune: localite,
     departement: departement?.code,
     region: region?.code,
-    academie: academie?.code.replace(/^0+/, ""), // Mapping pour coller à notre constante ACADEMIES
+    academie: academie?.code,
     complete: label,
   };
 };
