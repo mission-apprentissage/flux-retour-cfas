@@ -1,11 +1,4 @@
-import {
-  CODE_POSTAL_REGEX,
-  CODE_INSEE_REGEX,
-  DEPARTEMENTS_BY_CODE,
-  REGIONS_BY_CODE,
-  ACADEMIES_BY_CODE,
-  PAYS_BY_CODE,
-} from "../../constants";
+import { CODE_POSTAL_REGEX, CODE_INSEE_REGEX, PAYS_BY_CODE } from "../../constants";
 import { zodEnumFromObjKeys } from "../../utils/zodHelper";
 import { zodOpenApi } from "../zodOpenApi";
 
@@ -55,11 +48,19 @@ export const zAdresse = zodOpenApi.object({
     .openapi({ example: "PARIS" })
     .max(80)
     .optional(),
-  departement: zodEnumFromObjKeys(DEPARTEMENTS_BY_CODE)
+  departement: zodOpenApi
+    .string()
+    .regex(/^[0-9]{2,3}$/)
     .openapi({ examples: ["01", "59"] })
     .optional(),
-  region: zodEnumFromObjKeys(REGIONS_BY_CODE).optional(),
-  academie: zodEnumFromObjKeys(ACADEMIES_BY_CODE).optional(),
+  region: zodOpenApi
+    .string()
+    .regex(/^[0-9]{2,3}$/)
+    .optional(),
+  academie: zodOpenApi
+    .string()
+    .regex(/^[0-9]{2}$/)
+    .optional(),
   complete: zodOpenApi
     .string({
       description: "Adresse complète",
