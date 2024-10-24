@@ -1,7 +1,7 @@
 import { isEqual } from "date-fns";
 import { cloneDeep, get } from "lodash-es";
 import { Collection, WithoutId } from "mongodb";
-import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
+import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, normalizeAcademieCode } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
@@ -82,15 +82,15 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
     return effectifData;
   }
 
+  const academieNum = adresseInfo.num_academie?.toString().padStart(2, "0");
+
   effectifDataWithAddress.apprenant.adresse = stripEmptyFields({
     ...effectifDataWithAddress.apprenant.adresse,
     commune: adresseInfo.commune,
     code_insee: adresseInfo.code_commune_insee,
     code_postal: adresseInfo.code_postal,
     departement: DEPARTEMENTS_BY_CODE[adresseInfo.num_departement] ? (adresseInfo.num_departement as any) : undefined,
-    academie: ACADEMIES_BY_CODE[adresseInfo.num_academie?.toString()]
-      ? (adresseInfo.num_academie?.toString() as any)
-      : undefined,
+    academie: normalizeAcademieCode(academieNum) ?? undefined,
     region: REGIONS_BY_CODE[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
   });
 

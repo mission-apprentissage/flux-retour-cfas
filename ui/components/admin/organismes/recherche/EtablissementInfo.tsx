@@ -51,10 +51,10 @@ function getCatalogueEtablissementInfo(siret: string, formations: OffreFormation
       return acc;
     },
     {
-      enseigne: new Set(),
-      adresse: new Set(),
-      raison_sociale: new Set(),
-      date_creation: new Set(),
+      enseigne: new Set<string>(),
+      adresse: new Set<string>(),
+      raison_sociale: new Set<string>(),
+      date_creation: new Set<string>(),
     }
   );
 
