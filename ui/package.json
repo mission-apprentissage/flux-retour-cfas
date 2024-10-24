@@ -10,6 +10,7 @@
     "node": ">=22",
     "npm": "please-use-yarn"
   },
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build --no-lint",
