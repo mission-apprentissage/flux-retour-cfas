@@ -332,7 +332,7 @@ export const legacySchema = {
             code_postal: {
               bsonType: "string",
               description: "Le code postal doit contenir 5 caractères",
-              example: "75000",
+              example: "75001",
               maxLength: 5,
               minLength: 5,
               pattern: "^[0-9]{5}$",
@@ -351,7 +351,7 @@ export const legacySchema = {
             complete: {
               bsonType: "string",
               description: "Adresse complète",
-              example: "13 Bis Boulevard de la liberté 75000 PARIS",
+              example: "13 Bis Boulevard de la liberté 75001 PARIS",
             },
             departement: {
               bsonType: "string",
@@ -730,7 +730,7 @@ export const legacySchema = {
         },
         code_postal_de_naissance: {
           bsonType: "string",
-          example: "75000",
+          example: "75001",
           maxLength: 5,
           minLength: 5,
           pattern: "^[0-9]{5}$",
@@ -902,7 +902,7 @@ export const legacySchema = {
                 code_postal: {
                   bsonType: "string",
                   description: "Le code postal doit contenir 5 caractères",
-                  example: "75000",
+                  example: "75001",
                   maxLength: 5,
                   minLength: 5,
                   pattern: "^[0-9]{5}$",
@@ -921,7 +921,7 @@ export const legacySchema = {
                 complete: {
                   bsonType: "string",
                   description: "Adresse complète",
-                  example: "13 Bis Boulevard de la liberté 75000 PARIS",
+                  example: "13 Bis Boulevard de la liberté 75001 PARIS",
                 },
                 departement: {
                   bsonType: "string",
@@ -1430,7 +1430,7 @@ export const legacySchema = {
               code_postal: {
                 bsonType: "string",
                 description: "Le code postal doit contenir 5 caractères",
-                example: "75000",
+                example: "75001",
                 maxLength: 5,
                 minLength: 5,
                 pattern: "^[0-9]{5}$",
@@ -1449,7 +1449,7 @@ export const legacySchema = {
               complete: {
                 bsonType: "string",
                 description: "Adresse complète",
-                example: "13 Bis Boulevard de la liberté 75000 PARIS",
+                example: "13 Bis Boulevard de la liberté 75001 PARIS",
               },
               departement: {
                 bsonType: "string",

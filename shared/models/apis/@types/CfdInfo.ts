@@ -1,4 +1,4 @@
-type TabCoCfdInfo = {
+type CfdInfo = {
   date_fermeture: Date | null;
   date_ouverture: Date | null;
   niveau: string | null;
@@ -13,4 +13,4 @@ type TabCoCfdInfo = {
   }>;
 };
 
-export default TabCoCfdInfo;
+export default CfdInfo;
