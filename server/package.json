@@ -51,7 +51,6 @@
     "escape-string-regexp": "^5.0.0",
     "express": "^4.21.1",
     "express-async-errors": "3.1.1",
-    "express-list-endpoints": "^6.0.0",
     "fast-xml-parser": "^4.5.0",
     "job-processor": "^1.6.3",
     "joi": "^17.13.3",
