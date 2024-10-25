@@ -121,7 +121,7 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   await executeProcessEffectifQueueItem(effectifQueue);
 }
 
-export function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
+function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
     const transaction = hub?.startTransaction({

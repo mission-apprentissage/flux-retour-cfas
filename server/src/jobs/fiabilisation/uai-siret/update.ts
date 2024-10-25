@@ -122,7 +122,7 @@ const updateOrganismeForCoupleFiabilise = async ({ uai_fiable, siret_fiable }: a
 /**
  * Fonction de fiabilisation des organismes fermé si on trouve un unique organisme ouvert lié
  */
-export const updateOrganismesFiablesFermes = async () => {
+const updateOrganismesFiablesFermes = async () => {
   // Récupération des couples fiables avec lookup sur le référentiel via SIRET et étant marqués comme fermés dans le référentiel
   const couplesFiablesFermesDansReferentiel = await organismesDb()
     .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE, ferme: true })

@@ -52,7 +52,7 @@ export const mergeEffectifWithDefaults = <T extends Partial<IEffectif>>(effectif
 /**
  * Méthode de mise à jour d'un effectif depuis son id
  */
-export const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErrors: false }) => {
+const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErrors: false }) => {
   const effectif = await effectifsDb().findOne({ _id });
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);

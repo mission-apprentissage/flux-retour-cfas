@@ -136,14 +136,6 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
 };
 
 /**
- * Méthode de récupération d'organismes depuis un siret
- * Previously getFromSiret
- */
-export const findOrganismesBySiret = async (siret: string, projection = {}) => {
-  return await organismesDb().find({ siret }, { projection }).toArray();
-};
-
-/**
  * Méthode de récupération d'un organisme depuis un uai
  * Previously getFromUai
  */
@@ -244,44 +236,6 @@ export const updateOrganismeTransmission = async (
   if (!modifyResult.value) {
     throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
-};
-
-/**
- * Returns sous-établissements by siret for an uai
- */
-export const getSousEtablissementsForUai = async (uai: string): Promise<Array<any>> => {
-  return await organismesDb()
-    .aggregate([
-      { $match: { uai, siret: { $ne: null } } },
-      { $group: { _id: "$siret", nom: { $first: "$nom" } } },
-      { $project: { _id: 0, siret: "$_id", nom: "$nom" } },
-    ])
-    .toArray();
-};
-
-export type OrganismesSearch = {
-  searchTerm?: string;
-  etablissement_num_region?: string;
-  etablissement_num_departement?: string;
-  etablissement_reseaux?: string;
-};
-
-/**
- * Supprime l'organisme identifié par son id et supprime tous ses effectifs
- */
-export const deleteOrganismeAndEffectifs = async (id: ObjectId) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
-  if (!organisme.uai) throw new Error(`IOrganisme ${_id.toString()} doesn't have any UAI`);
-
-  // Suppression des effectifs liés puis de l'organisme
-  const { deletedCount: deletedEffectifs } = await effectifsDb().deleteMany({ organisme_id: id });
-  const { deletedCount: deletedOrganisme } = await organismesDb().deleteOne({ _id: id });
-
-  return { deletedEffectifs, deletedOrganisme };
 };
 
 /**
@@ -1044,7 +998,7 @@ export function getOrganismeProjection(
 /**
  * Retourne la projection d'un organisme utilisé dans une liste selon les permissions.
  */
-export function getOrganismeListProjection(
+function getOrganismeListProjection(
   infoTransmissionEffectifsCondition: any
 ): Partial<WithId<OrganismeWithPermissions>> {
   return cleanProjection<WithId<OrganismeWithPermissions>>({
@@ -1121,7 +1075,7 @@ export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffect
   return invalidsSirets;
 }
 
-export async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
+async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
   const res = await organismesDb()
     .aggregate<{ _id: ObjectId }>([
       {

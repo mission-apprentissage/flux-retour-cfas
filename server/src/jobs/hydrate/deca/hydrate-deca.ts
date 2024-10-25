@@ -8,7 +8,7 @@ import { contratsDecaDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:contratsDeca" });
-export const DATE_DEBUT_CONTRATS_DISPONIBLES = new Date("2022-01-01T00:00:00.000Z"); // Date de début de disponibilité des données dans l'API Deca
+const DATE_DEBUT_CONTRATS_DISPONIBLES = new Date("2022-01-01T00:00:00.000Z"); // Date de début de disponibilité des données dans l'API Deca
 const NB_JOURS_MAX_PERIODE_FETCH = 59; // Nombre de jours maximum que l'on peut récupérer via un appel à l'API Deca
 
 /**

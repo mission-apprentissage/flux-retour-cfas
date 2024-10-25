@@ -174,7 +174,7 @@ export const buildFiabilisationCoupleForTdbCouple = async (
  * liés à des données valides et sans erreurs dans la file d'attente
  * @returns
  */
-export const getAllUniqueCouplesUaiSiretToFiabilise = async () => {
+const getAllUniqueCouplesUaiSiretToFiabilise = async () => {
   const [allCouplesUaiSiretTdb, allCouplesUaiSiretTdbInQueue] = await Promise.all([
     getAllCouplesUaiSiretTdb(),
     getAllCouplesUaiSiretTdbInQueue(),

@@ -77,10 +77,6 @@ export const getDbCollectionSchema = async (name) => {
   return collectionInfo?.options?.validator;
 };
 
-export const getDbCollectionIndexes = async (name) => {
-  return await ensureInitialization(mongodbClient).db().collection(name).indexes();
-};
-
 /**
  * Création d'une collection si elle n'existe pas
  * @param {string} collectionName

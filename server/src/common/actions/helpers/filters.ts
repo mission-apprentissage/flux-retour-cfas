@@ -8,14 +8,7 @@ export const organismeLookup = {
   as: "organisme",
 };
 
-export interface FilterConfiguration {
-  matchKey: string;
-
-  // optional transformer
-  transformValue?: (value: any) => any;
-}
-
-export const territoireFiltersSchema = {
+const territoireFiltersSchema = {
   organisme_regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_academies: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
