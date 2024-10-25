@@ -60,9 +60,6 @@ const config = {
   organismesConsultationApiKey: env.get("MNA_TDB_ORGANISMES_CONSULTATION_API_KEY").asString(),
 
   // API métiers externes
-  tablesCorrespondances: {
-    endpoint: "https://tables-correspondances.apprentissage.beta.gouv.fr/api",
-  },
   mnaCatalogApi: {
     endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
   },

@@ -32,7 +32,7 @@ export const zAdresse = zodOpenApi.object({
       description: "Le code postal doit contenir 5 caractères",
     })
     .regex(CODE_POSTAL_REGEX)
-    .openapi({ example: "75000" })
+    .openapi({ example: "75001" })
     .optional(),
   code_insee: zodOpenApi
     .string({
@@ -65,7 +65,7 @@ export const zAdresse = zodOpenApi.object({
     .string({
       description: "Adresse complète",
     })
-    .openapi({ example: "13 Boulevard de la liberté 75000 PARIS" })
+    .openapi({ example: "13 Boulevard de la liberté 75001 PARIS" })
     .optional(),
   pays: zodEnumFromObjKeys(PAYS_BY_CODE).describe("Pays").optional(),
   bassinEmploi: zodOpenApi
