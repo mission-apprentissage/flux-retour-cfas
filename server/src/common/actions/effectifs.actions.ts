@@ -7,13 +7,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import {
-  effectifsArchiveDb,
-  effectifsDECADb,
-  effectifsDb,
-  opcosRncpDb,
-  organismesDb,
-} from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDECADb, effectifsDb, opcosRncpDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -422,22 +416,6 @@ const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
-
-export const updateEffectifComputedFromOrganisme = async (organismeId: ObjectId) => {
-  const organisme = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
-
-  return (
-    organisme &&
-    effectifsDb().updateMany(
-      { organisme_id: new ObjectId(organisme._id) },
-      {
-        $set: {
-          "_computed.organisme": generateOrganismeComputed(organisme),
-        },
-      }
-    )
-  );
-};
 
 export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) => {
   return (

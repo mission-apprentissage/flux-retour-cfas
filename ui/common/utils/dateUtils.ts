@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-duplicates
-import { endOfMonth, format } from "date-fns";
+import { format } from "date-fns";
 // eslint-disable-next-line import/no-duplicates
 import { fr } from "date-fns/locale";
 
@@ -21,9 +21,6 @@ export const prettyPrintDate = (date) => {
  * Formate une date selon le format en paramètre
  */
 export const formatDate = (date: Date, dateFormat: string) => format(date, dateFormat, { locale: fr });
-
-// Elle vérifie si la date est aprés le dernier jour du mois
-export const isDateFuture = (date) => date > endOfMonth(new Date());
 
 export const formatDateDayMonthYear = (date: string | Date) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
