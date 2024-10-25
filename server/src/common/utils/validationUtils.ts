@@ -1,6 +1,5 @@
 import Joi from "joi";
 import { joiPasswordExtendCore } from "joi-password";
-import { UAI_REGEX } from "shared";
 import { z } from "zod";
 
 const joiPassword = Joi.extend(joiPasswordExtendCore);
@@ -13,10 +12,6 @@ export function passwordSchema(isAdmin = false) {
     .minOfLowercase(1)
     .minOfUppercase(1)
     .minOfNumeric(1);
-}
-
-export function isValidUAI(uai: string) {
-  return UAI_REGEX.test(uai);
 }
 
 export async function validateFullObjectSchema<T = any>(object, schema): Promise<T> {

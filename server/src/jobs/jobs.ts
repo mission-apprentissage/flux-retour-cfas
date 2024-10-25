@@ -65,9 +65,6 @@ import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organis
 import { removeMetiersFromOrganisme } from "./patches/removeMetiersFromOrganisme";
 import { updateFirstTransmissionDateForOrganismes } from "./patches/update-firstTransmissionDates";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
-import { clearSeedAssets } from "./seed/clearAssets";
-import { seedAdmin, seedSample, seedSampleOrganismes, seedSampleUsers } from "./seed/start";
-// import { generateTypes } from "./seed/types/generate-types";
 import { createErpUserLegacy } from "./users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
@@ -188,9 +185,6 @@ export async function setupJobProcessor() {
     jobs: {
       "init:dev": {
         handler: async () => {
-          await seedSampleOrganismes();
-          await seedSampleUsers();
-          await seedAdmin();
           await hydrateFromReferentiel();
           await hydrateFormationsCatalogue();
           await hydrateOrganismesFormations();
@@ -201,21 +195,6 @@ export async function setupJobProcessor() {
       },
       "hydrate:daily": {
         handler: dailyJobs,
-      },
-      "seed:sample": {
-        handler: async () => {
-          return seedSample();
-        },
-      },
-      "seed:admin": {
-        handler: async (job) => {
-          return seedAdmin((job.payload as any)?.email?.toLowerCase());
-        },
-      },
-      "seed:assets:clear": {
-        handler: async () => {
-          return clearSeedAssets();
-        },
       },
       clear: {
         handler: async (job) => {

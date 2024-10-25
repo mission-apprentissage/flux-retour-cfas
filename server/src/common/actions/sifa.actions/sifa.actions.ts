@@ -89,10 +89,10 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     const codeDiplome = wrapNumString(formationCfd);
     // Adresse de l'effectif
     const effectifAddress = effectif.apprenant.adresse
-      ? effectif.apprenant.adresse?.complete ??
+      ? (effectif.apprenant.adresse?.complete ??
         `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
           effectif.apprenant.adresse?.voie ?? ""
-        }`
+        }`)
       : undefined;
 
     const requiredFields = {

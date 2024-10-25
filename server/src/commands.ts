@@ -12,7 +12,6 @@ import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
-import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
@@ -309,39 +308,6 @@ program
   .description("[TEMPORAIRE] Suppression de metiers dans organismes")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:patches:remove-metiers-from-organisme"));
-
-/**
- * Job d'initialisation de données de test
- */
-program.command("seed:sample").description("Seed sample data").action(createJobAction("seed:sample"));
-
-/**
- * Job d'initialisation d'un user admin
- * Va initialiser les roles par défaut en plus
- */
-program
-  .command("seed:admin")
-  .description("Seed user admin")
-  .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("seed:admin"));
-
-/**
- * Job de seed des goals dans plausible,
- * sur les envs de dev, recette et production
- */
-program
-  .command("seed:plausible:goals")
-  .description("Seed plausible goals")
-  .action(async () => {
-    await seedPlausibleGoals();
-  });
-
-program
-  .command("seed:assets:clear")
-  .description("Seed assets clear")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("seed:assets:clear"));
 
 /**
  * Job de nettoyage de db
