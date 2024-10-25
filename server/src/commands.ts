@@ -338,18 +338,6 @@ program
   .action(createJobAction("hydrate:bassins-emploi"));
 
 program
-  .command("hydrate:organismes-bassins-emploi")
-  .description("Remplissage du champ organismes.adresse.bassinEmploi")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:organismes-bassins-emploi"));
-
-program
-  .command("hydrate:effectifs-computed")
-  .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:effectifs-computed"));
-
-program
   .command("tmp:effectifs:update_computed_statut")
   .description("Remplissage du champ effectifs._computed avec les types des effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -386,12 +374,6 @@ program
   .action(createJobAction("hydrate:formations-catalogue"));
 
 program
-  .command("hydrate:rome")
-  .description("Remplissage du ROME")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:rome"));
-
-program
   .command("hydrate:rncp")
   .description("Remplissage du RNCP")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -410,24 +392,10 @@ program
   .action(createJobAction("hydrate:organismes-relations"));
 
 program
-  .command("hydrate:organismes-soltea")
-  .description("Remplissage des organismes du fichier SOLTEA")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:organismes-soltea"));
-
-program
   .command("hydrate:organismes-prepa-apprentissage")
   .description("Remplissage des organismes du fichier Prepa Apprentissage")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:organismes-prepa-apprentissage"));
-
-program
-  .command("hydrate:contratsDeca")
-  .description("Remplissage des contrats Deca")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .option("-d, --drop", "Supprime les contrats existants avant de les recréer", false)
-  .option("-f, --full", "Récupère l'intégralité des données disponibles via l'API Deca", false)
-  .action(createJobAction("hydrate:contratsDeca"));
 
 program
   .command("hydrate:contrats-deca-raw")
@@ -512,12 +480,6 @@ program
   .action(createJobAction("hydrate:ofa-inconnus"));
 
 program
-  .command("hydrate:effectifs-computed-organismes-reseaux")
-  .description("Mise a jour des valeurs computed des effectifs pour les organismes appartennant à un réseau")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:effectifs-computed-organismes-reseaux"));
-
-program
   .command("hydrate:effectifs-computed-organismes-opcos")
   .description("Mise a jour des valeurs computed des effectifs pour les organismes appartennant à un opco")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -528,13 +490,6 @@ program
   .description("Mise a jour des liens entre les voeux et les effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:voeux-effectifs-relations"));
-
-program
-  .command("hydrate:computed-effectifs-by-opcos")
-  .description("Mise a jour des computed pour les effectifs d'un opco")
-  .requiredOption("--opco <string>", "Nom de l'opco")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:computed-effectifs-by-opcos"));
 
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
