@@ -12684,13 +12684,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.pick@npm:4.4.0":
-  version: 4.4.0
-  resolution: "lodash.pick@npm:4.4.0"
-  checksum: 2c36cab7da6b999a20bd3373b40e31a3ef81fa264f34a6979c852c5bc8ac039379686b27380f0cb8e3781610844fafec6949c6fbbebc059c98f8fa8570e3675f
-  languageName: node
-  linkType: hard
-
 "lodash.range@npm:3.2.0":
   version: 3.2.0
   resolution: "lodash.range@npm:3.2.0"
@@ -17562,7 +17555,6 @@ __metadata:
     jsonwebtoken: 8.5.1
     lil-http-terminator: ^1.2.3
     lodash-es: 4.17.21
-    lodash.pick: 4.4.0
     luxon: ^2.5.2
     migrate-mongo: 10.0.0
     mjml: ^4.15.3

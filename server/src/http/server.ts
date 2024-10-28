@@ -136,7 +136,6 @@ import {
 } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
-import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
@@ -154,7 +153,6 @@ import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
-import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
@@ -423,17 +421,6 @@ function setupRoutes(app: Application) {
       }
     },
     dossierApprenantRouter()
-  );
-
-  /*********************************************************
-   * API authentifié par clé utilisé pour le réferentiel   *
-   *********************************************************/
-  app.use(
-    "/api/organismes",
-    requireApiKeyAuthenticationMiddleware({
-      apiKeyValue: config.organismesConsultationApiKey,
-    }),
-    organismesRouter()
   );
 
   /********************************
@@ -707,35 +694,6 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
         return await getIndicateursEffectifsParDepartement(filters, req.user.acl, req.user.organisation);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/par-organisme",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        return await getIndicateursEffectifsParOrganisme(req.user, filters);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/:type",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = req.user.acl.effectifsNominatifs[type];
-        if (permissions === false) {
-          throw Boom.forbidden("Permissions invalides");
-        }
-
-        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
-        await createTelechargementListeNomLog(
-          type,
-          ids.map((id) => id.toString()),
-          new Date(),
-          req.user._id,
-          undefined,
-          new ObjectId(req.user.organisation_id)
-        );
-        return effectifsWithoutIds;
       })
     )
     .get(
