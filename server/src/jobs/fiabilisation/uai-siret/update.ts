@@ -3,14 +3,7 @@ import { PromisePool } from "@supercharge/promise-pool";
 import { ApiError } from "api-alternance-sdk";
 import Boom from "boom";
 import { AnyBulkWriteOperation } from "mongodb";
-import {
-  IOrganisme,
-  STATUT_CREATION_ORGANISME,
-  STATUT_FIABILISATION_API_ORGANISME,
-  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
-  STATUT_FIABILISATION_ORGANISME,
-  STATUT_PRESENCE_REFERENTIEL,
-} from "shared";
+import { IOrganisme, STATUT_FIABILISATION_ORGANISME, STATUT_PRESENCE_REFERENTIEL } from "shared";
 
 import { createOrganisme, findOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance";
@@ -106,7 +99,6 @@ const updateOrganismeForCoupleFiabilise = async ({ uai_fiable, siret_fiable }: a
       uai: uai_fiable,
       siret: siret_fiable,
       fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE,
-      creation_statut: STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION, // Ajout d'un flag pour identifier que c'est un organisme créé à partir d'un lieu
       organismesFormateurs: [],
       organismesResponsables: [],
     });
@@ -156,7 +148,7 @@ const updateOrganismeFiabilisationApiUaiSiret = async (
     return {
       updateOne: {
         filter: { _id },
-        update: { $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE } },
+        update: { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE } },
       },
     };
   }
@@ -171,10 +163,10 @@ const updateOrganismeFiabilisationApiUaiSiret = async (
         filter: { _id },
         update: {
           $set: {
-            fiabilisation_api_statut:
+            fiabilisation_statut:
               apiData.resultat == null
-                ? STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE
-                : STATUT_FIABILISATION_API_ORGANISME.FIABLE,
+                ? STATUT_FIABILISATION_ORGANISME.NON_FIABLE
+                : STATUT_FIABILISATION_ORGANISME.FIABLE,
             fiabilisation_api_response,
           },
         },
@@ -191,7 +183,7 @@ const updateOrganismeFiabilisationApiUaiSiret = async (
             updateOne: {
               filter: { _id },
               update: {
-                $set: { fiabilisation_api_statut: STATUT_FIABILISATION_API_ORGANISME.NON_FIABLE },
+                $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE },
               },
             },
           };
