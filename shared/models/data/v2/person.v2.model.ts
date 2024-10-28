@@ -6,7 +6,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
 const collectionName = "personV2";
 
-export const zPersonV2 = z.object({
+const zPersonV2 = z.object({
   _id: zObjectId,
   created_at: z.date(),
   updated_at: z.date(),

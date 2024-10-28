@@ -6,7 +6,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
 const collectionName = "formationV2";
 
-export const zFormationV2 = z.object({
+const zFormationV2 = z.object({
   _id: zObjectId,
   draft: z.boolean(),
   created_at: z.date(),
