@@ -73,5 +73,3 @@ export const zAdresse = zodOpenApi.object({
     })
     .optional(),
 });
-
-export type IAdresse = zodOpenApi.output<typeof zAdresse>;

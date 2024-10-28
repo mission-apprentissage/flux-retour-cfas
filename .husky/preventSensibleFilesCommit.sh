@@ -10,7 +10,7 @@ exception="$exception|docker-bake.json|eslintrc.json|app.json|tsconfig.json|.moc
 exception="$exception|launch.json|arborescence-rome-14-06-2021.json"
 exception="$exception|server/static/organismes/organismes-prepa-apprentissage.csv"
 exception="$exception|server/static/opcos/.*.csv"
-exception="$exception|modele-import.xlsx|.env|open-api.json"
+exception="$exception|modele-import.xlsx|.env|open-api.json|knip.json"
 exception="$exception)$|cypress/(.*).json"
 
 files=$(git diff --cached --name-only | grep -v -E "$exception" | grep -E "$sensible_files_pattern")

@@ -84,7 +84,7 @@ const zOrganisationNational = zOrganisationBase.merge(zOrganisationNationalCreat
 const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCreate);
 const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
 
-export const zOrganisation = z.discriminatedUnion("type", [
+const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationOrganisme,
   zOrganisationReaseau,
   zOrganisationRegional,
@@ -108,35 +108,11 @@ export const zOrganisationCreate = z.discriminatedUnion("type", [
 
 export type IOrganisationOrganismeFormation = z.output<typeof zOrganisationOrganisme>;
 
-export type IOrganisationTeteReseau = z.output<typeof zOrganisationReaseau>;
-
 export type IOrganisationOperateurPublicNational = z.output<typeof zOrganisationNational>;
-
-export type IOrganisationCarifOrefNational = z.output<typeof zOrganisationCarifOref>;
 
 export type IOrganisationOperateurPublicRegion = z.output<typeof zOrganisationRegional>;
 
-export type IOrganisationOperateurPublicDepartement = z.output<typeof zOrganisationDepartemental>;
-
 export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisationAcademie>;
-
-export type IOrganisationAdministrateur = z.output<typeof zOrganisationAdmin>;
-
-// types structurés pour faciliter les permissions
-export type IOrganisationByType = {
-  ORGANISME_FORMATION: IOrganisationOrganismeFormation;
-  TETE_DE_RESEAU: IOrganisationTeteReseau;
-  DREETS: IOrganisationOperateurPublicRegion;
-  DRAAF: IOrganisationOperateurPublicRegion;
-  CONSEIL_REGIONAL: IOrganisationOperateurPublicRegion;
-  CARIF_OREF_REGIONAL: IOrganisationOperateurPublicRegion;
-  DRAFPIC: IOrganisationOperateurPublicRegion;
-  DDETS: IOrganisationOperateurPublicDepartement;
-  ACADEMIE: IOrganisationOperateurPublicAcademie;
-  ADMINISTRATEUR: IOrganisationAdministrateur;
-  OPERATEUR_PUBLIC_NATIONAL: IOrganisationOperateurPublicNational;
-  CARIF_OREF_NATIONAL: IOrganisationCarifOrefNational;
-};
 
 export type IOrganisation = z.output<typeof zOrganisation>;
 export type IOrganisationJson = Jsonify<IOrganisation>;
@@ -144,22 +120,6 @@ export type IOrganisationJson = Jsonify<IOrganisation>;
 export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
 
 export type IOrganisationType = IOrganisation["type"];
-
-// types en doublon avec l'UI
-export const organisationTypes: IOrganisationType[] = [
-  "ORGANISME_FORMATION",
-  "TETE_DE_RESEAU",
-  "DREETS",
-  "DRAAF",
-  "CONSEIL_REGIONAL",
-  "CARIF_OREF_REGIONAL",
-  "DDETS",
-  "ACADEMIE",
-  "OPERATEUR_PUBLIC_NATIONAL",
-  "CARIF_OREF_NATIONAL",
-  "ADMINISTRATEUR",
-  "DRAFPIC",
-];
 
 export const TYPES_ORGANISATION = [
   { key: "ACADEMIE", nom: "Académie" },

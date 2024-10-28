@@ -78,10 +78,8 @@
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
     "swagger-ui-express": "^5.0.1",
-    "tsx": "^3.14.0",
     "type-fest": "^4.26.1",
     "uuid": "8.3.2",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
     "zod": "^3.23.8"
   },
   "prettier": {
@@ -107,6 +105,8 @@
     "randexp": "0.5.3",
     "sinon": "^15.2.0",
     "tsup": "^7.3.0",
-    "typescript": "^5.6.3"
+    "tsx": "^3.14.0",
+    "typescript": "^5.6.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
   }
 }

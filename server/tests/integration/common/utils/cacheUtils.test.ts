@@ -2,8 +2,8 @@ import { strict as assert } from "assert";
 
 import { spy } from "sinon";
 
+import { sleep } from "@/common/utils/asyncUtils";
 import { clearCache, tryCachedExecution } from "@/common/utils/cacheUtils";
-import { sleep } from "@/common/utils/timeUtils";
 
 describe("tryCachedExecution()", () => {
   beforeEach(() => {

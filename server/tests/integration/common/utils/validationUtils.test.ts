@@ -1,4 +1,4 @@
-import { isValidCFD, isValidINE } from "shared";
+import { isValidCFD } from "shared";
 
 import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
 
@@ -16,26 +16,6 @@ describe("Validation Utils", () => {
     ].forEach(({ input, output }) => {
       it(`Vérifie qu'un CFD de valeur ${JSON.stringify(input)} est ${output ? "valide" : "invalide"}`, () => {
         expect(isValidCFD(input)).toBe(output);
-      });
-    });
-  });
-
-  describe("validation de l'INE", () => {
-    [
-      { input: null, output: false },
-      { input: undefined, output: false },
-      { input: 0, output: false },
-      { input: "", output: false },
-      { input: "123456789F", output: false },
-      { input: "123456789FFF", output: false },
-      { input: "A123456789F", output: false },
-      // valid INEs
-      { input: "123456789FF", output: true },
-      { input: "1234567890F", output: true },
-      { input: "1234A12345F", output: true },
-    ].forEach(({ input, output }) => {
-      it(`Vérifie qu'un INE de valeur ${JSON.stringify(input)} est ${output ? "valide" : "invalide"}`, () => {
-        expect(isValidINE(input)).toBe(output);
       });
     });
   });

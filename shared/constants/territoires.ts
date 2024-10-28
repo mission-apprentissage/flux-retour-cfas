@@ -4,7 +4,7 @@ import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
  * Liste des régions du territoire national
  * https://fr.wikipedia.org/wiki/Code_officiel_g%C3%A9ographique
  */
-export const REGIONS = [
+const REGIONS = [
   {
     nom: "Guadeloupe",
     code: "01",
@@ -1550,7 +1550,7 @@ export const DEPARTEMENTS = [
 }>;
 
 type IDepartements = typeof DEPARTEMENTS;
-export type IDepartement = IDepartements[number];
+type IDepartement = IDepartements[number];
 export type IDepartmentCode = IDepartement["code"];
 
 export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPARTEMENTS.reduce(
@@ -1561,7 +1561,7 @@ export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPAR
   {} as Record<IDepartmentCode, IDepartement>
 );
 
-export const ACADEMIES = [
+const ACADEMIES = [
   { nom: "Paris", code: "1" },
   { nom: "Aix-Marseille", code: "2" },
   { nom: "Besançon", code: "3" },
@@ -1619,7 +1619,7 @@ export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.red
   {} as Record<IAcademieCode, IAcademie>
 );
 
-export const TERRITOIRE_TYPE = {
+const TERRITOIRE_TYPE = {
   REGION: "region",
   DEPARTEMENT: "departement",
   ACADEMIE: "academie",
@@ -1629,7 +1629,7 @@ export const TERRITOIRE_TYPE = {
  * Généré avec la commande :
  * xlsx-cli ZE2020_au_01-01-2023.xlsx --sheet-index=0 2>/dev/null | tail -n+7 | head -n-1 | jq -Rn 'reduce inputs as $line ([]; . + [$line | split(",") | {code: .[0], nom: .[1]} ])' > bassins_emploi.json
  */
-export const BASSINS_EMPLOI = [
+const BASSINS_EMPLOI = [
   {
     code: "0051",
     nom: "Alençon",

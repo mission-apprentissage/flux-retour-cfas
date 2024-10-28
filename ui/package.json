@@ -29,7 +29,6 @@
     "@tanstack/react-query": "4.36.1",
     "@tanstack/react-table": "^8.20.5",
     "axios": "^1.7.7",
-    "case-sensitive-paths-webpack-plugin": "2.4.0",
     "chakra-ui-markdown-renderer": "4.1.0",
     "chart.js": "^4.4.5",
     "date-fns": "^2.30.0",
@@ -73,6 +72,7 @@
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
+    "case-sensitive-paths-webpack-plugin": "2.4.0",
     "typescript": "^5.6.3"
   }
 }

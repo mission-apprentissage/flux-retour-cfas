@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
-import { getCurrentTime, resetTime, setTime, sleep } from "@/common/utils/timeUtils";
+import { sleep } from "@/common/utils/asyncUtils";
+import { getCurrentTime, resetTime, setTime } from "@/common/utils/timeUtils";
 
 describe("utils/timeUtils", () => {
   beforeEach(() => {
