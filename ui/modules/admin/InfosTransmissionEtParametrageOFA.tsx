@@ -56,26 +56,28 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       <HStack spacing="1w">
         <Text>Transmission :</Text>
         {parametrage?.transmission_api_active || parametrage?.transmission_manuelle_active ? (
-          <Box display="flex" alignItems="center" gap={3}>
+          <>
             <BadgeYes />
-            {(parametrage.transmission_api_version || parametrage.erps?.length > 0) && (
-              <Tag
-                textTransform="none"
-                variant="badge"
-                colorScheme="grey_tag"
-                size="md"
-                borderRadius={0}
-                primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
-              />
-            )}
-            <Text>
-              (
-              {parametrage.transmission_date
-                ? new Date(parametrage.transmission_date).toLocaleDateString()
-                : "Date non disponible"}
-              )
-            </Text>
-          </Box>
+            <Box display="flex" alignItems="center" gap={3}>
+              {(parametrage.transmission_api_version || parametrage.erps?.length > 0) && (
+                <Tag
+                  textTransform="none"
+                  variant="badge"
+                  colorScheme="grey_tag"
+                  size="md"
+                  borderRadius={0}
+                  primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
+                />
+              )}
+              <Text>
+                (
+                {parametrage.transmission_date
+                  ? new Date(parametrage.transmission_date).toLocaleDateString()
+                  : "Date non disponible"}
+                )
+              </Text>
+            </Box>
+          </>
         ) : (
           <BadgeNo />
         )}
