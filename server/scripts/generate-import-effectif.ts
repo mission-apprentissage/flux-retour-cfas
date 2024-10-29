@@ -82,6 +82,8 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     etablissement_formateur_siret: formateur.siret,
     etablissement_lieu_de_formation_uai: formateur.uai,
     etablissement_lieu_de_formation_siret: formateur.siret,
+    etablissement_lieu_de_formation_adresse: fakerFr.location.streetAddress(),
+    etablissement_lieu_de_formation_code_postal: fakerFr.helpers.fromRegExp("[0-9]{5}"),
     annee_scolaire: fakerFr.helpers.arrayElement(["2023-2024", "2024-2024"]),
     annee_formation: anneeFormation,
     formation_rncp: optional(formation.rncp_code),

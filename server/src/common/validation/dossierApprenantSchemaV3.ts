@@ -100,6 +100,8 @@ export const dossierApprenantSchemaV3Base = () =>
     etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret,
     etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai,
     etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret,
+    etablissement_lieu_de_formation_adresse: primitivesV1.etablissement_lieu_de_formation.adresse.optional(),
+    etablissement_lieu_de_formation_code_postal: primitivesV1.etablissement_lieu_de_formation.code_postal.optional(),
 
     formation_cfd: primitivesV1.formation.code_cfd.nullish(),
     // Champs SIFA

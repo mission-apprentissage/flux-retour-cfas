@@ -1277,8 +1277,8 @@ exports[`validation-schema should create validation schema for effectifs: effect
           "anyOf": [
             {
               "bsonType": "string",
-              "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+              "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
               "pattern": "^[0-9]{5}$",
             },
@@ -1286,8 +1286,8 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "bsonType": "null",
             },
           ],
-          "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+          "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
         },
         "courriel": {
@@ -1479,9 +1479,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             {
               "bsonType": "string",
               "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
               "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
@@ -1490,9 +1490,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             },
           ],
           "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
         },
         "derniere_situation": {
@@ -4251,8 +4251,8 @@ exports[`validation-schema should create validation schema for effectifsArchive:
           "anyOf": [
             {
               "bsonType": "string",
-              "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+              "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
               "pattern": "^[0-9]{5}$",
             },
@@ -4260,8 +4260,8 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "bsonType": "null",
             },
           ],
-          "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+          "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
         },
         "courriel": {
@@ -4453,9 +4453,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             {
               "bsonType": "string",
               "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
               "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
@@ -4464,9 +4464,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             },
           ],
           "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
         },
         "derniere_situation": {
@@ -6833,8 +6833,8 @@ exports[`validation-schema should create validation schema for effectifsDECA: ef
           "anyOf": [
             {
               "bsonType": "string",
-              "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+              "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
               "pattern": "^[0-9]{5}$",
             },
@@ -6842,8 +6842,8 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "bsonType": "null",
             },
           ],
-          "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+          "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
         },
         "courriel": {
@@ -7035,9 +7035,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             {
               "bsonType": "string",
               "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
               "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
@@ -7046,9 +7046,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             },
           ],
           "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
-      ou département.   
+      ou département.
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
-         
+
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
         },
         "derniere_situation": {
@@ -8911,8 +8911,8 @@ exports[`validation-schema should create validation schema for effectifsQueue: e
       "description": "Code postal de l'apprenant",
     },
     "code_postal_de_naissance_apprenant": {
-      "description": "Le code postal doit contenir 5 caractères.  
-Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+      "description": "Le code postal doit contenir 5 caractères.
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
     },
     "contrat_date_debut": {

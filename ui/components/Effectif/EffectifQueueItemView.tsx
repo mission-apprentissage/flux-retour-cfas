@@ -67,6 +67,11 @@ const attributes = [
   { label: "SIRET de l'établissement formateur", value: "etablissement_formateur_siret" },
   { label: "UAI de l'établissement du lieu de formation", value: "etablissement_lieu_de_formation_uai" },
   { label: "SIRET de l'établissement du lieu de formation", value: "etablissement_lieu_de_formation_siret" },
+  { label: "Adresse de l'établissement du lieu de formation", value: "etablissement_lieu_de_formation_adresse" },
+  {
+    label: "Code postal de l'établissement du lieu de formation",
+    value: "etablissement_lieu_de_formation_code_postal",
+  },
   { label: "Code CFD de la formation", value: "formation_cfd" },
   { label: "Dernière situation", value: "derniere_situation" },
   { label: "UAI du dernier organisme", value: "dernier_organisme_uai" },

@@ -28,6 +28,8 @@ export const televersementHeaders: Record<string, FieldConfig> = {
   etablissement_formateur_siret: { type: "string", mandatory: false },
   etablissement_lieu_de_formation_uai: { type: "string", mandatory: false },
   etablissement_lieu_de_formation_siret: { type: "string", mandatory: false },
+  etablissement_lieu_de_formation_adresse: { type: "string", mandatory: false },
+  etablissement_lieu_de_formation_code_postal: { type: "string", mandatory: false },
   annee_scolaire: { type: "string", mandatory: true },
   annee_formation: { type: "string", mandatory: true },
   formation_rncp: { type: "string", mandatory: false },

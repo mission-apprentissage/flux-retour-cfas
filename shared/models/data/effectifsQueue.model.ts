@@ -137,6 +137,8 @@ export const zEffectifQueue = z.object({
   siret_employeur_3: z.any({ description: organismeProps.siret.description }),
   siret_employeur_4: z.any({ description: organismeProps.siret.description }),
   formation_presentielle: z.any({ description: "Formation 100% à distance ou non" }),
+  etablissement_lieu_de_formation_adresse: z.any({ description: "Adresse du lieu de formation" }),
+  etablissement_lieu_de_formation_code_postal: z.any({ description: "Code postal du lieu de formation" }),
 
   // REQUIRED FIELDS
   date_inscription_formation: z.any({ description: formationProps.date_inscription.description }),
