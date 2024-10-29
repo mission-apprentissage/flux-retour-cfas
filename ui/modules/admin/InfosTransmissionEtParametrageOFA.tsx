@@ -16,6 +16,7 @@ interface InfosTransmissionParametrageOFAProps {
   api_key_active: boolean;
   api_key: string;
   parametrage_erp_date: Date;
+  parametrage_erp_author: string;
   erps: string[];
   organisme_transmetteur?: {
     _id: string;
@@ -55,26 +56,28 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       <HStack spacing="1w">
         <Text>Transmission :</Text>
         {parametrage?.transmission_api_active || parametrage?.transmission_manuelle_active ? (
-          <Box display="flex" alignItems="center" gap={3}>
+          <>
             <BadgeYes />
-            {(parametrage.transmission_api_version || parametrage.erps?.length > 0) && (
-              <Tag
-                textTransform="none"
-                variant="badge"
-                colorScheme="grey_tag"
-                size="md"
-                borderRadius={0}
-                primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
-              />
-            )}
-            <Text>
-              (
-              {parametrage.transmission_date
-                ? new Date(parametrage.transmission_date).toLocaleDateString()
-                : "Date non disponible"}
-              )
-            </Text>
-          </Box>
+            <Box display="flex" alignItems="center" gap={3}>
+              {(parametrage.transmission_api_version || parametrage.erps?.length > 0) && (
+                <Tag
+                  textTransform="none"
+                  variant="badge"
+                  colorScheme="grey_tag"
+                  size="md"
+                  borderRadius={0}
+                  primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
+                />
+              )}
+              <Text>
+                (
+                {parametrage.transmission_date
+                  ? new Date(parametrage.transmission_date).toLocaleDateString()
+                  : "Date non disponible"}
+                )
+              </Text>
+            </Box>
+          </>
         ) : (
           <BadgeNo />
         )}
@@ -83,6 +86,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         <HStack spacing="1w">
           <Text>Clé API :</Text>
           <HStack spacing="1w">
+            <BadgeYes />
             <Input value={apiKeyDisplay} isReadOnly size="sm" width="330px" />
             <Button size="sm" variant="primary" onClick={toggleApiKeyVisibility}>
               {showFullApiKey ? (
@@ -120,6 +124,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                 : "Date non disponible"}
               )
             </Text>
+            {parametrage.parametrage_erp_author && <Text>configuré par {organisme.parametrage_erp_author}</Text>}
           </HStack>
         ) : (
           <BadgeNo />
