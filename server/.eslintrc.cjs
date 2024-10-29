@@ -25,7 +25,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["tests/**/*.ts", "./tsup.config.ts", "src/dev.ts", "jest.config.js", "scripts/**/*.ts"],
+      files: ["tests/**/*.ts", "src/**/**.test.ts", "./tsup.config.ts", "src/dev.ts", "scripts/**/*.ts"],
       rules: {
         // autorise l'import des devDependencies
         "node/no-unpublished-import": "off",

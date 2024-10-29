@@ -1,5 +1,7 @@
 import { strict as assert } from "assert";
 
+import { it, describe, beforeEach } from "vitest";
+
 import { getCurrentTime, resetTime, setTime, sleep } from "@/common/utils/timeUtils";
 
 describe("utils/timeUtils", () => {

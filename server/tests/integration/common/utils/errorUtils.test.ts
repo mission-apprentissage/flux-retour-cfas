@@ -1,5 +1,7 @@
 import { strict as assert } from "assert";
 
+import { it, describe } from "vitest";
+
 import { effectifsDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { useMongo } from "@tests/jest/setupMongo";

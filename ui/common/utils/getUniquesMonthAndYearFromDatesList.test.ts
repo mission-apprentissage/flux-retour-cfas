@@ -1,3 +1,5 @@
+import { it, expect } from "vitest";
+
 import { getUniquesMonthAndYearFromDatesList } from "./dateUtils";
 
 it("renvoie un tableau de mois uniques", () => {

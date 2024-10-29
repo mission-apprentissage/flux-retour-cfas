@@ -1,3 +1,5 @@
+import { it, expect, describe } from "vitest";
+
 import { primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 describe("Regex primitivesV3", () => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`validation-schema should create validation schema for auditLogs: auditLogs 1`] = `
+exports[`validation-schema > should create validation schema for auditLogs > auditLogs 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -34,7 +34,7 @@ exports[`validation-schema should create validation schema for auditLogs: auditL
 }
 `;
 
-exports[`validation-schema should create validation schema for effectifV2: effectifV2 1`] = `
+exports[`validation-schema > should create validation schema for effectifV2 > effectifV2 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -111,7 +111,7 @@ exports[`validation-schema should create validation schema for effectifV2: effec
 }
 `;
 
-exports[`validation-schema should create validation schema for effectifs: effectifs 1`] = `
+exports[`validation-schema > should create validation schema for effectifs > effectifs 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -2417,7 +2417,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
-exports[`validation-schema should create validation schema for effectifsArchive: effectifsArchive 1`] = `
+exports[`validation-schema > should create validation schema for effectifsArchive > effectifsArchive 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -4772,7 +4772,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
-exports[`validation-schema should create validation schema for effectifsDECA: effectifsDECA 1`] = `
+exports[`validation-schema > should create validation schema for effectifsDECA > effectifsDECA 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -6744,7 +6744,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
-exports[`validation-schema should create validation schema for effectifsQueue: effectifsQueue 1`] = `
+exports[`validation-schema > should create validation schema for effectifsQueue > effectifsQueue 1`] = `
 {
   "additionalProperties": true,
   "bsonType": "object",
@@ -7086,7 +7086,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
-exports[`validation-schema should create validation schema for fiabilisationUaiSiret: fiabilisationUaiSiret 1`] = `
+exports[`validation-schema > should create validation schema for fiabilisationUaiSiret > fiabilisationUaiSiret 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -7172,7 +7172,7 @@ exports[`validation-schema should create validation schema for fiabilisationUaiS
 }
 `;
 
-exports[`validation-schema should create validation schema for formationV2: formationV2 1`] = `
+exports[`validation-schema > should create validation schema for formationV2 > formationV2 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -7219,7 +7219,7 @@ exports[`validation-schema should create validation schema for formationV2: form
 }
 `;
 
-exports[`validation-schema should create validation schema for formations: formations 1`] = `
+exports[`validation-schema > should create validation schema for formations > formations 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -7353,7 +7353,7 @@ exports[`validation-schema should create validation schema for formations: forma
 }
 `;
 
-exports[`validation-schema should create validation schema for formationsCatalogue: formationsCatalogue 1`] = `
+exports[`validation-schema > should create validation schema for formationsCatalogue > formationsCatalogue 1`] = `
 {
   "additionalProperties": true,
   "bsonType": "object",
@@ -8499,7 +8499,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
 }
 `;
 
-exports[`validation-schema should create validation schema for invitations: invitations 1`] = `
+exports[`validation-schema > should create validation schema for invitations > invitations 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -8539,7 +8539,7 @@ exports[`validation-schema should create validation schema for invitations: invi
 }
 `;
 
-exports[`validation-schema should create validation schema for jwtSessions: jwtSessions 1`] = `
+exports[`validation-schema > should create validation schema for jwtSessions > jwtSessions 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -8559,7 +8559,7 @@ exports[`validation-schema should create validation schema for jwtSessions: jwtS
 }
 `;
 
-exports[`validation-schema should create validation schema for maintenanceMessages: maintenanceMessages 1`] = `
+exports[`validation-schema > should create validation schema for maintenanceMessages > maintenanceMessages 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -8609,7 +8609,7 @@ exports[`validation-schema should create validation schema for maintenanceMessag
 }
 `;
 
-exports[`validation-schema should create validation schema for opcoRncp: opcoRncp 1`] = `
+exports[`validation-schema > should create validation schema for opcoRncp > opcoRncp 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -8667,7 +8667,7 @@ exports[`validation-schema should create validation schema for opcoRncp: opcoRnc
 }
 `;
 
-exports[`validation-schema should create validation schema for opcos: opcos 1`] = `
+exports[`validation-schema > should create validation schema for opcos > opcos 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -8686,7 +8686,7 @@ exports[`validation-schema should create validation schema for opcos: opcos 1`] 
 }
 `;
 
-exports[`validation-schema should create validation schema for organisations: organisations 1`] = `
+exports[`validation-schema > should create validation schema for organisations > organisations 1`] = `
 {
   "anyOf": [
     {
@@ -9137,7 +9137,7 @@ exports[`validation-schema should create validation schema for organisations: or
 }
 `;
 
-exports[`validation-schema should create validation schema for organismeV2: organismeV2 1`] = `
+exports[`validation-schema > should create validation schema for organismeV2 > organismeV2 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -9187,7 +9187,7 @@ exports[`validation-schema should create validation schema for organismeV2: orga
 }
 `;
 
-exports[`validation-schema should create validation schema for organismes: organismes 1`] = `
+exports[`validation-schema > should create validation schema for organismes > organismes 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -10569,7 +10569,7 @@ exports[`validation-schema should create validation schema for organismes: organ
 }
 `;
 
-exports[`validation-schema should create validation schema for organismesReferentiel: organismesReferentiel 1`] = `
+exports[`validation-schema > should create validation schema for organismesReferentiel > organismesReferentiel 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -10835,7 +10835,7 @@ exports[`validation-schema should create validation schema for organismesReferen
 }
 `;
 
-exports[`validation-schema should create validation schema for personV2: personV2 1`] = `
+exports[`validation-schema > should create validation schema for personV2 > personV2 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -10883,7 +10883,7 @@ exports[`validation-schema should create validation schema for personV2: personV
 }
 `;
 
-exports[`validation-schema should create validation schema for rncp: rncp 1`] = `
+exports[`validation-schema > should create validation schema for rncp > rncp 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -10937,7 +10937,7 @@ exports[`validation-schema should create validation schema for rncp: rncp 1`] = 
 }
 `;
 
-exports[`validation-schema should create validation schema for telechargementListeNomLogs: telechargementListeNomLogs 1`] = `
+exports[`validation-schema > should create validation schema for telechargementListeNomLogs > telechargementListeNomLogs 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -11028,7 +11028,7 @@ exports[`validation-schema should create validation schema for telechargementLis
 }
 `;
 
-exports[`validation-schema should create validation schema for transmissionV2: transmissionV2 1`] = `
+exports[`validation-schema > should create validation schema for transmissionV2 > transmissionV2 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -11062,7 +11062,7 @@ exports[`validation-schema should create validation schema for transmissionV2: t
 }
 `;
 
-exports[`validation-schema should create validation schema for users: users 1`] = `
+exports[`validation-schema > should create validation schema for users > users 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -11153,7 +11153,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
 }
 `;
 
-exports[`validation-schema should create validation schema for usersMigration: usersMigration 1`] = `
+exports[`validation-schema > should create validation schema for usersMigration > usersMigration 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
@@ -11319,7 +11319,7 @@ exports[`validation-schema should create validation schema for usersMigration: u
 }
 `;
 
-exports[`validation-schema should create validation schema for voeuxAffelnet: voeuxAffelnet 1`] = `
+exports[`validation-schema > should create validation schema for voeuxAffelnet > voeuxAffelnet 1`] = `
 {
   "additionalProperties": false,
   "bsonType": "object",
