@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";

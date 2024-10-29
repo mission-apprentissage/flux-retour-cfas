@@ -1,5 +1,7 @@
 import { strict as assert } from "assert";
 
+import { it, describe } from "vitest";
+
 import { generateRandomAlphanumericPhrase, stripEmptyFields } from "@/common/utils/miscUtils";
 
 describe("generateRandomAlphanumericPhrase", () => {

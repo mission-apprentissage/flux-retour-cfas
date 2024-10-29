@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import { vi, it, expect, describe, beforeEach } from "vitest";
 
 import { usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
@@ -11,6 +12,8 @@ const date = "2022-10-10T00:00:00.000Z";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
+
+vi.mock("@/common/services/mailer/mailer");
 
 describe("Password", () => {
   useMongo();
@@ -37,7 +40,7 @@ describe("Password", () => {
     });
 
     it("retourne 200 et envoie un mail si le mail est valide et l'utilisateur existe", async () => {
-      (sendEmail as jest.MockedFunction<typeof sendEmail>).mockClear();
+      vi.mocked(sendEmail).mockClear();
       await usersMigrationDb().insertOne({
         _id: new ObjectId(),
         account_status: "CONFIRMED",

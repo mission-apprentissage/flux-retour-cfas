@@ -1,9 +1,9 @@
 import { strict as assert } from "assert";
 
-import { jest } from "@jest/globals";
 import { omit } from "lodash-es";
 import { ObjectId } from "mongodb";
 import nock from "nock";
+import { vi, it, expect, describe } from "vitest";
 
 import {
   createFormation,
@@ -17,15 +17,13 @@ import { apiAlternanceCertifFixture } from "@tests/data/apiTablesDeCorrespondanc
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 
-// jest.mock doesn't work with ES6 modules... we need to move to vitest
-const originalCertificationFn = apiAlternanceClient.certification.index;
-beforeEach(() => {
-  // @ts-ignore
-  apiAlternanceClient.certification.index = jest.fn();
-});
-afterEach(() => {
-  apiAlternanceClient.certification.index = originalCertificationFn;
-});
+vi.mock("@/common/apis/apiAlternance", () => ({
+  apiAlternanceClient: {
+    certification: {
+      index: vi.fn(),
+    },
+  },
+}));
 
 describe("Tests des actions Formations", () => {
   useNock();
@@ -67,9 +65,7 @@ describe("Tests des actions Formations", () => {
     });
 
     it("returns created formation when cfd was found in API Alternance", async () => {
-      (
-        apiAlternanceClient.certification.index as jest.MockedFunction<typeof apiAlternanceClient.certification.index>
-      ).mockResolvedValueOnce(apiAlternanceCertifFixture);
+      vi.mocked(apiAlternanceClient.certification.index).mockResolvedValueOnce(apiAlternanceCertifFixture);
 
       const cfd = "13534005";
       const insertedId = await createFormation({ cfd });

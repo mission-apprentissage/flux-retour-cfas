@@ -6,6 +6,7 @@ import { IndicateursEffectifsAvecFormation } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { IRncp } from "shared/models/data/rncp.model";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";

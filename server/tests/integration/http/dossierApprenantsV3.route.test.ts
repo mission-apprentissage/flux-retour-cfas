@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { v4 as uuidv4 } from "uuid";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { createRandomOrganisme, createRandomDossierApprenantApiInput } from "@tests/data/randomizedSample";
