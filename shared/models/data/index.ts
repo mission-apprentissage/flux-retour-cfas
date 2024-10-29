@@ -2,7 +2,6 @@ export * from "./auditLogs.model";
 export * from "./effectifs.model";
 export * from "./effectifsArchive.model";
 export * from "./effectifsQueue.model";
-export * from "./fiabilisationUaiSiret.model";
 export * from "./formations.model";
 export * from "./formationsCatalogue.model";
 export * from "./invitations.model";

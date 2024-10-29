@@ -1,11 +1,9 @@
-import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
-import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
@@ -47,7 +45,6 @@ export const modelDescriptors = [
   OrganismesReferentielModelDescriptor,
   effectifsModelDescriptor,
   effectifsQueueModelDescriptor,
-  fiabilisationUaiSiretModelDescriptor,
   rncpModelDescriptor,
   effectifsDECAModelDescriptor,
   effectifsArchiveModelDescriptor,
@@ -80,8 +77,6 @@ export const effectifsArchiveDb = () =>
   getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
 export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
-export const fiabilisationUaiSiretDb = () =>
-  getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);
 export const voeuxAffelnetDb = () => getDbCollection<IVoeuAffelnet>(voeuxAffelnetDescriptor.collectionName);

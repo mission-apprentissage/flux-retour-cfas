@@ -42,7 +42,7 @@ const sampleOrganismeWithoutUAIOutput: IOrganisme = {
   reseaux: [],
   erps: [],
   relatedFormations: [],
-  fiabilisation_statut: "INCONNU",
+  fiabilisation_statut: "NON_FIABLE",
   ferme: false,
   prepa_apprentissage: false,
   qualiopi: false,

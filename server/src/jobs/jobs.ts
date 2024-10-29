@@ -16,13 +16,7 @@ import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
-import { getStats } from "./fiabilisation/stats";
-import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
-import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
-import {
-  updateOrganismesFiabilisationApiUaiSiret,
-  updateOrganismesFiabilisationUaiSiret,
-} from "./fiabilisation/uai-siret/update";
+import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
@@ -313,21 +307,7 @@ export async function setupJobProcessor() {
         },
       },
       "fiabilisation:uai-siret:run": {
-        handler: async () => {
-          // On reset le statut de fiabilisation de tous les organismes
-          await resetOrganismesFiabilisationStatut();
-          // On lance séquentiellement 2 fois de suite la construction (build) de la collection fiabilisation suivi de la MAJ des données liées (apply)
-          // Nécessaire pour le bon fonctionnement de l'algo
-          await buildFiabilisationUaiSiret();
-          await updateOrganismesFiabilisationUaiSiret();
-          const buildResults = await buildFiabilisationUaiSiret();
-          const updateResults = await updateOrganismesFiabilisationUaiSiret();
-
-          // Mise à jour des données de fiabilisation des couples UAI - SIRET à partir de l'API apprentissage
-          await updateOrganismesFiabilisationApiUaiSiret();
-
-          return { buildResults, updateResults };
-        },
+        handler: updateOrganismesFiabilisationStatut,
       },
       "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis": {
         handler: async (job) => {

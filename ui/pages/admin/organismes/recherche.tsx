@@ -214,17 +214,6 @@ const Organisme = () => {
                 ),
               },
               {
-                header: () => "Fiabilisation",
-                accessorKey: "fiabilisation",
-                enableSorting: false,
-                cell: ({ row }: CellContext<OrganismeSupportInfoJson, any>) => (
-                  <Label
-                    level={row.original.fiabilisation ? "success" : "error"}
-                    value={Boolean(row.original.fiabilisation)}
-                  />
-                ),
-              },
-              {
                 header: () => "Catalogue",
                 accessorKey: "formations",
                 enableSorting: false,
@@ -303,11 +292,7 @@ const Organisme = () => {
                       <TabPanel>
                         <SimpleGrid spacing="2">
                           <EtablissementInfo supportInfo={row.original} />
-                          <TdbInfo
-                            organisme={row.original.tdb}
-                            fiabilisation={row.original.fiabilisation}
-                            organisation={row.original.organisation}
-                          />
+                          <TdbInfo organisme={row.original.tdb} organisation={row.original.organisation} />
                           <ReferentielInfo organisme={row.original.referentiel} />
                           <FormationsInfo
                             organisme={row.original.tdb}
