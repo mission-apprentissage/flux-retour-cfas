@@ -1360,7 +1360,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
          
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
-              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
+              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
             {
               "bsonType": "null",
@@ -4211,7 +4211,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
          
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
-              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
+              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
             {
               "bsonType": "null",
@@ -6670,7 +6670,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 * Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
          
 * Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
-              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
+              "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
             },
             {
               "bsonType": "null",
