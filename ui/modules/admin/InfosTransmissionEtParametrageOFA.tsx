@@ -16,6 +16,7 @@ interface InfosTransmissionParametrageOFAProps {
   api_key_active: boolean;
   api_key: string;
   parametrage_erp_date: Date;
+  parametrage_erp_author: string;
   erps: string[];
   organisme_transmetteur?: {
     _id: string;
@@ -83,6 +84,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         <HStack spacing="1w">
           <Text>Clé API :</Text>
           <HStack spacing="1w">
+            <BadgeYes />
             <Input value={apiKeyDisplay} isReadOnly size="sm" width="330px" />
             <Button size="sm" variant="primary" onClick={toggleApiKeyVisibility}>
               {showFullApiKey ? (
@@ -120,6 +122,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                 : "Date non disponible"}
               )
             </Text>
+            {parametrage.parametrage_erp_author && <Text>configuré par {organisme.parametrage_erp_author}</Text>}
           </HStack>
         ) : (
           <BadgeNo />
