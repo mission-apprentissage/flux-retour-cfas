@@ -18,6 +18,7 @@ interface InfosTransmissionParametrageOFAProps {
   parametrage_erp_date: Date;
   parametrage_erp_author: string;
   erps: string[];
+  erp_unsupported: string;
   organisme_transmetteur?: {
     _id: string;
     enseigne?: string;
@@ -36,7 +37,6 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   );
   const [showFullApiKey, setShowFullApiKey] = useState(false);
   const { onCopy, hasCopied } = useClipboard(parametrage?.api_key ?? "");
-
   const toggleApiKeyVisibility = () => setShowFullApiKey(!showFullApiKey);
 
   const apiKeyDisplay = parametrage?.api_key
@@ -46,7 +46,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
     : "Aucune clé API disponible";
 
   return (
-    <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" gap={3} {...props}>
+    <Stack borderColor="#0063CB" borderWidth="2px" w="100%" p="2w" gap={4} {...props}>
       <Box color="#0063CB" display="flex" alignItems="center">
         <Box as="i" className="ri-eye-fill" />
         <Text fontSize="zeta" fontWeight="bold" ml="2">
@@ -55,7 +55,8 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       </Box>
       <HStack spacing="1w">
         <Text>Transmission :</Text>
-        {parametrage?.transmission_api_active || parametrage?.transmission_manuelle_active ? (
+        {parametrage?.transmission_date &&
+        (parametrage?.transmission_api_active || parametrage?.transmission_manuelle_active) ? (
           <>
             <BadgeYes />
             <Box display="flex" alignItems="center" gap={3}>
@@ -66,16 +67,13 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                   colorScheme="grey_tag"
                   size="md"
                   borderRadius={0}
-                  primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""}`}
+                  primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${parametrage.transmission_api_version || ""} ${
+                    parametrage.transmission_date
+                      ? new Date(parametrage.transmission_date).toLocaleDateString()
+                      : "Date non disponible"
+                  }`}
                 />
               )}
-              <Text>
-                (
-                {parametrage.transmission_date
-                  ? new Date(parametrage.transmission_date).toLocaleDateString()
-                  : "Date non disponible"}
-                )
-              </Text>
             </Box>
           </>
         ) : (
@@ -103,28 +101,22 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       )}
       <HStack spacing="1w">
         <Text>Paramétrage :</Text>
-        {parametrage?.parametrage_erp_active ? (
+        {parametrage?.parametrage_erp_active || parametrage?.erp_unsupported ? (
           <HStack spacing="1w" gap={3}>
             <BadgeYes />
-            {parametrage.erps?.map((erp, index) => (
-              <Tag
-                key={index}
-                textTransform="none"
-                variant="badge"
-                colorScheme="grey_tag"
-                primaryText={erp.toUpperCase()}
-                size="md"
-                borderRadius={0}
-              />
-            ))}
-            <Text>
-              (
-              {parametrage.parametrage_erp_date
-                ? new Date(parametrage.parametrage_erp_date).toLocaleDateString()
-                : "Date non disponible"}
-              )
-            </Text>
-            {parametrage.parametrage_erp_author && <Text>configuré par {organisme.parametrage_erp_author}</Text>}
+            <Tag
+              textTransform="none"
+              variant="badge"
+              colorScheme="grey_tag"
+              size="md"
+              borderRadius={0}
+              primaryText={`${parametrage.erps?.map((erp) => erp.toUpperCase()).join(", ")} ${
+                parametrage.erp_unsupported ? `${parametrage.erp_unsupported.toUpperCase()} ` : ""
+              }${
+                parametrage.parametrage_erp_date ? new Date(parametrage.parametrage_erp_date).toLocaleDateString() : ""
+              }`}
+            />
+            {parametrage.parametrage_erp_author && <Text>configuré par {parametrage.parametrage_erp_author}</Text>}
           </HStack>
         ) : (
           <BadgeNo />
