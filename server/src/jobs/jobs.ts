@@ -317,11 +317,6 @@ export async function setupJobProcessor() {
       "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis": {
         handler: async (job) => transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours),
       },
-      "fiabilisation:stats": {
-        handler: async () => {
-          return getStats();
-        },
-      },
       "send-reminder-emails": {
         handler: async () => {
           return sendReminderEmails();

@@ -258,7 +258,7 @@ export type IOrganismeOptional = Pick<
   | "erps"
   | "relatedFormations"
   | "fiabilisation_statut"
-  | "fiabilisation_api_statut"
+  | "fiabilisation_api_response"
   | "ferme"
   | "qualiopi"
   | "prepa_apprentissage"

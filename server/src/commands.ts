@@ -588,15 +588,6 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis"));
 
-/**
- * Job d'affichage des stats fiabilisation
- */
-program
-  .command("fiabilisation:stats")
-  .description("Affichage de stats sur le service")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("fiabilisation:stats"));
-
 program
   .command("send-reminder-emails")
   .description("Envoi des emails de relance")
