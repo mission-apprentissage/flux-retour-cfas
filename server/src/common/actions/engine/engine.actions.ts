@@ -192,7 +192,7 @@ export const mapEffectifQueueToEffectif = (
         responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
         responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
         derniere_situation: dossierApprenant.derniere_situation,
-        dernier_organisme_uai: dossierApprenant.dernier_organisme_uai,
+        dernier_organisme_uai: dossierApprenant.dernier_organisme_uai?.toString(),
         type_cfa: dossierApprenant.type_cfa,
       }),
     },

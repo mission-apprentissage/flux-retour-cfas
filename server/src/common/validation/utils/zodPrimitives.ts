@@ -443,7 +443,7 @@ export const primitivesV3 = {
       type: "integer",
       enum: EFFECTIF_DERNIER_SITUATION as any,
     }),
-  dernier_organisme_uai: z
+  dernier_organisme_uai: z.coerce
     .string()
     .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")
     .describe(
