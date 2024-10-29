@@ -1,4 +1,5 @@
 import { isValidCFD, isValidINE } from "shared";
+import { it, expect, describe } from "vitest";
 
 import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
 

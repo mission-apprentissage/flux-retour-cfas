@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
 import jwt from "jsonwebtoken";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import config from "@/config";

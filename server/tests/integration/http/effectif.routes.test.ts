@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";

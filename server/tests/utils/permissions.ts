@@ -3,6 +3,7 @@ import { ObjectId, WithId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { it } from "vitest";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
 

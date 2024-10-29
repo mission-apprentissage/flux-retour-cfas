@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { it, expect, describe } from "vitest";
 
 import { mergeEffectif } from "@/jobs/ingestion/process-ingestion";
 

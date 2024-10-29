@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import Joi from "joi";
+import { it, describe } from "vitest";
 
 const validators = {
   password: () =>

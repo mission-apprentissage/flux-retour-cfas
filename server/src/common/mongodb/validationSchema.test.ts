@@ -1,4 +1,5 @@
 import { zodToMongoSchema } from "shared";
+import { it, expect, describe } from "vitest";
 
 import { modelDescriptors } from "@/common/model/collections";
 

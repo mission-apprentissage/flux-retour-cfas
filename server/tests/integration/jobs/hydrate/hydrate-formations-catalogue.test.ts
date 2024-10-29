@@ -4,6 +4,7 @@ import { Readable } from "node:stream";
 import { ObjectId } from "mongodb";
 import nock from "nock";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import { it, describe } from "vitest";
 
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
