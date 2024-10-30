@@ -57,6 +57,11 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
   const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi, enseigne } =
     organismeFromReferentiel;
 
+  // On insère uniquement les organismes fiable (ayant un SIRET & UAI validé)
+  if (!uai && !siret) {
+    return;
+  }
+
   const adresseFormatted = mapAdresseReferentielToAdresseTdb(adresse);
   const isFerme = etat_administratif ? (etat_administratif === "fermé" ? true : false) : false;
 
@@ -68,17 +73,17 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
   if (!organismeInTdb) {
     try {
       await createOrganisme({
-        ...(uai ? { uai } : {}),
+        uai,
         siret,
-        ...(raison_sociale ? { nom: raison_sociale } : {}),
-        ...(raison_sociale ? { raison_sociale } : {}),
-        ...(enseigne ? { enseigne } : {}),
+        nom: raison_sociale ?? enseigne,
+        raison_sociale,
+        enseigne,
         nature,
         adresse: adresseFormatted,
         ferme: isFerme,
         qualiopi: qualiopi || false,
-        fiabilisation_statut:
-          !isFerme && uai ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.INCONNU,
+        // L'organisme sera fiabilisé par le job de fiabilisation qui intervient après
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
         est_dans_le_referentiel: uaiMultiplesInTdb
           ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
           : STATUT_PRESENCE_REFERENTIEL.PRESENT,
@@ -99,15 +104,13 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
     // Update de l'organisme sans appels API si existant
     const updatedOrganisme = {
       ...organismeInTdb,
-      ...(raison_sociale ? { nom: raison_sociale } : {}),
-      ...(raison_sociale ? { raison_sociale } : {}),
-      enseigne: enseigne,
-      nature: nature,
+      nom: raison_sociale ?? enseigne,
+      raison_sociale,
+      enseigne,
+      nature,
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
-      fiabilisation_statut:
-        !isFerme && uai ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.INCONNU,
       est_dans_le_referentiel: uaiMultiplesInTdb
         ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
         : STATUT_PRESENCE_REFERENTIEL.PRESENT,

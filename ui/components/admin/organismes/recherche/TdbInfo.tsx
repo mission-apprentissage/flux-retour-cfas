@@ -7,7 +7,7 @@ import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { CardInfo } from "./CarInfo";
 import { Label } from "./Label";
 
-function TdbInfoContent({ organisme, fiabilisation, organisation }) {
+function TdbInfoContent({ organisme, organisation }) {
   const reseaux = useMemo(() => organisme.reseaux ?? [], [organisme]);
   const nom = useMemo(() => organisme.nom ?? "inconnue", [organisme]);
   const opcos = useMemo(() => organisme.opcos ?? [], [organisme]);
@@ -58,12 +58,6 @@ function TdbInfoContent({ organisme, fiabilisation, organisation }) {
             value={organisme.fiabilisation_statut}
           />
         }
-        {fiabilisation?.uai_fiable != null && (
-          <Label level={"warning"} value={`UAI_FIABLE=${fiabilisation.uai_fiable}`} />
-        )}
-        {fiabilisation?.siret_fiable != null && (
-          <Label level={"warning"} value={`SIRET_FIABLE=${fiabilisation.siret_fiable}`} />
-        )}
       </HStack>
     </>
   );
@@ -108,11 +102,10 @@ function TransmissionInfoContent({ organisme }) {
 
 type TdbInfoProps = {
   organisme: OrganismeSupportInfoJson["tdb"] | null;
-  fiabilisation: OrganismeSupportInfoJson["fiabilisation"] | null;
   organisation: OrganismeSupportInfoJson["organisation"] | null;
 };
 
-export function TdbInfo({ organisme, fiabilisation, organisation }: TdbInfoProps) {
+export function TdbInfo({ organisme, organisation }: TdbInfoProps) {
   if (!organisme) {
     return (
       <CardInfo title="Tableau de bord">
@@ -124,7 +117,7 @@ export function TdbInfo({ organisme, fiabilisation, organisation }: TdbInfoProps
   return (
     <SimpleGrid templateColumns="repeat(2, 1fr)" spacing="2">
       <CardInfo title="Tableau de bord">
-        <TdbInfoContent organisme={organisme} fiabilisation={fiabilisation} organisation={organisation} />
+        <TdbInfoContent organisme={organisme} organisation={organisation} />
       </CardInfo>
       <CardInfo title="Transmission">
         <TransmissionInfoContent organisme={organisme} />

@@ -7086,92 +7086,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
-exports[`validation-schema > should create validation schema for fiabilisationUaiSiret > fiabilisationUaiSiret 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "created_at": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "rule_ids": {
-      "anyOf": [
-        {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "number",
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "siret": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Le SIRET du couple à fiabiliser",
-    },
-    "siret_fiable": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Le SIRET fiable lié au couple à fiabiliser",
-    },
-    "type": {
-      "anyOf": [
-        {
-          "bsonType": "string",
-          "description": "Statut de fiabilisation du couple UAI SIRET",
-          "enum": [
-            "FIABLE",
-            "A_FIABILISER",
-            "NON_FIABILISABLE_INEXISTANT",
-            "NON_FIABILISABLE_PB_COLLECTE",
-            "NON_FIABILISABLE_UAI_VALIDEE",
-            "NON_FIABILISABLE_UAI_NON_VALIDEE",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Statut de fiabilisation du couple UAI SIRET",
-    },
-    "uai": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "L'UAI du couple à fiabiliser",
-    },
-    "uai_fiable": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "L'UAI fiable lié au couple à fiabiliser",
-    },
-  },
-  "required": [
-    "_id",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for formationV2 > formationV2 1`] = `
 {
   "additionalProperties": false,
@@ -9495,13 +9409,6 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date d'ajout en base de données",
     },
-    "creation_statut": {
-      "bsonType": "string",
-      "description": "Flag pour identifier que c'est un organisme créé à partir d'un lieu",
-      "enum": [
-        "ORGANISME_LIEU_FORMATION",
-      ],
-    },
     "effectifs_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",
@@ -9542,93 +9449,66 @@ exports[`validation-schema > should create validation schema for organismes > or
       "description": "Le siret est fermé",
     },
     "fiabilisation_api_response": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "description": "Statut du siret et uai venant de l'API de l'organisme",
-      "properties": {
-        "candidats": {
-          "bsonType": "array",
-          "items": {
-            "additionalProperties": false,
-            "bsonType": "object",
-            "properties": {
-              "correspondances": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "description": "Statut du siret et uai venant de l'API de l'organisme",
+          "properties": {
+            "candidats": {
+              "bsonType": "array",
+              "items": {
                 "additionalProperties": false,
                 "bsonType": "object",
                 "properties": {
-                  "siret": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": false,
-                        "bsonType": "object",
-                        "properties": {
-                          "lui_meme": {
-                            "bsonType": "bool",
-                          },
-                          "son_formateur": {
-                            "bsonType": "bool",
-                          },
-                          "son_responsable": {
-                            "bsonType": "bool",
-                          },
-                        },
-                        "required": [
-                          "son_formateur",
-                          "son_responsable",
-                          "lui_meme",
-                        ],
-                      },
-                      {
-                        "bsonType": "null",
-                      },
-                    ],
-                  },
-                  "uai": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": false,
-                        "bsonType": "object",
-                        "properties": {
-                          "lui_meme": {
-                            "bsonType": "bool",
-                          },
-                          "son_lieu": {
-                            "bsonType": "bool",
-                          },
-                        },
-                        "required": [
-                          "lui_meme",
-                          "son_lieu",
-                        ],
-                      },
-                      {
-                        "bsonType": "null",
-                      },
-                    ],
-                  },
-                },
-                "required": [
-                  "uai",
-                  "siret",
-                ],
-              },
-              "organisme": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "identifiant": {
+                  "correspondances": {
                     "additionalProperties": false,
                     "bsonType": "object",
                     "properties": {
                       "siret": {
-                        "bsonType": "string",
-                        "pattern": "^\\d{9,14}$",
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "lui_meme": {
+                                "bsonType": "bool",
+                              },
+                              "son_formateur": {
+                                "bsonType": "bool",
+                              },
+                              "son_responsable": {
+                                "bsonType": "bool",
+                              },
+                            },
+                            "required": [
+                              "son_formateur",
+                              "son_responsable",
+                              "lui_meme",
+                            ],
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                       },
                       "uai": {
                         "anyOf": [
                           {
-                            "bsonType": "string",
-                            "pattern": "^\\d{1,7}[A-Z]$",
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "lui_meme": {
+                                "bsonType": "bool",
+                              },
+                              "son_lieu": {
+                                "bsonType": "bool",
+                              },
+                            },
+                            "required": [
+                              "lui_meme",
+                              "son_lieu",
+                            ],
                           },
                           {
                             "bsonType": "null",
@@ -9641,179 +9521,179 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "siret",
                     ],
                   },
+                  "organisme": {
+                    "additionalProperties": false,
+                    "bsonType": "object",
+                    "properties": {
+                      "identifiant": {
+                        "additionalProperties": false,
+                        "bsonType": "object",
+                        "properties": {
+                          "siret": {
+                            "bsonType": "string",
+                            "pattern": "^\\d{9,14}$",
+                          },
+                          "uai": {
+                            "anyOf": [
+                              {
+                                "bsonType": "string",
+                                "pattern": "^\\d{1,7}[A-Z]$",
+                              },
+                              {
+                                "bsonType": "null",
+                              },
+                            ],
+                          },
+                        },
+                        "required": [
+                          "uai",
+                          "siret",
+                        ],
+                      },
+                    },
+                    "required": [
+                      "identifiant",
+                    ],
+                  },
+                  "status": {
+                    "additionalProperties": false,
+                    "bsonType": "object",
+                    "properties": {
+                      "declaration_catalogue": {
+                        "bsonType": "bool",
+                      },
+                      "ouvert": {
+                        "bsonType": "bool",
+                      },
+                      "validation_uai": {
+                        "bsonType": "bool",
+                      },
+                    },
+                    "required": [
+                      "ouvert",
+                      "declaration_catalogue",
+                      "validation_uai",
+                    ],
+                  },
                 },
                 "required": [
-                  "identifiant",
-                ],
-              },
-              "status": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "declaration_catalogue": {
-                    "bsonType": "bool",
-                  },
-                  "ouvert": {
-                    "bsonType": "bool",
-                  },
-                  "validation_uai": {
-                    "bsonType": "bool",
-                  },
-                },
-                "required": [
-                  "ouvert",
-                  "declaration_catalogue",
-                  "validation_uai",
+                  "status",
+                  "correspondances",
+                  "organisme",
                 ],
               },
             },
-            "required": [
-              "status",
-              "correspondances",
-              "organisme",
-            ],
-          },
-        },
-        "metadata": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "siret": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "status": {
-                      "bsonType": "string",
-                      "enum": [
-                        "inconnu",
-                        "fermé",
-                        "ok",
-                      ],
-                    },
-                  },
-                  "required": [
-                    "status",
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-            "uai": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "status": {
-                      "bsonType": "string",
-                      "enum": [
-                        "inconnu",
-                        "ok",
-                      ],
-                    },
-                  },
-                  "required": [
-                    "status",
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-          "required": [
-            "uai",
-            "siret",
-          ],
-        },
-        "resultat": {
-          "anyOf": [
-            {
+            "metadata": {
               "additionalProperties": false,
               "bsonType": "object",
               "properties": {
-                "correspondances": {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "siret": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "lui_meme": {
-                              "bsonType": "bool",
-                            },
-                            "son_formateur": {
-                              "bsonType": "bool",
-                            },
-                            "son_responsable": {
-                              "bsonType": "bool",
-                            },
-                          },
-                          "required": [
-                            "son_formateur",
-                            "son_responsable",
-                            "lui_meme",
+                "siret": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "status": {
+                          "bsonType": "string",
+                          "enum": [
+                            "inconnu",
+                            "fermé",
+                            "ok",
                           ],
                         },
-                        {
-                          "bsonType": "null",
-                        },
+                      },
+                      "required": [
+                        "status",
                       ],
                     },
-                    "uai": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "lui_meme": {
-                              "bsonType": "bool",
-                            },
-                            "son_lieu": {
-                              "bsonType": "bool",
-                            },
-                          },
-                          "required": [
-                            "lui_meme",
-                            "son_lieu",
-                          ],
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
+                    {
+                      "bsonType": "null",
                     },
-                  },
-                  "required": [
-                    "uai",
-                    "siret",
                   ],
                 },
-                "organisme": {
+                "uai": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "status": {
+                          "bsonType": "string",
+                          "enum": [
+                            "inconnu",
+                            "ok",
+                          ],
+                        },
+                      },
+                      "required": [
+                        "status",
+                      ],
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+              },
+              "required": [
+                "uai",
+                "siret",
+              ],
+            },
+            "resultat": {
+              "anyOf": [
+                {
                   "additionalProperties": false,
                   "bsonType": "object",
                   "properties": {
-                    "identifiant": {
+                    "correspondances": {
                       "additionalProperties": false,
                       "bsonType": "object",
                       "properties": {
                         "siret": {
-                          "bsonType": "string",
-                          "pattern": "^\\d{9,14}$",
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "lui_meme": {
+                                  "bsonType": "bool",
+                                },
+                                "son_formateur": {
+                                  "bsonType": "bool",
+                                },
+                                "son_responsable": {
+                                  "bsonType": "bool",
+                                },
+                              },
+                              "required": [
+                                "son_formateur",
+                                "son_responsable",
+                                "lui_meme",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                         },
                         "uai": {
                           "anyOf": [
                             {
-                              "bsonType": "string",
-                              "pattern": "^\\d{1,7}[A-Z]$",
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "lui_meme": {
+                                  "bsonType": "bool",
+                                },
+                                "son_lieu": {
+                                  "bsonType": "bool",
+                                },
+                              },
+                              "required": [
+                                "lui_meme",
+                                "son_lieu",
+                              ],
                             },
                             {
                               "bsonType": "null",
@@ -9826,70 +9706,91 @@ exports[`validation-schema > should create validation schema for organismes > or
                         "siret",
                       ],
                     },
+                    "organisme": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "identifiant": {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "siret": {
+                              "bsonType": "string",
+                              "pattern": "^\\d{9,14}$",
+                            },
+                            "uai": {
+                              "anyOf": [
+                                {
+                                  "bsonType": "string",
+                                  "pattern": "^\\d{1,7}[A-Z]$",
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                          },
+                          "required": [
+                            "uai",
+                            "siret",
+                          ],
+                        },
+                      },
+                      "required": [
+                        "identifiant",
+                      ],
+                    },
+                    "status": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "declaration_catalogue": {
+                          "bsonType": "bool",
+                        },
+                        "ouvert": {
+                          "bsonType": "bool",
+                        },
+                        "validation_uai": {
+                          "bsonType": "bool",
+                        },
+                      },
+                      "required": [
+                        "ouvert",
+                        "declaration_catalogue",
+                        "validation_uai",
+                      ],
+                    },
                   },
                   "required": [
-                    "identifiant",
+                    "status",
+                    "correspondances",
+                    "organisme",
                   ],
                 },
-                "status": {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "declaration_catalogue": {
-                      "bsonType": "bool",
-                    },
-                    "ouvert": {
-                      "bsonType": "bool",
-                    },
-                    "validation_uai": {
-                      "bsonType": "bool",
-                    },
-                  },
-                  "required": [
-                    "ouvert",
-                    "declaration_catalogue",
-                    "validation_uai",
-                  ],
+                {
+                  "bsonType": "null",
                 },
-              },
-              "required": [
-                "status",
-                "correspondances",
-                "organisme",
               ],
             },
-            {
-              "bsonType": "null",
-            },
+          },
+          "required": [
+            "metadata",
+            "resultat",
+            "candidats",
           ],
         },
-      },
-      "required": [
-        "metadata",
-        "resultat",
-        "candidats",
+        {
+          "bsonType": "null",
+        },
       ],
-    },
-    "fiabilisation_api_statut": {
-      "bsonType": "string",
-      "description": "Statut de fiabilisation venant de l'API de l'organisme",
-      "enum": [
-        "FIABLE",
-        "NON_FIABLE",
-      ],
+      "description": "Statut du siret et uai venant de l'API de l'organisme",
     },
     "fiabilisation_statut": {
       "bsonType": "string",
       "description": "Statut de fiabilisation de l'organisme",
       "enum": [
         "FIABLE",
-        "NON_FIABILISABLE_PB_COLLECTE",
-        "NON_FIABILISABLE_UAI_NON_VALIDEE",
-        "NON_FIABILISABLE_UAI_VALIDEE",
-        "NON_FIABILISABLE_INEXISTANT",
-        "A_CONTACTER",
-        "INCONNU",
-        "INCONNU_INSCRIPTION",
+        "NON_FIABLE",
       ],
     },
     "first_transmission_date": {
