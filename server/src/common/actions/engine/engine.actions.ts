@@ -6,7 +6,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { PartialDeep } from "type-fest";
 
-import { getCommune } from "@/common/apis/apiAlternance";
+import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 /**

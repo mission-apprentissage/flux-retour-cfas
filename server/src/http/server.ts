@@ -101,7 +101,7 @@ import { createSession, removeSession } from "@/common/actions/sessions.actions"
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
-import { getCommune } from "@/common/apis/apiAlternance";
+import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";

@@ -6,7 +6,7 @@ import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.mode
 import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
-import { getCfdInfo } from "@/common/apis/apiAlternance";
+import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import logger from "@/common/logger";
 import {
