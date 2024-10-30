@@ -1,5 +1,5 @@
 import nock from "nock";
-import { beforeAll, beforeEach, afterEach } from "vitest";
+import { beforeAll, beforeEach, afterEach, afterAll } from "vitest";
 
 import { nockExternalApis } from "../utils/nockApis/index";
 

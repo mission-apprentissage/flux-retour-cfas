@@ -1373,7 +1373,7 @@ export const DEPARTEMENTS = [
 }>;
 
 type IDepartements = typeof DEPARTEMENTS;
-type IDepartement = IDepartements[number];
+export type IDepartement = IDepartements[number];
 export type IDepartmentCode = IDepartement["code"];
 
 export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPARTEMENTS.reduce(
