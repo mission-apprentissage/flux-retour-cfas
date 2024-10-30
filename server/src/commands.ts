@@ -707,6 +707,12 @@ program
   .action(createJobAction("tmp:patches:update-effectifs-source"));
 
 program
+  .command("tmp:patches:update-effectifs-lieu-de-formation")
+  .description("Ajout des information du lieu de formation dans les effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update-effectifs-lieu-de-formation"));
+
+program
   .command("dev:list-http-endpoints")
   .description("Liste les routes du serveur HTTP")
   .action(async () => {

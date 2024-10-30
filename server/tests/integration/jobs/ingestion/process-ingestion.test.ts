@@ -610,6 +610,12 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {
@@ -706,6 +712,12 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {
@@ -880,6 +892,12 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {

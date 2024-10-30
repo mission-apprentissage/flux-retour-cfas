@@ -33,6 +33,7 @@ import {
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
+import { hydrateEffectifsLieuDeFormation } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
 import { hydrateEffectifsQueueSource } from "./hydrate/effectifs-queue/update-effectifs-queue-source";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -482,6 +483,11 @@ export async function setupJobProcessor() {
       "tmp:patches:update-effectifs-source": {
         handler: async () => {
           return hydrateEffectifsSource();
+        },
+      },
+      "tmp:patches:update-effectifs-lieu-de-formation": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormation();
         },
       },
       "tmp:patches:update-effectifs-queue-source": {
