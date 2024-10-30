@@ -124,7 +124,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       </HStack>
       {parametrage?.organisme_transmetteur ? (
         <HStack alignItems="center" gap={3}>
-          <Text>Dernier organisme transmetteur des effectifs : </Text>
+          <Text>Dernier organisme transmetteur : </Text>
           <Link
             key={parametrage?.organisme_transmetteur._id}
             href={`/organismes/${parametrage?.organisme_transmetteur._id}`}
@@ -145,7 +145,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         w="fit-content"
         bg="white"
         onClick={async () => {
-          location.href = `/organismes/${organisme?._id}/transmissions`;
+          window.open(`/organismes/${organisme?._id}/transmissions`, "_blank");
         }}
       >
         <Box as="i" className="ri-eye-line" verticalAlign="middle" mr={2} />
