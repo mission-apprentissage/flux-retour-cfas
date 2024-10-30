@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { isValidCFD } from "shared/constants/validations";
 import { IEffectif } from "shared/models/data/effectifs.model";
 
-import { getCfdInfo } from "@/common/apis/apiAlternance";
+import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { formationsDb } from "@/common/model/collections";
 
 /**

@@ -6,7 +6,7 @@ import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { getCommune } from "@/common/apis/apiAlternance";
+import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
 import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";

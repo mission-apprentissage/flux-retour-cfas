@@ -7,7 +7,7 @@ import Boom from "boom";
 import { isEqual } from "lodash-es";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants";
 
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 
 function validationRegions(apiDepartements: IApiDepartement[]): number {

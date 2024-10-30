@@ -11,13 +11,13 @@ import {
   getNiveauFormationFromLibelle,
   getNiveauFormationLibelle,
 } from "@/common/actions/formations.actions";
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { formationsDb } from "@/common/model/collections";
 import { apiAlternanceCertifFixture } from "@tests/data/apiTablesDeCorrespondances";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 
-vi.mock("@/common/apis/apiAlternance", () => ({
+vi.mock("@/common/apis/apiAlternance/client", () => ({
   apiAlternanceClient: {
     certification: {
       index: vi.fn(),
