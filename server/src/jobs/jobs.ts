@@ -9,6 +9,7 @@ import { create as createMigration, status as statusMigration, up as upMigration
 
 import { clear, clearOrganismesRuleIds, clearUsers } from "./clear/clear-all";
 import { purgeQueues } from "./clear/purge-queues";
+import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
@@ -23,14 +24,8 @@ import {
   updateOrganismesFiabilisationUaiSiret,
 } from "./fiabilisation/uai-siret/update";
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
-import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { updateDecaFormation } from "./hydrate/deca/update-deca-formation";
-import {
-  hydrateEffectifsComputed,
-  hydrateEffectifsComputedOpcos,
-  hydrateEffectifsComputedReseaux,
-} from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
@@ -38,7 +33,6 @@ import { hydrateEffectifsQueueSource } from "./hydrate/effectifs-queue/update-ef
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
-import { hydrateROME } from "./hydrate/hydrate-rome";
 import { initOpcos } from "./hydrate/opcos/opcos";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import {
@@ -47,14 +41,11 @@ import {
 } from "./hydrate/organismes/hydrate-effectifs-count-with-hierarchy";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
-import { hydrateOrganismesBassinEmploi } from "./hydrate/organismes/hydrate-organismes-bassinEmploi";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesPrepaApprentissage } from "./hydrate/organismes/hydrate-organismes-prepa-apprentissage";
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
-import { hydrateOrganismesSoltea } from "./hydrate/organismes/hydrate-organismes-soltea";
 import { updateAllOrganismesRelatedFormations } from "./hydrate/organismes/update-organismes-with-apis";
-import { hydrateBassinsEmploi } from "./hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
@@ -72,57 +63,52 @@ import {
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
 
-const dailyJobs = async () => {
-  await addJob({ name: "hydrate:organismes-referentiel", queued: true });
+const dailyJobs = async (queued: boolean) => {
+  await addJob({ name: "hydrate:organismes-referentiel", queued });
 
   // # Remplissage des formations issus du catalogue
-  await addJob({ name: "hydrate:formations-catalogue", queued: true });
+  await addJob({ name: "hydrate:formations-catalogue", queued });
 
   // # Remplissage des organismes depuis le référentiel
-  await addJob({ name: "hydrate:organismes", queued: true });
+  await addJob({ name: "hydrate:organismes", queued });
 
   // # Mise à jour des relations
-  await addJob({ name: "hydrate:organismes-relations", queued: true });
-
-  // # Mise a jour des bassin d'emploi
-  await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
+  await addJob({ name: "hydrate:organismes-relations", queued });
 
   // # Remplissage des formations des organismes
-  await addJob({ name: "hydrate:organismes-formations", queued: true });
+  await addJob({ name: "hydrate:organismes-formations", queued });
 
   // # Remplissage des OPCOs
-  await addJob({ name: "hydrate:opcos", queued: true });
+  await addJob({ name: "hydrate:opcos", queued });
 
   // # Remplissage des réseaux
-  await addJob({ name: "hydrate:reseaux", queued: true });
+  await addJob({ name: "hydrate:reseaux", queued });
 
   // # Remplissage des ofa inconnus
-  await addJob({ name: "hydrate:ofa-inconnus", queued: true });
+  await addJob({ name: "hydrate:ofa-inconnus", queued });
 
   // # Lancement des scripts de fiabilisation des couples UAI - SIRET
-  await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
-
-  // # Mise à jour des organismes via APIs externes
-  // Désactivations temporaire car trop long à executer
-  // await addJob({ name: "update:organismes-with-apis", queued: true });
+  await addJob({ name: "fiabilisation:uai-siret:run", queued });
 
   // # Mise à jour des niveaux des formations des effectifs
-  await addJob({ name: "effectifs-formation-niveaux", queued: true });
+  await addJob({ name: "effectifs-formation-niveaux", queued });
 
   // # Purge des collections events et queues
-  await addJob({ name: "purge:queues", queued: true });
+  await addJob({ name: "purge:queues", queued });
 
   // # Mise a jour du nb d'effectifs
-  await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
+  await addJob({ name: "hydrate:organismes-effectifs-count", queued });
 
   // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
   await addJob({
     name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
-    queued: true,
+    queued,
   });
-  await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
+  await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued });
 
-  await addJob({ name: "hydrate:rncp", queued: true });
+  await addJob({ name: "hydrate:rncp", queued });
+
+  await addJob({ name: "computed:update", queued });
 
   return 0;
 };
@@ -137,23 +123,13 @@ export async function setupJobProcessor() {
         : {
             "Run daily jobs each day at 02h30": {
               cron_string: "30 2 * * *",
-              handler: dailyJobs,
+              handler: async () => dailyJobs(true),
             },
 
             "Send reminder emails at 7h": {
               cron_string: "0 7 * * *",
               handler: async () => {
                 await addJob({ name: "send-reminder-emails", queued: true });
-                return 0;
-              },
-            },
-
-            "Run hydrate contrats DECA job each day at 19h45": {
-              cron_string: "45 19 * * *",
-              handler: async () => {
-                // # Remplissage des contrats DECA
-                await addJob({ name: "hydrate:contratsDeca", queued: true, payload: { drop: false, full: false } });
-
                 return 0;
               },
             },
@@ -184,17 +160,10 @@ export async function setupJobProcessor() {
           },
     jobs: {
       "init:dev": {
-        handler: async () => {
-          await hydrateFromReferentiel();
-          await hydrateFormationsCatalogue();
-          await hydrateOrganismesFormations();
-          await hydrateOrganismesFromReferentiel();
-          await hydrateReseaux();
-          return;
-        },
+        handler: async () => dailyJobs(false),
       },
       "hydrate:daily": {
-        handler: dailyJobs,
+        handler: async () => dailyJobs(true),
       },
       clear: {
         handler: async (job) => {
@@ -209,21 +178,6 @@ export async function setupJobProcessor() {
       "clear:organismes-rules-ids": {
         handler: async () => {
           return clearOrganismesRuleIds();
-        },
-      },
-      "hydrate:bassins-emploi": {
-        handler: async () => {
-          return hydrateBassinsEmploi();
-        },
-      },
-      "hydrate:organismes-bassins-emploi": {
-        handler: async () => {
-          return hydrateOrganismesBassinEmploi();
-        },
-      },
-      "hydrate:effectifs-computed": {
-        handler: async () => {
-          return hydrateEffectifsComputed();
         },
       },
       "tmp:effectifs:update_computed_statut": {
@@ -251,11 +205,6 @@ export async function setupJobProcessor() {
           return hydrateFormationsCatalogue();
         },
       },
-      "hydrate:rome": {
-        handler: async () => {
-          return hydrateROME();
-        },
-      },
       "hydrate:rncp": {
         handler: async () => {
           return hydrateRNCP();
@@ -271,19 +220,9 @@ export async function setupJobProcessor() {
           return hydrateOrganismesRelations();
         },
       },
-      "hydrate:organismes-soltea": {
-        handler: async () => {
-          return hydrateOrganismesSoltea();
-        },
-      },
       "hydrate:organismes-prepa-apprentissage": {
         handler: async () => {
           return hydrateOrganismesPrepaApprentissage();
-        },
-      },
-      "hydrate:contratsDeca": {
-        handler: async (job) => {
-          return hydrateDeca(job.payload as any);
         },
       },
       "hydrate:contrats-deca-raw": {
@@ -333,11 +272,6 @@ export async function setupJobProcessor() {
           return hydrateOrganismesOPCOs();
         },
       },
-      "hydrate:computed-effectifs-by-opcos": {
-        handler: async (job) => {
-          return hydrateEffectifsComputedOpcos((job.payload as any)?.opco);
-        },
-      },
       "hydrate:reseaux": {
         handler: async () => {
           return hydrateReseaux();
@@ -346,11 +280,6 @@ export async function setupJobProcessor() {
       "hydrate:ofa-inconnus": {
         handler: async () => {
           return hydrateRaisonSocialeEtEnseigneOFAInconnus();
-        },
-      },
-      "hydrate:effectifs-computed-organismes-reseaux": {
-        handler: async () => {
-          return hydrateEffectifsComputedReseaux();
         },
       },
       "hydrate:voeux-effectifs-relations": {
@@ -518,6 +447,9 @@ export async function setupJobProcessor() {
         handler: async () => {
           return validateModels();
         },
+      },
+      "computed:update": {
+        handler: updateComputedFields,
       },
       "migrations:up": {
         handler: async () => {
