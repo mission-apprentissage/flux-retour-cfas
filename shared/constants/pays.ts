@@ -1,4 +1,4 @@
-export const PAYS = [
+const PAYS = [
   { code: "AF", label: "AFGHANISTAN", value: "AFGHANISTAN", libelle: "ÉTAT ISLAMIQUE D'AFGHANISTAN", actif: "Oui" },
   {
     code: "ZA",
@@ -386,8 +386,8 @@ export const PAYS = [
   { code: "ZW", label: "ZIMBABWE", value: "ZIMBABWE", libelle: "RÉPUBLIQUE DU ZIMBABWE", actif: "Oui" },
 ];
 
-export type IPays = (typeof PAYS)[number];
-export type IPaysCode = IPays["code"];
+type IPays = (typeof PAYS)[number];
+type IPaysCode = IPays["code"];
 
 export const PAYS_BY_CODE: Record<IPaysCode, IPays> = PAYS.reduce<Record<IPaysCode, IPays>>((acc, pays) => {
   acc[pays.code] = pays;

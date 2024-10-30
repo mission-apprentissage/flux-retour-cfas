@@ -24,7 +24,7 @@ import {
 
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-export interface FiltreOrganismeTerritoireConfig {
+interface FiltreOrganismeTerritoireConfig {
   defaultLabel?: string;
   disabled?: boolean;
   regions?: string[];

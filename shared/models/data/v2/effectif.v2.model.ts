@@ -8,14 +8,14 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 const collectionName = "effectifV2";
 
-export const zEffectifV2Computed = z
+const zEffectifV2Computed = z
   .object({
     nom: z.string().nullish(),
     prenom: z.string().nullish(),
     date_de_naissance: z.union([z.date(), z.string()]).nullish(),
   })
   .nullish();
-export const zEffectifV2 = z.object({
+const zEffectifV2 = z.object({
   _id: zObjectId,
   created_at: z.date(),
   updated_at: z.date(),

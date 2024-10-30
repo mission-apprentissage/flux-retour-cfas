@@ -89,5 +89,3 @@ export const plausibleGoals = [
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
-
-export const plausibleProperties = ["organisationType", "organisationNom"] as const;

@@ -4,6 +4,7 @@ import { AxiosInstance } from "axiosist";
 import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";

@@ -1,17 +1,5 @@
-import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
-
-// Collection name
-const collectionName = "airbyte_raw_bal_deca";
-
-// Indexes
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ statut: 1 }, {}],
-  [{ "employeur.siret": 1 }, { unique: false }],
-  [{ "formation.code_diplome": 1 }, { unique: false }],
-  [{ created_at: 1 }, { unique: false }],
-];
 
 // Address schema
 const zAdresse = z.object({
@@ -96,5 +84,3 @@ const zAirbyteRawBalDeca = z.object({
 
 // Define the type
 export type IAirbyteRawBalDeca = z.infer<typeof zAirbyteRawBalDeca>;
-
-export default { zod: zAirbyteRawBalDeca, indexes, collectionName };

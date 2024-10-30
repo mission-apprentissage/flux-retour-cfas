@@ -3,6 +3,7 @@ import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
+import { it, describe, beforeEach } from "vitest";
 
 import {
   deleteOldestDuplicates,

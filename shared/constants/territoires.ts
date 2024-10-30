@@ -1,6 +1,6 @@
 import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
-export const REGIONS = [
+const REGIONS = [
   {
     nom: "Guadeloupe",
     code: "01",
@@ -1384,7 +1384,7 @@ export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPAR
   {} as Record<IDepartmentCode, IDepartement>
 );
 
-export const ACADEMIES = [
+const ACADEMIES = [
   { nom: "Étranger", code: "00" },
   { nom: "Paris", code: "01" },
   { nom: "Aix-Marseille", code: "02" },
@@ -1462,7 +1462,7 @@ export function getAcademieByCode(code: string | number): IAcademie | null {
   return normalizedCode === null ? null : ACADEMIES_BY_CODE[normalizedCode];
 }
 
-export const TERRITOIRE_TYPE = {
+const TERRITOIRE_TYPE = {
   REGION: "region",
   DEPARTEMENT: "departement",
   ACADEMIE: "academie",

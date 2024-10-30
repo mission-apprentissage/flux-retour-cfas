@@ -13,7 +13,7 @@ import {
 } from "shared";
 
 import { createOrganisme, findOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
 

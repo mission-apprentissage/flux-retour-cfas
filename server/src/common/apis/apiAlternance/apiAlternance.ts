@@ -1,5 +1,4 @@
 import { captureException } from "@sentry/node";
-import { ApiClient } from "api-alternance-sdk";
 import type { ICommune } from "api-alternance-sdk";
 import Boom from "boom";
 import CfdInfo from "shared/models/apis/@types/CfdInfo";
@@ -7,10 +6,7 @@ import CfdInfo from "shared/models/apis/@types/CfdInfo";
 import logger from "@/common/logger";
 import config from "@/config";
 
-export const apiAlternanceClient = new ApiClient({
-  endpoint: "https://api.apprentissage.beta.gouv.fr/api",
-  key: config.apiAlternance.key,
-});
+import { apiAlternanceClient } from "./client";
 
 export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
   try {

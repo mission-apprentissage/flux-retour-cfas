@@ -3,7 +3,7 @@ import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 /**
  * Noms des réseaux de CFAS
  */
-export const TETE_DE_RESEAUX = [
+const TETE_DE_RESEAUX = [
   {
     nom: "ADEN",
     key: "ADEN",
@@ -126,13 +126,9 @@ export const TETE_DE_RESEAUX = [
   },
 ] as const satisfies ReadonlyArray<{ readonly nom: string; readonly key: string; readonly responsable: boolean }>;
 
-export const TETE_DE_RESEAU_ = [];
-
-export type ITetesDeReseaux = typeof TETE_DE_RESEAUX;
-export type ITeteDeReseau = ITetesDeReseaux[number];
+type ITetesDeReseaux = typeof TETE_DE_RESEAUX;
+type ITeteDeReseau = ITetesDeReseaux[number];
 export type ITeteDeReseauKey = ITeteDeReseau["key"];
-
-export type TeteDeReseauKey = (typeof TETE_DE_RESEAUX)[number]["key"];
 
 export const TETE_DE_RESEAUX_SORTED = sortAlphabeticallyBy("nom", TETE_DE_RESEAUX);
 
