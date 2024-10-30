@@ -1010,7 +1010,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
 export default withAuth(DashboardOrganisme);
 
-export function getForbiddenErrorText(ctx: AuthContext): string {
+function getForbiddenErrorText(ctx: AuthContext): string {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION":

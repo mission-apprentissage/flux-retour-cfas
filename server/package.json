@@ -51,7 +51,6 @@
     "escape-string-regexp": "^5.0.0",
     "express": "^4.21.1",
     "express-async-errors": "3.1.1",
-    "express-list-endpoints": "^6.0.0",
     "fast-xml-parser": "^4.5.0",
     "job-processor": "^1.6.3",
     "joi": "^17.13.3",
@@ -79,10 +78,8 @@
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
     "swagger-ui-express": "^5.0.1",
-    "tsx": "^3.14.0",
     "type-fest": "^4.26.1",
     "uuid": "8.3.2",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
     "zod": "^3.23.8"
   },
   "prettier": {
@@ -95,17 +92,17 @@
     "@types/boom": "^7.3.5",
     "@types/bunyan": "^1.8.11",
     "@types/express": "^4.17.21",
-    "@types/jest": "^29.5.13",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.7.5",
-    "@types/sinon": "^10.0.20",
     "axiosist": "0.10.0",
     "dotenv": "^16.4.5",
     "eslint-plugin-node": "11.1.0",
     "nock": "^14.0.0-beta.15",
     "randexp": "0.5.3",
     "tsup": "^7.3.0",
+    "tsx": "^3.14.0",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
   }
 }

@@ -85,7 +85,7 @@ jobs:
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
       - name: Encrypt logs
-        run: .bin/mna deploy:log:encrypt
+        run: .bin/mna-tdb deploy:log:encrypt
         if: always()
         env:
           ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
@@ -99,7 +99,7 @@ jobs:
 
       - name: Add Job summary
         if: always()
-        run: echo 'You can get logs using `.bin/mna deploy:log:decrypt ${{ github.run_id }} ${{ github.event.issue.number }}`' >> $GITHUB_STEP_SUMMARY
+        run: echo 'You can get logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }} ${{ github.event.issue.number }}`' >> $GITHUB_STEP_SUMMARY
 
       - name: Preview Summary when failed
         if: failure()

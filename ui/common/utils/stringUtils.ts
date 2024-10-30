@@ -19,11 +19,6 @@ export function formatCivility(civility: "Madame" | "Monsieur"): string {
   return civilityToAbbreviation[civility] ?? "";
 }
 
-export const capitalize = (str) => {
-  const firstLetter = str.charAt(0);
-  return `${firstLetter.toUpperCase()}${str.substr(1)}`;
-};
-
 /**
  * Retourne la représentation textuelle arrondie d'un grand nombre.
  */

@@ -129,13 +129,3 @@ export const clearAllCollections = async () => {
   let collections = await getDatabase().collections();
   return Promise.all(collections.map((c) => c.deleteMany({})));
 };
-
-/**
- * Clear d'une collection
- * @param {string} name
- * @returns
- */
-export async function clearCollection(name) {
-  logger.warn(`Suppression des données de la collection ${name}...`);
-  await getDatabase().collection(name).deleteMany({});
-}
