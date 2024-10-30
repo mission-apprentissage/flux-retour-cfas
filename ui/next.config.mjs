@@ -1,6 +1,8 @@
-const { withSentryConfig } = require("@sentry/nextjs");
-const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
-const { withPlausibleProxy } = require("next-plausible");
+import path from "path";
+import { fileURLToPath } from "url";
+
+import { withSentryConfig } from "@sentry/nextjs";
+import { withPlausibleProxy } from "next-plausible";
 
 function inline(value) {
   return value.replace(/\s{2,}/g, " ").trim();
@@ -30,22 +32,28 @@ const contentSecurityPolicy = `
 const nextConfig = {
   transpilePackages: ["shared"],
   poweredByHeader: false,
+  productionBrowserSourceMaps: true,
   swcMinify: true,
   experimental: {
-    appDir: false,
+    outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
     typedRoutes: true,
-    topLevelAwait: true,
+    instrumentationHook: true,
   },
   output: "standalone",
-  eslint: {
-    dirs: ["."],
-  },
   sentry: {
     hideSourceMaps: false,
-    widenClientFileUpload: true,
   },
   webpack: (config) => {
-    config.plugins.push(new CaseSensitivePathsPlugin());
+    config.module.rules.push({
+      test: /\.woff2$/,
+      type: "asset/resource",
+    });
+    config.resolve.extensionAlias = {
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+      ".cjs": [".cts", ".cjs"],
+    };
+    console.log(config);
     return config;
   },
   async headers() {
@@ -87,7 +95,7 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(
+export default withSentryConfig(
   withPlausibleProxy()(nextConfig),
   { silent: true, dryRun: !process.env.NEXT_PUBLIC_SENTRY_DSN },
   { hideSourcemaps: true }
