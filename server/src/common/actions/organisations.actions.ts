@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
-import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, withOrganismeListSummary } from "shared";
+import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
@@ -352,7 +352,7 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom}`;
     case "ACADEMIE":
-      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom}`;
+      return `Académie ${getAcademieByCode(organisation.code_academie)?.nom}`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
