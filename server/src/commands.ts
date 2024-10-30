@@ -570,6 +570,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:computed-effectifs-by-opcos"));
 
+program
+  .command("hydrate:update-effectifs-lieu-de-formation")
+  .description("Ajout des information du lieu de formation dans les effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:update-effectifs-lieu-de-formation"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
@@ -705,12 +711,6 @@ program
   .description("Mise a jour du chanps source dans les effectifs queue")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:patches:update-effectifs-source"));
-
-program
-  .command("tmp:patches:update-effectifs-lieu-de-formation")
-  .description("Ajout des information du lieu de formation dans les effectifs")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("tmp:patches:update-effectifs-lieu-de-formation"));
 
 program
   .command("dev:list-http-endpoints")

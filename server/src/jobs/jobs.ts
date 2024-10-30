@@ -119,6 +119,9 @@ const dailyJobs = async () => {
   // # Mise a jour du nb d'effectifs
   await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
 
+  // # Mise a jour ieu de formation d'effectifs
+  await addJob({ name: "hydrate:update-effectifs-lieu-de-formation", queued: true });
+
   // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
   await addJob({
     name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
@@ -375,6 +378,11 @@ export async function setupJobProcessor() {
           return hydrateEffectifsComputedReseaux();
         },
       },
+      "hydrate:update-effectifs-lieu-de-formation": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormation();
+        },
+      },
       "hydrate:voeux-effectifs-relations": {
         handler: async () => {
           return hydrateVoeuxEffectifsRelations();
@@ -483,11 +491,6 @@ export async function setupJobProcessor() {
       "tmp:patches:update-effectifs-source": {
         handler: async () => {
           return hydrateEffectifsSource();
-        },
-      },
-      "tmp:patches:update-effectifs-lieu-de-formation": {
-        handler: async () => {
-          return hydrateEffectifsLieuDeFormation();
         },
       },
       "tmp:patches:update-effectifs-queue-source": {
