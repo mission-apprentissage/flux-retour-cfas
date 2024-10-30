@@ -1,20 +1,14 @@
 import { captureException } from "@sentry/node";
-import TabCoCfdInfo from "shared/models/apis/@types/TabCoCfdInfo";
-import TabCoCodePostalInfo from "shared/models/apis/@types/TabCoCodePostalInfo";
+import type { ICommune } from "api-alternance-sdk";
+import Boom from "boom";
+import CfdInfo from "shared/models/apis/@types/CfdInfo";
 
 import logger from "@/common/logger";
 import config from "@/config";
 
-import { tryCachedExecution } from "../utils/cacheUtils";
+import { apiAlternanceClient } from "./client";
 
-import { apiAlternanceClient } from "./apiAlternance";
-import getApiClient from "./client";
-
-export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
-
-const client = getApiClient({ baseURL: API_ENDPOINT });
-
-export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
+export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
   try {
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
 
@@ -23,7 +17,7 @@ export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
     }
 
     // All certifications have CFD, so each `.cfd` property is not null (that's just a type refinement issue).
-    const data: TabCoCfdInfo = {
+    const data: CfdInfo = {
       date_fermeture: certifications[0].periode_validite.cfd!.fermeture,
       date_ouverture: certifications[0].periode_validite.cfd!.ouverture,
       niveau: certifications[0].intitule.niveau.cfd!.europeen,
@@ -57,26 +51,24 @@ export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
   }
 };
 
-export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<TabCoCodePostalInfo | null> => {
+export const getCommune = async (codePostal: string | null | undefined): Promise<ICommune | null> => {
   if (!codePostal) return null;
 
-  const serviceFunc = async () => {
-    try {
-      const { data } = await client.post("/code-postal", { codePostal }, { cache: { methods: ["post"] } });
-      return data;
-    } catch (error: any) {
-      logger.error(
-        `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
-        error.code || error.response?.status
-      );
-      captureException(
-        new Error(`getCodePostalInfo: something went wrong while requesting code postal "${codePostal}"`, {
-          cause: error,
-        })
-      );
-      return null;
-    }
-  };
+  const result = await apiAlternanceClient.geographie.rechercheCommune({ code: codePostal }).catch((error) => {
+    if (config.env === "test") throw error;
 
-  return tryCachedExecution(`codePostalInfo-${codePostal}`, 3600_000, serviceFunc);
+    logger.error(`getCommune: something went wrong while requesting code postal "${codePostal}": ${error.message}`, {
+      error,
+      codePostal,
+    });
+
+    const err = Boom.internal("Échec de l'appel API pour la recherche de code postal", { codePostal });
+    err.cause = error;
+    captureException(err);
+
+    return [];
+  });
+
+  // Returns the first commune
+  return result[0] ?? null;
 };

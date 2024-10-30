@@ -3,7 +3,7 @@ import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
 import Boom from "boom";
 import { STATUT_FIABILISATION_ORGANISME } from "shared/constants";
 
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
 
 type FiabilisationUaiSiret = {

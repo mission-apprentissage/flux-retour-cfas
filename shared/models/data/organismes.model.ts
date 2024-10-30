@@ -60,7 +60,7 @@ const organismesCountSchema = z.object({
   uaiNonDeterminee: z.number(),
 });
 
-export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
+type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
 
 export type IOrganismesCount = z.output<typeof organismesCountSchema>;
@@ -251,20 +251,6 @@ const zOrganisme = z
 
 export type IOrganisme = z.output<typeof zOrganisme>;
 export type IOrganismeJson = Jsonify<IOrganisme>;
-
-export type IOrganismeOptional = Pick<
-  IOrganisme,
-  | "reseaux"
-  | "erps"
-  | "relatedFormations"
-  | "fiabilisation_statut"
-  | "fiabilisation_api_response"
-  | "ferme"
-  | "qualiopi"
-  | "prepa_apprentissage"
-  | "created_at"
-  | "updated_at"
->;
 
 // Default value
 export function defaultValuesOrganisme(): Pick<

@@ -28,7 +28,7 @@ describe("mergeEffectif", () => {
           code_postal: "05109",
           commune: "[NOM_DE_LA_COMMUNE]",
           departement: "05",
-          academie: "2",
+          academie: "02",
           region: "93",
         },
       },

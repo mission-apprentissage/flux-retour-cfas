@@ -72,6 +72,7 @@ module.exports = {
           "**/dev.ts",
           "**/tsup.config.ts",
           "**/vitest.workspace.ts",
+          "**/next.config.js",
         ],
         optionalDependencies: false,
       },

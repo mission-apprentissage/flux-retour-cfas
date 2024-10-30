@@ -2,8 +2,8 @@ import { strict as assert } from "assert";
 
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
+import { sleep } from "@/common/utils/asyncUtils";
 import { clearCache, tryCachedExecution } from "@/common/utils/cacheUtils";
-import { sleep } from "@/common/utils/timeUtils";
 
 describe("tryCachedExecution()", () => {
   beforeEach(() => {

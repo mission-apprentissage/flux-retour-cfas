@@ -30,7 +30,7 @@ export const zApprenant = zodOpenApi.object({
       description:
         "Le code postal doit contenir 5 caractères.  \nPour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  \n*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
     })
-    .openapi({ example: "75000" })
+    .openapi({ example: "75001" })
     .regex(CODE_POSTAL_REGEX)
     .nullish(),
   nationalite: zodOpenApi

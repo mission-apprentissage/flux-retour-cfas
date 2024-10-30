@@ -5,13 +5,13 @@ import { ObjectId } from "bson";
 import type { IOrganisme } from "shared/models";
 import { describe, it, vi, beforeEach, expect } from "vitest";
 
-import { apiAlternanceClient } from "@/common/apis/apiAlternance";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { fiabilisationUaiSiret, updateOrganismesFiabilisationStatut } from "./updateFiabilisation";
 
-vi.mock("@/common/apis/apiAlternance", () => {
+vi.mock("@/common/apis/apiAlternance/client", () => {
   return {
     apiAlternanceClient: {
       organisme: {
