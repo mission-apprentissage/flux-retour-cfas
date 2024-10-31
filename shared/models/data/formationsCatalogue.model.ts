@@ -18,7 +18,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ etablissement_gestionnaire_uai: 1 }, { name: "etablissement_gestionnaire_uai" }],
 ];
 
-const zFormationCatalogue = z.object({
+export const zFormationCatalogue = z.object({
   _id: zObjectId,
   cle_ministere_educatif: z.string(),
   cfd: z.string(),
