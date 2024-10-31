@@ -157,7 +157,7 @@ export const zEffectifQueue = z.object({
   etablissement_lieu_de_formation_siret: z.any({ description: "SIRET de l'établissement (lieu de formation)" }),
 
   formation_cfd: z.any({ description: formationProps.cfd.description }),
-  dernier_organisme_departement: z.any({ description: "Département de l'organisme fréquenté l'année dernière" }),
+
   // internal fields
   ...internalFields,
 });

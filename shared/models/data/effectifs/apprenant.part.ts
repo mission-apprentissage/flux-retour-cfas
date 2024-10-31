@@ -4,7 +4,6 @@ import {
   SEXE_APPRENANT_ENUM,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
-  DEPARTEMENT_CODE_ETABLISSEMENT,
 } from "../../../constants";
 import { zodLiteralUnion } from "../../../utils/zodHelper";
 import { zAdresse } from "../../parts/adresseSchema";
@@ -118,7 +117,7 @@ export const zApprenant = zodOpenApi.object({
       description: "Type de CFA",
     })
     .nullish(),
-  dernier_organisme_departement: zodOpenApi.enum(DEPARTEMENT_CODE_ETABLISSEMENT as [string, ...string[]]).nullish(),
+
   dernier_diplome: zodLiteralUnion([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99], {
     description: "Dernier diplôme obtenu",
   }).nullish(),
