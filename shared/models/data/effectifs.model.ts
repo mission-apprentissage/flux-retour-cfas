@@ -153,6 +153,32 @@ export const zEffectif = z.object({
       }
     )
     .nullish(),
+  lieu_de_formation: z
+    .object({
+      uai: z
+        .string({
+          description: "Code UAI du lieu de formation",
+        })
+        .regex(UAI_REGEX)
+        .nullish(),
+      siret: z
+        .string({
+          description: "N° SIRET du lieu de formation",
+        })
+        .regex(SIRET_REGEX)
+        .nullish(),
+      adresse: z
+        .string({
+          description: "Adresse du lieu de formation",
+        })
+        .nullish(),
+      code_postal: z
+        .string({
+          description: "Code postal du lieu de formation",
+        })
+        .nullish(),
+    })
+    .nullish(),
   _computed: z
     .object(
       {

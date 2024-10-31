@@ -3135,6 +3135,59 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       "description": "Identifiant de l'apprenant dans l'erp",
     },
     "is_lock": {},
+    "lieu_de_formation": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "adresse": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse du lieu de formation",
+            },
+            "code_postal": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Code postal du lieu de formation",
+            },
+            "siret": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "N° SIRET du lieu de formation",
+                  "pattern": "^[0-9]{14}$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "N° SIRET du lieu de formation",
+            },
+            "uai": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Code UAI du lieu de formation",
+                  "pattern": "^[0-9]{7}[a-zA-Z]$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Code UAI du lieu de formation",
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "organisme_formateur_id": {
       "anyOf": [
         {
@@ -5986,6 +6039,59 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       "description": "Identifiant de l'apprenant dans l'erp",
     },
     "is_lock": {},
+    "lieu_de_formation": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "adresse": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse du lieu de formation",
+            },
+            "code_postal": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Code postal du lieu de formation",
+            },
+            "siret": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "N° SIRET du lieu de formation",
+                  "pattern": "^[0-9]{14}$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "N° SIRET du lieu de formation",
+            },
+            "uai": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Code UAI du lieu de formation",
+                  "pattern": "^[0-9]{7}[a-zA-Z]$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Code UAI du lieu de formation",
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "organisme_formateur_id": {
       "anyOf": [
         {
@@ -8650,6 +8756,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "etablissement_formateur_uai": {
       "description": "UAI de l'établissement formateur",
+    },
+    "etablissement_lieu_de_formation_adresse": {
+      "description": "Adresse du lieu de formation",
+    },
+    "etablissement_lieu_de_formation_code_postal": {
+      "description": "Code postal du lieu de formation",
     },
     "etablissement_lieu_de_formation_siret": {
       "description": "SIRET de l'établissement (lieu de formation)",

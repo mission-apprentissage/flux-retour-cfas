@@ -33,6 +33,7 @@ import {
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
+import { hydrateEffectifsLieuDeFormation } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
 import { hydrateEffectifsQueueSource } from "./hydrate/effectifs-queue/update-effectifs-queue-source";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -117,6 +118,9 @@ const dailyJobs = async () => {
 
   // # Mise a jour du nb d'effectifs
   await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
+
+  // # Mise a jour ieu de formation d'effectifs
+  await addJob({ name: "hydrate:update-effectifs-lieu-de-formation", queued: true });
 
   // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
   await addJob({
@@ -372,6 +376,11 @@ export async function setupJobProcessor() {
       "hydrate:effectifs-computed-organismes-reseaux": {
         handler: async () => {
           return hydrateEffectifsComputedReseaux();
+        },
+      },
+      "hydrate:update-effectifs-lieu-de-formation": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormation();
         },
       },
       "hydrate:voeux-effectifs-relations": {
