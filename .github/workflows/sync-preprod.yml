@@ -1,0 +1,78 @@
+name: Sync Preprod
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Synchronisation de la base de donnée Production -> Preprod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify new deployment on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "Synchronisation de la base de donnée Production -> Preprod initié..."
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          name: github_actions
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          known_hosts: ${{ vars.SSH_KNOWN_HOSTS }}
+          config: |
+            Host *
+              IdentityFile ~/.ssh/github_actions
+
+      - name: Create vault pwd file
+        run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
+
+      - name: Run playbook
+        run: .bin/mna-tdb preprod:sync
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+          ANSIBLE_REMOTE_USER: deploy
+          ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
+
+      - name: Encrypt logs
+        run: .bin/mna-tdb deploy:log:encrypt
+        if: always()
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+
+      - name: Upload logs artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-sync-preprod
+          path: /tmp/deploy.log.gpg
+
+      - name: Add Job summary
+        if: always()
+        run: echo 'You can get logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }} logs-sync-preprod`' >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify failure on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "La synchronisation de la base de donnée Production -> Preprod a échoué"
+          notify_when: "failure"
+          mention_groups: "!channel"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify success on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "Synchronisation de la base de donnée Production -> Preprod terminé avec succès"
+          notify_when: "success"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

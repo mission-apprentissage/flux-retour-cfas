@@ -106,7 +106,6 @@ export const dossierApprenantSchemaV3Base = () =>
     derniere_situation: primitivesV3.derniere_situation.optional(),
     dernier_organisme_uai: primitivesV3.dernier_organisme_uai.optional(),
     type_cfa: primitivesV3.type_cfa.optional(),
-    dernier_organisme_departement: primitivesV3.dernier_organisme_departement.optional(),
   });
 
 const dossierApprenantSchemaV3BaseWithApiData = () => {

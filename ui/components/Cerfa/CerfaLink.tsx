@@ -85,6 +85,16 @@ const CerfaLink = (props: CerfaLinkProps) => {
               </Text>
             </Button>
           </Link>
+          <HStack mt={3}>
+            <Image src="/images/landing-cards/city-hall.svg" w={10} alt="" />
+            <Text fontSize="omega">
+              Vous formez un apprenti en contrat chez un employeur public ? Utilisez{" "}
+              <Link href="https://celia.emploi.gouv.fr/" isExternal textDecoration="underline" display="inline">
+                CELIA
+              </Link>
+              .
+            </Text>
+          </HStack>
         </Box>
       </HStack>
     </Box>

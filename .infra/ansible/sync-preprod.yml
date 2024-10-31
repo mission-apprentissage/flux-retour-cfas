@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Sync data to preprod
+      ansible.builtin.shell:
+        chdir: "/opt/app"
+        cmd: "/opt/app/scripts/sync-preprod.sh"
+      async: 10800
+      poll: 60

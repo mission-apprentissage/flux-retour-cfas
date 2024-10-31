@@ -86,6 +86,8 @@ export default () => {
         api_key: 1,
         mode_de_transmission: 1,
         mode_de_transmission_configuration_date: 1,
+        mode_de_transmission_configuration_author_fullname: 1,
+        erp_unsupported: 1,
         api_version: 1,
         organisme_transmetteur_id: 1,
       });
@@ -109,7 +111,9 @@ export default () => {
         api_key: organisme.mode_de_transmission === "API" ? organisme.api_key : undefined,
         parametrage_erp_active: !!organisme.mode_de_transmission_configuration_date,
         parametrage_erp_date: organisme.mode_de_transmission_configuration_date,
+        parametrage_erp_author: organisme.mode_de_transmission_configuration_author_fullname,
         erps: organisme.erps,
+        erp_unsupported: organisme.erp_unsupported,
         organisme_transmetteur_id: organisme.organisme_transmetteur_id,
         ...(organismeTransmetteur
           ? {
