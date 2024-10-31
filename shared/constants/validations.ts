@@ -14,7 +14,7 @@ export const NIR_REGEX_PATTERN = "^[0-9]{13}$";
 export const NIR_LOOSE_REGEX_PATTERN = "^[0-9]{13}([0-9]{2})?$";
 // Basé sur les recommandations SIFA
 export const DERNIER_ORGANISME_UAI_PATTERN =
-  "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$";
+  "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$";
 export const PHONE_REGEX_PATTERN =
   "(?:([+]\\d{1,4})[-.\\s]?)?(?:[(](\\d{1,3})[)][-.\\s]?)?(\\d{1,4})[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,9})";
 
