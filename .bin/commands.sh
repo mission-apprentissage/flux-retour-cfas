@@ -14,6 +14,7 @@ function Help() {
    echo "  preview:cleanup --user <your_username>     Remove preview from close pull-requests"
    echo "  vault:edit                                 Edit vault file"
    echo "  vault:password                             Show vault password"
+   echo "  preprod:sync                               Sync preprod database with production"
    echo "  seed:update                                Update seed using a database"
    echo "  seed:apply                                 Apply seed to a database"
    echo "  deploy:log:encrypt                         Encrypt Github ansible logs"
@@ -72,10 +73,14 @@ function preview:cleanup() {
   "${SCRIPT_DIR}/run-playbook.sh" "preview_cleanup.yml" "preview"
 }
 
+function preprod:sync() {
+  "${SCRIPT_DIR}/run-playbook.sh" "sync-preprod.yml" "production"
+}
+
 function vault:init() {
   # Ensure Op is connected
-  op account get > /dev/null
-  op document get ".vault-password-tmpl" --vault "mna-vault-passwords-common" > "${ROOT_DIR}/.infra/vault/.vault-password.gpg"
+  op --account mission-apprentissage account account get > /dev/null
+  op --account mission-apprentissage account document get ".vault-password-tmpl" --vault "mna-vault-passwords-common" > "${ROOT_DIR}/.infra/vault/.vault-password.gpg"
 }
 
 function vault:edit() {
