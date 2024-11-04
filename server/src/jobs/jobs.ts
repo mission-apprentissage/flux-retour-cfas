@@ -111,7 +111,7 @@ const dailyJobs = async () => {
   // await addJob({ name: "update:organismes-with-apis", queued: true });
 
   // # Mise à jour des niveaux des formations des effectifs
-  await addJob({ name: "effectifs-formation-niveaux", queued: true });
+  await addJob({ name: "hydrate:effectifs-formation-niveaux", queued: true });
 
   // # Purge des collections events et queues
   await addJob({ name: "purge:queues", queued: true });
