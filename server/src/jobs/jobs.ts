@@ -33,7 +33,10 @@ import {
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
-import { hydrateEffectifsLieuDeFormation } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
+import {
+  hydrateEffectifsLieuDeFormation,
+  hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
+} from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { cleanEffectifsSource, hydrateEffectifsSource } from "./hydrate/effectifs/update-effectifs-source";
 import { hydrateEffectifsQueueSource } from "./hydrate/effectifs-queue/update-effectifs-queue-source";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -378,6 +381,11 @@ export async function setupJobProcessor() {
       "hydrate:update-effectifs-lieu-de-formation": {
         handler: async () => {
           return hydrateEffectifsLieuDeFormation();
+        },
+      },
+      "hydrate:update-effectifs-organisme-lieu-vers-formateur": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormationVersOrganismeFormateur();
         },
       },
       "hydrate:voeux-effectifs-relations": {

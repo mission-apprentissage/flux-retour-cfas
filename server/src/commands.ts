@@ -576,6 +576,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:update-effectifs-lieu-de-formation"));
 
+program
+  .command("hydrate:update-effectifs-organisme-lieu-vers-formateur")
+  .description("Mise à jour des organismes des effectifs de lieu de formation vers organisme formateur")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:update-effectifs-organisme-lieu-vers-formateur"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
