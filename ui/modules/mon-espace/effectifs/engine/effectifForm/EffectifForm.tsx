@@ -206,7 +206,6 @@ export const EffectifForm = memo(
     const fromDECA = useRecoilValue<any>(effectifFromDecaAtom);
     const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue<any>(effectifStateSelector(effectifId));
     const values = useRecoilValue<any>(valuesSelector);
-
     const sortedParcours = [...parcours].reverse();
     const currentStatus = sortedParcours[0];
     const historyStatus = sortedParcours.slice(1);
