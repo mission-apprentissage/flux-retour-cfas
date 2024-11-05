@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: .infra/vault/vault.yml
+  checksum: d86cec8212e2e16392af0c5c5c211b41b078902f8e815cea097c418eca76c235
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
 - filename: ui/modules/referencement-organisme/tabs/AideRelationsOrganismes.tsx
