@@ -10,7 +10,7 @@ export async function hydrateEffectifsLieuDeFormation() {
   const lieuFormationCache = new Map();
 
   try {
-    const cursor = effectifsDb().find({});
+    const cursor = effectifsDb().find({ lieu_de_formation: { $exists: false } });
 
     while (await cursor.hasNext()) {
       const effectif = await cursor.next();
