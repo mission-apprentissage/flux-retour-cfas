@@ -3,6 +3,8 @@ import { contratsSchema } from "@/modules/mon-espace/effectifs/engine/effectifFo
 import { formationSchema } from "@/modules/mon-espace/effectifs/engine/effectifForm/blocks/formation/formationSchema";
 import { statutsSchema } from "@/modules/mon-espace/effectifs/engine/effectifForm/blocks/statuts/statutSchema";
 
+import { lieuDeFormationSchema } from "../effectifForm/blocks/lieu-de-formation/lieuDeFormationSchema";
+
 import { controls } from "./controls";
 
 export const effectifFormSchema = {
@@ -11,6 +13,7 @@ export const effectifFormSchema = {
     ...contratsSchema,
     ...formationSchema,
     ...apprenantSchema,
+    ...lieuDeFormationSchema,
   },
   logics: controls,
 };

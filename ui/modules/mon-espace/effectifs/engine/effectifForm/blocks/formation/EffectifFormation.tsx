@@ -17,6 +17,8 @@ export const EffectifFormation = memo(() => {
         <InputController name="formation.date_entree" w="80" mb={0} />
         <InputController name="formation.date_fin" w="80" mb={0} />
         <InputController name="formation.date_obtention_diplome" w="80" mb={0} />
+        <InputController name="lieu_de_formation.adresse" w="80" mb={0} />
+        <InputController name="lieu_de_formation.code_postal" w="80" mb={0} />
       </Grid>
     </Box>
   );
