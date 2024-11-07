@@ -17,7 +17,7 @@ export default function InfoTeleversement() {
         </Box>
       </VStack>
       <Text mt={6} fontWeight="bold">
-        20 champs sont obligatoires pour chaque effectif :
+        18 champs sont obligatoires pour chaque effectif :
       </Text>
       <HStack mt={2} fontSize="zeta">
         <Grid templateColumns="repeat(3, 1fr)" gap={6}>
@@ -37,15 +37,13 @@ export default function InfoTeleversement() {
           </Box>
           <Box>
             <Text mt={6} fontWeight="bold">
-              6 champs concernant l’organisme de formation:
+              4 champs concernant l’organisme de formation:
             </Text>
             <UnorderedList>
               <ListItem>N° UAI de l’établissement responsable</ListItem>
               <ListItem>SIRET de l’établissement responsable</ListItem>
               <ListItem>N° UAI de l’établissement formateur</ListItem>
               <ListItem>SIRET de l’établissement formateur</ListItem>
-              <ListItem>N° UAI du lieu de formation</ListItem>
-              <ListItem>SIRET du lieu de formation</ListItem>
             </UnorderedList>
           </Box>
           <Box>

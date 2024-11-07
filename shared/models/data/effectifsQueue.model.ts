@@ -137,6 +137,8 @@ export const zEffectifQueue = z.object({
   siret_employeur_3: z.any({ description: organismeProps.siret.description }),
   siret_employeur_4: z.any({ description: organismeProps.siret.description }),
   formation_presentielle: z.any({ description: "Formation 100% à distance ou non" }),
+  etablissement_lieu_de_formation_uai: z.any({ description: "UAI de l'établissement (lieu de formation)" }),
+  etablissement_lieu_de_formation_siret: z.any({ description: "SIRET de l'établissement (lieu de formation)" }),
   etablissement_lieu_de_formation_adresse: z.any({ description: "Adresse du lieu de formation" }),
   etablissement_lieu_de_formation_code_postal: z.any({ description: "Code postal du lieu de formation" }),
 
@@ -153,8 +155,6 @@ export const zEffectifQueue = z.object({
   etablissement_responsable_siret: z.any({ description: "SIRET de l'établissement responsable" }),
   etablissement_formateur_uai: z.any({ description: "UAI de l'établissement formateur" }),
   etablissement_formateur_siret: z.any({ description: "SIRET de l'établissement formateur" }),
-  etablissement_lieu_de_formation_uai: z.any({ description: "UAI de l'établissement (lieu de formation)" }),
-  etablissement_lieu_de_formation_siret: z.any({ description: "SIRET de l'établissement (lieu de formation)" }),
 
   formation_cfd: z.any({ description: formationProps.cfd.description }),
 
