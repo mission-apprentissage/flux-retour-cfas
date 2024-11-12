@@ -619,12 +619,6 @@ describe("Processus d'ingestion", () => {
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {
@@ -721,12 +715,6 @@ describe("Processus d'ingestion", () => {
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {
@@ -901,12 +889,6 @@ describe("Processus d'ingestion", () => {
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {

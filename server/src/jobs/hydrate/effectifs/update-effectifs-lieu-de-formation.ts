@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/node";
 
+import { addComputedFields } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
@@ -50,6 +51,56 @@ export async function hydrateEffectifsLieuDeFormation() {
 
     logger.info(
       `${nbEffectifsMisAJour} effectifs mis à jour avec lieu_de_formation, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`
+    );
+  } catch (err) {
+    logger.error(`Échec de la mise à jour des effectifs: ${err}`);
+    captureException(err);
+  }
+}
+
+export async function hydrateEffectifsLieuDeFormationVersOrganismeFormateur() {
+  let nbEffectifsMisAJour = 0;
+  let nbEffectifsNonMisAJour = 0;
+
+  const organismeFormateurCache = new Map();
+
+  try {
+    const cursor = effectifsDb().find({ organisme_formateur_id: { $exists: true } });
+
+    while (await cursor.hasNext()) {
+      const effectif = await cursor.next();
+
+      if (effectif) {
+        let organismeFormateur;
+
+        if (organismeFormateurCache.has(effectif.organisme_formateur_id)) {
+          organismeFormateur = organismeFormateurCache.get(effectif.organisme_formateur_id);
+        } else if (effectif.organisme_formateur_id) {
+          organismeFormateur = await organismesDb().findOne({ _id: effectif.organisme_formateur_id });
+        }
+
+        if (organismeFormateur) {
+          const updatedEffectif = {
+            organisme_id: organismeFormateur._id,
+            organisme_formateur_id: organismeFormateur._id,
+            _computed: await addComputedFields({ organisme: organismeFormateur, effectif }),
+          };
+
+          const updateResult = await effectifsDb().updateOne({ _id: effectif._id }, { $set: updatedEffectif });
+
+          if (updateResult.modifiedCount > 0) {
+            nbEffectifsMisAJour++;
+          } else {
+            nbEffectifsNonMisAJour++;
+          }
+        } else {
+          nbEffectifsNonMisAJour++;
+        }
+      }
+    }
+
+    logger.info(
+      `${nbEffectifsMisAJour} effectifs mis à jour avec l'organisme formateur, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`
     );
   } catch (err) {
     logger.error(`Échec de la mise à jour des effectifs: ${err}`);
