@@ -9,7 +9,7 @@ export async function hydrateEffectifsLieuDeFormation() {
   let nbEffectifsNonMisAJour = 0;
 
   const lieuFormationCache = new Map();
-
+  logger.info("Starting hydrateEffectifsLieuDeFormation...");
   try {
     const cursor = effectifsDb().find({ lieu_de_formation: { $exists: false } });
 
