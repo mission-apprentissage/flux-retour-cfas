@@ -19,6 +19,11 @@ import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/u
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
+import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
+import {
+  hydrateEffectifsLieuDeFormation,
+  hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
+} from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -61,7 +66,7 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "fiabilisation:uai-siret:run", queued });
 
   // # Mise à jour des niveaux des formations des effectifs
-  await addJob({ name: "effectifs-formation-niveaux", queued });
+  await addJob({ name: "hydrate:effectifs-formation-niveaux", queued: true });
 
   // # Purge des collections events et queues
   await addJob({ name: "purge:queues", queued });
@@ -176,6 +181,11 @@ export async function setupJobProcessor() {
           });
         },
       },
+      "hydrate:effectifs-formation-niveaux": {
+        handler: async () => {
+          return hydrateEffectifsFormationsNiveaux();
+        },
+      },
       "dev:generate-open-api": {
         handler: async () => {
           return hydrateOpenApi();
@@ -204,6 +214,16 @@ export async function setupJobProcessor() {
       "hydrate:ofa-inconnus": {
         handler: async () => {
           return hydrateRaisonSocialeEtEnseigneOFAInconnus();
+        },
+      },
+      "hydrate:update-effectifs-lieu-de-formation": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormation();
+        },
+      },
+      "hydrate:update-effectifs-organisme-lieu-vers-formateur": {
+        handler: async () => {
+          return hydrateEffectifsLieuDeFormationVersOrganismeFormateur();
         },
       },
       "hydrate:voeux-effectifs-relations": {

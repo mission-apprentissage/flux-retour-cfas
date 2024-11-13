@@ -66,6 +66,8 @@ const headerTooltips = {
       SIRET), mais cela n’est pas toujours le cas (données SIRET et UAI obligatoires).
     </>
   ),
+  etablissement_lieu_de_formation_adresse: <>Adresse du lieu de formation.</>,
+  etablissement_lieu_de_formation_code_postal: <>Code postal du lieu de formation.</>,
   nom_apprenant: (
     <>Pour le nom et prénom de l’apprenant, les caractères spéciaux sont acceptés (données obligatoires).</>
   ),

@@ -467,6 +467,8 @@ describe("Processus d'ingestion", () => {
         etablissement_formateur_siret: SIRET,
         etablissement_lieu_de_formation_uai: UAI,
         etablissement_lieu_de_formation_siret: SIRET,
+        etablissement_lieu_de_formation_adresse: "1 rue de la paix",
+        etablissement_lieu_de_formation_code_postal: "75000",
         formation_cfd: "1234ABCD",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
@@ -494,6 +496,8 @@ describe("Processus d'ingestion", () => {
         etablissement_formateur_siret: SIRET,
         etablissement_lieu_de_formation_uai: UAI,
         etablissement_lieu_de_formation_siret: SIRET,
+        etablissement_lieu_de_formation_adresse: "1 rue de la paix",
+        etablissement_lieu_de_formation_code_postal: "75000",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: "9999999",
@@ -607,15 +611,15 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {
@@ -703,15 +707,15 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {
@@ -877,15 +881,15 @@ describe("Processus d'ingestion", () => {
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
           is_lock: expect.any(Object),
+          lieu_de_formation: {
+            adresse: "1 rue de la paix",
+            code_postal: "75000",
+            siret: "77937827200016",
+            uai: "0802004U",
+          },
           validation_errors: [],
           _computed: {
             organisme: {
-              region: "84",
-              departement: "01",
-              academie: "10",
-              uai: "0802004U",
-              siret: "77937827200016",
-              reseaux: [],
               fiable: false,
             },
             formation: {

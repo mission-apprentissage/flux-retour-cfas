@@ -10,7 +10,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/mongodb/seed.gpg
   checksum: 086c2803a427b3f3c48906bcfd04cd36fe61b3a757c349aa345371e47bdfb505
 - filename: .infra/vault/vault.yml
-  checksum: fac610526b1051bb6aa139ea9d7a3630dad28ae17200bfd225ba20f6ee15764e
+  checksum: 796635402459cd6f6edb18a01b54bb2ecbb75067335ec7b3a6fd291dfd25e806
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: shared/constants/aide.ts

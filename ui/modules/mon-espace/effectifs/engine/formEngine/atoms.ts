@@ -63,14 +63,18 @@ export const effectifStateSelector = selectorFamily({
         apprenant: any[];
         formation: any[];
         contrats: any[];
+        lieu_de_formation: any[];
       } = {
         statuts: [],
         apprenant: [],
         formation: [],
         contrats: [],
+        lieu_de_formation: [],
       };
       for (const validation_error of validation_errors) {
-        if (validation_error.fieldName.includes("contrats")) {
+        if (validation_error.fieldName.includes("lieu_de_formation")) {
+          validationErrorsByBlock.lieu_de_formation.push(validation_error);
+        } else if (validation_error.fieldName.includes("contrats")) {
           validationErrorsByBlock.contrats.push(validation_error);
         } else if (validation_error.fieldName.includes("apprenant.historique_statut")) {
           validationErrorsByBlock.statuts.push(validation_error);
@@ -86,14 +90,18 @@ export const effectifStateSelector = selectorFamily({
         apprenant: any[];
         formation: any[];
         contrats: any[];
+        lieu_de_formation: any[];
       } = {
         statuts: [],
         apprenant: [],
         formation: [],
         contrats: [],
+        lieu_de_formation: [],
       };
       for (const currentRequiredSifa of requiredSifa) {
-        if (currentRequiredSifa.includes("contrats")) {
+        if (currentRequiredSifa.includes("lieu_de_formation")) {
+          requiredSifaByBlock.lieu_de_formation.push(currentRequiredSifa);
+        } else if (currentRequiredSifa.includes("contrats")) {
           requiredSifaByBlock.contrats.push(currentRequiredSifa);
         } else if (currentRequiredSifa.includes("apprenant.historique_statut")) {
           requiredSifaByBlock.statuts.push(currentRequiredSifa);

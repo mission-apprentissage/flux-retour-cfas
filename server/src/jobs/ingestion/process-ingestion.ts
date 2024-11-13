@@ -386,12 +386,18 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       return {
         effectif: {
           ...effectif,
-          organisme_id: organismeLieu?._id,
+          organisme_id: organismeFormateur?._id,
           organisme_formateur_id: organismeFormateur?._id,
           organisme_responsable_id: organismeResponsable?._id,
-          _computed: await addComputedFields({ organisme: organismeLieu, effectif }),
+          lieu_de_formation: {
+            uai: effectifQueued.etablissement_lieu_de_formation_uai,
+            siret: effectifQueued.etablissement_lieu_de_formation_siret,
+            adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
+            code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+          },
+          _computed: await addComputedFields({ organisme: organismeFormateur, effectif }),
         },
-        organisme: organismeLieu,
+        organisme: organismeFormateur,
       };
     })
     .safeParseAsync(rawEffectifQueued);

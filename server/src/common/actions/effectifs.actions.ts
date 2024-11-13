@@ -298,6 +298,7 @@ function buildEffectifResult(effectif) {
     effectif.is_lock = {
       apprenant: {},
       formation: {},
+      lieu_de_formation: {},
     };
   }
 
@@ -393,6 +394,17 @@ function buildEffectifResult(effectif) {
           customizerLock
         ),
         paths.formation.adresse,
+        customizerPath
+      ),
+    },
+    lieu_de_formation: {
+      ...mergeWith(
+        mergeWith(
+          mergeWith(cloneDeep(effectifSchema.lieu_de_formation.properties), effectif.lieu_de_formation, customizer),
+          effectif.is_lock.lieu_de_formation,
+          customizerLock
+        ),
+        paths.lieu_de_formation,
         customizerPath
       ),
     },

@@ -193,6 +193,15 @@ export const primitivesV1 = {
     code_commune_insee: extensions.codeCommuneInsee().openapi({
       description: "Code Insee de la commune de l'établissement (lieu de formation)",
     }),
+    adresse: z.string().trim().describe("Adresse du lieu de formation"),
+    code_postal: z.preprocess(
+      (v: any) => (v ? String(v).trim().padStart(5, "0") : v),
+      z
+        .string()
+        .trim()
+        .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement")
+        .describe("Code postal du lieu de formation")
+    ),
   },
 
   formation: {

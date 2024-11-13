@@ -1980,6 +1980,40 @@ export const legacySchema = {
         },
       },
     },
+    lieu_de_formation: {
+      bsonType: "object",
+      description: "Lieu de formation de l'apprenant",
+      properties: {
+        uai: {
+          bsonType: "string",
+          description: "Code UAI du lieu de formation",
+          maxLength: 8,
+          minLength: 8,
+          pattern: "^[0-9]{7}[a-zA-Z]$",
+        },
+        siret: {
+          bsonType: "string",
+          description: "N° SIRET du lieu de formation",
+          maxLength: 14,
+          minLength: 14,
+          pattern: "^[0-9]{14}$",
+        },
+        adresse: {
+          bsonType: "string",
+          description: "Adresse du lieu de formation",
+          maxLength: 255,
+        },
+        code_postal: {
+          bsonType: "string",
+          description: "Code postal du lieu de formation",
+          maxLength: 5,
+          minLength: 5,
+          pattern: "^[0-9]{5}$",
+        },
+      },
+      additionalProperties: false,
+      required: ["uai", "siret"],
+    },
     id_erp_apprenant: {
       bsonType: "string",
       description: "Identifiant de l'apprenant dans l'erp",

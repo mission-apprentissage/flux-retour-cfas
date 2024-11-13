@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { WithId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
@@ -26,15 +27,20 @@ export const hydrateOrganismesFormations = async () => {
       { uai: organisme.uai, siret: organisme.siret, formations: formations.length },
       "updating organisme related formations"
     );
-    await organismesDb().updateOne(
-      { _id: organisme._id },
-      {
-        $set: {
-          relatedFormations: await Promise.all(formations.map((formation) => formatFormation(formation))),
-          updated_at: new Date(),
-        },
-      }
-    );
+    try {
+      await organismesDb().updateOne(
+        { _id: organisme._id },
+        {
+          $set: {
+            relatedFormations: await Promise.all(formations.map((formation) => formatFormation(formation))),
+            updated_at: new Date(),
+          },
+        }
+      );
+    } catch (err) {
+      logger.error("Impossible de créer les formations pour un organisme");
+      captureException(new Error(`Impossible de créer les formations pour un organisme `, { cause: err }));
+    }
   }
 };
 
