@@ -8,6 +8,7 @@ concurrency:
 
 jobs:
   cleanup:
+    if: false
     name: Clean Previews
     runs-on: ubuntu-latest
     steps:
