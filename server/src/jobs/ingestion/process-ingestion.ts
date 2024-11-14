@@ -290,16 +290,15 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
             effectifQueued?.etablissement_lieu_de_formation_uai,
             effectifQueued?.etablissement_lieu_de_formation_siret
           );
-          organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
           return organisme;
         })(),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_formateur_uai,
-            effectifQueued?.etablissement_formateur_siret,
-            { _id: 1 }
+            effectifQueued?.etablissement_formateur_siret
           );
+          organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
           return organisme;
         })(),
