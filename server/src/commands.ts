@@ -719,6 +719,12 @@ program
   .action(createJobAction("tmp:patches:update-effectifs-source"));
 
 program
+  .command("tmp:patches:update_effectifs_computed_organisme")
+  .description("Mise a jour des computed organisme des effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:update_effectifs_computed_organisme"));
+
+program
   .command("dev:list-http-endpoints")
   .description("Liste les routes du serveur HTTP")
   .action(async () => {

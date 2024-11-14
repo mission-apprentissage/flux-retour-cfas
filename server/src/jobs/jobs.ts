@@ -31,6 +31,7 @@ import {
   hydrateEffectifsComputedOpcos,
   hydrateEffectifsComputedReseaux,
 } from "./hydrate/effectifs/hydrate-effectifs-computed";
+import { hydrateEffectifsComputedOrganisme } from "./hydrate/effectifs/hydrate-effectifs-computed-organisme";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import {
@@ -512,6 +513,11 @@ export async function setupJobProcessor() {
         handler: async (job) => {
           const { name, rncpList } = job.payload as any;
           return initOpcos(name, rncpList);
+        },
+      },
+      "tmp:patches:update_effectifs_computed_organisme": {
+        handler: async () => {
+          return hydrateEffectifsComputedOrganisme();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
