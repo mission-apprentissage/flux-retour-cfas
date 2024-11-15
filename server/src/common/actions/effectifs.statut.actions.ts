@@ -173,11 +173,11 @@ export function determineStatutsByContrats(
   contracts.forEach((contract, index) => {
     const { dateDebut, dateRupture } = contract;
 
-    if (dateDebut <= effectiveDateFin) {
+    if (dateDebut) {
       statuts.push({ valeur: STATUT_APPRENANT.APPRENTI, date: dateDebut });
     }
 
-    if (dateRupture && dateRupture <= effectiveDateFin) {
+    if (dateRupture && dateRupture) {
       const nextContract = contracts[index + 1];
       if (!nextContract) {
         latestRuptureDate = dateRupture;
