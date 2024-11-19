@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
 import { SOURCE_APPRENANT } from "shared/constants";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";

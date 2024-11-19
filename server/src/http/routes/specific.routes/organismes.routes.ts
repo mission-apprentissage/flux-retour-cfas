@@ -1,5 +1,5 @@
 import express from "express";
-import pick from "lodash.pick";
+import { pick } from "lodash-es";
 import { Filter } from "mongodb";
 import { z } from "zod";
 

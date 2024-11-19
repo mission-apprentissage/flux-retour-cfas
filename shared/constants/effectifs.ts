@@ -79,6 +79,6 @@ export const SOURCE_APPRENANT = {
 
 export type SourceApprenant = (typeof SOURCE_APPRENANT)[keyof typeof SOURCE_APPRENANT];
 
-export const SOURCE_APPRENANT_VALUES = Object.values(SOURCE_APPRENANT) as [string, ...string[]];
+const SOURCE_APPRENANT_VALUES = Object.values(SOURCE_APPRENANT) as [string, ...string[]];
 
 export const SourceApprenantEnum = z.enum(SOURCE_APPRENANT_VALUES);

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
@@ -28,7 +29,7 @@ const organismeResponsable: IOrganisme = {
     commune: "Talence",
     departement: "33",
     region: "75",
-    academie: "4",
+    academie: "04",
     complete: "680 CRS DE LA LIBERATION 33400 TALENCE",
     bassinEmploi: "7505",
   },
@@ -55,7 +56,7 @@ const organismeFormateur: IOrganisme = {
     commune: "Talence",
     departement: "33",
     region: "75",
-    academie: "4",
+    academie: "04",
     complete: "680 CRS DE LA LIBERATION 33400 TALENCE",
     bassinEmploi: "7505",
   },

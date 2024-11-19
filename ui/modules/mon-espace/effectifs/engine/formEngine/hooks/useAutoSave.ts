@@ -19,7 +19,7 @@ const getIsLocked = (fields: Record<string, any>) => {
   return values;
 };
 
-export const autoSaveStatusAtom = atom({
+const autoSaveStatusAtom = atom({
   key: "autoSaveStatusAtom",
   default: "OK", // "OK" | "ERROR" | "PENDING"
 });

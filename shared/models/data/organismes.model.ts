@@ -11,8 +11,6 @@ import { zAdresse } from "shared/models/parts/adresseSchema";
 import {
   NATURE_ORGANISME_DE_FORMATION,
   SIRET_REGEX,
-  STATUT_CREATION_ORGANISME,
-  STATUT_FIABILISATION_API_ORGANISME,
   STATUT_FIABILISATION_ORGANISME,
   STATUT_PRESENCE_REFERENTIEL,
   TETE_DE_RESEAUX_BY_ID,
@@ -62,7 +60,7 @@ const organismesCountSchema = z.object({
   uaiNonDeterminee: z.number(),
 });
 
-export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
+type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
 
 export type IOrganismesCount = z.output<typeof organismesCountSchema>;
@@ -213,12 +211,9 @@ const zOrganisme = z
     fiabilisation_statut: zodEnumFromObjValues(STATUT_FIABILISATION_ORGANISME)
       .describe("Statut de fiabilisation de l'organisme")
       .optional(),
-    fiabilisation_api_statut: zodEnumFromObjValues(STATUT_FIABILISATION_API_ORGANISME)
-      .describe("Statut de fiabilisation venant de l'API de l'organisme")
-      .optional(),
     fiabilisation_api_response: zApiOrganismesRoutes.get["/organisme/v1/recherche"].response["200"]
       .describe("Statut du siret et uai venant de l'API de l'organisme")
-      .optional(),
+      .nullish(),
     mode_de_transmission: z.enum(["API", "MANUEL"]).describe("Mode de transmission des effectifs").optional(),
     mode_de_transmission_configuration_date: z
       .date({
@@ -229,10 +224,6 @@ const zOrganisme = z
       .string({
         description: "Auteur de la configuration (prénom nom)",
       })
-      .optional(),
-    creation_statut: z
-      .enum([STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION])
-      .describe("Flag pour identifier que c'est un organisme créé à partir d'un lieu")
       .optional(),
     organisme_transmetteur_id: z
       .string({
@@ -261,20 +252,6 @@ const zOrganisme = z
 export type IOrganisme = z.output<typeof zOrganisme>;
 export type IOrganismeJson = Jsonify<IOrganisme>;
 
-export type IOrganismeOptional = Pick<
-  IOrganisme,
-  | "reseaux"
-  | "erps"
-  | "relatedFormations"
-  | "fiabilisation_statut"
-  | "fiabilisation_api_statut"
-  | "ferme"
-  | "qualiopi"
-  | "prepa_apprentissage"
-  | "created_at"
-  | "updated_at"
->;
-
 // Default value
 export function defaultValuesOrganisme(): Pick<
   IOrganisme,
@@ -282,7 +259,6 @@ export function defaultValuesOrganisme(): Pick<
   | "erps"
   | "relatedFormations"
   | "fiabilisation_statut"
-  | "fiabilisation_api_statut"
   | "ferme"
   | "qualiopi"
   | "prepa_apprentissage"
@@ -293,7 +269,7 @@ export function defaultValuesOrganisme(): Pick<
     reseaux: [],
     erps: [],
     relatedFormations: [],
-    fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
+    fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
     ferme: false,
     qualiopi: false,
     prepa_apprentissage: false,

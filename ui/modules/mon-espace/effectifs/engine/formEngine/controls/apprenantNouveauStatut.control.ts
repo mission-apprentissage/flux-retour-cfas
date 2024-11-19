@@ -1,6 +1,6 @@
 import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
-export const apprenantNouveauStatutLogic = [
+export const apprenantNouveauStatutControl = [
   {
     deps: ["apprenant.nouveau_statut"],
     process: async ({ values, effectifId }) => {
@@ -24,5 +24,3 @@ export const apprenantNouveauStatutLogic = [
     },
   },
 ];
-
-export const apprenantNouveauStatutControl = apprenantNouveauStatutLogic;

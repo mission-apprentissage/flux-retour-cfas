@@ -4,6 +4,7 @@ import { subDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { it, expect, describe } from "vitest";
 
 import {
   createOrganisme,
@@ -41,7 +42,7 @@ const sampleOrganismeWithoutUAIOutput: IOrganisme = {
   reseaux: [],
   erps: [],
   relatedFormations: [],
-  fiabilisation_statut: "INCONNU",
+  fiabilisation_statut: "NON_FIABLE",
   ferme: false,
   prepa_apprentissage: false,
   qualiopi: false,

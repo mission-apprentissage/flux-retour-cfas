@@ -79,14 +79,14 @@ function InfoTransmissionDonnees({
 }
 export default InfoTransmissionDonnees;
 
-export type TranmissionDonneesState =
+type TranmissionDonneesState =
   | "donnees_non_disponibles"
   | "donnees_non_transmises"
   | "donnees_obsoletes"
   | "donnees_anciennes"
   | "donnees_recentes";
 
-export function getTranmissionDonneesState(
+function getTranmissionDonneesState(
   lastTransmissionDate?: string,
   permissionInfoTransmissionEffectifs?: boolean
 ): TranmissionDonneesState {

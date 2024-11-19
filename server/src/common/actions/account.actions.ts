@@ -44,7 +44,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         ...data,
         ...(uai ? { uai } : {}),
         siret,
-        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU_INSCRIPTION,
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
         organismesFormateurs: [],
         organismesResponsables: [],
       });

@@ -1,5 +1,7 @@
 import { strict as assert } from "assert";
 
+import { it, describe } from "vitest";
+
 import { escapeRegExp } from "@/common/utils/regexUtils";
 
 describe("escapeRegExp", () => {

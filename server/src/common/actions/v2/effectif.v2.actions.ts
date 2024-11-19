@@ -43,7 +43,7 @@ export const getOrCreateEffectifV2 = async (
   return effectif._id;
 };
 
-export const insertEffectifV2 = async (formation_id: ObjectId, person_id: ObjectId) => {
+const insertEffectifV2 = async (formation_id: ObjectId, person_id: ObjectId) => {
   const computed = await createComputed(person_id);
   return await effectifV2Db().insertOne({
     _id: new ObjectId(),

@@ -2,6 +2,7 @@ import { ObjectId, WithId, WithoutId } from "mongodb";
 import { CODES_STATUT_APPRENANT, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
@@ -195,10 +196,10 @@ describe("Processus d'ingestion", () => {
             telephone: "+33534648662",
             adresse: {
               code_insee: "05109",
-              code_postal: "05109",
-              commune: "[NOM_DE_LA_COMMUNE]",
+              code_postal: "05100",
+              commune: "Puy-Saint-Pierre",
               departement: "05",
-              academie: "2",
+              academie: "02",
               region: "93",
             },
           },
@@ -431,7 +432,7 @@ describe("Processus d'ingestion", () => {
         contrat_date_rupture: "2022-06-30T00:00:00.000Z",
         has_nir: true,
         adresse_apprenant: "1 rue de la paix",
-        code_postal_apprenant: "75000",
+        code_postal_apprenant: "75001",
         code_postal_de_naissance_apprenant: "44000",
         sexe_apprenant: "F",
         rqth_apprenant: true,
@@ -555,12 +556,12 @@ describe("Processus d'ingestion", () => {
             courriel: "johndoe@example.org",
             telephone: "0123456789",
             adresse: {
-              code_postal: "75000",
+              code_postal: "75001",
               complete: "1 rue de la paix",
-              commune: "[NOM_DE_LA_COMMUNE]",
-              code_insee: "75000",
+              commune: "Paris",
+              code_insee: "75056",
               departement: "75",
-              academie: "1",
+              academie: "01",
               region: "11",
             },
             sexe: "F",

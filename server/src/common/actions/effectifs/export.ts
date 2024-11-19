@@ -1,13 +1,13 @@
 import { getStatutApprenantNameFromCode } from "shared";
 
-export type FieldExport = {
+type FieldExport = {
   label: string;
   csvField: string;
   projectedMongoField?: string;
   valueGetter: (item: any) => any;
 };
 
-export const exportedFields: FieldExport[] = [
+const exportedFields: FieldExport[] = [
   {
     label: "Intitulé de la formation",
     csvField: "formation_libelle_long",
@@ -97,20 +97,6 @@ export const exportedFields: FieldExport[] = [
       ),
   },
 ];
-
-/**
- * Contains the MongoDB projection with all exported fields
- * "apprenant.nom": 1,
- * "apprenant.prenom": 1,
- */
-export const exportedMongoFieldsProjection = exportedFields
-  .map((item) => item.projectedMongoField)
-  .reduce((acc, projectedMongoField) => {
-    if (projectedMongoField) {
-      acc[projectedMongoField] = 1;
-    }
-    return acc;
-  }, {});
 
 export function mapMongoObjectToCSVObject(item) {
   return exportedFields.reduce((acc, exportedField) => {

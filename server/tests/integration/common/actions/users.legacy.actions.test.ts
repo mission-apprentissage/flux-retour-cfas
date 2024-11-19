@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
+import { it, describe } from "vitest";
 
 import {
   authenticateLegacy,

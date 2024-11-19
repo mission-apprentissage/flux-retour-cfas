@@ -1,3 +1,5 @@
+import { it, expect, describe } from "vitest";
+
 import { calculateBins } from "./graphs";
 
 const indicateurs = [

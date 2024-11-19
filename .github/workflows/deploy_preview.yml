@@ -86,9 +86,11 @@ jobs:
   #     - name: Create vault pwd file
   #       run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
 
-  #     - name: Install jmespath
-  #       run: |
-  #         sudo pipx inject ansible-core jmespath
+  #    - name: Encrypt logs
+  #      run: .bin/mna-tdb deploy:log:encrypt
+  #      if: always()
+  #      env:
+  #        ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
 
   #     - name: Run playbook
   #       run: .bin/mna-tdb deploy preview "${{ github.event.issue.number }}"
@@ -97,11 +99,9 @@ jobs:
   #         ANSIBLE_REMOTE_USER: deploy
   #         ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
-  #     - name: Encrypt logs
-  #       run: .bin/mna-tdb deploy:log:encrypt
-  #       if: always()
-  #       env:
-  #         ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+  #    - name: Add Job summary
+  #      if: always()
+  #      run: echo 'You can get logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }} ${{ github.event.issue.number }}`' >> $GITHUB_STEP_SUMMARY
 
   #     - name: Upload logs artifacts
   #       if: always()

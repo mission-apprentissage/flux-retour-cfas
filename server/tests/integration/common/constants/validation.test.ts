@@ -1,4 +1,5 @@
 import { DERNIER_ORGANISME_UAI_REGEX } from "shared";
+import { it, expect, describe } from "vitest";
 
 describe("Regex DERNIER_ORGANISME_UAI_REGEX", () => {
   describe("Cas valides", () => {

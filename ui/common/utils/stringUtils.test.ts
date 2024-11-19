@@ -1,3 +1,5 @@
+import { expect, it } from "vitest";
+
 import { prettyFormatNumber } from "./stringUtils";
 
 it("#prettyFormatNumber()", () => {

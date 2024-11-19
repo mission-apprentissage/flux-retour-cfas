@@ -4,9 +4,9 @@ import { AxiosInstance } from "axiosist";
 import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
-import { getUsersLinkedToOrganismeId } from "@/common/actions/users.actions";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
@@ -25,6 +25,57 @@ import { sampleOrganismeWithUAI, sampleOrganismeWithoutUai } from "../common/act
 
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
+
+const getUsersLinkedToOrganismeId = async (organismeId: ObjectId) => {
+  return await usersMigrationDb()
+    .aggregate([
+      {
+        $lookup: {
+          from: "organisations",
+          localField: "organisation_id",
+          foreignField: "_id",
+          as: "organisation",
+          pipeline: [
+            {
+              $lookup: {
+                from: "organismes",
+                as: "organisme",
+                let: {
+                  uai: "$uai",
+                  siret: "$siret",
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $or: [
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] },
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: [null, "$$uai"] }] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+          ],
+        },
+      },
+      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
+      { $match: { "organisation.organisme._id": organismeId } },
+      {
+        $project: {
+          civility: 1,
+          nom: 1,
+          prenom: 1,
+          email: 1,
+          telephone: 1,
+        },
+      },
+    ])
+    .toArray();
+};
 
 describe("Routes administrateur", () => {
   useMongo();
