@@ -1,0 +1,27 @@
+{
+  "workspaces": {
+    "server": {
+      "entry": ["src/main.ts!", "src/dev.ts", "src/db/migrations/*.ts!", "scripts/**/*.ts"],
+      "project": ["src/**/*.ts!", "tests/**/*.ts", "scripts/**/*.ts", "!src/**/*.test.ts!"],
+      "ignoreDependencies": ["@sentry/cli", "tsx"]
+    },
+    "shared": {
+      "entry": ["./**/*.ts!", "!./dist/**/*", "!./**/*.test.ts"],
+      "project": ["./**/*.ts", "!./dist", "!./**/*.test.ts!"],
+      "includeEntryExports": true
+    },
+    ".": {
+      "husky": true,
+      "commitlint": true,
+      "ignoreDependencies": [
+        "@commitlint/config-conventional",
+        "@semantic-release/changelog",
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/github",
+        "@semantic-release/release-notes-generator"
+      ],
+      "ignoreBinaries": ["mna-tdb"],
+      "project": ["!.husky/commitlint.config.js"]
+    }
+  }
+}

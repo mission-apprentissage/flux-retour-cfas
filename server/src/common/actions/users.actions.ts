@@ -1,5 +1,4 @@
 import Boom from "boom";
-import { addHours } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
@@ -8,7 +7,6 @@ import { usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
-import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
 import { hash, compare, isTooWeak } from "@/common/utils/passwordUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import config from "@/config";
@@ -302,36 +300,6 @@ export async function changePassword(authContext: AuthContext, password: string)
   );
 }
 
-/**
- * Génération d'un token d'update de mot de passe
- */
-export const generatePasswordUpdateToken = async (email: string) => {
-  const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
-
-  const user = await usersMigrationDb().findOne({ email });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
-  const token = generateRandomAlphanumericPhrase(80);
-  // token will only be valid for duration defined in PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS
-  const tokenExpiry = addHours(getCurrentTime(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
-
-  await usersMigrationDb().updateOne(
-    { _id: user._id },
-    {
-      $set: {
-        password_update_token: token,
-        password_update_token_expiry: tokenExpiry,
-      },
-    }
-  );
-
-  return token;
-};
-
 export async function updateUserProfile(ctx: AuthContext, infos: Partial<IUsersMigration>) {
   await usersMigrationDb().findOneAndUpdate(
     { _id: ctx._id },
@@ -361,57 +329,3 @@ export async function resendConfirmationEmail(userId: string): Promise<void> {
     activationToken: createActivationToken(user.email),
   });
 }
-
-/**
- * Fonction de récupération de la liste des utilisateurs liés à un organismeId
- */
-export const getUsersLinkedToOrganismeId = async (organismeId: ObjectId) => {
-  return await usersMigrationDb()
-    .aggregate([
-      {
-        $lookup: {
-          from: "organisations",
-          localField: "organisation_id",
-          foreignField: "_id",
-          as: "organisation",
-          pipeline: [
-            {
-              $lookup: {
-                from: "organismes",
-                as: "organisme",
-                let: {
-                  uai: "$uai",
-                  siret: "$siret",
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $or: [
-                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] },
-                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: [null, "$$uai"] }] },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
-          ],
-        },
-      },
-      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
-      { $match: { "organisation.organisme._id": organismeId } },
-      {
-        $project: {
-          civility: 1,
-          nom: 1,
-          prenom: 1,
-          email: 1,
-          telephone: 1,
-        },
-      },
-    ])
-    .toArray();
-};

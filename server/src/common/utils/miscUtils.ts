@@ -35,16 +35,6 @@ export const getPercentage = (count = 0, total = 0) => {
   return Math.round((count * 100) / total);
 };
 
-/**
- * Creates an object composed of the own and inherited enumerable property paths
- * of *object* that are not omitted.
- */
-export const omit = (object, props) => {
-  const copy = { ...object };
-  props.forEach((prop) => delete copy[prop]);
-  return copy;
-};
-
 export function stripEmptyFields<T extends object>(object: T): T {
   return Object.entries(object).reduce((acc, [key, value]) => {
     if (typeof value !== "undefined" && value !== null && value !== "") {

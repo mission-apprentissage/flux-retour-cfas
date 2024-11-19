@@ -79,7 +79,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           return;
         }
         const worksheet = workbook.Sheets[worksheetName];
-        const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[];
+        const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[][];
 
         const filteredJsonData = rawJsonData.filter((row: any[]) =>
           row.some((cell) => typeof cell === "string" && cell.trim() !== "")

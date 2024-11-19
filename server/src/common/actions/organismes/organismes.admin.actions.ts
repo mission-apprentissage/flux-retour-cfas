@@ -6,12 +6,11 @@ import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.mode
 import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
+import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
-import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
 import {
   effectifsDb,
-  fiabilisationUaiSiretDb,
   formationsCatalogueDb,
   organisationsDb,
   organismesDb,
@@ -211,8 +210,8 @@ async function getOffreFormations(siret: string): Promise<OffreFormation[]> {
   return Promise.all(formationsCatalogue.map(buildOffreDeFormation));
 }
 
-export async function findOrganismesSupportInfoBySiret(siret: string): Promise<OrganismeSupportInfo[]> {
-  const [apiEntreprise, tdb, referentiel, formations, fiabilisation, organisations] = await Promise.all([
+async function findOrganismesSupportInfoBySiret(siret: string): Promise<OrganismeSupportInfo[]> {
+  const [apiEntreprise, tdb, referentiel, formations, organisations] = await Promise.all([
     // Silent Error: c'est du support
     getEtablissement(siret).catch((err) => {
       logger.error(err);
@@ -221,7 +220,6 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
     organismesDb().find({ siret }).toArray(),
     organismesReferentielDb().find({ siret }).toArray(),
     getOffreFormations(siret),
-    fiabilisationUaiSiretDb().find({ siret }).toArray(),
     organisationsDb()
       .aggregate<IOrganisationOrganismeFormation & { users: IUsersMigration[] }>([
         { $match: { type: "ORGANISME_FORMATION", siret } },
@@ -244,7 +242,6 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
 
   const tdbByUai = new Map(tdb.map((o) => [o.uai ?? null, o]));
   const referentielByUai = new Map(referentiel.map((o) => [o.uai ?? null, o]));
-  const fiabilisationByUai = new Map(fiabilisation.map((o) => [o.uai ?? null, o]));
   const organisationByUai = new Map(organisations.map((o) => [o.uai ?? null, o]));
 
   const formationsByUai = new Map();
@@ -258,12 +255,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
     }
   }
 
-  const uais = new Set([
-    ...tdbByUai.keys(),
-    ...referentielByUai.keys(),
-    ...fiabilisationByUai.keys(),
-    ...formationsByUai.keys(),
-  ]);
+  const uais = new Set([...tdbByUai.keys(), ...referentielByUai.keys(), ...formationsByUai.keys()]);
 
   if (apiEntreprise && uais.size === 0) {
     uais.add(null);
@@ -313,7 +305,6 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
         "Organisme inconnu",
       tdb: tdbByUai.get(uai) ?? null,
       referentiel: referentielByUai.get(uai) ?? null,
-      fiabilisation: fiabilisationByUai.get(uai) ?? null,
       formations,
       apiEntreprise: apiEntreprise,
       organisation: organisationByUai.get(uai) ?? null,

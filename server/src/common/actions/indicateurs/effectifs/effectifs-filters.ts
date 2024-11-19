@@ -1,3 +1,4 @@
+import { zUai } from "api-alternance-sdk/internal";
 import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
@@ -14,7 +15,6 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisation, IOrganisationOperateurPublicNational } from "shared/models/data/organisations.model";
 
 import { escapeRegExp } from "@/common/utils/regexUtils";
-import { isValidUAI } from "@/common/utils/validationUtils";
 
 import { FullEffectifsFilters } from "../../helpers/filters";
 
@@ -27,7 +27,7 @@ const intervalParTrancheAge = {
 };
 
 function buildOrganismeSearchCondition(value: string) {
-  if (isValidUAI(value)) {
+  if (zUai.safeParse(value).success) {
     return [{ "_computed.organisme.uai": value }];
   }
   if (SIRET_REGEX.test(value)) {

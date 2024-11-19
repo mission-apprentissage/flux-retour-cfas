@@ -1,4 +1,5 @@
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { vi, it, expect, describe, beforeEach } from "vitest";
 
 import { buildNewHistoriqueStatutApprenant } from "./engine.actions";
 
@@ -9,10 +10,10 @@ const now = new Date("2023-12-31T10:00:00.000Z");
 
 describe("buildNewHistoriqueStatutApprenant", () => {
   beforeEach(() => {
-    import.meta.jest.useFakeTimers().setSystemTime(now);
-  });
-  afterEach(() => {
-    import.meta.jest.useRealTimers();
+    vi.useFakeTimers().setSystemTime(now);
+    return () => {
+      vi.useRealTimers();
+    };
   });
 
   it("doit retourner l'historique existant si la nouvelle valeur de statut est vide", () => {

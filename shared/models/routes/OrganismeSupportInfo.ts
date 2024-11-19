@@ -1,7 +1,6 @@
 import type { Jsonify } from "type-fest";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement.d";
-import { FiabilisationUaiSiret } from "../data/@types";
 import { OffreFormation } from "../data/@types/OffreFormation";
 import { IOrganisationOrganismeFormation } from "../data/organisations.model";
 import { IOrganisme } from "../data/organismes.model";
@@ -31,7 +30,6 @@ export interface OrganismeSupportInfo {
   nom: string;
   tdb: IOrganisme | null;
   referentiel: IOrganismeReferentiel | null;
-  fiabilisation: FiabilisationUaiSiret | null;
   formations: OffreFormation[];
   apiEntreprise: ApiEntEtablissement | null;
   organisation: (IOrganisationOrganismeFormation & { users: IUsersMigration[] }) | null;

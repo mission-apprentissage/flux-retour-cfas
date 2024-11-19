@@ -3,6 +3,7 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
+import { it, describe, beforeEach } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";

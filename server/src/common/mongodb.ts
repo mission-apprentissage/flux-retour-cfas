@@ -77,10 +77,6 @@ export const getDbCollectionSchema = async (name) => {
   return collectionInfo?.options?.validator;
 };
 
-export const getDbCollectionIndexes = async (name) => {
-  return await ensureInitialization(mongodbClient).db().collection(name).indexes();
-};
-
 /**
  * Création d'une collection si elle n'existe pas
  * @param {string} collectionName
@@ -133,13 +129,3 @@ export const clearAllCollections = async () => {
   let collections = await getDatabase().collections();
   return Promise.all(collections.map((c) => c.deleteMany({})));
 };
-
-/**
- * Clear d'une collection
- * @param {string} name
- * @returns
- */
-export async function clearCollection(name) {
-  logger.warn(`Suppression des données de la collection ${name}...`);
-  await getDatabase().collection(name).deleteMany({});
-}

@@ -4,6 +4,7 @@ import "express-async-errors";
 import fs from "fs";
 
 import * as Sentry from "@sentry/node";
+import { zUai } from "api-alternance-sdk/internal";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
@@ -100,7 +101,7 @@ import { createSession, removeSession } from "@/common/actions/sessions.actions"
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
-import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
+import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
@@ -111,7 +112,6 @@ import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -782,7 +782,7 @@ function setupRoutes(app: Application) {
 
         return stripEmptyFields({
           uai,
-          error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
+          error: zUai.safeParse(uai).success ? null : `L'UAI ${uai} n'est pas valide`,
         });
       })
     )
@@ -795,7 +795,7 @@ function setupRoutes(app: Application) {
             .trim()
             .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
         });
-        return await getCodePostalInfo(codePostal);
+        return await getCommune(codePostal);
       })
     )
     .get(

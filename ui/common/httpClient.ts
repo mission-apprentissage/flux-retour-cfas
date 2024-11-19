@@ -122,16 +122,6 @@ export const _post = async <RequestBody = any, ResponseBody = any>(
   return handleResponse<ResponseBody>(path, response);
 };
 
-export const _postFile = async (path: string, data, options?: AxiosRequestConfig<any>) => {
-  const response = await axios.post(`${publicConfig.baseUrl}${path}`, data, {
-    headers: getHeaders(null),
-    validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
-    ...options,
-  });
-  return handleResponse(path, response);
-};
-
 export const _put = async (path: string, body = {}, options?: AxiosRequestConfig<any>) => {
   const response = await axios.put(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),

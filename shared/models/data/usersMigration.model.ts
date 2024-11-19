@@ -2,7 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-export const collectionName = "usersMigration";
+const collectionName = "usersMigration";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ email: 1 }, { unique: true }],
@@ -11,7 +11,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisation_id: 1 }, {}],
 ];
 
-export const zUsersMigration = z.object({
+const zUsersMigration = z.object({
   _id: zObjectId,
   email: z.string().describe("Email utilisateur"),
   password: z.string().describe("Le mot de passe hashé"),

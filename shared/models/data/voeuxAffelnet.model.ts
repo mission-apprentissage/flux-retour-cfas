@@ -79,7 +79,7 @@ const zVoeuAffelnetRaw = z.object({
   libelle_public_etablissement: z.any().nullish(),
   annee_scolaire_rentree: z.any().nullish(),
 });
-export const zVoeuAffelnet = z.object({
+const zVoeuAffelnet = z.object({
   _id: zObjectId.describe("Identifiant unique MongoDB de l'instance voeu"),
   //voeu_id: zObjectId.describe("Identifant du voeu"),
   //revision: z.number({ description: "Numéro de révision du voeu" }),

@@ -3,6 +3,7 @@ import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { addDaysUTC } from "shared/utils";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { hydrateEffectifsComputedTypes } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";

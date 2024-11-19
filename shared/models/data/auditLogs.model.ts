@@ -3,7 +3,7 @@ import { zObjectId } from "zod-mongodb-schema";
 
 import { IModelDescriptor } from "./common";
 
-export const auditLogSchema = z
+const auditLogSchema = z
   .object({
     action: z.string().describe("L'action en cours"),
     date: z.date().describe("La date de l'évènement"),

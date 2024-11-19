@@ -15,7 +15,7 @@ const unlockAllCascade = {
   "contrats[0].adresse.region": { locked: false, reset: true },
 };
 
-export const employerSiretLogic = [
+export const employeurSiretControl = [
   {
     deps: ["contrats[0].siret"],
     process: async ({ values, signal }: { values?: any; signal?: any }) => {
@@ -160,5 +160,3 @@ export const employerSiretLogic = [
     },
   },
 ];
-
-export const employeurSiretControl = employerSiretLogic;

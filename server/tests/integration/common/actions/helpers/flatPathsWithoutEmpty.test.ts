@@ -1,3 +1,5 @@
+import { it, expect, describe } from "vitest";
+
 import { flatPathsWithoutEmpty } from "@/common/actions/effectifs.actions";
 
 describe("flatPathsWithoutEmpty()", () => {

@@ -1,5 +1,7 @@
 import { strict as assert } from "assert";
 
+import { it, describe } from "vitest";
+
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";

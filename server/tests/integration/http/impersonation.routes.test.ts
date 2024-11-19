@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axiosist";
+import { it, expect, describe, beforeEach } from "vitest";
 
 import { useMongo } from "@tests/jest/setupMongo";
 import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";

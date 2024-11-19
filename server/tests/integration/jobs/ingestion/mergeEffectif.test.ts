@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import { it, expect, describe } from "vitest";
 
 import { mergeEffectif } from "@/jobs/ingestion/process-ingestion";
 
@@ -27,7 +28,7 @@ describe("mergeEffectif", () => {
           code_postal: "05109",
           commune: "[NOM_DE_LA_COMMUNE]",
           departement: "05",
-          academie: "2",
+          academie: "02",
           region: "93",
         },
       },

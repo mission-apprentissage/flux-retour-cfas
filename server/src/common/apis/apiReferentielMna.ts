@@ -27,11 +27,6 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "relations",
 ];
 
-/**
- * Récupération des organismes du référentiel
- * Par défaut on récupère 10000 éléments par page et tous les champs définis dans DEFAULT_REFERENTIEL_FIELDS_TO_FETCH
- * @returns {Promise<{organismes: import("./@types/MnaOrganisme").default[]}>}
- */
 export const fetchOrganismes = async () => {
   const {
     data: { organismes },

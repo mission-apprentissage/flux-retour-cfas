@@ -1,5 +1,5 @@
-import { advanceTo } from "jest-date-mock";
 import { ObjectId } from "mongodb";
+import { vi, it, expect, describe, beforeEach } from "vitest";
 
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
@@ -7,6 +7,8 @@ import { sendReminderEmails } from "@/jobs/emails/reminder";
 import { useMongo } from "@tests/jest/setupMongo";
 import { userOrganisme } from "@tests/utils/permissions";
 import { initTestApp, testPasswordHash } from "@tests/utils/testUtils";
+
+vi.mock("@/common/services/mailer/mailer");
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 
@@ -18,7 +20,7 @@ describe("Job send-reminder-emails", () => {
   });
 
   beforeEach(() => {
-    import.meta.jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("relance après 7 jours si pas de configuration ni de données", async () => {
@@ -40,17 +42,17 @@ describe("Job send-reminder-emails", () => {
       }),
     ]);
 
-    advanceTo("2023-10-08T04:00z");
+    vi.setSystemTime(new Date("2023-10-08T04:00z"));
     await sendReminderEmails();
     // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
-    advanceTo("2023-10-08T05:00z");
+    vi.setSystemTime(new Date("2023-10-08T05:00z"));
     await sendReminderEmails();
     // 1 nouveau mail envoyé car >= 7j et 1ère relance
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
-    advanceTo("2023-10-08T06:00z");
+    vi.setSystemTime(new Date("2023-10-08T06:00z"));
     await sendReminderEmails();
     // 0 nouveau mail envoyé car relance déjà envoyée
     expect(sendEmail).toHaveBeenCalledTimes(1);
@@ -79,7 +81,7 @@ describe("Job send-reminder-emails", () => {
       }),
     ]);
 
-    advanceTo("2023-10-17T08:00z");
+    vi.setSystemTime(new Date("2023-10-17T08:00z"));
     await sendReminderEmails();
     // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
@@ -135,17 +137,17 @@ describe("Job send-reminder-emails", () => {
       }),
     ]);
 
-    advanceTo("2023-10-07T10:00z");
+    vi.setSystemTime(new Date("2023-10-07T10:00z"));
     await sendReminderEmails();
     // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
-    advanceTo("2023-10-08T10:00z");
+    vi.setSystemTime(new Date("2023-10-08T10:00z"));
     await sendReminderEmails();
     // 1 nouveau mail envoyé car >= 7j et 1ère relance pour user 1
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
-    advanceTo("2023-10-09T10:00z");
+    vi.setSystemTime(new Date("2023-10-09T10:00z"));
     // configuration et suppression ERP
     await app.requestAsUser("user1@tdb.local", "post", `/api/v1/organismes/${userOrganisme._id}/configure-erp`, {
       mode_de_transmission: "API",
@@ -153,17 +155,17 @@ describe("Job send-reminder-emails", () => {
     });
     await app.requestAsUser("user1@tdb.local", "delete", `/api/v1/organismes/${userOrganisme._id}/configure-erp`);
 
-    advanceTo("2023-10-10T10:00z");
+    vi.setSystemTime(new Date("2023-10-10T10:00z"));
     await sendReminderEmails();
     // 1 nouveau mail envoyé car état de relance réinitialisé pour user 1
     expect(sendEmail).toHaveBeenCalledTimes(2);
 
-    advanceTo("2023-10-11T10:00z");
+    vi.setSystemTime(new Date("2023-10-11T10:00z"));
     await sendReminderEmails();
     // 1 nouveau mail envoyé car >= 7j et 1ère relance pour user 2
     expect(sendEmail).toHaveBeenCalledTimes(3);
 
-    advanceTo("2023-10-12T10:00z");
+    vi.setSystemTime(new Date("2023-10-12T10:00z"));
     await sendReminderEmails();
     // 0 nouveau mail envoyé car relances déjà envoyées
     expect(sendEmail).toHaveBeenCalledTimes(3);

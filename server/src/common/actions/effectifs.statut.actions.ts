@@ -138,7 +138,7 @@ function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: D
     .filter((event, index, array) => index === 0 || event.valeur !== array[index - 1].valeur);
 }
 
-export function determineStatutsByContrats(
+function determineStatutsByContrats(
   effectif: IEffectif,
   evaluationDate?: Date
 ): { valeur: StatutApprenant; date: Date }[] {
