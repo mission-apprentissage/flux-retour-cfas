@@ -180,7 +180,7 @@ export function determineStatutsByContrats(
       }
     }
 
-    if (dateRupture) {
+    if (dateRupture && dateDebut < dateRupture) {
       const nextContract = contracts[index + 1];
       if (!nextContract) {
         latestRuptureDate = dateRupture;

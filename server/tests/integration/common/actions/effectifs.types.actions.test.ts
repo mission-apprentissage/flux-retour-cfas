@@ -118,10 +118,11 @@ describe("hydrateEffectifsComputedTypes", () => {
   });
 
   describe("apprenent en formation avec rupture de contrat", () => {
-    it("doit avoir le statut apprenti si rupture de contrat avant le début du contrat", async () => {
+    it("ne doit  pas avoir le statut d'apprenti si rupture de contrat avant le début du contrat", async () => {
       const ruptureDate = new Date(formation.date_entree.getTime());
       ruptureDate.setDate(formation.date_entree.getDate() - 10);
 
+      const customEvalutationDate = new Date(formation.date_entree.getTime() + 10);
       const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
@@ -135,15 +136,13 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate });
+      await hydrateEffectifsComputedTypes({ evaluationDate: customEvalutationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
       expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
         { valeur: STATUT_APPRENANT.INSCRIT, date: formation.date_entree },
-        { valeur: STATUT_APPRENANT.RUPTURANT, date: ruptureDate },
       ]);
-      expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.RUPTURANT);
     });
 
     it("doit avoir le statut rupturant si rupture de moins de 180 jours", async () => {
