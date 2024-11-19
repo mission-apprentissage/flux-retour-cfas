@@ -163,7 +163,7 @@ export function determineStatutsByContrats(
 
   const earliestContract = contracts[0]?.dateDebut;
 
-  if (dateEntree && earliestContract && earliestContract < dateEntree) {
+  if (dateEntree && earliestContract && earliestContract <= dateEntree) {
     statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: earliestContract });
   } else if (dateEntree) {
     statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: dateEntree });
@@ -174,7 +174,7 @@ export function determineStatutsByContrats(
     const { dateDebut, dateRupture } = contract;
 
     if (dateDebut) {
-      if (!dateRupture || (dateRupture && dateDebut < dateRupture)) {
+      if (!dateRupture || (dateRupture && dateDebut <= dateRupture)) {
         // Gestion des rutptures avant démarrage
         statuts.push({ valeur: STATUT_APPRENANT.APPRENTI, date: dateDebut });
       }
