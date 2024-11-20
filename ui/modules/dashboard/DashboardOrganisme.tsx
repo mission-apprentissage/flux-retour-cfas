@@ -279,6 +279,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
+  console.log("organisme", organisme);
+
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
 
   return (
@@ -367,7 +369,12 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   />
                 )}
                 {!organisme.is_transmission_target && (
-                  <InfoTransmissionDeca indicateursEffectifs={indicateursEffectifs} />
+                  <InfoTransmissionDeca
+                    date={
+                      organisme.last_effectifs_deca_update ? new Date(organisme.last_effectifs_deca_update) : undefined
+                    }
+                    indicateursEffectifs={indicateursEffectifs}
+                  />
                 )}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
