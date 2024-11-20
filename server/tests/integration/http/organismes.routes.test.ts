@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
+import { it, describe, beforeEach } from "vitest";
 
 import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";

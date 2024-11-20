@@ -137,14 +137,6 @@ export const effectifFormSetter = selector({
   },
 });
 
-export const valueSelector = selectorFamily({
-  key: "valueSelector",
-  get:
-    (name: string) =>
-    ({ get }) =>
-      (get(effectifFormAtom)?.[name] as any)?.value,
-});
-
 export const valuesSelector = selector({
   key: "valuesSelector",
   get: ({ get }) => getValues(get(effectifFormAtom) as any),

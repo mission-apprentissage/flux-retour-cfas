@@ -34,7 +34,7 @@ const contratProps = zContrat.shape;
 const apprenantProps = effectifsProps.apprenant.shape;
 
 // internal fields (shared with api V3)
-export const internalFields = {
+const internalFields = {
   source: SourceApprenantEnum,
   source_organisme_id: z.string({ description: effectifsProps.source_organisme_id.description }).nullish(),
   user_erp_id: z.string({ description: "Id de l'utilisateur ERP" }).nullish(),
@@ -66,7 +66,7 @@ export const internalFields = {
  * Une premiere validation est effectuée lors de la réception des données, et les erreurs sont stockées dans le champ `validation_errors`.
  * Une 2eme validation plus poussée (SIRET, formation, ...) est effectuée au moment de la creation de l'effectif et l'erreur est stockée dans le champ `error`.
  */
-export const zEffectifQueue = z.object({
+const zEffectifQueue = z.object({
   _id: zObjectId,
   // required fields to create an effectif
   nom_apprenant: z.any({ description: apprenantProps.nom.description }),

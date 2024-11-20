@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { it, afterEach, describe, beforeEach } from "vitest";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";

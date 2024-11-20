@@ -12,7 +12,7 @@ export default {
     nom: "LYCEE POLYVALENT LES ISCLES",
     nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
     adresse: {
-      academie: "2",
+      academie: "02",
       code_insee: "04112",
       code_postal: "04100",
       commune: "MANOSQUE",
@@ -30,7 +30,7 @@ export default {
     nom: "LYCEE POLYVALENT TEST",
     nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
     adresse: {
-      academie: "2",
+      academie: "02",
       code_insee: "04112",
       code_postal: "04100",
       commune: "MANOSQUE",
@@ -70,7 +70,7 @@ export default {
     nom: "PROMOTRANS",
     nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
     adresse: {
-      academie: "1",
+      academie: "01",
       code_insee: "75109",
       code_postal: "75009",
       commune: "PARIS 9",
@@ -158,7 +158,7 @@ export default {
     nom: "OGEC ST LUC CAMBRAI",
     nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
     adresse: {
-      academie: "9",
+      academie: "09",
       code_insee: "59122",
       code_postal: "59400",
       commune: "CAMBRAI",

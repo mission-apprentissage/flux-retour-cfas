@@ -343,17 +343,6 @@ const fonts = {
   heading: "Marianne, Arial",
 };
 
-const styles = {
-  global: {
-    "html, body": {
-      fontSize: `${rootFontSizePx}px`,
-      fontFamily: "Marianne, Arial",
-      background: "white",
-      color: "bluefrance",
-    },
-  },
-};
-
 const space = {
   0: "0",
   "1v": `${4 / rootFontSizePx}rem`,
@@ -371,4 +360,4 @@ const space = {
   "15w": `${120 / rootFontSizePx}rem`,
 };
 
-export { fonts, colors, styles, fontSizes, space, rootFontSizePx, textStyles };
+export { fonts, colors, fontSizes, space, rootFontSizePx, textStyles };

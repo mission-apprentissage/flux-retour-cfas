@@ -98,8 +98,8 @@ export const dossierApprenantSchemaV3Base = () =>
     etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret,
     etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai,
     etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret,
-    etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai,
-    etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret,
+    etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai.optional(),
+    etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret.optional(),
     etablissement_lieu_de_formation_adresse: primitivesV1.etablissement_lieu_de_formation.adresse.optional(),
     etablissement_lieu_de_formation_code_postal: primitivesV1.etablissement_lieu_de_formation.code_postal.optional(),
 
@@ -156,7 +156,7 @@ export const dossierApprenantSchemaV3Input = () => {
 // Utilisé par le téléversement manuel. Le but côté métier est d'obliger les utilisateurs à remplir des champs dont
 // ils pourraient avoir besoin dans SIFA alors que ce n'est pas toujours présent côté ERPs.
 // Source de la décision: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693232432865229
-export const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
+const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
   return dossierApprenantSchemaV3Base().merge(
     z.object({
       email_contact: primitivesV1.apprenant.email,
@@ -189,12 +189,6 @@ export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret
         message: messageUai,
       }),
       etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
-        message: messageSiret,
-      }),
-      etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai.refine(validateUAI, {
-        message: messageUai,
-      }),
-      etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret.refine(validateSiret, {
         message: messageSiret,
       }),
     })

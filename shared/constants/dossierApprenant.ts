@@ -40,16 +40,6 @@ export const getStatutApprenantNameFromCode = (
   statutCode?: (typeof CODES_STATUT_APPRENANT)[keyof typeof CODES_STATUT_APPRENANT]
 ) => LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
 
-/**
- * Liste des nom des indicateurs
- */
-export const EFFECTIF_INDICATOR_NAMES = {
-  apprentis: "apprenti",
-  inscritsSansContrats: "inscrit sans contrat",
-  rupturants: "rupturant",
-  abandons: "abandon",
-};
-
 // Liste des codes de dernière situation tels que définis par SIFA
 export const EFFECTIF_DERNIER_SITUATION = [
   1003, 1005, 1009, 1013, 1015, 1017, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001, 3101, 3003, 3103, 3009, 3109,

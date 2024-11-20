@@ -26,17 +26,6 @@ export async function createRequestStream(url, httpOptions = {}) {
   });
 }
 
-export function createUploadStream(url, httpOptions = {}) {
-  let options = {
-    ...parseUrl(url),
-    method: "PUT",
-    ...httpOptions,
-  };
-
-  logger.info(`Uploading ${url}...`);
-  return https.request(options);
-}
-
 export function responseWithCookie(res: Response, token: string) {
   return res.cookie(COOKIE_NAME, token, {
     maxAge: 6 * 24 * 60 * 60 * 1000, // 6 jours (unité en millisecondes)

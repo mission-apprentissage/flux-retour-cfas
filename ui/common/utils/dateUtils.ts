@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-duplicates
-import { endOfMonth, format } from "date-fns";
+import { format } from "date-fns";
 // eslint-disable-next-line import/no-duplicates
 import { fr } from "date-fns/locale";
 
@@ -22,9 +22,6 @@ export const prettyPrintDate = (date) => {
  */
 export const formatDate = (date: Date, dateFormat: string) => format(date, dateFormat, { locale: fr });
 
-// Elle vérifie si la date est aprés le dernier jour du mois
-export const isDateFuture = (date) => date > endOfMonth(new Date());
-
 export const formatDateDayMonthYear = (date: string | Date) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
@@ -42,19 +39,4 @@ export const formatDateHourMinutesSecondsMs = (date: string) => {
     second: "numeric",
     fractionalSecondDigits: 3,
   }).format(d);
-};
-
-export const getUniquesMonthAndYearFromDatesList = (input: { date: string | Date }[]) => {
-  const output: Date[] = [];
-
-  input.forEach((element) => {
-    const date = new Date(element.date);
-    const hasDateWithSameMonth =
-      output.findIndex((item) => {
-        return date.getFullYear() === item.getFullYear() && date.getMonth() === item.getMonth();
-      }) !== -1;
-
-    if (!hasDateWithSameMonth) output.push(date);
-  });
-  return output;
 };

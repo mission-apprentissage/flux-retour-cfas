@@ -25,10 +25,6 @@ Pour cela nous utilisons l'API du référentiel qui nous renvoie le contenu de l
 
 https://catalogue-apprentissage.intercariforef.org/
 
-## Tables de correspondances
-
-https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
-
 ## API Entreprise
 
 https://entreprise.api.gouv.fr

@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
+import { vi, it, expect, describe, beforeEach } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -12,6 +13,8 @@ import {
   initTestApp,
   testPasswordHash,
 } from "@tests/utils/testUtils";
+
+vi.mock("@/common/services/mailer/mailer");
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
@@ -50,7 +53,7 @@ describe("Routes users", () => {
         `/api/v1/admin/users/${id(1)}/validate`
       );
 
-      expect(response.status).toStrictEqual(200);
+      expect.soft(response.status).toStrictEqual(200);
       expect(response.data).toStrictEqual({
         message: "success",
       });
@@ -66,7 +69,7 @@ describe("Routes users", () => {
         `/api/v1/admin/users/${id(1)}/validate`
       );
 
-      expect(response.status).toStrictEqual(200);
+      expect.soft(response.status).toStrictEqual(200);
       expect(response.data).toStrictEqual({
         message: "success",
       });

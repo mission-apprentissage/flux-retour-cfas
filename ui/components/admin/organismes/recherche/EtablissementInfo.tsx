@@ -51,10 +51,10 @@ function getCatalogueEtablissementInfo(siret: string, formations: OffreFormation
       return acc;
     },
     {
-      enseigne: new Set(),
-      adresse: new Set(),
-      raison_sociale: new Set(),
-      date_creation: new Set(),
+      enseigne: new Set<string>(),
+      adresse: new Set<string>(),
+      raison_sociale: new Set<string>(),
+      date_creation: new Set<string>(),
     }
   );
 
@@ -148,7 +148,7 @@ function getInfoItemLevel(infoItem, type) {
     )
   );
 
-  const valueType = type !== "catalogue" ? infoItem[type] : infoItem.catalogue[0] ?? null;
+  const valueType = type !== "catalogue" ? infoItem[type] : (infoItem.catalogue[0] ?? null);
 
   if (valueType === "n/a") return "info";
 

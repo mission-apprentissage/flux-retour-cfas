@@ -12,14 +12,14 @@ export const getOrCreatePersonV2 = async (nom: string, prenom: string, date_de_n
   }
   return person._id;
 };
-export const getPersonV2 = async (nom: string, prenom: string, date_de_naissance: Date) => {
+const getPersonV2 = async (nom: string, prenom: string, date_de_naissance: Date) => {
   return personV2Db().findOne({
     nom: nom.toLowerCase(),
     prenom: prenom.toLowerCase(),
     date_de_naissance: new Date(date_de_naissance),
   });
 };
-export const insertPersonV2 = async (nom: string, prenom: string, date_de_naissance: Date) => {
+const insertPersonV2 = async (nom: string, prenom: string, date_de_naissance: Date) => {
   return personV2Db().insertOne({
     _id: new ObjectId(),
     created_at: new Date(),

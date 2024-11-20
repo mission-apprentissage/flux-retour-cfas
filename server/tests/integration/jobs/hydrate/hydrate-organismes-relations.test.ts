@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
+import { it, expect, describe } from "vitest";
 
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { hydrateOrganismesFromReferentiel } from "@/jobs/hydrate/organismes/hydrate-organismes";

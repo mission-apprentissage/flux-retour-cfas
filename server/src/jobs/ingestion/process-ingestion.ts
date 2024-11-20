@@ -3,11 +3,9 @@ import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
-import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import {
   IEffectif,
   ORGANISME_FORMATEUR_NOT_FOUND,
-  ORGANISME_LIEU_NOT_FOUND,
   ORGANISME_RESPONSABLE_NOT_FOUND,
   createCustomEffectifIssue,
 } from "shared/models/data/effectifs.model";
@@ -30,13 +28,7 @@ import {
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import {
-  effectifsDb,
-  effectifsQueueDb,
-  fiabilisationUaiSiretDb,
-  formationsCatalogueDb,
-  organismesDb,
-} from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
@@ -48,6 +40,8 @@ import dossierApprenantSchemaV1V2, {
 import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
+
+import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
 
@@ -121,7 +115,7 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   await executeProcessEffectifQueueItem(effectifQueue);
 }
 
-export function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
+function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
     const transaction = hub?.startTransaction({
@@ -256,7 +250,7 @@ interface OrganismeSearchStatsInfos {
   uai_corrige?: string;
   siret?: string;
   siret_corrige?: string;
-  fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
+  fiabilisation?: "FIABLE" | "NON_FIABLE" | "INCONNU";
   found?: boolean;
 }
 
@@ -281,17 +275,9 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
 
   const result = await dossierApprenantSchemaV3()
     .transform(async (effectifQueued, ctx) => {
-      const [effectif, organismeLieu, organismeFormateur, organismeResponsable, formation] = await Promise.all([
+      const [effectif, organismeFormateur, organismeResponsable, formation] = await Promise.all([
         (async () => {
           return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
-        (async () => {
-          const { organisme, stats } = await findOrganismeWithStats(
-            effectifQueued?.etablissement_lieu_de_formation_uai,
-            effectifQueued?.etablissement_lieu_de_formation_siret
-          );
-          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
-          return organisme;
         })(),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
@@ -323,18 +309,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         })(),
       ]);
 
-      if (!organismeLieu) {
-        ctx.addIssue(
-          createCustomEffectifIssue(
-            ORGANISME_LIEU_NOT_FOUND,
-            ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
-            {
-              uai: effectifQueued.etablissement_lieu_de_formation_uai,
-              siret: effectifQueued.etablissement_lieu_de_formation_siret,
-            }
-          )
-        );
-      }
       if (!organismeFormateur) {
         ctx.addIssue(
           createCustomEffectifIssue(
@@ -364,7 +338,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       validateContrat(effectifQueued, "_3", ctx);
       validateContrat(effectifQueued, "_4", ctx);
 
-      if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
+      if (!organismeFormateur || !organismeResponsable) {
         return NEVER;
       }
 
@@ -583,33 +557,24 @@ async function findOrganismeWithStats(
   const stats: OrganismeSearchStatsInfos = {};
 
   // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret
-  const fiabilisationResult = await fiabilisationUaiSiretDb().findOne({
+  const fiabilisationResult = await fiabilisationUaiSiret({
     uai: uai_etablissement,
     siret: siret_etablissement,
   });
-  let uai: string;
-  let siret: string;
-  if (fiabilisationResult?.type === "A_FIABILISER") {
-    uai = fiabilisationResult.uai_fiable as string;
-    siret = fiabilisationResult.siret_fiable as string;
-  } else {
-    uai = uai_etablissement;
-    siret = siret_etablissement as string;
-  }
 
   // 2. On cherche l'organisme avec le couple uai/siret
-  const organisme = await findOrganismeByUaiAndSiret(uai, siret, projection);
+  const organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
 
   // 3. Des indicateurs pour apporter des informations sur le traitement
   stats.uai = uai_etablissement;
-  if (uai !== uai_etablissement) {
-    stats.uai_corrige = uai;
+  if (fiabilisationResult.uai !== uai_etablissement) {
+    stats.uai_corrige = fiabilisationResult.uai;
   }
   stats.siret = siret_etablissement;
-  if (siret !== siret_etablissement) {
-    stats.siret_corrige = siret;
+  if (fiabilisationResult.siret !== siret_etablissement) {
+    stats.siret_corrige = fiabilisationResult.siret;
   }
-  stats.fiabilisation = fiabilisationResult?.type || "INCONNU";
+  stats.fiabilisation = fiabilisationResult.statut;
   stats.found = !!organisme;
   if (organisme) {
     stats.id = organisme._id.toString();
