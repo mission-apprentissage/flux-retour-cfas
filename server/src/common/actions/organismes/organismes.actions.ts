@@ -1031,7 +1031,6 @@ export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectif
   const uais = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
-    if (dossier.etablissement_lieu_de_formation_uai) uais.add(dossier.etablissement_lieu_de_formation_uai);
     if (dossier.etablissement_responsable_uai) uais.add(dossier.etablissement_responsable_uai);
   }
   const invalidsUais: string[] = [];
@@ -1048,7 +1047,6 @@ export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffect
   const sirets = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);
-    if (dossier.etablissement_lieu_de_formation_siret) sirets.add(dossier.etablissement_lieu_de_formation_siret);
     if (dossier.etablissement_responsable_siret) sirets.add(dossier.etablissement_responsable_siret);
   }
   const invalidsSirets: string[] = [];

@@ -6,7 +6,6 @@ import { SOURCE_APPRENANT } from "shared/constants";
 import {
   IEffectif,
   ORGANISME_FORMATEUR_NOT_FOUND,
-  ORGANISME_LIEU_NOT_FOUND,
   ORGANISME_RESPONSABLE_NOT_FOUND,
   createCustomEffectifIssue,
 } from "shared/models/data/effectifs.model";
@@ -276,17 +275,9 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
 
   const result = await dossierApprenantSchemaV3()
     .transform(async (effectifQueued, ctx) => {
-      const [effectif, organismeLieu, organismeFormateur, organismeResponsable, formation] = await Promise.all([
+      const [effectif, organismeFormateur, organismeResponsable, formation] = await Promise.all([
         (async () => {
           return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
-        (async () => {
-          const { organisme, stats } = await findOrganismeWithStats(
-            effectifQueued?.etablissement_lieu_de_formation_uai,
-            effectifQueued?.etablissement_lieu_de_formation_siret
-          );
-          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
-          return organisme;
         })(),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
@@ -318,18 +309,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         })(),
       ]);
 
-      if (!organismeLieu) {
-        ctx.addIssue(
-          createCustomEffectifIssue(
-            ORGANISME_LIEU_NOT_FOUND,
-            ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
-            {
-              uai: effectifQueued.etablissement_lieu_de_formation_uai,
-              siret: effectifQueued.etablissement_lieu_de_formation_siret,
-            }
-          )
-        );
-      }
       if (!organismeFormateur) {
         ctx.addIssue(
           createCustomEffectifIssue(
@@ -359,7 +338,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       validateContrat(effectifQueued, "_3", ctx);
       validateContrat(effectifQueued, "_4", ctx);
 
-      if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
+      if (!organismeFormateur || !organismeResponsable) {
         return NEVER;
       }
 
