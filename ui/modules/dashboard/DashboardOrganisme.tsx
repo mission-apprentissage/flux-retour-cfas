@@ -279,8 +279,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
-  console.log("organisme", organisme);
-
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
 
   return (
