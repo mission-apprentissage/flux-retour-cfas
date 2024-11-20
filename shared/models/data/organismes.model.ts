@@ -246,6 +246,9 @@ const zOrganisme = z
           "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
       })
       .nullish(),
+    last_erp_transmission_date: z
+      .date({ description: "Date de dernière transmission en tant qu'organisme transmetteur" })
+      .nullish(),
   })
   .strict();
 
