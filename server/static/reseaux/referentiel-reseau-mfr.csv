@@ -118,7 +118,6 @@ Siret;UAI validée;Raison sociale;Enseigne;numero_declaration_activite;etat_admi
 78151651300012;0861145C;MAISON FAMILIALE RURALE;;54860031786;actif;responsable_formateur;Rue de Montmorillon 86300 Chauvigny;Poitiers;Nouvelle-Aquitaine;Oui;mfr;mfr;;1;2021-12-17;0861145C;0861145C;;
 30436842600017;0861131M;MAISON FAMILIALE SERVICES;;54860031486;actif;responsable_formateur;8 Rue Emilien Fillon 86160 Gençay;Poitiers;Nouvelle-Aquitaine;Oui;mfr;mfr;;2;2021-12-17;0861131M;0861131M;0861423E;
 78641329400012;0851590S;MAISON FAMILIALE LA LOUISIERE;;52850122585;actif;responsable_formateur;Rue de Beaurepaire 85500 Les Herbiers;Nantes;Pays de la Loire;Oui;;mfr;;1;2021-12-17;0851590S;0851590S;;
-78650966100041;;ASS CTRE FORM APPRENTIS MAIS FAM VEND;CFA MAISONS FAMILIALES DE VENDEE;;actif;inconnue;412 Avenue notre-dame 85440 Talmont-Saint-Hilaire;Nantes;Pays de la Loire;Non;;mfr;1;;2021-12-17;0851589R;0851589R;;
 41355776000019;0851556E;MAISON FAMILIALE RURALE D'EDUCATION ET D'ORIENTATION DES SABLES D'OLONNE;;52850075285;actif;responsable_formateur;110 Rue du docteur schweitzer 85340 Les Sables-d'Olonne;Nantes;Pays de la Loire;Oui;mfr;mfr;;1;2021-12-17;0851556E;0851345A;0851556E;
 34229971600015;0851403N;INST FORMATION ALTERN COMMERCES METIERS;;52850056285;actif;responsable_formateur;le plessis bergeret 85280 La Ferrière;Nantes;Pays de la Loire;Oui;mfr;mfr;;1;2021-12-17;0851403N;0851345A;0851403N;
 78639247200019;0851309L;MAISON FAMILIALE RURALE EDUC ET ORIENT;;52850006985;actif;responsable_formateur;25 Avenue georges clémenceau 85110 Chantonnay;Nantes;Pays de la Loire;Oui;mfr;mfr;;1;2021-12-17;0851309L;0851309L;;
@@ -353,7 +352,6 @@ Siret;UAI validée;Raison sociale;Enseigne;numero_declaration_activite;etat_admi
 78338935600016;0550958T;MAISON FAMIL RURALE EDUC ORIEN;;41550046955;actif;responsable_formateur;Damvillers;Nancy-Metz;Grand Est;Oui;mfr;mfr;;2;2021-12-17;0550958T;0550958T;;
 78341511000015;0550892W;ASS MAISONS FAMILIALES VIGNEULLES HATTON;;41550010455;actif;responsable_formateur;Rue du Château des 4 Vents 55210 Vigneulles-lès-Hattonchâtel;Nancy-Metz;Grand Est;Oui;mfr;mfr;;1;2021-12-17;0550892W;0550892W;0551027T;
 44893459600017;0741630V;MAISON FAMILIALE CHAMP MOLLIAZ;;82740232774;actif;responsable_formateur;261 Route de lossy 74380 Cranves-Sales;Grenoble;Auvergne-Rhône-Alpes;Oui;;mfr;1;1;2021-12-17;0741630V;0741630V;;
-78045946700020;0520939N;MAISON FAMILIALE RURALE;;21520000652;actif;responsable_formateur;12 Rue du Baron de Beine 52000 Buxières-lès-Villiers;Reims;Grand Est;Oui;mfr;mfr;;;2021-12-17;0520939N;0520939N;;
 30287992900016;0520901X;MAISON FAMILIALE RURALE EDUCATION ORIENT;;21520027552;actif;responsable_formateur;Rue Toupot de Beveaux 52270 Doulaincourt-Saucourt;Reims;Grand Est;Oui;mfr;mfr;;1;2021-12-17;0520901X;0520901X;;
 30234347000019;0511733G;MAISON FAMILIALE RURALE EDUCATION ORIENT;;44510200651;actif;responsable_formateur;Auve;Reims;Grand Est;Oui;mfr;mfr;;1;2021-12-17;0511733G;0511733G;;
 30286824500010;0511732F;MAISON FAMILIALE RURALE EDUCATION ORIENT;;21510123251;actif;responsable_formateur;66 Rue de la Croliere 51130 Blancs-Coteaux;Reims;Grand Est;Oui;mfr;mfr;1;1;2021-12-17;0511732F;0511732F;;
@@ -418,3 +416,6 @@ Siret;UAI validée;Raison sociale;Enseigne;numero_declaration_activite;etat_admi
 30476321200020;0694458W;MAISON FAMILIALE RURALE VAL DE COISE;;82691183069;actif;responsable_formateur;291 CHS BEAUVOIR 69590 SAINT-SYMPHORIEN-SUR-COISE;Lyon;Auvergne-Rhône-Alpes;Oui;;mfr;;1;2021-12-24;0694458W;0692436Y;0694458W;
 82906328800015;0694366W;MAISON FAMILIALE RURALE D'EDUCATION ET D'ORIENTATION DU CAMPUS DU BEAUJOLAIS;MFR CAMPUS DU MARTELET;84691632469;actif;responsable_formateur;92 RUE DEPAGNEUX 69400 LIMAS;Lyon;Auvergne-Rhône-Alpes;Oui;;mfr;;1;2021-12-25;0694366W;0692436Y;0694366W;
 77833721200014;0251980S;MAISON FAMILIALE RURALE LA ROCHE DU TRESOR;;43250169225;actif;inconnue;1 RUE DU PRE 25510 PIERREFONTAINE-LES-VARANS;Besançon;Bourgogne-Franche-Comté;Oui;;mfr;1;;2021-12-26;0251500V;0251500V;0251980S;
+39521351500012;0741525F;;;;;;;;;;;mfr;;;;;;;
+84939883900027;0222053M;;;;;;;;;;;mfr;;;;;;;
+79459078600016;0851589R;;;;;;;;;;;mfr;;;;;;;
