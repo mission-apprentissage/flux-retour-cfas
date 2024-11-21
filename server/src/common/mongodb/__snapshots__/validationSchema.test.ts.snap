@@ -9552,6 +9552,18 @@ exports[`validation-schema > should create validation schema for organismes > or
       ],
       "description": "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
     },
+    "last_erp_transmission_date": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de dernière transmission en tant qu'organisme transmetteur",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de dernière transmission en tant qu'organisme transmetteur",
+    },
     "last_transmission_date": {
       "bsonType": "date",
       "description": "Date de la dernière transmission de données",
