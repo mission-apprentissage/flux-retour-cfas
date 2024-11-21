@@ -24,6 +24,7 @@ const SIRET_REFERENTIEL_FERME = "44370584100099";
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
+const ORGANISME_SOURCE_ID = getRandomSourceOrganismeId();
 const sortByPath = (array: { path?: string[] }[] | undefined | null) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
@@ -97,7 +98,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -149,7 +150,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.ERP,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -299,7 +300,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: getRandomSourceOrganismeId(),
+        source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
       };
 
@@ -475,7 +476,7 @@ describe("Processus d'ingestion", () => {
         formation_cfd: "1234ABCD",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: getRandomSourceOrganismeId(),
+        source_organisme_id: ORGANISME_SOURCE_ID,
       };
 
       const minimalSampleData: IEffectifQueue = {
@@ -503,7 +504,7 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_code_postal: "75000",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: getRandomSourceOrganismeId(),
+        source_organisme_id: ORGANISME_SOURCE_ID,
         _id: new ObjectId(),
       };
 
@@ -648,7 +649,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -754,7 +755,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -934,7 +935,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2022-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -953,7 +954,7 @@ describe("Processus d'ingestion", () => {
             ...createRandomDossierApprenantApiInput({ [requiredField]: undefined }),
             uai_etablissement: UAI,
             siret_etablissement: SIRET,
-            source_organisme_id: getRandomSourceOrganismeId(),
+            source_organisme_id: ORGANISME_SOURCE_ID,
             created_at: new Date(),
             _id: new ObjectId(),
           });
@@ -1015,7 +1016,7 @@ describe("Processus d'ingestion", () => {
             siret_etablissement: SIRET,
             id_formation: "invalideIdFormation",
           }),
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
         });
 
@@ -1071,7 +1072,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -1120,7 +1121,7 @@ describe("Processus d'ingestion", () => {
             contrat_date_fin: "abc",
             contrat_date_rupture: "13/11/2020",
           }),
-          source_organisme_id: getRandomSourceOrganismeId(),
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         });
@@ -1186,7 +1187,7 @@ describe("Processus d'ingestion", () => {
             tel_apprenant: "+33 534648662",
             code_commune_insee_apprenant: "05109",
             source: SOURCE_APPRENANT.FICHIER,
-            source_organisme_id: getRandomSourceOrganismeId(),
+            source_organisme_id: ORGANISME_SOURCE_ID,
             created_at: new Date(),
             _id: new ObjectId(),
           };
@@ -1245,7 +1246,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: getRandomSourceOrganismeId(),
+        source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
       };
 
