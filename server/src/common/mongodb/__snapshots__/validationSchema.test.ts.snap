@@ -10136,7 +10136,6 @@ exports[`validation-schema > should create validation schema for organismes > or
                 "siret": {
                   "bsonType": "string",
                   "description": "Siret du lieu de formation (optionnel)",
-                  "pattern": "^[0-9]{14}$",
                 },
                 "uai": {
                   "bsonType": "string",
