@@ -15,20 +15,26 @@ import TransmissionsErrorTab from "./TransmissionsErrorTab";
 interface ListeTransmissionsDetailsProps {
   organisme: Organisme;
   date: string;
+  modePublique?: boolean;
 }
 
-const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
+const ListeTransmissionsDetails = ({ organisme, date, modePublique = false }: ListeTransmissionsDetailsProps) => {
   const transmissionSuccessDetailCount = useRecoilValue(transmissionSuccessDetailsCountAtom);
   const transmissionErrorsDetailCount = useRecoilValue(transmissionErrorsDetailsCountAtom);
+
+  const computeBackLinkUrl = () => {
+    return modePublique ? `/organismes/${organisme._id}/transmissions` : `/transmissions`;
+  };
+
   return (
     <SimplePage>
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          Rapport du {formatDateNumericDayMonthYear(props.date)}
+          Rapport du {formatDateNumericDayMonthYear(date)}
         </Heading>
         <HStack mt={10} mb={10}>
           <Link
-            href={`/transmissions`}
+            href={computeBackLinkUrl()}
             color="action-high-blue-france"
             borderBottom="1px"
             _hover={{ textDecoration: "none" }}
@@ -36,7 +42,7 @@ const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
             <ArrowBackIcon mr={2} />
             Retour au tableau des rapports
           </Link>
-          Mes erreurs de transmissions du {formatDateNumericDayMonthYear(props.date)}
+          Mes erreurs de transmissions du {formatDateNumericDayMonthYear(date)}
         </HStack>
         <Tabs mt={8}>
           <TabList>
@@ -46,7 +52,7 @@ const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
 
           <TabPanels>
             <TabPanel px="0">
-              <TransmissionsErrorTab organisme={props.organisme} date={props.date} />
+              <TransmissionsErrorTab organisme={organisme} date={date} />
             </TabPanel>
             <TabPanel px="0">
               <Box mt={10} mb={10}>
@@ -62,10 +68,7 @@ const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
                 </Text>
               </Box>
 
-              <TransmissionSuccessDetailsTable
-                organisme={props.organisme}
-                date={props.date}
-              ></TransmissionSuccessDetailsTable>
+              <TransmissionSuccessDetailsTable organisme={organisme} date={date}></TransmissionSuccessDetailsTable>
             </TabPanel>
           </TabPanels>
         </Tabs>

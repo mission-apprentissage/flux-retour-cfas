@@ -8,30 +8,31 @@ import TransmissionByDayTable from "@/modules/transmissions/TransmissionByDayTab
 
 interface ListeTransmissionsPage {
   organisme: Organisme;
+  modePublique?: boolean;
 }
 
-const ListeTransmissionsPage = (props: ListeTransmissionsPage) => {
+const ListeTransmissionsPage = ({ organisme, modePublique = false }: ListeTransmissionsPage) => {
   useEffect(() => {
     const resetNotification = async () => {
-      if (props.organisme.has_transmission_errors) {
-        await _put(`/api/v1/organismes/${props.organisme._id}/transmission/reset-notification`, {});
+      if (organisme.has_transmission_errors) {
+        await _put(`/api/v1/organismes/${organisme._id}/transmission/reset-notification`, {});
       }
     };
 
     resetNotification();
-  }, [props.organisme]);
+  }, [organisme]);
 
   return (
     <SimplePage>
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          Mes transmissions
+          {modePublique ? "Ses" : "Mes"} transmissions
         </Heading>
         <Text mb={16}>
           Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des
           éléments manquants et/ou invalides sont listés dans un rapport complet.
         </Text>
-        <TransmissionByDayTable organisme={props.organisme}></TransmissionByDayTable>
+        <TransmissionByDayTable organisme={organisme} modePublique={modePublique}></TransmissionByDayTable>
       </Container>
     </SimplePage>
   );
