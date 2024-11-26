@@ -14,50 +14,6 @@ import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 const computeTextErrorDisplay = (count = 0) => {
   return Number(count) > 0 ? { color: "error", fontWeight: "bold" } : {};
 };
-const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
-  {
-    header: () => "Date de transmission",
-    accessorKey: "day",
-    cell: ({ row }) => <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.day)}</Text>,
-  },
-  {
-    header: () => "Transmission",
-    accessorKey: "status",
-    cell: ({ row }) => <Text>{formatStatut(row.original.success, row.original.error)}</Text>,
-  },
-  {
-    header: () => "Effectifs transmis",
-    accessorKey: "success",
-    cell: ({ row }) => <Text fontSize="1rem">{row.original.success}</Text>,
-  },
-  {
-    header: () => "Effectifs en échec",
-    accessorKey: "error",
-    cell: ({ row }) => (
-      <Text fontSize="1rem" {...computeTextErrorDisplay(row.original.error)}>
-        {" "}
-        {row.original.error}
-      </Text>
-    ),
-  },
-  {
-    header: () => "Total effectifs",
-    accessorKey: "total",
-    cell: ({ row }) => <Text fontSize="1rem">{row.original.total}</Text>,
-  },
-  {
-    accessorKey: "more",
-    enableSorting: false,
-    header: () => "Voir",
-    cell: ({ row }) => (
-      <Link href={`/transmissions/${row.original.day as any}`}>
-        <Button pl={0} pr={0} h={8} w={8} minW={8} backgroundColor="#F5F5FE">
-          <ArrowRightLine fontSize="12px" color="#000091" />
-        </Button>
-      </Link>
-    ),
-  },
-];
 
 const formatStatut = (success: number, error: number) => {
   return error ? (
@@ -74,12 +30,64 @@ const formatStatut = (success: number, error: number) => {
 };
 interface TransmissionPageProps {
   organisme: Organisme;
+  modePublique?: boolean;
 }
 
-const TransmissionByDayTable = (props: TransmissionPageProps) => {
+const TransmissionByDayTable = ({ organisme, modePublique = false }: TransmissionPageProps) => {
+  const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
+    {
+      header: () => "Date de transmission",
+      accessorKey: "day",
+      cell: ({ row }) => <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.day)}</Text>,
+    },
+    {
+      header: () => "Transmission",
+      accessorKey: "status",
+      cell: ({ row }) => <Text>{formatStatut(row.original.success, row.original.error)}</Text>,
+    },
+    {
+      header: () => "Effectifs transmis",
+      accessorKey: "success",
+      cell: ({ row }) => <Text fontSize="1rem">{row.original.success}</Text>,
+    },
+    {
+      header: () => "Effectifs en échec",
+      accessorKey: "error",
+      cell: ({ row }) => (
+        <Text fontSize="1rem" {...computeTextErrorDisplay(row.original.error)}>
+          {" "}
+          {row.original.error}
+        </Text>
+      ),
+    },
+    {
+      header: () => "Total effectifs",
+      accessorKey: "total",
+      cell: ({ row }) => <Text fontSize="1rem">{row.original.total}</Text>,
+    },
+    {
+      accessorKey: "more",
+      enableSorting: false,
+      header: () => "Voir",
+      cell: ({ row }) => (
+        <Link href={computeTransmissionDayUrl(row)}>
+          <Button pl={0} pr={0} h={8} w={8} minW={8} backgroundColor="#F5F5FE">
+            <ArrowRightLine fontSize="12px" color="#000091" />
+          </Button>
+        </Link>
+      ),
+    },
+  ];
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const [totalCount, setTotalCount] = useState(2);
   const [transmissionData, setTransmissionData] = useState([]);
+
+  const computeTransmissionDayUrl = (row) => {
+    return modePublique
+      ? `/organismes/${organisme._id}/transmissions/${row.original.day as any}`
+      : `/transmissions/${row.original.day as any}`;
+  };
 
   const computeQueryResponse = (successData: { data: any; pagination: any }, error: any) => {
     if (error) {
@@ -118,7 +126,7 @@ const TransmissionByDayTable = (props: TransmissionPageProps) => {
   const { data, error, isFetching } = useQuery({
     queryKey: ["transmissions", pagination],
     queryFn: () =>
-      _get(`/api/v1/organismes/${props.organisme._id}/transmission`, {
+      _get(`/api/v1/organismes/${organisme._id}/transmission`, {
         params: {
           page: pagination.pageIndex + 1,
           limit: pagination.pageSize,

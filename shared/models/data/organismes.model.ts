@@ -169,7 +169,6 @@ const zOrganisme = z
                       .string({
                         description: "Siret du lieu de formation (optionnel)",
                       })
-                      .regex(SIRET_REGEX)
                       .optional(),
                     adresse: zAdresse.describe("Adresse du lieu de formation (optionnel)").optional(),
                   })

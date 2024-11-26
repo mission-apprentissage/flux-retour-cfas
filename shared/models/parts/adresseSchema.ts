@@ -50,7 +50,7 @@ export const zAdresse = zodOpenApi.object({
     .optional(),
   departement: zodOpenApi
     .string()
-    .regex(/^[0-9]{2,3}$/)
+    .regex(/^(2A|2B|[0-9]{2,3})$/)
     .openapi({ examples: ["01", "59"] })
     .optional(),
   region: zodOpenApi
