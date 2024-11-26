@@ -1,10 +1,10 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { MongoClient, WithoutId } from "mongodb";
+import { MongoClient, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisme } from "shared/models";
-import { IAirbyteRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
+import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -16,13 +16,13 @@ import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
-import { getMongodbUri } from "@/common/mongodb";
+import { getBALMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 import config from "@/config";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(getMongodbUri(config.mongodb.decaDbName, true));
+const client = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
 
 export async function hydrateDecaRaw() {
   let count = { created: 0, updated: 0 };
@@ -32,14 +32,14 @@ export async function hydrateDecaRaw() {
     await client.connect();
 
     const query = {
-      "_airbyte_data.dispositif": "APPR",
-      "_airbyte_data.organisme_formation.uai_cfa": { $exists: true },
-      "_airbyte_data.organisme_formation.siret": { $exists: true },
-      "_airbyte_data.formation.date_debut_formation": { $exists: true },
-      "_airbyte_data.formation.date_fin_formation": { $exists: true },
+      dispositif: "APPR",
+      "organisme_formation.uai_cfa": { $exists: true },
+      "organisme_formation.siret": { $exists: true },
+      "formation.date_debut_formation": { $exists: true },
+      "formation.date_fin_formation": { $exists: true },
     };
 
-    const cursor = client.db().collection<IAirbyteRawBalDeca>(config.mongodb.decaDbCollection).find(query);
+    const cursor = client.db().collection<IRawBalDeca>(config.mongodb.decaDbCollectionBal).find(query);
 
     for await (const document of cursor) {
       totalCount++;
@@ -47,6 +47,7 @@ export async function hydrateDecaRaw() {
         count = await updateEffectifDeca(document, count);
       } catch (docError) {
         logger.error(`Error updating document ${document._id}: ${docError}`);
+        console.log(JSON.stringify(docError, null, 2));
       }
     }
 
@@ -63,7 +64,7 @@ export async function hydrateDecaRaw() {
   }
 }
 
-async function updateEffectifDeca(document: IAirbyteRawBalDeca, count: { created: number; updated: number }) {
+async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
   const newDocument: WithoutId<IEffectifDECA> = await transformDocument(document);
 
   const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
@@ -76,7 +77,7 @@ async function updateEffectifDeca(document: IAirbyteRawBalDeca, count: { created
     return { created: count.created, updated: count.updated + 1 };
   }
 }
-async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
+async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
   const {
     _id,
     alternant,
@@ -87,7 +88,7 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutI
     date_fin_contrat,
     date_effet_rupture,
     type_contrat,
-  } = document._airbyte_data;
+  } = document;
 
   const {
     nom,
@@ -133,7 +134,7 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutI
   }
 
   const effectif: WithoutId<IEffectifDECA> = {
-    deca_raw_id: document._id,
+    deca_raw_id: new ObjectId(document._id),
     apprenant: {
       nom,
       prenom,
