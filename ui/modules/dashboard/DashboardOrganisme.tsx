@@ -367,7 +367,12 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   />
                 )}
                 {!organisme.is_transmission_target && (
-                  <InfoTransmissionDeca indicateursEffectifs={indicateursEffectifs} />
+                  <InfoTransmissionDeca
+                    date={
+                      organisme.last_effectifs_deca_update ? new Date(organisme.last_effectifs_deca_update) : undefined
+                    }
+                    indicateursEffectifs={indicateursEffectifs}
+                  />
                 )}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />

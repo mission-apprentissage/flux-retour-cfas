@@ -15,7 +15,7 @@ import { addComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { effectifsDECADb } from "@/common/model/collections";
+import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 import config from "@/config";
@@ -27,6 +27,7 @@ const client = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
 export async function hydrateDecaRaw() {
   let count = { created: 0, updated: 0 };
   let totalCount = 0;
+  const organismeIds = new Set<string>();
 
   try {
     await client.connect();
@@ -44,15 +45,17 @@ export async function hydrateDecaRaw() {
     for await (const document of cursor) {
       totalCount++;
       try {
-        count = await updateEffectifDeca(document, count);
+        count = await updateEffectifDeca(document, count, organismeIds);
       } catch (docError) {
         logger.error(`Error updating document ${document._id}: ${docError}`);
-        console.log(JSON.stringify(docError, null, 2));
+        captureException(docError);
       }
     }
 
-    if (totalCount === 0) {
-      console.log("No documents found matching the criteria.");
+    if (totalCount > 0) {
+      await updateOrganismesLastEffectifUpdate(organismeIds);
+    } else {
+      logger.error("No documents found matching the criteria.");
     }
   } catch (err) {
     logger.error(`Échec de la mise à jour des effectifs: ${err}`);
@@ -64,22 +67,87 @@ export async function hydrateDecaRaw() {
   }
 }
 
-async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
-  const newDocument: WithoutId<IEffectifDECA> = await transformDocument(document);
+async function updateEffectifDeca(
+  document: IRawBalDeca,
+  count: { created: number; updated: number },
+  organismeIds: Set<string>
+) {
+  const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
 
-  const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
+  for (const newDocument of newDocuments) {
+    const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
 
-  if (!effectifFound) {
-    await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
-    return { updated: count.updated, created: count.created + 1 };
-  } else {
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: newDocument });
-    return { created: count.created, updated: count.updated + 1 };
+    if (!effectifFound) {
+      await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
+      count.created++;
+    } else {
+      await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: newDocument });
+      count.updated++;
+    }
+
+    organismeIds.add(newDocument.organisme_id.toString());
+  }
+
+  return count;
+}
+
+async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
+  const currentTimestamp = new Date();
+
+  try {
+    const bulkOperations = Array.from(organismeIds).map((organismeId) => ({
+      updateOne: {
+        filter: { _id: new ObjectId(organismeId) },
+        update: { $set: { last_effectifs_deca_update: currentTimestamp } },
+      },
+    }));
+
+    if (bulkOperations.length > 0) {
+      await organismesDb().bulkWrite(bulkOperations);
+      logger.info(`Mise à jour réussie de ${bulkOperations.length} organismes avec last_effectifs_deca_update.`);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.error("Erreur lors de la mise à jour de last_effectifs_deca_update pour les organismes :", error.message);
+    } else {
+      logger.error("Erreur lors de la mise à jour de last_effectifs_deca_update pour les organismes :", error);
+    }
   }
 }
-async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>> {
+
+async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>[]> {
+  const { formation } = document;
+
+  const dateDebutFormation = formation?.date_debut_formation ? new Date(formation.date_debut_formation) : null;
+  const dateFinFormation = formation?.date_fin_formation ? new Date(formation.date_fin_formation) : null;
+
+  const startYear = dateDebutFormation ? getYearFromDate(dateDebutFormation) : null;
+  const endYear = dateFinFormation ? getYearFromDate(dateFinFormation) : null;
+
+  if (!startYear || !endYear || startYear > endYear || endYear - startYear > 5) {
+    throw new Error(
+      `Les dates de début et de fin de formation sont incorrectes. Document ID: ${document._id}, ` +
+        `date de début de formation: ${dateDebutFormation}, date de fin de formation: ${dateFinFormation} `
+    );
+  }
+
+  const effectifs: WithoutId<IEffectifDECA>[] = [];
+
+  if (startYear === endYear) {
+    const anneeScolaire = `${startYear}-${startYear}`;
+    effectifs.push(await createEffectif(document, anneeScolaire));
+  } else {
+    for (let year = startYear; year < endYear; year++) {
+      const anneeScolaire = `${year}-${year + 1}`;
+      effectifs.push(await createEffectif(document, anneeScolaire));
+    }
+  }
+
+  return effectifs;
+}
+
+async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA>> {
   const {
-    _id,
     alternant,
     formation,
     employeur,
@@ -107,6 +175,15 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
+  const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+
+  if (!organisme) {
+    throw new Error("L'organisme n'a pas été trouvé dans la base de données.");
+  }
+
+  const currentTimestamp = new Date();
+  await effectifsDECADb().updateOne({ _id: organisme._id }, { $set: { last_effectifs_deca_update: currentTimestamp } });
+
   const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
   const dateFinContrat = date_fin_contrat ? new Date(date_fin_contrat) : null;
   const dateEffetRupture = date_effet_rupture ? new Date(date_effet_rupture) : null;
@@ -116,21 +193,15 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
 
   const dateNaissance = date_naissance ? new Date(date_naissance) : null;
 
+  if (!dateDebutContrat || !dateFinContrat) {
+    throw new Error("Les dates de début et de fin de contrat sont requises.");
+  }
+
   const startYear = getYearFromDate(dateDebutFormation);
   const endYear = getYearFromDate(dateFinFormation);
 
-  const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
-
-  if (!organisme) {
-    throw new Error("L'organisme n'a pas été trouvé dans la base de données");
-  }
-
   if (!startYear || !endYear) {
     throw new Error("L'année de début et l'année de fin doivent être définies");
-  }
-
-  if (!dateDebutContrat || !dateFinContrat) {
-    throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
   const effectif: WithoutId<IEffectifDECA> = {
@@ -184,7 +255,7 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
     updated_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
     source: SOURCE_APPRENANT.DECA,
-    annee_scolaire: startYear <= 2024 && endYear >= 2025 ? "2024-2025" : `${startYear}-${endYear}`,
+    annee_scolaire: anneeScolaire,
   };
 
   return {
