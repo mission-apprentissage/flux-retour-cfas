@@ -90,12 +90,12 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
   const itemsToProcess = await effectifsQueueDb()
     .find(filter)
     .sort({ created_at: 1 })
-    .limit(options?.limit ?? 100)
+    .limit(options?.limit ?? 1000)
     .toArray();
 
   logger.info({ filter, count: itemsToProcess.length }, "traitement des effectifsQueue");
 
-  const res = await PromisePool.withConcurrency(10)
+  const res = await PromisePool.withConcurrency(100)
     .for(itemsToProcess)
     .process(async (effectifQueued) => executeProcessEffectifQueueItem(effectifQueued));
   const totalValidItems = res.results.filter((valid) => valid).length;
