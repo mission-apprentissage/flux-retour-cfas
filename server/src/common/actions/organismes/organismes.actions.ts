@@ -233,6 +233,18 @@ export const updateOrganismeTransmission = async (
     }
   );
 
+  if (source_organisme_id) {
+    await organismesDb().findOneAndUpdate(
+      { _id: new ObjectId(source_organisme_id) },
+      {
+        $set: {
+          last_erp_transmission_date: new Date(),
+          updated_at: new Date(),
+        },
+      }
+    );
+  }
+
   if (!modifyResult.value) {
     throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
