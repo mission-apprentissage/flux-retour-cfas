@@ -2,7 +2,17 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [
+    {
+      cfd: 1,
+      rncp: 1,
+      organisme_formateur_id: 1,
+      organisme_responsable_id: 1,
+    },
+    {},
+  ],
+];
 
 const collectionName = "formationV2";
 
