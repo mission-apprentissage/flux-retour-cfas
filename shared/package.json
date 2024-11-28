@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.4.0",
-    "api-alternance-sdk": "^1.2.0",
+    "api-alternance-sdk": "^2.1.0",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "type-fest": "^4.26.1",

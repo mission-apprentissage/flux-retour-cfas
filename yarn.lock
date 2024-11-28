@@ -4979,17 +4979,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-alternance-sdk@npm:^1.2.0":
-  version: 1.3.0
-  resolution: "api-alternance-sdk@npm:1.3.0"
+"api-alternance-sdk@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "api-alternance-sdk@npm:2.1.0"
   dependencies:
     "@asteasolutions/zod-to-openapi": ^7.2.0
     jsonwebtoken: ^9.0.2
+    lru-cache: ^11.0.2
     luhn: ^2.4.1
     luxon: ^3.5.0
     openapi3-ts: ^4.4.0
+    safe-stable-stringify: ^2.5.0
     zod: ^3.23.8
-  checksum: fa21ca57aca00b0fd020430d2d34b0c9eab9a4b01b2b3ddbe673a54d374e43a561a815fbf9a921fcc23e22e86007ca59c4da720bd2a5c88dd3ca7916ed35347b
+  checksum: 44d744237da7e2113cf5fc8e0f78b6838222f9569750e139f4f11e46c04e02fb577a9e05c47630c0942de23248c0a737ecddab45358c007b5c1f823061777064
   languageName: node
   linkType: hard
 
@@ -11575,6 +11577,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^11.0.2":
+  version: 11.0.2
+  resolution: "lru-cache@npm:11.0.2"
+  checksum: f9c27c58919a30f42834de9444de9f75bcbbb802c459239f96dd449ad880d8f9a42f51556d13659864dc94ab2dbded9c4a4f42a3e25a45b6da01bb86111224df
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^6.0.0":
   version: 6.0.0
   resolution: "lru-cache@npm:6.0.0"
@@ -15979,6 +15988,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"safe-stable-stringify@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "safe-stable-stringify@npm:2.5.0"
+  checksum: d3ce103ed43c6c2f523e39607208bfb1c73aa48179fc5be53c3aa97c118390bffd4d55e012f5393b982b65eb3e0ee954dd57b547930d3f242b0053dcdb923d17
+  languageName: node
+  linkType: hard
+
 "safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0, safer-buffer@npm:^2.0.2, safer-buffer@npm:^2.1.0, safer-buffer@npm:~2.1.0":
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
@@ -16180,7 +16196,7 @@ __metadata:
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
-    api-alternance-sdk: ^1.2.0
+    api-alternance-sdk: ^2.1.0
     axios: 0.28.1
     axios-cache-interceptor: ^0.10.7
     axios-retry: 3.3.1
@@ -16308,7 +16324,7 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^6.4.0
     "@tsconfig/node22": ^22.0.0
     "@types/node": ^22.7.5
-    api-alternance-sdk: ^1.2.0
+    api-alternance-sdk: ^2.1.0
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1
