@@ -1,5 +1,6 @@
 import Boom from "boom";
 import express from "express";
+import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 import {
@@ -9,6 +10,7 @@ import {
   updateOneOrganismeRelatedFormations,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesSupportInfoBySiret } from "@/common/actions/organismes/organismes.admin.actions";
+import { organismesDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
@@ -145,6 +147,58 @@ export default () => {
       const updated = await updateOneOrganismeRelatedFormations(organisme);
 
       res.json(updated);
+    }
+  );
+
+  router.put(
+    "/:id/reseaux",
+    validateRequestMiddleware({
+      params: objectIdSchema("id"),
+      body: z.object({
+        reseaux: z.array(z.string()).nonempty("The reseaux field must be a non-empty array"),
+      }),
+    }),
+    async (req, res) => {
+      const { id } = req.params;
+      const { reseaux } = req.body as {
+        reseaux: (
+          | "ADEN"
+          | "CMA"
+          | "AGRI"
+          | "AGRI_CNEAP"
+          | "AGRI_UNREP"
+          | "AGRI_UNMFREO"
+          | "ANASUP"
+          | "AMUE"
+          | "CCI"
+          | "CFA_EC"
+          | "COMP_DU_DEVOIR"
+          | "COMP_DU_TOUR_DE_FRANCE"
+          | "GRETA"
+          | "UIMM"
+          | "AFPA"
+          | "AFTRAL"
+        )[];
+      };
+
+      const objectId = new ObjectId(id as string);
+
+      const organisme = await findOrganismeById(objectId);
+      if (!organisme) {
+        throw Boom.notFound(`Organisme with id ${id} not found`);
+      }
+
+      const updatedOrganisme = await organismesDb().findOneAndUpdate(
+        { _id: objectId },
+        { $set: { reseaux, updated_at: new Date() } },
+        { returnDocument: "after" }
+      );
+
+      if (!updatedOrganisme.value) {
+        throw Boom.badImplementation("Failed to update reseaux");
+      }
+
+      res.json(updatedOrganisme.value);
     }
   );
 
