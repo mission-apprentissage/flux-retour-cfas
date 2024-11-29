@@ -189,7 +189,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                       "anyOf": [
                         {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         {
                           "bsonType": "null",
@@ -403,7 +403,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                 },
                 "departement": {
                   "bsonType": "string",
-                  "pattern": "^[0-9]{2,3}$",
+                  "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "numero": {
                   "bsonType": "int",
@@ -1022,7 +1022,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         },
                         "departement": {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         "numero": {
                           "bsonType": "int",
@@ -1518,7 +1518,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                       },
                       "departement": {
                         "bsonType": "string",
-                        "pattern": "^[0-9]{2,3}$",
+                        "pattern": "^(2A|2B|[0-9]{2,3})$",
                       },
                       "numero": {
                         "bsonType": "int",
@@ -2425,7 +2425,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       "anyOf": [
                         {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         {
                           "bsonType": "null",
@@ -2639,7 +2639,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                 },
                 "departement": {
                   "bsonType": "string",
-                  "pattern": "^[0-9]{2,3}$",
+                  "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "numero": {
                   "bsonType": "int",
@@ -3258,7 +3258,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         },
                         "departement": {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         "numero": {
                           "bsonType": "int",
@@ -3754,7 +3754,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                       },
                       "departement": {
                         "bsonType": "string",
-                        "pattern": "^[0-9]{2,3}$",
+                        "pattern": "^(2A|2B|[0-9]{2,3})$",
                       },
                       "numero": {
                         "bsonType": "int",
@@ -4710,7 +4710,7 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                       "anyOf": [
                         {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         {
                           "bsonType": "null",
@@ -5258,7 +5258,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         },
                         "departement": {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                         "numero": {
                           "bsonType": "int",
@@ -5728,7 +5728,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                       },
                       "departement": {
                         "bsonType": "string",
-                        "pattern": "^[0-9]{2,3}$",
+                        "pattern": "^(2A|2B|[0-9]{2,3})$",
                       },
                       "numero": {
                         "bsonType": "int",
@@ -8891,7 +8891,7 @@ exports[`validation-schema > should create validation schema for organismes > or
         },
         "departement": {
           "bsonType": "string",
-          "pattern": "^[0-9]{2,3}$",
+          "pattern": "^(2A|2B|[0-9]{2,3})$",
         },
         "numero": {
           "bsonType": "int",
@@ -9552,6 +9552,18 @@ exports[`validation-schema > should create validation schema for organismes > or
       ],
       "description": "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
     },
+    "last_erp_transmission_date": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de dernière transmission en tant qu'organisme transmetteur",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de dernière transmission en tant qu'organisme transmetteur",
+    },
     "last_transmission_date": {
       "bsonType": "date",
       "description": "Date de la dernière transmission de données",
@@ -9888,7 +9900,7 @@ exports[`validation-schema > should create validation schema for organismes > or
                     },
                     "departement": {
                       "bsonType": "string",
-                      "pattern": "^[0-9]{2,3}$",
+                      "pattern": "^(2A|2B|[0-9]{2,3})$",
                     },
                     "numero": {
                       "bsonType": "int",
@@ -10136,7 +10148,6 @@ exports[`validation-schema > should create validation schema for organismes > or
                 "siret": {
                   "bsonType": "string",
                   "description": "Siret du lieu de formation (optionnel)",
-                  "pattern": "^[0-9]{14}$",
                 },
                 "uai": {
                   "bsonType": "string",
@@ -11032,7 +11043,7 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
                         },
                         {
                           "bsonType": "string",
-                          "pattern": "^[0-9]{2,3}$",
+                          "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
                       ],
                     },

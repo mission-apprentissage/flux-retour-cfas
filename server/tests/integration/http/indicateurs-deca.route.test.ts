@@ -5,6 +5,7 @@ import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
+import { getRandomSourceOrganismeId } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { RequestAsOrganisationFunc, initTestApp } from "@tests/utils/testUtils";
 
@@ -87,7 +88,7 @@ const createEff = (org) => ({
   id_erp_apprenant: new ObjectId().toString(),
   api_version: "v3",
   source: SOURCE_APPRENANT.FICHIER,
-  source_organisme_id: "9999999",
+  source_organisme_id: getRandomSourceOrganismeId(),
   date_inscription_formation: `2023-09-01T00:00:00.000Z`,
   date_entree_formation: `2023-09-01T00:00:00.000Z`,
   date_fin_formation: `2024-06-30T00:00:00.000Z`,
@@ -166,7 +167,7 @@ const createEffDECA = (org) => ({
   created_at: new Date("2024-04-24T09:23:11.021Z"),
   annee_scolaire: "2023-2024",
   source: SOURCE_APPRENANT.FICHIER,
-  source_organisme_id: "9999999",
+  source_organisme_id: getRandomSourceOrganismeId(),
   id_erp_apprenant: new ObjectId().toString(),
   organisme_id: org._id,
   organisme_formateur_id: org._id,
