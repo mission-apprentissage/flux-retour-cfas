@@ -256,8 +256,8 @@ const createFieldFactory =
     }
 
     if (modeSifa && requiredFieldsSifa.includes(name)) {
-      fieldSchema.required = true; // TODO
-      if (!value) fieldSchema.warning = "Requis pour l'enquête"; // TODO
+      fieldSchema.required = true;
+      if (!value) fieldSchema.warning = "Donnée requise par SIFA. Veuillez la compléter.";
     }
 
     return {
@@ -268,8 +268,7 @@ const createFieldFactory =
       pattern: data.pattern,
       enum: data.enum,
       ...fieldSchema,
-      // locked: !draft ? true : fieldSchema.locked ?? data.locked,
-      locked: fieldSchema.locked ?? data.locked,
+      locked: modeSifa && fieldSchema.required ? false : true,
       success: !isEmptyValue(data?.value),
       description: fieldSchema.showInfo ? data.description : fieldSchema.description,
       example: data.example,

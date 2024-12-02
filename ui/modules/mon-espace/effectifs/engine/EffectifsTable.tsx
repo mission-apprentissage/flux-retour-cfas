@@ -1,4 +1,4 @@
-import { Box, Text, HStack, Button, UnorderedList, ListItem } from "@chakra-ui/react";
+import { Box, Text, HStack, Button, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import React, { useState } from "react";
@@ -72,30 +72,6 @@ const EffectifsTable = ({
         }}
         triggerExpand={triggerExpand}
         columns={{
-          ...(columns.includes("expander")
-            ? {
-                expander: {
-                  size: 25,
-                  header: () => " ",
-                  cell: ({ row }) => {
-                    return row.getCanExpand() ? (
-                      <Button
-                        onClick={() => {
-                          onTriggerExpand({ tableId: tableId, rowId: row.id });
-                        }}
-                        cursor="pointer"
-                      >
-                        {row.getIsExpanded() ? (
-                          <SubtractLine fontSize="12px" color="bluefrance" />
-                        ) : (
-                          <AddFill fontSize="12px" color="bluefrance" />
-                        )}
-                      </Button>
-                    ) : null;
-                  },
-                },
-              }
-            : {}),
           ...(columns.includes("annee_scolaire")
             ? {
                 annee_scolaire: {
@@ -170,40 +146,6 @@ const EffectifsTable = ({
                 },
               }
             : {}),
-          ...(columns.includes("statut_courant")
-            ? {
-                statut_courant: {
-                  size: 170,
-                  header: () => "Statut courant apprenant(e)",
-                  cell: ({ row }) => {
-                    const statut = organismesEffectifs[row.id]?.statut;
-
-                    if (!statut || !statut.parcours.length) {
-                      return (
-                        <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
-                          Aucun statut
-                        </Text>
-                      );
-                    }
-                    const historiqueSorted = statut.parcours.sort((a, b) => {
-                      return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
-                    });
-                    const current = [...historiqueSorted].pop();
-
-                    return (
-                      <HStack textAlign="left">
-                        <Text fontSize="1rem" fontWeight="bold">
-                          {getStatut(current.valeur)}
-                        </Text>
-                        <Text fontSize="0.8rem">
-                          (depuis {DateTime.fromISO(current.date).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
-                        </Text>
-                      </HStack>
-                    );
-                  },
-                },
-              }
-            : {}),
           ...(columns.includes("nom")
             ? {
                 nom: {
@@ -253,6 +195,40 @@ const EffectifsTable = ({
                       );
                     }
                     return getValue();
+                  },
+                },
+              }
+            : {}),
+          ...(columns.includes("statut_courant")
+            ? {
+                statut_courant: {
+                  size: 170,
+                  header: () => "Statut courant apprenant(e)",
+                  cell: ({ row }) => {
+                    const statut = organismesEffectifs[row.id]?.statut;
+
+                    if (!statut || !statut.parcours.length) {
+                      return (
+                        <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
+                          Aucun statut
+                        </Text>
+                      );
+                    }
+                    const historiqueSorted = statut.parcours.sort((a, b) => {
+                      return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
+                    });
+                    const current = [...historiqueSorted].pop();
+
+                    return (
+                      <HStack textAlign="left">
+                        <Text fontSize="1rem" fontWeight="bold">
+                          {getStatut(current.valeur)}
+                        </Text>
+                        <Text fontSize="0.8rem">
+                          (depuis {DateTime.fromISO(current.date).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
+                        </Text>
+                      </HStack>
+                    );
                   },
                 },
               }
@@ -347,12 +323,31 @@ const EffectifsTable = ({
                     <Box>
                       État de la donnée
                       <InfoTooltip
+                        headerComponent={() => <Text>État de la donnée</Text>}
                         contentComponent={() => (
-                          <Text>
-                            {modeSifa
-                              ? "Ce champ indique si les données renseignées sont complètes pour l'enquête SIFA ou non."
-                              : "Ce champ indique si les données affichées contiennent des erreurs ou non."}
-                          </Text>
+                          <Box>
+                            {modeSifa ? (
+                              <>
+                                <Text as="p">
+                                  Cette colonne indique si les données obligatoires pour l’enquête SIFA sont complètes
+                                  ou manquantes.
+                                </Text>
+                                <Text as="p">
+                                  Si manquante(s), veuillez les compléter à la source (sur votre ERP si votre organisme
+                                  transmet via API). Les modifications apportées seront visibles dès le lendemain sur
+                                  cette page.
+                                </Text>
+                                <Text as="p" mt={3}>
+                                  <strong>Note :</strong> vous pouvez aussi télécharger le fichier en l’état, mais il
+                                  faudra compléter les données manquantes sur ce dernier.
+                                </Text>
+                              </>
+                            ) : (
+                              <Text as="p">
+                                Ce champ indique si les données affichées contiennent des erreurs ou non.
+                              </Text>
+                            )}
+                          </Box>
                         )}
                       />
                     </Box>
@@ -365,14 +360,14 @@ const EffectifsTable = ({
                     const MissingSIFA = ({ requiredSifa }) => {
                       if (!requiredSifa?.length)
                         return (
-                          <HStack color="flatsuccess" w="full" pl={5}>
+                          <HStack color="flatsuccess" w="full">
                             <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complète pour SIFA</Text>
                           </HStack>
                         );
 
                       return (
                         <Box>
-                          <HStack color="warning" w="full" pl={5}>
+                          <HStack color="warning" w="full">
                             <Alert boxSize={4} />{" "}
                             <Text fontSize="1rem">{requiredSifa.length} manquante(s) pour SIFA</Text>
                             <InfoTooltip
@@ -383,6 +378,23 @@ const EffectifsTable = ({
                                     {requiredSifa.map((fieldName, i) => (
                                       <ListItem key={i}>{fieldName}</ListItem>
                                     ))}
+                                  </UnorderedList>
+                                  <Text as="p" my={3}>
+                                    Veuillez le(s) corriger/compléter sur&nbsp;:
+                                  </Text>
+                                  <UnorderedList>
+                                    <ListItem>
+                                      <Text as="p">
+                                        votre outil de gestion (ex : Gestibase, Ypareo) si vous transmettez par API. La
+                                        donnée apparaîtra sur le Tableau de bord dans les prochaines 24 heures.
+                                      </Text>
+                                    </ListItem>
+                                    <ListItem>
+                                      <Text as="p">
+                                        le Tableau de bord de l’apprentissage si vous avez transmis vos effectifs via
+                                        fichier Excel.
+                                      </Text>
+                                    </ListItem>
                                   </UnorderedList>
                                 </Box>
                               )}
@@ -396,7 +408,7 @@ const EffectifsTable = ({
                       if (!validation_errors?.length) return null;
                       return (
                         <Box>
-                          <HStack color="redmarianne" w="full" pl={5}>
+                          <HStack color="redmarianne" w="full">
                             <Alert boxSize={4} />{" "}
                             <Text fontSize="1rem">{validation_errors.length} erreur(s) de transmission</Text>
                           </HStack>
@@ -422,6 +434,32 @@ const EffectifsTable = ({
                         <ValidationsErrorsInfo validation_errors={validation_errors} />
                       </Box>
                     );
+                  },
+                },
+              }
+            : {}),
+          ...(columns.includes("expander")
+            ? {
+                expander: {
+                  size: 25,
+                  header: () => " ",
+                  cell: ({ row }) => {
+                    return row.getCanExpand() ? (
+                      <Flex justifyContent="end">
+                        <Button
+                          onClick={() => {
+                            onTriggerExpand({ tableId: tableId, rowId: row.id });
+                          }}
+                          cursor="pointer"
+                        >
+                          {row.getIsExpanded() ? (
+                            <SubtractLine fontSize="12px" color="bluefrance" />
+                          ) : (
+                            <AddFill fontSize="12px" color="bluefrance" />
+                          )}
+                        </Button>
+                      </Flex>
+                    ) : null;
                   },
                 },
               }

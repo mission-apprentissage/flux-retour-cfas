@@ -1,3 +1,4 @@
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Center,
   Heading,
@@ -14,6 +15,7 @@ import {
   ListItem,
   Grid,
   Image,
+  Collapse,
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
@@ -25,6 +27,7 @@ import { DuplicateEffectifGroupPagination, getSIFADate, SIFA_GROUP } from "share
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { downloadObject } from "@/common/utils/browser";
+import ButtonTeleversement from "@/components/buttons/ButtonTeleversement";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
@@ -36,7 +39,9 @@ import useToaster from "@/hooks/useToaster";
 import { effectifsStateAtom, effectifFromDecaAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifTableContainer from "@/modules/mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import InfoTeleversementSIFA from "@/modules/organismes/InfoTeleversementSIFA";
 import { DownloadLine, ExternalLinkLine } from "@/theme/components/icons";
+import Eye from "@/theme/components/icons/Eye";
 
 function useOrganismesEffectifs(organismeId: string) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -82,6 +87,10 @@ const SIFAPage = (props: SIFAPageProps) => {
   const { toastWarning, toastSuccess } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs, refetch } = useOrganismesEffectifs(organisme._id);
+  const [show, setShow] = useState(false);
+  const handleToggle = () => {
+    setShow(!show);
+  };
 
   const [searchValue, setSearchValue] = useState("");
   const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
@@ -143,7 +152,7 @@ const SIFAPage = (props: SIFAPageProps) => {
         <HStack gap={4}>
           <SupportLink href={SIFA_GROUP}></SupportLink>
           <DownloadButton
-            variant="secondary"
+            variant="primary"
             action={async () => {
               trackPlausibleEvent("telechargement_sifa");
               downloadObject(
@@ -196,17 +205,36 @@ const SIFAPage = (props: SIFAPageProps) => {
                 </Text>
               </ListItem>
             </UnorderedList>
-            <Link
-              variant="link"
-              href="/InstructionsSIFA_31122023.pdf"
-              mt={4}
-              isExternal
-              aria-label="Télécharger le fichier d'instruction SIFA pour 2023 (PDF, 1.5 Mo)"
-              plausibleGoal="telechargement_fichier_instruction_sifa"
-            >
-              Fichier d’instruction SIFA (2023)
-              <DownloadLine mb={1} ml={2} fontSize="xs" />
-            </Link>
+            <Flex mt={4} gap={6}>
+              <Link
+                variant="link"
+                href="/InstructionsSIFA_31122023.pdf"
+                isExternal
+                aria-label="Télécharger le fichier d'instruction SIFA pour 2023 (PDF, 1.5 Mo)"
+                plausibleGoal="telechargement_fichier_instruction_sifa"
+              >
+                Fichier d’instruction SIFA (2023)
+                <DownloadLine mb={1} ml={2} fontSize="xs" />
+              </Link>
+              <BasicModal
+                renderTrigger={(onOpen) => (
+                  <ButtonTeleversement
+                    onClick={(e) => {
+                      e.preventDefault();
+                      trackPlausibleEvent("televersement_clic_modale_donnees_obligatoires");
+                      onOpen();
+                    }}
+                  >
+                    <Eye mr={2} />
+                    Les données obligatoires
+                  </ButtonTeleversement>
+                )}
+                title="SIFA : les données obligatoires à renseigner"
+                size="4xl"
+              >
+                <InfoTeleversementSIFA />
+              </BasicModal>
+            </Flex>
             <Text fontSize="xs" color="mgalt">
               PDF – 1.5 Mo
             </Text>
@@ -215,52 +243,69 @@ const SIFAPage = (props: SIFAPageProps) => {
             <Text color="#3A3A3A" fontSize="gamma" fontWeight="bold" mb={4}>
               Quelques conseils sur le fichier SIFA et sa manipulation :
             </Text>
-            <Text color="grey.800">
-              <UnorderedList spacing={2} px={6}>
-                <ListItem>
-                  Vérifiez que tous vos apprentis soient bien présents dans le fichier. Si non, téléchargez le fichier
-                  et complétez à la main avec vos effectifs manquants.
-                </ListItem>
-                <ListItem>
-                  Avant de téléverser votre fichier SIFA sur le portail de la DEPP, veuillez en{" "}
-                  <strong>supprimer la première ligne</strong> d‘en-tête de colonnes.
-                </ListItem>
-                <ListItem>
-                  <strong>Attention ! Si vous ouvrez le fichier avec Excel</strong>, veuillez le sauvegarder (Fichier
-                  &gt; Enregistrer sous) au format{" "}
-                  <BasicModal
-                    triggerType="link"
-                    button="CSV (délimiteur point-virgule)"
-                    title="Format CSV (délimiteur point-virgule)"
-                    size="6xl"
-                  >
-                    <Image
-                      src="/images/CSV-delimiter.png"
-                      alt="CSV Delimiter"
-                      width="100%"
-                      maxWidth="100%"
-                      objectFit="cover"
-                    />
-                  </BasicModal>{" "}
-                  après suppression de la première ligne pour assurer la compatibilité avec l‘enquête SIFA.
-                </ListItem>
-                <ListItem>
-                  L’enquête SIFA sera terminée dès lors que le fichier est accepté par la plateforme SIFA.
-                </ListItem>
-                <ListItem>
-                  En cas de difficultés ou questions, veuillez lire la{" "}
-                  <Link
-                    href={"https://mission-apprentissage.notion.site/Enqu-te-SIFA-a546590b47764051bf1c486b1d57d227"}
-                    textDecoration={"underline"}
-                    isExternal
-                    plausibleGoal="clic_sifa_faq"
-                  >
-                    FAQ dédiée
-                  </Link>
-                  .
-                </ListItem>
-              </UnorderedList>
+            <Text
+              style={{
+                color: "#000091",
+                textDecoration: "underline",
+                textUnderlineOffset: "4px",
+                cursor: "pointer",
+              }}
+              onClick={handleToggle}
+              mb={2}
+            >
+              {" "}
+              {!show ? <ChevronDownIcon /> : <ChevronUpIcon />} Voir les détails
             </Text>
+            <Collapse in={show}>
+              <Text color="grey.800">
+                <UnorderedList spacing={2} px={6}>
+                  <ListItem>
+                    Vérifiez que tous vos apprentis soient bien présents dans le fichier. Si non, téléchargez le fichier
+                    et complétez à la main avec vos effectifs manquants.
+                  </ListItem>
+                  <ListItem>
+                    Avant de téléverser votre fichier SIFA sur le portail de la DEPP, veuillez{" "}
+                    <strong>supprimer la première ligne</strong> d‘en-tête de colonnes.
+                  </ListItem>
+                  <ListItem>
+                    <strong>Attention ! Si vous ouvrez le fichier avec Excel</strong>, veuillez le sauvegarder (Fichier
+                    &gt; Enregistrer sous) au format{" "}
+                    <BasicModal
+                      triggerType="link"
+                      button="CSV (délimiteur point-virgule)"
+                      title="Format CSV (délimiteur point-virgule)"
+                      size="6xl"
+                    >
+                      <Image
+                        src="/images/CSV-delimiter.png"
+                        alt="CSV Delimiter"
+                        width="100%"
+                        maxWidth="100%"
+                        objectFit="cover"
+                      />
+                    </BasicModal>{" "}
+                    après suppression de la première ligne pour assurer la compatibilité avec l‘enquête SIFA.
+                  </ListItem>
+                  <ListItem>
+                    L’enquête SIFA sera terminée dès lors que le fichier est accepté par la plateforme SIFA.
+                  </ListItem>
+                  <ListItem>
+                    En cas de difficultés ou questions, veuillez lire la{" "}
+                    <Link
+                      href={
+                        "https://aide.cfas.apprentissage.beta.gouv.fr/fr/category/organisme-de-formation-cfa-fhh03f/"
+                      }
+                      textDecoration={"underline"}
+                      isExternal
+                      plausibleGoal="clic_sifa_faq"
+                    >
+                      FAQ dédiée
+                    </Link>
+                    .
+                  </ListItem>
+                </UnorderedList>
+              </Text>
+            </Collapse>
           </Ribbons>
         </Grid>
       </Box>
