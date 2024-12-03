@@ -36,8 +36,6 @@ interface EffectifsTableProps {
   searchValue?: string;
   RenderErrorImport?: (data: any) => any;
   onCountItemsChange?: (count: number) => any;
-  triggerExpand: any;
-  onTriggerExpand: any;
   tableId: string;
   refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
 }
@@ -51,8 +49,6 @@ const EffectifsTable = ({
   searchValue,
   RenderErrorImport = () => {},
   onCountItemsChange = () => {},
-  triggerExpand,
-  onTriggerExpand,
   tableId,
   refetch,
 }: EffectifsTableProps) => {
@@ -70,7 +66,6 @@ const EffectifsTable = ({
           setCount(count);
           onCountItemsChange(count);
         }}
-        triggerExpand={triggerExpand}
         columns={{
           ...(columns.includes("annee_scolaire")
             ? {
@@ -446,12 +441,7 @@ const EffectifsTable = ({
                   cell: ({ row }) => {
                     return row.getCanExpand() ? (
                       <Flex justifyContent="end">
-                        <Button
-                          onClick={() => {
-                            onTriggerExpand({ tableId: tableId, rowId: row.id });
-                          }}
-                          cursor="pointer"
-                        >
+                        <Button>
                           {row.getIsExpanded() ? (
                             <SubtractLine fontSize="12px" color="bluefrance" />
                           ) : (
