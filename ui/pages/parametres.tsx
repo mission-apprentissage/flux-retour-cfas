@@ -42,7 +42,7 @@ import { Check, DownloadLine, Checkbox as IconCheckbox } from "@/theme/component
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const desiredOrder = [
+const desiredErpOrder = [
   "ymag",
   "gesti",
   "scform",
@@ -268,8 +268,8 @@ const ParametresPage = () => {
                 {erps
                   .filter(({ disabled }) => !disabled)
                   .sort((a, b) => {
-                    const indexA = desiredOrder.indexOf(a.unique_id);
-                    const indexB = desiredOrder.indexOf(b.unique_id);
+                    const indexA = desiredErpOrder.indexOf(a.unique_id);
+                    const indexB = desiredErpOrder.indexOf(b.unique_id);
                     return indexA - indexB;
                   })
                   .map((erp) => (
