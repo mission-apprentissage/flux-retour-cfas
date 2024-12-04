@@ -56,7 +56,12 @@ export async function fiabilisationUaiSiret({ uai, siret }): Promise<Fiabilisati
 }
 
 export async function updateOrganismesFiabilisationStatut() {
-  for await (const organisme of organismesDb().find({})) {
+  // Reduce the bacth size to prevent idle cursor timeout
+  // MongoDB will close the cursor after a period of inactivity
+  // Reducing the batch size will make sure the cursor timeout is reset more often
+  const cursor = organismesDb().find({}, { batchSize: 10 });
+
+  for await (const organisme of cursor) {
     if (!organisme.uai || !organisme.siret) {
       // Dans le future, ce cas ne devrait pas arriver car tous les organismes devraient avoir un UAI et un SIRET
       await organismesDb().updateOne(

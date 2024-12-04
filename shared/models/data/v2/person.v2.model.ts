@@ -2,7 +2,16 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [
+    {
+      date_de_naissance: 1,
+      nom: 1,
+      prenom: 1,
+    },
+    {},
+  ],
+];
 
 const collectionName = "personV2";
 

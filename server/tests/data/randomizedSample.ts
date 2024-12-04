@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
-import { WithoutId } from "mongodb";
+import { ObjectId, WithoutId } from "mongodb";
 import RandExp from "randexp";
 import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
@@ -12,6 +12,8 @@ import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierAp
 
 import sampleEtablissements, { SampleEtablissement } from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
+
+export const getRandomSourceOrganismeId = () => new ObjectId().toString();
 
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
