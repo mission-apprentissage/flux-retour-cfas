@@ -268,7 +268,7 @@ const createFieldFactory =
       pattern: data.pattern,
       enum: data.enum,
       ...fieldSchema,
-      locked: modeSifa && fieldSchema.required ? false : true,
+      locked: modeSifa ? false : true,
       success: !isEmptyValue(data?.value),
       description: fieldSchema.showInfo ? data.description : fieldSchema.description,
       example: data.example,
