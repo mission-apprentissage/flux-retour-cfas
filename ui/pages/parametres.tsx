@@ -42,6 +42,24 @@ import { Check, DownloadLine, Checkbox as IconCheckbox } from "@/theme/component
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
+const desiredOrder = [
+  "ymag",
+  "gesti",
+  "scform",
+  "fcamanager",
+  "aimaira",
+  "cactus",
+  "myclic",
+  "gescicca",
+  "formasup",
+  "formasup-hdf",
+  "charlemagne",
+  "ammon",
+  "ofa-link",
+  "filiz",
+  "hyperplanning",
+];
+
 /**
  * Composant à plusieurs états selon stepConfigurationERP.
  */
@@ -249,6 +267,11 @@ const ParametresPage = () => {
                 </option>
                 {erps
                   .filter(({ disabled }) => !disabled)
+                  .sort((a, b) => {
+                    const indexA = desiredOrder.indexOf(a.unique_id);
+                    const indexB = desiredOrder.indexOf(b.unique_id);
+                    return indexA - indexB;
+                  })
                   .map((erp) => (
                     <option value={erp.unique_id} key={erp.unique_id}>
                       {erp.name}
