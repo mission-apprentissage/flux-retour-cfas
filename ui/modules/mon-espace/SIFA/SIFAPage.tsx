@@ -93,7 +93,6 @@ const SIFAPage = (props: SIFAPageProps) => {
   };
 
   const [searchValue, setSearchValue] = useState("");
-  const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
   const organismesEffectifsGroupedBySco: any = useMemo(
     () => groupBy(organismesEffectifs, "annee_scolaire"),
@@ -389,8 +388,6 @@ const SIFAPage = (props: SIFAPageProps) => {
                       formation={formation}
                       searchValue={searchValue}
                       modeSifa={true}
-                      triggerExpand={triggerExpand}
-                      onTriggerExpand={setTriggerExpand}
                       refetch={refetch}
                     />
                   );
