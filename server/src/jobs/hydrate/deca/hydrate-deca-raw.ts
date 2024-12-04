@@ -27,7 +27,17 @@ const client = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
 export async function hydrateDecaRaw() {
   let count = { created: 0, updated: 0 };
   let totalCount = 0;
-  const organismeIds = new Set<string>();
+  let organismeIds = new Set<string>();
+
+  const processBuffer = async (buffer) => {
+    const results = await Promise.allSettled(buffer);
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        organismeIds = new Set([...organismeIds, ...result.value.organismesId]);
+      }
+    });
+    totalCount += buffer.length;
+  };
 
   try {
     await client.connect();
@@ -42,14 +52,29 @@ export async function hydrateDecaRaw() {
 
     const cursor = client.db().collection<IRawBalDeca>(config.mongodb.decaDbCollectionBal).find(query);
 
+    let promiseArray: Array<any> = [];
     for await (const document of cursor) {
-      totalCount++;
-      try {
-        count = await updateEffectifDeca(document, count, organismeIds);
-      } catch (docError) {
-        logger.error(`Error updating document ${document._id}: ${docError}`);
-        captureException(docError);
+      promiseArray.push(
+        new Promise((res, rej) => {
+          totalCount++;
+          try {
+            res(updateEffectifDeca(document, count));
+          } catch (e) {
+            rej(`Échec de la mise à jour du document ${document._id}: ${e}`);
+            //logger.error(`Échec de la mise à jour du document ${document._id}: ${e}`);
+          }
+        })
+      );
+
+      if (promiseArray.length === 100) {
+        await processBuffer(promiseArray);
+        promiseArray = [];
       }
+    }
+
+    if (promiseArray.length > 0) {
+      await processBuffer(promiseArray);
+      promiseArray = [];
     }
 
     if (totalCount > 0) {
@@ -67,13 +92,9 @@ export async function hydrateDecaRaw() {
   }
 }
 
-async function updateEffectifDeca(
-  document: IRawBalDeca,
-  count: { created: number; updated: number },
-  organismeIds: Set<string>
-) {
+async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
   const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
-
+  const organismesId = new Set<string>();
   for (const newDocument of newDocuments) {
     const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
 
@@ -85,10 +106,10 @@ async function updateEffectifDeca(
       count.updated++;
     }
 
-    organismeIds.add(newDocument.organisme_id.toString());
+    organismesId.add(newDocument.organisme_id.toString());
   }
 
-  return count;
+  return { count, organismesId };
 }
 
 async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
