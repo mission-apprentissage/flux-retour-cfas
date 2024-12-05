@@ -21,14 +21,13 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
-import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { effectifsDb, effectifsQueueDb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
@@ -41,6 +40,10 @@ import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
 
+import {
+  getEffectifCertification,
+  withEffectifFormation,
+} from "../fiabilisation/certification/fiabilisation-certification";
 import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
@@ -275,10 +278,8 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
 
   const result = await dossierApprenantSchemaV3()
     .transform(async (effectifQueued, ctx) => {
-      const [effectif, organismeFormateur, organismeResponsable, formation] = await Promise.all([
-        (async () => {
-          return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
+      let [effectif, organismeFormateur, organismeResponsable] = await Promise.all([
+        transformEffectifQueueToEffectif(effectifQueued),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_formateur_uai,
@@ -296,16 +297,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           );
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
           return organisme;
-        })(),
-        (async () => {
-          if (!effectifQueued.formation_cfd) {
-            return null;
-          }
-
-          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
-          itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
-          itemProcessingInfos.formation_found = !!formationFromCatalogue;
-          return formationFromCatalogue;
         })(),
       ]);
 
@@ -342,23 +333,15 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         return NEVER;
       }
 
-      // Set du niveau de la formation depuis le catalogue
-      if (formation && effectif.formation) {
-        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-        effectif.formation.niveau_libelle = formation.niveau;
+      const certification = await getEffectifCertification(effectif);
+      effectif = withEffectifFormation(effectif, certification);
 
-        // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
-        // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
-        if (effectif.formation.date_fin && effectif.formation.date_entree) {
-          effectif.formation.duree_formation_relle = Math.round(
-            (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) /
-              1000 /
-              60 /
-              60 /
-              24 /
-              30
-          );
-        }
+      // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
+      // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
+      if (effectif.formation?.date_fin && effectif.formation?.date_entree) {
+        effectif.formation.duree_formation_relle = Math.round(
+          (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) / 1000 / 60 / 60 / 24 / 30
+        );
       }
 
       return {
@@ -373,7 +356,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
             adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
             code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
           },
-          _computed: await addComputedFields({ organisme: organismeFormateur, effectif }),
+          _computed: await addComputedFields({ organisme: organismeFormateur, effectif, certification }),
         },
         organisme: organismeFormateur,
       };
@@ -397,10 +380,8 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
 
   const result = await dossierApprenantSchemaV1V2()
     .transform(async (effectifQueued, ctx) => {
-      const [effectif, organisme, formation] = await Promise.all([
-        (async () => {
-          return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
+      let [effectif, organisme] = await Promise.all([
+        transformEffectifQueueToEffectif(effectifQueued),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued.uai_etablissement,
@@ -409,12 +390,6 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
           organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
           return organisme;
-        })(),
-        (async () => {
-          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
-          itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
-          itemProcessingInfos.formation_found = !!formationFromCatalogue;
-          return formationFromCatalogue;
         })(),
       ]);
 
@@ -431,16 +406,14 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
         return NEVER;
       }
 
-      // Set du niveau de la formation depuis le catalogue
-      if (formation && effectif.formation) {
-        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-        effectif.formation.niveau_libelle = formation.niveau;
-      }
+      const certification = await getEffectifCertification(effectif);
+      effectif = withEffectifFormation(effectif, certification);
+
       return {
         effectif: {
           ...effectif,
           organisme_id: organisme?._id,
-          _computed: await addComputedFields({ organisme, effectif }),
+          _computed: await addComputedFields({ organisme, effectif, certification }),
         },
         organisme: organisme,
       };

@@ -281,7 +281,7 @@ export const userOrganisme = organismesByLabel["OF cible"];
 export const commonEffectifsAttributes = async () => ({
   organisme_id: userOrganisme._id,
 
-  _computed: await addComputedFields({ organisme: userOrganisme }),
+  _computed: await addComputedFields({ organisme: userOrganisme, certification: null }),
 });
 
 type TestFunc<ExpectedResult> = (

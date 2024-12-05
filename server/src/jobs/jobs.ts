@@ -1,7 +1,10 @@
 import { addJob, initJobProcessor } from "job-processor";
+import type { AnyBulkWriteOperation } from "mongodb";
+import type { IEffectif } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import logger from "@/common/logger";
+import { effectifsDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -13,6 +16,10 @@ import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
+import {
+  getEffectifCertification,
+  withEffectifFormation,
+} from "./fiabilisation/certification/fiabilisation-certification";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
@@ -318,6 +325,56 @@ export async function setupJobProcessor() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
         },
+      },
+      "tmp:migration:formation-certification": {
+        handler: async (job, signal) => {
+          // In case of interruption, we can restart the job from the last processed effectif
+          // Any updated effectif has either been updated by the job or has been updated by the processing queue
+
+          const cursor = effectifsDb().find({ updated_at: { $lte: job.updated_at } });
+
+          let ops: AnyBulkWriteOperation<IEffectif>[] = [];
+
+          for await (const effectif of cursor) {
+            const certification = await getEffectifCertification(effectif);
+            const update: Partial<IEffectif> = {
+              formation: withEffectifFormation(effectif, certification).formation,
+              updated_at: new Date(),
+            };
+
+            if (effectif._computed?.formation) {
+              update._computed = {
+                ...effectif._computed,
+                formation: {
+                  ...effectif._computed.formation,
+                  codes_rome: certification?.domaines.rome.rncp?.map(({ code }) => code) ?? null,
+                },
+              };
+            }
+
+            ops.push({
+              updateOne: {
+                filter: { _id: effectif._id },
+                update: { $set: update },
+              },
+            });
+
+            if (ops.length > 200) {
+              await effectifsDb().bulkWrite(ops, { ordered: false });
+              ops = [];
+              if (signal.aborted) {
+                throw signal.reason;
+              }
+            }
+          }
+
+          if (ops.length > 0) {
+            await effectifsDb().bulkWrite(ops, { ordered: false });
+          }
+
+          // TODO: Formation v2 migration
+        },
+        resumable: true,
       },
     },
   });

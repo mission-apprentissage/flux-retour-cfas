@@ -19,6 +19,10 @@ import { effectifsDECADb } from "@/common/model/collections";
 import { getMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 import config from "@/config";
+import {
+  getEffectifCertification,
+  withEffectifFormation,
+} from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
@@ -132,7 +136,7 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutI
     throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
-  const effectif: WithoutId<IEffectifDECA> = {
+  let effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: document._id,
     apprenant: {
       nom,
@@ -186,9 +190,12 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutI
     annee_scolaire: startYear <= 2024 && endYear >= 2025 ? "2024-2025" : `${startYear}-${endYear}`,
   };
 
+  const certification = await getEffectifCertification(effectif);
+  effectif = withEffectifFormation(effectif, certification);
+
   return {
     ...effectif,
-    _computed: await addComputedFields({ organisme, effectif: effectif as WithoutId<IEffectif> }),
+    _computed: await addComputedFields({ organisme, effectif: effectif as WithoutId<IEffectif>, certification }),
     is_deca_compatible: !organisme.is_transmission_target,
   };
 }

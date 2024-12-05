@@ -1,3 +1,4 @@
+import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithoutId } from "mongodb";
@@ -129,9 +130,11 @@ export const lockEffectif = async (effectif: IEffectif) => {
 export const addComputedFields = async ({
   organisme,
   effectif,
+  certification,
 }: {
   organisme?: IOrganisme;
   effectif?: IEffectif | WithoutId<IEffectif>;
+  certification: ICertification | null;
 }): Promise<Partial<IEffectif["_computed"]>> => {
   const computedFields: Partial<IEffectif["_computed"]> = {};
 
@@ -149,7 +152,7 @@ export const addComputedFields = async ({
 
     if (rncpList) {
       computedFields.formation = {
-        // codes_rome: rncp.romes,  TODO LATER
+        codes_rome: certification?.domaines.rome.rncp?.map(({ code }) => code) ?? null,
         opcos: rncpList.map(({ _computed }) => _computed.opco.nom),
       };
     }
