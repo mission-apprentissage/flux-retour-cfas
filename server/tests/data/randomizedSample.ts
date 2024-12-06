@@ -117,6 +117,7 @@ export const createSampleEffectif = async ({
   let computedFields = await addComputedFields({
     organisme: organisme as IOrganisme,
     effectif: merge({}, baseEffectif, params) as IEffectif,
+    certification: null,
   });
 
   let fullEffectif = merge({}, baseEffectif, params, {

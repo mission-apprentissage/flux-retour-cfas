@@ -179,6 +179,11 @@ export const zEffectif = z.object({
         .nullish(),
     })
     .nullish(),
+  _raw: z
+    .object({
+      formation: zFormationEffectif.nullish(),
+    })
+    .nullish(),
   _computed: z
     .object(
       {
