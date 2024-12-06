@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
+import { primitivesV1, primitivesV3 } from "./zodPrimitives";
 
 export const stripModelAdditionalKeys = (validationSchema, data) => {
   const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
