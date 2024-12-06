@@ -14,7 +14,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
-import { lockEffectif, addComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
+import { lockEffectif, mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
@@ -41,8 +41,8 @@ import dossierApprenantSchemaV3, {
 } from "@/common/validation/dossierApprenantSchemaV3";
 
 import {
+  fiabilisationEffectifFormation,
   getEffectifCertification,
-  withEffectifFormation,
 } from "../fiabilisation/certification/fiabilisation-certification";
 import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
@@ -277,7 +277,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
   let organismeTarget: any;
 
   const result = await dossierApprenantSchemaV3()
-    .transform(async (effectifQueued, ctx) => {
+    .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
       let [effectif, organismeFormateur, organismeResponsable] = await Promise.all([
         transformEffectifQueueToEffectif(effectifQueued),
         (async () => {
@@ -334,7 +334,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       }
 
       const certification = await getEffectifCertification(effectif);
-      effectif = withEffectifFormation(effectif, certification);
 
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
@@ -345,19 +344,25 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       }
 
       return {
-        effectif: {
-          ...effectif,
-          organisme_id: organismeFormateur?._id,
-          organisme_formateur_id: organismeFormateur?._id,
-          organisme_responsable_id: organismeResponsable?._id,
-          lieu_de_formation: {
-            uai: effectifQueued.etablissement_lieu_de_formation_uai,
-            siret: effectifQueued.etablissement_lieu_de_formation_siret,
-            adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
-            code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+        effectif: await withComputedFields(
+          {
+            ...effectif,
+            formation: fiabilisationEffectifFormation(effectif, certification),
+            organisme_id: organismeFormateur?._id,
+            organisme_formateur_id: organismeFormateur?._id,
+            organisme_responsable_id: organismeResponsable?._id,
+            lieu_de_formation: {
+              uai: effectifQueued.etablissement_lieu_de_formation_uai,
+              siret: effectifQueued.etablissement_lieu_de_formation_siret,
+              adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
+              code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+            },
+            _raw: {
+              formation: effectif.formation,
+            },
           },
-          _computed: await addComputedFields({ organisme: organismeFormateur, effectif, certification }),
-        },
+          { organisme: organismeFormateur, certification }
+        ),
         organisme: organismeFormateur,
       };
     })
@@ -378,47 +383,53 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
   const itemProcessingInfos: ItemProcessingInfos = {};
   let organismeTarget;
 
-  const result = await dossierApprenantSchemaV1V2()
-    .transform(async (effectifQueued, ctx) => {
-      let [effectif, organisme] = await Promise.all([
-        transformEffectifQueueToEffectif(effectifQueued),
-        (async () => {
-          const { organisme, stats } = await findOrganismeWithStats(
-            effectifQueued.uai_etablissement,
-            effectifQueued.siret_etablissement
-          );
-          organismeTarget = organisme;
-          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
-          return organisme;
-        })(),
-      ]);
+  const result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }> =
+    await dossierApprenantSchemaV1V2()
+      .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
+        let [effectif, organisme] = await Promise.all([
+          transformEffectifQueueToEffectif(effectifQueued),
+          (async () => {
+            const { organisme, stats } = await findOrganismeWithStats(
+              effectifQueued.uai_etablissement,
+              effectifQueued.siret_etablissement
+            );
+            organismeTarget = organisme;
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
+            return organisme;
+          })(),
+        ]);
 
-      if (!organisme) {
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          message: "organisme non trouvé",
-          path: ["uai_etablissement", "siret_etablissement"],
-          params: {
-            uai: effectifQueued.uai_etablissement,
-            siret: effectifQueued.siret_etablissement,
-          },
-        });
-        return NEVER;
-      }
+        if (!organisme) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme non trouvé",
+            path: ["uai_etablissement", "siret_etablissement"],
+            params: {
+              uai: effectifQueued.uai_etablissement,
+              siret: effectifQueued.siret_etablissement,
+            },
+          });
+          return NEVER;
+        }
 
-      const certification = await getEffectifCertification(effectif);
-      effectif = withEffectifFormation(effectif, certification);
+        const certification = await getEffectifCertification(effectif);
 
-      return {
-        effectif: {
-          ...effectif,
-          organisme_id: organisme?._id,
-          _computed: await addComputedFields({ organisme, effectif, certification }),
-        },
-        organisme: organisme,
-      };
-    })
-    .safeParseAsync(rawEffectifQueued);
+        return {
+          effectif: await withComputedFields(
+            {
+              ...effectif,
+              organisme_id: organisme?._id,
+              formation: fiabilisationEffectifFormation(effectif, certification),
+              _raw: {
+                formation: effectif.formation,
+              },
+            },
+            { organisme, certification }
+          ),
+          organisme: organisme,
+        };
+      })
+      .safeParseAsync(rawEffectifQueued);
   return {
     result,
     itemProcessingInfos,

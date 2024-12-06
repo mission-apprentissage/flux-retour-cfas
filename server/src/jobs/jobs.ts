@@ -19,8 +19,8 @@ import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
 import {
+  fiabilisationEffectifFormation,
   getEffectifCertification,
-  withEffectifFormation,
 } from "./fiabilisation/certification/fiabilisation-certification";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
@@ -333,26 +333,24 @@ export async function setupJobProcessor() {
           // In case of interruption, we can restart the job from the last processed effectif
           // Any updated effectif has either been updated by the job or has been updated by the processing queue
 
-          const cursor = effectifsDb().find({ updated_at: { $lte: job.updated_at } });
+          const cursor = effectifsDb().find({ created_at: { $lte: job.created_at } }, { sort: { created_at: -1 } });
 
           let bulk: IEffectif[] = [];
 
           const processEffectif = async (effectif: IEffectif) => {
             const certification = await getEffectifCertification(effectif);
 
-            const update: Partial<IEffectif> = {
-              formation: withEffectifFormation(effectif, certification).formation,
-            };
-
-            if (effectif._computed?.formation) {
-              update._computed = {
+            const update = {
+              formation: fiabilisationEffectifFormation(effectif, certification),
+              "_raw.formation": effectif.formation,
+              _computed: {
                 ...effectif._computed,
                 formation: {
-                  ...effectif._computed.formation,
+                  ...effectif._computed?.formation,
                   codes_rome: certification?.domaines.rome.rncp?.map(({ code }) => code) ?? null,
                 },
-              };
-            }
+              },
+            };
 
             await effectifsDb()
               .updateOne({ _id: effectif._id }, { $set: update })
@@ -363,6 +361,7 @@ export async function setupJobProcessor() {
                     motif: MOTIF_SUPPRESSION.Doublon,
                     description: "Suppression du doublon suite à la migration des formations",
                   });
+                  return;
                 }
 
                 throw err;
@@ -370,9 +369,14 @@ export async function setupJobProcessor() {
           };
 
           for await (const effectif of cursor) {
+            if (effectif._raw?.formation) {
+              // Already migrated
+              continue;
+            }
+
             bulk.push(effectif);
 
-            if (bulk.length > 200) {
+            if (bulk.length > 100) {
               await Promise.all(bulk.map(processEffectif));
               if (signal.aborted) {
                 return;

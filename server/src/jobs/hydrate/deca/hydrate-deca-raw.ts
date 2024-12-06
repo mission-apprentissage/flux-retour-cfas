@@ -3,7 +3,7 @@ import { normalize } from "path";
 import { captureException } from "@sentry/node";
 import { MongoClient, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
-import { IEffectif, IOrganisme } from "shared/models";
+import { IOrganisme } from "shared/models";
 import { IAirbyteRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
@@ -11,7 +11,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
-import { addComputedFields } from "@/common/actions/effectifs.actions";
+import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
@@ -20,8 +20,8 @@ import { getMongodbUri } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 import config from "@/config";
 import {
+  fiabilisationEffectifFormation,
   getEffectifCertification,
-  withEffectifFormation,
 } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
@@ -191,11 +191,13 @@ async function transformDocument(document: IAirbyteRawBalDeca): Promise<WithoutI
   };
 
   const certification = await getEffectifCertification(effectif);
-  effectif = withEffectifFormation(effectif, certification);
 
-  return {
-    ...effectif,
-    _computed: await addComputedFields({ organisme, effectif: effectif as WithoutId<IEffectif>, certification }),
-    is_deca_compatible: !organisme.is_transmission_target,
-  };
+  return withComputedFields(
+    {
+      ...effectif,
+      formation: fiabilisationEffectifFormation(effectif, certification),
+      is_deca_compatible: !organisme.is_transmission_target,
+    },
+    { organisme, certification }
+  );
 }

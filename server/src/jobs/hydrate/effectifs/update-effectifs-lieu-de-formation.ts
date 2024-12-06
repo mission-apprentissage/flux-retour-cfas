@@ -3,10 +3,7 @@ import { captureException } from "@sentry/node";
 import { addComputedFields } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import {
-  getEffectifCertification,
-  withEffectifFormation,
-} from "@/jobs/fiabilisation/certification/fiabilisation-certification";
+import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 export async function hydrateEffectifsLieuDeFormation() {
   let nbEffectifsMisAJour = 0;
@@ -91,7 +88,7 @@ export async function hydrateEffectifsLieuDeFormationVersOrganismeFormateur() {
             organisme_formateur_id: organismeFormateur._id,
             _computed: await addComputedFields({
               organisme: organismeFormateur,
-              effectif: withEffectifFormation(effectif, certification),
+              effectif,
               certification,
             }),
           };

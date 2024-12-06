@@ -1,7 +1,7 @@
 import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
-import { ObjectId, WithoutId } from "mongodb";
+import { ObjectId, type WithoutId } from "mongodb";
 import { IOpcos, IRncp } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -127,23 +127,23 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addComputedFields = async ({
+export const addComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>({
   organisme,
   effectif,
   certification,
 }: {
   organisme?: IOrganisme;
-  effectif?: IEffectif | WithoutId<IEffectif>;
+  effectif?: T;
   certification: ICertification | null;
-}): Promise<Partial<IEffectif["_computed"]>> => {
-  const computedFields: Partial<IEffectif["_computed"]> = {};
+}): Promise<IEffectif["_computed"]> => {
+  const computedFields: IEffectif["_computed"] = {};
 
   if (organisme) {
     computedFields.organisme = generateOrganismeComputed(organisme);
   }
 
   if (effectif) {
-    const statut = createComputedStatutObject(effectif as IEffectif, new Date());
+    const statut = createComputedStatutObject(effectif, new Date());
     computedFields.statut = statut;
   }
 
@@ -159,6 +159,22 @@ export const addComputedFields = async ({
   }
 
   return computedFields;
+};
+
+export const withComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>(
+  effectif: T,
+  {
+    organisme,
+    certification,
+  }: {
+    organisme?: IOrganisme;
+    certification: ICertification | null;
+  }
+): Promise<T> => {
+  return {
+    ...effectif,
+    _computed: await addComputedFields({ organisme, effectif, certification }),
+  };
 };
 
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
