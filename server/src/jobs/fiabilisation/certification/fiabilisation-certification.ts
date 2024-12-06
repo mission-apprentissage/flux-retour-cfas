@@ -210,28 +210,25 @@ export async function getEffectifCertification(effectif: Pick<IEffectif, "format
   return getEffectiveEffectifCertification(effectif, certifications);
 }
 
-export function withEffectifFormation<T extends Pick<IEffectif, "formation">>(
+export function fiabilisationEffectifFormation<T extends Pick<IEffectif, "formation">>(
   effectif: T,
   certification: ICertification | null
-): T {
+): T["formation"] {
   if (!certification) {
-    return effectif;
+    return effectif.formation;
   }
 
   const niveau = certification.intitule.niveau.rncp?.europeen ?? certification.intitule.niveau.cfd?.europeen ?? null;
 
   return {
-    ...effectif,
-    formation: {
-      ...effectif.formation,
-      cfd: certification.identifiant.cfd,
-      rncp: certification.identifiant.rncp,
-      libelle_long:
-        certification.intitule.cfd?.long ?? certification.intitule.rncp ?? effectif.formation?.libelle_long ?? null,
-      libelle_court:
-        certification.intitule.cfd?.court ?? certification.intitule.rncp ?? effectif.formation?.libelle_court ?? null,
-      niveau,
-      niveau_libelle: getNiveauFormationFromLibelle(niveau),
-    },
+    ...effectif.formation,
+    cfd: certification.identifiant.cfd,
+    rncp: certification.identifiant.rncp,
+    libelle_long:
+      certification.intitule.cfd?.long ?? certification.intitule.rncp ?? effectif.formation?.libelle_long ?? null,
+    libelle_court:
+      certification.intitule.cfd?.court ?? certification.intitule.rncp ?? effectif.formation?.libelle_court ?? null,
+    niveau,
+    niveau_libelle: getNiveauFormationFromLibelle(niveau),
   };
 }
