@@ -229,7 +229,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
-  const effectif: WithoutId<IEffectifDECA> = {
+  let effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: new ObjectId(document._id),
     apprenant: {
       nom,
