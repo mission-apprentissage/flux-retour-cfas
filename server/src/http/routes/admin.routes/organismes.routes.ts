@@ -90,6 +90,7 @@ export default () => {
         erp_unsupported: 1,
         api_version: 1,
         organisme_transmetteur_id: 1,
+        last_erp_transmission_date: 1,
       });
 
       if (!organisme) {
@@ -103,7 +104,7 @@ export default () => {
       }
 
       res.json({
-        transmission_date: organisme.last_transmission_date,
+        transmission_date: organisme.last_erp_transmission_date,
         transmission_api_active: organisme.mode_de_transmission === "API",
         transmission_api_version: organisme.api_version,
         transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",

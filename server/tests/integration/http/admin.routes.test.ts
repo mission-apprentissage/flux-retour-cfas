@@ -691,7 +691,6 @@ describe("Routes administrateur", () => {
 
       expect(response.status).toBe(200);
       expect(response.data).toEqual({
-        transmission_date: sampleTransmissionDate.toISOString(),
         transmission_api_active: true,
         transmission_api_version: "V2",
         transmission_manuelle_active: false,
@@ -724,7 +723,6 @@ describe("Routes administrateur", () => {
 
       expect(response.status).toBe(200);
       expect(response.data).toEqual({
-        transmission_date: sampleTransmissionDate.toISOString(),
         transmission_api_active: false,
         transmission_manuelle_active: true,
         api_key_active: true,

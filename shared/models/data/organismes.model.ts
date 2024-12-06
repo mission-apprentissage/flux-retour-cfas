@@ -250,6 +250,9 @@ const zOrganisme = z
         description: "Date de la dernière mise à jour des effectifs deca pour cet organisme",
       })
       .optional(),
+    last_erp_transmission_date: z
+      .date({ description: "Date de dernière transmission en tant qu'organisme transmetteur" })
+      .nullish(),
   })
   .strict();
 
