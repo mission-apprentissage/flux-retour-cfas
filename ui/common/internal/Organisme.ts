@@ -981,6 +981,7 @@ export interface Organisme {
   created_at?: string;
 
   is_transmission_target?: boolean;
+  last_effectifs_deca_update?: string;
 
   formationsCount?: number;
   permissions?: {

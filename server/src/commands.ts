@@ -304,6 +304,12 @@ program
     return createJobAction(name)(options);
   });
 
+program
+  .command("hydrate:contrats-deca-raw")
+  .description("Manually trigger the creation of deca effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:contrats-deca-raw"));
+
 export async function startCLI() {
   await program.parseAsync(process.argv);
 }

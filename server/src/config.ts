@@ -15,6 +15,10 @@ const config = {
     options: env.get("MNA_TDB_MONGODB_OPTIONS").required().asString(),
     decaDbName: env.get("MNA_TDB_DECA_DB_NAME").required().asString(),
     decaDbCollection: env.get("MNA_TDB_DECA_COLLECTION_NAME").required().asString(),
+    uriBal: env.get("MNA_BAL_MONGODB_URI").required().asString(),
+    dbNameBal: env.get("MNA_BAL_MONGODB_DB_NAME").required().asString(),
+    optionsBal: env.get("MNA_BAL_MONGODB_OPTIONS").asString(),
+    decaDbCollectionBal: env.get("MNA_BAL_DECA_COLLECTION_NAME").required().asString(),
   },
   auth: {
     passwordHashRounds: 10000,
