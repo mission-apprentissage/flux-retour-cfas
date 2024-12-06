@@ -49,8 +49,6 @@ function EffectifsPage(props: EffectifsPageProps) {
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
 
-  const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
-
   const {
     data: organismesEffectifs,
     isFetching,
@@ -246,8 +244,6 @@ function EffectifsPage(props: EffectifsPageProps) {
                         effectifs={effectifs}
                         formation={formation}
                         searchValue={searchValue}
-                        triggerExpand={triggerExpand}
-                        onTriggerExpand={setTriggerExpand}
                         refetch={refetch}
                       />
                     );
