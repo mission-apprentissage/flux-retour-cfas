@@ -2,6 +2,7 @@ import { captureException } from "@sentry/node";
 import express from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
+import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -10,7 +11,6 @@ import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model"
 import { formatError } from "@/common/utils/errorUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
-import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "@/common/validation/dossierApprenantSchemaV3";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 

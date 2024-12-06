@@ -1,6 +1,5 @@
+import { DossierApprenantSchemaV3BaseWithApiDataType } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z, ZodIssueCode } from "zod";
-
-import { DossierApprenantSchemaV3BaseWithApiDataType } from "./dossierApprenantSchemaV3";
 
 export const validateContrat = (
   contrat: DossierApprenantSchemaV3BaseWithApiDataType,

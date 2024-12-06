@@ -20,6 +20,11 @@ import {
   typesOrganismesIndicateurs,
   zEffectifArchive,
 } from "shared";
+import {
+  computeWarningsForDossierApprenantSchemaV3,
+  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
+} from "shared/models/parts/dossierApprenantSchemaV3";
+import { extensions, primitivesV1, primitivesV3 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -115,15 +120,10 @@ import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import {
-  computeWarningsForDossierApprenantSchemaV3,
-  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
-} from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { extensions, primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
