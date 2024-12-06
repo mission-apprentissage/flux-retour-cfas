@@ -28,8 +28,7 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w, onApp
       fieldType={fieldType ?? "text"}
       name={name}
       {...field}
-      // locked={field.locked && Boolean(field.value)}
-      locked={true}
+      locked={field.locked}
       value={field.value ?? ""}
       onChange={handle}
       isRequired={field.required}

@@ -20,6 +20,11 @@ export const getMongodbUri = (dbName: string = config.mongodb.dbName, withMainDb
   }
   return `${config.mongodb.uri}${dbName}?${config.mongodb.options}`;
 };
+
+export const getBALMongodbUri = (dbName: string) => {
+  return `${config.mongodb.uriBal}${dbName}?${config.mongodb.optionsBal}`;
+};
+
 /**
  * @param  {string} uri
  * @returns client

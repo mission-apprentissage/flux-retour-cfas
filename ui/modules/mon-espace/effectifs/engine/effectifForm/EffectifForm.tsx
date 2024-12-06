@@ -12,6 +12,7 @@ import {
   Select,
   FormControl,
   Input,
+  Flex,
 } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
 import React, { memo, useEffect, useRef, useState } from "react";
@@ -69,11 +70,17 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
   };
 
   return (
-    <Box>
+    <Flex justifyContent="flex-end">
       <BasicModal
         triggerType="link"
         button={
-          <AppButton color="#CE0500" borderColor="#CE0500" leftIcon={<Trash height={4} width={4} />} action={() => {}}>
+          <AppButton
+            color="#CE0500"
+            borderColor="#CE0500"
+            w={"auto"}
+            leftIcon={<Trash height={4} width={4} />}
+            action={() => {}}
+          >
             <Text>Supprimer l&apos;apprenant</Text>
           </AppButton>
         }
@@ -157,7 +164,7 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
           </Box>
         )}
       </BasicModal>{" "}
-    </Box>
+    </Flex>
   );
 };
 

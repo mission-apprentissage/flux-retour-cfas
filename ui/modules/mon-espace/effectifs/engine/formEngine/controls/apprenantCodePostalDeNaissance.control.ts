@@ -20,7 +20,7 @@ export const apprenantCodePostalDeNaissanceControl = [
         signal,
       });
 
-      if (response.messages.error) {
+      if (response?.messages?.error) {
         return { error: response.messages.error };
       }
     },
