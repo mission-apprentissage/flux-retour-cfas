@@ -36,7 +36,6 @@ import {
   UAI_INCONNUE_TAG_FORMAT,
   UAI_INCONNUE,
   UAI_INCONNUE_CAPITALIZE,
-  GO_MODIFICATION_RELATION_ELEMENT_LINK,
   CRISP_FAQ,
 } from "shared";
 
@@ -273,9 +272,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const aucunEffectifTransmis = !organisme.first_transmission_date;
 
   const hasOrganismesFormateurs = organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0;
-  const hasResponsabilitePartielle =
-    organisationType === "ORGANISME_FORMATION" &&
-    organisme.organismesResponsables?.some((o) => o.responsabilitePartielle);
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
@@ -292,36 +288,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         py="4"
         px="8"
       >
-        {/* Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef */}
-        {hasResponsabilitePartielle && (
-          <Container maxW="xl" p="8">
-            <Ribbons variant="warning">
-              <Text color="grey.800">
-                Nous fiabilisons les effectifs rattachés aux organismes avec lesquels vous êtes en relation en tant que
-                responsable ou responsable formateur. A cette fin nous sommes entrain de rattacher les effectifs aux
-                formations telles qu’elles sont déclarées au niveau du{" "}
-                <Link
-                  href="https://catalogue-apprentissage.intercariforef.org/"
-                  target="_blank"
-                  borderBottom="1px"
-                  _hover={{ textDecoration: "none" }}
-                >
-                  catalogue des formations en apprentissage
-                </Link>
-                .
-                <br />
-                <Link
-                  href={GO_MODIFICATION_RELATION_ELEMENT_LINK}
-                  target="_blank"
-                  borderBottom="1px"
-                  _hover={{ textDecoration: "none" }}
-                >
-                  Lien vers le support
-                </Link>
-              </Text>
-            </Ribbons>
-          </Container>
-        )}
         <Container maxW="xl" p="8">
           <HStack>
             <Box flex={3} maxW="xl" p="8">

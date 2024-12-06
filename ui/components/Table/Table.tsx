@@ -188,10 +188,19 @@ export default function Table({
               <Fragment key={row.id}>
                 <Box
                   as="tr"
-                  bg={j % 2 === 0 ? "#EEEEEE" : "white"}
+                  bg={j % 2 === 0 ? "grey.100" : "white"}
                   py="3"
                   data-rowindex={row.id}
-                  onClick={() => onRowClick?.(row.id)}
+                  onClick={() => {
+                    onRowClick?.(row.id);
+                    if (!props.isRowExpanded) {
+                      row.toggleExpanded();
+                    }
+                  }}
+                  _hover={{
+                    backgroundColor: "grey.200",
+                    cursor: "pointer",
+                  }}
                 >
                   {/* first row is a normal row */}
                   {row.getVisibleCells().map((cell) => {
