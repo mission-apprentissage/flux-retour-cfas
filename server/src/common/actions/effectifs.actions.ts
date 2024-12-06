@@ -271,7 +271,7 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
 
 export async function softDeleteEffectif(
   effectifId: ObjectId,
-  userId: ObjectId,
+  userId: ObjectId | null,
   {
     motif,
     description,

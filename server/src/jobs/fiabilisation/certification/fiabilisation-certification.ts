@@ -45,22 +45,24 @@ function isEffectifStartFormationWithinPeriod(
 }
 
 async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Promise<string | null> {
-  const cfd = effectif.formation?.cfd ?? null;
+  const rawCfd = effectif.formation?.cfd ?? null;
 
-  if (cfd === null) {
+  if (rawCfd === null) {
     return null;
   }
 
+  const cfd = rawCfd.padStart(8, "0");
+
   if (!zCfd.safeParse(cfd).success) {
-    captureException(Boom.internal('fiabilisation-certification: invalid cfd "%s"', { cfd }));
-    return cfd;
+    captureException(Boom.internal("fiabilisation-certification: invalid cfd", { cfd }));
+    return rawCfd;
   }
 
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
 
   if (certifications.length === 0) {
-    captureException(Boom.internal('fiabilisation-certification: cfd non found on API alternance "%s"', { cfd }));
-    return cfd;
+    captureException(Boom.internal("fiabilisation-certification: cfd non found on API alternance", { cfd }));
+    return rawCfd;
   }
 
   // We searched by CFD, so cfd part is always defined
@@ -81,13 +83,13 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
 
   if (candidates.length > 1) {
     captureException(
-      Boom.internal('fiabilisation-certification: multiple replacement found for cfd "%s"', { cfd, candidates })
+      Boom.internal("fiabilisation-certification: multiple replacement found for cfd", { cfd, candidates })
     );
     return cfd;
   }
 
   if (candidates.length === 0) {
-    captureException(Boom.internal('fiabilisation-certification: no replacement found for cfd "%s"', { cfd }));
+    captureException(Boom.internal("fiabilisation-certification: no replacement found for cfd", { cfd }));
     return cfd;
   }
 
@@ -112,7 +114,7 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
 
   if (certifications.length === 0) {
-    captureException(Boom.internal('fiabilisation-certification: rncp non found on API alternance "%s"', { rncp }));
+    captureException(Boom.internal("fiabilisation-certification: rncp non found on API alternance", { rncp }));
     return rncp;
   }
 
@@ -134,13 +136,13 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
 
   if (candidates.length > 1) {
     captureException(
-      Boom.internal('fiabilisation-certification: multiple replacement found for rncp "%s"', { rncp, candidates })
+      Boom.internal("fiabilisation-certification: multiple replacement found for rncp", { rncp, candidates })
     );
     return rncp;
   }
 
   if (candidates.length === 0) {
-    captureException(Boom.internal('fiabilisation-certification: no replacement found for rncp "%s"', { rncp }));
+    captureException(Boom.internal("fiabilisation-certification: no replacement found for rncp", { rncp }));
     return rncp;
   }
 

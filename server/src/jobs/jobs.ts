@@ -1,8 +1,10 @@
 import { addJob, initJobProcessor } from "job-processor";
-import type { AnyBulkWriteOperation } from "mongodb";
+import { MongoError } from "mongodb";
+import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
+import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
@@ -333,13 +335,13 @@ export async function setupJobProcessor() {
 
           const cursor = effectifsDb().find({ updated_at: { $lte: job.updated_at } });
 
-          let ops: AnyBulkWriteOperation<IEffectif>[] = [];
+          let bulk: IEffectif[] = [];
 
-          for await (const effectif of cursor) {
+          const processEffectif = async (effectif: IEffectif) => {
             const certification = await getEffectifCertification(effectif);
+
             const update: Partial<IEffectif> = {
               formation: withEffectifFormation(effectif, certification).formation,
-              updated_at: new Date(),
             };
 
             if (effectif._computed?.formation) {
@@ -352,24 +354,35 @@ export async function setupJobProcessor() {
               };
             }
 
-            ops.push({
-              updateOne: {
-                filter: { _id: effectif._id },
-                update: { $set: update },
-              },
-            });
+            await effectifsDb()
+              .updateOne({ _id: effectif._id }, { $set: update })
+              .catch(async (err) => {
+                // If the document is a duplicated effectif, we can safely remove the older document
+                if (err instanceof MongoError && err.code === 11000) {
+                  await softDeleteEffectif(effectif._id, null, {
+                    motif: MOTIF_SUPPRESSION.Doublon,
+                    description: "Suppression du doublon suite à la migration des formations",
+                  });
+                }
 
-            if (ops.length > 200) {
-              await effectifsDb().bulkWrite(ops, { ordered: false });
-              ops = [];
+                throw err;
+              });
+          };
+
+          for await (const effectif of cursor) {
+            bulk.push(effectif);
+
+            if (bulk.length > 200) {
+              await Promise.all(bulk.map(processEffectif));
               if (signal.aborted) {
-                throw signal.reason;
+                return;
               }
+              bulk = [];
             }
           }
 
-          if (ops.length > 0) {
-            await effectifsDb().bulkWrite(ops, { ordered: false });
+          if (bulk.length > 0) {
+            await Promise.all(bulk.map(processEffectif));
           }
 
           // TODO: Formation v2 migration
