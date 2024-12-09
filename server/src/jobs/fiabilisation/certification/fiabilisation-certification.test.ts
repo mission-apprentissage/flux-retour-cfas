@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 
-import { getEffectiveEffectifCertification, getEffectifCertification } from "./fiabilisation-certification";
+import { getSessionCertification, getEffectifCertification, getEffectifSession } from "./fiabilisation-certification";
 
 vi.mock("@/common/apis/apiAlternance/client", () => {
   return {
@@ -15,55 +15,136 @@ vi.mock("@/common/apis/apiAlternance/client", () => {
   };
 });
 
-describe("getEffectiveEffectifCertification", () => {
-  const certifications = [
-    { periode_validite: { debut: null, fin: new Date("2020-01-01"), rncp: null, cfd: null } },
-    { periode_validite: { debut: new Date("2020-01-01"), fin: new Date("2021-01-01"), rncp: null, cfd: null } },
-    { periode_validite: { debut: new Date("2021-01-01"), fin: new Date("2021-08-01"), rncp: null, cfd: null } },
-    { periode_validite: { debut: new Date("2021-08-01"), fin: new Date("2022-01-01"), rncp: null, cfd: null } },
-    { periode_validite: { debut: new Date("2022-01-01"), fin: null, rncp: null, cfd: null } },
-  ];
-
-  describe("when date_entree is defined", () => {
-    it.each([
-      [new Date("2021-09-01"), certifications[3]],
-      [new Date("2019-09-01"), certifications[0]],
-      [new Date("2022-09-01"), certifications[4]],
-    ])("should return certification valid when effectif started %s", (dateEntree, expected) => {
-      expect(getEffectiveEffectifCertification({ formation: { date_entree: dateEntree } }, certifications)).toBe(
-        expected
-      );
+describe("getEffectifSession", () => {
+  it("should return session when date_entree and date_fin are defined", () => {
+    expect(
+      getEffectifSession({ formation: { date_entree: new Date("2021-09-01"), date_fin: new Date("2022-09-01") } })
+    ).toEqual({
+      start: new Date("2021-09-01"),
+      end: new Date("2022-09-01"),
     });
   });
 
-  describe("when periode is defined", () => {
-    it.each([
-      [2021, 2023, certifications[3]],
-      [2019, 2021, certifications[0]],
-      [2022, 2024, certifications[4]],
-      [2020, 2021, certifications[1]],
-    ])("should return certification valid when effectif period was %s-%s", (p1, p2, expected) => {
-      expect(getEffectiveEffectifCertification({ formation: { periode: [p1, p2] } }, certifications)).toBe(expected);
+  it("should fallback over periode", () => {
+    expect(getEffectifSession({ formation: { periode: [2021, 2022] } })).toEqual({
+      start: new Date("2021-01-01"),
+      end: new Date("2022-12-31"),
+    });
+  });
+
+  it("should return null when no formation is defined", () => {
+    expect(getEffectifSession({ formation: null })).toEqual({
+      start: null,
+      end: null,
     });
   });
 
   it("should prefer date_entree over periode", () => {
-    expect(
-      getEffectiveEffectifCertification(
-        { formation: { date_entree: new Date("2021-09-01"), periode: [2024, 2025] } },
-        certifications
-      )
-    ).toBe(certifications[3]);
+    expect(getEffectifSession({ formation: { date_entree: new Date("2021-09-01"), periode: [2022, 2023] } })).toEqual({
+      start: new Date("2021-09-01"),
+      end: null,
+    });
   });
+});
 
-  it("should return null when no certification is valid", () => {
-    expect(
-      getEffectiveEffectifCertification({ formation: { date_entree: new Date("2024-09-01") } }, [certifications[1]])
-    ).toBe(null);
-  });
+describe("getSessionCertification", () => {
+  const certifications = [
+    {
+      identifiant: { cfd: "50033610", rncp: null, rncp_anterieur_2019: null },
+      periode_validite: {
+        debut: null,
+        fin: new Date("2019-12-31"),
+        rncp: null,
+        cfd: {
+          ouverture: new Date("2000-08-01"),
+          fermeture: new Date("2021-07-31"),
+          premiere_session: 2000,
+          derniere_session: 2021,
+        },
+      },
+    },
+    {
+      identifiant: { cfd: "50033610", rncp: "RNCP5364", rncp_anterieur_2019: true },
+      periode_validite: {
+        debut: new Date("2020-01-01"),
+        fin: new Date("2020-12-31"),
+        rncp: {
+          actif: false,
+          activation: new Date("2020-01-01"),
+          debut_parcours: null,
+          fin_enregistrement: new Date("2020-12-31"),
+        },
+        cfd: {
+          ouverture: new Date("2000-08-01"),
+          fermeture: new Date("2021-07-31"),
+          premiere_session: 2000,
+          derniere_session: 2021,
+        },
+      },
+    },
+    {
+      identifiant: { cfd: "50033610", rncp: "RNCP34670", rncp_anterieur_2019: false },
+      periode_validite: {
+        debut: new Date("2021-01-01"),
+        fin: new Date("2021-07-31"),
+        rncp: {
+          actif: true,
+          activation: new Date("2021-01-01"),
+          debut_parcours: null,
+          fin_enregistrement: new Date("2021-12-31"),
+        },
+        cfd: {
+          ouverture: new Date("2000-08-01"),
+          fermeture: new Date("2021-07-31"),
+          premiere_session: 2000,
+          derniere_session: 2021,
+        },
+      },
+    },
+    {
+      identifiant: { cfd: "50033616", rncp: "RNCP34670", rncp_anterieur_2019: false },
+      periode_validite: {
+        debut: new Date("2021-08-01"),
+        fin: new Date("2021-12-31"),
+        rncp: {
+          actif: true,
+          activation: new Date("2021-01-01"),
+          debut_parcours: null,
+          fin_enregistrement: new Date("2021-12-31"),
+        },
+        cfd: {
+          ouverture: new Date("2021-08-01"),
+          fermeture: null,
+          premiere_session: 2021,
+          derniere_session: null,
+        },
+      },
+    },
+    {
+      identifiant: { cfd: "50033616", rncp: "RNCP39266", rncp_anterieur_2019: false },
+      periode_validite: {
+        debut: new Date("2022-01-01"),
+        fin: null,
+        rncp: null,
+        cfd: {
+          ouverture: new Date("2021-08-01"),
+          fermeture: null,
+          premiere_session: 2021,
+          derniere_session: null,
+        },
+      },
+    },
+  ];
 
-  it("should return null when no formation is defined", () => {
-    expect(getEffectiveEffectifCertification({ formation: null }, certifications)).toBe(null);
+  it.each([
+    [{ start: new Date("2021-09-01"), end: null }, certifications[3]],
+    [{ start: new Date("2021-09-01"), end: new Date("2024-08-01") }, certifications[3]],
+    [{ start: new Date("2022-01-01"), end: null }, certifications[4]],
+    [{ start: new Date("2022-01-01"), end: new Date("2024-08-01") }, certifications[4]],
+    [{ start: new Date("2019-09-01"), end: null }, certifications[0]],
+    [{ start: new Date("2022-09-01"), end: null }, certifications[4]],
+  ])("should return certification valid for session %s", (session, expected) => {
+    expect(getSessionCertification(session, certifications)).toBe(expected);
   });
 });
 
