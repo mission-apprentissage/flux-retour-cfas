@@ -4,7 +4,7 @@ import { zCfd, zRncp } from "api-alternance-sdk/internal";
 import Boom from "boom";
 import type { IEffectif } from "shared/models";
 
-import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
+import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 
 function isEffectifStartFormationWithinPeriod(
@@ -229,6 +229,6 @@ export function fiabilisationEffectifFormation<T extends Pick<IEffectif, "format
     libelle_court:
       certification.intitule.cfd?.court ?? certification.intitule.rncp ?? effectif.formation?.libelle_court ?? null,
     niveau,
-    niveau_libelle: getNiveauFormationFromLibelle(niveau),
+    niveau_libelle: getNiveauFormationLibelle(niveau),
   };
 }
