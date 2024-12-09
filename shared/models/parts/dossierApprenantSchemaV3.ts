@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { primitivesV1, primitivesV3 } from "./zodPrimitives";
 
-export const stripModelAdditionalKeys = (validationSchema, data) => {
+export const stripModelAdditionalKeys = (validationSchema: any, data: any) => {
   const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
     return data[curr] !== undefined
       ? {
@@ -195,13 +195,13 @@ export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret
   );
 }
 
-export function computeWarningsForDossierApprenantSchemaV3(data) {
+export function computeWarningsForDossierApprenantSchemaV3(data: Array<DossierApprenantSchemaV3ZodType>) {
   return {
     contratCount: countContratWarning(data),
   };
 }
 
-const countContratWarning = (data) => {
+const countContratWarning = (data: Array<DossierApprenantSchemaV3ZodType>) => {
   return data.reduce(
     (acc: number, { contrat_date_debut, contrat_date_debut_2, contrat_date_debut_3, contrat_date_debut_4 }) => {
       return !contrat_date_debut && !contrat_date_debut_2 && !contrat_date_debut_3 && !contrat_date_debut_4
