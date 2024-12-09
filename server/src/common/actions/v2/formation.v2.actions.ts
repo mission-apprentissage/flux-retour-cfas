@@ -24,6 +24,7 @@ const getFormationV2 = async (
   organisme_responsable_id: ObjectId,
   organisme_formateur_id: ObjectId
 ) => {
+  // CFD & RNCP --> tjr en uppercase
   return formationV2Db().findOne({
     cfd: cfd.replace(/\s/g, "").toLowerCase(),
     rncp: rncp.replace(/\s/g, "").toLowerCase(),
