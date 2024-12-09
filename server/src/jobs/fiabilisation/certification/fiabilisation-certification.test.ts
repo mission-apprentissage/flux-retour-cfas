@@ -593,14 +593,22 @@ describe("getEffectifCertification", () => {
   });
 
   it("should skip CFD code not valid", async () => {
-    vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue(certificationsByRncp);
+    vi.mocked(apiAlternanceClient.certification.index).mockImplementation(async (filter) => {
+      if (filter.identifiant?.rncp) {
+        return certificationsByRncp;
+      }
+
+      return [];
+    });
+
     expect(
       await getEffectifCertification({
         formation: { cfd: "54", rncp: "RNCP24440", date_entree: new Date("2021-09-01") },
       })
     ).toBe(null);
-    expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(1);
-    expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { rncp: "RNCP24440" } });
+    expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
+    expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "00000054" } });
+    expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { rncp: "RNCP24440" } });
   });
 
   it('should resolve "effective" CFD', async () => {
