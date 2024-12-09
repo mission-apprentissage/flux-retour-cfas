@@ -37,6 +37,5 @@ export const formatDateHourMinutesSecondsMs = (date: string) => {
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
-    fractionalSecondDigits: 3,
   }).format(d);
 };
