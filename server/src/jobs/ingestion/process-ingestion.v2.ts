@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { WithId } from "mongodb";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 
@@ -46,5 +47,6 @@ export const handleEffectifTransmission = async (effectifQueue: WithId<IEffectif
     await insertTransmissionV2(effectifQueue.source_organisme_id, formationId);
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
+    captureException(e);
   }
 };

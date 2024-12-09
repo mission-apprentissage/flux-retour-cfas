@@ -210,5 +210,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   const json2csvParser = new Parser({ fields: SIFA_FIELDS, delimiter: ";", withBOM: true });
   const csv = await json2csvParser.parse(items);
 
-  return csv;
+  const effectifsIds = effectifs.map((effectif) => effectif._id.toString());
+  return { csv, effectifsIds };
 };
