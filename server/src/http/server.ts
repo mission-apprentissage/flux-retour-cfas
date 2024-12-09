@@ -613,9 +613,11 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
-          const sifaCsv = await generateSifa(organismeId as any as ObjectId);
+          const { csv, effectifsIds } = await generateSifa(organismeId as any as ObjectId);
           res.attachment(`tdb-données-sifa-${organismeId}.csv`);
-          return sifaCsv;
+
+          await createTelechargementListeNomLog("sifa", effectifsIds, new Date(), req.user?._id, organismeId);
+          return csv;
         })
       )
       .put(

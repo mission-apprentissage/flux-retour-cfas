@@ -16,7 +16,8 @@ export const createTelechargementListeNomLog = async (
     | "organismes_sans_effectifs"
     | "organismes_nature_inconnue"
     | "organismes_siret_ferme"
-    | "organismes_uai_non_determine",
+    | "organismes_uai_non_determine"
+    | "sifa",
   elementList: string[],
   date: Date,
   userId: ObjectId,
