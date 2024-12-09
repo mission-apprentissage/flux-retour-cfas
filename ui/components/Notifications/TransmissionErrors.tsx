@@ -1,5 +1,4 @@
-import { CloseIcon } from "@chakra-ui/icons";
-import { Flex, IconButton, Link, Text } from "@chakra-ui/react";
+import { Flex, Link, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 
 import { _put } from "@/common/httpClient";
@@ -18,11 +17,6 @@ const NotificationTransmissionError = ({ organisme }: { organisme: Organisme }) 
     }
   }, [organisme]);
 
-  const onCloseNotification = async () => {
-    await _put(`/api/v1/organismes/${organisme._id}/transmission/reset-notification`, {});
-    setHasTransmissionError(false);
-  };
-
   return (
     <>
       {hasTransmissionError && (
@@ -30,13 +24,13 @@ const NotificationTransmissionError = ({ organisme }: { organisme: Organisme }) 
           <Flex justify="space-between" align="center">
             <Text color="grey.800">
               <strong>
-                {`Des erreurs dans l’envoi des données ont été détectées${
+                {`Bonjour, des erreurs ont été détectées dans vos données${
                   organisme.transmission_errors_date
                     ? ` le ${new Date(organisme.transmission_errors_date).toLocaleDateString()}`
                     : ""
                 }`}
               </strong>
-              . Consultez le{" "}
+              . Consultez votre{" "}
               <Link
                 href="/transmissions"
                 display="inline"
@@ -45,17 +39,9 @@ const NotificationTransmissionError = ({ organisme }: { organisme: Organisme }) 
               >
                 rapport de transmission
               </Link>{" "}
-              pour les identifier et les corriger. Une fois la correction effectuée, vous pouvez fermer ce bandeau et
-              revenir dans 24h pour vérifier que les erreurs ont disparu.
+              pour les identifier et les corriger. Une fois la correction effectuée, revenez dans 24h pour vérifier
+              qu’elles ont disparu.
             </Text>
-            <IconButton
-              aria-label="Close"
-              icon={<CloseIcon />}
-              onClick={() => onCloseNotification()}
-              size="sm"
-              variant="ghost"
-              ml={4}
-            />
           </Flex>
         </Ribbons>
       )}
