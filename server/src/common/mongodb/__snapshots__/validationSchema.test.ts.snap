@@ -10669,6 +10669,7 @@ exports[`validation-schema > should create validation schema for telechargementL
         "affelnet_concretise",
         "affelnet",
         "affelnet_non_concretise",
+        "sifa",
       ],
     },
     "user_id": {
