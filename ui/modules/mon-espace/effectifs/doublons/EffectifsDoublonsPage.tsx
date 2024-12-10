@@ -93,7 +93,7 @@ const EffectifsDoublonsPage = ({ isMine }) => {
 
       <Stack spacing={6}>
         {isMine && (
-          <VStack align="start" width={2 / 3} gap={0}>
+          <VStack align="start" width={2 / 3} gap={0} mb={6}>
             <Text fontWeight="bold" fontSize="delta">
               Vérifiez {duplicates?.length === 1 ? "le duplicat" : `les ${duplicates?.length} duplicats`}{" "}
               d&apos;effectifs. Pour chacun, supprimez celui avec les informations incorrectes.

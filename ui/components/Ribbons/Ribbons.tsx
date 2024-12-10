@@ -48,7 +48,7 @@ type RibbonsProps = {
 
 const Ribbons = ({ variant = "info", oneLiner = true, children, px, py, ...rest }: RibbonsProps) => {
   return (
-    <Box width="50%" {...rest}>
+    <Box width={2 / 3} {...rest}>
       <Flex
         borderColor={stylesMap[variant].borderColor}
         borderWidth={stylesMap[variant].borderWidth}
