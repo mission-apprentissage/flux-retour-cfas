@@ -19,7 +19,6 @@ import {
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
-import router from "next/router";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, getSIFADate, SIFA_GROUP } from "shared";
@@ -36,6 +35,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useToaster from "@/hooks/useToaster";
+import BandeauDuplicatsEffectifs from "@/modules/effectifs/BandeauDuplicatsEffectifs";
 import { effectifsStateAtom, effectifFromDecaAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifTableContainer from "@/modules/mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
@@ -348,23 +348,10 @@ const SIFAPage = (props: SIFAPageProps) => {
         </HStack>
       </Box>
 
-      {duplicates && duplicates?.totalItems > 0 && (
-        <Ribbons variant="alert" my={6}>
-          <Box ml={3}>
-            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
-              Nous avons détecté {duplicates?.totalItems} duplicat{duplicates?.totalItems > 1 ? "s" : ""} pour l’année
-              scolaire en cours.
-            </Text>
-
-            <Link
-              variant="whiteBg"
-              href={`${router.asPath.replace("enquete-sifa", "effectifs")}/doublons`}
-              plausibleGoal="clic_verifier_doublons_effectifs"
-            >
-              Vérifier
-            </Link>
-          </Box>
-        </Ribbons>
+      {!props.modePublique && duplicates && duplicates?.totalItems > 0 && (
+        <Box mt={10}>
+          <BandeauDuplicatsEffectifs totalItems={duplicates?.totalItems} />
+        </Box>
       )}
 
       <Box mt={10} mb={16}>
