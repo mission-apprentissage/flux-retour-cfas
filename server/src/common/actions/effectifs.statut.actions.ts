@@ -1,9 +1,10 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { cloneDeep } from "lodash-es";
-import { MongoServerError, UpdateFilter } from "mongodb";
+import { MongoServerError, UpdateFilter, type WithoutId } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { addDaysUTC } from "shared/utils";
 
 import logger from "../logger";
@@ -43,7 +44,10 @@ function shouldUpdateStatut(effectif: IEffectif): boolean {
  * @param {Date} evaluationDate La date à laquelle l'évaluation du statut est effectuée.
  * @returns {IEffectifComputedStatut} L'objet de statut calculé pour l'effectif.
  */
-export function createComputedStatutObject(effectif: IEffectif, evaluationDate: Date): IEffectifComputedStatut | null {
+export function createComputedStatutObject(
+  effectif: IEffectif | WithoutId<IEffectifDECA>,
+  evaluationDate: Date
+): IEffectifComputedStatut | null {
   try {
     const parcours = generateUnifiedParcours(effectif, evaluationDate);
 
@@ -59,7 +63,7 @@ export function createComputedStatutObject(effectif: IEffectif, evaluationDate: 
       {
         context: "createComputedStatutObject",
         evaluationDate,
-        effectifId: effectif._id,
+        effectifId: "_id" in effectif ? effectif._id : null,
         errorStack: error instanceof Error ? error.stack : undefined,
       }
     );
@@ -97,7 +101,7 @@ function handleUpdateError(err: unknown, effectif: IEffectif) {
 }
 
 const generateUnifiedParcours = (
-  effectif: IEffectif,
+  effectif: IEffectif | WithoutId<IEffectifDECA>,
   evaluationDate: Date
 ): { valeur: StatutApprenant; date: Date }[] => {
   let parcours: { valeur: StatutApprenant; date: Date }[] = [];
@@ -139,7 +143,7 @@ function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: D
 }
 
 function determineStatutsByContrats(
-  effectif: IEffectif,
+  effectif: IEffectif | WithoutId<IEffectifDECA>,
   evaluationDate?: Date
 ): { valeur: StatutApprenant; date: Date }[] {
   if (!effectif.formation?.date_entree && !effectif.formation?.date_fin) {

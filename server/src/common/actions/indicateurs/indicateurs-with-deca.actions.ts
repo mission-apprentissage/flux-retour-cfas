@@ -126,6 +126,7 @@ export const getOrganismeIndicateursEffectifsParFormation = async (
   ];
 
   const mapRNCP = indicateurs.reduce((acc, { rncp_code, ...rest }) => {
+    // TODO: get niveau from CFD if not found
     const rncp = rncp_code ?? "null";
     return acc[rncp]
       ? {
