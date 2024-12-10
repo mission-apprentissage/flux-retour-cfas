@@ -1,9 +1,9 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3, RouteConfig } from "@asteasolutions/zod-to-openapi";
 import { SourceApprenantEnum, TD_API_ELEMENT_LINK } from "shared/constants";
+import { dossierApprenantSchemaV3Base } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
 
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
-import { dossierApprenantSchemaV3Base } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 
 const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
