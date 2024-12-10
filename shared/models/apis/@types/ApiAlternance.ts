@@ -1,4 +1,4 @@
-type CfdInfo = {
+export type CfdInfo = {
   date_fermeture: Date | null;
   date_ouverture: Date | null;
   niveau: string | null;
@@ -13,4 +13,13 @@ type CfdInfo = {
   }>;
 };
 
-export default CfdInfo;
+export type RncpInfo = {
+  code_rncp: string;
+  intitule: string;
+  niveau: string | null;
+  date_fin_validite_enregistrement: Date | null;
+  actif: boolean;
+  eligible_apprentissage: boolean;
+  eligible_professionnalisation: boolean;
+  romes: { code: string; intitule: string }[];
+};

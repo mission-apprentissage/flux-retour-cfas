@@ -17,7 +17,7 @@
     "init:dev": "yarn cli init:dev",
     "build": "tsup-node --env.NODE_ENV production",
     "typecheck": "tsc --noEmit",
-    "generate:import": "tsx scripts/generate-import-effectif.ts generate"
+    "generate:import": "tsx scripts/index.ts generate"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.4.0",

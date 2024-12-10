@@ -1,7 +1,5 @@
 import { ArrowForwardIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import {
-  Badge,
-  HStack,
   Link,
   Modal,
   ModalCloseButton,
@@ -15,17 +13,16 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { IndicateursEffectifsAvecFormation } from "shared";
 
 import { _get } from "@/common/httpClient";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationNiveau";
+
+import { CertificationDetails } from "./CertificationDetails/CertificationDetails";
 
 interface CustomColumnDef {
   accessorKey: string;
@@ -88,7 +85,8 @@ const formationsTableColumnsDefs: CustomColumnDef[] = [
 ];
 
 interface NiveauAvecFormations {
-  niveau: string;
+  id: string;
+  niveau: string | null;
   label: string;
   formations: IndicateursEffectifsAvecFormation[];
 }
@@ -97,41 +95,46 @@ interface IndicateursEffectifsParFormationTableProps {
   formations: IndicateursEffectifsAvecFormation[];
 }
 function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFormationTableProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedCodeRNCP, setSelectedCodeRNCP] = useState<string | null>(null);
-
-  const { data: ficheRNCP } = useQuery(["/api/v1/rncp", selectedCodeRNCP], async () => {
-    if (selectedCodeRNCP) {
-      const ficheRNCP = await _get(`/api/v1/rncp/${selectedCodeRNCP}`);
-      onOpen();
-      return ficheRNCP;
-    } else {
-      return {};
-    }
-  });
+  const [selectedFormation, setSelectedFormation] = useState<IndicateursEffectifsAvecFormation | null>(null);
   const [expandedNiveaux, setExpandedNiveaux] = useState<{ [niveau: string]: boolean }>({});
 
-  function toggleExpand(niveau: string) {
-    expandedNiveaux[niveau] = !expandedNiveaux[niveau];
-    setExpandedNiveaux({ ...expandedNiveaux });
-  }
+  const niveauxAvecFormations: NiveauAvecFormations[] = useMemo(() => {
+    const groupedByNiveau = props.formations.reduce<Map<string | null, NiveauAvecFormations>>((acc, formation) => {
+      if (!acc.has(formation.niveau_europeen)) {
+        acc.set(formation.niveau_europeen, {
+          id: formation.niveau_europeen ?? "",
+          niveau: formation.niveau_europeen,
+          label: niveauFormationByNiveau[formation.niveau_europeen ?? ""] ?? "Niveau inconnu",
+          formations: [],
+        });
+      }
 
-  const niveauxAvecFormations = useMemo(() => {
-    return Object.values(
-      props.formations.reduce<{ [key: string]: NiveauAvecFormations }>((acc, formation) => {
-        let formationsNiveau = acc[formation.rncp?.niveau ?? ""];
-        if (!formationsNiveau) {
-          formationsNiveau = acc[formation.rncp?.niveau ?? ""] = {
-            niveau: `${formation.rncp?.niveau ?? ""}`,
-            label: niveauFormationByNiveau[formation.rncp?.niveau ?? ""] ?? "Sans niveau",
-            formations: [],
-          };
-        }
-        formationsNiveau.formations.push(formation);
-        return acc;
-      }, {})
-    ).sort((a, b) => (a.niveau < b.niveau ? -1 : 1));
+      acc.get(formation.niveau_europeen)!.formations.push(formation);
+
+      return acc;
+    }, new Map());
+
+    return Array.from(groupedByNiveau.values()).sort((a, b) => {
+      if (a.niveau === null) {
+        return 1;
+      }
+
+      if (b.niveau === null) {
+        return -1;
+      }
+
+      return a.niveau.localeCompare(b.niveau);
+    });
   }, [props.formations]);
+
+  const toggleExpand = useCallback((niveauId: string) => {
+    setExpandedNiveaux((current) => ({
+      ...current,
+      [niveauId]: !current[niveauId],
+    }));
+  }, []);
+
+  const isExpanded = useCallback((niveauId: string): boolean => Boolean(expandedNiveaux[niveauId]), [expandedNiveaux]);
 
   return (
     <>
@@ -147,8 +150,8 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
         </Thead>
         <Tbody fontSize="zeta">
           {niveauxAvecFormations.map((niveauAvecFormations) => (
-            <Fragment key={niveauAvecFormations.niveau}>
-              <Tr key={niveauAvecFormations.niveau}>
+            <Fragment key={niveauAvecFormations.id}>
+              <Tr key={niveauAvecFormations.id}>
                 <Td
                   background="#F5F5FE"
                   color="bluefrance"
@@ -159,38 +162,47 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                   title="Cliquer pour afficher/masquer le détail"
                   lineHeight="3em"
                   borderBottom=".5px solid bluefrance"
-                  onClick={() => toggleExpand(niveauAvecFormations.niveau)}
+                  onClick={() => toggleExpand(niveauAvecFormations.id)}
                 >
                   <ChevronDownIcon
                     boxSize="6"
-                    transform={expandedNiveaux[niveauAvecFormations.niveau] ? "rotate(-180deg)" : ""}
+                    transform={isExpanded(niveauAvecFormations.id) ? "rotate(-180deg)" : ""}
                     transition=".3s"
                   />
-                  {niveauAvecFormations.label}
+                  {niveauFormationByNiveau[niveauAvecFormations.id] ?? "Niveau inconnu"}
                 </Td>
               </Tr>
 
-              {expandedNiveaux[niveauAvecFormations.niveau] &&
+              {isExpanded(niveauAvecFormations.id) &&
                 niveauAvecFormations.formations.map((formation) => (
                   <Tr key={formation.rncp_code}>
                     <Td>
-                      {formation.rncp?.intitule ? (
+                      {formation.intitule ? (
                         <Link
                           display="block"
                           fontSize="1rem"
                           width="var(--chakra-sizes-lg)"
-                          title={formation.rncp.intitule}
-                          onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
+                          title={formation.intitule}
+                          onClick={() => setSelectedFormation(formation)}
                         >
-                          {formation.rncp.intitule}
+                          {formation.intitule}
                         </Link>
                       ) : (
-                        <Text fontSize="1rem">Fiche non trouvée</Text>
+                        <Text fontSize="1rem">Certification non trouvée</Text>
                       )}
                       <Text mt={2} color="#3A3A3A" fontSize="omega">
                         RNCP&nbsp;:{" "}
                         {formation.rncp_code ? (
                           formation.rncp_code
+                        ) : (
+                          <Text as="span" color="red">
+                            INCONNU
+                          </Text>
+                        )}
+                        {" / "}
+                        CFD&nbsp;:{" "}
+                        {formation.cfd_code ? (
+                          formation.cfd_code
                         ) : (
                           <Text as="span" color="red">
                             INCONNU
@@ -209,62 +221,16 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
         </Tbody>
       </Table>
 
-      {ficheRNCP && (
-        <Modal
-          isOpen={isOpen}
-          onClose={() => {
-            onClose();
-            setSelectedCodeRNCP(null);
-          }}
-          size="3xl"
-        >
+      {selectedFormation !== null && (
+        <Modal isOpen={selectedFormation !== null} onClose={() => setSelectedFormation(null)} size="3xl">
           <ModalOverlay />
           <ModalContent borderRadius="0" p="2w" pb="4w">
             <ModalHeader display="flex" alignItems="center" fontSize="24px" pl="0">
               <ArrowForwardIcon boxSize={"8"} mr="2" />
-              {ficheRNCP.intitule}
+              {selectedFormation.intitule ?? selectedFormation.rncp_code}
             </ModalHeader>
             <ModalCloseButton size="lg" />
-            <VStack borderWidth="1px" borderColor="bluefrance" p={6} alignItems="start" gap={2}>
-              <HStack w="100%">
-                <Text>Code RNCP&nbsp;:</Text>
-                <TextBadge>{ficheRNCP.rncp}</TextBadge>
-
-                <Link
-                  variant="whiteBg"
-                  href={`https://www.francecompetences.fr/recherche/rncp/${ficheRNCP.rncp?.substring(4)}`}
-                  isExternal
-                  ml="auto !important"
-                >
-                  Consulter la fiche
-                </Link>
-              </HStack>
-              <HStack>
-                <Text>État&nbsp;:</Text>
-                <TextBadge>{ficheRNCP.etat_fiche}</TextBadge>
-              </HStack>
-              <HStack>
-                <Text>Actif&nbsp;:</Text>
-                <TextBadge>{ficheRNCP.actif ? "oui" : "non"}</TextBadge>
-              </HStack>
-              <HStack>
-                <Text>Niveau de formation&nbsp;:</Text>
-                <Badge
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                  textTransform="none"
-                >
-                  {niveauFormationByNiveau[ficheRNCP.niveau] ?? "Inconnu"}
-                </Badge>
-              </HStack>
-              <HStack>
-                <Text>Codes ROME&nbsp;:</Text>
-                <TextBadge>{ficheRNCP.romes?.join(", ")}</TextBadge>
-              </HStack>
-            </VStack>
+            <CertificationDetails rncp_code={selectedFormation.rncp_code} cfd_code={selectedFormation.cfd_code} />
           </ModalContent>
         </Modal>
       )}
@@ -273,18 +239,3 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
 }
 
 export default IndicateursEffectifsParFormationTable;
-
-function TextBadge({ children }: { children: string | JSX.Element }) {
-  return (
-    <Badge
-      fontSize="epsilon"
-      textColor="grey.800"
-      paddingX="1w"
-      paddingY="2px"
-      backgroundColor="#ECEAE3"
-      textTransform="none"
-    >
-      {children}
-    </Badge>
-  );
-}

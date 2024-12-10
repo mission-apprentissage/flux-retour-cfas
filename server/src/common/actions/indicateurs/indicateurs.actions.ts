@@ -23,6 +23,7 @@ import {
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
+import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -30,7 +31,11 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
+function buildIndicateursEffectifsPipeline(
+  groupBy: string | null | Record<string, string>,
+  currentDate: Date,
+  extraAccumulator: Record<string, unknown> = {}
+) {
   return [
     {
       $addFields: {
@@ -78,6 +83,7 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
             $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION] }, 1, 0],
           },
         },
+        ...extraAccumulator,
       },
     },
     {
@@ -92,6 +98,7 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
         abandons: 1,
         rupturants: 1,
         finDeFormation: 1,
+        ...Object.entries(extraAccumulator).reduce((acc, [key]) => ({ ...acc, [key]: 1 }), {}),
       },
     },
   ];
@@ -441,8 +448,8 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
   db: Collection<any>,
   decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecFormation[]> {
-  const indicateurs = (await db
-    .aggregate([
+  const indicateurs = await db
+    .aggregate<IndicateursEffectifsAvecFormation>([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
@@ -453,43 +460,58 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
           }
         ),
       },
-      ...buildIndicateursEffectifsPipeline("$formation.rncp", filters.date),
+      ...buildIndicateursEffectifsPipeline(
+        {
+          rncp: "$formation.rncp",
+          cfd: "$formation.cfd",
+        },
+        filters.date,
+        {
+          intitule: { $first: "$formation.libelle_long" },
+          niveau_europeen: { $first: "$formation.niveau" },
+        }
+      ),
       {
         $project: {
           _id: 0,
-          rncp_code: "$_id",
+          rncp_code: "$_id.rncp",
+          cfd_code: "$_id.cfd",
           apprenants: 1,
           apprentis: 1,
           inscrits: 1,
           abandons: 1,
           rupturants: 1,
-        },
-      },
-      {
-        $lookup: {
-          from: "rncp",
-          localField: "rncp_code",
-          foreignField: "rncp",
-          as: "rncp",
-          pipeline: [
-            {
-              $project: {
-                _id: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$rncp",
-          preserveNullAndEmptyArrays: true,
+          intitule: 1,
+          niveau_europeen: 1,
         },
       },
     ])
-    .toArray()) as IndicateursEffectifsAvecFormation[];
+    .toArray();
 
-  return indicateurs;
+  // Fix temporaire en attendant la V2
+  // Correction des intitulés de formation manquants, à partir du CFD / RNCP
+  return Promise.all(
+    indicateurs.map(async (indicateur) => {
+      if (indicateur.rncp_code === null && indicateur.cfd_code === null) {
+        return indicateur;
+      }
+
+      if (indicateur.intitule && indicateur.niveau_europeen) {
+        return indicateur;
+      }
+
+      const [cfdInfo, rncpInfo] = await Promise.all([
+        indicateur.cfd_code ? getCfdInfo(indicateur.cfd_code) : null,
+        indicateur.rncp_code ? getRncpInfo(indicateur.rncp_code) : null,
+      ]);
+
+      return {
+        ...indicateur,
+        intitule: indicateur.intitule ?? cfdInfo?.intitule_long ?? rncpInfo?.intitule ?? null,
+        niveau_europeen: indicateur.niveau_europeen ?? rncpInfo?.niveau ?? cfdInfo?.niveau ?? null,
+      };
+    })
+  );
 }
 
 export async function getEffectifsNominatifsGenerique(
