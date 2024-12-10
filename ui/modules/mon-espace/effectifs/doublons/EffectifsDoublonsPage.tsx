@@ -93,13 +93,14 @@ const EffectifsDoublonsPage = ({ isMine }) => {
 
       <Stack spacing={6}>
         {isMine && (
-          <VStack align="start" width={2 / 3} gap={0}>
+          <VStack align="start" width={2 / 3} gap={0} mb={6}>
             <Text fontWeight="bold" fontSize="delta">
               Vérifiez {duplicates?.length === 1 ? "le duplicat" : `les ${duplicates?.length} duplicats`}{" "}
               d&apos;effectifs. Pour chacun, supprimez celui avec les informations incorrectes.
             </Text>
             <Text mt={2}>
-              Les effectifs ci-dessous existent car des données ont été modifiées sur chacun d’entre eux.
+              Les effectifs ci-dessous apparaissent en doublons car une ou plusieurs données ont été modifiées sur
+              chacun d’entre eux.
             </Text>
             <Text>
               Ces dernières sont signalées en{" "}
