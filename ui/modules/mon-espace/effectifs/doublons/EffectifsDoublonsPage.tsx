@@ -99,7 +99,8 @@ const EffectifsDoublonsPage = ({ isMine }) => {
               d&apos;effectifs. Pour chacun, supprimez celui avec les informations incorrectes.
             </Text>
             <Text mt={2}>
-              Les effectifs ci-dessous existent car des données ont été modifiées sur chacun d’entre eux.
+              Les effectifs ci-dessous apparaissent en doublons car une ou plusieurs données ont été modifiées sur
+              chacun d’entre eux.
             </Text>
             <Text>
               Ces dernières sont signalées en{" "}
