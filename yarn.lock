@@ -4995,6 +4995,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"api-alternance-sdk@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "api-alternance-sdk@npm:2.2.0"
+  dependencies:
+    "@asteasolutions/zod-to-openapi": ^7.2.0
+    jsonwebtoken: ^9.0.2
+    lru-cache: ^11.0.2
+    luhn: ^2.4.1
+    luxon: ^3.5.0
+    openapi3-ts: ^4.4.0
+    safe-stable-stringify: ^2.5.0
+    zod: ^3.23.8
+  checksum: 51efb8d16f21231ed9902da1b4400b76b1369f5e422f2a1a2e8606ca71ee7a8c99c195c3135411801d9c257d0030f2175a81477c34e8349df81ca9627fa4e2f7
+  languageName: node
+  linkType: hard
+
 "append-field@npm:^1.0.0":
   version: 1.0.0
   resolution: "append-field@npm:1.0.0"
@@ -16196,7 +16212,7 @@ __metadata:
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
-    api-alternance-sdk: ^2.1.0
+    api-alternance-sdk: ^2.2.0
     axios: 0.28.1
     axios-cache-interceptor: ^0.10.7
     axios-retry: 3.3.1
