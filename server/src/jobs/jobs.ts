@@ -1,5 +1,5 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { MongoError } from "mongodb";
+import { MongoError, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -392,6 +392,58 @@ export async function setupJobProcessor() {
           // TODO: Formation v2 migration
         },
         resumable: true,
+      },
+      "tmp:migration:effectifs:duree_formation_relle": {
+        handler: async () => {
+          const batchSize = 100;
+          const collection = effectifsDb();
+          const cursor = collection.find(
+            { "formation.date_entree": { $exists: true }, "formation.date_fin": { $exists: true } },
+            { projection: { "formation.date_entree": 1, "formation.date_fin": 1 } }
+          );
+
+          let documentsProcessed = 0;
+
+          while (await cursor.hasNext()) {
+            const batch: WithId<IEffectif>[] = [];
+            for (let i = 0; i < batchSize && (await cursor.hasNext()); i++) {
+              const doc = await cursor.next();
+              if (doc) batch.push(doc);
+            }
+
+            const bulkOps = batch
+              .map((doc) => {
+                const { date_entree, date_fin } = doc.formation || {};
+                if (date_entree && date_fin) {
+                  const dureeFormationRelle = Math.round(
+                    (new Date(date_fin).getTime() - new Date(date_entree).getTime()) / 1000 / 60 / 60 / 24 / 30
+                  );
+                  return {
+                    updateOne: {
+                      filter: { _id: doc._id },
+                      update: { $set: { "formation.duree_formation_relle": dureeFormationRelle } },
+                    },
+                  };
+                }
+                return null;
+              })
+              .filter((op): op is Exclude<typeof op, null> => op !== null);
+
+            try {
+              const result = await collection.bulkWrite(bulkOps, { ordered: false });
+              documentsProcessed += result.modifiedCount;
+              console.log(`Documents traités jusqu'à présent : ${documentsProcessed}`);
+            } catch (err) {
+              if (err instanceof MongoError) {
+                console.error("Erreur MongoDB lors de l'opération bulkWrite :", err);
+              } else {
+                throw err;
+              }
+            }
+          }
+
+          console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
+        },
       },
     },
   });
