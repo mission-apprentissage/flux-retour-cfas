@@ -4979,23 +4979,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-alternance-sdk@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "api-alternance-sdk@npm:2.1.0"
-  dependencies:
-    "@asteasolutions/zod-to-openapi": ^7.2.0
-    jsonwebtoken: ^9.0.2
-    lru-cache: ^11.0.2
-    luhn: ^2.4.1
-    luxon: ^3.5.0
-    openapi3-ts: ^4.4.0
-    safe-stable-stringify: ^2.5.0
-    zod: ^3.23.8
-  checksum: 44d744237da7e2113cf5fc8e0f78b6838222f9569750e139f4f11e46c04e02fb577a9e05c47630c0942de23248c0a737ecddab45358c007b5c1f823061777064
-  languageName: node
-  linkType: hard
-
-"api-alternance-sdk@npm:^2.2.0":
+"api-alternance-sdk@npm:^2.1.0, api-alternance-sdk@npm:^2.2.0":
   version: 2.2.0
   resolution: "api-alternance-sdk@npm:2.2.0"
   dependencies:
