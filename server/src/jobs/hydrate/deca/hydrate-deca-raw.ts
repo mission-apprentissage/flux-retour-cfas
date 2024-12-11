@@ -1,7 +1,7 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { MongoClient, ObjectId, WithoutId } from "mongodb";
+import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisme } from "shared/models";
 import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
@@ -96,20 +96,35 @@ export async function hydrateDecaRaw() {
   }
 }
 
+async function upsertEffectifDeca(
+  effectif: WithoutId<IEffectifDECA>,
+  count: { created: number; updated: number },
+  retry: boolean = true
+) {
+  const effectifFound = await checkIfEffectifExists<IEffectifDECA>(effectif, effectifsDECADb());
+
+  if (!effectifFound) {
+    try {
+      await effectifsDECADb().insertOne({ ...effectif, _id: new ObjectId() });
+      count.created++;
+    } catch (err) {
+      // Le code d'erreur 11000 correspond à une duplication d'index unique
+      // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
+      if (retry && err instanceof MongoError && err.code === 11000) {
+        return upsertEffectifDeca(effectif, count, false);
+      }
+    }
+  } else {
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif });
+    count.updated++;
+  }
+}
+
 async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
   const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
   const organismesId = new Set<string>();
   for (const newDocument of newDocuments) {
-    const effectifFound = await checkIfEffectifExists(newDocument, effectifsDECADb());
-
-    if (!effectifFound) {
-      await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
-      count.created++;
-    } else {
-      await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: newDocument });
-      count.updated++;
-    }
-
+    await upsertEffectifDeca(newDocument, count);
     organismesId.add(newDocument.organisme_id.toString());
   }
 

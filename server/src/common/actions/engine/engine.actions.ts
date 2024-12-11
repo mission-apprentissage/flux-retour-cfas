@@ -1,6 +1,6 @@
 import { isEqual } from "date-fns";
-import { cloneDeep, get } from "lodash-es";
-import { Collection, WithoutId } from "mongodb";
+import { cloneDeep } from "lodash-es";
+import { Collection } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
@@ -91,19 +91,37 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
   return effectifDataWithAddress;
 };
 
-/**
- * Fonction de vérification de la présence d'un effectif via la clé d'unicité
- * id_erp_apprenant : identifiant unique du jeune dans le CFA
- * organisme_id : identifiant de l'organisme de formation en apprentissage
- * formation.cfd : Code formation diplôme de la formation suivie par le jeune
- * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
- */
-export const checkIfEffectifExists = async (effectif: IEffectif | WithoutId<IEffectifDECA>, db: Collection<any>) => {
-  const queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"];
-  // Recherche de l'effectif via sa clé d'unicité
-  const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>(
+  effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire" | "formation">,
+  db: Collection<any>
+): Promise<E | null> => {
+  const effectifs = await db
+    .find({
+      id_erp_apprenant: effectif.id_erp_apprenant,
+      organisme_id: effectif.organisme_id,
+      annee_scolaire: effectif.annee_scolaire,
+    })
+    .toArray();
 
-  return await db.findOne(query);
+  const newCfd = effectif.formation?.cfd ?? null;
+  const newRncp = effectif.formation;
+
+  const macthingEffectifs = effectifs.filter((eff) => {
+    const currentCfd = eff.formation?.cfd ?? null;
+    const currentRncp = eff.formation?.rncp ?? null;
+
+    // Si le CFD est null, on considère qu'on met à jour l'effectif
+    const isSameCfd = currentCfd === newCfd || currentCfd === null || newCfd === null;
+    const isSameRncp = currentRncp === newRncp || currentRncp === null || newRncp === null;
+
+    return isSameCfd && isSameRncp;
+  });
+
+  if (macthingEffectifs.length === 0) {
+    return null;
+  }
+
+  return macthingEffectifs[0];
 };
 
 /**
