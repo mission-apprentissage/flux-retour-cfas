@@ -353,7 +353,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
-                {!modePublique && duplicates && duplicates?.totalItems > 0 && <AlertDuplicatsEffectifs />}
+                {duplicates && duplicates?.totalItems > 0 && <AlertDuplicatsEffectifs />}
                 {organisationType === "ADMINISTRATEUR" && (
                   <>
                     <Button
