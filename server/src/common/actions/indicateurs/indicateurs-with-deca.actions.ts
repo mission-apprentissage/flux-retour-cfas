@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { Acl } from "shared/constants/permissions";
-import { IOrganisation } from "shared/models";
+import { IOrganisation, type IndicateursEffectifsAvecFormation } from "shared/models";
 
 import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -113,7 +113,7 @@ export const getOrganismeIndicateursEffectifsParFormation = async (
   ctx: AuthContext,
   organismeId: ObjectId,
   filters: FullEffectifsFilters
-) => {
+): Promise<IndicateursEffectifsAvecFormation[]> => {
   const indicateurs = [
     ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDb())),
     ...(await getOrganismeIndicateursEffectifsParFormationGenerique(
@@ -125,29 +125,31 @@ export const getOrganismeIndicateursEffectifsParFormation = async (
     )),
   ];
 
-  const mapRNCP = indicateurs.reduce((acc, { rncp_code, ...rest }) => {
-    // TODO: get niveau from CFD if not found
-    const rncp = rncp_code ?? "null";
-    return acc[rncp]
-      ? {
-          ...acc,
-          [rncp]: {
-            rncp_code,
-            apprentis: acc[rncp].apprentis + rest.apprentis,
-            abandons: acc[rncp].abandons + rest.abandons,
-            inscrits: acc[rncp].inscrits + rest.inscrits,
-            apprenants: acc[rncp].apprenants + rest.apprenants,
-            rupturants: acc[rncp].rupturants + rest.rupturants,
-          },
-        }
-      : {
-          ...acc,
-          [rncp]: {
-            rncp_code,
-            ...rest,
-          },
+  const mapRNCP = indicateurs.reduce<Record<string, IndicateursEffectifsAvecFormation>>(
+    (acc, { rncp_code, cfd_code, ...rest }) => {
+      const id = `${rncp_code ?? "null"}-${cfd_code ?? "null"}`;
+
+      if (acc[id] == null) {
+        acc[id] = {
+          rncp_code,
+          cfd_code,
+          ...rest,
         };
-  }, {});
+      } else {
+        acc[id] = {
+          ...acc[id],
+          apprentis: acc[id].apprentis + rest.apprentis,
+          abandons: acc[id].abandons + rest.abandons,
+          inscrits: acc[id].inscrits + rest.inscrits,
+          apprenants: acc[id].apprenants + rest.apprenants,
+          rupturants: acc[id].rupturants + rest.rupturants,
+        };
+      }
+
+      return acc;
+    },
+    {}
+  );
 
   return Object.values(mapRNCP);
 };
