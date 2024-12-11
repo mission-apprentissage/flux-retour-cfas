@@ -8958,6 +8958,43 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "ml_id": {
+          "bsonType": "number",
+          "description": "Identifiant de la mission locale",
+        },
+        "nom": {
+          "bsonType": "string",
+          "description": "Nom de la mission locale",
+        },
+        "siret": {
+          "bsonType": "string",
+          "description": "N° SIRET",
+          "pattern": "^[0-9]{14}$",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "_id",
+        "created_at",
+        "type",
+        "nom",
+        "siret",
+        "ml_id",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "created_at": {
+          "bsonType": "date",
+          "description": "Date de création en base de données",
+        },
         "organisme_id": {
           "bsonType": "string",
           "description": "Identifiant de l'organisme",
