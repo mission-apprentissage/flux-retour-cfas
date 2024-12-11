@@ -207,12 +207,12 @@ const SIFAPage = (props: SIFAPageProps) => {
             <Flex mt={4} gap={6}>
               <Link
                 variant="link"
-                href="/InstructionsSIFA_31122023.pdf"
+                href="/InstructionsSIFA_31122024.pdf"
                 isExternal
-                aria-label="Télécharger le fichier d'instruction SIFA pour 2023 (PDF, 1.5 Mo)"
+                aria-label="Télécharger le fichier d'instruction SIFA pour 2024 (PDF, 1.5 Mo)"
                 plausibleGoal="telechargement_fichier_instruction_sifa"
               >
-                Fichier d’instruction SIFA (2023)
+                Fichier d’instruction SIFA (2024)
                 <DownloadLine mb={1} ml={2} fontSize="xs" />
               </Link>
               <BasicModal
