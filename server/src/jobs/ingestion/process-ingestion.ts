@@ -11,6 +11,9 @@ import {
 } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import dossierApprenantSchemaV3, {
+  DossierApprenantSchemaV3ZodType,
+} from "shared/models/parts/dossierApprenantSchemaV3";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
@@ -36,9 +39,6 @@ import { validateContrat } from "@/common/validation/contratsDossierApprenantSch
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
 } from "@/common/validation/dossierApprenantSchemaV1V2";
-import dossierApprenantSchemaV3, {
-  DossierApprenantSchemaV3ZodType,
-} from "@/common/validation/dossierApprenantSchemaV3";
 
 import {
   fiabilisationEffectifFormation,
