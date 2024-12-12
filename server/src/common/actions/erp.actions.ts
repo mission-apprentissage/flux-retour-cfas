@@ -2,14 +2,17 @@ import Boom from "boom";
 import { ObjectId } from "mongodb";
 
 import { erpDb } from "../model/collections";
+import { slugify } from "../utils/stringUtils";
 
 export const createERP = async (name: string) => {
+  const uniqueId = slugify(name);
+
   return erpDb().insertOne({
     _id: new ObjectId(),
     name,
     created_at: new Date(),
     apiV3: true,
-    unique_id: name.toLowerCase(),
+    unique_id: uniqueId,
   });
 };
 
