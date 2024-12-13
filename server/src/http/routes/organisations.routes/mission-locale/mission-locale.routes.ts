@@ -14,5 +14,5 @@ export default () => {
 const getIndicateursMissionLocale = async (req, { locals }) => {
   const { missionLocale } = locals;
   const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-  return await getEffectifIndicateursForMissionLocaleId(filters, missionLocale._id);
+  return await getEffectifIndicateursForMissionLocaleId(filters, missionLocale._id.toString());
 };

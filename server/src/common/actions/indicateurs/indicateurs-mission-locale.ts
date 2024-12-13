@@ -1,5 +1,3 @@
-import { ObjectId } from "bson";
-
 import { effectifsDb } from "@/common/model/collections";
 
 import { DateFilters } from "../helpers/filters";
@@ -10,7 +8,7 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
   const aggregation = [
     {
       $match: {
-        missionLocaleId: new ObjectId(missionLocaleId),
+        "_computed.missionLocale.id": missionLocaleId,
       },
     },
     ...buildIndicateursEffectifsPipeline(null, filters.date),
@@ -23,7 +21,6 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
       },
     },
   ];
-
-  const indicateurs = await effectifsDb().aggregate(aggregation).next();
+  const indicateurs = await effectifsDb().aggregate(aggregation).toArray();
   return indicateurs ?? { inscrits: 0, abandons: 0, rupturants: 0 };
 };
