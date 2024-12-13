@@ -1,5 +1,4 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { MongoError } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -18,10 +17,6 @@ import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
-import {
-  fiabilisationEffectifFormation,
-  getEffectifCertification,
-} from "./fiabilisation/certification/fiabilisation-certification";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
@@ -328,68 +323,96 @@ export async function setupJobProcessor() {
           return createMigration(job.payload as any);
         },
       },
-      "tmp:migration:formation-certification": {
+      "tmp:migration:duplicat-formation": {
         handler: async (job, signal) => {
           // In case of interruption, we can restart the job from the last processed effectif
           // Any updated effectif has either been updated by the job or has been updated by the processing queue
 
-          const processEffectif = async (effectif: IEffectif) => {
-            const certification = await getEffectifCertification(effectif);
-
-            const update = {
-              formation: fiabilisationEffectifFormation(effectif, certification),
-              "_raw.formation": effectif.formation,
-              _computed: {
-                ...effectif._computed,
-                formation: {
-                  ...effectif._computed?.formation,
-                  codes_rome: certification?.domaines.rome.rncp?.map(({ code }) => code) ?? null,
-                },
-              },
+          const cursor = effectifsDb().aggregate<{
+            _id: {
+              annee_scolaire: IEffectif["annee_scolaire"];
+              id_erp_apprenant: IEffectif["id_erp_apprenant"];
+              organisme_id: IEffectif["organisme_id"];
             };
+            count: number;
+            effectifs: IEffectif[];
+          }>([
+            {
+              $sort: {
+                organisme_id: 1,
+                id_erp_apprenant: 1,
+                annee_scolaire: 1,
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  annee_scolaire: "$annee_scolaire",
+                  id_erp_apprenant: "$id_erp_apprenant",
+                  organisme_id: "$organisme_id",
+                },
+                count: { $sum: 1 },
+                effectifs: { $addToSet: "$$ROOT" },
+              },
+            },
+            { $match: { count: { $gt: 1 } } },
+          ]);
 
-            await effectifsDb()
-              .updateOne({ _id: effectif._id }, { $set: update })
-              .catch(async (err) => {
-                // If the document is a duplicated effectif, we can safely remove the older document
-                if (err instanceof MongoError && err.code === 11000) {
-                  await softDeleteEffectif(effectif._id, null, {
-                    motif: MOTIF_SUPPRESSION.Doublon,
-                    description: "Suppression du doublon suite à la migration des formations",
-                  });
-                  return;
-                }
+          for await (const doc of cursor) {
+            const validEffectifs: IEffectif[] = [];
+            const duplicatedEffectifs: IEffectif[] = [];
 
-                throw err;
-              });
-          };
+            // Sort effectifs in reverse updated_at order in order to keep the most recent effectif
+            const effectifs = doc.effectifs.toSorted((a, b) => {
+              if (a.updated_at == null) return 1;
+              if (b.updated_at == null) return -1;
+              return a.updated_at.getTime() > b.updated_at.getTime() ? -1 : 1;
+            });
 
-          const cursorEffectif = effectifsDb().find(
-            { created_at: { $lte: job.created_at } },
-            { sort: { created_at: -1 } }
-          );
-          let bulkEffectifs: IEffectif[] = [];
-          for await (const effectif of cursorEffectif) {
-            if (effectif._raw?.formation) {
-              // Already migrated
-              continue;
-            }
-
-            bulkEffectifs.push(effectif);
-
-            if (bulkEffectifs.length > 100) {
-              await Promise.all(bulkEffectifs.map(processEffectif));
-              if (signal.aborted) {
-                return;
+            for (const effectif of effectifs) {
+              if (validEffectifs.length === 0) {
+                validEffectifs.push(effectif);
+                continue;
               }
-              bulkEffectifs = [];
+
+              const currentCfd = effectif.formation?.cfd ?? null;
+              const currentRncp = effectif.formation?.rncp ?? null;
+
+              if (!currentCfd && !currentRncp) {
+                duplicatedEffectifs.push(effectif);
+                continue;
+              }
+
+              const isDuplicated = validEffectifs.some((validEffectif) => {
+                const validCfd = validEffectif.formation?.cfd ?? null;
+                const validRncp = validEffectif.formation?.rncp ?? null;
+
+                const isSameCfd = validCfd === null || currentCfd === null || validCfd === currentCfd;
+                const isSameRncp = validRncp === null || currentRncp === null || validRncp === currentRncp;
+
+                return isSameCfd && isSameRncp;
+              });
+
+              if (isDuplicated) {
+                duplicatedEffectifs.push(effectif);
+              } else {
+                validEffectifs.push(effectif);
+              }
+            }
+
+            await Promise.all(
+              duplicatedEffectifs.map(async (effectif) =>
+                softDeleteEffectif(effectif._id, null, {
+                  motif: MOTIF_SUPPRESSION.Doublon,
+                  description: "Doublon de formation",
+                })
+              )
+            );
+
+            if (signal.aborted) {
+              return;
             }
           }
-          if (bulkEffectifs.length > 0) {
-            await Promise.all(bulkEffectifs.map(processEffectif));
-          }
-
-          // TODO: Formation v2 migration
         },
         resumable: true,
       },

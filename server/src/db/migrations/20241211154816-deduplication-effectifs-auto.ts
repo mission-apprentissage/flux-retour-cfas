@@ -1,8 +1,10 @@
+import { addJob } from "job-processor";
 import type { ObjectId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
+import { recreateIndexes } from "@/jobs/db/recreateIndexes";
 
 export const up = async () => {
   const effectifDuplicats = await effectifsDb()
@@ -116,8 +118,16 @@ export const up = async () => {
     await effectifsDECADb().deleteMany({ _id: { $ne: lastUpdatedDoc.id } });
   }
 
+  // Recreate indexes before dropping unique index as it will be used to create new indexes
+  await recreateIndexes({ drop: false });
+
   // DROP unique index
   await effectifsDb().dropIndex(
     "organisme_id_1_annee_scolaire_1_id_erp_apprenant_1_apprenant.nom_1_apprenant.prenom_1_formation.cfd_1_formation.annee_1"
   );
+
+  await addJob({
+    name: "tmp:migration:duplicat-formation",
+    queued: true,
+  });
 };
