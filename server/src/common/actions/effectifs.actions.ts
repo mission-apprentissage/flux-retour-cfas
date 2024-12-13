@@ -2,7 +2,7 @@ import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, type WithoutId } from "mongodb";
-import { IOpcos, IRncp } from "shared/models";
+import { IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
@@ -465,4 +465,34 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
       }
     )
   );
+};
+
+export const buildEffectifForMissionLocale = (
+  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: IUsersMigration }
+) => {
+  const result = {
+    _id: effectif._id,
+    apprenant: {
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      date_de_naissance: effectif.apprenant.date_de_naissance,
+      adresse: effectif.apprenant.adresse,
+      telephone: effectif.apprenant.telephone,
+      courriel: effectif.apprenant.courriel,
+      rqth: effectif.apprenant.rqth,
+    },
+    parcours: effectif._computed?.statut,
+    formation: effectif.formation,
+    organisme: effectif._computed?.organisme,
+    user: {
+      nom: effectif.cfa_users?.nom,
+      fonction: effectif.cfa_users?.prenom,
+      email: effectif.cfa_users?.email,
+      telephone: effectif.cfa_users?.telephone,
+    },
+    organisme_id: effectif.organisme_id,
+    annee_scolaire: effectif.annee_scolaire,
+    source: effectif.source,
+  };
+  return result;
 };

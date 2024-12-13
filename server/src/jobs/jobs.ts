@@ -1,12 +1,12 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { MongoError } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
-import type { IEffectif } from "shared/models";
+import type { IEffectif, IOrganisation, IOrganisationOrganismeFormation } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -392,6 +392,23 @@ export async function setupJobProcessor() {
           // TODO: Formation v2 migration
         },
         resumable: true,
+      },
+      "tmp:migration:organisation-organisme": {
+        handler: async () => {
+          const organisations: Array<IOrganisation> = await organisationsDb()
+            .find({
+              type: "ORGANISME_FORMATION",
+            })
+            .toArray();
+
+          for (let i = 0; i < organisations.length; i++) {
+            const orga = organisations[i] as IOrganisationOrganismeFormation;
+            const organisme = await organismesDb().findOne({ siret: orga.siret, uai: orga.uai ?? undefined });
+            if (organisme) {
+              await organisationsDb().updateOne({ _id: orga._id }, { $set: { organisme_id: organisme._id } });
+            }
+          }
+        },
       },
     },
   });
