@@ -1,6 +1,5 @@
 import { captureException } from "@sentry/node";
 import { IEffectif } from "shared/models";
-import { substractDaysUTC } from "shared/utils";
 
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import logger from "@/common/logger";
@@ -23,11 +22,6 @@ export async function hydrateEffectifsComputedTypes(
   const BULK_SIZE = 100;
   let bulkEffectifs: IEffectif[] = [];
 
-  const computedQuery = {
-    ...query,
-    updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
-  };
-
   const processEffectif = async (eff: IEffectif) => {
     if (eff) {
       const isSuccess = await updateEffectifStatut(eff, evaluationDate);
@@ -40,7 +34,7 @@ export async function hydrateEffectifsComputedTypes(
   };
 
   try {
-    const cursor = effectifsDb().find(computedQuery);
+    const cursor = effectifsDb().find(query);
 
     while (await cursor.hasNext()) {
       const effectif: IEffectif | null = await cursor.next();

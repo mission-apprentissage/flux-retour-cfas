@@ -2,7 +2,7 @@ import { addJob, initJobProcessor } from "job-processor";
 import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
@@ -186,10 +186,12 @@ export async function setupJobProcessor() {
       "hydrate:effectifs:update_computed_statut": {
         handler: async (job, signal) => {
           const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
+          const evaluationDate = new Date();
           return hydrateEffectifsComputedTypes(
             {
               query: {
-                annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+                annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
+                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
                 ...(organismeId ? { organisme_id: organismeId } : {}),
               },
             },
