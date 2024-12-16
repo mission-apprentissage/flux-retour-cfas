@@ -1,5 +1,5 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { MongoError, WithId } from "mongodb";
+import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -184,9 +184,13 @@ export async function setupJobProcessor() {
         },
       },
       "hydrate:effectifs:update_computed_statut_month": {
-        handler: async () => {
+        handler: async (job?) => {
+          const organismeId = (job?.payload?.id as string) ? new ObjectId(job?.payload?.id as string) : null;
           return hydrateEffectifsComputedTypes({
-            query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
+            query: {
+              annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+              ...(organismeId ? { organisme_id: organismeId } : {}),
+            },
           });
         },
       },
