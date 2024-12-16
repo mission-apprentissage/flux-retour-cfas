@@ -306,7 +306,7 @@ program
   .description("Manually trigger the update of the computed")
   .option("--id <string>", "Id de l'organisme", (organismeId) => organismeId, null)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:effectifs:update_computed_statut_month"));
+  .action(createJobAction("hydrate:effectifs:update_computed_statut"));
 
 program
   .command("job:run")

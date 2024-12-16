@@ -3,6 +3,10 @@ export function addDaysUTC(date: Date, days: number) {
   return result;
 }
 
+export function substractDaysUTC(date: Date, days: number) {
+  return addDaysUTC(date, -days);
+}
+
 export const getYearFromDate = (date?: Date | null): number | undefined => {
   return date ? new Date(date).getFullYear() : undefined;
 };
