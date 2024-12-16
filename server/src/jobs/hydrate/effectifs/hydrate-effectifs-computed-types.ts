@@ -15,7 +15,7 @@ import { effectifsDb } from "@/common/model/collections";
  */
 export async function hydrateEffectifsComputedTypes(
   { query = {}, evaluationDate = new Date() } = {},
-  signal: AbortSignal
+  signal?: AbortSignal
 ) {
   let nbEffectifsMisAJour = 0;
   let nbEffectifsNonMisAJour = 0;
