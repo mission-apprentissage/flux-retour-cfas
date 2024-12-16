@@ -28,8 +28,8 @@ export const formationSchema = {
   "formation.duree_formation_relle": {
     fieldType: "numberStepper",
     label: "Durée de la formation réelle en mois :",
-    requiredMessage: "Le nombre d'heures de la formation est obligatoire",
-    validateMessage: " n'est pas un nombre d'heures valide",
+    requiredMessage: "Le nombre de mois réel de la formation est obligatoire",
+    validateMessage: " n'est pas un nombre de mois valide",
     mask: "C",
     maskBlocks: [
       {
@@ -46,7 +46,7 @@ export const formationSchema = {
     required: true,
     label: "Durée théorique en mois :",
     requiredMessage: "Le nombre de mois théorique est obligatoire",
-    validateMessage: " n'est pas un nombre d'année valide",
+    validateMessage: " n'est pas un nombre de mois valide",
     mask: "C",
     maskBlocks: [
       {
