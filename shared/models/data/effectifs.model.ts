@@ -87,6 +87,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.fiable": 1, annee_scolaire: 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
+  [{ "_computed.missionLocale.id": 1 }, {}],
 ];
 
 const StatutApprenantEnum = zodEnumFromArray(
@@ -101,6 +102,10 @@ const zEffectifComputedStatut = z.object({
       valeur: StatutApprenantEnum,
     })
   ),
+});
+
+const zEffectifComputedMissionLocale = z.object({
+  id: z.string(),
 });
 
 export const zEffectif = z.object({
@@ -227,6 +232,7 @@ export const zEffectif = z.object({
           .nullish(),
         // @TODO: nullish en attendant la migration et passage en nullable ensuite (migration: 20240305085918-effectifs-types.ts)
         statut: zEffectifComputedStatut.nullish(),
+        missionLocale: zEffectifComputedMissionLocale.nullish(),
       },
       {
         description: "Propriétés calculées ou récupérées d'autres collections",

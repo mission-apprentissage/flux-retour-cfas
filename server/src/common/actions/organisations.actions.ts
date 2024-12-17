@@ -323,6 +323,8 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {
   const organisation = await getOrganisationById(organisationId);
   switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return `Mission locale ${organisation.nom}`;
     case "ORGANISME_FORMATION": {
       const organisme = await organismesDb().findOne({
         siret: organisation.siret,

@@ -162,6 +162,25 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                 },
               ],
             },
+            "missionLocale": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "id": {
+                      "bsonType": "string",
+                    },
+                  },
+                  "required": [
+                    "id",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
             "organisme": {
               "anyOf": [
                 {
@@ -2694,6 +2713,25 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       ],
                     },
                   },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "missionLocale": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "id": {
+                      "bsonType": "string",
+                    },
+                  },
+                  "required": [
+                    "id",
+                  ],
                 },
                 {
                   "bsonType": "null",
@@ -8947,6 +8985,43 @@ exports[`validation-schema > should create validation schema for opcos > opcos 1
 exports[`validation-schema > should create validation schema for organisations > organisations 1`] = `
 {
   "anyOf": [
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "created_at": {
+          "bsonType": "date",
+          "description": "Date de création en base de données",
+        },
+        "ml_id": {
+          "bsonType": "number",
+          "description": "Identifiant de la mission locale",
+        },
+        "nom": {
+          "bsonType": "string",
+          "description": "Nom de la mission locale",
+        },
+        "siret": {
+          "bsonType": "string",
+          "description": "N° SIRET",
+          "pattern": "^[0-9]{14}$",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "_id",
+        "created_at",
+        "type",
+        "nom",
+        "siret",
+        "ml_id",
+      ],
+    },
     {
       "additionalProperties": false,
       "bsonType": "object",

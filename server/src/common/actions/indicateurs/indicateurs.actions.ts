@@ -30,7 +30,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
+export function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
   return [
     {
       $addFields: {
