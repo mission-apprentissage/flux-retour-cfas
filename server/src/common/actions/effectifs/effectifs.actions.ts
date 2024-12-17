@@ -149,10 +149,11 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
+    { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
         from: "organisations",
-        localField: "organisme_id",
+        localField: "stringify_organisme_id",
         foreignField: "organisme_id",
         as: "organisation",
       },

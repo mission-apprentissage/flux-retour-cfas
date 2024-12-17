@@ -405,7 +405,10 @@ export async function setupJobProcessor() {
             const orga = organisations[i] as IOrganisationOrganismeFormation;
             const organisme = await organismesDb().findOne({ siret: orga.siret, uai: orga.uai ?? undefined });
             if (organisme) {
-              await organisationsDb().updateOne({ _id: orga._id }, { $set: { organisme_id: organisme._id } });
+              await organisationsDb().updateOne(
+                { _id: orga._id },
+                { $set: { organisme_id: organisme._id.toString() } }
+              );
             }
           }
         },
