@@ -23,7 +23,7 @@ export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
 }> {
   const alreadyExists = await getUserByEmail(registration.user.email);
-  let registrationExtraData = {};
+  let registrationExtraData: { organisme_id?: string } = {};
   if (alreadyExists) {
     throw Boom.conflict("Cet email est déjà utilisé.");
   }
@@ -51,7 +51,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         organismesResponsables: [],
       });
     } finally {
-      registrationExtraData = { organisme_id: organisme?._id };
+      registrationExtraData = { organisme_id: organisme?._id.toString() };
     }
   }
   const organisation = await organisationsDb().findOne(registration.organisation);
