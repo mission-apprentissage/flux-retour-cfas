@@ -22,7 +22,7 @@ const OrganismesDoublonsList = ({ data }) => {
       data={data || []}
       loading={false}
       variant="third"
-      isRowExpanded={true}
+      expandAllRows={true}
       renderSubComponent={RenderSubComponent}
       paginationState={defaultPaginationState}
       columns={[

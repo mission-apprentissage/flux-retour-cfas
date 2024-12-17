@@ -327,7 +327,7 @@ function IndicateursForm(props: IndicateursFormProps) {
         </HStack>
 
         <NewTable
-          data={indicateursEffectifs || []}
+          data={(indicateursEffectifs ?? []).map((effectif) => ({ ...effectif, id: effectif.organisme_id }))}
           loading={indicateursEffectifsLoading}
           noDataMessage="Aucun organisme ne semble correspondre aux filtres que vous avez sélectionnés"
           // paginationState={pagination}

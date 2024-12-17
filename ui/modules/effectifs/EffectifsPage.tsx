@@ -1,36 +1,20 @@
 import { AddIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  Center,
-  Circle,
-  Container,
-  Heading,
-  HStack,
-  Spinner,
-  Switch,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Container, Heading, HStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import groupBy from "lodash.groupby";
+import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP, getStatutApprenantNameFromCode } from "shared";
+import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP } from "shared";
 
-import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 
 import { effectifFromDecaAtom, effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
-import EffectifsTableContainer from "../mon-espace/effectifs/engine/EffectifTableContainer";
-import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import EffectifsTable from "../mon-espace/effectifs/engine/effectifsTable/EffectifsTable";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 
 import BandeauDuplicatsEffectifs from "./BandeauDuplicatsEffectifs";
@@ -39,41 +23,185 @@ interface EffectifsPageProps {
   organisme: Organisme;
   modePublique: boolean;
 }
-function EffectifsPage(props: EffectifsPageProps) {
-  // Booléen temporaire pour la désactivation temporaire du bouton de téléchargement de la liste
-  const TMP_DEACTIVATE_DOWNLOAD_BUTTON = true;
 
+function EffectifsPage(props: EffectifsPageProps) {
   const router = useRouter();
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-  const [searchValue, setSearchValue] = useState("");
-  const [showOnlyErrors, setShowOnlyErrors] = useState(false);
-  const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
 
-  const {
-    data: organismesEffectifs,
-    isFetching,
-    refetch,
-  } = useQuery(["organismes", props.organisme._id, "effectifs"], async () => {
-    const { fromDECA, organismesEffectifs } = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`);
-    // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
-    setCurrentEffectifsState(
-      organismesEffectifs.reduce((acc, { id, validation_errors }) => {
-        acc.set(id, { validation_errors, requiredSifa: [] });
-        return acc;
-      }, new Map())
-    );
-    setEffectifFromDecaState(fromDECA);
-    return organismesEffectifs;
-  });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [search, setSearch] = useState<string>("");
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
+
+  useEffect(() => {
+    const parseQueryToFilters = (query: Record<string, string | undefined>) => {
+      const filters: Record<string, string[]> = {};
+      Object.entries(query).forEach(([key, value]) => {
+        if (
+          value &&
+          key !== "pageIndex" &&
+          key !== "pageSize" &&
+          key !== "search" &&
+          key !== "sortField" &&
+          key !== "sortOrder"
+        ) {
+          try {
+            if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
+              const parsed = JSON.parse(decodeURIComponent(value));
+              filters[key] = Array.isArray(parsed) ? parsed : [parsed];
+            } else {
+              filters[key] = [decodeURIComponent(value)];
+            }
+          } catch {
+            filters[key] = [decodeURIComponent(value)];
+          }
+        }
+      });
+      return filters;
+    };
+
+    const parsedFilters = parseQueryToFilters(router.query as Record<string, string | undefined>);
+    setFilters(parsedFilters || {});
+  }, [router.query]);
+
+  const { data, isFetching } = useQuery(
+    ["organismes", props.organisme._id, "effectifs", pagination, search, filters, sort],
+    async () => {
+      const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
+        params: {
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+          search,
+          sortField: sort[0]?.id,
+          sortOrder: sort[0]?.desc ? "desc" : "asc",
+          ...filters,
+        },
+      });
+
+      const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
+
+      setCurrentEffectifsState(
+        organismesEffectifs.reduce((acc, { id, validation_errors }) => {
+          acc.set(id, { validation_errors, requiredSifa: [] });
+          return acc;
+        }, new Map())
+      );
+
+      setEffectifFromDecaState(fromDECA);
+
+      return { total, filters: returnedFilters, organismesEffectifs };
+    },
+    { keepPreviousData: true }
+  );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
-  const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);
+  const handlePaginationChange = (newPagination) => {
+    setPagination(newPagination);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          pageIndex: newPagination.pageIndex,
+          pageSize: newPagination.pageSize,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const handleSearchChange = (value: string) => {
+    setPagination({ ...pagination, pageIndex: 0 });
+    setSearch(value);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, search: value },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const handleFilterChange = (newFilters: Record<string, string[]>) => {
+    setPagination({ ...pagination, pageIndex: 0 });
+    const mergedFilters = { ...filters };
+
+    Object.entries(newFilters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        mergedFilters[key] = values;
+      } else {
+        delete mergedFilters[key];
+      }
+    });
+
+    const queryFilters = Object.entries(mergedFilters).reduce(
+      (acc, [key, values]) => {
+        acc[key] = JSON.stringify(values);
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+
+    const updatedQuery = { ...router.query, ...queryFilters };
+    Object.keys(router.query).forEach((key) => {
+      if (!queryFilters[key]) {
+        delete updatedQuery[key];
+      }
+    });
+
+    setFilters(mergedFilters);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: updatedQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const handleSortChange = (newSort: SortingState) => {
+    setPagination({ ...pagination, pageIndex: 0 });
+    setSort(newSort);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          sortField: newSort[0]?.id,
+          sortOrder: newSort[0]?.desc ? "desc" : "asc",
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const resetFilters = () => {
+    setFilters({});
+    setSearch("");
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {},
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const title = `${props.modePublique ? "Ses" : "Mes"} effectifs`;
+
   return (
     <SimplePage title={title}>
       <Container maxW="xl" p="8">
@@ -90,48 +218,10 @@ function EffectifsPage(props: EffectifsPageProps) {
                 Ajouter via fichier Excel
               </Link>
             </HStack>
-            {!TMP_DEACTIVATE_DOWNLOAD_BUTTON && organismesEffectifs?.length ? (
-              <DownloadButton
-                borderBottom={0}
-                variant="link"
-                ml={2}
-                action={() => {
-                  exportDataAsXlsx(
-                    `tdb-effectifs-${filtreAnneeScolaire}.xlsx`,
-                    organismesEffectifs?.map((effectif) => {
-                      return {
-                        organisme_uai: props.organisme.uai,
-                        organisme_siret: props.organisme.siret,
-                        organisme_nom: props.organisme.raison_sociale,
-                        organisme_nature: props.organisme.nature,
-                        apprenant_nom: effectif.nom,
-                        apprenant_prenom: effectif.prenom,
-                        apprenant_date_de_naissance: effectif.date_de_naissance,
-                        apprenant_statut: getStatutApprenantNameFromCode(
-                          effectif.historique_statut?.sort((a, b) => {
-                            return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
-                          })[0]?.valeur_statut
-                        ),
-                        formation_annee: effectif.formation?.annee,
-                        formation_cfd: effectif.formation?.cfd,
-                        formation_date_debut_formation: effectif.formation?.periode?.[0],
-                        formation_date_fin_formation: effectif.formation?.periode?.[1],
-                        formation_libelle_long: effectif.formation?.libelle_long,
-                        formation_niveau: effectif.formation?.niveau,
-                        formation_rncp: effectif.formation?.rncp,
-                      };
-                    }) || [],
-                    effectifsExportColumns
-                  );
-                }}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            ) : null}
           </div>
         </HStack>
 
-        {organismesEffectifs && organismesEffectifs.length === 0 && (
+        {data?.organismesEffectifs?.length === 0 && Object.keys(filters).length === 0 && (
           <BandeauTransmission organisme={props.organisme} modePublique={props.modePublique} />
         )}
 
@@ -139,105 +229,23 @@ function EffectifsPage(props: EffectifsPageProps) {
           <BandeauDuplicatsEffectifs totalItems={duplicates?.totalItems} />
         )}
 
-        {isFetching && (
-          <Center h="200px">
-            <Spinner />
-          </Center>
-        )}
-
-        {organismesEffectifs && organismesEffectifs.length > 0 && (
-          <>
-            <VStack alignItems="flex-start">
-              <Input
-                {...{
-                  name: "search_effectifs",
-                  fieldType: "text",
-                  mask: "C",
-                  maskBlocks: [
-                    {
-                      name: "C",
-                      mask: "Pattern",
-                      pattern: "^.*$",
-                    },
-                  ],
-                  placeholder: "Rechercher un apprenant...",
-                  value: searchValue,
-                  onSubmit: (value) => {
-                    setSearchValue(value.trim());
-                  },
-                }}
-                w="35%"
-              />
-            </VStack>
-            <VStack alignItems="flex-start" mt={8}>
-              <HStack w="full">
-                <Box fontWeight="bold" flexGrow={1}>
-                  Filtrer&nbsp;:
-                </Box>
-                <HStack>
-                  <Switch
-                    variant="icon"
-                    onChange={(e) => {
-                      setShowOnlyErrors(e.target.checked);
-                    }}
-                  />
-                  <Text flexGrow={1}>Afficher uniquement les données en erreur</Text>
-                </HStack>
-              </HStack>
-              <HStack w="full" mt={2}>
-                <Text>Par année scolaire</Text>
-                <BadgeButton onClick={() => setFiltreAnneeScolaire("all")} active={filtreAnneeScolaire === "all"}>
-                  Toutes
-                </BadgeButton>
-                {Object.keys(effectifsByAnneeScolaire).map((anneeScolaire) => {
-                  return (
-                    <BadgeButton
-                      onClick={() => setFiltreAnneeScolaire(anneeScolaire)}
-                      key={anneeScolaire}
-                      active={anneeScolaire === filtreAnneeScolaire}
-                    >
-                      {anneeScolaire}
-                    </BadgeButton>
-                  );
-                })}
-              </HStack>
-            </VStack>
-          </>
-        )}
-
         <Box mt={10} mb={16}>
-          {Object.entries<any[]>(effectifsByAnneeScolaire).map(([anneeScolaire, effectifs]) => {
-            if (filtreAnneeScolaire !== "all" && anneeScolaire !== filtreAnneeScolaire) {
-              return null;
-            }
-            const orgaEffectifs = showOnlyErrors
-              ? effectifs.filter((effectif) => effectif.validation_errors.length)
-              : effectifs;
-            const effectifsByCfd: { [cfd: string]: any[] } = groupBy(orgaEffectifs, "formation.cfd");
-            return (
-              <Box key={anneeScolaire} mb={5}>
-                <Text>
-                  {anneeScolaire} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
-                </Text>
-                <Box p={4} borderColor="dgalt" borderWidth="1px">
-                  {Object.entries(effectifsByCfd).map(([cfd, effectifs]) => {
-                    const { formation } = effectifs[0];
-                    return (
-                      <EffectifsTableContainer
-                        key={`${anneeScolaire}${cfd}`}
-                        tableId={`${anneeScolaire}${cfd}`}
-                        canEdit={true}
-                        effectifs={effectifs}
-                        formation={formation}
-                        searchValue={searchValue}
-                        refetch={refetch}
-                      />
-                    );
-                  })}
-                </Box>
-              </Box>
-            );
-          })}
+          <EffectifsTable
+            organisme={props.organisme}
+            organismesEffectifs={data?.organismesEffectifs || []}
+            filters={filters}
+            pagination={pagination}
+            search={search}
+            sort={sort}
+            onPaginationChange={handlePaginationChange}
+            onSearchChange={handleSearchChange}
+            onFilterChange={handleFilterChange}
+            onSortChange={handleSortChange}
+            total={data?.total || 0}
+            availableFilters={data?.filters || {}}
+            resetFilters={resetFilters}
+            isFetching={isFetching}
+          />
         </Box>
       </Container>
     </SimplePage>
@@ -245,16 +253,3 @@ function EffectifsPage(props: EffectifsPageProps) {
 }
 
 export default EffectifsPage;
-
-const BadgeButton = ({ onClick, active = false, children, ...props }) => {
-  return (
-    <Button onClick={onClick} variant={active ? "badgeSelected" : "badge"} {...props}>
-      {children}
-      {active && (
-        <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
-          <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
-        </Circle>
-      )}
-    </Button>
-  );
-};

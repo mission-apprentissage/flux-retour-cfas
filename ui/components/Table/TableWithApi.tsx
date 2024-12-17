@@ -1,3 +1,4 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Button, Flex, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
@@ -11,18 +12,16 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 
-import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
+import { FirstPageIcon, LastPageIcon } from "@/modules/dashboard/icons";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
-import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "../dashboard/icons";
-
-interface NewTableProps<T> extends SystemProps {
+interface TableWithApiProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
   data: T[];
+  total?: number;
   noDataMessage?: string;
-  loading?: boolean;
   expandAllRows?: boolean;
   enableRowExpansion?: boolean;
   sortingState?: SortingState;
@@ -36,18 +35,15 @@ interface NewTableProps<T> extends SystemProps {
   renderDivider?: () => React.ReactElement;
 }
 
-function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean }>) {
-  const isLoading = props.isLoading ?? false;
-  const [pagination, setPagination] = useState<PaginationState>(
-    props.paginationState ?? {
-      pageIndex: 0,
-      pageSize: 20,
-    }
-  );
-
+function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: boolean }>) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(
     props.expandAllRows ? new Set(props.data.map((row) => row.id)) : new Set()
   );
+
+  const totalPages = useMemo(() => {
+    if (!props.total) return 1;
+    return Math.ceil(props.total / (props.paginationState?.pageSize || 20));
+  }, [props.total, props.paginationState?.pageSize]);
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRows((prev) => {
@@ -64,13 +60,18 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
   const table = useReactTable({
     data: props.data,
     columns: props.columns,
+    pageCount: totalPages,
     state: {
-      pagination: pagination,
+      pagination: props.paginationState ?? {
+        pageIndex: 0,
+        pageSize: 20,
+      },
       sorting: props.sortingState,
     },
+    manualPagination: true,
     onPaginationChange: (updater) => {
       const newState = functionalUpdate(updater, table.getState().pagination);
-      setPagination(newState);
+      props.onPaginationChange?.(newState);
     },
     onSortingChange: (updater) => {
       const newState = functionalUpdate(updater, table.getState().sorting);
@@ -80,6 +81,8 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const { pageIndex } = table.getState().pagination;
 
   return (
     <>
@@ -134,13 +137,7 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
           ))}
         </Thead>
         <Tbody>
-          {isLoading ? (
-            <RowsSkeleton
-              nbRows={pagination.pageSize}
-              nbColumns={props.columns.length + (props.enableRowExpansion ? 1 : 0)}
-              height="40px"
-            />
-          ) : !props.data || props.data.length === 0 ? (
+          {!props.data || props.data.length === 0 ? (
             <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
               <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
                 {props.noDataMessage ?? "Aucun résultat"}
@@ -207,7 +204,7 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
         </Tbody>
       </Table>
 
-      {(props.showPagination ?? true) && !isLoading && (
+      {props.showPagination !== false && (
         <HStack mt={8} spacing={3} justifyContent="space-between">
           <HStack spacing={3}>
             <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
@@ -217,27 +214,27 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
               <ChevronLeftIcon />
             </Button>
 
-            {table.getState().pagination.pageIndex - 1 > 0 && (
-              <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 2)}>
-                {table.getState().pagination.pageIndex - 1}
+            {pageIndex - 1 > 0 && (
+              <Button variant="unstyled" onClick={() => table.setPageIndex(pageIndex - 2)}>
+                {pageIndex - 1}
               </Button>
             )}
-            {table.getState().pagination.pageIndex > 0 && (
+            {pageIndex > 0 && (
               <Button variant="unstyled" onClick={() => table.previousPage()}>
-                {table.getState().pagination.pageIndex}
+                {pageIndex}
               </Button>
             )}
             <Button bg="bluefrance" color="white" pointerEvents="none" fontSize="zeta">
-              {table.getState().pagination.pageIndex + 1}
+              {pageIndex + 1}
             </Button>
-            {table.getCanNextPage() && (
+            {pageIndex + 1 < totalPages && (
               <Button variant="unstyled" onClick={() => table.nextPage()}>
-                {table.getState().pagination.pageIndex + 2}
+                {pageIndex + 2}
               </Button>
             )}
-            {table.getState().pagination.pageIndex + 2 < table.getPageCount() && (
-              <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 2)}>
-                {table.getState().pagination.pageIndex + 3}
+            {pageIndex + 2 < totalPages && (
+              <Button variant="unstyled" onClick={() => table.setPageIndex(pageIndex + 2)}>
+                {pageIndex + 3}
               </Button>
             )}
 
@@ -246,7 +243,7 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
             </Button>
             <Button
               variant="unstyled"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              onClick={() => table.setPageIndex(totalPages - 1)}
               isDisabled={!table.getCanNextPage()}
             >
               <LastPageIcon />
@@ -258,9 +255,7 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
               variant="filled"
               fontSize="zeta"
               value={table.getState().pagination.pageSize}
-              onChange={(e) => {
-                table.setPageSize(Number(e.target.value));
-              }}
+              onChange={(e) => table.setPageSize(Number(e.target.value))}
             >
               {[5, 10, 20, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
@@ -275,4 +270,4 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
   );
 }
 
-export default NewTable;
+export default TableWithApi;
