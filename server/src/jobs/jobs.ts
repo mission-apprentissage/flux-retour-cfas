@@ -1,8 +1,8 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { MongoError } from "mongodb";
+import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif, IOrganisation, IOrganisationOrganismeFormation } from "shared/models";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
@@ -118,10 +118,10 @@ export async function setupJobProcessor() {
               },
             },
 
-            "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
-              cron_string: "45 0 1 * *",
+            "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
+              cron_string: "0 5 * * 6",
               handler: async () => {
-                await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
+                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
                 return 0;
               },
             },
@@ -183,12 +183,22 @@ export async function setupJobProcessor() {
           return hydrateDecaRaw();
         },
       },
-      "hydrate:effectifs:update_computed_statut_month": {
-        handler: async () => {
-          return hydrateEffectifsComputedTypes({
-            query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
-          });
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async (job, signal) => {
+          const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
+          const evaluationDate = new Date();
+          return hydrateEffectifsComputedTypes(
+            {
+              query: {
+                annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
+                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
+                ...(organismeId ? { organisme_id: organismeId } : {}),
+              },
+            },
+            signal
+          );
         },
+        resumable: true,
       },
       "hydrate:effectifs-formation-niveaux": {
         handler: async () => {
@@ -411,6 +421,58 @@ export async function setupJobProcessor() {
               );
             }
           }
+        },
+      },
+      "tmp:migration:effectifs:duree_formation_relle": {
+        handler: async () => {
+          const batchSize = 100;
+          const collection = effectifsDb();
+          const cursor = collection.find(
+            { "formation.date_entree": { $exists: true }, "formation.date_fin": { $exists: true } },
+            { projection: { "formation.date_entree": 1, "formation.date_fin": 1 } }
+          );
+
+          let documentsProcessed = 0;
+
+          while (await cursor.hasNext()) {
+            const batch: WithId<IEffectif>[] = [];
+            for (let i = 0; i < batchSize && (await cursor.hasNext()); i++) {
+              const doc = await cursor.next();
+              if (doc) batch.push(doc);
+            }
+
+            const bulkOps = batch
+              .map((doc) => {
+                const { date_entree, date_fin } = doc.formation || {};
+                if (date_entree && date_fin) {
+                  const dureeFormationRelle = Math.round(
+                    (new Date(date_fin).getTime() - new Date(date_entree).getTime()) / 1000 / 60 / 60 / 24 / 30
+                  );
+                  return {
+                    updateOne: {
+                      filter: { _id: doc._id },
+                      update: { $set: { "formation.duree_formation_relle": dureeFormationRelle } },
+                    },
+                  };
+                }
+                return null;
+              })
+              .filter((op): op is Exclude<typeof op, null> => op !== null);
+
+            try {
+              const result = await collection.bulkWrite(bulkOps, { ordered: false });
+              documentsProcessed += result.modifiedCount;
+              console.log(`Documents traités jusqu'à présent : ${documentsProcessed}`);
+            } catch (err) {
+              if (err instanceof MongoError) {
+                console.error("Erreur MongoDB lors de l'opération bulkWrite :", err);
+              } else {
+                throw err;
+              }
+            }
+          }
+
+          console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
       },
     },

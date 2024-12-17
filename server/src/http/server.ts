@@ -20,6 +20,11 @@ import {
   typesOrganismesIndicateurs,
   zEffectifArchive,
 } from "shared";
+import {
+  computeWarningsForDossierApprenantSchemaV3,
+  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
+} from "shared/models/parts/dossierApprenantSchemaV3";
+import { extensions, primitivesV1, primitivesV3 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -95,12 +100,11 @@ import {
   mergeOrganismeSansUaiDansOrganismeFiable,
 } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
-import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
-import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
+import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
@@ -114,15 +118,10 @@ import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import {
-  computeWarningsForDossierApprenantSchemaV3,
-  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
-} from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { extensions, primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -759,7 +758,14 @@ function setupRoutes(app: Application) {
   authRouter.get(
     "/api/v1/rncp/:code_rncp",
     returnResult(async (req) => {
-      return await getFicheRNCP(req.params.code_rncp);
+      return await getRncpInfo(req.params.code_rncp);
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/cfd/:cfd_code",
+    returnResult(async (req) => {
+      return await getCfdInfo(req.params.cfd_code);
     })
   );
 

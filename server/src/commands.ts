@@ -296,6 +296,19 @@ program
   .action(createJobAction("send-reminder-emails"));
 
 program
+  .command("hydrate:contrats-deca-raw")
+  .description("Manually trigger the creation of deca effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:contrats-deca-raw"));
+
+program
+  .command("hydrate:effectifs:update_computed_statut")
+  .description("Manually trigger the update of the computed")
+  .option("--id <string>", "Id de l'organisme", (organismeId) => organismeId, null)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:effectifs:update_computed_statut"));
+
+program
   .command("job:run")
   .description("Run a job")
   .requiredOption("-n, --name <string>", "Job name")
@@ -303,12 +316,6 @@ program
   .action(({ name, ...options }) => {
     return createJobAction(name)(options);
   });
-
-program
-  .command("hydrate:contrats-deca-raw")
-  .description("Manually trigger the creation of deca effectifs")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:contrats-deca-raw"));
 
 export async function startCLI() {
   await program.parseAsync(process.argv);

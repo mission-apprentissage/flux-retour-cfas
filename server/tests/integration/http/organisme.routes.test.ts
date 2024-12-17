@@ -1,15 +1,14 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { ObjectId, WithoutId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { IndicateursEffectifsAvecFormation } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import { IRncp } from "shared/models/data/rncp.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
-import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import {
@@ -698,22 +697,19 @@ describe("Routes /organismes/:id", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    const ficheRNCP: WithoutId<IRncp> = {
-      rncp: "RNCP34956",
-      actif: true,
-      etat_fiche: "Publiée",
-      intitule: "Arts de la cuisine",
-      niveau: 4,
-      romes: ["G1602"],
-    };
-
     beforeEach(async () => {
       await Promise.all([
         effectifsDb().insertOne({
           _id: new ObjectId(),
           ...(await createSampleEffectif({
             ...(await commonEffectifsAttributes()),
-            formation: { ...createRandomFormation(anneeScolaire, new Date(date)), rncp: ficheRNCP.rncp },
+            formation: {
+              ...createRandomFormation(anneeScolaire, new Date(date)),
+              rncp: "RNCP37682",
+              cfd: "36T32603",
+              libelle_long: "TECHNICIEN SUPERIEUR SYSTEMES ET RESEAUX (TP)",
+              niveau: "5",
+            },
             annee_scolaire: anneeScolaire,
             contrats: [
               {
@@ -722,7 +718,6 @@ describe("Routes /organismes/:id", () => {
             ],
           })),
         }),
-        rncpDb().insertOne({ _id: new ObjectId(), ...ficheRNCP }),
       ]);
     });
 
@@ -774,8 +769,10 @@ describe("Routes /organismes/:id", () => {
             expect(response.status).toStrictEqual(200);
             expect(response.data).toStrictEqual([
               {
-                rncp_code: ficheRNCP.rncp,
-                rncp: ficheRNCP,
+                rncp_code: "RNCP37682",
+                cfd_code: "36T32603",
+                intitule: "TECHNICIEN SUPERIEUR SYSTEMES ET RESEAUX (TP)",
+                niveau_europeen: "5",
                 apprenants: 1,
                 apprentis: 1,
                 inscrits: 0,

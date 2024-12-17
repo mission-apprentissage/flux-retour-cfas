@@ -1,7 +1,7 @@
 import { captureException } from "@sentry/node";
 import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
-import CfdInfo from "shared/models/apis/@types/CfdInfo";
+import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
 import config from "@/config";
@@ -47,6 +47,37 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
       error.response?.data || error.message
     );
     captureException(new Error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, { cause: error }));
+    return null;
+  }
+};
+
+export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
+  try {
+    const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
+
+    if (certifications.length === 0) {
+      return null;
+    }
+
+    // All certifications have RNCP, so each `.rncp` property is not null (that's just a type refinement issue).
+    const data: RncpInfo = {
+      code_rncp: certifications[0].identifiant.rncp!,
+      intitule: certifications[0].intitule.rncp!,
+      niveau: certifications[0].intitule.niveau.rncp!.europeen,
+      date_fin_validite_enregistrement: certifications[0].periode_validite.rncp!.fin_enregistrement,
+      actif: certifications[0].periode_validite.rncp!.actif,
+      eligible_apprentissage: certifications[0].type.voie_acces.rncp!.apprentissage,
+      eligible_professionnalisation: certifications[0].type.voie_acces.rncp!.contrat_professionnalisation,
+      romes: certifications[0].domaines.rome.rncp!,
+    };
+
+    return data;
+  } catch (error: any) {
+    logger.error(
+      `getRncpInfo: something went wrong while requesting RNCP "${rncp}"`,
+      error.response?.data || error.message
+    );
+    captureException(new Error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, { cause: error }));
     return null;
   }
 };

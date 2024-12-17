@@ -74,6 +74,7 @@ export function createComputedStatutObject(
 function createUpdateObject(effectif: IEffectif, evaluationDate: Date): UpdateFilter<IEffectif> {
   return {
     $set: {
+      updated_at: new Date(),
       "_computed.statut": createComputedStatutObject(effectif, evaluationDate),
     },
   };
