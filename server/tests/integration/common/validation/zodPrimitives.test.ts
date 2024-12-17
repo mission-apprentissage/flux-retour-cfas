@@ -1,6 +1,5 @@
+import { primitivesV3 } from "shared/models/parts/zodPrimitives";
 import { it, expect, describe } from "vitest";
-
-import { primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 describe("Regex primitivesV3", () => {
   describe("derniere_situation", () => {

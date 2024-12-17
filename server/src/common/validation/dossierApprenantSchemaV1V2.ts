@@ -1,6 +1,5 @@
+import { primitivesV1, primitivesV3 } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
-
-import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 /**
  * Note: ce schema est seulement utilisé pour générer la documentation OpenAPI pour l'API v1.

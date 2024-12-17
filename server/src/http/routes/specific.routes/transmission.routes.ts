@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import express from "express";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 
 import {
@@ -9,7 +10,6 @@ import {
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
 import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
 import paginationSchema from "@/common/validation/paginationSchema";
-import { extensions } from "@/common/validation/utils/zodPrimitives";
 import { returnResult, requireOrganismePermission } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
