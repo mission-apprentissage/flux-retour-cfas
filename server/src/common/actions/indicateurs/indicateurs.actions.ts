@@ -31,7 +31,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(
+export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
   extraAccumulator: Record<string, unknown> = {}
