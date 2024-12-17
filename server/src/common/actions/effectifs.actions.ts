@@ -2,7 +2,7 @@ import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, type WithoutId } from "mongodb";
-import { IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
+import { IEffecifMissionLocale, IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
@@ -468,8 +468,14 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
 };
 
 export const buildEffectifForMissionLocale = (
-  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: IUsersMigration }
-) => {
+  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }
+): IEffecifMissionLocale => {
+  const users = effectif.cfa_users.map(({ nom, prenom, email, telephone }) => ({
+    nom,
+    prenom,
+    email,
+    telephone,
+  }));
   const result = {
     _id: effectif._id,
     apprenant: {
@@ -484,15 +490,10 @@ export const buildEffectifForMissionLocale = (
     statut: effectif._computed?.statut,
     formation: effectif.formation,
     organisme: effectif._computed?.organisme,
-    user: {
-      nom: effectif.cfa_users?.nom,
-      fonction: effectif.cfa_users?.prenom,
-      email: effectif.cfa_users?.email,
-      telephone: effectif.cfa_users?.telephone,
-    },
+    users,
     organisme_id: effectif.organisme_id,
     annee_scolaire: effectif.annee_scolaire,
     source: effectif.source,
   };
-  return result;
+  return result as IEffecifMissionLocale;
 };

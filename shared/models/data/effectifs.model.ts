@@ -103,6 +103,40 @@ export const zEffectifComputedStatut = z.object({
   ),
 });
 
+export const zEffectifComputedOrganisme = z.object({
+  region: zAdresse.shape.region.nullish(),
+  departement: zAdresse.shape.departement.nullish(),
+  academie: zAdresse.shape.academie.nullish(),
+  reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").nullish(),
+  bassinEmploi: z.string({}).nullish(),
+
+  // 2 champs utiles seulement pour les indicateurs v1
+  // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
+  uai: z
+    .string({
+      description: "Code UAI de l'établissement",
+    })
+    .regex(UAI_REGEX)
+    .nullish(),
+  siret: z
+    .string({
+      description: "N° SIRET de l'établissement",
+    })
+    .regex(SIRET_REGEX)
+    .nullish(),
+  fiable: z
+    .boolean({
+      description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false`,
+    })
+    .nullish(),
+});
+
+export const zEffectifAnneeScolaire = z
+  .string({
+    description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
+  })
+  .regex(YEAR_RANGE_REGEX);
+
 export const zEffectif = z.object({
   _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
   organisme_id: zObjectId.describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),
@@ -118,11 +152,7 @@ export const zEffectif = z.object({
       description: "Identifiant de l'organisme id source transmettant",
     })
     .nullish(),
-  annee_scolaire: z
-    .string({
-      description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-    })
-    .regex(YEAR_RANGE_REGEX),
+  annee_scolaire: zEffectifAnneeScolaire,
   apprenant: zApprenant,
   formation: zFormationEffectif.nullish(),
   contrats: z
@@ -187,38 +217,7 @@ export const zEffectif = z.object({
   _computed: z
     .object(
       {
-        organisme: z
-          .object({
-            region: zAdresse.shape.region.nullish(),
-            departement: zAdresse.shape.departement.nullish(),
-            academie: zAdresse.shape.academie.nullish(),
-            reseaux: z
-              .array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID))
-              .describe("Réseaux du CFA, s'ils existent")
-              .nullish(),
-            bassinEmploi: z.string({}).nullish(),
-
-            // 2 champs utiles seulement pour les indicateurs v1
-            // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
-            uai: z
-              .string({
-                description: "Code UAI de l'établissement",
-              })
-              .regex(UAI_REGEX)
-              .nullish(),
-            siret: z
-              .string({
-                description: "N° SIRET de l'établissement",
-              })
-              .regex(SIRET_REGEX)
-              .nullish(),
-            fiable: z
-              .boolean({
-                description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false`,
-              })
-              .nullish(),
-          })
-          .nullish(),
+        organisme: zEffectifComputedOrganisme.nullish(),
         formation: z
           .object({
             codes_rome: z.array(z.string()).nullish(),

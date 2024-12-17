@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { organismeLookup } from "@/common/actions/helpers/filters";
@@ -173,12 +173,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     {
-      $unwind: {
-        path: "$cfa_users",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
@@ -189,16 +183,17 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const result = (await effectifsDb().aggregate(aggregation).next()) as {
     pagination: any;
-    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: IUsersMigration }>;
+    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }>;
   };
 
   if (!result) {
     return { pagination: { total: 0, page, limit }, data: [] };
   }
+  const { pagination, data } = result;
 
-  if (result.pagination) {
-    result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  if (pagination) {
+    pagination.lastPage = Math.ceil(result.pagination.total / limit);
   }
-  result.data = result.data.map((effectif) => buildEffectifForMissionLocale(effectif));
-  return result;
+  const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
+  return { pagination, data: effectifs };
 };
