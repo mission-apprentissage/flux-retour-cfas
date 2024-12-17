@@ -138,14 +138,14 @@ export const getDetailedEffectifById = async (_id: any) => {
 };
 
 export const getPaginatedEffectifsByMissionLocaleId = async (
-  missionLocaleId: string,
+  missionLocaleId: number,
   page: number = 1,
   limit: number = 20
 ) => {
   const aggregation = [
     {
       $match: {
-        "_computed.missionLocale.id": missionLocaleId,
+        "apprenant.adresse.mission_locale_id": missionLocaleId,
         annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
@@ -184,12 +184,21 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
       },
     },
-    { $unwind: { path: "$pagination" } },
+    { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
-  const { pagination, data } = (await effectifsDb().aggregate(aggregation).next()) as {
+
+  const result = (await effectifsDb().aggregate(aggregation).next()) as {
     pagination: any;
     data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: IUsersMigration }>;
   };
-  const effectifs = data.map((effectif) => buildEffectifForMissionLocale(effectif));
-  return { pagination, data: effectifs };
+
+  if (!result) {
+    return { pagination: { total: 0, page, limit }, data: [] };
+  }
+
+  if (result.pagination) {
+    result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  }
+  result.data = result.data.map((effectif) => buildEffectifForMissionLocale(effectif));
+  return result;
 };

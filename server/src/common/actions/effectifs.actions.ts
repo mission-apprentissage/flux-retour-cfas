@@ -481,7 +481,7 @@ export const buildEffectifForMissionLocale = (
       courriel: effectif.apprenant.courriel,
       rqth: effectif.apprenant.rqth,
     },
-    parcours: effectif._computed?.statut,
+    statut: effectif._computed?.statut,
     formation: effectif.formation,
     organisme: effectif._computed?.organisme,
     user: {

@@ -73,4 +73,5 @@ export const zAdresse = zodOpenApi.object({
       description: "Code Bassin d'emploi",
     })
     .optional(),
+  mission_locale_id: zodOpenApi.number({ description: "Id de mission locale" }).optional(),
 });
