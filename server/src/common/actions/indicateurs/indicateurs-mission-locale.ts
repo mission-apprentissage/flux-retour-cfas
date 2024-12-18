@@ -4,11 +4,11 @@ import { DateFilters } from "../helpers/filters";
 
 import { buildIndicateursEffectifsPipeline } from "./indicateurs.actions";
 
-export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: string) => {
+export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: number) => {
   const aggregation = [
     {
       $match: {
-        "_computed.missionLocale.id": missionLocaleId,
+        "apprenant.adresse.mission_locale_id": missionLocaleId,
       },
     },
     ...buildIndicateursEffectifsPipeline(null, filters.date),

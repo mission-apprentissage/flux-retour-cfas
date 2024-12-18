@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { organismeLookup } from "@/common/actions/helpers/filters";
@@ -138,14 +138,14 @@ export const getDetailedEffectifById = async (_id: any) => {
 };
 
 export const getPaginatedEffectifsByMissionLocaleId = async (
-  missionLocaleId: string,
+  missionLocaleId: number,
   page: number = 1,
   limit: number = 20
 ) => {
   const aggregation = [
     {
       $match: {
-        "_computed.missionLocale.id": missionLocaleId,
+        "apprenant.adresse.mission_locale_id": missionLocaleId,
         annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
@@ -173,23 +173,27 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     {
-      $unwind: {
-        path: "$cfa_users",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
       },
     },
-    { $unwind: { path: "$pagination" } },
+    { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
-  const { pagination, data } = (await effectifsDb().aggregate(aggregation).next()) as {
+
+  const result = (await effectifsDb().aggregate(aggregation).next()) as {
     pagination: any;
-    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: IUsersMigration }>;
+    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }>;
   };
-  const effectifs = data.map((effectif) => buildEffectifForMissionLocale(effectif));
+
+  if (!result) {
+    return { pagination: { total: 0, page, limit }, data: [] };
+  }
+  const { pagination, data } = result;
+
+  if (pagination) {
+    pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  }
+  const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
   return { pagination, data: effectifs };
 };

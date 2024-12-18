@@ -87,14 +87,13 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.fiable": 1, annee_scolaire: 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
-  [{ "_computed.missionLocale.id": 1 }, {}],
 ];
 
 const StatutApprenantEnum = zodEnumFromArray(
   STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
 );
 
-const zEffectifComputedStatut = z.object({
+export const zEffectifComputedStatut = z.object({
   en_cours: StatutApprenantEnum,
   parcours: z.array(
     z.object({
@@ -104,9 +103,39 @@ const zEffectifComputedStatut = z.object({
   ),
 });
 
-const zEffectifComputedMissionLocale = z.object({
-  id: z.string(),
+export const zEffectifComputedOrganisme = z.object({
+  region: zAdresse.shape.region.nullish(),
+  departement: zAdresse.shape.departement.nullish(),
+  academie: zAdresse.shape.academie.nullish(),
+  reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").nullish(),
+  bassinEmploi: z.string({}).nullish(),
+
+  // 2 champs utiles seulement pour les indicateurs v1
+  // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
+  uai: z
+    .string({
+      description: "Code UAI de l'établissement",
+    })
+    .regex(UAI_REGEX)
+    .nullish(),
+  siret: z
+    .string({
+      description: "N° SIRET de l'établissement",
+    })
+    .regex(SIRET_REGEX)
+    .nullish(),
+  fiable: z
+    .boolean({
+      description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false`,
+    })
+    .nullish(),
 });
+
+export const zEffectifAnneeScolaire = z
+  .string({
+    description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
+  })
+  .regex(YEAR_RANGE_REGEX);
 
 export const zEffectif = z.object({
   _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
@@ -123,11 +152,7 @@ export const zEffectif = z.object({
       description: "Identifiant de l'organisme id source transmettant",
     })
     .nullish(),
-  annee_scolaire: z
-    .string({
-      description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-    })
-    .regex(YEAR_RANGE_REGEX),
+  annee_scolaire: zEffectifAnneeScolaire,
   apprenant: zApprenant,
   formation: zFormationEffectif.nullish(),
   contrats: z
@@ -192,38 +217,7 @@ export const zEffectif = z.object({
   _computed: z
     .object(
       {
-        organisme: z
-          .object({
-            region: zAdresse.shape.region.nullish(),
-            departement: zAdresse.shape.departement.nullish(),
-            academie: zAdresse.shape.academie.nullish(),
-            reseaux: z
-              .array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID))
-              .describe("Réseaux du CFA, s'ils existent")
-              .nullish(),
-            bassinEmploi: z.string({}).nullish(),
-
-            // 2 champs utiles seulement pour les indicateurs v1
-            // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
-            uai: z
-              .string({
-                description: "Code UAI de l'établissement",
-              })
-              .regex(UAI_REGEX)
-              .nullish(),
-            siret: z
-              .string({
-                description: "N° SIRET de l'établissement",
-              })
-              .regex(SIRET_REGEX)
-              .nullish(),
-            fiable: z
-              .boolean({
-                description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false`,
-              })
-              .nullish(),
-          })
-          .nullish(),
+        organisme: zEffectifComputedOrganisme.nullish(),
         formation: z
           .object({
             codes_rome: z.array(z.string()).nullish(),
@@ -232,7 +226,6 @@ export const zEffectif = z.object({
           .nullish(),
         // @TODO: nullish en attendant la migration et passage en nullable ensuite (migration: 20240305085918-effectifs-types.ts)
         statut: zEffectifComputedStatut.nullish(),
-        missionLocale: zEffectifComputedMissionLocale.nullish(),
       },
       {
         description: "Propriétés calculées ou récupérées d'autres collections",
