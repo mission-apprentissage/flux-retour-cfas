@@ -2,7 +2,7 @@ import { addJob, initJobProcessor } from "job-processor";
 import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import type { IEffectif } from "shared/models";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
@@ -114,10 +114,10 @@ export async function setupJobProcessor() {
               },
             },
 
-            "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
-              cron_string: "45 0 1 * *",
+            "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
+              cron_string: "0 5 * * 6",
               handler: async () => {
-                await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
+                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
                 return 0;
               },
             },
@@ -179,16 +179,22 @@ export async function setupJobProcessor() {
           return hydrateDecaRaw();
         },
       },
-      "hydrate:effectifs:update_computed_statut_month": {
-        handler: async (job?) => {
-          const organismeId = (job?.payload?.id as string) ? new ObjectId(job?.payload?.id as string) : null;
-          return hydrateEffectifsComputedTypes({
-            query: {
-              annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
-              ...(organismeId ? { organisme_id: organismeId } : {}),
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async (job, signal) => {
+          const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
+          const evaluationDate = new Date();
+          return hydrateEffectifsComputedTypes(
+            {
+              query: {
+                annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
+                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
+                ...(organismeId ? { organisme_id: organismeId } : {}),
+              },
             },
-          });
+            signal
+          );
         },
+        resumable: true,
       },
       "hydrate:effectifs-formation-niveaux": {
         handler: async () => {
