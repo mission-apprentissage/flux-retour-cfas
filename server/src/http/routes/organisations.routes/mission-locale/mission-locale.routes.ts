@@ -1,9 +1,11 @@
 import express from "express";
 import { IOrganisationMissionLocale } from "shared/models";
 
-import { getPaginatedEffectifsByMissionLocaleId } from "@/common/actions/effectifs/effectifs.actions";
 import { dateFiltersSchema } from "@/common/actions/helpers/filters";
-import { getEffectifIndicateursForMissionLocaleId } from "@/common/actions/indicateurs/indicateurs-mission-locale";
+import {
+  getEffectifIndicateursForMissionLocaleId,
+  getPaginatedEffectifsByMissionLocaleId,
+} from "@/common/actions/mission-locale/mission-locale.actions";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 

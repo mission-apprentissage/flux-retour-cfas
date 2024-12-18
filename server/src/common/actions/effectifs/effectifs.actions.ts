@@ -1,11 +1,7 @@
 import { ObjectId } from "mongodb";
-import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
-import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { organismeLookup } from "@/common/actions/helpers/filters";
 import { effectifsDb } from "@/common/model/collections";
-
-import { buildEffectifForMissionLocale } from "../effectifs.actions";
 
 // Méthode de récupération de la liste des effectifs en base
 export const getAllEffectifs = async (
@@ -135,65 +131,4 @@ export const getDetailedEffectifById = async (_id: any) => {
     .next();
 
   return organisme;
-};
-
-export const getPaginatedEffectifsByMissionLocaleId = async (
-  missionLocaleId: number,
-  page: number = 1,
-  limit: number = 20
-) => {
-  const aggregation = [
-    {
-      $match: {
-        "apprenant.adresse.mission_locale_id": missionLocaleId,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
-      },
-    },
-    { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
-    {
-      $lookup: {
-        from: "organisations",
-        localField: "stringify_organisme_id",
-        foreignField: "organisme_id",
-        as: "organisation",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisation",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
-        from: "usersMigration",
-        localField: "organisation._id",
-        foreignField: "organisation_id",
-        as: "cfa_users",
-      },
-    },
-    {
-      $facet: {
-        pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
-        data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
-      },
-    },
-    { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
-  ];
-
-  const result = (await effectifsDb().aggregate(aggregation).next()) as {
-    pagination: any;
-    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }>;
-  };
-
-  if (!result) {
-    return { pagination: { total: 0, page, limit }, data: [] };
-  }
-  const { pagination, data } = result;
-
-  if (pagination) {
-    pagination.lastPage = Math.ceil(result.pagination.total / limit);
-  }
-  const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
-  return { pagination, data: effectifs };
 };
