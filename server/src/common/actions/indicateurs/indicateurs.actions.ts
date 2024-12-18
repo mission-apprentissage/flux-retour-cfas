@@ -59,7 +59,7 @@ export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, da
         ...createDernierStatutFieldPipeline(date),
         {
           $match: {
-            $or: [statut.map((s) => ({ "dernierStatut.valeur": s }))],
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
           },
         },
       ]
