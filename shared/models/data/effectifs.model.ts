@@ -18,6 +18,7 @@ import { zApprenant } from "./effectifs/apprenant.part";
 import { zContrat } from "./effectifs/contrat.part";
 import { zFormationEffectif } from "./effectifs/formation.part";
 
+// test
 const collectionName = "effectifs";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
