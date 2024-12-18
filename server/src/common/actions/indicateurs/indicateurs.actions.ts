@@ -14,6 +14,7 @@ import {
   hasRecentTransmissions,
   shouldDisplayContactInEffectifNominatif,
 } from "shared";
+import { StatutApprenant } from "shared/constants/effectifs";
 
 import {
   DateFilters,
@@ -31,30 +32,46 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
+export const createDernierStatutFieldPipeline = (date: Date) => [
+  {
+    $addFields: {
+      dernierStatut: {
+        $arrayElemAt: [
+          {
+            $filter: {
+              input: "$_computed.statut.parcours",
+              as: "statut",
+              cond: {
+                $lte: ["$$statut.date", date],
+              },
+            },
+          },
+          -1,
+        ],
+      },
+    },
+  },
+];
+
+export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
+  statut.length
+    ? [
+        ...createDernierStatutFieldPipeline(date),
+        {
+          $match: {
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+          },
+        },
+      ]
+    : [];
+
 export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
   extraAccumulator: Record<string, unknown> = {}
 ) {
   return [
-    {
-      $addFields: {
-        dernierStatut: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$_computed.statut.parcours",
-                as: "statut",
-                cond: {
-                  $lte: ["$$statut.date", currentDate],
-                },
-              },
-            },
-            -1,
-          ],
-        },
-      },
-    },
+    ...createDernierStatutFieldPipeline(currentDate),
     {
       $group: {
         _id: groupBy,
