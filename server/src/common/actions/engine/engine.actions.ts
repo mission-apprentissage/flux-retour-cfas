@@ -104,7 +104,7 @@ export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>
     .toArray();
 
   const newCfd = effectif.formation?.cfd ?? null;
-  const newRncp = effectif.formation;
+  const newRncp = effectif.formation?.rncp ?? null;
 
   const macthingEffectifs = effectifs.filter((eff) => {
     const currentCfd = eff.formation?.cfd ?? null;
