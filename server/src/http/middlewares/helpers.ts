@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
+import { IEffectif, IOrganisationMissionLocale, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -38,6 +38,19 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   if (req.user.organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès non autorisé");
   }
+  next();
+}
+
+export function requireMissionLocale(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+  if (user.organisation.type !== "MISSION_LOCALE") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = user.organisation as IOrganisationMissionLocale;
+
+  res.locals.missionLocale = orga;
   next();
 }
 

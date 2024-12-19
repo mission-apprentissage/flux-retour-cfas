@@ -17,5 +17,8 @@ export function canViewOngletIndicateursVueGraphique(organisationType: IOrganisa
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return true;
+
+    default:
+      return false;
   }
 }

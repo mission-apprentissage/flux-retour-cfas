@@ -1062,5 +1062,7 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
       return false;
     case "ADMINISTRATEUR":
       return false;
+    default:
+      return false;
   }
 }
