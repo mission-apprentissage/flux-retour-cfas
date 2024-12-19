@@ -1,4 +1,5 @@
 import { Filter, RootFilterOperators } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 import { z } from "zod";
 
 export const organismeLookup = {
@@ -73,3 +74,13 @@ export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<
     $and: nonEmptyFilters,
   };
 }
+
+export const effectifsFiltersMissionLocaleSchema = {
+  statut: z.array(z.enum([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT]).optional()),
+  rqth: z.boolean().optional(),
+  mineur: z.boolean().optional(),
+  niveau: z.array(z.string()).optional(),
+  code_insee: z.array(z.string()).optional(),
+};
+
+export type EffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
