@@ -176,7 +176,7 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
             case "MISSION_LOCALE":
               return (
                 <Text fontSize="20px" fontWeight="bold">
-                  Mission locale
+                  Mission Locale {organisation.nom}
                 </Text>
               );
           }
