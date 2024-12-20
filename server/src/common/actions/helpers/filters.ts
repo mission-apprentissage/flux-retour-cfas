@@ -82,7 +82,7 @@ export const effectifsFiltersMissionLocaleSchema = {
     .optional(),
   rqth: zBooleanStringSchema.optional(),
   mineur: zBooleanStringSchema.optional(),
-  niveau: z.array(z.string()).optional(),
+  niveaux: z.array(z.string()).optional(),
   code_insee: z.array(z.string()).optional(),
 };
 
