@@ -1,10 +1,9 @@
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Flex, Button, useDisclosure } from "@chakra-ui/react";
+import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Flex, Button, useDisclosure, Tag } from "@chakra-ui/react";
 import { useRef, useEffect, useState } from "react";
-import { DuplicateEffectifDetail, getStatutApprenantNameFromCode } from "shared";
+import { DuplicateEffectifDetail, getStatut } from "shared";
 
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { getNestedValue } from "@/common/utils/misc";
-import { toPascalCase } from "@/common/utils/stringUtils";
 import { ScrollShadowBox } from "@/components/ScrollShadowBox/ScrollShadowBox";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import { useDraggableScroll } from "@/hooks/useDraggableScroll";
@@ -104,19 +103,21 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
   );
 
   const renderHistoriqueStatut = (duplicates) => {
-    duplicates.forEach((duplicate) => {
-      duplicate.apprenant.historique_statut.sort(
-        (a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime()
-      );
-    });
+    const processedDuplicates = duplicates.map((duplicate) => ({
+      ...duplicate,
+      statut: {
+        ...duplicate.statut,
+        parcours: duplicate.statut?.parcours?.slice().reverse() || [],
+      },
+    }));
 
-    const maxHistoriqueStatutLength = Math.max(...duplicates.map((dup) => dup.apprenant.historique_statut.length));
+    const maxStatutParcoursLength = Math.max(...processedDuplicates.map((dup) => dup.statut?.parcours?.length || 0));
 
     return (
       <>
-        {renderTableGroupHeader("Historique du statut", duplicates, "ri-calendar-fill")}
+        {renderTableGroupHeader("Historique du statut", processedDuplicates, "ri-calendar-fill")}
         <Tbody>
-          {Array.from({ length: maxHistoriqueStatutLength }).map((_, rowIndex) => (
+          {Array.from({ length: maxStatutParcoursLength }).map((_, rowIndex) => (
             <Tr key={`statut-row-${rowIndex}`} fontSize="14" bg={rowIndex % 2 === 0 ? "grey.100" : "white"}>
               <Td
                 fontWeight="bold"
@@ -126,11 +127,11 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                 py={3}
                 bg={rowIndex % 2 === 0 ? "grey.100" : "white"}
               >
-                {rowIndex === 0 ? "Statut" : "Ancien statut"}
+                {rowIndex === 0 ? "Statut actuel" : "Statut précédent"}
               </Td>
 
-              {duplicates.map((duplicate, duplicateIndex) => {
-                const statut = duplicate.apprenant.historique_statut[rowIndex];
+              {processedDuplicates.map((duplicate, duplicateIndex) => {
+                const statut = duplicate.statut?.parcours?.[rowIndex];
                 if (!statut) {
                   return (
                     <Td key={`duplicate-${duplicateIndex}-statut-${rowIndex}`} py={3} color="grey">
@@ -146,12 +147,11 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                   >
                     <>
                       <Text as="b" display="block">
-                        {toPascalCase(getStatutApprenantNameFromCode(statut.valeur_statut))}
+                        {getStatut(statut.valeur)}
                       </Text>
                       <Text display="block" fontSize={12}>
-                        à la date du {formatDateDayMonthYear(statut.date_statut)}
+                        à la date du {formatDateDayMonthYear(statut.date)}
                       </Text>
-                      <Text fontSize={12}>reçu le {formatDateDayMonthYear(statut.date_reception)}</Text>
                     </>
                   </Td>
                 );
@@ -335,6 +335,11 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                     >
                       <Flex justify="space-between" align="center">
                         <Text>Duplicat {index + 1}</Text>
+                        {index === 0 && (
+                          <Tag backgroundColor="#B8FEC9" color="#18753C" size="sm">
+                            Dernier effectif transmis
+                          </Tag>
+                        )}
                         <Button
                           aria-label={`Supprimer duplicat ${index + 1}`}
                           variant="secondary"
