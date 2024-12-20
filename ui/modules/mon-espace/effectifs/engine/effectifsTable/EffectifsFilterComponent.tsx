@@ -12,6 +12,7 @@ interface EffectifsFilterComponentProps {
   onChange: (selectedValues: string[]) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  sortOrder?: "asc" | "desc";
 }
 
 const EffectifsFilterComponent: React.FC<EffectifsFilterComponentProps> = ({
@@ -22,7 +23,15 @@ const EffectifsFilterComponent: React.FC<EffectifsFilterComponentProps> = ({
   onChange,
   isOpen,
   setIsOpen,
+  sortOrder = "asc",
 }) => {
+  const sortedOptions = [...options].sort((a, b) => {
+    if (sortOrder === "asc") {
+      return a.localeCompare(b);
+    }
+    return b.localeCompare(a);
+  });
+
   return (
     <div key={filterKey}>
       <FilterButton
@@ -35,7 +44,7 @@ const EffectifsFilterComponent: React.FC<EffectifsFilterComponentProps> = ({
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup defaultValue={selectedValues} size="sm" onChange={onChange}>
             <Stack>
-              {options.map((option, index) => (
+              {sortedOptions.map((option, index) => (
                 <Checkbox key={index} value={option} iconSize="0.5rem">
                   {capitalizeWords(option)}
                 </Checkbox>

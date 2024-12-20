@@ -17,6 +17,8 @@ import { Fragment, useState, useMemo } from "react";
 import { FirstPageIcon, LastPageIcon } from "@/modules/dashboard/icons";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
+const DEFAULT_COL_SIZE = 220;
+
 interface TableWithApiProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
   data: T[];
@@ -57,6 +59,19 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
     });
   };
 
+  const columnWidths = useMemo(() => {
+    return props.columns.reduce(
+      (acc, col) => {
+        const columnId = "accessorKey" in col ? col.accessorKey : col.id;
+        if (columnId) {
+          acc[columnId as string] = col.size || DEFAULT_COL_SIZE;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }, [props.columns]);
+
   const table = useReactTable({
     data: props.data,
     columns: props.columns,
@@ -90,48 +105,55 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
         <Thead>
           {table.getHeaderGroups().map((headerGroup, index) => (
             <Tr key={`headerGroup_${index}`}>
-              {headerGroup.headers.map((header, headerIndex) => (
-                <Th
-                  key={`header_${headerIndex}`}
-                  colSpan={header.colSpan}
-                  cursor={header.column.getCanSort() ? "pointer" : "default"}
-                  userSelect={header.column.getCanSort() ? "none" : "initial"}
-                  onClick={header.column.getToggleSortingHandler()}
-                  _hover={
-                    header.column.getCanSort()
-                      ? {
-                          backgroundColor: "grey.100",
-                          "> div > .sort-icon": {
-                            display: "inline-block",
-                            color: "black",
-                          },
-                        }
-                      : undefined
-                  }
-                  paddingBottom={3}
-                  bg="white"
-                >
-                  {header.isPlaceholder ? null : (
-                    <Flex justify="space-between" align="center" width="100%">
-                      <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
-                      <Box
-                        ml={2}
-                        className="sort-icon"
-                        display={header.column.getCanSort() ? "inline-block" : "none"}
-                        w="14px"
-                      >
-                        {header.column.getIsSorted() === "desc" && <Box as="span">▼</Box>}
-                        {header.column.getIsSorted() === "asc" && <Box as="span">▲</Box>}
-                        {header.column.getIsSorted() === false && (
-                          <Box as="span" color="grey.400">
-                            ▼
-                          </Box>
-                        )}
-                      </Box>
-                    </Flex>
-                  )}
-                </Th>
-              ))}
+              {headerGroup.headers.map((header, headerIndex) => {
+                const columnId =
+                  "accessorKey" in header.column.columnDef ? header.column.columnDef.accessorKey : header.column.id;
+                const width = columnId ? columnWidths[columnId as string] || "auto" : "auto";
+
+                return (
+                  <Th
+                    key={`header_${headerIndex}`}
+                    colSpan={header.colSpan}
+                    cursor={header.column.getCanSort() ? "pointer" : "default"}
+                    userSelect={header.column.getCanSort() ? "none" : "initial"}
+                    onClick={header.column.getToggleSortingHandler()}
+                    style={{ width }}
+                    _hover={
+                      header.column.getCanSort()
+                        ? {
+                            backgroundColor: "grey.100",
+                            "> div > .sort-icon": {
+                              display: "inline-block",
+                              color: "black",
+                            },
+                          }
+                        : undefined
+                    }
+                    paddingBottom={3}
+                    bg="white"
+                  >
+                    {header.isPlaceholder ? null : (
+                      <Flex justify="space-between" align="center" width="100%">
+                        <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
+                        <Box
+                          ml={2}
+                          className="sort-icon"
+                          display={header.column.getCanSort() ? "inline-block" : "none"}
+                          w="14px"
+                        >
+                          {header.column.getIsSorted() === "desc" && <Box as="span">▼</Box>}
+                          {header.column.getIsSorted() === "asc" && <Box as="span">▲</Box>}
+                          {header.column.getIsSorted() === false && (
+                            <Box as="span" color="grey.400">
+                              ▼
+                            </Box>
+                          )}
+                        </Box>
+                      </Flex>
+                    )}
+                  </Th>
+                );
+              })}
               {props.enableRowExpansion && <Th></Th>}
             </Tr>
           ))}
@@ -151,14 +173,13 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                 <Fragment key={`fragment_${row.original.id}`}>
                   <Tr
                     key={`row_${row.original.id}`}
-                    borderLeftWidth={row.original.prominent ? "4px" : ""}
-                    borderLeftColor="blue_cumulus_main"
+                    className={`${isExpanded ? "table-row-expanded" : ""}`}
                     onClick={() => props.enableRowExpansion && toggleRowExpansion(row.original.id)}
                     cursor={props.enableRowExpansion ? "pointer" : "default"}
-                    _hover={props.enableRowExpansion ? { backgroundColor: "gray.100" } : undefined}
+                    bg={isExpanded ? "#E3E3FD" : "inherit"}
                   >
                     {row.getVisibleCells().map((cell, cellIndex) => (
-                      <Td key={`cellContent_${cellIndex}`}>
+                      <Td key={`cellContent_${cellIndex}`} px={3}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </Td>
                     ))}
@@ -183,8 +204,8 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                   </Tr>
 
                   {isExpanded && props.renderSubComponent && (
-                    <Tr key={`rowExpanded_${row.original.id}`}>
-                      <Td colSpan={row.getVisibleCells().length + (props.enableRowExpansion ? 1 : 0)}>
+                    <Tr className="expanded-row" key={`rowExpanded_${row.original.id}`}>
+                      <Td colSpan={row.getVisibleCells().length + (props.enableRowExpansion ? 1 : 0)} px={0} py={3}>
                         {props.renderSubComponent(row)}
                       </Td>
                     </Tr>

@@ -1,16 +1,16 @@
 import { Button, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 
-import EffectifsFilterComponent from "./EffectifsFilterComponent";
+import EffectifsFilterComponent from "../../effectifs/engine/effectifsTable/EffectifsFilterComponent";
 
-interface EffectifsFilterPanelProps {
+interface SIFAEffectifsFilterPanelProps {
   filters: Record<string, string[]>;
   availableFilters: Record<string, string[]>;
   onFilterChange: (filters: Record<string, string[]>) => void;
   resetFilters: () => void;
 }
 
-const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
+const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
   filters,
   availableFilters,
   onFilterChange,
@@ -29,20 +29,6 @@ const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
         FILTRER PAR
       </Text>
       <Stack direction="row" spacing={4} wrap="wrap">
-        {/* Année scolaire */}
-        {availableFilters?.annee_scolaire && (
-          <EffectifsFilterComponent
-            filterKey="annee_scolaire"
-            displayName="Année scolaire"
-            options={availableFilters.annee_scolaire}
-            selectedValues={filters.annee_scolaire || []}
-            onChange={(values) => handleCheckboxChange("annee_scolaire", values)}
-            isOpen={openFilter === "annee_scolaire"}
-            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "annee_scolaire" : null)}
-            sortOrder="desc"
-          />
-        )}
-
         {/* Source */}
         {availableFilters?.source && (
           <EffectifsFilterComponent
@@ -53,19 +39,6 @@ const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
             onChange={(values) => handleCheckboxChange("source", values)}
             isOpen={openFilter === "source"}
             setIsOpen={(isOpen) => setOpenFilter(isOpen ? "source" : null)}
-          />
-        )}
-
-        {/* Statut courant */}
-        {availableFilters?.statut_courant && (
-          <EffectifsFilterComponent
-            filterKey="statut_courant"
-            displayName="Statut"
-            options={availableFilters.statut_courant}
-            selectedValues={filters.statut_courant || []}
-            onChange={(values) => handleCheckboxChange("statut_courant", values)}
-            isOpen={openFilter === "statut_courant"}
-            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "statut_courant" : null)}
           />
         )}
 
@@ -90,4 +63,4 @@ const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
   );
 };
 
-export default EffectifsFilterPanel;
+export default SIFAEffectifsFilterPanel;

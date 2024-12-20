@@ -14,7 +14,6 @@ import {
 import { Fragment, useState } from "react";
 
 import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
-import { AddFill, SubtractLine } from "@/theme/components/icons";
 
 import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "../dashboard/icons";
 
@@ -23,43 +22,24 @@ interface NewTableProps<T> extends SystemProps {
   data: T[];
   noDataMessage?: string;
   loading?: boolean;
-  expandAllRows?: boolean;
-  enableRowExpansion?: boolean;
+  isRowExpanded?: boolean;
   sortingState?: SortingState;
   paginationState?: PaginationState;
   variant?: string;
   showPagination?: boolean;
-  isLoading?: boolean;
   onSortingChange?: (state: SortingState) => any;
   onPaginationChange?: (state: PaginationState) => any;
   renderSubComponent?: (row: Row<T>) => React.ReactElement;
   renderDivider?: () => React.ReactElement;
 }
 
-function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean }>) {
-  const isLoading = props.isLoading ?? false;
+function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
   const [pagination, setPagination] = useState<PaginationState>(
     props.paginationState ?? {
       pageIndex: 0,
       pageSize: 20,
     }
   );
-
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(
-    props.expandAllRows ? new Set(props.data.map((row) => row.id)) : new Set()
-  );
-
-  const toggleRowExpansion = (rowId: string) => {
-    setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowId)) {
-        newSet.delete(rowId);
-      } else {
-        newSet.add(rowId);
-      }
-      return newSet;
-    });
-  };
 
   const table = useReactTable({
     data: props.data,
@@ -87,117 +67,89 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
         <Thead>
           {table.getHeaderGroups().map((headerGroup, index) => (
             <Tr key={`headerGroup_${index}`}>
-              {headerGroup.headers.map((header, headerIndex) => (
-                <Th
-                  key={`header_${headerIndex}`}
-                  colSpan={header.colSpan}
-                  cursor={header.column.getCanSort() ? "pointer" : "default"}
-                  userSelect={header.column.getCanSort() ? "none" : "initial"}
-                  onClick={header.column.getToggleSortingHandler()}
-                  _hover={
-                    header.column.getCanSort()
-                      ? {
-                          backgroundColor: "grey.100",
-                          "> div > .sort-icon": {
-                            display: "inline-block",
-                            color: "black",
-                          },
-                        }
-                      : undefined
-                  }
-                  paddingBottom={3}
-                  bg="white"
-                >
-                  {header.isPlaceholder ? null : (
-                    <Flex justify="space-between" align="center" width="100%">
-                      <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
-                      <Box
-                        ml={2}
-                        className="sort-icon"
-                        display={header.column.getCanSort() ? "inline-block" : "none"}
-                        w="14px"
-                      >
-                        {header.column.getIsSorted() === "desc" && <Box as="span">▼</Box>}
-                        {header.column.getIsSorted() === "asc" && <Box as="span">▲</Box>}
-                        {header.column.getIsSorted() === false && (
-                          <Box as="span" color="grey.400">
-                            ▼
-                          </Box>
-                        )}
-                      </Box>
-                    </Flex>
-                  )}
-                </Th>
-              ))}
-              {props.enableRowExpansion && <Th></Th>}
+              {headerGroup.headers.map((header, headerIndex) => {
+                return (
+                  <Th
+                    key={`header_${headerIndex}`}
+                    colSpan={header.colSpan}
+                    cursor={header.column.getCanSort() ? "pointer" : "default"}
+                    userSelect={header.column.getCanSort() ? "none" : "initial"}
+                    onClick={header.column.getToggleSortingHandler()}
+                    _hover={
+                      header.column.getCanSort()
+                        ? {
+                            backgroundColor: "grey.100",
+                            "> div > .sort-icon": {
+                              display: "inline-block",
+                              color: "black",
+                            },
+                          }
+                        : undefined
+                    }
+                    paddingBottom={3}
+                    bg="white"
+                  >
+                    {header.isPlaceholder ? null : (
+                      <Flex justify="space-between" align="center" width="100%">
+                        <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
+                        <Box
+                          ml={2}
+                          className="sort-icon"
+                          display={header.column.getCanSort() ? "inline-block" : "none"}
+                          w="14px"
+                        >
+                          {header.column.getIsSorted() === "desc" && <Box as="span">▼</Box>}
+                          {header.column.getIsSorted() === "asc" && <Box as="span">▲</Box>}
+                          {header.column.getIsSorted() === false && (
+                            <Box as="span" color="grey.400">
+                              ▼
+                            </Box>
+                          )}
+                        </Box>
+                      </Flex>
+                    )}
+                  </Th>
+                );
+              })}
             </Tr>
           ))}
         </Thead>
         <Tbody>
-          {isLoading ? (
-            <RowsSkeleton
-              nbRows={pagination.pageSize}
-              nbColumns={props.columns.length + (props.enableRowExpansion ? 1 : 0)}
-              height="40px"
-            />
-          ) : !props.data || props.data.length === 0 ? (
+          {props.loading ? (
+            <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
+          ) : table.getRowModel().rows.length === 0 ? (
             <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
               <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
                 {props.noDataMessage ?? "Aucun résultat"}
               </Td>
             </Tr>
           ) : (
-            table.getRowModel().rows.map((row) => {
-              const isExpanded = expandedRows.has(row.original.id);
-
+            table.getRowModel().rows.map((row, index) => {
               return (
-                <Fragment key={`fragment_${row.original.id}`}>
+                <Fragment key={`fragment_${index}`}>
                   <Tr
-                    key={`row_${row.original.id}`}
+                    key={`row_${index}`}
                     borderLeftWidth={row.original.prominent ? "4px" : ""}
                     borderLeftColor="blue_cumulus_main"
-                    onClick={() => props.enableRowExpansion && toggleRowExpansion(row.original.id)}
-                    cursor={props.enableRowExpansion ? "pointer" : "default"}
-                    _hover={props.enableRowExpansion ? { backgroundColor: "gray.100" } : undefined}
                   >
-                    {row.getVisibleCells().map((cell, cellIndex) => (
-                      <Td key={`cellContent_${cellIndex}`}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </Td>
-                    ))}
-                    {props.enableRowExpansion && (
-                      <Td>
-                        <Flex justifyContent="end">
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleRowExpansion(row.original.id);
-                            }}
-                          >
-                            {isExpanded ? (
-                              <SubtractLine fontSize="12px" color="bluefrance" />
-                            ) : (
-                              <AddFill fontSize="12px" color="bluefrance" />
-                            )}
-                          </Button>
-                        </Flex>
-                      </Td>
-                    )}
+                    {row.getVisibleCells().map((cell, index) => {
+                      return (
+                        <Td key={`cellContent_${index}`}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </Td>
+                      );
+                    })}
                   </Tr>
 
-                  {isExpanded && props.renderSubComponent && (
-                    <Tr key={`rowExpanded_${row.original.id}`}>
-                      <Td colSpan={row.getVisibleCells().length + (props.enableRowExpansion ? 1 : 0)}>
-                        {props.renderSubComponent(row)}
-                      </Td>
+                  {props.isRowExpanded && (
+                    <Tr key={`rowExpanded_${index}`}>
+                      <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
                     </Tr>
                   )}
 
                   {props.renderDivider && (
-                    <Tr key={`rowDivider_${row.original.id}`}>
-                      <Td colSpan={row.getVisibleCells().length + (props.enableRowExpansion ? 1 : 0)}>
-                        {props.renderDivider()}
-                      </Td>
+                    <Tr key={`rowDivider_${index}`}>
+                      <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
                     </Tr>
                   )}
                 </Fragment>
@@ -207,7 +159,7 @@ function NewTable<T>(props: NewTableProps<T & { id: string; prominent?: boolean 
         </Tbody>
       </Table>
 
-      {(props.showPagination ?? true) && !isLoading && (
+      {(props.showPagination ?? true) && (
         <HStack mt={8} spacing={3} justifyContent="space-between">
           <HStack spacing={3}>
             <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>

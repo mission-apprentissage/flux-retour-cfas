@@ -17,7 +17,7 @@ const effectifsTableColumnsDefs = [
       </>
     ),
     cell: ({ row, getValue }) => <ShowErrorInCell item={row.original} fieldName="annee_scolaire" value={getValue()} />,
-    size: 100,
+    size: 120,
   },
   {
     accessorKey: "nom",
@@ -30,7 +30,7 @@ const effectifsTableColumnsDefs = [
       </>
     ),
     cell: ({ row, getValue }) => <ShowErrorInCell item={row.original} fieldName="apprenant.nom" value={getValue()} />,
-    size: 150,
+    size: 160,
   },
   {
     accessorKey: "prenom",
@@ -45,21 +45,22 @@ const effectifsTableColumnsDefs = [
     cell: ({ row, getValue }) => (
       <ShowErrorInCell item={row.original} fieldName="apprenant.prenom" value={getValue()} />
     ),
-    size: 150,
+    size: 160,
   },
   {
     accessorKey: "formation",
     header: () => "Formation",
     cell: ({ row }) => {
       return (
-        <VStack alignItems="start" spacing={0}>
-          <Text>{row.original?.formation?.libelle_long || "Libellé manquant"}</Text>
-          <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
+        <VStack alignItems="start" spacing={0} width="340px">
+          <Text noOfLines={1}>{row.original?.formation?.libelle_long || "Libellé manquant"}</Text>
+          <Text fontSize="xs" color="#777777" whiteSpace="nowrap">
             CFD&nbsp;: {row.original?.formation?.cfd} - RNCP&nbsp;: {row.original?.formation?.cfd}
           </Text>
         </VStack>
       );
     },
+    size: 350,
   },
   {
     accessorKey: "source",
@@ -90,7 +91,7 @@ const effectifsTableColumnsDefs = [
         value={getValue() === "FICHIER" ? capitalizeWords(getValue()) : getValue()}
       />
     ),
-    size: 100,
+    size: 150,
   },
   {
     accessorKey: "statut_courant",
@@ -134,13 +135,13 @@ const effectifsTableColumnsDefs = [
       return (
         <VStack alignItems="start" spacing={0}>
           <Text>{getStatut(current.valeur)}</Text>
-          <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
+          <Text fontSize="xs" color="#777777" whiteSpace="nowrap">
             depuis le {DateTime.fromISO(current.date).setLocale("fr-FR").toFormat("dd/MM/yyyy")}
           </Text>
         </VStack>
       );
     },
-    size: 150,
+    size: 170,
   },
 ];
 

@@ -5,7 +5,7 @@ import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP } from "shared";
+import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP, getAnneeScolaireFromDate } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -31,41 +31,46 @@ function EffectifsPage(props: EffectifsPageProps) {
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
-  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    annee_scolaire: [getAnneeScolaireFromDate(new Date())],
+  });
   const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
 
   useEffect(() => {
-    const parseQueryToFilters = (query: Record<string, string | undefined>) => {
-      const filters: Record<string, string[]> = {};
-      Object.entries(query).forEach(([key, value]) => {
-        if (
-          value &&
-          key !== "pageIndex" &&
-          key !== "pageSize" &&
-          key !== "search" &&
-          key !== "sortField" &&
-          key !== "sortOrder"
-        ) {
-          try {
-            if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
-              const parsed = JSON.parse(decodeURIComponent(value));
-              filters[key] = Array.isArray(parsed) ? parsed : [parsed];
-            } else {
-              filters[key] = [decodeURIComponent(value)];
-            }
-          } catch {
-            filters[key] = [decodeURIComponent(value)];
-          }
+    const parseFilter = (key: string, value: string | string[] | undefined) => {
+      if (value) {
+        const values = Array.isArray(value) ? value : [value];
+        try {
+          return values.map((v) => {
+            const decodedValue = decodeURIComponent(v);
+            return decodedValue.startsWith("[") && decodedValue.endsWith("]")
+              ? JSON.parse(decodedValue)
+              : [decodedValue];
+          });
+        } catch {
+          return values.map((v) => decodeURIComponent(v));
         }
-      });
-      return filters;
+      }
+      return undefined;
     };
 
-    const parsedFilters = parseQueryToFilters(router.query as Record<string, string | undefined>);
-    setFilters(parsedFilters || {});
+    const mergedFilters: Record<string, string[]> = { ...filters };
+
+    const filterKeys = ["formation", "statut_courant", "annee_scolaire", "source"];
+
+    filterKeys.forEach((key) => {
+      const parsedFilter = parseFilter(key, router.query[key]);
+      if (parsedFilter) {
+        mergedFilters[key] = parsedFilter.flat();
+      }
+    });
+
+    if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
+      setFilters(mergedFilters);
+    }
   }, [router.query]);
 
-  const { data, isFetching } = useQuery(
+  const { data, isFetching, refetch } = useQuery(
     ["organismes", props.organisme._id, "effectifs", pagination, search, filters, sort],
     async () => {
       const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
@@ -117,7 +122,6 @@ function EffectifsPage(props: EffectifsPageProps) {
   };
 
   const handleSearchChange = (value: string) => {
-    setPagination({ ...pagination, pageIndex: 0 });
     setSearch(value);
 
     router.push(
@@ -158,6 +162,7 @@ function EffectifsPage(props: EffectifsPageProps) {
     });
 
     setFilters(mergedFilters);
+
     router.push(
       {
         pathname: router.pathname,
@@ -190,10 +195,13 @@ function EffectifsPage(props: EffectifsPageProps) {
     setFilters({});
     setSearch("");
 
+    const { organismeId } = router.query;
+
+    const updatedQuery = organismeId ? { organismeId } : {};
     router.push(
       {
         pathname: router.pathname,
-        query: {},
+        query: updatedQuery,
       },
       undefined,
       { shallow: true }
@@ -245,6 +253,9 @@ function EffectifsPage(props: EffectifsPageProps) {
             availableFilters={data?.filters || {}}
             resetFilters={resetFilters}
             isFetching={isFetching}
+            modeSifa={false}
+            canEdit={false}
+            refetch={refetch}
           />
         </Box>
       </Container>
