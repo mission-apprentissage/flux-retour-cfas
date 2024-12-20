@@ -26,12 +26,17 @@ export const Table = {
             backgroundColor: "grey.100",
           },
           _hover: {
-            backgroundColor: "grey.200",
+            backgroundColor: "#E3E3FD",
           },
-        },
-        td: {
-          paddingY: "2",
-          paddingX: "3",
+          "&.table-row-expanded": {
+            backgroundColor: "#E3E3FD",
+            _hover: {
+              backgroundColor: "#E3E3FD",
+            },
+          },
+          "&.expanded-row": {
+            backgroundColor: "white",
+          },
         },
       },
     },

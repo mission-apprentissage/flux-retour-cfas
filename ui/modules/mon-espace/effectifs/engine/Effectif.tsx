@@ -1,4 +1,4 @@
-import { Box, Skeleton } from "@chakra-ui/react";
+import { Skeleton } from "@chakra-ui/react";
 import React from "react";
 import { Statut } from "shared";
 
@@ -38,9 +38,7 @@ const Effectif = React.memo(function EffectifMemo({
     <>
       {/* @ts-expect-error */}
       <EffectifFormControllerContext.Provider value={effectifFormController}>
-        <Box my={12} px={5}>
-          <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} />
-        </Box>
+        <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} />
       </EffectifFormControllerContext.Provider>
     </>
   );

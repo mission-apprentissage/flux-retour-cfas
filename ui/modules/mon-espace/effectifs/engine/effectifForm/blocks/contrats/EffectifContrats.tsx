@@ -9,7 +9,7 @@ export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
     <>
       {contrats?.map((contrat, i) => {
         return (
-          <Box key={i} borderBottomWidth="1px" borderColor="grey.700">
+          <Box key={i} my={6}>
             <HStack spacing={2} alignItems="flex-end" mb={3}>
               <InputController name={`contrats[${i}].date_debut`} mb={0} w="33%" />
               <InputController name={`contrats[${i}].date_fin`} mb={0} w="33%" />

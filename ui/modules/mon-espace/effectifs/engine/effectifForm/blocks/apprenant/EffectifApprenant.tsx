@@ -18,7 +18,7 @@ export const EffectifApprenant = memo(({ apprenant, modeSifa }: { apprenant: any
   if (!organisme) return null;
 
   return (
-    <Box>
+    <Box my={6}>
       <Flex>
         <Box w="55%" flex="1">
           <InputController name="apprenant.ine" />
