@@ -20,7 +20,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, getSIFADate, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
@@ -44,10 +44,19 @@ import { DownloadLine, ExternalLinkLine } from "@/theme/components/icons";
 import Eye from "@/theme/components/icons/Eye";
 
 function useOrganismesEffectifs(organismeId: string) {
-  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
+  const [currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
+  const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef<string | null>(null);
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
+
+  useEffect(() => {
+    const invalidCount = currentEffectifsState
+      .values()
+      .toArray()
+      .filter((effectif) => effectif.requiredSifa.length > 0).length;
+    setSifaInvalidCount(invalidCount);
+  }, [currentEffectifsState]);
 
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
@@ -74,7 +83,12 @@ function useOrganismesEffectifs(organismeId: string) {
     return organismesEffectifs;
   });
 
-  return { isLoading: isFetching || isLoading, organismesEffectifs: organismesEffectifs || [], refetch };
+  return {
+    isLoading: isFetching || isLoading,
+    organismesEffectifs: organismesEffectifs || [],
+    refetch,
+    sifaInvalidCount,
+  };
 }
 
 interface SIFAPageProps {
@@ -86,7 +100,7 @@ const SIFAPage = (props: SIFAPageProps) => {
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
-  const { isLoading, organismesEffectifs, refetch } = useOrganismesEffectifs(organisme._id);
+  const { isLoading, organismesEffectifs, refetch, sifaInvalidCount } = useOrganismesEffectifs(organisme._id);
   const [show, setShow] = useState(false);
   const handleToggle = () => {
     setShow(!show);
@@ -114,11 +128,9 @@ const SIFAPage = (props: SIFAPageProps) => {
   };
 
   const handleToastOnSifaDownload = () => {
-    const nbEffectifsInvalides = organismesEffectifs.filter((effectif) => effectif.requiredSifa.length > 0).length;
-
-    nbEffectifsInvalides > 0
+    sifaInvalidCount > 0
       ? toastWarning(
-          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${sifaInvalidCount} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
           {
             isClosable: true,
             duration: 20000,
@@ -131,6 +143,18 @@ const SIFAPage = (props: SIFAPageProps) => {
             duration: 20000,
           }
         );
+  };
+
+  const downloadSifaFile = async () => {
+    trackPlausibleEvent("telechargement_sifa");
+    downloadObject(
+      await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
+      `tdb-données-sifa-${
+        organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
+      }-${new Date().toLocaleDateString()}.csv`,
+      "text/plain"
+    );
+    handleToastOnSifaDownload();
   };
 
   if (isLoading) {
@@ -150,20 +174,7 @@ const SIFAPage = (props: SIFAPageProps) => {
 
         <HStack gap={4}>
           <SupportLink href={SIFA_GROUP}></SupportLink>
-          <DownloadButton
-            variant="primary"
-            action={async () => {
-              trackPlausibleEvent("telechargement_sifa");
-              downloadObject(
-                await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
-                `tdb-données-sifa-${
-                  organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
-                }-${new Date().toLocaleDateString()}.csv`,
-                "text/plain"
-              );
-              handleToastOnSifaDownload();
-            }}
-          >
+          <DownloadButton variant="primary" action={downloadSifaFile}>
             Télécharger le fichier SIFA
           </DownloadButton>
         </HStack>
