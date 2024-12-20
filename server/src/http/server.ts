@@ -45,7 +45,6 @@ import {
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
   getEffectifsNominatifsWithoutId,
@@ -130,6 +129,7 @@ import errorMiddleware from "./middlewares/errorMiddleware";
 import {
   requireAdministrator,
   requireEffectifOrganismePermission,
+  requireMissionLocale,
   requireOrganismePermission,
   returnResult,
 } from "./middlewares/helpers";
@@ -149,6 +149,8 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
+import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
+import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -364,7 +366,8 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await rejectInvitation(req.params.token);
       })
-    );
+    )
+    .use("/api/v1/mission-locale", missionLocalePublicRoutes());
 
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
@@ -508,14 +511,10 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/effectifs/:type",
+        requireOrganismePermission("effectifsNominatifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const permissions = await getOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
-          if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
-            throw Boom.forbidden("Permissions invalides");
-          }
-
           const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
             req.user,
             filters,
@@ -928,6 +927,7 @@ function setupRoutes(app: Application) {
           await resendInvitationEmail(req.user, req.params.invitationId);
         })
       )
+      .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
   );
 
   /********************************
