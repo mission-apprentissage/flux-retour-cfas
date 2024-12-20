@@ -16,7 +16,7 @@ import {
   PHONE_REGEX_PATTERN,
 } from "shared";
 
-import { telephoneConverter } from "../../../server/src/common/validation/utils/frenchTelephoneNumber";
+import { telephoneConverter } from "../../utils/frenchTelephoneNumber";
 
 extendZodWithOpenApi(z);
 

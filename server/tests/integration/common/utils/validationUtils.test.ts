@@ -1,7 +1,6 @@
 import { isValidCFD } from "shared";
+import { telephoneConverter } from "shared/utils/frenchTelephoneNumber";
 import { it, expect, describe } from "vitest";
-
-import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
 
 describe("Validation Utils", () => {
   describe("validation du CFD", () => {
