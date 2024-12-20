@@ -35,7 +35,6 @@ import InfoTransmissionDonnees from "./InfoTransmissionDonnees";
 import OrganismesFilterPanel, { OrganismeFiltersListVisibilityProps } from "./OrganismesFilterPanel";
 
 type OrganismeNormalized = Organisme & {
-  id: string;
   normalizedName: string;
   normalizedUai: string;
   normalizedCommune: string;
