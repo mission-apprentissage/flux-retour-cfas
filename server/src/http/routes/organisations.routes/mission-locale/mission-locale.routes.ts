@@ -1,7 +1,11 @@
 import express from "express";
 import { IOrganisationMissionLocale } from "shared/models";
 
-import { dateFiltersSchema } from "@/common/actions/helpers/filters";
+import {
+  dateFiltersSchema,
+  effectifsFiltersMissionLocaleSchema,
+  withPaginationSchema,
+} from "@/common/actions/helpers/filters";
 import {
   getEffectifIndicateursForMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
@@ -22,7 +26,8 @@ const getIndicateursMissionLocale = async (req, { locals }) => {
   return await getEffectifIndicateursForMissionLocaleId(filters, missionLocale.ml_id);
 };
 
-const getEffectifsMissionLocale = async (_req, { locals }) => {
+const getEffectifsMissionLocale = async ({ query }, { locals }) => {
+  const filters = await validateFullZodObjectSchema(query, withPaginationSchema(effectifsFiltersMissionLocaleSchema));
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  return await getPaginatedEffectifsByMissionLocaleId(missionLocale.ml_id);
+  return await getPaginatedEffectifsByMissionLocaleId(missionLocale.ml_id, filters);
 };

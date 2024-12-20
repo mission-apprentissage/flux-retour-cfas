@@ -1,6 +1,7 @@
 import { Filter, RootFilterOperators } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
-import { z } from "zod";
+import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
+import { z, ZodRawShape } from "zod";
 
 export const organismeLookup = {
   from: "organismes",
@@ -76,11 +77,47 @@ export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<
 }
 
 export const effectifsFiltersMissionLocaleSchema = {
-  statut: z.array(z.enum([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT]).optional()),
-  rqth: z.boolean().optional(),
-  mineur: z.boolean().optional(),
+  statut: z
+    .array(z.enum([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT]).optional())
+    .optional(),
+  rqth: zBooleanStringSchema.optional(),
+  mineur: zBooleanStringSchema.optional(),
   niveau: z.array(z.string()).optional(),
   code_insee: z.array(z.string()).optional(),
 };
 
-export type EffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
+export type IEffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
+
+export const paginationFiltersSchema = {
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+  sort: z.string().optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+};
+
+export const withPaginationSchema = (schema: ZodRawShape) => {
+  return {
+    ...schema,
+    ...paginationFiltersSchema,
+  };
+};
+
+export type IPaginationFilters = z.infer<z.ZodObject<typeof paginationFiltersSchema>>;
+
+export type WithPagination<T> = T & IPaginationFilters;
+
+export const buildSortFilter = (sort: string, order: "asc" | "desc") => {
+  return {
+    [sort]: order === "asc" ? 1 : -1,
+  };
+};
+
+export const buildMineurFilter = (mineur: boolean) => {
+  return mineur
+    ? {
+        "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) },
+      }
+    : {
+        "apprenant.date_de_naissance": { $lt: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) },
+      };
+};

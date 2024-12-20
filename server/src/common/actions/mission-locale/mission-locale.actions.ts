@@ -1,11 +1,11 @@
-import { STATUT_APPRENANT } from "shared/constants";
+import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { effectifsDb } from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
-import { DateFilters } from "../helpers/filters";
+import { buildSortFilter, DateFilters, IEffectifsFiltersMissionLocale, WithPagination } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
 
 export const EFF_MISSION_LOCALE_FILTER = [
@@ -19,11 +19,37 @@ export const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
+export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+  const { statut = null, rqth = null, mineur = null, niveau = null, code_insee = null } = effectifFilters;
+  const filter = [
+    ...filterByDernierStatutPipeline(
+      (statut as Array<StatutApprenant>) ?? [
+        STATUT_APPRENANT.ABANDON,
+        STATUT_APPRENANT.RUPTURANT,
+        STATUT_APPRENANT.INSCRIT,
+      ],
+      new Date()
+    ),
+    {
+      $match: {
+        ...(rqth !== null ? { "apprenant.rqth": rqth } : {}),
+        ...(mineur !== null
+          ? { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) } }
+          : {}),
+        ...(niveau ? {} : {}),
+        ...(code_insee ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
+      },
+    },
+  ];
+
+  return filter;
+};
+
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
-  page: number = 1,
-  limit: number = 20
+  effectifsFiltersMissionLocale: WithPagination<IEffectifsFiltersMissionLocale>
 ) => {
+  const { page = 1, limit = 20, sort = "nom", order = "asc", ...effectifFilters } = effectifsFiltersMissionLocale;
   const aggregation = [
     {
       $match: {
@@ -31,10 +57,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
-    ...filterByDernierStatutPipeline(
-      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
-      new Date()
-    ),
+    ...buildFiltersForMissionLocale(effectifFilters),
     ...EFF_MISSION_LOCALE_FILTER,
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
@@ -60,6 +83,9 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     {
+      $sort: buildSortFilter(sort, order),
+    },
+    {
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
@@ -67,13 +93,12 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
-
   const result = (await effectifsDb().aggregate(aggregation).next()) as {
     pagination: any;
     data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }>;
   };
 
-  if (!result) {
+  if (!result || result?.data.length === 0) {
     return { pagination: { total: 0, page, limit }, data: [] };
   }
   const { pagination, data } = result;
