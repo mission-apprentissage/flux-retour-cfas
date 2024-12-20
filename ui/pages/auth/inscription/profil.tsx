@@ -173,6 +173,12 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   Administrateur
                 </Text>
               );
+            case "MISSION_LOCALE":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  Mission Locale {organisation.nom}
+                </Text>
+              );
           }
         })()}
       </Box>
