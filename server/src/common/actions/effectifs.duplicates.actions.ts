@@ -44,7 +44,7 @@ const getBasePipeline = (organisme_id) => [
       },
       count: { $sum: 1 },
       duplicates: {
-        $addToSet: {
+        $push: {
           id: "$_id",
           created_at: "$created_at",
           updated_at: "$updated_at",
@@ -55,14 +55,22 @@ const getBasePipeline = (organisme_id) => [
           historique_statut: "$historique_statut",
           id_erp_apprenant: "$id_erp_apprenant",
           annee_scolaire: "$annee_scolaire",
+          statut: "$_computed.statut",
         },
       },
       firstNomApprenant: { $first: "$apprenant.nom" },
       firstPrenomApprenant: { $first: "$apprenant.prenom" },
     },
   },
-  { $sort: { firstNomApprenant: 1, firstPrenomApprenant: 1 } },
+  {
+    $addFields: {
+      duplicates: {
+        $sortArray: { input: "$duplicates", sortBy: { updated_at: -1 } },
+      },
+    },
+  },
   { $match: { count: { $gt: 1 } } },
+  { $sort: { firstNomApprenant: 1, firstPrenomApprenant: 1 } },
 ];
 
 /**
