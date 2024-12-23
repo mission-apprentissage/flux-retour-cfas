@@ -8875,6 +8875,73 @@ exports[`validation-schema > should create validation schema for maintenanceMess
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleEffectif > missionLocaleEffectif 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "commentaires": {
+      "bsonType": "string",
+      "maxLength": 500,
+    },
+    "effectif_id": {
+      "bsonType": "objectId",
+    },
+    "inscrit_france_travail": {
+      "bsonType": "string",
+      "enum": [
+        "OUI",
+        "NON",
+        "INCONNU",
+      ],
+    },
+    "mission_locale_id": {
+      "bsonType": "objectId",
+    },
+    "situation": {
+      "bsonType": "string",
+      "enum": [
+        "CONTACTE_AVEC_SUIVI",
+        "CONTACT_SANS_SUIVI",
+        "DEJA_SUIVI",
+        "INJOIGNABLE",
+        "NON_CONTACTE",
+      ],
+    },
+    "situation_updated_at": {
+      "bsonType": "date",
+    },
+    "statut_correct": {
+      "bsonType": "bool",
+    },
+    "statut_reel": {
+      "bsonType": "string",
+      "enum": [
+        "CONTRAT_SIGNE_NON_DEMARRE",
+        "RETOUR_EN_VOIE_SCOLAIRE",
+        "ABANDON",
+        "RUPTURE",
+        "DECROCHAGE",
+        "AUTRE",
+      ],
+    },
+    "statut_reel_text": {
+      "bsonType": "string",
+      "maxLength": 150,
+    },
+  },
+  "required": [
+    "_id",
+    "mission_locale_id",
+    "effectif_id",
+    "situation_updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for opcoRncp > opcoRncp 1`] = `
 {
   "additionalProperties": false,

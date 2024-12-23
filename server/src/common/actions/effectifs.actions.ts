@@ -5,6 +5,7 @@ import { ObjectId, type WithoutId } from "mongodb";
 import { IEffecifMissionLocale, IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
@@ -468,7 +469,9 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
 };
 
 export const buildEffectifForMissionLocale = (
-  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }
+  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+    ml_effectif: IMissionLocaleEffectif;
+  }
 ): IEffecifMissionLocale => {
   const users = effectif.cfa_users.map(({ nom, prenom, email, telephone }) => ({
     nom,
@@ -486,6 +489,15 @@ export const buildEffectifForMissionLocale = (
       telephone: effectif.apprenant.telephone,
       courriel: effectif.apprenant.courriel,
       rqth: effectif.apprenant.rqth,
+    },
+    situation_data: {
+      situation: effectif.ml_effectif?.situation,
+      situation_updated_at: effectif.ml_effectif?.situation_updated_at,
+      statut_correct: effectif.ml_effectif?.statut_correct,
+      statut_reel: effectif.ml_effectif?.statut_reel,
+      statut_reel_text: effectif.ml_effectif?.statut_reel_text,
+      inscrit_france_travail: effectif.ml_effectif?.inscrit_france_travail,
+      commentaires: effectif.ml_effectif?.commentaires,
     },
     statut: effectif._computed?.statut,
     formation: effectif.formation,

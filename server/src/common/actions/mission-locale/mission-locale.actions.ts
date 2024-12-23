@@ -1,8 +1,11 @@
+import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
-import { effectifsDb } from "@/common/model/collections";
+import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
+import { effectifsDb, missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters, IEffectifsFiltersMissionLocale, WithPagination } from "../helpers/filters";
@@ -27,6 +30,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     niveaux = null,
     code_insee = null,
     search = null,
+    situation = null,
   } = effectifFilters;
 
   const filter = [
@@ -60,6 +64,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
           : {}),
         ...(niveaux ? { "formation.niveau": { $in: niveaux } } : {}),
         ...(code_insee ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
+        ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
       },
     },
   ];
@@ -69,9 +74,39 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
 
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
   effectifsFiltersMissionLocale: WithPagination<IEffectifsFiltersMissionLocale>
 ) => {
   const { page = 1, limit = 20, sort = "nom", order = "asc", ...effectifFilters } = effectifsFiltersMissionLocale;
+
+  const effectifMissionLocaleLookupAggregation = [
+    {
+      $lookup: {
+        let: { missionLocaleMongoId: new ObjectId(missionLocaleMongoId), effectif_id: "$_id" },
+        from: "missionLocaleEffectif",
+        as: "ml_effectif",
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$mission_locale_id", "$$missionLocaleMongoId"] },
+                  { $eq: ["$effectif_id", "$$effectif_id"] },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: "$ml_effectif",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ];
+
   const aggregation = [
     {
       $match: {
@@ -79,8 +114,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
-    ...buildFiltersForMissionLocale(effectifFilters),
-    ...EFF_MISSION_LOCALE_FILTER,
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
@@ -96,6 +129,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...effectifMissionLocaleLookupAggregation,
+    ...buildFiltersForMissionLocale(effectifFilters),
+    ...EFF_MISSION_LOCALE_FILTER,
+
     {
       $lookup: {
         from: "usersMigration",
@@ -117,7 +154,11 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   ];
   const result = (await effectifsDb().aggregate(aggregation).next()) as {
     pagination: any;
-    data: Array<IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> }>;
+    data: Array<
+      IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+        ml_effectif: IMissionLocaleEffectif;
+      }
+    >;
   };
 
   if (!result || result?.data.length === 0) {
@@ -152,4 +193,35 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
   ];
   const indicateurs = await effectifsDb().aggregate(aggregation).toArray();
   return indicateurs ?? { inscrits: 0, abandons: 0, rupturants: 0 };
+};
+
+export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, data: IUpdateMissionLocaleEffectif) => {
+  const {
+    effectif_id,
+    situation,
+    statut_reel,
+    statut_reel_text,
+    inscrit_france_travail,
+    commentaires,
+    statut_correct,
+  } = data;
+
+  return missionLocaleEffectifsDb().updateOne(
+    {
+      mission_locale_id: missionLocaleId,
+      effectif_id: new ObjectId(effectif_id),
+    },
+    {
+      $set: {
+        ...(situation !== undefined ? { situation } : {}),
+        ...(statut_reel !== undefined ? { statut_reel } : {}),
+        ...(statut_reel_text !== undefined ? { statut_reel_text } : {}),
+        ...(inscrit_france_travail !== undefined ? { inscrit_france_travail } : {}),
+        ...(commentaires !== undefined ? { commentaires } : {}),
+        ...(statut_correct !== undefined ? { statut_correct } : {}),
+        ...(situation !== undefined ? { situation_updated_at: new Date() } : {}),
+      },
+    },
+    { upsert: true }
+  );
 };
