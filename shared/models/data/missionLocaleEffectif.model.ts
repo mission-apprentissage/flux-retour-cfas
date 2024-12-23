@@ -27,11 +27,14 @@ export enum INSCRIPTION_FRANCE_TRAVAIL {
   NON = "NON",
   INCONNU = "INCONNU",
 }
+
+export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
+
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
-  situation: z.nativeEnum(SITUATION_ENUM).optional(),
+  situation: zSituationEnum.optional(),
   situation_updated_at: z.date(),
   statut_correct: z.boolean().optional(),
   statut_reel: z.nativeEnum(STATUT_JEUNE_MISSION_LOCALE).optional(),

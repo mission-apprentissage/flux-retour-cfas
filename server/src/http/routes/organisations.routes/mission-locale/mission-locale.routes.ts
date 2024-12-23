@@ -35,7 +35,7 @@ const getIndicateursMissionLocale = async (req, { locals }) => {
 const getEffectifsMissionLocale = async ({ query }, { locals }) => {
   const filters = await validateFullZodObjectSchema(query, withPaginationSchema(effectifsFiltersMissionLocaleSchema));
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  return await getPaginatedEffectifsByMissionLocaleId(missionLocale.ml_id, filters);
+  return await getPaginatedEffectifsByMissionLocaleId(missionLocale.ml_id, missionLocale._id, filters);
 };
 
 const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {

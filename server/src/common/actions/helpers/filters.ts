@@ -1,5 +1,6 @@
 import { Filter, RootFilterOperators } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import { zSituationEnum } from "shared/models/data/missionLocaleEffectif.model";
 import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
 import { z, ZodRawShape } from "zod";
 
@@ -85,6 +86,7 @@ export const effectifsFiltersMissionLocaleSchema = {
   niveaux: z.array(z.string()).optional(),
   code_insee: z.array(z.string()).optional(),
   search: z.string().optional(),
+  situation: z.array(zSituationEnum.optional()).optional(),
 };
 
 export type IEffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
