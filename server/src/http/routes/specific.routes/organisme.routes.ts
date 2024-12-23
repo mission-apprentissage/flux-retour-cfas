@@ -1,17 +1,17 @@
 import { ObjectId } from "bson";
 import {
+  STATUT_APPRENANT,
   getAnneesScolaireListFromDate,
   getSIFADate,
   requiredApprenantAdresseFieldsSifa,
   requiredFieldsSifa,
 } from "shared";
 
-// import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 
 export async function getOrganismeEffectifs(
-  organismeId,
-  sifa = false,
+  organismeId: ObjectId,
+  sifa: boolean = false,
   options: {
     pageIndex: number;
     pageSize: number;
@@ -23,7 +23,8 @@ export async function getOrganismeEffectifs(
 ) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
   const { pageIndex, pageSize, search, filters, sortField, sortOrder } = options;
-  const db = await effectifsDb();
+  const isDeca = !organisme?.is_transmission_target;
+  const db = isDeca ? effectifsDECADb() : effectifsDb();
 
   const parsedFilters = Object.entries(filters).reduce(
     (acc, [key, value]) => {
@@ -93,6 +94,25 @@ export async function getOrganismeEffectifs(
               ...(sifa && {
                 annee_scolaire: {
                   $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
+                },
+                "_computed.statut.parcours": {
+                  $elemMatch: {
+                    valeur: STATUT_APPRENANT.APPRENTI,
+                    date: {
+                      $eq: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$_computed.statut.parcours",
+                              as: "parcours",
+                              cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
+                            },
+                          },
+                          -1,
+                        ],
+                      },
+                    },
+                  },
                 },
               }),
             },
@@ -181,10 +201,60 @@ export async function getOrganismeEffectifs(
   const [data] = await db.aggregate(pipeline).toArray();
 
   return {
-    fromDECA: !organisme?.is_transmission_target,
+    fromDECA: isDeca,
     total: data?.total || 0,
     filters: data?.filters || {},
     organismesEffectifs: data?.results || [],
+  };
+}
+
+export async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = false) {
+  const organisme = await organismesDb().findOne({ _id: organismeId });
+  const isDeca = !organisme?.is_transmission_target;
+  const db = isDeca ? effectifsDECADb() : effectifsDb();
+
+  const pipeline = [
+    {
+      $match: {
+        organisme_id: organismeId,
+        ...(sifa && {
+          annee_scolaire: {
+            $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
+          },
+          "_computed.statut.parcours": {
+            $elemMatch: {
+              valeur: STATUT_APPRENANT.APPRENTI,
+              date: {
+                $eq: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$_computed.statut.parcours",
+                        as: "parcours",
+                        cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
+                      },
+                    },
+                    -1,
+                  ],
+                },
+              },
+            },
+          },
+        }),
+      },
+    },
+    {
+      $project: {
+        id: { $toString: "$_id" },
+      },
+    },
+  ];
+
+  const effectifs = await db.aggregate(pipeline).toArray();
+
+  return {
+    fromDECA: isDeca,
+    organismesEffectifs: effectifs,
   };
 }
 
@@ -196,7 +266,7 @@ export async function updateOrganismeEffectifs(
   }
 ) {
   if (!update["apprenant.type_cfa"]) return;
-  const { fromDECA, organismesEffectifs } = await getOrganismeEffectifs(organismeId, sifa);
+  const { fromDECA, organismesEffectifs } = await getAllOrganismeEffectifsIds(organismeId, sifa);
 
   !fromDECA &&
     (await effectifsDb().updateMany(
