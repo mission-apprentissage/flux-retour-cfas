@@ -1,8 +1,10 @@
+import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters, IEffectifsFiltersMissionLocale, WithPagination } from "../helpers/filters";
@@ -152,4 +154,22 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
   ];
   const indicateurs = await effectifsDb().aggregate(aggregation).toArray();
   return indicateurs ?? { inscrits: 0, abandons: 0, rupturants: 0 };
+};
+
+export const setEffectifMissionLocaleData = async (
+  missionLocaleId: ObjectId,
+  data: { effectifId: string; situation: SITUATION_ENUM }
+) => {
+  return missionLocaleEffectifsDb().updateOne(
+    {
+      mission_locale_id: missionLocaleId,
+      effectif_id: new ObjectId(data.effectifId),
+    },
+    {
+      $set: {
+        situation: data.situation,
+      },
+    },
+    { upsert: true }
+  );
 };
