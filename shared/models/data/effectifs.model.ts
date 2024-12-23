@@ -85,7 +85,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.fiable": 1, annee_scolaire: 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
-  [{ "apprenant.adresse.mission_locale_id": 1 }, {}],
+  [{ "apprenant.adresse.mission_locale_id": 1, annee_scolaire: 1 }, {}],
 ];
 
 const StatutApprenantEnum = zodEnumFromArray(
