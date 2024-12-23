@@ -93,9 +93,59 @@ describe("hydrateEffectifsComputedTypes", () => {
 
       expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
     });
+
+    it("doit avoir le statut apprenti même si le contrat commence dans le futur", async () => {
+      const customDateDeDebutDeContrat = new Date();
+      customDateDeDebutDeContrat.setDate(customDateDeDebutDeContrat.getDate() + 7);
+
+      const effectif = await createSampleEffectif({
+        organisme: sampleOrganisme,
+        contrats: [
+          {
+            date_debut: customDateDeDebutDeContrat,
+            date_fin: formation.date_fin,
+          },
+        ],
+        formation,
+      });
+
+      const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
+      await hydrateEffectifsComputedTypes();
+
+      const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
+
+      expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
+    });
   });
 
   describe("apprenent en formation avec rupture de contrat", () => {
+    it("ne doit  pas avoir le statut d'apprenti si rupture de contrat avant le début du contrat", async () => {
+      const ruptureDate = new Date(formation.date_entree.getTime());
+      ruptureDate.setDate(formation.date_entree.getDate() - 10);
+
+      const customEvalutationDate = new Date(formation.date_entree.getTime() + 10);
+      const effectif = await createSampleEffectif({
+        organisme: sampleOrganisme,
+        contrats: [
+          {
+            date_debut: formation.date_entree,
+            date_fin: formation.date_fin,
+            date_rupture: ruptureDate,
+          },
+        ],
+        formation,
+      });
+
+      const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
+      await hydrateEffectifsComputedTypes({ evaluationDate: customEvalutationDate });
+
+      const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
+
+      expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
+        { valeur: STATUT_APPRENANT.INSCRIT, date: formation.date_entree },
+      ]);
+    });
+
     it("doit avoir le statut rupturant si rupture de moins de 180 jours", async () => {
       const ruptureDate = new Date(evaluationDate.getTime());
       ruptureDate.setDate(ruptureDate.getDate() - 179);
