@@ -2,8 +2,6 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { IOrganisationMissionLocale } from "shared/models";
-import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import { z } from "zod";
 
 import {
   dateFiltersSchema,
@@ -15,6 +13,7 @@ import {
   getPaginatedEffectifsByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -41,12 +40,9 @@ const getEffectifsMissionLocale = async ({ query }, { locals }) => {
 
 const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const data = await validateFullZodObjectSchema(body, {
-    effectifId: z.string().regex(/^[0-9a-f]{24}$/),
-    situation: z.nativeEnum(SITUATION_ENUM),
-  });
+  const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
 
-  const effectif = await effectifsDb().findOne({ _id: new ObjectId(data.effectifId) });
+  const effectif = await effectifsDb().findOne({ _id: new ObjectId(data.effectif_id) });
 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");

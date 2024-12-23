@@ -14,11 +14,30 @@ export enum SITUATION_ENUM {
   NON_CONTACTE = "NON_CONTACTE",
 }
 
+export enum STATUT_JEUNE_MISSION_LOCALE {
+  CONTRAT_SIGNE_NON_DEMARRE = "CONTRAT_SIGNE_NON_DEMARRE",
+  RETOUR_EN_VOIE_SCOLAIRE = "RETOUR_EN_VOIE_SCOLAIRE",
+  ABANDON = "ABANDON",
+  RUPTURE = "RUPTURE",
+  DECROCHAGE = "DECROCHAGE",
+  AUTRE = "AUTRE",
+}
+export enum INSCRIPTION_FRANCE_TRAVAIL {
+  OUI = "OUI",
+  NON = "NON",
+  INCONNU = "INCONNU",
+}
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
-  situation: z.nativeEnum(SITUATION_ENUM),
+  situation: z.nativeEnum(SITUATION_ENUM).optional(),
+  situation_updated_at: z.date(),
+  statut_correct: z.boolean().optional(),
+  statut_reel: z.nativeEnum(STATUT_JEUNE_MISSION_LOCALE).optional(),
+  statut_reel_text: z.string().max(150).optional(),
+  inscrit_france_travail: z.nativeEnum(INSCRIPTION_FRANCE_TRAVAIL).optional(),
+  commentaires: z.string().max(500).optional(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
