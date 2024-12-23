@@ -51,6 +51,13 @@ export const createDernierStatutFieldPipeline = (date: Date) => [
       },
     },
   },
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
+      },
+    },
+  },
 ];
 
 export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>

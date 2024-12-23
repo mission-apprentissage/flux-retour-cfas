@@ -22,6 +22,18 @@ export const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
+const A_RISQUE_FILTER = [
+  {
+    $match: {
+      $or: [
+        { dernierStatut: STATUT_APPRENANT.ABANDON },
+        { $and: [{ "dernierStatut.valeur": STATUT_APPRENANT.RUPTURANT }, { dernierStatutDureeInDay: { $gt: 150 } }] }, // 5 mois en jours
+        { $and: [{ "dernierStatut.valeur": STATUT_APPRENANT.INSCRIT }, { dernierStatutDureeInDay: { $gt: 60 } }] }, // 2 mois en
+      ],
+    },
+  },
+];
+
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = null,
@@ -31,6 +43,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     code_insee = null,
     search = null,
     situation = null,
+    a_risque = null,
   } = effectifFilters;
 
   const filter = [
@@ -62,11 +75,12 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
         ...(mineur !== null
           ? { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) } }
           : {}),
-        ...(niveaux ? { "formation.niveau": { $in: niveaux } } : {}),
-        ...(code_insee ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
-        ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
+        ...(niveaux !== null ? { "formation.niveau": { $in: niveaux } } : {}),
+        ...(code_insee !== null ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
+        ...(situation !== null ? { "ml_effectif.situation": { $in: situation } } : {}),
       },
     },
+    ...(a_risque ? A_RISQUE_FILTER : []),
   ];
 
   return filter;
@@ -132,7 +146,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     ...effectifMissionLocaleLookupAggregation,
     ...buildFiltersForMissionLocale(effectifFilters),
     ...EFF_MISSION_LOCALE_FILTER,
-
     {
       $lookup: {
         from: "usersMigration",
