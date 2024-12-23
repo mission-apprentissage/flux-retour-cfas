@@ -44,6 +44,8 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     search = null,
     situation = null,
     a_risque = null,
+    last_update_value = null,
+    last_update_order = null,
   } = effectifFilters;
 
   const filter = [
@@ -78,6 +80,15 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
         ...(niveaux !== null ? { "formation.niveau": { $in: niveaux } } : {}),
         ...(code_insee !== null ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
         ...(situation !== null ? { "ml_effectif.situation": { $in: situation } } : {}),
+        ...(last_update_value !== null && last_update_order !== null
+          ? {
+              updated_at: {
+                [last_update_order === "AFTER" ? "$gte" : "$lte"]: new Date(
+                  new Date().setDate(new Date().getDate() - last_update_value)
+                ),
+              },
+            }
+          : {}),
       },
     },
     ...(a_risque ? A_RISQUE_FILTER : []),
