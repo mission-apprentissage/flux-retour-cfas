@@ -20,7 +20,15 @@ export const EFF_MISSION_LOCALE_FILTER = [
 ];
 
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
-  const { statut = null, rqth = null, mineur = null, niveaux = null, code_insee = null } = effectifFilters;
+  const {
+    statut = null,
+    rqth = null,
+    mineur = null,
+    niveaux = null,
+    code_insee = null,
+    search = null,
+  } = effectifFilters;
+
   const filter = [
     ...filterByDernierStatutPipeline(
       (statut as Array<StatutApprenant>) ?? [
@@ -32,6 +40,20 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     ),
     {
       $match: {
+        ...(search !== null
+          ? {
+              $or: search
+                .trim()
+                .split(" ")
+                .reduce((acc: Array<object>, currentSearch) => {
+                  return [
+                    ...acc,
+                    { "apprenant.nom": { $regex: currentSearch, $options: "i" } },
+                    { "apprenant.prenom": { $regex: currentSearch, $options: "i" } },
+                  ];
+                }, []),
+            }
+          : {}),
         ...(rqth !== null ? { "apprenant.rqth": rqth } : {}),
         ...(mineur !== null
           ? { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) } }
