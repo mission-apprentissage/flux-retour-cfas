@@ -84,6 +84,7 @@ export const effectifsFiltersMissionLocaleSchema = {
   mineur: zBooleanStringSchema.optional(),
   niveaux: z.array(z.string()).optional(),
   code_insee: z.array(z.string()).optional(),
+  search: z.string().optional(),
 };
 
 export type IEffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
