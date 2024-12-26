@@ -65,6 +65,8 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
   const { ref, onMouseUp, onMouseDown, isDragging } = useDraggableScroll();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
+  const [currentEffectifDuplicate, setCurrentEffectifDuplicate] = useState<DuplicateEffectifDetail>();
+
   const cancelRef = useRef();
   const tableRef = useRef<HTMLTableElement>(null);
   const topScrollRef = useRef<HTMLDivElement>(null);
@@ -85,6 +87,16 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
       setTableWidth(`${tableRef.current.offsetWidth}px`);
     }
   }, [tableRef.current?.offsetWidth]);
+
+  const handleDialogOpen = (duplicate: DuplicateEffectifDetail) => {
+    setCurrentEffectifDuplicate(duplicate);
+    onOpenAlertDialog();
+  };
+
+  const handleDialogClose = () => {
+    setCurrentEffectifDuplicate(undefined);
+    onCloseAlertDialog();
+  };
 
   const renderTableGroupHeader = (title: string, duplicates: DuplicateEffectifDetail[], icon: string) => (
     <Thead color="bluefrances">
@@ -345,19 +357,13 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                           variant="secondary"
                           onClick={() => {
                             trackPlausibleEvent("suppression_doublons_effectifs");
-                            onOpenAlertDialog();
+                            handleDialogOpen(duplicate);
                           }}
                         >
                           <Box as="i" className="ri-delete-bin-line" mr={2} />
                           <Text as="span">Supprimer</Text>
                         </Button>
                       </Flex>
-                      <EffectifDoublonDeleteAlertDialog
-                        cancelRef={cancelRef}
-                        isOpen={isOpenAlertDialog}
-                        onClose={onCloseAlertDialog}
-                        duplicateDetail={duplicate}
-                      />
                     </Th>
                   ))}
                 </Tr>
@@ -371,6 +377,12 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
           </Box>
         </Box>
       </ScrollShadowBox>
+      <EffectifDoublonDeleteAlertDialog
+        cancelRef={cancelRef}
+        isOpen={isOpenAlertDialog}
+        onClose={handleDialogClose}
+        duplicateDetail={currentEffectifDuplicate}
+      />
     </>
   );
 };
