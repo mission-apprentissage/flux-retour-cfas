@@ -27,6 +27,7 @@ export const zContrat = zodOpenApi.object({
         zodOpenApi.literal(27),
         zodOpenApi.literal(28),
         zodOpenApi.literal(29),
+        zodOpenApi.literal(30),
       ],
       {
         description: "Le type d'employeur doit être en adéquation avec son statut juridique.",
