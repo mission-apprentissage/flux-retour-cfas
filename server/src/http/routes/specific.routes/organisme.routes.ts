@@ -43,13 +43,16 @@ export async function getOrganismeEffectifs(
     {} as Record<string, string[]>
   );
 
-  const matchConditions = {
+  const matchOrgaAndAnneScolaire = (sifa: boolean) => ({
     organisme_id: organismeId,
     ...(sifa && {
       annee_scolaire: {
         $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
       },
     }),
+  });
+
+  const matchConditions = {
     ...Object.keys(parsedFilters).reduce((acc, key) => {
       if (parsedFilters[key]?.length > 0) {
         const fieldKey =
@@ -86,37 +89,40 @@ export async function getOrganismeEffectifs(
 
   const pipeline = [
     {
+      $match: {
+        ...matchOrgaAndAnneScolaire(sifa),
+      },
+    },
+    {
       $facet: {
         allFilters: [
-          {
-            $match: {
-              organisme_id: organismeId,
-              ...(sifa && {
-                annee_scolaire: {
-                  $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
-                },
-                "_computed.statut.parcours": {
-                  $elemMatch: {
-                    valeur: STATUT_APPRENANT.APPRENTI,
-                    date: {
-                      $eq: {
-                        $arrayElemAt: [
-                          {
-                            $filter: {
-                              input: "$_computed.statut.parcours",
-                              as: "parcours",
-                              cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
-                            },
+          ...(sifa
+            ? [
+                {
+                  $match: {
+                    "_computed.statut.parcours": {
+                      $elemMatch: {
+                        valeur: STATUT_APPRENANT.APPRENTI,
+                        date: {
+                          $eq: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: "$_computed.statut.parcours",
+                                  as: "parcours",
+                                  cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
+                                },
+                              },
+                              -1,
+                            ],
                           },
-                          -1,
-                        ],
+                        },
                       },
                     },
                   },
                 },
-              }),
-            },
-          },
+              ]
+            : []),
           {
             $group: {
               _id: null,
