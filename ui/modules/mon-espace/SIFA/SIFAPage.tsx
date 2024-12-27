@@ -108,8 +108,8 @@ function SIFAPage(props: SIFAPageProps) {
       const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
 
       setCurrentEffectifsState(
-        organismesEffectifs.reduce((acc, { id, validation_errors }) => {
-          acc.set(id, { validation_errors, requiredSifa: [] });
+        organismesEffectifs.reduce((acc, { id, validation_errors, requiredSifa }) => {
+          acc.set(id, { validation_errors, requiredSifa });
           return acc;
         }, new Map())
       );

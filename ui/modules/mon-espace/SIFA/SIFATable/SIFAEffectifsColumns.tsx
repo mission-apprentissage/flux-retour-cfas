@@ -1,11 +1,11 @@
-import { Alert, Box, HStack, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
+import { Box, HStack, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 import { DateTime } from "luxon";
 import { useRecoilValue } from "recoil";
 import { getStatut } from "shared";
 
 import { capitalizeWords } from "@/common/utils/stringUtils";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
-import { ValidateIcon } from "@/theme/components/icons";
+import { ValidateIcon, Alert } from "@/theme/components/icons";
 
 import { effectifStateSelector } from "../../effectifs/engine/formEngine/atoms";
 
