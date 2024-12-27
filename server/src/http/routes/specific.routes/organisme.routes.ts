@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { compact, get } from "lodash-es";
 import {
   STATUT_APPRENANT,
   getAnneesScolaireListFromDate,
@@ -52,6 +53,36 @@ export async function getOrganismeEffectifs(
     }),
   });
 
+  const addSifaFilter = (sifa: boolean) => {
+    return sifa
+      ? [
+          {
+            $addFields: {
+              dernierStatut: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: "$_computed.statut.parcours",
+                      as: "statut",
+                      cond: {
+                        $lte: ["$$statut.date", currentDate],
+                      },
+                    },
+                  },
+                  -1,
+                ],
+              },
+            },
+          },
+          {
+            $match: {
+              "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+            },
+          },
+        ]
+      : [];
+  };
+
   const matchConditions = {
     ...Object.keys(parsedFilters).reduce((acc, key) => {
       if (parsedFilters[key]?.length > 0) {
@@ -87,42 +118,17 @@ export async function getOrganismeEffectifs(
       ? { [fieldMap[sortField] || sortField]: sortOrder === "desc" ? -1 : 1 }
       : { "formation.annee_scolaire": -1 };
 
+  const currentDate = sifa ? getSIFADate(new Date()) : new Date();
   const pipeline = [
     {
       $match: {
         ...matchOrgaAndAnneScolaire(sifa),
       },
     },
+    ...addSifaFilter(sifa),
     {
       $facet: {
         allFilters: [
-          ...(sifa
-            ? [
-                {
-                  $match: {
-                    "_computed.statut.parcours": {
-                      $elemMatch: {
-                        valeur: STATUT_APPRENANT.APPRENTI,
-                        date: {
-                          $eq: {
-                            $arrayElemAt: [
-                              {
-                                $filter: {
-                                  input: "$_computed.statut.parcours",
-                                  as: "parcours",
-                                  cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
-                                },
-                              },
-                              -1,
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              ]
-            : []),
           {
             $group: {
               _id: null,
@@ -147,40 +153,6 @@ export async function getOrganismeEffectifs(
           { $sort: sortConditions },
           { $skip: pageIndex * pageSize },
           { $limit: pageSize },
-          {
-            $project: {
-              id: { $toString: "$_id" },
-              id_erp_apprenant: 1,
-              organisme_id: 1,
-              annee_scolaire: 1,
-              source: 1,
-              validation_errors: 1,
-              formation: 1,
-              nom: "$apprenant.nom",
-              prenom: "$apprenant.prenom",
-              date_de_naissance: "$apprenant.date_de_naissance",
-              historique_statut: "$apprenant.historique_statut",
-              statut: "$_computed.statut",
-              ...(sifa
-                ? {
-                    requiredSifa: {
-                      $filter: {
-                        input: {
-                          $setUnion: [
-                            requiredFieldsSifa,
-                            {
-                              $cond: [{ $not: "$apprenant.adresse.complete" }, requiredApprenantAdresseFieldsSifa, []],
-                            },
-                          ],
-                        },
-                        as: "fieldName",
-                        cond: { $or: [{ $not: { $ifNull: ["$$fieldName", false] } }] },
-                      },
-                    },
-                  }
-                : {}),
-            },
-          },
         ],
         totalCount: [
           { $match: matchConditions },
@@ -206,11 +178,37 @@ export async function getOrganismeEffectifs(
 
   const [data] = await db.aggregate(pipeline).toArray();
 
+  const effectifs = data?.results.map((effectif) => ({
+    id: effectif._id.toString(),
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    organisme_id: organismeId,
+    annee_scolaire: effectif.annee_scolaire,
+    source: effectif.source,
+    validation_errors: effectif.validation_errors,
+    formation: effectif.formation,
+    nom: effectif.apprenant.nom,
+    prenom: effectif.apprenant.prenom,
+    date_de_naissance: effectif.apprenant.date_de_naissance,
+    historique_statut: effectif.apprenant.historique_statut,
+    statut: effectif._computed?.statut,
+    ...(sifa
+      ? {
+          requiredSifa: compact(
+            [
+              ...(!effectif.apprenant.adresse?.complete
+                ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
+                : requiredFieldsSifa),
+            ].map((fieldName) => (!get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined))
+          ),
+        }
+      : {}),
+  }));
+
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
     filters: data?.filters || {},
-    organismesEffectifs: data?.results || [],
+    organismesEffectifs: effectifs || [],
   };
 }
 
