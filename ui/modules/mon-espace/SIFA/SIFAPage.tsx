@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
@@ -48,9 +48,9 @@ function SIFAPage(props: SIFAPageProps) {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
-  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-
+  const [currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
+  const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
@@ -120,6 +120,14 @@ function SIFAPage(props: SIFAPageProps) {
     },
     { keepPreviousData: true }
   );
+
+  useEffect(() => {
+    const invalidCount = currentEffectifsState
+      .values()
+      .toArray()
+      .filter((effectif) => effectif.requiredSifa.length > 0).length;
+    setSifaInvalidCount(invalidCount);
+  }, [currentEffectifsState]);
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -231,11 +239,10 @@ function SIFAPage(props: SIFAPageProps) {
 
   const handleToastOnSifaDownload = () => {
     const organismesEffectifs = data?.organismesEffectifs || [];
-    const nbEffectifsInvalides = organismesEffectifs.filter((effectif) => effectif.requiredSifa.length > 0).length;
 
-    nbEffectifsInvalides > 0
+    sifaInvalidCount > 0
       ? toastWarning(
-          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${sifaInvalidCount} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
           {
             isClosable: true,
             duration: 20000,
