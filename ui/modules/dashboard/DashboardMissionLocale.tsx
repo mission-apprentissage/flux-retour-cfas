@@ -1,5 +1,5 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
-import { Box, Container, Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Center, Container, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { getOrganisationLabel } from "shared";
 
@@ -25,7 +25,13 @@ const DashboardMissionLocale = () => {
     { retry: 1 }
   );
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <Center h="200px">
+        <Spinner />
+      </Center>
+    );
+  }
 
   return (
     <Box>
@@ -79,7 +85,7 @@ const DashboardMissionLocale = () => {
           <GridItem bg="galt">
             <IndicatorCard
               label="jeunes sans contrat"
-              count={indicateurs[0].inscrits}
+              count={indicateurs.inscrits}
               tooltipHeader="Jeune sans contrat"
               tooltipLabel={
                 <>
@@ -94,7 +100,7 @@ const DashboardMissionLocale = () => {
           <GridItem bg="galt">
             <IndicatorCard
               label="jeunes en rupture de contrat"
-              count={indicateurs[0].rupturants}
+              count={indicateurs.rupturants}
               tooltipHeader="Rupturant"
               tooltipLabel={
                 <>
@@ -110,7 +116,7 @@ const DashboardMissionLocale = () => {
           <GridItem bg="galt">
             <IndicatorCard
               label="sorties d’apprentissage"
-              count={indicateurs[0].abandons}
+              count={indicateurs.abandons}
               tooltipHeader="Sorties d’apprentissage (anciennement “abandons”)"
               tooltipLabel={
                 <div>
