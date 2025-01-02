@@ -26,7 +26,7 @@ import { BasicModal } from "@/components/Modals/BasicModal";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { effectifIdAtom, effectifFromDecaAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifStateSelector, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
-import { Trash } from "@/theme/components/icons";
+import { Alert, Trash } from "@/theme/components/icons";
 import { ErrorPill } from "@/theme/components/icons/ErrorPill";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
 
@@ -291,6 +291,7 @@ export const EffectifForm = memo(
                   validationErrors={validationErrorsByBlock.apprenant}
                   requiredSifa={requiredSifaByBlock.apprenant}
                 >
+                  <WarningMessage modeSifa />
                   <EffectifApprenant apprenant={values?.apprenant} modeSifa={modeSifa} />
                 </AccordionItemChild>
               )}
@@ -303,6 +304,7 @@ export const EffectifForm = memo(
                   validationErrors={validationErrorsByBlock.formation}
                   requiredSifa={requiredSifaByBlock.formation}
                 >
+                  <WarningMessage modeSifa />
                   <EffectifFormation />
                 </AccordionItemChild>
               )}
@@ -315,6 +317,7 @@ export const EffectifForm = memo(
                   validationErrors={validationErrorsByBlock.contrats}
                   requiredSifa={requiredSifaByBlock.contrats}
                 >
+                  <WarningMessage modeSifa />
                   <ApprenantContrats contrats={values?.contrats} />
                 </AccordionItemChild>
               )}
@@ -325,6 +328,20 @@ export const EffectifForm = memo(
     );
   }
 );
+
+export const WarningMessage = ({ modeSifa }: { modeSifa: boolean }) => {
+  if (!modeSifa) return null;
+
+  return (
+    <HStack alignItems={"center"} mt={4}>
+      <Alert color="warning" bg="white" boxSize="5" />
+      <Text fontSize="zeta" color="warning">
+        Les champs verrouillés ci-dessous le sont en raison de l&#39;envoi automatique, chaque nuit, par votre ERP, des
+        données de votre établissement.
+      </Text>
+    </HStack>
+  );
+};
 
 // eslint-disable-next-line react/display-name
 const AccordionItemChild = React.memo(
