@@ -215,7 +215,7 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
       },
     },
   ];
-  const indicateurs = await effectifsDb().aggregate(aggregation).toArray();
+  const indicateurs = await effectifsDb().aggregate(aggregation).next();
   return indicateurs ?? { inscrits: 0, abandons: 0, rupturants: 0 };
 };
 

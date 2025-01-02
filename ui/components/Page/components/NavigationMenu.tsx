@@ -138,6 +138,23 @@ function NavBarTransverse(): React.ReactElement {
   );
 }
 
+function NavBarMissionLocale(): React.ReactElement {
+  return (
+    <>
+      <NavItem to="/" exactMatch>
+        Mon tableau de bord
+      </NavItem>
+      <NavItem to="/apprenants" exactMatch>
+        Apprenants
+      </NavItem>
+      <NavItem to="/cfa" exactMatch isDisabled>
+        CFA
+      </NavItem>
+      <MenuQuestions />
+    </>
+  );
+}
+
 function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
   return (
@@ -225,6 +242,10 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
   switch (auth?.organisation?.type) {
     case "ORGANISME_FORMATION": {
       return <NavBarOrganismeFormation />;
+    }
+
+    case "MISSION_LOCALE": {
+      return <NavBarMissionLocale />;
     }
 
     case "TETE_DE_RESEAU":

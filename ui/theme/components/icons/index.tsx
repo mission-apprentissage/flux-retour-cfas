@@ -19,6 +19,7 @@ export * from "./ErrorIcon";
 export * from "./ExternalLinkLine";
 export * from "./InfoCircle";
 export * from "./InformationAvatar";
+export * from "./InfoSquare";
 export * from "./Interrogation";
 export * from "./IoArrowBackward";
 export * from "./IoArrowForward";
