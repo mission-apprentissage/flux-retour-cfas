@@ -18,7 +18,6 @@ import { RupturantsIcon, InscritsSansContratsIcon, AbandonsIcon } from "./icons"
 
 const DashboardMissionLocale = () => {
   const { auth } = useAuth();
-  console.log("CONSOLE LOG ~ DashboardMissionLocale ~ auth:", auth);
 
   const { data: indicateurs, isFetching: isLoading } = useQuery(
     ["mission-locale-indicateurs"],
