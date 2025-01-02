@@ -569,7 +569,18 @@ function setupRoutes(app: Application) {
         "/effectifs",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          return await getOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true");
+          const { pageIndex, pageSize, search, sortField, sortOrder, sifa, ...filters } = req.query;
+
+          const options = {
+            pageIndex: parseInt(pageIndex, 10) || 0,
+            pageSize: parseInt(pageSize, 10) || 10,
+            search: search || "",
+            sortField,
+            sortOrder,
+            filters,
+          };
+
+          return await getOrganismeEffectifs(res.locals.organismeId, sifa === "true", options);
         })
       )
       .put(

@@ -26,7 +26,7 @@ const EffectifDoublonDeleteAlertDialog = ({
   isOpen: boolean;
   onClose?: () => void;
   cancelRef;
-  duplicateDetail: DuplicateEffectifDetail;
+  duplicateDetail?: DuplicateEffectifDetail;
 }) => {
   const queryClient = useQueryClient();
   const { trackPlausibleEvent } = usePlausibleTracking();

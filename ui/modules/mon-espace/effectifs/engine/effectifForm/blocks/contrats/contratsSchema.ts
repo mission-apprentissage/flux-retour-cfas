@@ -141,6 +141,10 @@ export const contratsSchema = {
             label: "29 Autre employeur public",
             value: 29,
           },
+          {
+            label: "30 Etablissement public industriel et commercial",
+            value: 30,
+          },
         ],
       },
     ],

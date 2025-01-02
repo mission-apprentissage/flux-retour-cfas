@@ -1,4 +1,3 @@
-import { Box } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
 import { useSetRecoilState } from "recoil";
@@ -23,14 +22,12 @@ const EffectifTableDetails = ({ row, modeSifa = false, canEdit = false, refetch 
   }
 
   return (
-    <Box>
-      <Effectif
-        modeSifa={modeSifa}
-        canEdit={canEdit}
-        parcours={row?.original?.statut?.parcours || []}
-        refetch={refetch}
-      />
-    </Box>
+    <Effectif
+      modeSifa={modeSifa}
+      canEdit={canEdit}
+      parcours={row?.original?.statut?.parcours || []}
+      refetch={refetch}
+    />
   );
 };
 
