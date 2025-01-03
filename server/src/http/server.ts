@@ -570,7 +570,8 @@ function setupRoutes(app: Application) {
         "/effectifs",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          const { pageIndex, pageSize, search, sortField, sortOrder, sifa, ...filters } = req.query;
+          const { pageIndex, pageSize, search, sortField, sortOrder, sifa, only_sifa_missing_fields, ...filters } =
+            req.query;
 
           const options = {
             pageIndex: parseInt(pageIndex, 10) || 0,
@@ -581,7 +582,12 @@ function setupRoutes(app: Application) {
             filters,
           };
 
-          return await getOrganismeEffectifs(res.locals.organismeId, sifa === "true", options);
+          return await getOrganismeEffectifs(
+            res.locals.organismeId,
+            sifa === "true",
+            only_sifa_missing_fields,
+            options
+          );
         })
       )
       .put(
