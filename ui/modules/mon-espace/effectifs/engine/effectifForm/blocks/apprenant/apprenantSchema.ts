@@ -494,7 +494,7 @@ export const apprenantSchema = {
             value: 1021,
           },
           {
-            label: "Autres 3ème (agricole, insertion, projet professionnel,SGEPA..)",
+            label: "1023 Autres 3ème (agricole, insertion, projet professionnel,SGEPA..)",
             value: 1023,
           },
         ],
