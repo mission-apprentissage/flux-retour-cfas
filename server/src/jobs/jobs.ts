@@ -1,12 +1,12 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
-import type { IEffectif } from "shared/models";
+import type { IEffectif, IOrganisation, IOrganisationOrganismeFormation } from "shared/models";
 import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -426,6 +426,26 @@ export async function setupJobProcessor() {
           }
         },
         resumable: true,
+      },
+      "tmp:migration:organisation-organisme": {
+        handler: async () => {
+          const organisations: Array<IOrganisation> = await organisationsDb()
+            .find({
+              type: "ORGANISME_FORMATION",
+            })
+            .toArray();
+
+          for (let i = 0; i < organisations.length; i++) {
+            const orga = organisations[i] as IOrganisationOrganismeFormation;
+            const organisme = await organismesDb().findOne({ siret: orga.siret, uai: orga.uai ?? undefined });
+            if (organisme) {
+              await organisationsDb().updateOne(
+                { _id: orga._id },
+                { $set: { organisme_id: organisme._id.toString() } }
+              );
+            }
+          }
+        },
       },
       "tmp:migration:effectifs:duree_formation_relle": {
         handler: async () => {

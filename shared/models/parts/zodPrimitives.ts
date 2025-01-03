@@ -484,3 +484,12 @@ export const primitivesV3 = {
       })
   ),
 };
+
+export const zBooleanStringSchema = z.preprocess((v) => {
+  if (typeof v == "boolean") return v;
+  if (v === "true") {
+    return true;
+  } else if (v === "false") {
+    return false;
+  }
+}, z.boolean());

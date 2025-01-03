@@ -1,5 +1,4 @@
-import { Box, Center, Grid, GridItem, HStack, Skeleton, Text } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import { Box, Grid, GridItem, Skeleton, Text } from "@chakra-ui/react";
 import {
   PlausibleGoalType,
   TypeEffectifNominatif,
@@ -11,11 +10,10 @@ import {
 import { getEffectifsExportColumnFromOrganisationType } from "@/common/actions/organisation.actions";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { formatNumber } from "@/common/utils/stringUtils";
 import AppButton, { AppButtonProps } from "@/components/buttons/Button";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import { IndicatorCard } from "@/components/Card/IndicatorCard";
 import { BasicModal } from "@/components/Modals/BasicModal";
-import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import { EffectifsFiltersFull, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
@@ -64,37 +62,6 @@ const DownloadButtonWithModal = ({ children, action, ...props }: AppButtonProps)
     </DownloadButton>
   );
 };
-
-interface CardProps {
-  label: string;
-  count: number;
-  tooltipHeader: ReactNode | string;
-  tooltipLabel: ReactNode | string;
-  icon: ReactNode;
-  big?: boolean;
-  children?: ReactNode;
-}
-function Card({ label, count, tooltipHeader, tooltipLabel, icon, big = false, children }: CardProps) {
-  return (
-    <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
-      <HStack gap={3}>
-        <Box alignSelf={"start"} pt="3">
-          {icon}
-        </Box>
-        <Box>
-          <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
-            {formatNumber(count)}
-          </Text>
-          <Text fontSize={12}>
-            {label}
-            <InfoTooltip headerComponent={() => tooltipHeader} contentComponent={() => <Box>{tooltipLabel}</Box>} />
-          </Text>
-          {children}
-        </Box>
-      </HStack>
-    </Center>
-  );
-}
 
 const typeToGoalPlausible: { [key in Exclude<TypeEffectifNominatif, "inconnu">]: PlausibleGoalType } = {
   inscritSansContrat: "telechargement_liste_sans_contrats",
@@ -173,7 +140,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
   return (
     <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
-        <Card
+        <IndicatorCard
           label="apprenants"
           count={indicateursEffectifs.apprenants}
           tooltipHeader="Nombre d’apprenants en contrat d’apprentissage"
@@ -205,10 +172,10 @@ function IndicateursGrid(props: IndicateursGridProps) {
               Télécharger la liste
             </DownloadButtonWithModal>
           )}
-        </Card>
+        </IndicatorCard>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
-        <Card
+        <IndicatorCard
           label="dont apprentis"
           count={indicateursEffectifs.apprentis}
           tooltipHeader="Apprenti"
@@ -233,10 +200,10 @@ function IndicateursGrid(props: IndicateursGridProps) {
               Télécharger la liste
             </DownloadButtonWithModal>
           )}
-        </Card>
+        </IndicatorCard>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
-        <Card
+        <IndicatorCard
           label="dont rupturants"
           count={indicateursEffectifs.rupturants}
           tooltipHeader="Rupturant"
@@ -262,10 +229,10 @@ function IndicateursGrid(props: IndicateursGridProps) {
               Télécharger la liste
             </DownloadButtonWithModal>
           )}
-        </Card>
+        </IndicatorCard>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
-        <Card
+        <IndicatorCard
           label="dont jeunes sans contrat"
           count={indicateursEffectifs.inscrits}
           tooltipHeader="Jeune sans contrat"
@@ -290,10 +257,10 @@ function IndicateursGrid(props: IndicateursGridProps) {
               Télécharger la liste
             </DownloadButtonWithModal>
           )}
-        </Card>
+        </IndicatorCard>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
-        <Card
+        <IndicatorCard
           label="sorties d’apprentissage"
           count={indicateursEffectifs.abandons}
           tooltipHeader="Sorties d’apprentissage (anciennement “abandons”)"
@@ -321,7 +288,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
               Télécharger la liste
             </DownloadButtonWithModal>
           )}
-        </Card>
+        </IndicatorCard>
       </GridItem>
     </Grid>
   );
