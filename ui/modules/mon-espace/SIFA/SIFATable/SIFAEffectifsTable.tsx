@@ -1,5 +1,5 @@
 import { SearchIcon } from "@chakra-ui/icons";
-import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
+import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ColumnDef, Row, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
@@ -12,21 +12,22 @@ import TableWithApi from "@/components/Table/TableWithApi";
 import EffectifTableDetails from "../../effectifs/engine/EffectifsTableDetails";
 
 import SIFAeffectifsTableColumnsDefs from "./SIFAEffectifsColumns";
-import SIFAEffectifsFilterPanel from "./SIFAEffectifsFilterPanel";
+import SIFAEffectifsFilterPanel, { SIFAFilterType } from "./SIFAEffectifsFilterPanel";
 
 interface EffectifsTableProps {
   organisme: Organisme;
   organismesEffectifs: any[];
-  filters: Record<string, string[]>;
+  filters: SIFAFilterType;
   pagination: any;
   search: string;
   sort: SortingState;
   onPaginationChange: (pagination: any) => void;
   onSearchChange: (search: string) => void;
-  onFilterChange: (filters: Record<string, string[]>) => void;
+  onFilterChange: (filters: SIFAFilterType) => void;
   onSortChange: (sort: SortingState) => void;
+  onSifaMissingFilterChange: (checked: boolean) => void;
   total: number;
-  availableFilters: Record<string, string[]>;
+  availableFilters: SIFAFilterType;
   resetFilters: () => void;
   isFetching: boolean;
   canEdit?: boolean;
@@ -56,7 +57,6 @@ const EffectifsTable = ({
 
   const [sort, setSort] = useState<SortingState>(initialSort);
   const [localSearch, setLocalSearch] = useState(search || "");
-  const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   useEffect(() => {
     setSort(initialSort);
@@ -111,10 +111,6 @@ const EffectifsTable = ({
     onSortChange(newSort);
   };
 
-  const filteredEffectifs = showOnlyErrors
-    ? organismesEffectifs.filter((effectif) => effectif.validation_errors?.length > 0)
-    : organismesEffectifs;
-
   return (
     <Box mt={4}>
       <Box border="1px solid" borderColor="openbluefrance" p={4}>
@@ -138,24 +134,12 @@ const EffectifsTable = ({
           </InputGroup>
         </HStack>
         <Divider mb="4" />
-        <HStack justifyContent="space-between" alignItems="center">
-          <SIFAEffectifsFilterPanel
-            filters={filters}
-            availableFilters={availableFilters}
-            onFilterChange={onFilterChange}
-            resetFilters={resetFilters}
-          />
-          <HStack mt={6}>
-            <Switch
-              variant="icon"
-              isChecked={showOnlyErrors}
-              onChange={(e) => {
-                setShowOnlyErrors(e.target.checked);
-              }}
-            />
-            <Text flexGrow={1}>Afficher uniquement les données manquantes pour SIFA</Text>
-          </HStack>
-        </HStack>
+        <SIFAEffectifsFilterPanel
+          filters={filters}
+          availableFilters={availableFilters}
+          onFilterChange={onFilterChange}
+          resetFilters={resetFilters}
+        />
       </Box>
 
       <Text my={10} fontWeight="bold">
@@ -163,7 +147,7 @@ const EffectifsTable = ({
       </Text>
 
       <TableWithApi
-        data={filteredEffectifs}
+        data={organismesEffectifs}
         paginationState={pagination}
         total={total}
         columns={SIFAeffectifsTableColumnsDefs({ modeSifa, organismesEffectifs }) as ColumnDef<any, any>[]}

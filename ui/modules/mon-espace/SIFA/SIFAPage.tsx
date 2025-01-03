@@ -37,6 +37,7 @@ import Eye from "@/theme/components/icons/Eye";
 
 import { effectifsStateAtom, effectifFromDecaAtom } from "../effectifs/engine/atoms";
 
+import { SIFAFilterType } from "./SIFATable/SIFAEffectifsFilterPanel";
 import SIFAEffectifsTable from "./SIFATable/SIFAEffectifsTable";
 
 interface SIFAPageProps {
@@ -53,12 +54,12 @@ function SIFAPage(props: SIFAPageProps) {
   const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
-  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [filters, setFilters] = useState<SIFAFilterType>({});
   const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const parseFilter = (key: string, value: string | string[] | undefined) => {
+    const defaultFilterParser = (value) => {
       if (value) {
         const values = Array.isArray(value) ? value : [value];
         try {
@@ -72,17 +73,27 @@ function SIFAPage(props: SIFAPageProps) {
           return values.map((v) => decodeURIComponent(v));
         }
       }
-      return undefined;
+    };
+    const parseFilter = (key: string, value: string | string[] | undefined) => {
+      switch (key) {
+        case "onlySifaMissingFields":
+          return value === "true" ? "true" : undefined;
+        case "source":
+        case "formation_libelle_long":
+          return defaultFilterParser(value)?.flat();
+        default:
+          return undefined;
+      }
     };
 
-    const filters: Record<string, string[]> = {};
+    const filters: Record<string, string[] | string> = {};
 
-    const filterKeys = ["formation", "source"];
+    const filterKeys = ["formation_libelle_long", "source", "onlySifaMissingFields"];
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
       if (parsedFilter) {
-        filters[key] = parsedFilter.flat();
+        filters[key] = parsedFilter;
       }
     });
 
@@ -167,18 +178,26 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleFilterChange = (newFilters: Record<string, string[]>) => {
+  const handleMissingSifaChange = (checked: boolean) => {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, onlySifaMissingFields: checked },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const handleFilterChange = (newFilters: SIFAFilterType) => {
     setPagination({ ...pagination, pageIndex: 0 });
-    const mergedFilters = { ...filters };
 
-    Object.entries(newFilters).forEach(([key, values]) => {
-      if (values.length > 0) {
-        mergedFilters[key] = values;
-      } else {
-        delete mergedFilters[key];
-      }
-    });
-
+    const mergedFilters = {
+      ...(newFilters.source && newFilters.source.length && { source: newFilters.source }),
+      ...(newFilters.formation_libelle_long &&
+        newFilters.formation_libelle_long.length && { formation_libelle_long: newFilters.formation_libelle_long }),
+      ...(newFilters.onlySifaMissingFields && { onlySifaMissingFields: newFilters.onlySifaMissingFields }),
+    };
     const queryFilters = Object.entries(mergedFilters).reduce(
       (acc, [key, values]) => {
         acc[key] = JSON.stringify(values);
@@ -442,6 +461,7 @@ function SIFAPage(props: SIFAPageProps) {
           onPaginationChange={handlePaginationChange}
           onSearchChange={handleSearchChange}
           onFilterChange={handleFilterChange}
+          onSifaMissingFilterChange={handleMissingSifaChange}
           onSortChange={handleSortChange}
           total={data?.total || 0}
           availableFilters={data?.filters || {}}
