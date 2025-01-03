@@ -77,7 +77,7 @@ function SIFAPage(props: SIFAPageProps) {
     const parseFilter = (key: string, value: string | string[] | undefined) => {
       switch (key) {
         case "only_sifa_missing_fields":
-          return value === "true" ? "true" : undefined;
+          return value === "true";
         case "source":
         case "formation_libelle_long":
           return defaultFilterParser(value)?.flat();
@@ -86,7 +86,7 @@ function SIFAPage(props: SIFAPageProps) {
       }
     };
 
-    const filters: Record<string, string[] | string> = {};
+    const filters: SIFAFilterType = {};
 
     const filterKeys = ["formation_libelle_long", "source", "only_sifa_missing_fields"];
 
@@ -177,25 +177,15 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleMissingSifaChange = (checked: boolean) => {
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, only_sifa_missing_fields: checked },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
   const handleFilterChange = (newFilters: SIFAFilterType) => {
     setPagination({ ...pagination, pageIndex: 0 });
 
     const mergedFilters = {
-      ...(newFilters.source && newFilters.source.length && { source: newFilters.source }),
-      ...(newFilters.formation_libelle_long &&
-        newFilters.formation_libelle_long.length && { formation_libelle_long: newFilters.formation_libelle_long }),
-      ...(newFilters.only_sifa_missing_fields && { only_sifa_missing_fields: newFilters.only_sifa_missing_fields }),
+      ...(newFilters.source && newFilters.source.length ? { source: newFilters.source } : {}),
+      ...(newFilters.formation_libelle_long && newFilters.formation_libelle_long.length
+        ? { formation_libelle_long: newFilters.formation_libelle_long }
+        : {}),
+      ...(newFilters.only_sifa_missing_fields ? { only_sifa_missing_fields: newFilters.only_sifa_missing_fields } : {}),
     };
     const queryFilters = Object.entries(mergedFilters).reduce(
       (acc, [key, values]) => {
@@ -216,7 +206,6 @@ function SIFAPage(props: SIFAPageProps) {
         delete updatedQuery[key];
       }
     });
-
     setFilters(mergedFilters);
 
     router.push(
@@ -470,7 +459,6 @@ function SIFAPage(props: SIFAPageProps) {
           onPaginationChange={handlePaginationChange}
           onSearchChange={handleSearchChange}
           onFilterChange={handleFilterChange}
-          onSifaMissingFilterChange={handleMissingSifaChange}
           onSortChange={handleSortChange}
           total={data?.total || 0}
           availableFilters={data?.filters || {}}

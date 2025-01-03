@@ -25,7 +25,6 @@ interface EffectifsTableProps {
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: SIFAFilterType) => void;
   onSortChange: (sort: SortingState) => void;
-  onSifaMissingFilterChange: (checked: boolean) => void;
   total: number;
   availableFilters: SIFAFilterType;
   resetFilters: () => void;

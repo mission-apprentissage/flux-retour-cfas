@@ -22,7 +22,6 @@ const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
   resetFilters,
 }) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
-
   const handleCheckboxChange = (filterKey: string, selectedValues: string[]) => {
     const updatedFilters = { ...filters, [filterKey]: selectedValues };
     onFilterChange(updatedFilters);
@@ -71,11 +70,7 @@ const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
           </Button>
         </Stack>
         <Stack direction="row" spacing={4} wrap="wrap">
-          <Switch
-            variant="icon"
-            checked={filters.only_sifa_missing_fields as boolean}
-            onChange={handleMissingSifaChange}
-          />
+          <Switch variant="icon" isChecked={filters.only_sifa_missing_fields} onChange={handleMissingSifaChange} />
           <Text flexGrow={1}>Afficher uniquement les données manquantes pour SIFA</Text>
         </Stack>
       </HStack>
