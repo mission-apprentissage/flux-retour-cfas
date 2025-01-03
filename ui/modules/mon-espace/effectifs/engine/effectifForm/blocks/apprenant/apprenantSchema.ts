@@ -474,14 +474,6 @@ export const apprenantSchema = {
             value: 1009,
           },
           {
-            label: "1013 DIMA de collège ou de lycée",
-            value: 1013,
-          },
-          {
-            label: "1015 DIMA de CFA",
-            value: 1015,
-          },
-          {
             label: "1017 4ème générale",
             value: 1017,
           },
