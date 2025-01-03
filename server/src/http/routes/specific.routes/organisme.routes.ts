@@ -2,6 +2,7 @@ import { ObjectId } from "bson";
 import { compact, get } from "lodash-es";
 import {
   STATUT_APPRENANT,
+  getAnneeScolaireFromDate,
   getAnneesScolaireListFromDate,
   getSIFADate,
   requiredApprenantAdresseFieldsSifa,
@@ -212,7 +213,12 @@ export async function getOrganismeEffectifs(
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
-    filters: data?.filters || {},
+    filters: {
+      ...data?.filters,
+      annee_scolaire: Array.from(
+        new Set([...(data?.filters?.annee_scolaire || []), getAnneeScolaireFromDate(new Date())])
+      ),
+    },
     organismesEffectifs: effectifs || [],
   };
 }
