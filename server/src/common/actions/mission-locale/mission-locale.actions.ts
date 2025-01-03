@@ -202,6 +202,7 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
     {
       $match: {
         "apprenant.adresse.mission_locale_id": missionLocaleId,
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
       },
     },
     ...EFF_MISSION_LOCALE_FILTER,
