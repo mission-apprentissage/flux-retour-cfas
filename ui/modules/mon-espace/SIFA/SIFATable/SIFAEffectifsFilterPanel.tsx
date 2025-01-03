@@ -6,7 +6,7 @@ import EffectifsFilterComponent from "../../effectifs/engine/effectifsTable/Effe
 export type SIFAFilterType = {
   source?: string[];
   formation_libelle_long?: string[];
-  onlySifaMissingFields?: boolean;
+  only_sifa_missing_fields?: boolean;
 };
 interface SIFAEffectifsFilterPanelProps {
   filters: SIFAFilterType;
@@ -29,7 +29,7 @@ const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
   };
 
   const handleMissingSifaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedFilters = { ...filters, onlySifaMissingFields: event.target.checked };
+    const updatedFilters = { ...filters, only_sifa_missing_fields: event.target.checked };
     onFilterChange(updatedFilters);
   };
 
@@ -73,7 +73,7 @@ const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
         <Stack direction="row" spacing={4} wrap="wrap">
           <Switch
             variant="icon"
-            checked={filters.onlySifaMissingFields as boolean}
+            checked={filters.only_sifa_missing_fields as boolean}
             onChange={handleMissingSifaChange}
           />
           <Text flexGrow={1}>Afficher uniquement les données manquantes pour SIFA</Text>

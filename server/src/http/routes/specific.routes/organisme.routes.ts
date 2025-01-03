@@ -14,7 +14,7 @@ import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/colle
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   sifa: boolean = false,
-  onlySifaMissingFields: boolean = false,
+  only_sifa_missing_fields: boolean = false,
   options: {
     pageIndex: number;
     pageSize: number;
@@ -208,7 +208,7 @@ export async function getOrganismeEffectifs(
           }
         : {}),
     }))
-    .filter((effectif) => (sifa && onlySifaMissingFields ? effectif.requiredSifa.length > 0 : true));
+    .filter((effectif) => (sifa && only_sifa_missing_fields ? effectif.requiredSifa.length > 0 : true));
 
   return {
     fromDECA: isDeca,

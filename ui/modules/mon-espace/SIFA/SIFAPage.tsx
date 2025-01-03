@@ -76,7 +76,7 @@ function SIFAPage(props: SIFAPageProps) {
     };
     const parseFilter = (key: string, value: string | string[] | undefined) => {
       switch (key) {
-        case "onlySifaMissingFields":
+        case "only_sifa_missing_fields":
           return value === "true" ? "true" : undefined;
         case "source":
         case "formation_libelle_long":
@@ -88,7 +88,7 @@ function SIFAPage(props: SIFAPageProps) {
 
     const filters: Record<string, string[] | string> = {};
 
-    const filterKeys = ["formation_libelle_long", "source", "onlySifaMissingFields"];
+    const filterKeys = ["formation_libelle_long", "source", "only_sifa_missing_fields"];
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -181,7 +181,7 @@ function SIFAPage(props: SIFAPageProps) {
     router.push(
       {
         pathname: router.pathname,
-        query: { ...router.query, onlySifaMissingFields: checked },
+        query: { ...router.query, only_sifa_missing_fields: checked },
       },
       undefined,
       { shallow: true }
@@ -195,7 +195,7 @@ function SIFAPage(props: SIFAPageProps) {
       ...(newFilters.source && newFilters.source.length && { source: newFilters.source }),
       ...(newFilters.formation_libelle_long &&
         newFilters.formation_libelle_long.length && { formation_libelle_long: newFilters.formation_libelle_long }),
-      ...(newFilters.onlySifaMissingFields && { onlySifaMissingFields: newFilters.onlySifaMissingFields }),
+      ...(newFilters.only_sifa_missing_fields && { only_sifa_missing_fields: newFilters.only_sifa_missing_fields }),
     };
     const queryFilters = Object.entries(mergedFilters).reduce(
       (acc, [key, values]) => {
