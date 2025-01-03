@@ -122,10 +122,9 @@ function SIFAPage(props: SIFAPageProps) {
   );
 
   useEffect(() => {
-    const invalidCount = currentEffectifsState
-      .values()
-      .toArray()
-      .filter((effectif) => effectif.requiredSifa.length > 0).length;
+    const invalidCount = Array.from(currentEffectifsState.values()).filter(
+      (effectif) => effectif.requiredSifa.length > 0
+    ).length;
     setSifaInvalidCount(invalidCount);
   }, [currentEffectifsState]);
 
@@ -188,13 +187,19 @@ function SIFAPage(props: SIFAPageProps) {
     );
 
     const updatedQuery = { ...router.query, ...queryFilters };
+
+    if (!updatedQuery.organismeId) {
+      updatedQuery.organismeId = router.query.organismeId as string;
+    }
+
     Object.keys(router.query).forEach((key) => {
-      if (!queryFilters[key]) {
+      if (!queryFilters[key] && key !== "organismeId") {
         delete updatedQuery[key];
       }
     });
 
     setFilters(mergedFilters);
+
     router.push(
       {
         pathname: router.pathname,
@@ -227,10 +232,14 @@ function SIFAPage(props: SIFAPageProps) {
     setFilters({});
     setSearch("");
 
+    const updatedQuery = {
+      organismeId: router.query.organismeId,
+    };
+
     router.push(
       {
         pathname: router.pathname,
-        query: {},
+        query: updatedQuery,
       },
       undefined,
       { shallow: true }
