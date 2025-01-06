@@ -55,7 +55,7 @@ function SIFAPage(props: SIFAPageProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<SIFAFilterType>({});
-  const [sort, setSort] = useState<SortingState>([{ desc: false, id: "nom" }]);
+  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
