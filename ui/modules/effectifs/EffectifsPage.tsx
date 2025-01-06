@@ -34,7 +34,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   const [filters, setFilters] = useState<Record<string, string[]>>({
     annee_scolaire: [getAnneeScolaireFromDate(new Date())],
   });
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
+  const [sort, setSort] = useState<SortingState>([{ desc: false, id: "nom" }]);
 
   useEffect(() => {
     const parseFilter = (key: string, value: string | string[] | undefined) => {
