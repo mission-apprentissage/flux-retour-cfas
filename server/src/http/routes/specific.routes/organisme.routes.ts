@@ -11,6 +11,27 @@ import {
 
 import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 
+const FIELD_MAP: Record<string, string> = {
+  nom: "apprenant.nom",
+  prenom: "apprenant.prenom",
+  formation: "formation.libelle_long",
+  statut_courant: "_computed.statut.en_cours",
+  annee_scolaire: "annee_scolaire",
+};
+
+const computeSort = (sortField: string | null, sortOrder: string | null) => {
+  if (!sortField || !sortOrder) {
+    return { annee_scolaire: -1, "apprenant.nom": 1 };
+  }
+
+  switch (sortField) {
+    case FIELD_MAP.annee_scolaire:
+      return { annee_scolaire: sortOrder === "desc" ? -1 : 1, "apprenant.nom": 1 };
+    default:
+      return { [FIELD_MAP[sortField] || sortField]: sortOrder === "desc" ? -1 : 1 };
+  }
+};
+
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   sifa: boolean = false,
@@ -107,18 +128,7 @@ export async function getOrganismeEffectifs(
       }),
   };
 
-  const fieldMap: Record<string, string> = {
-    nom: "apprenant.nom",
-    prenom: "apprenant.prenom",
-    formation: "formation.libelle_long",
-    statut_courant: "_computed.statut.en_cours",
-    annee_scolaire: "annee_scolaire",
-  };
-
-  const sortConditions =
-    sortField && sortOrder
-      ? { [fieldMap[sortField] || sortField]: sortOrder === "desc" ? -1 : 1 }
-      : { "formation.annee_scolaire": -1 };
+  const sortConditions = computeSort(sortField, sortOrder);
 
   const currentDate = sifa ? getSIFADate(new Date()) : new Date();
   const pipeline = [
