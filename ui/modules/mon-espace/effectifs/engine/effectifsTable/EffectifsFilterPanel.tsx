@@ -43,16 +43,16 @@ const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
           />
         )}
 
-        {/* Source */}
-        {availableFilters?.source && (
+        {/* Formation */}
+        {availableFilters?.formation_libelle_long && (
           <EffectifsFilterComponent
-            filterKey="source"
-            displayName="Source de la donnée"
-            options={availableFilters.source}
-            selectedValues={filters.source || []}
-            onChange={(values) => handleCheckboxChange("source", values)}
-            isOpen={openFilter === "source"}
-            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "source" : null)}
+            filterKey="formation_libelle_long"
+            displayName="Formation"
+            options={availableFilters.formation_libelle_long}
+            selectedValues={filters.formation_libelle_long || []}
+            onChange={(values) => handleCheckboxChange("formation_libelle_long", values)}
+            isOpen={openFilter === "formation_libelle_long"}
+            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "formation_libelle_long" : null)}
           />
         )}
 
@@ -69,16 +69,16 @@ const EffectifsFilterPanel: React.FC<EffectifsFilterPanelProps> = ({
           />
         )}
 
-        {/* Formation */}
-        {availableFilters?.formation_libelle_long && (
+        {/* Source */}
+        {availableFilters?.source && (
           <EffectifsFilterComponent
-            filterKey="formation_libelle_long"
-            displayName="Formation"
-            options={availableFilters.formation_libelle_long}
-            selectedValues={filters.formation_libelle_long || []}
-            onChange={(values) => handleCheckboxChange("formation_libelle_long", values)}
-            isOpen={openFilter === "formation_libelle_long"}
-            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "formation_libelle_long" : null)}
+            filterKey="source"
+            displayName="Source de la donnée"
+            options={availableFilters.source}
+            selectedValues={filters.source || []}
+            onChange={(values) => handleCheckboxChange("source", values)}
+            isOpen={openFilter === "source"}
+            setIsOpen={(isOpen) => setOpenFilter(isOpen ? "source" : null)}
           />
         )}
 

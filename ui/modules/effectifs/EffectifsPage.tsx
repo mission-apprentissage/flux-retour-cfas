@@ -155,8 +155,13 @@ function EffectifsPage(props: EffectifsPageProps) {
     );
 
     const updatedQuery = { ...router.query, ...queryFilters };
+
+    if (!updatedQuery.organismeId) {
+      updatedQuery.organismeId = router.query.organismeId as string;
+    }
+
     Object.keys(router.query).forEach((key) => {
-      if (!queryFilters[key]) {
+      if (!queryFilters[key] && key !== "organismeId") {
         delete updatedQuery[key];
       }
     });

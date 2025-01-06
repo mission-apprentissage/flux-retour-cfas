@@ -327,6 +327,7 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                     borderColor="grey.800"
                     color="grey.800"
                     textTransform="none"
+                    letterSpacing="0px"
                     width={FIXED_COLUMN_WIDTH}
                     minWidth={FIXED_COLUMN_WIDTH}
                     maxWidth={FIXED_COLUMN_WIDTH}
@@ -341,6 +342,7 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                       borderColor="grey.800"
                       color="grey.800"
                       textTransform="none"
+                      letterSpacing="0px"
                       width={COLUMN_WIDTH}
                       minWidth={COLUMN_WIDTH}
                       p="2"
