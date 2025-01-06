@@ -2,6 +2,7 @@ import { ObjectId } from "bson";
 import { compact, get } from "lodash-es";
 import {
   STATUT_APPRENANT,
+  getAnneeScolaireFromDate,
   getAnneesScolaireListFromDate,
   getSIFADate,
   requiredApprenantAdresseFieldsSifa,
@@ -13,6 +14,7 @@ import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/colle
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   sifa: boolean = false,
+  only_sifa_missing_fields: boolean = false,
   options: {
     pageIndex: number;
     pageSize: number;
@@ -178,36 +180,45 @@ export async function getOrganismeEffectifs(
 
   const [data] = await db.aggregate(pipeline).toArray();
 
-  const effectifs = data?.results.map((effectif) => ({
-    id: effectif._id.toString(),
-    id_erp_apprenant: effectif.id_erp_apprenant,
-    organisme_id: organismeId,
-    annee_scolaire: effectif.annee_scolaire,
-    source: effectif.source,
-    validation_errors: effectif.validation_errors,
-    formation: effectif.formation,
-    nom: effectif.apprenant.nom,
-    prenom: effectif.apprenant.prenom,
-    date_de_naissance: effectif.apprenant.date_de_naissance,
-    historique_statut: effectif.apprenant.historique_statut,
-    statut: effectif._computed?.statut,
-    ...(sifa
-      ? {
-          requiredSifa: compact(
-            [
-              ...(!effectif.apprenant.adresse?.complete
-                ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
-                : requiredFieldsSifa),
-            ].map((fieldName) => (!get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined))
-          ),
-        }
-      : {}),
-  }));
+  const effectifs = data?.results
+    .map((effectif) => ({
+      id: effectif._id.toString(),
+      id_erp_apprenant: effectif.id_erp_apprenant,
+      organisme_id: organismeId,
+      annee_scolaire: effectif.annee_scolaire,
+      source: effectif.source,
+      validation_errors: effectif.validation_errors,
+      formation: effectif.formation,
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      date_de_naissance: effectif.apprenant.date_de_naissance,
+      historique_statut: effectif.apprenant.historique_statut,
+      statut: effectif._computed?.statut,
+      ...(sifa
+        ? {
+            requiredSifa: compact(
+              [
+                ...(!effectif.apprenant.adresse?.complete
+                  ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
+                  : requiredFieldsSifa),
+              ].map((fieldName) =>
+                !get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined
+              )
+            ),
+          }
+        : {}),
+    }))
+    .filter((effectif) => (sifa && only_sifa_missing_fields ? effectif.requiredSifa.length > 0 : true));
 
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
-    filters: data?.filters || {},
+    filters: {
+      ...data?.filters,
+      annee_scolaire: Array.from(
+        new Set([...(data?.filters?.annee_scolaire || []), getAnneeScolaireFromDate(new Date())])
+      ),
+    },
     organismesEffectifs: effectifs || [],
   };
 }
