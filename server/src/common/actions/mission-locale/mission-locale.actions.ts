@@ -132,7 +132,36 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
   ];
 
-  const aggregation = [
+  const adresseFilterAggregation = [
+    {
+      $match: {
+        "apprenant.adresse.mission_locale_id": missionLocaleId,
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+      },
+    },
+    {
+      $group: {
+        _id: "$apprenant.adresse.code_insee",
+        commune: { $addToSet: "$apprenant.adresse" },
+      },
+    },
+    {
+      $unwind: {
+        path: "$commune",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        code_insee: "$commune.code_insee",
+        code_postal: "$commune.code_postal",
+        nom: "$commune.commune",
+      },
+    },
+  ];
+
+  const effectifsAggregation = [
     {
       $match: {
         "apprenant.adresse.mission_locale_id": missionLocaleId,
@@ -176,7 +205,8 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
-  const result = (await effectifsDb().aggregate(aggregation).next()) as {
+
+  const resultEffectif = (await effectifsDb().aggregate(effectifsAggregation).next()) as {
     pagination: any;
     data: Array<
       IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
@@ -185,16 +215,19 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     >;
   };
 
-  if (!result || result?.data.length === 0) {
-    return { pagination: { total: 0, page, limit }, data: [] };
+  const resultAdresse = await effectifsDb().aggregate(adresseFilterAggregation).toArray();
+
+  if (!resultEffectif || resultEffectif?.data.length === 0) {
+    return { pagination: { total: 0, page, limit }, data: [], filter: [] };
   }
-  const { pagination, data } = result;
+
+  const { pagination, data } = resultEffectif;
 
   if (pagination) {
-    pagination.lastPage = Math.ceil(result.pagination.total / limit);
+    pagination.lastPage = Math.ceil(pagination.total / limit);
   }
   const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
-  return { pagination, data: effectifs };
+  return { pagination, data: effectifs, filter: resultAdresse };
 };
 
 export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: number) => {
