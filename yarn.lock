@@ -3768,6 +3768,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:^7.114.0":
+  version: 7.120.2
+  resolution: "@sentry/types@npm:7.120.2"
+  checksum: 45a46cd13f2b7a0590439c0b98e14b50cd1a0a610d8b5d977934a82336ad88a9fd0efb6a93c86063ae25ae2e587994b6b7ad122e808c82110d71c132cc55b02b
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:7.119.2":
   version: 7.119.2
   resolution: "@sentry/utils@npm:7.119.2"
@@ -16186,6 +16193,7 @@ __metadata:
     "@sentry/cli": ^2.37.0
     "@sentry/integrations": ^7.114.0
     "@sentry/node": ^7.119.2
+    "@sentry/types": ^7.114.0
     "@supercharge/promise-pool": ^2.4.0
     "@types/boom": ^7.3.5
     "@types/bunyan": ^1.8.11
