@@ -55,7 +55,7 @@ const effectifsTableColumnsDefs = [
         <VStack alignItems="start" spacing={0} width="340px">
           <Text noOfLines={1}>{row.original?.formation?.libelle_long || "Libellé manquant"}</Text>
           <Text fontSize="xs" color="#777777" whiteSpace="nowrap">
-            CFD&nbsp;: {row.original?.formation?.cfd} - RNCP&nbsp;: {row.original?.formation?.cfd}
+            CFD&nbsp;: {row.original?.formation?.cfd} - RNCP&nbsp;: {row.original?.formation?.rncp}
           </Text>
         </VStack>
       );
