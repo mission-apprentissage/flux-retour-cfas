@@ -42,6 +42,7 @@ import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { validationTerritoires } from "./territoire/validationTerritoire";
+import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
 const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "hydrate:organismes-referentiel", queued });
@@ -498,6 +499,9 @@ export async function setupJobProcessor() {
 
           console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
+      },
+      "tmp:migration:hydrate-mission-locale": {
+        handler: tmpMigrationMissionLocaleEffectif,
       },
     },
   });
