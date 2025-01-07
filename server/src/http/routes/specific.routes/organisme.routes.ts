@@ -32,6 +32,72 @@ const computeSort = (sortField: string | null, sortOrder: string | null) => {
   }
 };
 
+const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
+  organisme_id: organismeId,
+  ...(sifa && {
+    annee_scolaire: {
+      $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
+    },
+  }),
+});
+
+const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, currentDate: Date) => {
+  return sifa
+    ? [
+        {
+          $addFields: {
+            dernierStatut: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$_computed.statut.parcours",
+                    as: "statut",
+                    cond: {
+                      $lte: ["$$statut.date", currentDate],
+                    },
+                  },
+                },
+                -1,
+              ],
+            },
+          },
+        },
+        {
+          $match: {
+            "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+          },
+        },
+        ...(only_sifa_missing_fields
+          ? [
+              {
+                $match: {
+                  $or: [
+                    ...[...requiredFieldsSifa].map((field) => {
+                      return {
+                        [field]: null,
+                      };
+                    }),
+                    {
+                      $and: [
+                        { "apprenant.adresse.complete": null },
+                        {
+                          $or: requiredApprenantAdresseFieldsSifa.map((field) => {
+                            return {
+                              [field]: null,
+                            };
+                          }),
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ]
+    : [];
+};
+
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   sifa: boolean = false,
@@ -67,45 +133,6 @@ export async function getOrganismeEffectifs(
     {} as Record<string, string[]>
   );
 
-  const matchOrgaAndAnneScolaire = (sifa: boolean) => ({
-    organisme_id: organismeId,
-    ...(sifa && {
-      annee_scolaire: {
-        $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
-      },
-    }),
-  });
-
-  const addSifaFilter = (sifa: boolean) => {
-    return sifa
-      ? [
-          {
-            $addFields: {
-              dernierStatut: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$_computed.statut.parcours",
-                      as: "statut",
-                      cond: {
-                        $lte: ["$$statut.date", currentDate],
-                      },
-                    },
-                  },
-                  -1,
-                ],
-              },
-            },
-          },
-          {
-            $match: {
-              "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
-            },
-          },
-        ]
-      : [];
-  };
-
   const matchConditions = {
     ...Object.keys(parsedFilters).reduce((acc, key) => {
       if (parsedFilters[key]?.length > 0) {
@@ -134,10 +161,10 @@ export async function getOrganismeEffectifs(
   const pipeline = [
     {
       $match: {
-        ...matchOrgaAndAnneScolaire(sifa),
+        ...matchOrgaAndAnneScolaire(sifa, organismeId),
       },
     },
-    ...addSifaFilter(sifa),
+    ...addSifaFilter(sifa, only_sifa_missing_fields, currentDate),
     {
       $facet: {
         allFilters: [
@@ -187,38 +214,33 @@ export async function getOrganismeEffectifs(
       },
     },
   ];
-
   const [data] = await db.aggregate(pipeline).toArray();
 
-  const effectifs = data?.results
-    .map((effectif) => ({
-      id: effectif._id.toString(),
-      id_erp_apprenant: effectif.id_erp_apprenant,
-      organisme_id: organismeId,
-      annee_scolaire: effectif.annee_scolaire,
-      source: effectif.source,
-      validation_errors: effectif.validation_errors,
-      formation: effectif.formation,
-      nom: effectif.apprenant.nom,
-      prenom: effectif.apprenant.prenom,
-      date_de_naissance: effectif.apprenant.date_de_naissance,
-      historique_statut: effectif.apprenant.historique_statut,
-      statut: effectif._computed?.statut,
-      ...(sifa
-        ? {
-            requiredSifa: compact(
-              [
-                ...(!effectif.apprenant.adresse?.complete
-                  ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
-                  : requiredFieldsSifa),
-              ].map((fieldName) =>
-                !get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined
-              )
-            ),
-          }
-        : {}),
-    }))
-    .filter((effectif) => (sifa && only_sifa_missing_fields ? effectif.requiredSifa.length > 0 : true));
+  const effectifs = data?.results.map((effectif) => ({
+    id: effectif._id.toString(),
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    organisme_id: organismeId,
+    annee_scolaire: effectif.annee_scolaire,
+    source: effectif.source,
+    validation_errors: effectif.validation_errors,
+    formation: effectif.formation,
+    nom: effectif.apprenant.nom,
+    prenom: effectif.apprenant.prenom,
+    date_de_naissance: effectif.apprenant.date_de_naissance,
+    historique_statut: effectif.apprenant.historique_statut,
+    statut: effectif._computed?.statut,
+    ...(sifa
+      ? {
+          requiredSifa: compact(
+            [
+              ...(!effectif.apprenant.adresse?.complete
+                ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
+                : requiredFieldsSifa),
+            ].map((fieldName) => (!get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined))
+          ),
+        }
+      : {}),
+  }));
 
   return {
     fromDECA: isDeca,
