@@ -5,6 +5,7 @@ import Boom from "boom";
 import type { IEffectif } from "shared/models";
 
 import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
+import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 
 function isWithRange(date: Date | null, range: { debut: Date | null; fin: Date | null }): boolean {
@@ -264,18 +265,29 @@ export async function getEffectifCertification(effectif: Pick<IEffectif, "format
   }
 
   const certifications = await apiAlternanceClient.certification.index({ identifiant: filter });
-
   const session = getEffectifSession(effectif);
 
   return getSessionCertification(session, certifications);
 }
 
-export function fiabilisationEffectifFormation<T extends Pick<IEffectif, "formation">>(
+export async function fiabilisationEffectifFormation<T extends Pick<IEffectif, "formation">>(
   effectif: T,
   certification: ICertification | null
-): T["formation"] {
+): Promise<T["formation"]> {
   if (!certification) {
-    return effectif.formation;
+    const [cfdInfo, rncpInfo] = await Promise.all([
+      effectif.formation?.cfd ? getCfdInfo(effectif.formation?.cfd) : null,
+      effectif.formation?.rncp ? getRncpInfo(effectif.formation?.rncp) : null,
+    ]);
+
+    const niveau = cfdInfo?.niveau ?? rncpInfo?.niveau ?? null;
+
+    return {
+      ...effectif.formation,
+      libelle_long: cfdInfo?.intitule_long ?? rncpInfo?.intitule ?? null,
+      niveau,
+      niveau_libelle: getNiveauFormationLibelle(niveau),
+    };
   }
 
   const niveau = certification.intitule.niveau.rncp?.europeen ?? certification.intitule.niveau.cfd?.europeen ?? null;
