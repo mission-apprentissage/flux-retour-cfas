@@ -5,21 +5,16 @@ import { Row, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
-import { effectifsExportColumns } from "@/common/exports";
-import { Organisme } from "@/common/internal/Organisme";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import DownloadButton from "@/components/buttons/DownloadButton";
 import TableWithApi from "@/components/Table/TableWithApi";
 
-import EffectifTableDetails from "../EffectifsTableDetails";
+// import ApprenantTableDetails from "../ApprenantsTableDetails";
 
-import effectifsTableColumnsDefs from "./EffectifsColumns";
-import EffectifsFilterPanel from "./EffectifsFilterPanel";
+import apprenantsTableColumnsDefs from "./ApprenantsColumns";
+import ApprenantsDetails from "./ApprenantsDetails";
+import ApprenantsFilterPanel from "./ApprenantsFilterPanel";
 
-const DISPLAY_DOWNLOAD_BUTTON = false;
-interface EffectifsTableProps {
-  organisme: Organisme;
-  organismesEffectifs: any[];
+interface ApprenantsTableProps {
+  apprenants: any[];
   filters: Record<string, string[]>;
   pagination: any;
   search: string;
@@ -28,18 +23,14 @@ interface EffectifsTableProps {
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: Record<string, string[]>) => void;
   onSortChange: (sort: SortingState) => void;
-  total: number;
   availableFilters: Record<string, string[]>;
   resetFilters: () => void;
   isFetching: boolean;
-  canEdit?: boolean;
-  modeSifa?: boolean;
   refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
 }
 
-const EffectifsTable = ({
-  organisme,
-  organismesEffectifs,
+const ApprenantsTable = ({
+  apprenants,
   filters,
   pagination,
   search,
@@ -48,14 +39,10 @@ const EffectifsTable = ({
   onSearchChange,
   onFilterChange,
   onSortChange,
-  total,
   availableFilters,
   resetFilters,
   isFetching,
-  canEdit,
-  modeSifa,
-  refetch,
-}: EffectifsTableProps) => {
+}: ApprenantsTableProps) => {
   const router = useRouter();
 
   const [sort, setSort] = useState<SortingState>(initialSort);
@@ -115,10 +102,6 @@ const EffectifsTable = ({
     onSortChange(newSort);
   };
 
-  const filteredEffectifs = showOnlyErrors
-    ? organismesEffectifs.filter((effectif) => effectif.validation_errors?.length > 0)
-    : organismesEffectifs;
-
   return (
     <Box mt={4}>
       <Box border="1px solid" borderColor="openbluefrance" p={4}>
@@ -140,80 +123,46 @@ const EffectifsTable = ({
               </Button>
             </InputRightElement>
           </InputGroup>
-          {DISPLAY_DOWNLOAD_BUTTON && (
-            <DownloadButton
-              variant="primary"
-              ml={2}
-              w="25%"
-              action={() => {
-                exportDataAsXlsx(
-                  `tdb-effectifs.xlsx`,
-                  organismesEffectifs?.map((effectif) => ({
-                    organisme_uai: organisme.uai,
-                    organisme_siret: organisme.siret,
-                    organisme_nom: organisme.raison_sociale,
-                    organisme_nature: organisme.nature,
-                    apprenant_nom: effectif.nom,
-                    apprenant_prenom: effectif.prenom,
-                    apprenant_date_de_naissance: effectif.date_de_naissance,
-                    apprenant_statut: effectif.statut_courant,
-                    formation_annee: effectif.formation?.annee,
-                    formation_cfd: effectif.formation?.cfd,
-                    formation_libelle_long: effectif.formation?.libelle_long,
-                    formation_niveau: effectif.formation?.niveau,
-                    formation_rncp: effectif.formation?.rncp,
-                    formation_date_debut_formation: effectif.formation?.date_debut_formation,
-                    formation_date_fin_formation: effectif.formation?.date_fin_formation,
-                  })) || [],
-                  effectifsExportColumns
-                );
-              }}
-            >
-              Télécharger la liste
-            </DownloadButton>
-          )}
         </HStack>
         <Divider mb="4" />
         <HStack justifyContent="space-between" alignItems="center">
-          <EffectifsFilterPanel
+          <ApprenantsFilterPanel
             filters={filters}
             availableFilters={availableFilters}
             onFilterChange={onFilterChange}
             resetFilters={resetFilters}
           />
-          <HStack mt={6}>
-            <Switch
-              variant="icon"
-              isChecked={showOnlyErrors}
-              onChange={(e) => {
-                setShowOnlyErrors(e.target.checked);
-              }}
-            />
-            <Text flexGrow={1}>Afficher uniquement les données en erreur</Text>
-          </HStack>
+        </HStack>
+        <HStack mt={6} spacing={4} alignItems="center">
+          <Text>Afficher les jeunes “à risque”</Text>
+          <Switch
+            variant="icon"
+            isChecked={showOnlyErrors}
+            onChange={(e) => {
+              setShowOnlyErrors(e.target.checked);
+            }}
+          />
         </HStack>
       </Box>
 
       <Text my={10} fontWeight="bold">
-        {total} apprenant(es) trouvé(es)
+        {pagination.total} apprenant(es) trouvé(es)
       </Text>
 
       <TableWithApi
-        data={filteredEffectifs}
+        data={apprenants}
         paginationState={pagination}
-        total={total}
-        columns={effectifsTableColumnsDefs}
+        total={pagination.total}
+        columns={apprenantsTableColumnsDefs}
         enableRowExpansion={true}
         sortingState={sort}
         onSortingChange={handleSortChange}
         onPaginationChange={handlePaginationChange}
         isLoading={isFetching}
-        renderSubComponent={(row: Row<any>) => (
-          <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />
-        )}
+        renderSubComponent={(row: Row<any>) => <ApprenantsDetails row={row} />}
       />
     </Box>
   );
 };
 
-export default EffectifsTable;
+export default ApprenantsTable;

@@ -473,11 +473,12 @@ export const buildEffectifForMissionLocale = (
     ml_effectif: IMissionLocaleEffectif;
   }
 ): IEffecifMissionLocale => {
-  const users = effectif.cfa_users.map(({ nom, prenom, email, telephone }) => ({
+  const users = effectif.cfa_users.map(({ nom, prenom, email, telephone, fonction }) => ({
     nom,
     prenom,
     email,
     telephone,
+    fonction,
   }));
   const result = {
     _id: effectif._id,
