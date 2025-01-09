@@ -280,13 +280,14 @@ export async function fiabilisationEffectifFormation<T extends Pick<IEffectif, "
       effectif.formation?.rncp ? getRncpInfo(effectif.formation?.rncp) : null,
     ]);
 
-    const niveau = cfdInfo?.niveau ?? rncpInfo?.niveau ?? null;
-
+    const niveau = cfdInfo?.niveau ?? rncpInfo?.niveau;
+    const intituleLong = cfdInfo?.intitule_long ?? rncpInfo?.intitule;
+    const niveauLibelle = niveau ? getNiveauFormationLibelle(niveau) : null;
     return {
       ...effectif.formation,
-      libelle_long: cfdInfo?.intitule_long ?? rncpInfo?.intitule ?? null,
-      niveau,
-      niveau_libelle: getNiveauFormationLibelle(niveau),
+      ...(intituleLong && { libelle_long: intituleLong }),
+      ...(niveau && { niveau }),
+      ...(niveauLibelle && { niveau_libelle: niveauLibelle }),
     };
   }
 

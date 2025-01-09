@@ -158,6 +158,8 @@ export async function getOrganismeEffectifs(
   const sortConditions = computeSort(sortField, sortOrder);
 
   const currentDate = sifa ? getSIFADate(new Date()) : new Date();
+
+  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
   const pipeline = [
     {
       $match: {
@@ -180,10 +182,10 @@ export async function getOrganismeEffectifs(
           {
             $project: {
               _id: 0,
-              annee_scolaire: 1,
-              source: 1,
-              statut_courant: 1,
-              formation_libelle_long: 1,
+              annee_scolaire: filterNotNull("annee_scolaire"),
+              source: filterNotNull("source"),
+              statut_courant: filterNotNull("statut_courant"),
+              formation_libelle_long: filterNotNull("formation_libelle_long"),
             },
           },
         ],
