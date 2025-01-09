@@ -1,4 +1,4 @@
-import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Link, Select, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 const apprenantsTableColumnsDefs = [
@@ -46,9 +46,17 @@ const apprenantsTableColumnsDefs = [
     size: 160,
   },
   {
-    accessorKey: "contact",
-    header: () => "Contacté",
-    cell: () => <></>,
+    accessorKey: "apprenant.situation",
+    header: () => "Situation",
+    cell: () => (
+      <Select placeholder="Choisir" onClick={(event) => event.stopPropagation()}>
+        <option value="contacte_soutien">Contacté, soutien nécessaire</option>
+        <option value="contacte_pas_de_suivi">Contacté, pas de suivi nécessaire</option>
+        <option value="deja_accompagne">Déjà accompagné par ML</option>
+        <option value="injoignable">Injoignable</option>
+        <option value="non_contacte">Non contacté</option>
+      </Select>
+    ),
     size: 160,
   },
 ];

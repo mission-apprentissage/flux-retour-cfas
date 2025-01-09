@@ -15,7 +15,7 @@ import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/App
 function EffectifsPage() {
   const router = useRouter();
 
-  const [pagination, setPagination] = useState({ page: 0, limit: 20 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({
     annee_scolaire: [getAnneeScolaireFromDate(new Date())],
@@ -64,15 +64,15 @@ function EffectifsPage() {
     ["apprenants", pagination],
     async () => {
       const response = await _get(`/api/v1/organisation/mission-locale/effectifs`, {
-        params: {
-          // pageIndex: pagination.pageIndex,
-          // pageSize: pagination.pageSize,
-          // search,
-          // sortField: sort[0]?.id,
-          // sortOrder: sort[0]?.desc ? "desc" : "asc",
-          // ...filters,
-        },
+        params: {},
       });
+
+      setPagination((prev) => ({
+        ...prev,
+        pageSize: response.pagination.limit,
+        pageIndex: --response.pagination.page,
+        total: response.pagination.total,
+      }));
 
       const transformedData = response.data.map((item) => ({
         ...item,
@@ -88,7 +88,6 @@ function EffectifsPage() {
     { keepPreviousData: true }
   );
 
-  console.log("CONSOLE LOG ~ EffectifsPage ~ apprenants:", apprenants);
   const handlePaginationChange = (newPagination) => {
     setPagination(newPagination);
 
@@ -120,7 +119,7 @@ function EffectifsPage() {
   };
 
   const handleFilterChange = (newFilters: Record<string, string[]>) => {
-    setPagination({ ...pagination, page: 0 });
+    setPagination({ ...pagination, pageIndex: 0 });
     const mergedFilters = { ...filters };
 
     Object.entries(newFilters).forEach(([key, values]) => {
@@ -159,7 +158,7 @@ function EffectifsPage() {
   };
 
   const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, page: 0 });
+    setPagination({ ...pagination, pageIndex: 0 });
     setSort(newSort);
 
     router.push(
@@ -240,7 +239,6 @@ function EffectifsPage() {
             onSearchChange={handleSearchChange}
             onFilterChange={handleFilterChange}
             onSortChange={handleSortChange}
-            total={0}
             availableFilters={{}}
             resetFilters={resetFilters}
             isFetching={isFetching}

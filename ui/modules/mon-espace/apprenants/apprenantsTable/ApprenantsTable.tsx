@@ -23,7 +23,6 @@ interface ApprenantsTableProps {
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: Record<string, string[]>) => void;
   onSortChange: (sort: SortingState) => void;
-  total: number;
   availableFilters: Record<string, string[]>;
   resetFilters: () => void;
   isFetching: boolean;
@@ -40,7 +39,6 @@ const ApprenantsTable = ({
   onSearchChange,
   onFilterChange,
   onSortChange,
-  total,
   availableFilters,
   resetFilters,
   isFetching,
@@ -134,27 +132,27 @@ const ApprenantsTable = ({
             onFilterChange={onFilterChange}
             resetFilters={resetFilters}
           />
-          <HStack mt={6}>
-            <Switch
-              variant="icon"
-              isChecked={showOnlyErrors}
-              onChange={(e) => {
-                setShowOnlyErrors(e.target.checked);
-              }}
-            />
-            <Text flexGrow={1}>Afficher les jeunes non contactés</Text>
-          </HStack>
+        </HStack>
+        <HStack mt={6} spacing={4} alignItems="center">
+          <Text>Afficher les jeunes “à risque”</Text>
+          <Switch
+            variant="icon"
+            isChecked={showOnlyErrors}
+            onChange={(e) => {
+              setShowOnlyErrors(e.target.checked);
+            }}
+          />
         </HStack>
       </Box>
 
       <Text my={10} fontWeight="bold">
-        {total} apprenant(es) trouvé(es)
+        {pagination.total} apprenant(es) trouvé(es)
       </Text>
 
       <TableWithApi
         data={apprenants}
         paginationState={pagination}
-        total={total}
+        total={pagination.total}
         columns={apprenantsTableColumnsDefs}
         enableRowExpansion={true}
         sortingState={sort}

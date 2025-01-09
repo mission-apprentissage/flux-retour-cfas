@@ -1,5 +1,20 @@
-import { Box, HStack, Text, Table, Tbody, Tr, Td, TableContainer, Flex, Heading } from "@chakra-ui/react";
-import React from "react";
+import {
+  Box,
+  HStack,
+  Text,
+  Table,
+  Tbody,
+  Tr,
+  Td,
+  TableContainer,
+  Flex,
+  Heading,
+  Select,
+  Textarea,
+  Radio,
+  RadioGroup,
+} from "@chakra-ui/react";
+import React, { useState } from "react";
 
 import { calculateAge } from "@/common/utils/dateUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
@@ -22,6 +37,9 @@ const getLastStatut = (statut: any) => {
 };
 
 const ApprenantsDetails = ({ row }) => {
+  const [statutCorrect, setStatutCorrect] = useState("");
+  const [franceTravail, setFranceTravail] = useState("");
+
   const apprenant = row.original.apprenant;
   const statut = row.original.statut;
   const organisme = row.original.organisme;
@@ -93,17 +111,61 @@ const ApprenantsDetails = ({ row }) => {
             </Tbody>
           </Table>
         </Box>
-        <Box p={4} flex="1">
-          <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={3}>
+        <Box p={4} flex="1" maxW="600px" mx="auto">
+          <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={4}>
             Vos commentaires et retours
           </Heading>
-          <Text>Le statut affiché du jeune est-il correct ?</Text>
-          <Text>Veuillez préciser son statut actuel.</Text>
-          <Text>Le jeune est-il inscrit à France Travail ?</Text>
-          <Text>
-            Notez ici des informations recueillies auprès du jeune et sa situation, que vous jugez utiles de partager.
-            (150 caractères maximum)
+
+          <Text as="span" fontWeight="bold" color="bluefrance" mb={4}>
+            Il a été indiqué que le jeune a été contacté le 21/11/2024 .
           </Text>
+
+          <Box my={4}>
+            <Text fontSize="md" mb={3}>
+              1. Le statut du jeune affiché est-il correct ?
+            </Text>
+            <RadioGroup onChange={setStatutCorrect} value={statutCorrect}>
+              <HStack spacing={4}>
+                <Radio value="oui">Oui</Radio>
+                <Radio value="non">Non</Radio>
+              </HStack>
+            </RadioGroup>
+
+            <Text fontSize="sm" mt={4} mb={2}>
+              Veuillez préciser son statut actuel.
+            </Text>
+            <Select placeholder="Sélectionner une option">
+              <option value="contacte_soutien">Contacté, soutien nécessaire</option>
+              <option value="contacte_pas_de_suivi">Contacté, pas de suivi nécessaire</option>
+              <option value="deja_accompagne">Déjà accompagné par ML</option>
+              <option value="injoignable">Injoignable</option>
+              <option value="non_contacte">Non contacté</option>
+            </Select>
+          </Box>
+
+          <Box mb={6}>
+            <Text fontSize="md" mb={3}>
+              2. Le jeune est-il inscrit à France Travail ?
+            </Text>
+            <RadioGroup onChange={setFranceTravail} value={franceTravail}>
+              <HStack spacing={4}>
+                <Radio value="oui">Oui</Radio>
+                <Radio value="non">Non</Radio>
+                <Radio value="je_ne_sais_pas">Je ne sais pas</Radio>
+              </HStack>
+            </RadioGroup>
+          </Box>
+
+          <Box mb={6}>
+            <Text fontSize="md" mb={3}>
+              3. Notez ici des informations recueillies auprès du jeune et sa situation, que vous jugez utiles de
+              partager.{" "}
+              <Text as="span" fontSize="sm" color="gray.500">
+                (150 caractères maximum)
+              </Text>
+            </Text>
+            <Textarea placeholder="Vos retours sur l’accompagnement du jeune" maxLength={150} />
+          </Box>
         </Box>
       </Flex>
 
