@@ -41,6 +41,7 @@ import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organis
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
+import { tmpFiabilisationCertification } from "./patches/certification/fiabilisation-certification";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
@@ -478,6 +479,10 @@ export async function setupJobProcessor() {
 
           console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
+      },
+      "tmp:migration:formation-certification": {
+        handler: tmpFiabilisationCertification,
+        resumable: true,
       },
     },
   });
