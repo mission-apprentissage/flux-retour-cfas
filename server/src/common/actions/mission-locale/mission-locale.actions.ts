@@ -142,7 +142,13 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     {
       $group: {
         _id: "$apprenant.adresse.code_insee",
-        commune: { $addToSet: "$apprenant.adresse" },
+        commune: {
+          $addToSet: {
+            code_insee: "$apprenant.adresse.code_insee",
+            code_postal: "$apprenant.adresse.code_postal",
+            nom: "$apprenant.adresse.commune",
+          },
+        },
       },
     },
     {
@@ -156,7 +162,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         _id: 0,
         code_insee: "$commune.code_insee",
         code_postal: "$commune.code_postal",
-        nom: "$commune.commune",
+        nom: "$commune.nom",
       },
     },
   ];
