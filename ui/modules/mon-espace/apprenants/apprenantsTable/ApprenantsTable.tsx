@@ -1,7 +1,7 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
+import { Row, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
@@ -10,9 +10,11 @@ import TableWithApi from "@/components/Table/TableWithApi";
 // import ApprenantTableDetails from "../ApprenantsTableDetails";
 
 import apprenantsTableColumnsDefs from "./ApprenantsColumns";
+import ApprenantsDetails from "./ApprenantsDetails";
 import ApprenantsFilterPanel from "./ApprenantsFilterPanel";
 
 interface ApprenantsTableProps {
+  apprenants: any[];
   filters: Record<string, string[]>;
   pagination: any;
   search: string;
@@ -29,6 +31,7 @@ interface ApprenantsTableProps {
 }
 
 const ApprenantsTable = ({
+  apprenants,
   filters,
   pagination,
   search,
@@ -111,7 +114,7 @@ const ApprenantsTable = ({
               name="search_organisme"
               placeholder="Rechercher un apprenant"
               value={localSearch}
-              onChange={handleSearchInputChange} // This should work correctly now
+              onChange={handleSearchInputChange}
               onKeyDown={handleKeyDown}
               flex="1"
               mr="2"
@@ -149,7 +152,7 @@ const ApprenantsTable = ({
       </Text>
 
       <TableWithApi
-        data={[]}
+        data={apprenants}
         paginationState={pagination}
         total={total}
         columns={apprenantsTableColumnsDefs}
@@ -158,9 +161,7 @@ const ApprenantsTable = ({
         onSortingChange={handleSortChange}
         onPaginationChange={handlePaginationChange}
         isLoading={isFetching}
-        // renderSubComponent={(row: Row<any>) => (
-        //   <ApprenantTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />
-        // )}
+        renderSubComponent={(row: Row<any>) => <ApprenantsDetails row={row} />}
       />
     </Box>
   );

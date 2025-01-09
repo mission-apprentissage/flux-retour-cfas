@@ -26,7 +26,7 @@ export const zEffectifMissionLocale = z.object({
   statut: zEffectifComputedStatut,
   formation: zFormationEffectif,
   organisme: zEffectifComputedOrganisme,
-  users: z.array(zUsersMigration.pick({ nom: true, prenom: true, email: true, telephone: true })),
+  users: z.array(zUsersMigration.pick({ nom: true, prenom: true, email: true, telephone: true, fonction: true })),
   organisme_id: zObjectId,
   annee_scolaire: zEffectifAnneeScolaire,
   source: SourceApprenantEnum,

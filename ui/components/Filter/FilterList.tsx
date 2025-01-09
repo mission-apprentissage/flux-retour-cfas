@@ -4,7 +4,7 @@ import { capitalizeWords } from "@/common/utils/stringUtils";
 import { FilterButton } from "@/components/FilterButton/FilterButton";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-interface ApprenantsFilterComponentProps {
+interface FilterListProps {
   filterKey: string;
   displayName: string;
   options: string[];
@@ -15,7 +15,7 @@ interface ApprenantsFilterComponentProps {
   sortOrder?: "asc" | "desc";
 }
 
-const ApprenantsFilterComponent: React.FC<ApprenantsFilterComponentProps> = ({
+const FilterList: React.FC<FilterListProps> = ({
   filterKey,
   displayName,
   options,
@@ -57,4 +57,4 @@ const ApprenantsFilterComponent: React.FC<ApprenantsFilterComponentProps> = ({
   );
 };
 
-export default ApprenantsFilterComponent;
+export default FilterList;

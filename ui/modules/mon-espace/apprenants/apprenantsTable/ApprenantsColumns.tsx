@@ -1,47 +1,16 @@
-import { Box, HStack, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
-import { DateTime } from "luxon";
-import { getStatut } from "shared";
-
-import { capitalizeWords } from "@/common/utils/stringUtils";
-import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import { useState } from "react";
 
 const apprenantsTableColumnsDefs = [
   {
-    accessorKey: "annee_scolaire",
-    header: () => (
-      <>
-        Période{" "}
-        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-          *
-        </Box>
-      </>
-    ),
-    cell: ({ row, getValue }) => <ShowErrorInCell item={row.original} fieldName="annee_scolaire" value={getValue()} />,
-    size: 120,
-  },
-  {
-    accessorKey: "nom",
-    header: () => (
-      <>
-        Nom{" "}
-        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-          *
-        </Box>
-      </>
-    ),
+    accessorKey: "apprenant.nom",
+    header: () => "Nom",
     cell: ({ row, getValue }) => <ShowErrorInCell item={row.original} fieldName="apprenant.nom" value={getValue()} />,
     size: 160,
   },
   {
-    accessorKey: "prenom",
-    header: () => (
-      <>
-        Prénom{" "}
-        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-          *
-        </Box>
-      </>
-    ),
+    accessorKey: "apprenant.prenom",
+    header: () => "Prénom",
     cell: ({ row, getValue }) => (
       <ShowErrorInCell item={row.original} fieldName="apprenant.prenom" value={getValue()} />
     ),
@@ -49,7 +18,7 @@ const apprenantsTableColumnsDefs = [
   },
   {
     accessorKey: "formation",
-    header: () => "Formation",
+    header: () => "Formation suivie",
     cell: ({ row }) => {
       return (
         <VStack alignItems="start" spacing={0} width="340px">
@@ -63,87 +32,60 @@ const apprenantsTableColumnsDefs = [
     size: 350,
   },
   {
-    accessorKey: "source",
-    header: () => (
-      <>
-        Source{" "}
-        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-          *
-        </Box>
-        <InfoTooltip
-          headerComponent={() => "Source de la donnée"}
-          contentComponent={() => (
-            <Box>
-              <Text as="p">
-                Ce champ indique la provenance de la donnée. Par exemple, la donnée est transmise par un ERP ou via un
-                téléversement de fichier Excel, ou encore de plateforme DECA (Dépôt des Contrats d’Alternance).
-              </Text>
-            </Box>
-          )}
-          aria-label="Informations sur la répartition des apprenants au national"
-        />
-      </>
-    ),
+    accessorKey: "apprenant.telephone",
+    header: () => "Téléphone",
     cell: ({ row, getValue }) => (
-      <ShowErrorInCell
-        item={row.original}
-        fieldName="apprenant.prenom"
-        value={getValue() === "FICHIER" ? capitalizeWords(getValue()) : getValue()}
-      />
+      <ShowErrorInCell item={row.original} fieldName="apprenant.prenom" value={getValue()} />
     ),
-    size: 150,
+    size: 160,
   },
   {
-    accessorKey: "statut_courant",
-    header: () => (
-      <>
-        Statut actuel{" "}
-        <InfoTooltip
-          headerComponent={() => "Statut actuel"}
-          contentComponent={() => (
-            <Box>
-              <Text as="p">Un jeune peut être :</Text>
-              <UnorderedList my={3}>
-                <ListItem>apprenti en contrat</ListItem>
-                <ListItem>inscrit sans contrat signé</ListItem>
-                <ListItem>en rupture de contrat</ListItem>
-                <ListItem>en fin de formation (diplômé)</ListItem>
-                <ListItem>abandon (a quitté le CFA)</ListItem>
-              </UnorderedList>
-            </Box>
-          )}
-          aria-label="Informations sur la répartition des apprenants au national"
-        />
-      </>
-    ),
-    cell: ({ row }) => {
-      const statut = row.original?.statut;
-
-      if (!statut || !statut.parcours.length) {
-        return (
-          <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
-            Aucun statut
-          </Text>
-        );
-      }
-
-      const historiqueSorted = statut.parcours.sort(
-        (a, b) => new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime()
-      );
-      const current = [...historiqueSorted].pop();
-
-      return (
-        <VStack alignItems="start" spacing={0}>
-          <Text>{getStatut(current.valeur)}</Text>
-          <Text fontSize="xs" color="#777777" whiteSpace="nowrap">
-            depuis le {DateTime.fromISO(current.date).setLocale("fr-FR").toFormat("dd/MM/yyyy")}
-          </Text>
-        </VStack>
-      );
-    },
-    size: 170,
+    accessorKey: "apprenant.courriel",
+    header: () => "Email",
+    cell: ({ row }) => <EmailCell email={row.original.apprenant.courriel} />,
+    size: 160,
+  },
+  {
+    accessorKey: "contact",
+    header: () => "Contacté",
+    cell: () => <></>,
+    size: 160,
   },
 ];
+
+const EmailCell = ({ email }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyEmail = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard
+      .writeText(email)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 3000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+
+  return (
+    <Link
+      variant="blueBg"
+      href="#"
+      onClick={handleCopyEmail}
+      py={2.5}
+      px={4}
+      display="flex"
+      alignItems="center"
+      w="fit-content"
+    >
+      <Box as="i" className={isCopied ? "ri-checkbox-circle-fill ri-lg" : "ri-mail-line ri-lg"} mr={2} />
+      {isCopied ? "Copié" : "Copier"}
+    </Link>
+  );
+};
 
 const ShowErrorInCell = ({ item, fieldName, value }) => {
   const { validation_errors } = item;

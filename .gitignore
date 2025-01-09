@@ -171,3 +171,5 @@ server/outputs/
 
 # Sentry Config File
 .sentryclirc
+
+.codegpt
