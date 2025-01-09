@@ -9,7 +9,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Page from "@/components/Page/Page";
 import Table from "@/components/Table/Table";
-import withAuth from "@/components/withAuth";
+import withAuth, { allOrganisationExcept } from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import useToaster from "@/hooks/useToaster";
 import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
@@ -227,4 +227,4 @@ const PageGestionDesMembres = () => {
   );
 };
 
-export default withAuth(PageGestionDesMembres);
+export default withAuth(PageGestionDesMembres, [...allOrganisationExcept("MISSION_LOCALE")]);
