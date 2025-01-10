@@ -303,6 +303,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "FIN_DE_FORMATION_EN_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -323,6 +324,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "FIN_DE_FORMATION_EN_CONTRAT",
                             ],
                           },
                         },
@@ -2840,6 +2842,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "FIN_DE_FORMATION_EN_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -2860,6 +2863,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "FIN_DE_FORMATION_EN_CONTRAT",
                             ],
                           },
                         },
@@ -5426,6 +5430,7 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "FIN_DE_FORMATION_EN_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -5446,6 +5451,7 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "FIN_DE_FORMATION_EN_CONTRAT",
                             ],
                           },
                         },
