@@ -56,3 +56,5 @@ export const zContrat = zodOpenApi.object({
   date_rupture: zodOpenApi.date({ description: "Date de rupture du contrat" }).nullish(),
   cause_rupture: zodOpenApi.string({ description: "Cause de rupture du contrat" }).nullish(),
 });
+
+export type IContrat = zodOpenApi.infer<typeof zContrat>;

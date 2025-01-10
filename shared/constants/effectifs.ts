@@ -7,6 +7,7 @@ export const STATUT_APPRENANT = {
   APPRENTI: "APPRENTI",
   RUPTURANT: "RUPTURANT",
   FIN_DE_FORMATION: "FIN_DE_FORMATION",
+  FIN_DE_FORMATION_EN_CONTRAT: "FIN_DE_FORMATION_EN_CONTRAT",
 } as const;
 
 export type StatutApprenant = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
@@ -19,6 +20,7 @@ const STATUT_NAME: { [key in StatutApprenant]: string } = {
   INSCRIT: "Sans contrat",
   APPRENTI: "Apprenti",
   RUPTURANT: "Rupturant",
+  FIN_DE_FORMATION_EN_CONTRAT: "Fin de formation (contrat encore en cours)",
   FIN_DE_FORMATION: "Fin de formation",
 };
 

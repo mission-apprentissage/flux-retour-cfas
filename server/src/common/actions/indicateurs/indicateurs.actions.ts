@@ -80,7 +80,16 @@ function buildIndicateursEffectifsPipeline(
         },
         finDeFormation: {
           $sum: {
-            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION] }, 1, 0],
+            $cond: [
+              {
+                $or: [
+                  { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION] },
+                  { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION_EN_CONTRAT] },
+                ],
+              },
+              1,
+              0,
+            ],
           },
         },
         ...extraAccumulator,
@@ -525,9 +534,9 @@ export async function getEffectifsNominatifsGenerique(
   const computedType = (t: TypeEffectifNominatif) => {
     switch (t) {
       case "apprenant":
-        return ["APPRENTI", "INSCRIT", "RUPTURANT", "FIN_DE_FORMATION"];
+        return ["APPRENTI", "INSCRIT", "RUPTURANT", "FIN_DE_FORMATION_EN_CONTRAT", "FIN_DE_FORMATION"];
       case "apprenti":
-        return ["APPRENTI", "FIN_DE_FORMATION"];
+        return ["APPRENTI", "FIN_DE_FORMATION_EN_CONTRAT", "FIN_DE_FORMATION"];
       case "inscritSansContrat":
         return ["INSCRIT"];
       case "rupturant":

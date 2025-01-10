@@ -479,6 +479,11 @@ export async function setupJobProcessor() {
           console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
       },
+      "tmp:migration:update-effectif-computed-statut": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes();
+        },
+      },
     },
   });
 }
