@@ -1,7 +1,7 @@
 import { readdir, writeFile } from "node:fs/promises";
 import path from "path";
 
-import { internal } from "boom";
+import Boom from "boom";
 import { format } from "date-fns";
 
 import { getDatabase, getMongodbClient } from "@/common/mongodb";
@@ -75,7 +75,7 @@ export async function up(): Promise<number> {
           .insertOne({ fileName: migrationFile, appliedAt: new Date() });
         console.log(`${migrationFile} : APPLIED`);
       } catch (e) {
-        throw withCause(internal("Error applying migration", { migrationFile }), e as Error);
+        throw withCause(Boom.internal("Error applying migration", { migrationFile }), e as Error);
       }
     }
   }
