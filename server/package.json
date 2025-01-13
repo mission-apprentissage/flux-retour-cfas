@@ -62,7 +62,6 @@
     "lodash-es": "4.17.21",
     "lodash.pick": "4.4.0",
     "luxon": "^2.5.2",
-    "migrate-mongo": "10.0.0",
     "mjml": "^4.15.3",
     "mongodb": "^5.9.2",
     "multer": "^1.4.5-lts.1",

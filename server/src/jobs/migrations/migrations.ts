@@ -1,14 +1,17 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 import path from "path";
 
-import { config, create as mcreate, status as mstatus, up as mup } from "migrate-mongo";
+import { internal } from "boom";
+import { format } from "date-fns";
 
-import { getMongodbClient } from "@/common/mongodb";
+import { getDatabase, getMongodbClient } from "@/common/mongodb";
+import { withCause } from "@/common/utils/errorUtils";
 import { __dirname } from "@/common/utils/esmUtils";
+import config from "@/config";
 
 const myConfig = {
   mongodb: {
-    url: process.env.FLUX_RETOUR_CFAS_MONGODB_URI as string,
+    url: config.mongodb.uri,
 
     // in URL
     databaseName: "",
@@ -22,7 +25,7 @@ const myConfig = {
   },
 
   // The migrations dir, can be an relative or absolute path. Only edit this when really necessary.
-  migrationsDir: path.join(__dirname(import.meta.url), "./db/migrations"),
+  migrationsDir: path.join(__dirname(import.meta.url), "./migrations"),
 
   // The mongodb collection where the applied changes are stored. Only edit this when really necessary.
   changelogCollectionName: "changelog",
@@ -38,43 +41,84 @@ const myConfig = {
   moduleSystem: "esm",
 };
 
-export async function up() {
-  config.set(myConfig);
+async function listMigrationFiles(): Promise<string[]> {
+  const files = await readdir(myConfig.migrationsDir, { withFileTypes: true });
 
-  await status();
+  return files
+    .filter((file) => file.isFile() && file.name.endsWith(myConfig.migrationFileExtension))
+    .map((file) => file.name);
+}
 
-  const client = getMongodbClient();
-  await mup(client.db(), client);
+async function getAppliedMigrations(): Promise<Map<string, Date>> {
+  const db = getDatabase();
+  const appliedMigrations = await db
+    .collection("changelog")
+    .find({}, { sort: { fileName: 1 } })
+    .toArray();
+
+  return new Map(appliedMigrations.map(({ fileName, appliedAt }) => [fileName, appliedAt]));
+}
+
+export async function up(): Promise<number> {
+  const migrationFiles = await listMigrationFiles();
+  const appliedMigrationsFiles = await getAppliedMigrations();
+
+  let count = 0;
+  for (const migrationFile of migrationFiles) {
+    if (!appliedMigrationsFiles.has(migrationFile)) {
+      count++;
+      try {
+        const { up } = await import(path.join(myConfig.migrationsDir, migrationFile));
+        await up(getDatabase(), getMongodbClient());
+        await getDatabase()
+          .collection(myConfig.changelogCollectionName)
+          .insertOne({ fileName: migrationFile, appliedAt: new Date() });
+        console.log(`${migrationFile} : APPLIED`);
+      } catch (e) {
+        throw withCause(internal("Error applying migration", { migrationFile }), e as Error);
+      }
+    }
+  }
+
+  return count;
 }
 
 // Show migration status and returns number of pending migrations
-export async function status(): Promise<number> {
-  // @ts-ignore
-  config.set(myConfig);
-  const client = getMongodbClient();
+export async function status(): Promise<{ count: number; requireShutdown: boolean }> {
+  const migrationFiles = await listMigrationFiles();
+  const appliedMigrationsFiles = await getAppliedMigrations();
 
-  // @ts-ignore
-  const migrationStatus = await mstatus(client.db());
-  migrationStatus.forEach(({ fileName, appliedAt }) => console.log(fileName, ":", appliedAt));
+  const result = {
+    requireShutdown: false,
+    count: 0,
+  };
 
-  return migrationStatus.filter(({ appliedAt }) => appliedAt === "PENDING").length;
+  for (const migrationFile of migrationFiles) {
+    if (!appliedMigrationsFiles.has(migrationFile)) {
+      result.count++;
+    }
+    const { requireShutdown = false } = await import(path.join(myConfig.migrationsDir, migrationFile));
+    result.requireShutdown = result.requireShutdown || requireShutdown;
+
+    const appliedAt = appliedMigrationsFiles.get(migrationFile) ?? "PENDING";
+    console.log(`${migrationFile} : ${appliedAt}`);
+  }
+
+  return result;
 }
 
 export async function create({ description }: { description: string }) {
-  config.set({
-    ...myConfig,
-    migrationsDir: "src/db/migrations",
-    migrationFileExtension: ".ts",
-  });
-  const fileName = await mcreate(description);
-  const file = `src/db/migrations/${fileName}`;
-  const content = await readFile(file, {
-    encoding: "utf-8",
-  });
-  // ajoute le typage TS et supprime la migration down inutile
-  const newContent = `import { Db } from "mongodb";
+  const fileName = `${format(new Date(), "yyyyMMddHHmmss")}-${description.replaceAll(" ", "_")}.ts`;
+  const file = `src/migrations/${fileName}`;
+  const newContent = `
+import { getDbCollection } from "@/common/utils/mongodbUtils";
 
-${content.replaceAll("async (db, client)", "async (db: Db)").replace(/\nexport const down =[\s\S]+/, "")}`;
+export const up = async () => {
+await getDbCollection("").updateMany({}, { $set: { "profile.newField": "defaultValue" } });
+};
+
+// set to false ONLY IF migration does not imply a breaking change (ex: update field value or add index)
+export const requireShutdown: boolean = true;`;
 
   await writeFile(file, newContent, { encoding: "utf-8" });
   console.log("Created:", fileName);
