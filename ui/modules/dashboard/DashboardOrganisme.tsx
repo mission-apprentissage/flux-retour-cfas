@@ -15,16 +15,13 @@ import {
   Link,
   Collapse,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import {
   natureOrganismeDeFormationLabel,
   TETE_DE_RESEAUX_BY_ID,
-  IndicateursEffectifs,
-  IndicateursEffectifsAvecFormation,
-  IndicateursOrganismes,
   IOrganisationCreate,
   REFERENTIEL_ONISEP,
   CARIF_OREF,
@@ -36,7 +33,6 @@ import {
   UAI_INCONNUE_TAG_FORMAT,
   UAI_INCONNUE,
   UAI_INCONNUE_CAPITALIZE,
-  GO_MODIFICATION_RELATION_ELEMENT_LINK,
   CRISP_FAQ,
 } from "shared";
 
@@ -44,7 +40,6 @@ import { convertOrganismeToExport, organismesExportColumns } from "@/common/expo
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { Organisme } from "@/common/internal/Organisme";
-import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
@@ -62,6 +57,8 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import InfosTransmissionEtParametrageOFA from "../admin/InfosTransmissionEtParametrageOFA";
 import { ExternalLinks } from "../admin/OrganismeDetail";
+import BandeauDuplicatsEffectifs from "../effectifs/BandeauDuplicatsEffectifs";
+import AlertDuplicatsEffectifs from "../organismes/AlertDuplicatsEffectifs";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";
@@ -193,10 +190,49 @@ const natureOrganismeDeFormationTooltip = {
   ),
 };
 
+export const useOrganismeData = (organismeId: string, permissions: Organisme["permissions"], modePublique: boolean) => {
+  const queries = [
+    {
+      queryKey: ["organismes", organismeId, "contacts"],
+      queryFn: () => _get(`/api/v1/organismes/${organismeId}/contacts`),
+      enabled: !!organismeId && modePublique,
+    },
+    {
+      queryKey: ["organismes", organismeId, "indicateurs/effectifs"],
+      queryFn: () =>
+        _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, {
+          params: { date: new Date() },
+        }),
+      enabled: !!organismeId && permissions?.indicateursEffectifs,
+    },
+    {
+      queryKey: ["organismes", organismeId, "indicateurs/organismes"],
+      queryFn: () => _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes`),
+      enabled: !!organismeId,
+    },
+    {
+      queryKey: ["organismes", organismeId, "indicateurs/effectifs/par-formation"],
+      queryFn: () =>
+        _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs/par-formation`, {
+          params: { date: new Date() },
+        }),
+      enabled: !!organismeId && permissions?.indicateursEffectifs,
+    },
+    {
+      queryKey: ["organismes", organismeId, "duplicates"],
+      queryFn: () => _get(`/api/v1/organismes/${organismeId}/duplicates`),
+      enabled: !!organismeId,
+    },
+  ];
+
+  return useQueries({ queries });
+};
+
 interface Props {
   organisme: Organisme;
   modePublique: boolean; // permet d'afficher plus d'informations, notamment les responsables, qualiopi
 }
+
 const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const router = useRouter();
   const { auth, organisationType } = useAuth();
@@ -206,47 +242,20 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   );
   const isOFviewingItsPublicPage = modePublique && organisme?._id === ownOrganisme?._id;
 
-  const { data: contacts } = useQuery<User[]>(
-    ["organismes", organisme?._id, "contacts"],
-    () => _get(`/api/v1/organismes/${organisme._id}/contacts`),
-    {
-      enabled: !!organisme?._id && modePublique,
-    }
-  );
+  const [
+    contactsQuery,
+    indicateursEffectifsQuery,
+    indicateursOrganismesQuery,
+    formationsAvecIndicateursQuery,
+    duplicatesQuery,
+  ] = useOrganismeData(organisme?._id, organisme?.permissions, modePublique);
 
-  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<IndicateursEffectifs>(
-    ["organismes", organisme?._id, "indicateurs/effectifs"],
-    () =>
-      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs`, {
-        params: {
-          date: new Date(),
-        },
-      }),
-    {
-      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
-    }
-  );
-
-  const { data: indicateursOrganismes } = useQuery<IndicateursOrganismes>(
-    ["organismes", organisme?._id, "indicateurs/organismes"],
-    () => _get(`/api/v1/organismes/${organisme._id}/indicateurs/organismes`),
-    {
-      enabled: !!organisme?._id,
-    }
-  );
-
-  const { data: formationsAvecIndicateurs } = useQuery<IndicateursEffectifsAvecFormation[]>(
-    ["organismes", organisme?._id, "indicateurs/effectifs/par-formation"],
-    async () =>
-      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs/par-formation`, {
-        params: {
-          date: new Date(),
-        },
-      }),
-    {
-      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
-    }
-  );
+  const contacts = contactsQuery.data;
+  const indicateursEffectifs = indicateursEffectifsQuery.data;
+  const indicateursEffectifsLoading = indicateursEffectifsQuery.isLoading;
+  const indicateursOrganismes = indicateursOrganismesQuery.data;
+  const formationsAvecIndicateurs = formationsAvecIndicateursQuery.data;
+  const duplicates = duplicatesQuery.data;
 
   const indicateursOrganismesPieData = useMemo<any[]>(() => {
     if (!indicateursOrganismes) {
@@ -273,9 +282,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const aucunEffectifTransmis = !organisme.first_transmission_date;
 
   const hasOrganismesFormateurs = organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0;
-  const hasResponsabilitePartielle =
-    organisationType === "ORGANISME_FORMATION" &&
-    organisme.organismesResponsables?.some((o) => o.responsabilitePartielle);
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
@@ -292,36 +298,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         py="4"
         px="8"
       >
-        {/* Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef */}
-        {hasResponsabilitePartielle && (
-          <Container maxW="xl" p="8">
-            <Ribbons variant="warning">
-              <Text color="grey.800">
-                Nous fiabilisons les effectifs rattachés aux organismes avec lesquels vous êtes en relation en tant que
-                responsable ou responsable formateur. A cette fin nous sommes entrain de rattacher les effectifs aux
-                formations telles qu’elles sont déclarées au niveau du{" "}
-                <Link
-                  href="https://catalogue-apprentissage.intercariforef.org/"
-                  target="_blank"
-                  borderBottom="1px"
-                  _hover={{ textDecoration: "none" }}
-                >
-                  catalogue des formations en apprentissage
-                </Link>
-                .
-                <br />
-                <Link
-                  href={GO_MODIFICATION_RELATION_ELEMENT_LINK}
-                  target="_blank"
-                  borderBottom="1px"
-                  _hover={{ textDecoration: "none" }}
-                >
-                  Lien vers le support
-                </Link>
-              </Text>
-            </Ribbons>
-          </Container>
-        )}
         <Container maxW="xl" p="8">
           <HStack>
             <Box flex={3} maxW="xl" p="8">
@@ -367,11 +343,17 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   />
                 )}
                 {!organisme.is_transmission_target && (
-                  <InfoTransmissionDeca indicateursEffectifs={indicateursEffectifs} />
+                  <InfoTransmissionDeca
+                    date={
+                      organisme.last_effectifs_deca_update ? new Date(organisme.last_effectifs_deca_update) : undefined
+                    }
+                    indicateursEffectifs={indicateursEffectifs}
+                  />
                 )}
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
+                {duplicates && duplicates?.totalItems > 0 && <AlertDuplicatsEffectifs />}
                 {organisationType === "ADMINISTRATEUR" && (
                   <>
                     <Button
@@ -680,19 +662,16 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
                 {organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
                   <HStack alignItems="flex-start">
-                    <Text whiteSpace="nowrap">
-                      Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
-                      {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
-                      {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
-                    </Text>
+                    <Text whiteSpace="nowrap">Votre organisme dispense des formations pour&nbsp;:</Text>
                     <VStack alignItems="start">
                       {organisme.organismesResponsables.map((organisme) => (
                         <Link
                           key={organisme._id}
-                          href={`/organismes/${organisme._id}`}
+                          href={`https://catalogue-apprentissage.intercariforef.org/etablissement/${organisme?.siret || ""}`}
                           borderBottom="1px"
                           color="action-high-blue-france"
                           _hover={{ textDecoration: "none" }}
+                          isExternal
                         >
                           {organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}
                         </Link>
@@ -736,6 +715,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 (année scolaire 2024-2025)
               </Text>
             </Heading>
+            {!modePublique && duplicates && duplicates?.totalItems > 0 && (
+              <BandeauDuplicatsEffectifs totalItems={duplicates?.totalItems} />
+            )}
 
             <NotificationTransmissionError organisme={organisme} />
 

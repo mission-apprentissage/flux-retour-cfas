@@ -1,17 +1,11 @@
 import { writeFileSync } from "fs";
 
 import { faker as fakerEn, Faker, fr } from "@faker-js/faker";
-import { program } from "commander";
-import { config } from "dotenv";
+import { program, type Command } from "commander";
 import { MongoClient } from "mongodb";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { write, utils } from "xlsx";
-
-import { getMongodbUri } from "@/common/mongodb";
-
-config({ path: ".env" });
-config({ path: ".env.local", override: true });
 
 const fakerFr = new Faker({ locale: [fr] });
 
@@ -29,15 +23,17 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     { value: 3, weight: 10 },
   ]);
 
-  const dateInscription = fakerFr.date.past({
-    years: anneeFormation,
-  });
-  const dateEntree = fakerEn.date.soon({
+  const dateEntree = formation.date_debut?.at(-1) ?? null;
+  const dateFin = formation.date_fin?.at(-1) ?? null;
+
+  if (!dateEntree || !dateFin) {
+    throw new Error('Formation "date_debut" or "date_fin" is missing');
+  }
+
+  const dateInscription = fakerFr.date.recent({
     days: 90,
-    refDate: dateInscription,
+    refDate: new Date(dateEntree),
   });
-  const dateFin = new Date(dateInscription);
-  dateFin.setFullYear(dateInscription.getFullYear() + anneeFormation);
 
   return {
     nom_apprenant: lastName,
@@ -84,13 +80,13 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     etablissement_lieu_de_formation_siret: formateur.siret,
     etablissement_lieu_de_formation_adresse: fakerFr.location.streetAddress(),
     etablissement_lieu_de_formation_code_postal: fakerFr.helpers.fromRegExp("[0-9]{5}"),
-    annee_scolaire: fakerFr.helpers.arrayElement(["2023-2024", "2024-2024"]),
+    annee_scolaire: fakerFr.helpers.arrayElement(["2024-2025", "2025-2025"]),
     annee_formation: anneeFormation,
     formation_rncp: optional(formation.rncp_code),
     formation_cfd: formation.cfd,
     date_inscription_formation: dateInscription,
-    date_entree_formation: dateEntree,
-    date_fin_formation: dateFin,
+    date_entree_formation: new Date(dateEntree),
+    date_fin_formation: new Date(dateFin),
     duree_theorique_formation_mois: Number(formation.duree) * 12,
     libelle_court_formation: formation.intitule_court ?? formation.intitule_long,
     obtention_diplome_formation: "",
@@ -124,59 +120,46 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
   };
 }
 
-let client: MongoClient | null = null;
+export default function registerCommand(program: Command, getClient: () => MongoClient) {
+  program
+    .command("generate <siret>")
+    .option("-c, --count <number>", "Count", "50")
+    .option("-n, --name <string>", "Name", "import")
+    .action(async (siret, { count, name }) => {
+      const client = getClient();
 
-program
-  .configureHelp({
-    sortSubcommands: true,
-  })
-  .showSuggestionAfterError()
-  .hook("preAction", async () => {
-    client = new MongoClient(getMongodbUri() ?? "");
-    await client.connect();
-  })
-  .hook("postAction", async () => {
-    await client?.close();
-  })
-  .command("generate <siret>")
-  .option("-c, --count <number>", "Count", "50")
-  .option("-n, --name <string>", "Name", "import")
-  .action(async (siret, { count, name }) => {
-    if (!client) {
-      throw new Error("Missing mongodb client");
-    }
+      const formateur = await client.db("flux-retour-cfas").collection<IOrganisme>("organismes").findOne({ siret });
 
-    const formateur = await client.db("flux-retour-cfas").collection<IOrganisme>("organismes").findOne({ siret });
+      if (formateur === null) {
+        throw new Error("OF not found");
+      }
 
-    if (formateur === null) {
-      throw new Error("OF not found");
-    }
+      if (formateur.relatedFormations == null) {
+        throw new Error("Not related formation");
+      }
 
-    if (formateur.relatedFormations == null) {
-      throw new Error("Not related formation");
-    }
+      const formationCles = formateur.relatedFormations.map((f) => f.cle_ministere_educatif);
+      const formations: IFormationCatalogue[] = (await client
+        .db("flux-retour-cfas")
+        .collection("formationsCatalogue")
+        .find({ cle_ministere_educatif: { $in: formationCles } })
+        .toArray()) as any;
 
-    const formationCles = formateur.relatedFormations.map((f) => f.cle_ministere_educatif);
-    const formations: IFormationCatalogue[] = (await client
-      .db("flux-retour-cfas")
-      .collection("formationsCatalogue")
-      .find({ cle_ministere_educatif: { $in: formationCles } })
-      .toArray()) as any;
+      if (formations.length === 0) {
+        throw new Error("Formation not found");
+      }
 
-    if (formations.length === 0) {
-      throw new Error("Formation not found");
-    }
+      const data: any[] = [];
+      for (let i = 0; i < Number(count); i += 1) {
+        data.push(fakeEffectif(formateur, fakerEn.helpers.arrayElement(formations)));
+      }
 
-    const data: any[] = [];
-    for (let i = 0; i < Number(count); i += 1) {
-      data.push(fakeEffectif(formateur, fakerEn.helpers.arrayElement(formations)));
-    }
+      const worksheet = utils.json_to_sheet(data);
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, "Sheet");
 
-    const worksheet = utils.json_to_sheet(data);
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Sheet");
-
-    writeFileSync(`./outputs/${name}.xlsx`, write(workbook, { type: "buffer" }));
-  });
+      writeFileSync(`./outputs/${name}.xlsx`, write(workbook, { type: "buffer" }));
+    });
+}
 
 await program.parseAsync(process.argv);

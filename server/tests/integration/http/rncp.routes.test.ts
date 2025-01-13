@@ -1,9 +1,9 @@
 import { AxiosInstance } from "axiosist";
-import { ObjectId } from "mongodb";
-import { IRncp } from "shared/models/data/rncp.model";
-import { it, expect, describe, beforeEach } from "vitest";
+import type { RncpInfo } from "shared/models/apis/@types/ApiAlternance";
+import { it, expect, describe, beforeEach, vi } from "vitest";
 
-import { organismesDb, rncpDb } from "@/common/model/collections";
+import { getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
+import { organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { organismes, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
@@ -12,30 +12,41 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
+vi.mock("@/common/apis/apiAlternance/apiAlternance");
+
 describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
   useMongo();
 
-  const ficheRNCP: IRncp = {
-    _id: new ObjectId(),
-    rncp: "RNCP34956",
+  const rncpInfo: RncpInfo = {
+    code_rncp: "RNCP37682",
+    intitule: "Technicien supérieur systèmes et réseaux",
+    niveau: "5",
+    date_fin_validite_enregistrement: new Date("2026-09-01T23:59:59.000+02:00"),
     actif: true,
-    etat_fiche: "Publiée",
-    intitule: "Arts de la cuisine",
-    niveau: 4,
-    romes: ["G1602"],
+    eligible_apprentissage: true,
+    eligible_professionnalisation: true,
+    romes: [
+      {
+        code: "I1401",
+        intitule: "Maintenance informatique et bureautique",
+      },
+      {
+        code: "M1810",
+        intitule: "Production et exploitation de systèmes d''information",
+      },
+    ],
   };
 
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
     requestAsOrganisation = app.requestAsOrganisation;
-  });
-  beforeEach(async () => {
-    await Promise.all([organismesDb().insertMany(organismes), rncpDb().insertOne(ficheRNCP)]);
+    vi.mocked(getRncpInfo).mockResolvedValue(rncpInfo);
+    await organismesDb().insertMany(organismes);
   });
 
   it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-    const response = await httpClient.get(`/api/v1/rncp/${ficheRNCP.rncp}`);
+    const response = await httpClient.get(`/api/v1/rncp/${rncpInfo.code_rncp}`);
     expectUnauthorizedError(response);
   });
 
@@ -68,13 +79,11 @@ describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
         Administrateur: true,
       },
       async (organisation, allowed) => {
-        const response = await requestAsOrganisation(organisation, "get", `/api/v1/rncp/${ficheRNCP.rncp}`);
+        const response = await requestAsOrganisation(organisation, "get", `/api/v1/rncp/${rncpInfo.code_rncp}`);
 
-        expect(response.status).toStrictEqual(allowed ? 200 : 403);
-        expect(response.data).toStrictEqual({
-          ...ficheRNCP,
-          _id: ficheRNCP._id.toString(),
-        });
+        expect(response.status).toEqual(allowed ? 200 : 403);
+        expect(response.data).toEqual(JSON.parse(JSON.stringify(rncpInfo)));
+        expect(getRncpInfo).toHaveBeenCalledWith(rncpInfo.code_rncp);
       }
     );
   });

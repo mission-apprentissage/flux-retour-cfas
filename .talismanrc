@@ -8,11 +8,13 @@ fileignoreconfig:
 - filename: .bin/scripts/setup-local-env.sh
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
 - filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: 086c2803a427b3f3c48906bcfd04cd36fe61b3a757c349aa345371e47bdfb505
+  checksum: b28ed98d8847151cf88eb36d3f7f45804138789ada46b2c00964f35b86f5c609
 - filename: .infra/vault/vault.yml
   checksum: 796635402459cd6f6edb18a01b54bb2ecbb75067335ec7b3a6fd291dfd25e806
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
+- filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
+  checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
 - filename: ui/common/utils/televersement.ts

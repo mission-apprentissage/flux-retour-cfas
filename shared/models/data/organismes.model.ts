@@ -169,7 +169,6 @@ const zOrganisme = z
                       .string({
                         description: "Siret du lieu de formation (optionnel)",
                       })
-                      .regex(SIRET_REGEX)
                       .optional(),
                     adresse: zAdresse.describe("Adresse du lieu de formation (optionnel)").optional(),
                   })
@@ -245,6 +244,14 @@ const zOrganisme = z
         description:
           "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
       })
+      .nullish(),
+    last_effectifs_deca_update: z
+      .date({
+        description: "Date de la dernière mise à jour des effectifs deca pour cet organisme",
+      })
+      .optional(),
+    last_erp_transmission_date: z
+      .date({ description: "Date de dernière transmission en tant qu'organisme transmetteur" })
       .nullish(),
   })
   .strict();

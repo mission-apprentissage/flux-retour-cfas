@@ -19,7 +19,7 @@ const PageTransmissionsDeMonOrganismes = () => {
     return <UnauthorizedPage />;
   }
 
-  return <ListeTransmissionsDetails organisme={organisme} date={date} />;
+  return <ListeTransmissionsDetails organisme={organisme} date={date} modePublique={true} />;
 };
 
 export default withAuth(PageTransmissionsDeMonOrganismes);

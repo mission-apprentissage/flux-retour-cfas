@@ -7,7 +7,12 @@ import { it, expect, describe, beforeEach } from "vitest";
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
-import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { mockApiApprentissageCertificationApi } from "@tests/data/api.apprentissage.beta.gouv.fr/certification/apiApprentissage.certification.mock";
+import {
+  createRandomDossierApprenantApiInput,
+  createRandomOrganisme,
+  getRandomSourceOrganismeId,
+} from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 
@@ -20,6 +25,7 @@ const SIRET_REFERENTIEL_FERME = "44370584100099";
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
+const ORGANISME_SOURCE_ID = getRandomSourceOrganismeId();
 const sortByPath = (array: { path?: string[] }[] | undefined | null) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
@@ -57,6 +63,8 @@ describe("Processus d'ingestion", () => {
     ]);
     await createOrganisme(createRandomOrganisme({ uai: UAI, siret: SIRET }));
     await createOrganisme(createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE }));
+
+    mockApiApprentissageCertificationApi();
   });
 
   const requiredFields = [
@@ -93,7 +101,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -101,7 +109,6 @@ describe("Processus d'ingestion", () => {
         const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-
         expect(updatedInput?.error).toBeUndefined();
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
@@ -146,7 +153,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.ERP,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -205,10 +212,14 @@ describe("Processus d'ingestion", () => {
           },
           contrats: [],
           formation: {
-            cfd: "50033610",
+            cfd: "50033616", // CFD fiabilisé en fonction de la date d'entrée en formation
             annee: 0,
             periode: [2021, 2023],
-            libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
+            libelle_court: "METIERS DE LA COIFFURE",
+            libelle_long: "METIERS DE LA COIFFURE (CAP)",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
+            rncp: "RNCP34670", // RNCP associé au CFD
           },
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           is_lock: {
@@ -233,6 +244,10 @@ describe("Processus d'ingestion", () => {
             formation: {
               cfd: true,
               libelle_long: true,
+              libelle_court: true,
+              niveau: true,
+              niveau_libelle: true,
+              rncp: true,
               periode: true,
               annee: true,
             },
@@ -245,6 +260,14 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           updated_at: expect.any(Date),
           organisme_id: expect.any(ObjectId),
+          _raw: {
+            formation: {
+              annee: 0,
+              cfd: "50033610",
+              libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
+              periode: [2021, 2023],
+            },
+          },
           _computed: {
             organisme: {
               academie: "10",
@@ -272,6 +295,10 @@ describe("Processus d'ingestion", () => {
                 },
               ],
             },
+            formation: {
+              codes_rome: ["D1202"],
+              opcos: [],
+            },
           },
         });
       });
@@ -296,7 +323,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: "9999999",
+        source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
       };
 
@@ -395,7 +422,7 @@ describe("Processus d'ingestion", () => {
         await expect(effectifsDb().countDocuments({})).resolves.toBe(2);
 
         // Check historiques des effectifs
-        const effectifInserted = await effectifsDb().findOne({ "formation.cfd": commonSampleData.id_formation });
+        const effectifInserted = await effectifsDb().findOne({ "formation.cfd": "50033616" });
         expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
@@ -426,7 +453,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "0123456789",
         libelle_court_formation: "CAP",
         annee_formation: 1,
-        formation_rncp: "RNCP 123", // les espaces sont supprimés
+        formation_rncp: "RNCP 5364", // les espaces sont supprimés
         contrat_date_debut: "2021-09-01T00:00:00.000Z",
         contrat_date_fin: "2022-06-30T00:00:00.000Z",
         contrat_date_rupture: "2022-06-30T00:00:00.000Z",
@@ -472,7 +499,7 @@ describe("Processus d'ingestion", () => {
         formation_cfd: "1234ABCD",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: "9999999",
+        source_organisme_id: ORGANISME_SOURCE_ID,
       };
 
       const minimalSampleData: IEffectifQueue = {
@@ -485,7 +512,7 @@ describe("Processus d'ingestion", () => {
         id_erp_apprenant: "123456789",
         api_version: "v3",
         annee_formation: 1,
-        formation_rncp: "RNCP123",
+        formation_rncp: "RNCP5364",
         date_inscription_formation: "2021-09-01T00:00:00.000Z",
         date_entree_formation: "2021-09-01T00:00:00.000Z",
         date_fin_formation: "2022-06-30T00:00:00.000Z",
@@ -500,7 +527,7 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_code_postal: "75000",
         created_at: new Date(),
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: "9999999",
+        source_organisme_id: ORGANISME_SOURCE_ID,
         _id: new ObjectId(),
       };
 
@@ -593,7 +620,8 @@ describe("Processus d'ingestion", () => {
           formation: {
             periode: [],
             cfd: "1234ABCD",
-            rncp: "RNCP123",
+            rncp: "RNCP5364",
+            duree_formation_relle: 10,
             annee: 1,
             obtention_diplome: true,
             date_obtention_diplome: new Date("2022-06-30T00:00:00.000Z"),
@@ -618,6 +646,29 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
+          _raw: {
+            formation: {
+              annee: 1,
+              cause_exclusion: "absences répétées et injustifiées",
+              cfd: "1234ABCD",
+              date_entree: new Date("2021-09-01T00:00:00.000Z"),
+              date_exclusion: new Date("2022-06-30T00:00:00.000Z"),
+              date_fin: new Date("2022-06-30T00:00:00.000Z"),
+              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
+              date_obtention_diplome: new Date("2022-06-30T00:00:00.000Z"),
+              duree_formation_relle: 10,
+              duree_theorique_mois: 24,
+              formation_presentielle: true,
+              obtention_diplome: true,
+              periode: [],
+              referent_handicap: {
+                email: "a3@example-example.org",
+                nom: "Doe",
+                prenom: "John",
+              },
+              rncp: "RNCP5364",
+            },
+          },
           _computed: {
             organisme: {
               academie: "10",
@@ -629,6 +680,7 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
             },
             formation: {
+              codes_rome: null,
               opcos: [],
             },
             statut: {
@@ -645,7 +697,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -704,11 +756,17 @@ describe("Processus d'ingestion", () => {
           },
           contrats: [],
           formation: {
+            cfd: "50033616", // CFD associé au RNCP
             periode: [],
-            rncp: "RNCP123",
+            rncp: "RNCP34670", // RNCP fiabilisé en fontion de la date d'entrée
             annee: 1,
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
+            libelle_court: "METIERS DE LA COIFFURE",
+            libelle_long: "METIERS DE LA COIFFURE (CAP)",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
             duree_theorique_mois: 24,
+            duree_formation_relle: 10,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
@@ -720,6 +778,18 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
+          _raw: {
+            formation: {
+              annee: 1,
+              date_entree: new Date("2021-09-01T00:00:00.000Z"),
+              date_fin: new Date("2022-06-30T00:00:00.000Z"),
+              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
+              duree_formation_relle: 10,
+              duree_theorique_mois: 24,
+              periode: [],
+              rncp: "RNCP5364",
+            },
+          },
           _computed: {
             organisme: {
               academie: "10",
@@ -731,6 +801,7 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
             },
             formation: {
+              codes_rome: ["D1202"],
               opcos: [],
             },
             statut: {
@@ -751,7 +822,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -840,7 +911,7 @@ describe("Processus d'ingestion", () => {
           // L'année scolaire accepte des dates identiques
           annee_scolaire: "2022-2022",
           // La chaine RNCP est ajoutée au début du nombre
-          formation_rncp: "  12-3  ",
+          formation_rncp: "  34-670  ",
           has_nir: true,
           // Le sexe peut être un number
           sexe_apprenant: 2,
@@ -885,7 +956,13 @@ describe("Processus d'ingestion", () => {
           contrats: [],
           formation: {
             periode: [],
-            rncp: "RNCP123",
+            cfd: "50033616",
+            rncp: "RNCP34670",
+            libelle_court: "METIERS DE LA COIFFURE",
+            libelle_long: "METIERS DE LA COIFFURE (CAP)",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
+            duree_formation_relle: 10,
             annee: 1,
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
             duree_theorique_mois: 24,
@@ -900,6 +977,18 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
+          _raw: {
+            formation: {
+              annee: 1,
+              date_entree: new Date("2021-09-01T00:00:00.000Z"),
+              date_fin: new Date("2022-06-30T00:00:00.000Z"),
+              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
+              duree_formation_relle: 10,
+              duree_theorique_mois: 24,
+              periode: [],
+              rncp: "RNCP34670",
+            },
+          },
           _computed: {
             organisme: {
               academie: "10",
@@ -911,6 +1000,7 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
             },
             formation: {
+              codes_rome: ["D1202"],
               opcos: [],
             },
             statut: {
@@ -931,7 +1021,7 @@ describe("Processus d'ingestion", () => {
           created_at: expect.any(Date),
           annee_scolaire: "2022-2022",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -950,7 +1040,7 @@ describe("Processus d'ingestion", () => {
             ...createRandomDossierApprenantApiInput({ [requiredField]: undefined }),
             uai_etablissement: UAI,
             siret_etablissement: SIRET,
-            source_organisme_id: "9999999",
+            source_organisme_id: ORGANISME_SOURCE_ID,
             created_at: new Date(),
             _id: new ObjectId(),
           });
@@ -1012,7 +1102,7 @@ describe("Processus d'ingestion", () => {
             siret_etablissement: SIRET,
             id_formation: "invalideIdFormation",
           }),
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
         });
 
@@ -1068,7 +1158,7 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: SOURCE_APPRENANT.FICHIER,
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         };
@@ -1117,7 +1207,7 @@ describe("Processus d'ingestion", () => {
             contrat_date_fin: "abc",
             contrat_date_rupture: "13/11/2020",
           }),
-          source_organisme_id: "9999999",
+          source_organisme_id: ORGANISME_SOURCE_ID,
           created_at: new Date(),
           _id: new ObjectId(),
         });
@@ -1183,7 +1273,7 @@ describe("Processus d'ingestion", () => {
             tel_apprenant: "+33 534648662",
             code_commune_insee_apprenant: "05109",
             source: SOURCE_APPRENANT.FICHIER,
-            source_organisme_id: "9999999",
+            source_organisme_id: ORGANISME_SOURCE_ID,
             created_at: new Date(),
             _id: new ObjectId(),
           };
@@ -1242,7 +1332,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: SOURCE_APPRENANT.FICHIER,
-        source_organisme_id: "9999999",
+        source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
       };
 

@@ -6,7 +6,7 @@ import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngin
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const EffectifFormation = memo(() => {
   return (
-    <Box my={9}>
+    <Box my={6}>
       <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="1w">
         <InputController name="formation.rncp" w="80" mb={0} />
         <InputController name="formation.cfd" w="80" mb={0} />

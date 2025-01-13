@@ -233,6 +233,18 @@ export const updateOrganismeTransmission = async (
     }
   );
 
+  if (source_organisme_id) {
+    await organismesDb().findOneAndUpdate(
+      { _id: new ObjectId(source_organisme_id) },
+      {
+        $set: {
+          last_erp_transmission_date: new Date(),
+          updated_at: new Date(),
+        },
+      }
+    );
+  }
+
   if (!modifyResult.value) {
     throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
@@ -965,6 +977,7 @@ export function getOrganismeProjection(
     has_transmission_errors: 1,
     transmission_errors_date: 1,
     is_transmission_target: 1,
+    last_effectifs_deca_update: 1,
     erps: permissionsOrganisme.infoTransmissionEffectifs,
     erp_unsupported: permissionsOrganisme.infoTransmissionEffectifs,
     first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
