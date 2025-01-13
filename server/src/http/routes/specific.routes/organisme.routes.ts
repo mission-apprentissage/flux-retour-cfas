@@ -64,7 +64,14 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
         },
         {
           $match: {
-            "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+            $or: [
+              {
+                "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+              },
+              {
+                "dernierStatut.valeur": STATUT_APPRENANT.RUPTURANT,
+              },
+            ],
           },
         },
         ...(only_sifa_missing_fields
