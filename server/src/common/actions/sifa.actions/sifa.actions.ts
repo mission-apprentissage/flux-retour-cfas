@@ -160,7 +160,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         : "",
     };
 
-    const dernierContratActif = effectif.contrats ? effectif.contrats[effectif.contrats.length - 1] : undefined;
+    const dernierContratActif = effectif.contrats?.length ? effectif.contrats[effectif.contrats.length - 1] : undefined;
     const employeurFields = {
       SIRET_EMP: wrapNumString(dernierContratActif?.siret),
       TYPE_EMP: dernierContratActif?.type_employeur,
