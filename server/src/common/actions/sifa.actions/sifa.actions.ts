@@ -28,7 +28,7 @@ export const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean
     }
   });
 
-  return latestStatus === STATUT_APPRENANT.APPRENTI;
+  return latestStatus === STATUT_APPRENANT.APPRENTI || latestStatus === STATUT_APPRENANT.RUPTURANT;
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
@@ -160,7 +160,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         : "",
     };
 
-    const dernierContratActif = effectif.contrats?.[0];
+    const dernierContratActif = effectif.contrats ? effectif.contrats[effectif.contrats.length - 1] : undefined;
     const employeurFields = {
       SIRET_EMP: wrapNumString(dernierContratActif?.siret),
       TYPE_EMP: dernierContratActif?.type_employeur,
