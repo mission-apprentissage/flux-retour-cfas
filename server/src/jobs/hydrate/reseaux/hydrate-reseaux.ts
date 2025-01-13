@@ -1,9 +1,10 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
-import { STATUT_PRESENCE_REFERENTIEL } from "shared";
+import { ObjectId } from "mongodb";
+import { STATUT_PRESENCE_REFERENTIEL, zReseau } from "shared";
 
 import logger from "@/common/logger";
-import { organismesDb } from "@/common/model/collections";
+import { organismesDb, reseauxDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
@@ -177,4 +178,82 @@ const hydrateReseauFile = async (filename: string) => {
       organismeUpdateErrorCount,
     },
   };
+};
+
+/**
+ * Fonction de remplissage de la collection reseaux
+ */
+export const populateReseauxCollection = async (): Promise<void> => {
+  const uniqueReseaux = new Set<string>();
+
+  for (const file of INPUT_FILES) {
+    try {
+      const filePath = getStaticFilePath(file);
+      const reseauFile = readJsonFromCsvFile(filePath, ";");
+
+      reseauFile.forEach((row: any) => {
+        const reseaux = parseReseauxTextFromCsv(row[INPUT_FILE_COLUMN_NAMES.RESEAUX_A_JOUR]);
+        reseaux.forEach((reseau) => uniqueReseaux.add(reseau));
+      });
+
+      logger.info(`Fichier traité avec succès : ${file}`);
+    } catch (error) {
+      logger.error(`Erreur lors du traitement du fichier ${file} :`, error);
+      captureException(error);
+    }
+  }
+
+  const reseauxArray = Array.from(uniqueReseaux).map((nom) => ({
+    nom,
+    organismes_ids: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+  }));
+
+  const validatedReseaux = reseauxArray.filter((reseau) => {
+    try {
+      zReseau.parse(reseau);
+      return true;
+    } catch (error) {
+      console.error(`Réseau invalide : ${reseau.nom}`, error);
+      return false;
+    }
+  });
+
+  const reseauToOrganismesMap: Record<string, ObjectId[]> = {};
+
+  await Promise.all(
+    Array.from(uniqueReseaux).map(async (reseau) => {
+      try {
+        const organismes = await organismesDb()
+          .find({ reseaux: { $in: [reseau as any] } })
+          .project({ _id: 1 })
+          .toArray();
+
+        reseauToOrganismesMap[reseau] = organismes.map((organisme) => new ObjectId(organisme._id));
+      } catch (error) {
+        logger.error(`Erreur lors de la récupération des organismes pour le réseau ${reseau} :`, error);
+        captureException(error);
+      }
+    })
+  );
+
+  const reseauxWithOrganismes = validatedReseaux.map((reseau) => ({
+    ...reseau,
+    organismes_ids: reseauToOrganismesMap[reseau.nom] || [],
+    updated_at: new Date(),
+  }));
+
+  if (reseauxWithOrganismes.length > 0) {
+    try {
+      await reseauxDb().deleteMany({});
+      const result = await reseauxDb().insertMany(reseauxWithOrganismes, { ordered: true });
+      logger.info(`${result.insertedCount} réseaux ajoutés avec succès à la collection avec les IDs des organismes.`);
+    } catch (error) {
+      logger.error("Erreur lors de l'insertion des réseaux avec les IDs des organismes dans la collection :", error);
+      captureException(error);
+    }
+  } else {
+    logger.warn("Aucun réseau valide trouvé pour l'insertion.");
+  }
 };

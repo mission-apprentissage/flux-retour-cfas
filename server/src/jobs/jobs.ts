@@ -38,7 +38,7 @@ import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
-import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
+import { hydrateReseaux, populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { validationTerritoires } from "./territoire/validationTerritoire";
@@ -244,6 +244,11 @@ export async function setupJobProcessor() {
       "hydrate:voeux-effectifs-relations": {
         handler: async () => {
           return hydrateVoeuxEffectifsRelations();
+        },
+      },
+      "populate:reseaux": {
+        handler: async () => {
+          return populateReseauxCollection();
         },
       },
       "purge:queues": {

@@ -146,6 +146,7 @@ import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
+import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
@@ -971,6 +972,7 @@ function setupRoutes(app: Application) {
       .use(requireAdministrator)
       .use("/users", usersAdmin())
       .use("/organismes", organismesAdmin())
+      .use("/reseaux", reseauxAdmin())
       .use("/effectifs", effectifsAdmin())
       .use("/transmissions", transmissionRoutesAdmin())
       .use("/affelnet", affelnetRoutesAdmin())

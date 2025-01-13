@@ -16,6 +16,7 @@ import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organi
 import OrganismesReferentielModelDescriptor, {
   IOrganismeReferentiel,
 } from "shared/models/data/organismesReferentiel.model";
+import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
@@ -57,6 +58,7 @@ export const modelDescriptors = [
   organismesV2ModelDescriptor,
   personV2ModelDescriptor,
   transmissionV2Descriptor,
+  ReseauxModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -85,6 +87,7 @@ export const telechargementListesNominativesLogsDb = () =>
 export const erpDb = () => getDbCollection<IErp>(erpModelDescriptor.collectionName);
 export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
 export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
+export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.collectionName);
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
