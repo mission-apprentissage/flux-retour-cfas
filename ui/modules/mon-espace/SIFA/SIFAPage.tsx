@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
@@ -35,7 +35,7 @@ import InfoTeleversementSIFA from "@/modules/organismes/InfoTeleversementSIFA";
 import { ExternalLinkLine, DownloadLine } from "@/theme/components/icons";
 import Eye from "@/theme/components/icons/Eye";
 
-import { effectifsStateAtom, effectifFromDecaAtom } from "../effectifs/engine/atoms";
+import { effectifFromDecaAtom } from "../effectifs/engine/atoms";
 
 import { SIFAFilterType } from "./SIFATable/SIFAEffectifsFilterPanel";
 import SIFAEffectifsTable from "./SIFATable/SIFAEffectifsTable";
@@ -50,8 +50,6 @@ function SIFAPage(props: SIFAPageProps) {
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-  const [currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
-  const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<SIFAFilterType>({});
@@ -116,28 +114,14 @@ function SIFAPage(props: SIFAPageProps) {
         },
       });
 
-      const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
-
-      setCurrentEffectifsState(
-        organismesEffectifs.reduce((acc, { id, validation_errors, requiredSifa }) => {
-          acc.set(id, { validation_errors, requiredSifa });
-          return acc;
-        }, new Map())
-      );
+      const { fromDECA, total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs } = response;
 
       setEffectifFromDecaState(fromDECA);
 
-      return { total, filters: returnedFilters, organismesEffectifs };
+      return { total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs };
     },
     { keepPreviousData: true }
   );
-
-  useEffect(() => {
-    const invalidCount = Array.from(currentEffectifsState.values()).filter(
-      (effectif) => effectif.requiredSifa.length > 0
-    ).length;
-    setSifaInvalidCount(invalidCount);
-  }, [currentEffectifsState]);
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -254,12 +238,14 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleToastOnSifaDownload = () => {
-    const organismesEffectifs = data?.organismesEffectifs || [];
+  const handleToastOnSifaDownload = async () => {
+    const { total, missingRequiredFieldsTotal } = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
+      params: { sifa: true },
+    });
 
-    sifaInvalidCount > 0
+    missingRequiredFieldsTotal > 0
       ? toastWarning(
-          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${sifaInvalidCount} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          `Parmi les ${total} effectifs que vous avez déclarés, ${missingRequiredFieldsTotal} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
           {
             isClosable: true,
             duration: 20000,

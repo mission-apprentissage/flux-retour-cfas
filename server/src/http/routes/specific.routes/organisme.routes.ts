@@ -41,6 +41,34 @@ const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
   }),
 });
 
+const computeSifaMissingFieldsFilter = () => {
+  return [
+    {
+      $match: {
+        $or: [
+          ...[...requiredFieldsSifa].map((field) => {
+            return {
+              [field]: null,
+            };
+          }),
+          {
+            $and: [
+              { "apprenant.adresse.complete": null },
+              {
+                $or: requiredApprenantAdresseFieldsSifa.map((field) => {
+                  return {
+                    [field]: null,
+                  };
+                }),
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ];
+};
+
 const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, currentDate: Date) => {
   return sifa
     ? [
@@ -74,33 +102,7 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
             ],
           },
         },
-        ...(only_sifa_missing_fields
-          ? [
-              {
-                $match: {
-                  $or: [
-                    ...[...requiredFieldsSifa].map((field) => {
-                      return {
-                        [field]: null,
-                      };
-                    }),
-                    {
-                      $and: [
-                        { "apprenant.adresse.complete": null },
-                        {
-                          $or: requiredApprenantAdresseFieldsSifa.map((field) => {
-                            return {
-                              [field]: null,
-                            };
-                          }),
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ]
-          : []),
+        ...(only_sifa_missing_fields ? computeSifaMissingFieldsFilter() : []),
       ]
     : [];
 };
@@ -206,6 +208,13 @@ export async function getOrganismeEffectifs(
             $count: "count",
           },
         ],
+        missingRequiredFieldsCount: [
+          { $match: matchConditions },
+          ...computeSifaMissingFieldsFilter(),
+          {
+            $count: "count",
+          },
+        ],
       },
     },
     {
@@ -218,6 +227,7 @@ export async function getOrganismeEffectifs(
         },
         results: "$results",
         total: { $arrayElemAt: ["$totalCount.count", 0] },
+        missingRequiredFieldsCount: { $arrayElemAt: ["$missingRequiredFieldsCount.count", 0] },
       },
     },
   ];
@@ -252,6 +262,7 @@ export async function getOrganismeEffectifs(
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
+    missingRequiredFieldsTotal: data?.missingRequiredFieldsCount || 0,
     filters: {
       ...data?.filters,
       annee_scolaire: Array.from(
