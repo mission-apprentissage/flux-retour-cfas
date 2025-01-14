@@ -8,26 +8,32 @@ import { _put } from "@/common/httpClient";
 import { AutoCompleteOrganismes } from "@/components/Autocomplete/Organismes";
 import { BasicModal } from "@/components/Modals/BasicModal";
 
-export const AddOrganisme: React.FC = () => {
+interface AddOrganismeProps {
+  reseauId: string;
+  refetch: any;
+}
+
+export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
   const [selectedOrganisme, setSelectedOrganisme] = useState<OrganismeSupportInfoJson | null>(null);
   const toast = useToast();
 
   const { mutateAsync: addReseaux, isLoading: isAdding } = useMutation(
-    async ({ id, reseaux }: { id: string; reseaux: string[] }) => {
-      return await _put(`/api/v1/admin/organismes/${id}/reseaux`, { reseaux });
+    async ({ organismeId }: { organismeId: string | null | undefined }) => {
+      if (!selectedOrganisme) {
+        throw new Error("No organisme selected");
+      }
+      return await _put(`/api/v1/admin/reseaux/${reseauId}`, { organismeId });
     }
   );
 
   const handleAdd = async () => {
     if (!selectedOrganisme) return;
 
-    const payload = {
-      id: selectedOrganisme.siret,
-      reseaux: ["AFTRAL"],
-    };
-
     try {
-      await addReseaux(payload);
+      await addReseaux({
+        organismeId: selectedOrganisme.tdb?._id,
+      });
+
       toast({
         title: "Succès",
         description: `Le réseau a été ajouté à l'organisme ${selectedOrganisme.tdb?.raison_sociale || "inconnu"}`,
@@ -35,6 +41,7 @@ export const AddOrganisme: React.FC = () => {
         duration: 5000,
         isClosable: true,
       });
+      refetch();
       setSelectedOrganisme(null);
     } catch (error) {
       toast({

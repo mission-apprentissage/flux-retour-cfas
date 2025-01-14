@@ -3,12 +3,10 @@ import { Box, Button, Container, Heading, HStack, Input, InputGroup, InputRightE
 import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import { useState } from "react";
-import { UAI_INCONNUE_TAG_FORMAT } from "shared";
+import { IOrganisme, IReseau, UAI_INCONNUE_TAG_FORMAT } from "shared";
 
 import { _get, _post } from "@/common/httpClient";
-import { Organisme } from "@/common/internal/Organisme";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { AddOrganisme } from "@/components/admin/reseaux/AddOrganisme";
 import { RemoveOrganisme } from "@/components/admin/reseaux/RemoveOrganisme";
@@ -32,101 +30,89 @@ export const getServerSideProps = async (context) => {
   };
 };
 
-const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>[] = [
-  {
-    header: () => "Nom de l’organisme",
-    accessorKey: "normalizedName",
-    cell: ({ row }) => (
-      <>
-        <Link
-          href={`/organismes/${(row.original as any)?._id}`}
-          display="block"
-          fontSize="1rem"
-          width="var(--chakra-sizes-lg)"
-          title={row.original.enseigne ?? row.original.raison_sociale}
-        >
-          {row.original.enseigne ?? row.original.raison_sociale ?? "Organisme inconnu"}
-        </Link>
-      </>
-    ),
-  },
-  {
-    accessorKey: "UAI",
-    cell: ({ row }) => row.original.uai || UAI_INCONNUE_TAG_FORMAT,
-  },
-  {
-    accessorKey: "SIRET",
-    cell: ({ row }) => row.original.siret || UAI_INCONNUE_TAG_FORMAT,
-  },
-  {
-    accessorKey: "nature",
-    sortingFn: (a, b) => {
-      const natureA = a.original.nature === "inconnue" ? " " : a.original.nature;
-      const natureB = b.original.nature === "inconnue" ? " " : b.original.nature;
-      return natureA.localeCompare(natureB);
+const organismesTableColumnsDefs = ({
+  reseauId,
+  refetch,
+}: {
+  reseauId: string;
+  refetch: any;
+}): AccessorKeyColumnDef<OrganismeNormalized, any>[] => {
+  return [
+    {
+      header: () => "Nom de l’organisme",
+      accessorKey: "normalizedName",
+      cell: ({ row }) => (
+        <>
+          <Link
+            href={`/organismes/${row.original?._id}`}
+            display="block"
+            fontSize="1rem"
+            width="var(--chakra-sizes-lg)"
+            title={row.original.enseigne ?? row.original.raison_sociale}
+          >
+            {row.original.enseigne ?? row.original.raison_sociale ?? "Organisme inconnu"}
+          </Link>
+        </>
+      ),
     },
-    header: () => <>Nature</>,
-    cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
-  },
-  {
-    accessorKey: "adresse",
-    sortingFn: (a, b) => {
-      const communeA = a.original.adresse?.commune || "";
-      const communeB = b.original.adresse?.commune || "";
-      return communeA.localeCompare(communeB);
+    {
+      accessorKey: "UAI",
+      cell: ({ row }) => row.original.uai || UAI_INCONNUE_TAG_FORMAT,
     },
-    header: () => <>Localisation</>,
-    cell: ({ row }) => (
-      <Box>
-        {row.original.adresse?.commune || ""}
-        <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
-          {row.original.adresse?.code_postal || ""}
-          {row.original.adresse?.code_insee && row.original.adresse?.code_postal !== row.original.adresse?.code_insee
-            ? ` (Insee: ${row.original.adresse?.code_insee})`
-            : ""}
-        </Text>
-      </Box>
-    ),
-  },
-  {
-    accessorKey: "more",
-    enableSorting: false,
-    header: () => "Supprimer",
-    cell: () => <RemoveOrganisme />,
-  },
-];
+    {
+      accessorKey: "SIRET",
+      cell: ({ row }) => row.original.siret || UAI_INCONNUE_TAG_FORMAT,
+    },
+    {
+      accessorKey: "nature",
+      sortingFn: (a, b) => {
+        const natureA = a.original.nature === "inconnue" ? " " : a.original.nature;
+        const natureB = b.original.nature === "inconnue" ? " " : b.original.nature;
+        return natureA.localeCompare(natureB);
+      },
+      header: () => <>Nature</>,
+      cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
+    },
+    {
+      accessorKey: "adresse",
+      sortingFn: (a, b) => {
+        const communeA = a.original.adresse?.commune || "";
+        const communeB = b.original.adresse?.commune || "";
+        return communeA.localeCompare(communeB);
+      },
+      header: () => <>Localisation</>,
+      cell: ({ row }) => (
+        <Box>
+          {row.original.adresse?.commune || ""}
+          <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
+            {row.original.adresse?.code_postal || ""}
+            {row.original.adresse?.code_insee && row.original.adresse?.code_postal !== row.original.adresse?.code_insee
+              ? ` (Insee: ${row.original.adresse?.code_insee})`
+              : ""}
+          </Text>
+        </Box>
+      ),
+    },
+    {
+      accessorKey: "more",
+      enableSorting: false,
+      header: () => "Supprimer",
+      cell: ({ row }) => {
+        return <RemoveOrganisme reseauId={reseauId} organismeId={row.original._id} refetch={refetch} />;
+      },
+    },
+  ];
+};
 
 const NetworkPage = ({ id }) => {
   const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
-  const router = useRouter();
   const [sort, setSort] = useState<SortingState>(defaultSort);
 
-  const { data: reseau } = useQuery<any[], any>(
-    ["reseau", "admin", "search"],
-    () => _get<any[]>(`/api/v1/admin/reseaux/${id}`),
-    {}
-  );
-
-  const [reseauxFilter] = useState(id.toUpperCase());
-
-  const q = typeof router.query.q !== "string" ? "" : router.query.q;
-
-  const { data: organismes } = useQuery<Organisme[], any>(
-    ["organisme", "admin", "search", q, reseauxFilter],
-    ({ signal }) =>
-      _get<Organisme[]>(`/api/v1/admin/organismes`, {
-        signal,
-        params: {
-          q,
-          limit: 1000,
-          filter: {
-            reseaux: reseau.nom,
-          },
-        },
-      }),
-    { enabled: router.isReady }
-  );
-
+  const { data: reseau, refetch } = useQuery<
+    IReseau & {
+      organismes: IOrganisme[];
+    }
+  >(["reseau"], () => _get(`/api/v1/admin/reseaux/${id}`), {});
   const title = `Réseau ${reseau?.nom || "inconnu"}`;
 
   return (
@@ -139,7 +125,7 @@ const NetworkPage = ({ id }) => {
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
             {title}
           </Heading>
-          <AddOrganisme />
+          <AddOrganisme reseauId={id} refetch={refetch} />
         </HStack>
         <Link href="/admin/reseaux" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
           <Box as="i" className="ri-arrow-left-line" /> Revenir en arrière
@@ -180,11 +166,11 @@ const NetworkPage = ({ id }) => {
           </HStack>
         </Box>
         <NewTable
-          data={organismes?.data || []}
+          data={reseau?.organismes || []}
           loading={false}
           sortingState={sort}
           onSortingChange={(state) => setSort(state)}
-          columns={organismesTableColumnsDefs}
+          columns={organismesTableColumnsDefs({ reseauId: id, refetch })}
         />
       </Container>
     </Page>

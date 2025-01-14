@@ -17,7 +17,7 @@ const Users = () => {
   const [selectedReseau, setSelectedReseau] = useState<string>();
 
   const { data: reseauxData } = useQuery<any[], any>(
-    ["reseauau", "admin", "search"],
+    ["reseau", "admin", "search"],
     ({ signal }) => _get<any[]>(`/api/v1/admin/reseaux`, { signal }),
     {}
   );
