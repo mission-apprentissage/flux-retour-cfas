@@ -17,7 +17,7 @@ import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate, SIFA_GROUP } from "shared";
+import { DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate, getSIFADate, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -109,7 +109,7 @@ function SIFAPage(props: SIFAPageProps) {
           search,
           sortField: sort[0]?.id,
           sortOrder: sort[0]?.desc ? "desc" : "asc",
-          annee_scolaire: getAnneesScolaireListFromDate(new Date()),
+          annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
           sifa: true,
           ...filters,
         },
