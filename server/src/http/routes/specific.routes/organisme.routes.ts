@@ -107,6 +107,18 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
     : [];
 };
 
+const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean, organismeId: ObjectId) => {
+  const currentDate = sifa ? getSIFADate(new Date()) : new Date();
+  return [
+    {
+      $match: {
+        ...matchOrgaAndAnneScolaire(sifa, organismeId),
+      },
+    },
+    ...addSifaFilter(sifa, only_sifa_missing_fields, currentDate),
+  ];
+};
+
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   sifa: boolean = false,
@@ -166,14 +178,8 @@ export async function getOrganismeEffectifs(
 
   const sortConditions = computeSort(sortField, sortOrder);
 
-  const currentDate = sifa ? getSIFADate(new Date()) : new Date();
   const pipeline = [
-    {
-      $match: {
-        ...matchOrgaAndAnneScolaire(sifa, organismeId),
-      },
-    },
-    ...addSifaFilter(sifa, only_sifa_missing_fields, currentDate),
+    ...computeSifaAggregation(sifa, only_sifa_missing_fields, organismeId),
     {
       $facet: {
         allFilters: [
@@ -279,35 +285,7 @@ export async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = 
   const db = isDeca ? effectifsDECADb() : effectifsDb();
 
   const pipeline = [
-    {
-      $match: {
-        organisme_id: organismeId,
-        ...(sifa && {
-          annee_scolaire: {
-            $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
-          },
-          "_computed.statut.parcours": {
-            $elemMatch: {
-              valeur: STATUT_APPRENANT.APPRENTI,
-              date: {
-                $eq: {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: "$_computed.statut.parcours",
-                        as: "parcours",
-                        cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
-                      },
-                    },
-                    -1,
-                  ],
-                },
-              },
-            },
-          },
-        }),
-      },
-    },
+    ...computeSifaAggregation(sifa, false, organismeId),
     {
       $project: {
         id: { $toString: "$_id" },
