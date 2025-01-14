@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
@@ -35,7 +35,7 @@ import InfoTeleversementSIFA from "@/modules/organismes/InfoTeleversementSIFA";
 import { ExternalLinkLine, DownloadLine } from "@/theme/components/icons";
 import Eye from "@/theme/components/icons/Eye";
 
-import { effectifFromDecaAtom } from "../effectifs/engine/atoms";
+import { effectifsStateAtom, effectifFromDecaAtom } from "../effectifs/engine/atoms";
 
 import { SIFAFilterType } from "./SIFATable/SIFAEffectifsFilterPanel";
 import SIFAEffectifsTable from "./SIFATable/SIFAEffectifsTable";
@@ -55,6 +55,7 @@ function SIFAPage(props: SIFAPageProps) {
   const [filters, setFilters] = useState<SIFAFilterType>({});
   const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
+  const [_currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
 
   useEffect(() => {
     const defaultFilterParser = (value) => {
@@ -115,6 +116,13 @@ function SIFAPage(props: SIFAPageProps) {
       });
 
       const { fromDECA, total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs } = response;
+
+      setCurrentEffectifsState(
+        organismesEffectifs.reduce((acc, { id, validation_errors, requiredSifa }) => {
+          acc.set(id, { validation_errors, requiredSifa });
+          return acc;
+        }, new Map())
+      );
 
       setEffectifFromDecaState(fromDECA);
 
