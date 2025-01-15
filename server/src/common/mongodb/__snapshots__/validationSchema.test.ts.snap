@@ -11139,6 +11139,42 @@ exports[`validation-schema > should create validation schema for personV2 > pers
 }
 `;
 
+exports[`validation-schema > should create validation schema for reseaux > reseaux 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+      "description": "Identifiant unique",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création du réseau",
+    },
+    "nom": {
+      "bsonType": "string",
+      "description": "Nom du réseau",
+      "minLength": 1,
+    },
+    "organismes_ids": {
+      "bsonType": "array",
+      "description": "Liste des IDs des organismes associés au réseau",
+      "items": {
+        "bsonType": "objectId",
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date de dernière mise à jour du réseau",
+    },
+  },
+  "required": [
+    "nom",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for rncp > rncp 1`] = `
 {
   "additionalProperties": false,
