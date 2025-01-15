@@ -2,7 +2,7 @@ import { Box, Center, HStack, Heading, Spinner, Text, Stack, VStack, useDisclosu
 import { useQuery } from "@tanstack/react-query";
 import React, { useRef } from "react";
 import { useRecoilValue } from "recoil";
-import { DuplicateEffectifGroup } from "shared";
+import { CRISP_FAQ, DuplicateEffectifGroup, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _get } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
@@ -92,9 +92,53 @@ const EffectifsDoublonsPage = ({ isMine }) => {
       </HStack>
 
       <Stack spacing={6}>
-        <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mb={4}>
-          {`Vérifier les ${totalCount} duplicats d'effectifs pour l'année scolaire en cours`}
-        </Text>
+        {isMine && (
+          <VStack align="start" width={2 / 3} gap={0} mb={6}>
+            <Text fontWeight="bold" fontSize="delta">
+              Vérifiez {duplicates?.length === 1 ? "le duplicat" : `les ${duplicates?.length} duplicats`}{" "}
+              d&apos;effectifs. Pour chacun, supprimez celui avec les informations incorrectes.
+            </Text>
+            <Text mt={2}>
+              Les effectifs ci-dessous apparaissent en doublons car une ou plusieurs données ont été modifiées sur
+              chacun d’entre eux.
+            </Text>
+            <Text>
+              Ces dernières sont signalées en{" "}
+              <Text as="span" color="red" fontWeight="bold">
+                rouge
+              </Text>
+              .
+            </Text>
+            <Text>
+              Par exemple, un code RNCP a été rajouté ou un numéro de téléphone a été modifié. Vérifiez les informations
+              en dépliant chaque ligne et supprimez le(s) doublon(s) incorrect(s).
+            </Text>
+            <Text mt={2}>
+              En cas de difficulté, lisez la{" "}
+              <Link
+                href={CRISP_FAQ}
+                textDecoration={"underline"}
+                isExternal
+                plausibleGoal="clic_sifa_faq"
+                color="bluefrance"
+              >
+                FAQ dédiée
+              </Link>{" "}
+              ou{" "}
+              <Link
+                href={SUPPORT_PAGE_ACCUEIL}
+                target="_blank"
+                textDecoration="underline"
+                isExternal
+                whiteSpace="nowrap"
+                color="bluefrance"
+              >
+                contactez-nous
+              </Link>
+              .
+            </Text>
+          </VStack>
+        )}
 
         <EffectifsDoublonsList
           data={duplicates || []}

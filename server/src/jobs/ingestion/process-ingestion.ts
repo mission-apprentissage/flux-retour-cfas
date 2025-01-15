@@ -11,24 +11,26 @@ import {
 } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import dossierApprenantSchemaV3, {
+  DossierApprenantSchemaV3ZodType,
+} from "shared/models/parts/dossierApprenantSchemaV3";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
-import { lockEffectif, addComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
+import { lockEffectif, mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
-import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { effectifsDb, effectifsQueueDb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
@@ -37,10 +39,11 @@ import { validateContrat } from "@/common/validation/contratsDossierApprenantSch
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
 } from "@/common/validation/dossierApprenantSchemaV1V2";
-import dossierApprenantSchemaV3, {
-  DossierApprenantSchemaV3ZodType,
-} from "@/common/validation/dossierApprenantSchemaV3";
 
+import {
+  fiabilisationEffectifFormation,
+  getEffectifCertification,
+} from "../fiabilisation/certification/fiabilisation-certification";
 import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
@@ -274,11 +277,9 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
   let organismeTarget: any;
 
   const result = await dossierApprenantSchemaV3()
-    .transform(async (effectifQueued, ctx) => {
-      const [effectif, organismeFormateur, organismeResponsable, formation] = await Promise.all([
-        (async () => {
-          return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
+    .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
+      let [effectif, organismeFormateur, organismeResponsable] = await Promise.all([
+        transformEffectifQueueToEffectif(effectifQueued),
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_formateur_uai,
@@ -296,16 +297,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           );
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
           return organisme;
-        })(),
-        (async () => {
-          if (!effectifQueued.formation_cfd) {
-            return null;
-          }
-
-          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
-          itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
-          itemProcessingInfos.formation_found = !!formationFromCatalogue;
-          return formationFromCatalogue;
         })(),
       ]);
 
@@ -342,39 +333,36 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         return NEVER;
       }
 
-      // Set du niveau de la formation depuis le catalogue
-      if (formation && effectif.formation) {
-        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-        effectif.formation.niveau_libelle = formation.niveau;
+      const certification = await getEffectifCertification(effectif);
 
-        // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
-        // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
-        if (effectif.formation.date_fin && effectif.formation.date_entree) {
-          effectif.formation.duree_formation_relle = Math.round(
-            (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) /
-              1000 /
-              60 /
-              60 /
-              24 /
-              30
-          );
-        }
+      // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
+      // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
+      if (effectif.formation?.date_fin && effectif.formation?.date_entree) {
+        effectif.formation.duree_formation_relle = Math.round(
+          (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) / 1000 / 60 / 60 / 24 / 30
+        );
       }
 
       return {
-        effectif: {
-          ...effectif,
-          organisme_id: organismeFormateur?._id,
-          organisme_formateur_id: organismeFormateur?._id,
-          organisme_responsable_id: organismeResponsable?._id,
-          lieu_de_formation: {
-            uai: effectifQueued.etablissement_lieu_de_formation_uai,
-            siret: effectifQueued.etablissement_lieu_de_formation_siret,
-            adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
-            code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+        effectif: await withComputedFields(
+          {
+            ...effectif,
+            formation: fiabilisationEffectifFormation(effectif, certification),
+            organisme_id: organismeFormateur?._id,
+            organisme_formateur_id: organismeFormateur?._id,
+            organisme_responsable_id: organismeResponsable?._id,
+            lieu_de_formation: {
+              uai: effectifQueued.etablissement_lieu_de_formation_uai,
+              siret: effectifQueued.etablissement_lieu_de_formation_siret,
+              adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
+              code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+            },
+            _raw: {
+              formation: effectif.formation,
+            },
           },
-          _computed: await addComputedFields({ organisme: organismeFormateur, effectif }),
-        },
+          { organisme: organismeFormateur, certification }
+        ),
         organisme: organismeFormateur,
       };
     })
@@ -395,57 +383,53 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
   const itemProcessingInfos: ItemProcessingInfos = {};
   let organismeTarget;
 
-  const result = await dossierApprenantSchemaV1V2()
-    .transform(async (effectifQueued, ctx) => {
-      const [effectif, organisme, formation] = await Promise.all([
-        (async () => {
-          return await transformEffectifQueueToEffectif(effectifQueued);
-        })(),
-        (async () => {
-          const { organisme, stats } = await findOrganismeWithStats(
-            effectifQueued.uai_etablissement,
-            effectifQueued.siret_etablissement
-          );
-          organismeTarget = organisme;
-          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
-          return organisme;
-        })(),
-        (async () => {
-          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
-          itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
-          itemProcessingInfos.formation_found = !!formationFromCatalogue;
-          return formationFromCatalogue;
-        })(),
-      ]);
+  const result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }> =
+    await dossierApprenantSchemaV1V2()
+      .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
+        let [effectif, organisme] = await Promise.all([
+          transformEffectifQueueToEffectif(effectifQueued),
+          (async () => {
+            const { organisme, stats } = await findOrganismeWithStats(
+              effectifQueued.uai_etablissement,
+              effectifQueued.siret_etablissement
+            );
+            organismeTarget = organisme;
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
+            return organisme;
+          })(),
+        ]);
 
-      if (!organisme) {
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          message: "organisme non trouvé",
-          path: ["uai_etablissement", "siret_etablissement"],
-          params: {
-            uai: effectifQueued.uai_etablissement,
-            siret: effectifQueued.siret_etablissement,
-          },
-        });
-        return NEVER;
-      }
+        if (!organisme) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme non trouvé",
+            path: ["uai_etablissement", "siret_etablissement"],
+            params: {
+              uai: effectifQueued.uai_etablissement,
+              siret: effectifQueued.siret_etablissement,
+            },
+          });
+          return NEVER;
+        }
 
-      // Set du niveau de la formation depuis le catalogue
-      if (formation && effectif.formation) {
-        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-        effectif.formation.niveau_libelle = formation.niveau;
-      }
-      return {
-        effectif: {
-          ...effectif,
-          organisme_id: organisme?._id,
-          _computed: await addComputedFields({ organisme, effectif }),
-        },
-        organisme: organisme,
-      };
-    })
-    .safeParseAsync(rawEffectifQueued);
+        const certification = await getEffectifCertification(effectif);
+
+        return {
+          effectif: await withComputedFields(
+            {
+              ...effectif,
+              organisme_id: organisme?._id,
+              formation: fiabilisationEffectifFormation(effectif, certification),
+              _raw: {
+                formation: effectif.formation,
+              },
+            },
+            { organisme, certification }
+          ),
+          organisme: organisme,
+        };
+      })
+      .safeParseAsync(rawEffectifQueued);
   return {
     result,
     itemProcessingInfos,
@@ -506,7 +490,7 @@ const createOrUpdateEffectif = async (
     },
   };
   const itemProcessingInfos: ItemProcessingInfos = {};
-  let effectifDb = await checkIfEffectifExists(effectifWithComputedFields, effectifsDb());
+  let effectifDb = await checkIfEffectifExists<IEffectif>(effectifWithComputedFields, effectifsDb());
   itemProcessingInfos.effectif_new = !effectifDb;
 
   try {

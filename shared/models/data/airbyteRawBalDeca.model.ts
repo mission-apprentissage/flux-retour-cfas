@@ -52,8 +52,8 @@ const zOrganismeFormation = z.object({
 });
 
 // Main schema for the airbyte data
-const zAirbyteData = z.object({
-  _id: z.string(),
+const zRawBalDeca = z.object({
+  _id: zObjectId,
   no_contrat: z.string(),
   type_contrat: z.string(),
   alternant: zAlternant,
@@ -75,12 +75,5 @@ const zAirbyteData = z.object({
   _ab_cdc_deleted_at: z.null().optional(),
 });
 
-const zAirbyteRawBalDeca = z.object({
-  _id: zObjectId.describe("Identifiant MongoDB de l'enregistrement"),
-  _airbyte_data: zAirbyteData,
-  _airbyte_data_hash: z.string(),
-  _airbyte_emitted_at: z.string().describe("Date à laquelle les données ont été émises").optional(),
-});
-
 // Define the type
-export type IAirbyteRawBalDeca = z.infer<typeof zAirbyteRawBalDeca>;
+export type IRawBalDeca = z.infer<typeof zRawBalDeca>;

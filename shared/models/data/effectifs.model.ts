@@ -26,10 +26,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       organisme_id: 1,
       annee_scolaire: 1,
       id_erp_apprenant: 1,
-      "apprenant.nom": 1,
-      "apprenant.prenom": 1,
       "formation.cfd": 1,
-      "formation.annee": 1,
+      "formation.rncp": 1,
     },
     { unique: true },
   ],
@@ -177,6 +175,11 @@ export const zEffectif = z.object({
           description: "Code postal du lieu de formation",
         })
         .nullish(),
+    })
+    .nullish(),
+  _raw: z
+    .object({
+      formation: zFormationEffectif.nullish(),
     })
     .nullish(),
   _computed: z

@@ -1,7 +1,12 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { MongoError, ObjectId, WithId } from "mongodb";
+import { MOTIF_SUPPRESSION } from "shared/constants";
+import type { IEffectif } from "shared/models";
+import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
+import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
+import { effectifsDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -109,10 +114,10 @@ export async function setupJobProcessor() {
               },
             },
 
-            "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
-              cron_string: "45 0 1 * *",
+            "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
+              cron_string: "0 5 * * 6",
               handler: async () => {
-                await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
+                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
                 return 0;
               },
             },
@@ -174,12 +179,22 @@ export async function setupJobProcessor() {
           return hydrateDecaRaw();
         },
       },
-      "hydrate:effectifs:update_computed_statut_month": {
-        handler: async () => {
-          return hydrateEffectifsComputedTypes({
-            query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
-          });
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async (job, signal) => {
+          const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
+          const evaluationDate = new Date();
+          return hydrateEffectifsComputedTypes(
+            {
+              query: {
+                annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
+                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
+                ...(organismeId ? { organisme_id: organismeId } : {}),
+              },
+            },
+            signal
+          );
         },
+        resumable: true,
       },
       "hydrate:effectifs-formation-niveaux": {
         handler: async () => {
@@ -317,6 +332,151 @@ export async function setupJobProcessor() {
         handler: async (job) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
+        },
+      },
+      "tmp:migration:duplicat-formation": {
+        handler: async (job, signal) => {
+          // In case of interruption, we can restart the job from the last processed effectif
+          // Any updated effectif has either been updated by the job or has been updated by the processing queue
+
+          const cursor = effectifsDb().aggregate<{
+            _id: {
+              annee_scolaire: IEffectif["annee_scolaire"];
+              id_erp_apprenant: IEffectif["id_erp_apprenant"];
+              organisme_id: IEffectif["organisme_id"];
+            };
+            count: number;
+            effectifs: IEffectif[];
+          }>([
+            {
+              $sort: {
+                organisme_id: 1,
+                id_erp_apprenant: 1,
+                annee_scolaire: 1,
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  annee_scolaire: "$annee_scolaire",
+                  id_erp_apprenant: "$id_erp_apprenant",
+                  organisme_id: "$organisme_id",
+                },
+                count: { $sum: 1 },
+                effectifs: { $addToSet: "$$ROOT" },
+              },
+            },
+            { $match: { count: { $gt: 1 } } },
+          ]);
+
+          for await (const doc of cursor) {
+            const validEffectifs: IEffectif[] = [];
+            const duplicatedEffectifs: IEffectif[] = [];
+
+            // Sort effectifs in reverse updated_at order in order to keep the most recent effectif
+            const effectifs = doc.effectifs.toSorted((a, b) => {
+              if (a.updated_at == null) return 1;
+              if (b.updated_at == null) return -1;
+              return a.updated_at.getTime() > b.updated_at.getTime() ? -1 : 1;
+            });
+
+            for (const effectif of effectifs) {
+              if (validEffectifs.length === 0) {
+                validEffectifs.push(effectif);
+                continue;
+              }
+
+              const currentCfd = effectif.formation?.cfd ?? null;
+              const currentRncp = effectif.formation?.rncp ?? null;
+
+              if (!currentCfd && !currentRncp) {
+                duplicatedEffectifs.push(effectif);
+                continue;
+              }
+
+              const isDuplicated = validEffectifs.some((validEffectif) => {
+                const validCfd = validEffectif.formation?.cfd ?? null;
+                const validRncp = validEffectif.formation?.rncp ?? null;
+
+                const isSameCfd = validCfd === null || currentCfd === null || validCfd === currentCfd;
+                const isSameRncp = validRncp === null || currentRncp === null || validRncp === currentRncp;
+
+                return isSameCfd && isSameRncp;
+              });
+
+              if (isDuplicated) {
+                duplicatedEffectifs.push(effectif);
+              } else {
+                validEffectifs.push(effectif);
+              }
+            }
+
+            await Promise.all(
+              duplicatedEffectifs.map(async (effectif) =>
+                softDeleteEffectif(effectif._id, null, {
+                  motif: MOTIF_SUPPRESSION.Doublon,
+                  description: "Doublon de formation",
+                })
+              )
+            );
+
+            if (signal.aborted) {
+              return;
+            }
+          }
+        },
+        resumable: true,
+      },
+      "tmp:migration:effectifs:duree_formation_relle": {
+        handler: async () => {
+          const batchSize = 100;
+          const collection = effectifsDb();
+          const cursor = collection.find(
+            { "formation.date_entree": { $exists: true }, "formation.date_fin": { $exists: true } },
+            { projection: { "formation.date_entree": 1, "formation.date_fin": 1 } }
+          );
+
+          let documentsProcessed = 0;
+
+          while (await cursor.hasNext()) {
+            const batch: WithId<IEffectif>[] = [];
+            for (let i = 0; i < batchSize && (await cursor.hasNext()); i++) {
+              const doc = await cursor.next();
+              if (doc) batch.push(doc);
+            }
+
+            const bulkOps = batch
+              .map((doc) => {
+                const { date_entree, date_fin } = doc.formation || {};
+                if (date_entree && date_fin) {
+                  const dureeFormationRelle = Math.round(
+                    (new Date(date_fin).getTime() - new Date(date_entree).getTime()) / 1000 / 60 / 60 / 24 / 30
+                  );
+                  return {
+                    updateOne: {
+                      filter: { _id: doc._id },
+                      update: { $set: { "formation.duree_formation_relle": dureeFormationRelle } },
+                    },
+                  };
+                }
+                return null;
+              })
+              .filter((op): op is Exclude<typeof op, null> => op !== null);
+
+            try {
+              const result = await collection.bulkWrite(bulkOps, { ordered: false });
+              documentsProcessed += result.modifiedCount;
+              console.log(`Documents traités jusqu'à présent : ${documentsProcessed}`);
+            } catch (err) {
+              if (err instanceof MongoError) {
+                console.error("Erreur MongoDB lors de l'opération bulkWrite :", err);
+              } else {
+                throw err;
+              }
+            }
+          }
+
+          console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
       },
     },
