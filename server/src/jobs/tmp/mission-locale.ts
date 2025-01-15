@@ -1,11 +1,11 @@
 import { captureException } from "@sentry/node";
-import { WithId } from "mongodb";
+import { Collection, WithId } from "mongodb";
 import { IEffectif } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
-import { effectifsDb } from "@/common/model/collections";
 
-const updateEffectifWithMissionLocale = async (effectif: WithId<IEffectif>) => {
+const updateEffectifWithMissionLocale = async (effectif: WithId<IEffectif | IEffectifDECA>, db: Collection<any>) => {
   const { code_insee, code_postal } = effectif?.apprenant?.adresse || {};
   const codePostalOrCodeInsee = code_insee || code_postal;
   if (!codePostalOrCodeInsee) {
@@ -17,19 +17,19 @@ const updateEffectifWithMissionLocale = async (effectif: WithId<IEffectif>) => {
     return null;
   }
 
-  return effectifsDb().updateOne(
+  return db.updateOne(
     { _id: effectif._id },
     { $set: { "apprenant.adresse.mission_locale_id": communeInfo.mission_locale.id } }
   );
 };
 
-export const tmpMigrationMissionLocaleEffectif = async () => {
+export const tmpMigrationMissionLocaleEffectif = async (db: Collection<any>) => {
   const processBuffer = async (buffer) => {
     await Promise.allSettled(buffer);
   };
 
   try {
-    const cursor = effectifsDb().find(
+    const cursor = db.find(
       { "apprenant.adresse.mission_locale_id": { $exists: false } },
       { projection: { "apprenant.adresse.code_insee": 1, "apprenant.adresse.code_postal": 1 } }
     );
@@ -39,7 +39,7 @@ export const tmpMigrationMissionLocaleEffectif = async () => {
       promiseArray.push(
         new Promise((res, rej) => {
           try {
-            res(updateEffectifWithMissionLocale(document));
+            res(updateEffectifWithMissionLocale(document, db));
           } catch (e) {
             rej(`Échec de la mise à jour du document ${document._id}: ${e}`);
             captureException(e);

@@ -6,7 +6,7 @@ import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -501,7 +501,10 @@ export async function setupJobProcessor() {
         },
       },
       "tmp:migration:hydrate-mission-locale": {
-        handler: tmpMigrationMissionLocaleEffectif,
+        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDb()),
+      },
+      "tmp:migration:hydrate-mission-locale-deca": {
+        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDECADb()),
       },
     },
   });
