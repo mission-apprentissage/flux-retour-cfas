@@ -1,4 +1,3 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Container, Heading, HStack, VStack, Text, Link, Flex } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
@@ -202,28 +201,28 @@ function EffectifsPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (sans contrat, en rupture de
-            contrat ou en rupture sèche) et leurs coordonnées, identifiés comme ayant besoin d’un accompagnement par la
-            Mission locale.Cliquez sur chaque jeune pour plus d’informations sur son parcours.
+            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (identifiés comme inscrit
+            sans contrat, en rupture de contrat ou en abandon/sortie d’apprentissage) et leurs coordonnées, susceptibles
+            d&apos;être intéressés par une mise en relation et accompagnement avec une Mission Locale. Cliquez sur
+            chaque jeune pour plus d’informations sur son parcours.
           </Text>
-          <Text>Sources : CFA et DECA</Text>
+          <Text fontStyle="italic">
+            Sources : CFA et{" "}
+            <Link
+              isExternal
+              textDecoration="underLine"
+              color="bluefrance"
+              href="https://efpconnect.emploi.gouv.fr/auth/realms/efp/protocol/cas/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
+            >
+              DECA
+            </Link>
+          </Text>
           <Ribbons variant="alert">
             <Flex direction="column" ml={3} gap={2} justifyContent="flexstart">
               <Text color="grey.800">
                 Nous vous mettons à disposition les contacts des jeunes et leur CFA : vous êtes encouragé à les
                 contacter. Ne partagez pas ces listes.
               </Text>
-              <Link
-                href="/apprenants"
-                color="action-high-blue-france"
-                borderBottom="1px"
-                w="fit-content"
-                display="flex"
-                alignItems="center"
-              >
-                Lire la charte
-                <ArrowForwardIcon />
-              </Link>
             </Flex>
           </Ribbons>
         </VStack>
@@ -254,16 +253,19 @@ function EffectifsPage() {
             <Accordion defaultIndex={undefined} useCustomIcons={true} w={2 / 3}>
               <Accordion.Item title="Qu’est-il attendu des Missions Locales concernant cette mise à disposition des listes ?">
                 <Text>
-                  L’accès à cette liste est strictement personnelle et ne peut en aucun cas être partagée.Un compte
-                  utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
-                  aux données.
+                  L’objectif du Tableau de bord de l’apprentissage est l’accompagnement des jeunes apprenants en
+                  difficulté par différents acteurs, dont les Missions Locales. En contactant directement les jeunes,
+                  vous qualifiez leur situation, et identifiez potentiellement un accompagnement à mettre en place. Vos
+                  remontées sur le Tableau de bord permettent à notre équipe de mesurer l’impact de la plateforme et
+                  d’améliorer la qualité des données exposées.
                 </Text>
               </Accordion.Item>
               <Accordion.Item title="D’où viennent les données exposées ci-dessus ?">
                 <Text>
-                  L’accès à cette liste est strictement personnelle et ne peut en aucun cas être partagée.Un compte
-                  utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
-                  aux données.
+                  Le Tableau de bord expose les données issues des CFA, qui nous partagent les informations sur leurs
+                  apprenants, leur formation et leur statut. Ces données sont envoyées soit par ERP (outil de gestion
+                  des effectifs, comme Ypareo), soit téléversement d’un fichier Excel rempli par leurs soins. Nous
+                  travaillons chaque jour à récolter plus de données fraîches en connectant les CFA à la plateforme.
                 </Text>
               </Accordion.Item>
               <Accordion.Item title="Puis-je partager le fichier à des collaborateurs ?">

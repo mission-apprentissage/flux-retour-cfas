@@ -27,8 +27,8 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({ filters, 
         <FilterList
           key="rupture"
           filterKey="rupture"
-          displayName={"Rupture de contrat"}
-          options={["Rupture de contrat", "Sans contrat", "Abandons "]}
+          displayName="Statut"
+          options={["Inscrit sans contrat", "Rupture de contrat", "Abandon"]}
           selectedValues={filters["rupture"] || []}
           onChange={(values) => handleCheckboxChange("rupture", values)}
           isOpen={openFilter === "rupture"}

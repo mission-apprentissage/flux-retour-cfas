@@ -23,7 +23,7 @@ function SimplePage({ title, children }: Props) {
       <Head>{title && <title>{title}</title>}</Head>
       <Header />
       <NavigationMenu />
-      <Box minH={"40vh"} flexGrow="1" pb={8}>
+      <Box minH={"40vh"} flexGrow="1" pb={20}>
         {children}
       </Box>
       <Link
