@@ -16,9 +16,9 @@ const Users = () => {
   const router = useRouter();
   const [selectedReseau, setSelectedReseau] = useState<string>();
 
-  const { data: reseauxData } = useQuery<any[], any>(
+  const { data: reseauxData } = useQuery<{ _id: string; nom: string }[], any>(
     ["reseau", "admin", "search"],
-    ({ signal }) => _get<any[]>(`/api/v1/admin/reseaux`, { signal }),
+    ({ signal }) => _get(`/api/v1/admin/reseaux`, { signal }),
     {}
   );
 
@@ -28,7 +28,8 @@ const Users = () => {
 
   const handleNavigation = () => {
     if (selectedReseau) {
-      router.push(`/admin/reseaux/${selectedReseau}`);
+      const sanitizedSelectedReseau = encodeURIComponent(selectedReseau);
+      router.push(`/admin/reseaux/${sanitizedSelectedReseau}`);
     }
   };
 
@@ -45,14 +46,14 @@ const Users = () => {
         <FormControl mb={4}>
           <FormLabel>Sélectionnez le réseau à mettre à jour :</FormLabel>
           <Select placeholder="Sélectionner un réseau" onChange={handleChange}>
-            {reseauxData?.map((reseau, index) => (
-              <option value={reseau._id} key={index}>
+            {reseauxData?.map((reseau) => (
+              <option value={reseau._id} key={reseau._id}>
                 {reseau.nom}
               </option>
             ))}
           </Select>
         </FormControl>
-        <Button onClick={handleNavigation} variant="primary" mr={5} mt={4} isDisabled={!setSelectedReseau}>
+        <Button onClick={handleNavigation} variant="primary" mr={5} mt={4} isDisabled={!selectedReseau}>
           Modifier ce réseau
         </Button>
       </Box>
