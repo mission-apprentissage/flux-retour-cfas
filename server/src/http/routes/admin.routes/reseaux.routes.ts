@@ -118,7 +118,6 @@ export default () => {
           { returnDocument: "after" }
         );
 
-        console.log("CONSOLE LOG ~ result:", result);
         if (!result.value) {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }

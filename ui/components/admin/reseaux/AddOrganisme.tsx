@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { OrganismeSupportInfoJson } from "shared";
 
 import { _put } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
 import { AutoCompleteOrganismes } from "@/components/Autocomplete/Organismes";
 import { BasicModal } from "@/components/Modals/BasicModal";
 
@@ -14,7 +15,7 @@ interface AddOrganismeProps {
 }
 
 export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
-  const [selectedOrganisme, setSelectedOrganisme] = useState<OrganismeSupportInfoJson | null>(null);
+  const [selectedOrganisme, setSelectedOrganisme] = useState<Organisme | null>(null);
   const toast = useToast();
 
   const { mutateAsync: addReseaux, isLoading: isAdding } = useMutation(
@@ -26,23 +27,24 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
     }
   );
 
-  const handleAdd = async () => {
+  const handleAdd = async (onClose: () => void) => {
     if (!selectedOrganisme) return;
 
     try {
       await addReseaux({
-        organismeId: selectedOrganisme.tdb?._id,
+        organismeId: selectedOrganisme?._id,
       });
 
       toast({
         title: "Succès",
-        description: `Le réseau a été ajouté à l'organisme ${selectedOrganisme.tdb?.raison_sociale || "inconnu"}`,
+        description: `Le réseau a été ajouté à l'organisme ${selectedOrganisme?.raison_sociale || "inconnu"}`,
         status: "success",
         duration: 5000,
         isClosable: true,
       });
       refetch();
       setSelectedOrganisme(null);
+      onClose();
     } catch (error) {
       toast({
         title: "Erreur",
@@ -64,9 +66,24 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
         </Button>
       }
       size="6xl"
+      renderFooter={(onClose) => (
+        <Flex justifyContent="flex-end">
+          <Button
+            textStyle="sm"
+            variant="primary"
+            onClick={() => handleAdd(onClose)}
+            isLoading={isAdding}
+            isDisabled={isAdding}
+          >
+            Ajouter
+          </Button>
+        </Flex>
+      )}
     >
       <Box minH="400px">
-        <AutoCompleteOrganismes onSelect={(organisme: OrganismeSupportInfoJson) => setSelectedOrganisme(organisme)} />
+        <AutoCompleteOrganismes
+          onSelect={(organisme: OrganismeSupportInfoJson) => setSelectedOrganisme(organisme as unknown as Organisme)}
+        />
 
         {selectedOrganisme && (
           <Box p={4} borderRadius="md" mt={6} border="1px solid" borderColor="gray.200">
@@ -74,13 +91,13 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
               <Flex>
                 <Text mr={2}>Raison sociale:</Text>
                 <Tag variant="badge" colorScheme="grey_tag" size="lg" fontSize="epsilon" borderRadius="0">
-                  {selectedOrganisme.tdb?.raison_sociale || "Inconnue"}
+                  {selectedOrganisme?.raison_sociale || "Inconnue"}
                 </Tag>
               </Flex>
               <Flex>
                 <Text mr={2}>Nom commercial:</Text>
                 <Tag variant="badge" colorScheme="grey_tag" size="lg" fontSize="epsilon" borderRadius="0">
-                  {selectedOrganisme.tdb?.enseigne || "Inconnue"}
+                  {selectedOrganisme?.enseigne || "Inconnue"}
                 </Tag>
               </Flex>
               <Flex>
@@ -92,13 +109,13 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
               <Flex>
                 <Text mr={2}>Domiciliation:</Text>
                 <Tag variant="badge" colorScheme="grey_tag" size="lg" fontSize="epsilon" borderRadius="0">
-                  {selectedOrganisme.tdb?.adresse?.complete || "Inconnue"}
+                  {selectedOrganisme?.adresse?.complete || "Inconnue"}
                 </Tag>
               </Flex>
               <Flex>
                 <Text mr={2}>Réseau:</Text>
                 <Tag variant="badge" colorScheme="grey_tag" size="lg" fontSize="epsilon" borderRadius="0">
-                  {selectedOrganisme.tdb?.reseaux?.length ? selectedOrganisme.tdb.reseaux.join(", ") : "Inconnue"}
+                  {selectedOrganisme?.reseaux?.length ? selectedOrganisme.reseaux.join(", ") : "Inconnue"}
                 </Tag>
               </Flex>
               <Flex>
@@ -111,11 +128,6 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
             <Text mt={4} fontStyle="italic">
               Êtes-vous sûr.e de vouloir rajouter cet organisme de votre réseau ?
             </Text>
-            <Flex mt={6} justifyContent="flex-end">
-              <Button textStyle="sm" variant="primary" onClick={handleAdd} isLoading={isAdding} isDisabled={isAdding}>
-                Ajouter
-              </Button>
-            </Flex>
           </Box>
         )}
       </Box>
