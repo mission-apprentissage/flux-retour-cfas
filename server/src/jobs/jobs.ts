@@ -38,7 +38,7 @@ import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
-import { hydrateReseaux, populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { validationTerritoires } from "./territoire/validationTerritoire";
@@ -60,9 +60,6 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Remplissage des OPCOs
   await addJob({ name: "hydrate:opcos", queued });
-
-  // # Remplissage des réseaux
-  await addJob({ name: "hydrate:reseaux", queued });
 
   // # Remplissage des ofa inconnus
   await addJob({ name: "hydrate:ofa-inconnus", queued });
@@ -219,11 +216,6 @@ export async function setupJobProcessor() {
       "hydrate:opcos": {
         handler: async () => {
           return hydrateOrganismesOPCOs();
-        },
-      },
-      "hydrate:reseaux": {
-        handler: async () => {
-          return hydrateReseaux();
         },
       },
       "hydrate:ofa-inconnus": {
