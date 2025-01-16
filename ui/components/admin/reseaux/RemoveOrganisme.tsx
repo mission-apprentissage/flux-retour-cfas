@@ -6,11 +6,12 @@ import { _delete } from "@/common/httpClient";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import { Trash } from "@/theme/components/icons";
 
-export const RemoveOrganisme: React.FC<{ reseauId: string; organismeId: string; refetch: any }> = ({
-  reseauId,
-  organismeId,
-  refetch,
-}) => {
+export const RemoveOrganisme: React.FC<{
+  reseauId: string;
+  organismeId: string;
+  organismeName: string;
+  refetch: any;
+}> = ({ reseauId, organismeId, organismeName, refetch }) => {
   const toast = useToast();
 
   const { mutateAsync: removeReseaux, isLoading: isRemoving } = useMutation(async () => {
@@ -42,7 +43,7 @@ export const RemoveOrganisme: React.FC<{ reseauId: string; organismeId: string; 
 
   return (
     <BasicModal
-      title="Suppression de l’organisme AFTRAL du réseau"
+      title={`Suppression de l’organisme ${organismeName} du réseau`}
       button={
         <Box display="flex" justifyContent="center" alignItems="center">
           <Trash height={4} width={4} color="bluefrance" _hover={{ cursor: "pointer" }} />

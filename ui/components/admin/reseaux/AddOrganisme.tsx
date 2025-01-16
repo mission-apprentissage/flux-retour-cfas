@@ -11,10 +11,11 @@ import { BasicModal } from "@/components/Modals/BasicModal";
 
 interface AddOrganismeProps {
   reseauId: string;
+  reseauName: string;
   refetch: any;
 }
 
-export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
+export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProps) => {
   const [selectedOrganisme, setSelectedOrganisme] = useState<Organisme | null>(null);
   const toast = useToast();
 
@@ -58,7 +59,7 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
 
   return (
     <BasicModal
-      title="Ajouter un organisme au réseau AFTRAL"
+      title={`Ajouter un organisme au réseau ${reseauName}`}
       button={
         <Button textStyle="sm" variant="primary">
           <AddIcon boxSize={3} mr={2} />
@@ -68,15 +69,17 @@ export const AddOrganisme = ({ reseauId, refetch }: AddOrganismeProps) => {
       size="6xl"
       renderFooter={(onClose) => (
         <Flex justifyContent="flex-end">
-          <Button
-            textStyle="sm"
-            variant="primary"
-            onClick={() => handleAdd(onClose)}
-            isLoading={isAdding}
-            isDisabled={isAdding}
-          >
-            Ajouter
-          </Button>
+          {selectedOrganisme && (
+            <Button
+              textStyle="sm"
+              variant="primary"
+              onClick={() => handleAdd(onClose)}
+              isLoading={isAdding}
+              isDisabled={isAdding}
+            >
+              Ajouter
+            </Button>
+          )}
         </Flex>
       )}
     >

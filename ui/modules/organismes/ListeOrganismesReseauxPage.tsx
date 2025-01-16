@@ -90,7 +90,14 @@ const organismesTableColumnsDefs = ({
       enableSorting: false,
       header: () => "Supprimer",
       cell: ({ row }) => {
-        return <RemoveOrganisme reseauId={reseauId} organismeId={row.original._id} refetch={refetch} />;
+        return (
+          <RemoveOrganisme
+            reseauId={reseauId}
+            organismeId={row.original._id}
+            organismeName={row.original.raison_sociale}
+            refetch={refetch}
+          />
+        );
       },
     },
   ];
@@ -161,7 +168,7 @@ function ListeOrganismesReseauPage({ reseau, organismes, refetch }: ListeOrganis
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
             {title}
           </Heading>
-          <AddOrganisme reseauId={reseauId} refetch={refetch} />
+          <AddOrganisme reseauId={reseauId} reseauName={reseau?.nom || ""} refetch={refetch} />
         </HStack>
         <Link href="/admin/reseaux" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
           <Box as="i" className="ri-arrow-left-line" /> Revenir en arrière

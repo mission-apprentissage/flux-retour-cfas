@@ -77,7 +77,6 @@ export default () => {
         throw Boom.notFound(`Reseau with id ${id} not found`);
       }
 
-      // Add organisme to the reseau
       const result = await reseauxDb().findOneAndUpdate(
         { _id: new ObjectId(id as string) },
         {
@@ -90,14 +89,7 @@ export default () => {
         throw Boom.internal("Failed to update the organismes_ids array.");
       }
 
-      const updateOrganisme = await organismesDb().updateOne(
-        { _id: organismeObjectId },
-        { $addToSet: { reseaux: reseau.nom } }
-      );
-
-      if (updateOrganisme.modifiedCount === 0) {
-        throw Boom.internal("Échec de la mise à jour du champ 'reseaux' de l'organisme.");
-      }
+      await organismesDb().updateOne({ _id: organismeObjectId }, { $addToSet: { reseaux: reseau.nom } });
 
       const updatedOrganisme = await organismesDb().findOne({ _id: organismeObjectId });
       if (updatedOrganisme) {
@@ -141,14 +133,7 @@ export default () => {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }
 
-        const updateOrganisme = await organismesDb().updateOne(
-          { _id: organismeId as ObjectId },
-          { $pull: { reseaux: reseau.nom } }
-        );
-
-        if (updateOrganisme.modifiedCount === 0) {
-          throw Boom.internal("Échec de la mise à jour du champ 'reseaux' de l'organisme.");
-        }
+        await organismesDb().updateOne({ _id: organismeId as ObjectId }, { $pull: { reseaux: reseau.nom } });
 
         const updatedOrganisme = await organismesDb().findOne({ _id: organismeId as ObjectId });
         if (updatedOrganisme) {
