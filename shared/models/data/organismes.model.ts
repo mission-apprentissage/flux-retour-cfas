@@ -13,10 +13,9 @@ import {
   SIRET_REGEX,
   STATUT_FIABILISATION_ORGANISME,
   STATUT_PRESENCE_REFERENTIEL,
-  TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
 } from "../../constants";
-import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
+import { zodEnumFromObjValues } from "../../utils/zodHelper";
 
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
@@ -109,7 +108,7 @@ const zOrganisme = z
         description: "OPCOs du CFA, s'ils existent",
       })
       .optional(),
-    reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").optional(),
+    reseaux: z.array(z.string()).describe("Réseaux du CFA, s'ils existent").optional(),
     erps: z
       .array(
         z.string()

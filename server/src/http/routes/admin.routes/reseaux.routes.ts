@@ -8,6 +8,7 @@ import { organismesDb, reseauxDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+import { updateComputedFieldForOrganisme } from "@/jobs/computed/update-computed";
 
 export default () => {
   const router = express.Router();
@@ -76,6 +77,7 @@ export default () => {
         throw Boom.notFound(`Reseau with id ${id} not found`);
       }
 
+      // Add organisme to the reseau
       const result = await reseauxDb().findOneAndUpdate(
         { _id: new ObjectId(id as string) },
         {
@@ -86,6 +88,20 @@ export default () => {
 
       if (!result.value) {
         throw Boom.internal("Failed to update the organismes_ids array.");
+      }
+
+      const updateOrganisme = await organismesDb().updateOne(
+        { _id: organismeObjectId },
+        { $addToSet: { reseaux: reseau.nom } }
+      );
+
+      if (updateOrganisme.modifiedCount === 0) {
+        throw Boom.internal("Échec de la mise à jour du champ 'reseaux' de l'organisme.");
+      }
+
+      const updatedOrganisme = await organismesDb().findOne({ _id: organismeObjectId });
+      if (updatedOrganisme) {
+        await updateComputedFieldForOrganisme(updatedOrganisme);
       }
 
       res.json(result.value);
@@ -110,16 +126,33 @@ export default () => {
       const { id, organismeId } = params;
 
       try {
+        const reseau = await getReseauById(id as string);
+        if (!reseau) {
+          throw Boom.notFound(`Reseau with id ${id} not found`);
+        }
+
         const result = await reseauxDb().findOneAndUpdate(
           { _id: new ObjectId(id as string) },
-          {
-            $pull: { organismes_ids: organismeId as ObjectId },
-          },
+          { $pull: { organismes_ids: organismeId as ObjectId } },
           { returnDocument: "after" }
         );
 
         if (!result.value) {
           throw Boom.notFound(`No reseau found with id ${id}`);
+        }
+
+        const updateOrganisme = await organismesDb().updateOne(
+          { _id: organismeId as ObjectId },
+          { $pull: { reseaux: reseau.nom } }
+        );
+
+        if (updateOrganisme.modifiedCount === 0) {
+          throw Boom.internal("Échec de la mise à jour du champ 'reseaux' de l'organisme.");
+        }
+
+        const updatedOrganisme = await organismesDb().findOne({ _id: organismeId as ObjectId });
+        if (updatedOrganisme) {
+          await updateComputedFieldForOrganisme(updatedOrganisme);
         }
 
         res.json(result.value);
