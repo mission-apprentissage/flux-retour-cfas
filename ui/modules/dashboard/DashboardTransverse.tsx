@@ -8,7 +8,6 @@ import {
   getOrganisationLabel,
   IOrganisationJson,
   REGIONS_BY_CODE,
-  TETE_DE_RESEAUX_BY_ID,
 } from "shared";
 
 import { _get } from "@/common/httpClient";
@@ -41,7 +40,7 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     }
 
     case "TETE_DE_RESEAU":
-      return `Votre périmètre correspond aux organismes du réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
+      return `Votre périmètre correspond aux organismes du réseau ${organisation.reseau}`;
 
     case "DREETS":
     case "DRAAF":

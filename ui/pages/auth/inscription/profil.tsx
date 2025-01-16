@@ -21,13 +21,7 @@ import {
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import {
-  ACADEMIES_BY_CODE,
-  DEPARTEMENTS_BY_CODE,
-  IOrganisationJson,
-  REGIONS_BY_CODE,
-  TETE_DE_RESEAUX_BY_ID,
-} from "shared";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, IOrganisationJson, REGIONS_BY_CODE } from "shared";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
 
@@ -99,7 +93,7 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
             case "TETE_DE_RESEAU":
               return (
                 <Text fontSize="20px" fontWeight="bold">
-                  {TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}
+                  {organisation.reseau}
                 </Text>
               );
 
