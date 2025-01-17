@@ -6,11 +6,21 @@ const collectionName = "reseaux";
 
 export const zReseau = z.object({
   _id: zObjectId.optional(),
+  key: z
+    .string({
+      description: "Clé du réseau",
+    })
+    .min(1, "La clé du réseau est obligatoire"),
   nom: z
     .string({
       description: "Nom du réseau",
     })
     .min(1, "Le nom du réseau est obligatoire"),
+  responsable: z
+    .boolean({
+      description: "Le réseau est-il responsable ?",
+    })
+    .default(false),
   organismes_ids: z
     .array(zObjectId, {
       description: "Liste des IDs des organismes associés au réseau",
@@ -30,15 +40,8 @@ export const zReseau = z.object({
 
 export type IReseau = z.infer<typeof zReseau>;
 
-export function defaultValuesReseau(): Pick<IReseau, "organismes_ids" | "created_at" | "updated_at"> {
-  return {
-    organismes_ids: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-}
-
 export const reseauxIndexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ key: 1 }, { name: "key", unique: true }],
   [{ nom: 1 }, { name: "nom", unique: true }],
   [{ organismes_ids: 1 }, { name: "organismes_ids" }],
   [{ created_at: 1 }, { name: "created_at" }],

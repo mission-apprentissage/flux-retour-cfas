@@ -150,6 +150,7 @@ import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
+import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -365,7 +366,8 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await rejectInvitation(req.params.token);
       })
-    );
+    )
+    .use("/api/v1/reseaux", getAllReseauxRoutes());
 
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *

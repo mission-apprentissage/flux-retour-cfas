@@ -94,7 +94,7 @@ const organismesTableColumnsDefs = ({
           <RemoveOrganisme
             reseauId={reseauId}
             organismeId={row.original._id}
-            organismeName={row.original.raison_sociale}
+            organismeName={row.original.raison_sociale ?? "Organisme inconnu"}
             refetch={refetch}
           />
         );

@@ -2,6 +2,7 @@ import { Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
+import { useTeteDeReseaux } from "@/modules/dashboard/hooks/useTeteDeReseaux";
 import {
   PaginationInfosQuery,
   convertPaginationInfosToQuery,
@@ -31,6 +32,8 @@ const UsersFiltersPanel = () => {
       sort: sort ?? [{ desc: false, id: "nom" }],
     };
   }, [JSON.stringify(router.query)]);
+
+  const { data: reseaux } = useTeteDeReseaux();
 
   const updateState = (newParams: Partial<{ [key in keyof UsersFilters]: any }>) => {
     void router.push(
@@ -80,7 +83,11 @@ const UsersFiltersPanel = () => {
         />
 
         {/* FILTRE Réseau */}
-        <FiltreUsersReseaux value={usersFilters.reseaux} onChange={(reseaux) => updateState({ reseaux })} />
+        <FiltreUsersReseaux
+          reseaux={reseaux || []}
+          value={usersFilters.reseaux}
+          onChange={(reseaux) => updateState({ reseaux })}
+        />
 
         {/* FILTRE Statut du compte */}
         <FiltreUsersAccountStatut

@@ -2,7 +2,7 @@ import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb, reseauxDb } from "@/common/model/collections";
 import { historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -11,6 +11,7 @@ import {
   commonEffectifsAttributes,
   testPermissions,
   organismes,
+  reseaux,
 } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
 
@@ -26,6 +27,7 @@ describe("Routes diverses", () => {
   });
   beforeEach(async () => {
     await organismesDb().insertMany(organismes);
+    await reseauxDb().insertMany(reseaux);
   });
 
   describe("DELETE /api/v1/effectif - suppression d'effectif", () => {

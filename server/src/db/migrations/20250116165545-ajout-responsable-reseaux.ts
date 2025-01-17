@@ -1,8 +1,7 @@
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { addJob } from "job-processor";
 
-/**
- * Noms des réseaux de CFAS
- */
+import { reseauxDb } from "@/common/model/collections";
+
 const TETE_DE_RESEAUX = [
   {
     nom: "ADEN",
@@ -126,20 +125,12 @@ const TETE_DE_RESEAUX = [
   },
 ] as const satisfies ReadonlyArray<{ readonly nom: string; readonly key: string; readonly responsable: boolean }>;
 
-type ITetesDeReseaux = typeof TETE_DE_RESEAUX;
-type ITeteDeReseau = ITetesDeReseaux[number];
-export type ITeteDeReseauKey = ITeteDeReseau["key"];
-
-export const TETE_DE_RESEAUX_SORTED = sortAlphabeticallyBy("nom", TETE_DE_RESEAUX);
-
-export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce(
-  (acc, reseau) => {
-    acc[reseau.key] = reseau;
-    return acc;
-  },
-  {} as Record<ITeteDeReseauKey, ITeteDeReseau>
-);
-
-export function isTeteDeReseauResponsable(key: ITeteDeReseauKey): boolean {
-  return TETE_DE_RESEAUX_BY_ID[key].responsable;
-}
+export const up = async () => {
+  for (const reseau of TETE_DE_RESEAUX) {
+    await reseauxDb().insertOne({ ...reseau, created_at: new Date(), updated_at: new Date(), organismes_ids: [] });
+  }
+  await addJob({
+    name: "populate:reseaux",
+    queued: true,
+  });
+};
