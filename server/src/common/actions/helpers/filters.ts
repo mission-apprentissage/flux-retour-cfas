@@ -1,5 +1,5 @@
 import { Filter, RootFilterOperators } from "mongodb";
-import { z } from "zod";
+import { ZodRawShape, z } from "zod";
 
 export const organismeLookup = {
   from: "organismes",
@@ -73,3 +73,27 @@ export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<
     $and: nonEmptyFilters,
   };
 }
+
+export const paginationFiltersSchema = {
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+  sort: z.string().optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+};
+
+export const withPaginationSchema = (schema: ZodRawShape) => {
+  return {
+    ...schema,
+    ...paginationFiltersSchema,
+  };
+};
+
+export type IPaginationFilters = z.infer<z.ZodObject<typeof paginationFiltersSchema>>;
+
+export type WithPagination<T> = T & IPaginationFilters;
+
+export const buildSortFilter = (sort: string, order: "asc" | "desc") => {
+  return {
+    [sort]: order === "asc" ? 1 : -1,
+  };
+};
