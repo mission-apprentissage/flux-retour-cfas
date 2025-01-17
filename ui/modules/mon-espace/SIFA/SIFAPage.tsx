@@ -17,7 +17,7 @@ import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DuplicateEffectifGroupPagination, SIFA_GROUP } from "shared";
+import { DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate, getSIFADate, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -50,13 +50,12 @@ function SIFAPage(props: SIFAPageProps) {
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-  const [currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
-  const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<SIFAFilterType>({});
   const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
+  const [_currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
 
   useEffect(() => {
     const defaultFilterParser = (value) => {
@@ -110,13 +109,13 @@ function SIFAPage(props: SIFAPageProps) {
           search,
           sortField: sort[0]?.id,
           sortOrder: sort[0]?.desc ? "desc" : "asc",
-          annee_scolaire: ["2024-2025"],
+          annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
           sifa: true,
           ...filters,
         },
       });
 
-      const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
+      const { fromDECA, total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs } = response;
 
       setCurrentEffectifsState(
         organismesEffectifs.reduce((acc, { id, validation_errors, requiredSifa }) => {
@@ -127,17 +126,10 @@ function SIFAPage(props: SIFAPageProps) {
 
       setEffectifFromDecaState(fromDECA);
 
-      return { total, filters: returnedFilters, organismesEffectifs };
+      return { total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs };
     },
     { keepPreviousData: true }
   );
-
-  useEffect(() => {
-    const invalidCount = Array.from(currentEffectifsState.values()).filter(
-      (effectif) => effectif.requiredSifa.length > 0
-    ).length;
-    setSifaInvalidCount(invalidCount);
-  }, [currentEffectifsState]);
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -254,12 +246,14 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleToastOnSifaDownload = () => {
-    const organismesEffectifs = data?.organismesEffectifs || [];
+  const handleToastOnSifaDownload = async () => {
+    const { total, missingRequiredFieldsTotal } = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
+      params: { sifa: true },
+    });
 
-    sifaInvalidCount > 0
+    missingRequiredFieldsTotal > 0
       ? toastWarning(
-          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${sifaInvalidCount} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          `Parmi les ${total} effectifs que vous avez déclarés, ${missingRequiredFieldsTotal} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
           {
             isClosable: true,
             duration: 20000,
