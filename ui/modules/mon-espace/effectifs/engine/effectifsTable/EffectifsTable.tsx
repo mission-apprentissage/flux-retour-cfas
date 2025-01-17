@@ -2,7 +2,6 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
 import { Row } from "@tanstack/react-table";
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { IPaginationFilters } from "shared/models/routes/pagination";
 
@@ -53,8 +52,6 @@ const EffectifsTable = ({
   modeSifa,
   refetch,
 }: EffectifsTableProps) => {
-  const router = useRouter();
-
   const [localSearch, setLocalSearch] = useState(search || "");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
@@ -78,30 +75,6 @@ const EffectifsTable = ({
 
   const executeSearch = () => {
     onSearchChange(localSearch);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, search: localSearch },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleTableChange = (newPagination: IPaginationFilters) => {
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          ...newPagination,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
-    onTableChange(newPagination);
   };
 
   const filteredEffectifs = showOnlyErrors
@@ -193,7 +166,7 @@ const EffectifsTable = ({
         total={total}
         columns={effectifsTableColumnsDefs}
         enableRowExpansion={true}
-        onTableChange={handleTableChange}
+        onTableChange={onTableChange}
         isLoading={isFetching}
         renderSubComponent={(row: Row<any>) => (
           <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />

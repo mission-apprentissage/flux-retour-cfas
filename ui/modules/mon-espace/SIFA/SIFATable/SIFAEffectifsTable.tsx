@@ -2,7 +2,6 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { getSIFADate } from "shared";
 import { IPaginationFilters } from "shared/models/routes/pagination";
@@ -49,8 +48,6 @@ const EffectifsTable = ({
   modeSifa,
   refetch,
 }: EffectifsTableProps) => {
-  const router = useRouter();
-
   const [localSearch, setLocalSearch] = useState(search || "");
 
   useEffect(() => {
@@ -73,30 +70,6 @@ const EffectifsTable = ({
 
   const executeSearch = () => {
     onSearchChange(localSearch);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, search: localSearch },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleTableChange = (newPagination: IPaginationFilters) => {
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          ...newPagination,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
-    onTableChange(newPagination);
   };
 
   return (
@@ -140,7 +113,7 @@ const EffectifsTable = ({
         total={total}
         columns={SIFAeffectifsTableColumnsDefs({ modeSifa, organismesEffectifs }) as ColumnDef<any, any>[]}
         enableRowExpansion={true}
-        onTableChange={handleTableChange}
+        onTableChange={onTableChange}
         isLoading={isFetching}
         renderSubComponent={(row: Row<any>) => (
           <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />

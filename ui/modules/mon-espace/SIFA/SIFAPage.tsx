@@ -94,6 +94,7 @@ function SIFAPage(props: SIFAPageProps) {
 
     const filters: SIFAFilterType = {};
     const mergedPagination = { ...pagination };
+    const searchFilter = router.query.search;
 
     const filterKeys = ["formation_libelle_long", "source", "only_sifa_missing_fields"];
     const paginationKeys = ["limit", "page", "order", "sort"];
@@ -111,6 +112,10 @@ function SIFAPage(props: SIFAPageProps) {
         mergedPagination[key] = parsedValue;
       }
     });
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
 
     setFilters(filters);
     const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
@@ -176,6 +181,15 @@ function SIFAPage(props: SIFAPageProps) {
 
   const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, ...newPagination },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const handleFilterChange = (newFilters: SIFAFilterType) => {

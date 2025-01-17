@@ -66,6 +66,7 @@ function EffectifsPage(props: EffectifsPageProps) {
 
     const filterKeys = ["formation_libelle_long", "statut_courant", "annee_scolaire", "source", "search"];
     const paginationKeys = ["limit", "page", "order", "sort"];
+    const searchFilter = router.query.search;
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -83,6 +84,10 @@ function EffectifsPage(props: EffectifsPageProps) {
 
     if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
       setFilters(mergedFilters);
+    }
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
     }
 
     const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
@@ -131,6 +136,15 @@ function EffectifsPage(props: EffectifsPageProps) {
 
   const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, ...newPagination },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const handleSearchChange = (value: string) => {
