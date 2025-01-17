@@ -1,9 +1,10 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
-import { Row, SortingState } from "@tanstack/react-table";
+import { Row } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
+import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { Organisme } from "@/common/internal/Organisme";
@@ -21,13 +22,11 @@ interface EffectifsTableProps {
   organisme: Organisme;
   organismesEffectifs: any[];
   filters: Record<string, string[]>;
-  pagination: any;
+  pagination: IPaginationFilters;
   search: string;
-  sort: SortingState;
-  onPaginationChange: (pagination: any) => void;
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: Record<string, string[]>) => void;
-  onSortChange: (sort: SortingState) => void;
+  onTableChange: (pagination: IPaginationFilters) => void;
   total: number;
   availableFilters: Record<string, string[]>;
   resetFilters: () => void;
@@ -43,11 +42,9 @@ const EffectifsTable = ({
   filters,
   pagination,
   search,
-  sort: initialSort,
-  onPaginationChange,
   onSearchChange,
   onFilterChange,
-  onSortChange,
+  onTableChange,
   total,
   availableFilters,
   resetFilters,
@@ -58,14 +55,12 @@ const EffectifsTable = ({
 }: EffectifsTableProps) => {
   const router = useRouter();
 
-  const [sort, setSort] = useState<SortingState>(initialSort);
   const [localSearch, setLocalSearch] = useState(search || "");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   useEffect(() => {
-    setSort(initialSort);
     setLocalSearch(search || "");
-  }, [initialSort, search]);
+  }, [search]);
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearch(event.target.value);
@@ -94,25 +89,19 @@ const EffectifsTable = ({
     );
   };
 
-  const handlePaginationChange = (newPagination) => {
-    onPaginationChange(newPagination);
-
+  const handleTableChange = (newPagination: IPaginationFilters) => {
     router.push(
       {
         pathname: router.pathname,
         query: {
           ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
+          ...newPagination,
         },
       },
       undefined,
       { shallow: true }
     );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    onSortChange(newSort);
+    onTableChange(newPagination);
   };
 
   const filteredEffectifs = showOnlyErrors
@@ -204,9 +193,7 @@ const EffectifsTable = ({
         total={total}
         columns={effectifsTableColumnsDefs}
         enableRowExpansion={true}
-        sortingState={sort}
-        onSortingChange={handleSortChange}
-        onPaginationChange={handlePaginationChange}
+        onTableChange={handleTableChange}
         isLoading={isFetching}
         renderSubComponent={(row: Row<any>) => (
           <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />

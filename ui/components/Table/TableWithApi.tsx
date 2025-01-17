@@ -2,9 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Button, Flex, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
-  PaginationState,
   Row,
-  SortingState,
   flexRender,
   functionalUpdate,
   getCoreRowModel,
@@ -13,6 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Fragment, useState, useMemo } from "react";
+import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import { FirstPageIcon, LastPageIcon } from "@/modules/dashboard/icons";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
@@ -26,27 +25,28 @@ interface TableWithApiProps<T> extends SystemProps {
   noDataMessage?: string;
   expandAllRows?: boolean;
   enableRowExpansion?: boolean;
-  sortingState?: SortingState;
-  paginationState?: PaginationState;
+  paginationState: IPaginationFilters;
   variant?: string;
   showPagination?: boolean;
   isLoading?: boolean;
-  onSortingChange?: (state: SortingState) => any;
-  onPaginationChange?: (state: PaginationState) => any;
+  onTableChange: (state: IPaginationFilters) => any;
   renderSubComponent?: (row: Row<T>) => React.ReactElement;
   renderDivider?: () => React.ReactElement;
 }
 
 function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: boolean }>) {
+  const paginationState = props.paginationState;
+
+  const page = paginationState.page !== undefined ? paginationState.page : 0;
+  const limit = paginationState.limit !== undefined ? paginationState.limit : 10;
+
   const [expandedRows, setExpandedRows] = useState<Set<string>>(
     props.expandAllRows ? new Set(props.data.map((row) => row.id)) : new Set()
   );
-
   const totalPages = useMemo(() => {
     if (!props.total) return 1;
-    return Math.ceil(props.total / (props.paginationState?.pageSize || 20));
-  }, [props.total, props.paginationState?.pageSize]);
-
+    return Math.ceil(props.total / limit);
+  }, [props.total, page]);
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set<string>();
@@ -75,21 +75,29 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
     columns: props.columns,
     pageCount: totalPages,
     state: {
-      pagination: props.paginationState ?? {
-        pageIndex: 0,
-        pageSize: 20,
+      pagination: {
+        pageIndex: page,
+        pageSize: limit,
       },
-      sorting: props.sortingState,
+      sorting: [
+        {
+          id: paginationState?.sort || "",
+          desc: paginationState?.order === "desc",
+        },
+      ],
     },
     manualPagination: true,
-    onPaginationChange: (updater) => {
-      const newState = functionalUpdate(updater, table.getState().pagination);
-      props.onPaginationChange?.(newState);
+    onStateChange: (updater) => {
+      const newState = functionalUpdate(updater, table.getState());
+      const { pagination, sorting } = newState;
+      props.onTableChange({
+        limit: pagination.pageSize,
+        page: pagination.pageIndex,
+        sort: sorting[0]?.id,
+        order: sorting[0]?.desc ? "desc" : "asc",
+      });
     },
-    onSortingChange: (updater) => {
-      const newState = functionalUpdate(updater, table.getState().sorting);
-      props.onSortingChange?.(newState);
-    },
+
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

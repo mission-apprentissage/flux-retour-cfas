@@ -1,10 +1,11 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
 import { UseQueryResult } from "@tanstack/react-query";
-import { ColumnDef, Row, SortingState } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { getSIFADate } from "shared";
+import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import { Organisme } from "@/common/internal/Organisme";
 import TableWithApi from "@/components/Table/TableWithApi";
@@ -20,11 +21,9 @@ interface EffectifsTableProps {
   filters: SIFAFilterType;
   pagination: any;
   search: string;
-  sort: SortingState;
-  onPaginationChange: (pagination: any) => void;
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: SIFAFilterType) => void;
-  onSortChange: (sort: SortingState) => void;
+  onTableChange: (pagination: IPaginationFilters) => void;
   total: number;
   availableFilters: SIFAFilterType;
   resetFilters: () => void;
@@ -39,11 +38,9 @@ const EffectifsTable = ({
   filters,
   pagination,
   search,
-  sort: initialSort,
-  onPaginationChange,
   onSearchChange,
   onFilterChange,
-  onSortChange,
+  onTableChange,
   total,
   availableFilters,
   resetFilters,
@@ -54,13 +51,11 @@ const EffectifsTable = ({
 }: EffectifsTableProps) => {
   const router = useRouter();
 
-  const [sort, setSort] = useState<SortingState>(initialSort);
   const [localSearch, setLocalSearch] = useState(search || "");
 
   useEffect(() => {
-    setSort(initialSort);
     setLocalSearch(search || "");
-  }, [initialSort, search]);
+  }, [search]);
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearch(event.target.value);
@@ -89,25 +84,19 @@ const EffectifsTable = ({
     );
   };
 
-  const handlePaginationChange = (newPagination) => {
-    onPaginationChange(newPagination);
-
+  const handleTableChange = (newPagination: IPaginationFilters) => {
     router.push(
       {
         pathname: router.pathname,
         query: {
           ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
+          ...newPagination,
         },
       },
       undefined,
       { shallow: true }
     );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    onSortChange(newSort);
+    onTableChange(newPagination);
   };
 
   return (
@@ -151,9 +140,7 @@ const EffectifsTable = ({
         total={total}
         columns={SIFAeffectifsTableColumnsDefs({ modeSifa, organismesEffectifs }) as ColumnDef<any, any>[]}
         enableRowExpansion={true}
-        sortingState={sort}
-        onSortingChange={handleSortChange}
-        onPaginationChange={handlePaginationChange}
+        onTableChange={handleTableChange}
         isLoading={isFetching}
         renderSubComponent={(row: Row<any>) => (
           <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />
