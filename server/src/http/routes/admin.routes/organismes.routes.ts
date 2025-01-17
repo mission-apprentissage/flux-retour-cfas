@@ -40,6 +40,7 @@ export default () => {
       if (result) {
         result.filter = filter;
       }
+
       return res.json(result);
     }
   );

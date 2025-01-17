@@ -258,6 +258,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("dev:generate-open-api"));
 
+program
+  .command("populate:reseaux")
+  .description("Populate reséaux collection")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("populate:reseaux"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**

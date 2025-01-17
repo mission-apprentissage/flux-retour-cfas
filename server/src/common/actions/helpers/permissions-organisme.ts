@@ -1,7 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 import {
-  isTeteDeReseauResponsable,
   throwUnexpectedError,
   TypeEffectifNominatif,
   Acl,
@@ -14,7 +13,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
-import { organismesDb } from "@/common/model/collections";
+import { organismesDb, reseauxDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { findOrganismeFormateursIds } from "./permissions";
@@ -66,7 +65,14 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
     }
     case "TETE_DE_RESEAU": {
       const sameReseau = { reseau: { $in: [organisation.reseau] } };
-      const isResponsable = isTeteDeReseauResponsable(organisation.reseau);
+      const reseau = await reseauxDb().findOne({ key: organisation.reseau });
+      if (!reseau) {
+        logger.error({ reseau: organisation.reseau }, "reseau de l'organisation non trouvé");
+        throw Boom.forbidden("reseau de l'organisation non trouvé");
+      }
+
+      const isResponsable = reseau?.responsable;
+
       return {
         viewContacts: sameReseau,
         infoTransmissionEffectifs: sameReseau,

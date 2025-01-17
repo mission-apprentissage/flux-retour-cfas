@@ -8,7 +8,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
-import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb, reseauxDb, usersMigrationDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import {
@@ -19,6 +19,7 @@ import {
   organismesByLabel,
   organismeCibleId,
   profilsPermissionByLabel,
+  reseaux,
 } from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
@@ -238,6 +239,7 @@ describe("Routes /organismes/:id", () => {
   });
   beforeEach(async () => {
     await organismesDb().insertMany(organismes);
+    await reseauxDb().insertMany(reseaux);
   });
 
   describe("GET /organismes/:id - détail d'un organisme", () => {

@@ -3,7 +3,6 @@ export * from "./dossierApprenant";
 export * from "./effectifs";
 export * from "./fiabilisation";
 export * from "./indicateurs";
-export * from "./networks";
 export * from "./organisme";
 export * from "./organismes";
 export * from "./organisations";

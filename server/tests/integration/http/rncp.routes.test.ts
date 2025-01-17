@@ -3,9 +3,9 @@ import type { RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
-import { organismesDb } from "@/common/model/collections";
+import { organismesDb, reseauxDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
-import { organismes, testPermissions } from "@tests/utils/permissions";
+import { organismes, reseaux, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
@@ -43,6 +43,7 @@ describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
     requestAsOrganisation = app.requestAsOrganisation;
     vi.mocked(getRncpInfo).mockResolvedValue(rncpInfo);
     await organismesDb().insertMany(organismes);
+    await reseauxDb().insertMany(reseaux);
   });
 
   it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {

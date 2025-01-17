@@ -1,5 +1,4 @@
 import { TypeEffectifNominatif } from "./indicateurs";
-import { ITeteDeReseauKey } from "./networks";
 
 // Permissions Profils d'organisation vs Fonctionnalités pour visualiser les données d'un OFA cible (= 2e niveau d'onglet)
 export type PermissionsOrganisme = {
@@ -15,7 +14,7 @@ export type PermissionOrganisme = keyof PermissionsOrganisme;
 
 export type PermissionScope = {
   id?: { $in: ReadonlyArray<string> };
-  reseau?: { $in: ReadonlyArray<ITeteDeReseauKey> };
+  reseau?: { $in: ReadonlyArray<string> };
   region?: { $in: ReadonlyArray<string> };
   departement?: { $in: ReadonlyArray<string> };
   academie?: { $in: ReadonlyArray<string> };
