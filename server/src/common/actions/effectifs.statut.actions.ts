@@ -178,11 +178,14 @@ function determineStatutsByContrats(
   contracts.forEach((contract, index) => {
     const { dateDebut, dateRupture } = contract;
 
-    if (dateDebut <= effectiveDateFin) {
-      statuts.push({ valeur: STATUT_APPRENANT.APPRENTI, date: dateDebut });
+    if (dateDebut) {
+      if (!dateRupture || (dateRupture && dateDebut <= dateRupture)) {
+        // Gestion des rutptures avant démarrage
+        statuts.push({ valeur: STATUT_APPRENANT.APPRENTI, date: dateDebut });
+      }
     }
 
-    if (dateRupture && dateRupture <= effectiveDateFin) {
+    if (dateRupture && dateDebut <= dateRupture) {
       const nextContract = contracts[index + 1];
       if (!nextContract) {
         latestRuptureDate = dateRupture;
