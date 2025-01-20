@@ -1,16 +1,23 @@
 import { Button, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
+import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
 
 import FilterList from "@/components/Filter/FilterList";
 
 interface ApprenantsFilterPanelProps {
   filters: Record<string, string[]>;
   availableFilters: Record<string, string[]>;
+  communes: Commune[];
   onFilterChange: (filters: Record<string, string[]>) => void;
   resetFilters: () => void;
 }
 
-const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({ filters, onFilterChange, resetFilters }) => {
+const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
+  filters,
+  communes,
+  onFilterChange,
+  resetFilters,
+}) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
 
   const handleCheckboxChange = (filterKey: string, selectedValues: string[]) => {
@@ -25,23 +32,30 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({ filters, 
       </Text>
       <Stack direction="row" spacing={0} wrap="wrap">
         <FilterList
-          key="rupture"
-          filterKey="rupture"
+          key="statut"
+          filterKey="statut"
           displayName="Statut"
-          options={["Inscrit sans contrat", "Rupture de contrat", "Abandon"]}
-          selectedValues={filters["rupture"] || []}
-          onChange={(values) => handleCheckboxChange("rupture", values)}
-          isOpen={openFilter === "rupture"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "rupture" : null)}
+          options={{
+            [STATUT_APPRENANT.INSCRIT]: STATUT_NAME[STATUT_APPRENANT.INSCRIT],
+            [STATUT_APPRENANT.RUPTURANT]: STATUT_NAME[STATUT_APPRENANT.RUPTURANT],
+            [STATUT_APPRENANT.ABANDON]: STATUT_NAME[STATUT_APPRENANT.ABANDON],
+          }}
+          selectedValues={filters["statut"] || []}
+          onChange={(values) => handleCheckboxChange("statut", values)}
+          isOpen={openFilter === "statut"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "statut" : null)}
           sortOrder="desc"
         />
 
         <FilterList
           key="rqth"
           filterKey="rqth"
-          displayName={"RQTH"}
-          options={["Oui", "Non"]}
-          selectedValues={filters["rqth"] || []}
+          displayName="RQTH"
+          options={{
+            true: "Oui",
+            false: "Non",
+          }}
+          selectedValues={filters["rqth"]?.map(String) || []}
           onChange={(values) => handleCheckboxChange("rqth", values)}
           isOpen={openFilter === "rqth"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "rqth" : null)}
@@ -51,8 +65,11 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({ filters, 
         <FilterList
           key="mineur"
           filterKey="mineur"
-          displayName={"Mineur"}
-          options={["Oui", "Non"]}
+          displayName="Mineur"
+          options={{
+            true: "Oui",
+            false: "Non",
+          }}
           selectedValues={filters["mineur"] || []}
           onChange={(values) => handleCheckboxChange("mineur", values)}
           isOpen={openFilter === "mineur"}
@@ -61,59 +78,59 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({ filters, 
         />
 
         <FilterList
-          key="niveau_formation"
-          filterKey="niveau_formation"
+          key="niveaux"
+          filterKey="niveaux"
           displayName={"Niveau de formation"}
-          options={[
-            "3 (CAP, BEP...)",
-            "4 (Baccalauréat)",
-            "5 (BTS, DUT, DEUG)",
-            "6 (Licence, Bachelor)",
-            "7 (Master...)",
-            "8 (Doctorat)",
-          ]}
-          selectedValues={filters["niveau_formation"] || []}
-          onChange={(values) => handleCheckboxChange("niveau_formation", values)}
-          isOpen={openFilter === "niveau_formation"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "niveau_formation" : null)}
+          options={{
+            3: "CAP, BEP...",
+            4: "Baccalauréat",
+            5: "BTS, DUT, DEUG",
+            6: "Licence, Bachelor",
+            7: "Master...",
+            8: "Doctorat",
+          }}
+          selectedValues={filters["niveaux"] || []}
+          onChange={(values) => handleCheckboxChange("niveaux", values)}
+          isOpen={openFilter === "niveaux"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "niveaux" : null)}
           sortOrder="asc"
         />
 
         <FilterList
-          key="commune_residence"
-          filterKey="commune_residence"
+          key="code_insee"
+          filterKey="code_insee"
           displayName={"Commune de résidence"}
-          options={["Paris", "Lyon", "Marseille", "Autre"]}
-          selectedValues={filters["commune_residence"] || []}
-          onChange={(values) => handleCheckboxChange("commune_residence", values)}
-          isOpen={openFilter === "commune_residence"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "commune_residence" : null)}
+          options={Object.fromEntries((communes || []).map(({ code_insee, commune }) => [code_insee, commune]))}
+          selectedValues={filters["code_insee"] || []}
+          onChange={(values) => handleCheckboxChange("code_insee", values)}
+          isOpen={openFilter === "code_insee"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_insee" : null)}
           sortOrder="desc"
         />
 
-        <FilterList
-          key="fraicheur_donnee"
-          filterKey="fraicheur_donnee"
+        {/*        <FilterList
+          key="last_update_value"
+          filterKey="last_update_value"
           displayName={"Fraîcheur de la donnée"}
           options={["< 1 semaine", "> 1 semaine"]}
-          selectedValues={filters["fraicheur_donnee"] || []}
-          onChange={(values) => handleCheckboxChange("fraicheur_donnee", values)}
-          isOpen={openFilter === "fraicheur_donnee"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "fraicheur_donnee" : null)}
+          selectedValues={filters["last_update_value"] || []}
+          onChange={(values) => handleCheckboxChange("last_update_value", values)}
+          isOpen={openFilter === "last_update_value"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "last_update_value" : null)}
           sortOrder="asc"
         />
+        */}
 
         <FilterList
           key="situation"
           filterKey="situation"
-          displayName={"Situation"}
-          options={[
-            "Contacté, soutien nécessaire",
-            "Contacté, pas de suivi nécessaire",
-            "Déjà accompagné par ML",
-            "Injoignable",
-            "Non contacté",
-          ]}
+          displayName="Situation"
+          options={Object.fromEntries(
+            Object.entries(SITUATION_ENUM).map(([key, value]) => [
+              value,
+              SITUATION_LABEL_ENUM[key as keyof typeof SITUATION_LABEL_ENUM],
+            ])
+          )}
           selectedValues={filters["situation"] || []}
           onChange={(values) => handleCheckboxChange("situation", values)}
           isOpen={openFilter === "situation"}

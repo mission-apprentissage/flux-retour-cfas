@@ -1,9 +1,9 @@
 import { Box, Container, Heading, HStack, VStack, Text, Link, Flex } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getAnneeScolaireFromDate } from "shared";
+import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
+import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
 import Accordion from "@/components/Accordion/Accordion";
@@ -11,15 +11,20 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/ApprenantsTable";
 
+const DEFAULT_PAGINATION: IPaginationFilters = {
+  page: 0,
+  limit: 5,
+  sort: "rupture",
+  order: "desc",
+};
+
 function EffectifsPage() {
   const router = useRouter();
-
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
+  const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({
-    annee_scolaire: [getAnneeScolaireFromDate(new Date())],
+    rupture: [],
   });
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
 
   useEffect(() => {
     const parseFilter = (key: string, value: string | string[] | undefined) => {
@@ -40,8 +45,11 @@ function EffectifsPage() {
     };
 
     const mergedFilters: Record<string, string[]> = { ...filters };
+    const mergedPagination = { ...pagination };
 
-    const filterKeys = ["formation", "statut_courant", "annee_scolaire", "source"];
+    const filterKeys = ["statut", "rqth", "mineur", "niveaux", "code_insee", "last_update_value", "situation"];
+    const paginationKeys = ["limit", "page", "order", "sort"];
+    const searchFilter = router.query.search;
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -50,145 +58,66 @@ function EffectifsPage() {
       }
     });
 
+    paginationKeys.forEach((key) => {
+      const parsedValue = router.query[key];
+      if (parsedValue) {
+        mergedPagination[key] = parsedValue;
+      }
+    });
+
     if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
       setFilters(mergedFilters);
     }
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
+
+    const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
+
+    setPagination(zodPagination);
   }, [router.query]);
 
-  const {
-    data: apprenants,
-    isFetching,
-    refetch,
-  } = useQuery(
-    ["apprenants", pagination],
+  const { data: apprenants, isFetching } = useQuery(
+    ["apprenants", pagination, search, filters],
     async () => {
       const response = await _get(`/api/v1/organisation/mission-locale/effectifs`, {
-        params: {},
+        params: {
+          page: pagination.page,
+          limit: pagination.limit,
+          sort: pagination.sort,
+          order: pagination.order,
+          search,
+          ...filters,
+        },
       });
-
-      setPagination((prev) => ({
-        ...prev,
-        pageSize: response.pagination.limit,
-        pageIndex: --response.pagination.page,
-        total: response.pagination.total,
-      }));
-
-      const transformedData = response.data.map((item) => ({
-        ...item,
-        id: item._id,
-        _id: undefined,
-      }));
-
-      return {
-        ...response,
-        data: transformedData,
-      };
+      return response;
     },
     { keepPreviousData: true }
   );
 
-  const handlePaginationChange = (newPagination) => {
+  const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: { ...router.query, ...newPagination } }, undefined, {
+      shallow: true,
+    });
   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, search: value },
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: { ...router.query, search: value } }, undefined, { shallow: true });
   };
 
   const handleFilterChange = (newFilters: Record<string, string[]>) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    const mergedFilters = { ...filters };
-
-    Object.entries(newFilters).forEach(([key, values]) => {
-      if (values.length > 0) {
-        mergedFilters[key] = values;
-      } else {
-        delete mergedFilters[key];
-      }
-    });
-
-    const queryFilters = Object.entries(mergedFilters).reduce(
-      (acc, [key, values]) => {
-        acc[key] = JSON.stringify(values);
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-
-    const updatedQuery = { ...router.query, ...queryFilters };
-    Object.keys(router.query).forEach((key) => {
-      if (!queryFilters[key]) {
-        delete updatedQuery[key];
-      }
-    });
-
-    setFilters(mergedFilters);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    setSort(newSort);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          sortField: newSort[0]?.id,
-          sortOrder: newSort[0]?.desc ? "desc" : "asc",
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
+    setPagination({ ...pagination, page: 0 });
+    setFilters(newFilters);
+    router.push({ pathname: router.pathname, query: { ...router.query, ...newFilters } }, undefined, { shallow: true });
   };
 
   const resetFilters = () => {
     setFilters({});
     setSearch("");
-
-    const { organismeId } = router.query;
-
-    const updatedQuery = organismeId ? { organismeId } : {};
-    router.push(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: {} }, undefined, { shallow: true });
   };
 
   return (
@@ -230,18 +159,17 @@ function EffectifsPage() {
         <Box mt={10} mb={16}>
           <ApprenantsTable
             apprenants={apprenants?.data || []}
+            communes={apprenants?.filter}
             filters={filters}
             pagination={pagination}
             search={search}
-            sort={sort}
-            onPaginationChange={handlePaginationChange}
             onSearchChange={handleSearchChange}
             onFilterChange={handleFilterChange}
-            onSortChange={handleSortChange}
-            availableFilters={{}}
+            onTableChange={handleTableChange}
+            total={apprenants?.pagination.total || 0}
+            availableFilters={apprenants?.filters || {}}
             resetFilters={resetFilters}
             isFetching={isFetching}
-            refetch={refetch}
           />
         </Box>
         <Flex gap={12} mt={16} mb={6}>

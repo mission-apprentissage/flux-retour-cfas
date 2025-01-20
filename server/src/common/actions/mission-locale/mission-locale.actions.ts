@@ -56,6 +56,9 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     last_update_order = null,
   } = effectifFilters;
 
+  const today = new Date();
+  const adultThreshold = new Date(today.setFullYear(today.getFullYear() - 18));
+
   const filter = [
     ...filterByDernierStatutPipeline(
       (statut as Array<StatutApprenant>) ?? [
@@ -81,9 +84,20 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
                 }, []),
             }
           : {}),
-        ...(rqth !== null ? { "apprenant.rqth": rqth } : {}),
-        ...(mineur !== null
-          ? { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) } }
+        ...(rqth !== null && rqth.length > 0
+          ? {
+              $or: [
+                { "apprenant.rqth": { $in: rqth } },
+                ...(rqth.includes(false) ? [{ "apprenant.rqth": { $exists: false } }] : []),
+              ],
+            }
+          : {}),
+        ...(mineur !== null && mineur.length > 0
+          ? mineur.includes(true) && mineur.includes(false)
+            ? {}
+            : mineur.includes(true)
+              ? { "apprenant.date_de_naissance": { $gte: adultThreshold } }
+              : { "apprenant.date_de_naissance": { $lt: adultThreshold } }
           : {}),
         ...(niveaux !== null ? { "formation.niveau": { $in: niveaux } } : {}),
         ...(code_insee !== null ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
@@ -170,7 +184,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
           $addToSet: {
             code_insee: "$apprenant.adresse.code_insee",
             code_postal: "$apprenant.adresse.code_postal",
-            nom: "$apprenant.adresse.commune",
+            commune: "$apprenant.adresse.commune",
           },
         },
       },
@@ -186,7 +200,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         _id: 0,
         code_insee: "$commune.code_insee",
         code_postal: "$commune.code_postal",
-        nom: "$commune.nom",
+        commune: "$commune.commune",
       },
     },
   ];
@@ -225,7 +239,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     {
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
-        data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
       },
     },
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
@@ -243,7 +257,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const resultAdresse = await effectifsDb().aggregate(adresseFilterAggregation).toArray();
 
   if (!resultEffectif || resultEffectif?.data.length === 0) {
-    return { pagination: { total: 0, page, limit }, data: [], filter: [] };
+    return { pagination: { total: 0, page, limit }, data: [], filter: resultAdresse };
   }
 
   const { pagination, data } = resultEffectif;

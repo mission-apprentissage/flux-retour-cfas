@@ -78,3 +78,11 @@ export const zAdresse = zodOpenApi.object({
 export const zAdresseWithMissionLocale = zAdresse.extend({
   mission_locale_id: zodOpenApi.number({ description: "Id de mission locale" }).optional(),
 });
+
+export const zCommune = zAdresse.pick({
+  code_insee: true,
+  code_postal: true,
+  commune: true,
+});
+
+export type Commune = zodOpenApi.infer<typeof zCommune>;
