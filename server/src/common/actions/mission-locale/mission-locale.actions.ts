@@ -4,7 +4,10 @@ import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
-import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
+import {
+  effectifsFiltersMissionLocaleSchema,
+  IEffectifsFiltersMissionLocale,
+} from "shared/models/routes/mission-locale/missionLocale.api";
 import { WithPagination } from "shared/models/routes/pagination";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
@@ -126,7 +129,7 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
-  effectifsFiltersMissionLocale: WithPagination<IEffectifsFiltersMissionLocale>
+  effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
 ) => {
   const { page = 1, limit = 20, sort = "nom", order = "asc", ...effectifFilters } = effectifsFiltersMissionLocale;
 
