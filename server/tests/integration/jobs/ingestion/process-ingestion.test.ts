@@ -640,6 +640,9 @@ describe("Processus d'ingestion", () => {
             formation_presentielle: true,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            libelle_long: "Coiffure",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {

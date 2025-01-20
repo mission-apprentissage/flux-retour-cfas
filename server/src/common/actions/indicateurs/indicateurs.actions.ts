@@ -24,7 +24,6 @@ import {
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
-import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -512,30 +511,7 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
     ])
     .toArray();
 
-  // Fix temporaire en attendant la V2
-  // Correction des intitulés de formation manquants, à partir du CFD / RNCP
-  return Promise.all(
-    indicateurs.map(async (indicateur) => {
-      if (indicateur.rncp_code === null && indicateur.cfd_code === null) {
-        return indicateur;
-      }
-
-      if (indicateur.intitule && indicateur.niveau_europeen) {
-        return indicateur;
-      }
-
-      const [cfdInfo, rncpInfo] = await Promise.all([
-        indicateur.cfd_code ? getCfdInfo(indicateur.cfd_code) : null,
-        indicateur.rncp_code ? getRncpInfo(indicateur.rncp_code) : null,
-      ]);
-
-      return {
-        ...indicateur,
-        intitule: indicateur.intitule ?? cfdInfo?.intitule_long ?? rncpInfo?.intitule ?? null,
-        niveau_europeen: indicateur.niveau_europeen ?? rncpInfo?.niveau ?? cfdInfo?.niveau ?? null,
-      };
-    })
-  );
+  return indicateurs;
 }
 
 export async function getEffectifsNominatifsGenerique(

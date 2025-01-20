@@ -343,11 +343,12 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         );
       }
 
+      const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
       return {
         effectif: await withComputedFields(
           {
             ...effectif,
-            formation: fiabilisationEffectifFormation(effectif, certification),
+            formation: computedFormation,
             organisme_id: organismeFormateur?._id,
             organisme_formateur_id: organismeFormateur?._id,
             organisme_responsable_id: organismeResponsable?._id,
@@ -413,13 +414,13 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
         }
 
         const certification = await getEffectifCertification(effectif);
-
+        const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
         return {
           effectif: await withComputedFields(
             {
               ...effectif,
               organisme_id: organisme?._id,
-              formation: fiabilisationEffectifFormation(effectif, certification),
+              formation: computedFormation,
               _raw: {
                 formation: effectif.formation,
               },
