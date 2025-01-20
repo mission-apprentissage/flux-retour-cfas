@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   HStack,
   Text,
   Table,
@@ -39,6 +40,7 @@ const getLastStatut = (statut: any) => {
 const ApprenantsDetails = ({ row }) => {
   const [statutCorrect, setStatutCorrect] = useState("");
   const [franceTravail, setFranceTravail] = useState("");
+  const [apprenantStatut, setApprenantStatut] = useState<boolean>(false);
 
   const apprenant = row.original.apprenant;
   const statut = row.original.statut;
@@ -49,8 +51,8 @@ const ApprenantsDetails = ({ row }) => {
 
   return (
     <Box borderWidth="2px" borderStyle="solid" borderColor="#E3E3FD" p={4} mt={3}>
-      <Flex bg="#F9F8F6">
-        <Box p={4} flex="1">
+      <Flex bg="white" gap={2}>
+        <Box p={6} flex="1" bg="#F9F8F6">
           <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={3}>
             Ses informations
           </Heading>
@@ -111,7 +113,7 @@ const ApprenantsDetails = ({ row }) => {
             </Tbody>
           </Table>
         </Box>
-        <Box p={4} flex="1" maxW="600px" mx="auto">
+        <Box p={6} flex="1" maxW="600px" mx="auto" bg="#F9F8F6">
           <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={4}>
             Vos commentaires et retours
           </Heading>
@@ -124,23 +126,34 @@ const ApprenantsDetails = ({ row }) => {
             <Text fontSize="md" mb={3}>
               1. Le statut du jeune affiché est-il correct ?
             </Text>
-            <RadioGroup onChange={setStatutCorrect} value={statutCorrect}>
+            <RadioGroup
+              onChange={(value) => {
+                setStatutCorrect(value);
+                setApprenantStatut(value === "non");
+              }}
+              value={statutCorrect}
+            >
               <HStack spacing={4}>
                 <Radio value="oui">Oui</Radio>
                 <Radio value="non">Non</Radio>
               </HStack>
             </RadioGroup>
 
-            <Text fontSize="sm" mt={4} mb={2}>
-              Veuillez préciser son statut actuel.
-            </Text>
-            <Select placeholder="Sélectionner une option">
-              <option value="contacte_soutien">Contacté, soutien nécessaire</option>
-              <option value="contacte_pas_de_suivi">Contacté, pas de suivi nécessaire</option>
-              <option value="deja_accompagne">Déjà accompagné par ML</option>
-              <option value="injoignable">Injoignable</option>
-              <option value="non_contacte">Non contacté</option>
-            </Select>
+            {apprenantStatut && (
+              <>
+                <Text fontSize="sm" mt={4} mb={2}>
+                  Veuillez préciser son statut actuel.
+                </Text>
+                <Select placeholder="Sélectionner une option">
+                  <option value="contacte_soutien">Contrat signé non démarré</option>
+                  <option value="contacte_pas_de_suivi">Retour en voie scolaire initiale</option>
+                  <option value="deja_accompagne">Abandon de la formation</option>
+                  <option value="injoignable">Rupture de contrat d’apprentissage</option>
+                  <option value="non_contacte">Décrochage (abandon)</option>
+                  <option value="non_contacte">Autre raison</option>
+                </Select>
+              </>
+            )}
           </Box>
 
           <Box mb={6}>
@@ -161,11 +174,16 @@ const ApprenantsDetails = ({ row }) => {
               3. Notez ici des informations recueillies auprès du jeune et sa situation, que vous jugez utiles de
               partager.{" "}
               <Text as="span" fontSize="sm" color="gray.500">
-                (150 caractères maximum)
+                (200 caractères maximum)
               </Text>
             </Text>
-            <Textarea placeholder="Vos retours sur l’accompagnement du jeune" maxLength={150} />
+            <Textarea placeholder="Vos retours sur l’accompagnement du jeune" maxLength={200} />
           </Box>
+          <Flex justifyContent="flex-end">
+            <Button variant="secondary" size={"sm"}>
+              Enregistrer
+            </Button>
+          </Flex>
         </Box>
       </Flex>
 

@@ -305,13 +305,15 @@ const MenuQuestions = () => {
           >
             Centre d’aide
           </MenuItem>
-          <MenuItem
-            as="a"
-            href="/referencement-organisme"
-            onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
-          >
-            Référencement de votre organisme
-          </MenuItem>
+          {organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && (
+            <MenuItem
+              as="a"
+              href="/referencement-organisme"
+              onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
+            >
+              Référencement de votre organisme
+            </MenuItem>
+          )}
           <MenuItem as="a" href="/glossaire">
             Glossaire
           </MenuItem>

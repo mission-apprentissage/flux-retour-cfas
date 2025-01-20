@@ -1,10 +1,9 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Container, Heading, HStack, VStack, Text, Link, Flex } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getAnneeScolaireFromDate } from "shared";
+import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
+import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
 import Accordion from "@/components/Accordion/Accordion";
@@ -12,15 +11,20 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/ApprenantsTable";
 
+const DEFAULT_PAGINATION: IPaginationFilters = {
+  page: 0,
+  limit: 5,
+  sort: "rupture",
+  order: "desc",
+};
+
 function EffectifsPage() {
   const router = useRouter();
-
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
+  const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({
-    annee_scolaire: [getAnneeScolaireFromDate(new Date())],
+    rupture: [],
   });
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
 
   useEffect(() => {
     const parseFilter = (key: string, value: string | string[] | undefined) => {
@@ -41,8 +45,11 @@ function EffectifsPage() {
     };
 
     const mergedFilters: Record<string, string[]> = { ...filters };
+    const mergedPagination = { ...pagination };
 
-    const filterKeys = ["formation", "statut_courant", "annee_scolaire", "source"];
+    const filterKeys = ["statut", "rqth", "mineur", "niveaux", "code_insee", "last_update_value", "situation"];
+    const paginationKeys = ["limit", "page", "order", "sort"];
+    const searchFilter = router.query.search;
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -51,145 +58,66 @@ function EffectifsPage() {
       }
     });
 
+    paginationKeys.forEach((key) => {
+      const parsedValue = router.query[key];
+      if (parsedValue) {
+        mergedPagination[key] = parsedValue;
+      }
+    });
+
     if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
       setFilters(mergedFilters);
     }
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
+
+    const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
+
+    setPagination(zodPagination);
   }, [router.query]);
 
-  const {
-    data: apprenants,
-    isFetching,
-    refetch,
-  } = useQuery(
-    ["apprenants", pagination],
+  const { data: apprenants, isFetching } = useQuery(
+    ["apprenants", pagination, search, filters],
     async () => {
       const response = await _get(`/api/v1/organisation/mission-locale/effectifs`, {
-        params: {},
+        params: {
+          page: pagination.page,
+          limit: pagination.limit,
+          sort: pagination.sort,
+          order: pagination.order,
+          search,
+          ...filters,
+        },
       });
-
-      setPagination((prev) => ({
-        ...prev,
-        pageSize: response.pagination.limit,
-        pageIndex: --response.pagination.page,
-        total: response.pagination.total,
-      }));
-
-      const transformedData = response.data.map((item) => ({
-        ...item,
-        id: item._id,
-        _id: undefined,
-      }));
-
-      return {
-        ...response,
-        data: transformedData,
-      };
+      return response;
     },
     { keepPreviousData: true }
   );
 
-  const handlePaginationChange = (newPagination) => {
+  const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: { ...router.query, ...newPagination } }, undefined, {
+      shallow: true,
+    });
   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, search: value },
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: { ...router.query, search: value } }, undefined, { shallow: true });
   };
 
   const handleFilterChange = (newFilters: Record<string, string[]>) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    const mergedFilters = { ...filters };
-
-    Object.entries(newFilters).forEach(([key, values]) => {
-      if (values.length > 0) {
-        mergedFilters[key] = values;
-      } else {
-        delete mergedFilters[key];
-      }
-    });
-
-    const queryFilters = Object.entries(mergedFilters).reduce(
-      (acc, [key, values]) => {
-        acc[key] = JSON.stringify(values);
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-
-    const updatedQuery = { ...router.query, ...queryFilters };
-    Object.keys(router.query).forEach((key) => {
-      if (!queryFilters[key]) {
-        delete updatedQuery[key];
-      }
-    });
-
-    setFilters(mergedFilters);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    setSort(newSort);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          sortField: newSort[0]?.id,
-          sortOrder: newSort[0]?.desc ? "desc" : "asc",
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
+    setPagination({ ...pagination, page: 0 });
+    setFilters(newFilters);
+    router.push({ pathname: router.pathname, query: { ...router.query, ...newFilters } }, undefined, { shallow: true });
   };
 
   const resetFilters = () => {
     setFilters({});
     setSearch("");
-
-    const { organismeId } = router.query;
-
-    const updatedQuery = organismeId ? { organismeId } : {};
-    router.push(
-      {
-        pathname: router.pathname,
-        query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
+    router.push({ pathname: router.pathname, query: {} }, undefined, { shallow: true });
   };
 
   return (
@@ -202,28 +130,28 @@ function EffectifsPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (sans contrat, en rupture de
-            contrat ou en rupture sèche) et leurs coordonnées, identifiés comme ayant besoin d’un accompagnement par la
-            Mission locale.Cliquez sur chaque jeune pour plus d’informations sur son parcours.
+            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (identifiés comme inscrit
+            sans contrat, en rupture de contrat ou en abandon/sortie d’apprentissage) et leurs coordonnées, susceptibles
+            d&apos;être intéressés par une mise en relation et accompagnement avec une Mission Locale. Cliquez sur
+            chaque jeune pour plus d’informations sur son parcours.
           </Text>
-          <Text>Sources : CFA et DECA</Text>
+          <Text fontStyle="italic">
+            Sources : CFA et{" "}
+            <Link
+              isExternal
+              textDecoration="underLine"
+              color="bluefrance"
+              href="https://efpconnect.emploi.gouv.fr/auth/realms/efp/protocol/cas/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
+            >
+              DECA
+            </Link>
+          </Text>
           <Ribbons variant="alert">
             <Flex direction="column" ml={3} gap={2} justifyContent="flexstart">
               <Text color="grey.800">
                 Nous vous mettons à disposition les contacts des jeunes et leur CFA : vous êtes encouragé à les
                 contacter. Ne partagez pas ces listes.
               </Text>
-              <Link
-                href="/apprenants"
-                color="action-high-blue-france"
-                borderBottom="1px"
-                w="fit-content"
-                display="flex"
-                alignItems="center"
-              >
-                Lire la charte
-                <ArrowForwardIcon />
-              </Link>
             </Flex>
           </Ribbons>
         </VStack>
@@ -231,18 +159,17 @@ function EffectifsPage() {
         <Box mt={10} mb={16}>
           <ApprenantsTable
             apprenants={apprenants?.data || []}
+            communes={apprenants?.filter}
             filters={filters}
             pagination={pagination}
             search={search}
-            sort={sort}
-            onPaginationChange={handlePaginationChange}
             onSearchChange={handleSearchChange}
             onFilterChange={handleFilterChange}
-            onSortChange={handleSortChange}
-            availableFilters={{}}
+            onTableChange={handleTableChange}
+            total={apprenants?.pagination.total || 0}
+            availableFilters={apprenants?.filters || {}}
             resetFilters={resetFilters}
             isFetching={isFetching}
-            refetch={refetch}
           />
         </Box>
         <Flex gap={12} mt={16} mb={6}>
@@ -254,16 +181,19 @@ function EffectifsPage() {
             <Accordion defaultIndex={undefined} useCustomIcons={true} w={2 / 3}>
               <Accordion.Item title="Qu’est-il attendu des Missions Locales concernant cette mise à disposition des listes ?">
                 <Text>
-                  L’accès à cette liste est strictement personnelle et ne peut en aucun cas être partagée.Un compte
-                  utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
-                  aux données.
+                  L’objectif du Tableau de bord de l’apprentissage est l’accompagnement des jeunes apprenants en
+                  difficulté par différents acteurs, dont les Missions Locales. En contactant directement les jeunes,
+                  vous qualifiez leur situation, et identifiez potentiellement un accompagnement à mettre en place. Vos
+                  remontées sur le Tableau de bord permettent à notre équipe de mesurer l’impact de la plateforme et
+                  d’améliorer la qualité des données exposées.
                 </Text>
               </Accordion.Item>
               <Accordion.Item title="D’où viennent les données exposées ci-dessus ?">
                 <Text>
-                  L’accès à cette liste est strictement personnelle et ne peut en aucun cas être partagée.Un compte
-                  utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
-                  aux données.
+                  Le Tableau de bord expose les données issues des CFA, qui nous partagent les informations sur leurs
+                  apprenants, leur formation et leur statut. Ces données sont envoyées soit par ERP (outil de gestion
+                  des effectifs, comme Ypareo), soit téléversement d’un fichier Excel rempli par leurs soins. Nous
+                  travaillons chaque jour à récolter plus de données fraîches en connectant les CFA à la plateforme.
                 </Text>
               </Accordion.Item>
               <Accordion.Item title="Puis-je partager le fichier à des collaborateurs ?">

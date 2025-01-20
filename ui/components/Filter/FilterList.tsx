@@ -7,7 +7,7 @@ import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 interface FilterListProps {
   filterKey: string;
   displayName: string;
-  options: string[];
+  options: Record<string, string>;
   selectedValues: string[];
   onChange: (selectedValues: string[]) => void;
   isOpen: boolean;
@@ -25,11 +25,11 @@ const FilterList: React.FC<FilterListProps> = ({
   setIsOpen,
   sortOrder = "asc",
 }) => {
-  const sortedOptions = [...options].sort((a, b) => {
+  const sortedOptions = Object.entries(options).sort(([_keyA, valA], [_keyB, valB]) => {
     if (sortOrder === "asc") {
-      return a.localeCompare(b);
+      return valA.localeCompare(valB);
     }
-    return b.localeCompare(a);
+    return valB.localeCompare(valA);
   });
 
   return (
@@ -44,9 +44,9 @@ const FilterList: React.FC<FilterListProps> = ({
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup defaultValue={selectedValues} size="sm" onChange={onChange}>
             <Stack>
-              {sortedOptions.map((option, index) => (
-                <Checkbox key={index} value={option} iconSize="0.5rem">
-                  {capitalizeWords(option)}
+              {sortedOptions.map(([key, value]) => (
+                <Checkbox key={key} value={key} iconSize="0.5rem">
+                  {capitalizeWords(value)}
                 </Checkbox>
               ))}
             </Stack>
