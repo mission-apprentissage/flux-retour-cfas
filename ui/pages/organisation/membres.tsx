@@ -13,6 +13,7 @@ import withAuth, { allOrganisationExcept } from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import useToaster from "@/hooks/useToaster";
 import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
+import InvitationFormAdmin from "@/modules/mon-espace/organisation/InvitationFormAdmin";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -80,7 +81,7 @@ const PageGestionDesMembres = () => {
             Vous êtes actuellement <strong>Gestionnaire</strong> pour votre organisation sur le tableau de bord.
           </Text>
           <InvitationForm onInvitation={() => refetchInvitations()} />
-
+          <InvitationFormAdmin onInvitation={() => refetchInvitations()} />
           {statusMembres === "success" && statusInvitations === "success" && (
             <Box>
               {membresEnAttenteValidation.length > 0 && (

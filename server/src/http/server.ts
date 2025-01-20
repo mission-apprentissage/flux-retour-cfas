@@ -108,6 +108,7 @@ import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -871,7 +872,11 @@ function setupRoutes(app: Application) {
       .post(
         "/membres",
         returnResult(async (req) => {
-          await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+          await inviteUserToOrganisation(
+            req.user,
+            req.body.email.toLowerCase(),
+            (req.user as AuthContext).organisation_id
+          );
         })
       )
       .delete(

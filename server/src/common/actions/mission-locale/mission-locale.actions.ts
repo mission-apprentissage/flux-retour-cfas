@@ -1,14 +1,22 @@
+import type { IMissionLocale } from "api-alternance-sdk";
+import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  effectifsFiltersMissionLocaleSchema,
+  IEffectifsFiltersMissionLocale,
+} from "shared/models/routes/mission-locale/missionLocale.api";
+import { WithPagination } from "shared/models/routes/pagination";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
-import { effectifsDb, missionLocaleEffectifsDb } from "@/common/model/collections";
+import { effectifsDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
-import { buildSortFilter, DateFilters, IEffectifsFiltersMissionLocale, WithPagination } from "../helpers/filters";
+import { buildSortFilter, DateFilters } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
 
 export const EFF_MISSION_LOCALE_FILTER = [
@@ -121,7 +129,7 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
-  effectifsFiltersMissionLocale: WithPagination<IEffectifsFiltersMissionLocale>
+  effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
 ) => {
   const { page = 1, limit = 20, sort = "nom", order = "asc", ...effectifFilters } = effectifsFiltersMissionLocale;
 
@@ -296,4 +304,29 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
     },
     { upsert: true }
   );
+};
+
+export const getOrCreateMissionLocaleById = async (id: number) => {
+  const mlDb = await organisationsDb().findOne({ ml_id: id });
+
+  if (mlDb) {
+    return mlDb;
+  }
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales();
+  const ml: IMissionLocale | undefined = allMl.find((ml) => ml.id === id);
+  if (!ml) {
+    Boom.notFound(`Mission locale with id ${id} not found`);
+    return;
+  }
+
+  const orga = await organisationsDb().insertOne({
+    _id: new ObjectId(),
+    type: "MISSION_LOCALE",
+    created_at: new Date(),
+    ml_id: ml.id,
+    nom: ml.nom,
+    siret: ml.siret,
+  });
+
+  return organisationsDb().findOne({ _id: orga.insertedId });
 };
