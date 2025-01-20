@@ -1,6 +1,7 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Center, Container, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { getOrganisationLabel } from "shared";
 
 import { _get, _post } from "@/common/httpClient";
@@ -62,7 +63,7 @@ const DashboardMissionLocale = () => {
         <HStack alignItems={"center"} my={8}>
           <InfoSquare color="bluefrance" bg="white" boxSize="5" />
           <Text>
-            Les apprenants et CFA restitués sur votre espace sont domiciliés sur votre zone de couverture géographique.
+            Les apprenants restitués sur votre espace sont domiciliés sur votre zone de couverture géographique.
           </Text>
         </HStack>
         <Text fontSize={14}>
@@ -78,6 +79,9 @@ const DashboardMissionLocale = () => {
             DECA
           </Link>{" "}
           (Dépôt des Contrats d’Alternance) peuvent apparaître pour ces derniers.
+        </Text>
+        <Text mt={4}>
+          Le <strong>{format(new Date(), "dd MMMM yyyy")}</strong>
         </Text>
       </Container>
       <Container maxW="xl" px={8}>
@@ -133,7 +137,7 @@ const DashboardMissionLocale = () => {
           </GridItem>
         </Grid>
         <Link href="/apprenants" color="action-high-blue-france" borderBottom="1px" mt={6}>
-          Voir les listes nominatives des apprenants
+          Voir la liste nominative des apprenants
           <ArrowForwardIcon />
         </Link>
       </Container>

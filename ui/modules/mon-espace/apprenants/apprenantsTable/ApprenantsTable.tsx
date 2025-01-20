@@ -1,13 +1,11 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
-import { UseQueryResult } from "@tanstack/react-query";
-import { Row, SortingState } from "@tanstack/react-table";
-import { useRouter } from "next/router";
+import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
+import { Commune } from "shared";
+import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import TableWithApi from "@/components/Table/TableWithApi";
-
-// import ApprenantTableDetails from "../ApprenantsTableDetails";
 
 import apprenantsTableColumnsDefs from "./ApprenantsColumns";
 import ApprenantsDetails from "./ApprenantsDetails";
@@ -15,44 +13,39 @@ import ApprenantsFilterPanel from "./ApprenantsFilterPanel";
 
 interface ApprenantsTableProps {
   apprenants: any[];
+  communes: Commune[];
   filters: Record<string, string[]>;
-  pagination: any;
+  pagination: IPaginationFilters;
   search: string;
-  sort: SortingState;
-  onPaginationChange: (pagination: any) => void;
   onSearchChange: (search: string) => void;
   onFilterChange: (filters: Record<string, string[]>) => void;
-  onSortChange: (sort: SortingState) => void;
+  onTableChange: (pagination: IPaginationFilters) => void;
+  total: number;
   availableFilters: Record<string, string[]>;
   resetFilters: () => void;
   isFetching: boolean;
-  refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
 }
 
 const ApprenantsTable = ({
   apprenants,
+  communes,
   filters,
   pagination,
   search,
-  sort: initialSort,
-  onPaginationChange,
   onSearchChange,
   onFilterChange,
-  onSortChange,
+  onTableChange,
+  total,
   availableFilters,
   resetFilters,
   isFetching,
 }: ApprenantsTableProps) => {
-  const router = useRouter();
-
-  const [sort, setSort] = useState<SortingState>(initialSort);
   const [localSearch, setLocalSearch] = useState(search || "");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   useEffect(() => {
-    setSort(initialSort);
     setLocalSearch(search || "");
-  }, [initialSort, search]);
+  }, [search]);
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearch(event.target.value);
@@ -70,36 +63,6 @@ const ApprenantsTable = ({
 
   const executeSearch = () => {
     onSearchChange(localSearch);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, search: localSearch },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handlePaginationChange = (newPagination) => {
-    onPaginationChange(newPagination);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    onSortChange(newSort);
   };
 
   return (
@@ -131,6 +94,7 @@ const ApprenantsTable = ({
             availableFilters={availableFilters}
             onFilterChange={onFilterChange}
             resetFilters={resetFilters}
+            communes={communes}
           />
         </HStack>
         <HStack mt={6} spacing={4} alignItems="center">
@@ -146,18 +110,16 @@ const ApprenantsTable = ({
       </Box>
 
       <Text my={10} fontWeight="bold">
-        {pagination.total} apprenant(es) trouvé(es)
+        {total} apprenant(es) trouvé(es)
       </Text>
 
       <TableWithApi
         data={apprenants}
         paginationState={pagination}
-        total={pagination.total}
+        total={total}
         columns={apprenantsTableColumnsDefs}
         enableRowExpansion={true}
-        sortingState={sort}
-        onSortingChange={handleSortChange}
-        onPaginationChange={handlePaginationChange}
+        onTableChange={onTableChange}
         isLoading={isFetching}
         renderSubComponent={(row: Row<any>) => <ApprenantsDetails row={row} />}
       />

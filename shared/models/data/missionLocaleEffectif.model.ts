@@ -14,6 +14,14 @@ export enum SITUATION_ENUM {
   NON_CONTACTE = "NON_CONTACTE",
 }
 
+export enum SITUATION_LABEL_ENUM {
+  CONTACTE_AVEC_SUIVI = "Contacté, soutien nécessaire",
+  CONTACT_SANS_SUIVI = "Contacté, pas de suivi nécessaire",
+  DEJA_SUIVI = "Déjà accompagné par ML",
+  INJOIGNABLE = "Injoignable",
+  NON_CONTACTE = "Non contacté",
+}
+
 export enum STATUT_JEUNE_MISSION_LOCALE {
   CONTRAT_SIGNE_NON_DEMARRE = "CONTRAT_SIGNE_NON_DEMARRE",
   RETOUR_EN_VOIE_SCOLAIRE = "RETOUR_EN_VOIE_SCOLAIRE",
