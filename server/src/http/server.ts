@@ -24,7 +24,7 @@ import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
 } from "shared/models/parts/dossierApprenantSchemaV3";
-import { extensions, primitivesV1, primitivesV3 } from "shared/models/parts/zodPrimitives";
+import { extensions, primitivesV1 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -150,11 +150,11 @@ import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes"
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
+import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
-import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
 
@@ -566,41 +566,6 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/effectifs",
-        requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
-          const { pageIndex, pageSize, search, sortField, sortOrder, sifa, only_sifa_missing_fields, ...filters } =
-            req.query;
-
-          const options = {
-            pageIndex: parseInt(pageIndex, 10) || 0,
-            pageSize: parseInt(pageSize, 10) || 10,
-            search: search || "",
-            sortField,
-            sortOrder,
-            filters,
-          };
-
-          return await getOrganismeEffectifs(
-            res.locals.organismeId,
-            sifa === "true",
-            only_sifa_missing_fields,
-            options
-          );
-        })
-      )
-      .put(
-        "/effectifs",
-        requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
-          const updated = await validateFullZodObjectSchema(req.body, {
-            "apprenant.type_cfa": primitivesV3.type_cfa.optional(),
-          });
-          await updateOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true", updated);
-        })
-      )
-      // Route handler
-      .get(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
@@ -713,6 +678,7 @@ function setupRoutes(app: Application) {
           )
       )
       .use("/transmission", transmissionRoutes())
+      .use("/effectifs", effectifsOrganismeRoutes())
   );
 
   /********************************

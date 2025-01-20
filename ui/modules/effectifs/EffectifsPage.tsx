@@ -1,11 +1,12 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, Container, Heading, HStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP, getAnneeScolaireFromDate } from "shared";
+import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
+import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -24,17 +25,23 @@ interface EffectifsPageProps {
   modePublique: boolean;
 }
 
+const DEFAULT_PAGINATION: IPaginationFilters = {
+  page: 0,
+  limit: 10,
+  sort: "annee_scolaire",
+  order: "desc",
+};
+
 function EffectifsPage(props: EffectifsPageProps) {
   const router = useRouter();
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({
     annee_scolaire: [getAnneeScolaireFromDate(new Date())],
   });
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
 
   useEffect(() => {
     const parseFilter = (key: string, value: string | string[] | undefined) => {
@@ -55,8 +62,11 @@ function EffectifsPage(props: EffectifsPageProps) {
     };
 
     const mergedFilters: Record<string, string[]> = { ...filters };
+    const mergedPagination = { ...pagination };
 
-    const filterKeys = ["formation", "statut_courant", "annee_scolaire", "source"];
+    const filterKeys = ["formation_libelle_long", "statut_courant", "annee_scolaire", "source", "search"];
+    const paginationKeys = ["limit", "page", "order", "sort"];
+    const searchFilter = router.query.search;
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -65,22 +75,42 @@ function EffectifsPage(props: EffectifsPageProps) {
       }
     });
 
+    paginationKeys.forEach((key) => {
+      const parsedValue = router.query[key];
+      if (parsedValue) {
+        mergedPagination[key] = parsedValue;
+      }
+    });
+
     if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
       setFilters(mergedFilters);
     }
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
+
+    const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
+
+    setPagination(zodPagination);
   }, [router.query]);
 
   const { data, isFetching, refetch } = useQuery(
-    ["organismes", props.organisme._id, "effectifs", pagination, search, filters, sort],
+    ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
     async () => {
+      const { page, limit, sort, order } = pagination;
+      const { formation_libelle_long, statut_courant, annee_scolaire, source } = filters;
       const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
         params: {
-          pageIndex: pagination.pageIndex,
-          pageSize: pagination.pageSize,
+          page: page ?? DEFAULT_PAGINATION.page,
+          limit: limit ?? DEFAULT_PAGINATION.limit,
+          sort: sort ?? DEFAULT_PAGINATION.sort,
+          order: order ?? DEFAULT_PAGINATION.order,
           search,
-          sortField: sort[0]?.id,
-          sortOrder: sort[0]?.desc ? "desc" : "asc",
-          ...filters,
+          formation_libelle_long,
+          statut_courant,
+          annee_scolaire,
+          source,
         },
       });
 
@@ -104,17 +134,13 @@ function EffectifsPage(props: EffectifsPageProps) {
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
-  const handlePaginationChange = (newPagination) => {
+  const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);
 
     router.push(
       {
         pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
+        query: { ...router.query, ...newPagination },
       },
       undefined,
       { shallow: true }
@@ -135,7 +161,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   };
 
   const handleFilterChange = (newFilters: Record<string, string[]>) => {
-    setPagination({ ...pagination, pageIndex: 0 });
+    setPagination({ ...pagination, page: 0 });
     const mergedFilters = { ...filters };
 
     Object.entries(newFilters).forEach(([key, values]) => {
@@ -172,24 +198,6 @@ function EffectifsPage(props: EffectifsPageProps) {
       {
         pathname: router.pathname,
         query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    setSort(newSort);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          sortField: newSort[0]?.id,
-          sortOrder: newSort[0]?.desc ? "desc" : "asc",
-        },
       },
       undefined,
       { shallow: true }
@@ -249,11 +257,9 @@ function EffectifsPage(props: EffectifsPageProps) {
             filters={filters}
             pagination={pagination}
             search={search}
-            sort={sort}
-            onPaginationChange={handlePaginationChange}
             onSearchChange={handleSearchChange}
             onFilterChange={handleFilterChange}
-            onSortChange={handleSortChange}
+            onTableChange={handleTableChange}
             total={data?.total || 0}
             availableFilters={data?.filters || {}}
             resetFilters={resetFilters}

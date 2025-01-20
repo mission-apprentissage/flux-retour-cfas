@@ -2,12 +2,10 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { IOrganisationMissionLocale } from "shared/models";
+import { effectifsFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
+import { withPaginationSchema } from "shared/models/routes/pagination";
 
-import {
-  dateFiltersSchema,
-  effectifsFiltersMissionLocaleSchema,
-  withPaginationSchema,
-} from "@/common/actions/helpers/filters";
+import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifIndicateursForMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,

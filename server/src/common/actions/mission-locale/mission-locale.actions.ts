@@ -97,6 +97,27 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
   return filter;
 };
 
+const generateMissionLocaleMatchStage = (missionLocaleId: number) => {
+  return {
+    $match: {
+      "apprenant.adresse.mission_locale_id": missionLocaleId,
+      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+    },
+  };
+};
+
+const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
+  return [
+    generateMissionLocaleMatchStage(missionLocaleId),
+    {
+      $unionWith: {
+        coll: "effectifsDECA",
+        pipeline: [generateMissionLocaleMatchStage(missionLocaleId)],
+      },
+    },
+  ];
+};
+
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
@@ -133,12 +154,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   ];
 
   const adresseFilterAggregation = [
-    {
-      $match: {
-        "apprenant.adresse.mission_locale_id": missionLocaleId,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
-      },
-    },
+    ...generateUnionWithEffectifDECA(missionLocaleId),
     {
       $group: {
         _id: "$apprenant.adresse.code_insee",
@@ -168,12 +184,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   ];
 
   const effectifsAggregation = [
-    {
-      $match: {
-        "apprenant.adresse.mission_locale_id": missionLocaleId,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
-      },
-    },
+    ...generateUnionWithEffectifDECA(missionLocaleId),
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
@@ -233,17 +244,13 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
   const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
+
   return { pagination, data: effectifs, filter: resultAdresse };
 };
 
 export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: number) => {
   const aggregation = [
-    {
-      $match: {
-        "apprenant.adresse.mission_locale_id": missionLocaleId,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
-      },
-    },
+    ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...buildIndicateursEffectifsPipeline(null, filters.date),
     {
@@ -255,6 +262,7 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
       },
     },
   ];
+
   const indicateurs = await effectifsDb().aggregate(aggregation).next();
   return indicateurs ?? { inscrits: 0, abandons: 0, rupturants: 0 };
 };
