@@ -164,6 +164,11 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     {
+      $match: {
+        "apprenant.adresse.code_insee": { $exists: true },
+      },
+    },
+    {
       $group: {
         _id: "$apprenant.adresse.code_insee",
         commune: {
