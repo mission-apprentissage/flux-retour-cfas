@@ -138,6 +138,23 @@ function NavBarTransverse(): React.ReactElement {
   );
 }
 
+function NavBarMissionLocale(): React.ReactElement {
+  return (
+    <>
+      <NavItem to="/" exactMatch>
+        Mon tableau de bord
+      </NavItem>
+      <NavItem to="/apprenants" exactMatch>
+        Apprenants
+      </NavItem>
+      <NavItem to="/cfa" exactMatch isDisabled>
+        CFA
+      </NavItem>
+      <MenuQuestions />
+    </>
+  );
+}
+
 function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
   return (
@@ -227,6 +244,10 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
       return <NavBarOrganismeFormation />;
     }
 
+    case "MISSION_LOCALE": {
+      return <NavBarMissionLocale />;
+    }
+
     case "TETE_DE_RESEAU":
     case "DREETS":
     case "DRAAF":
@@ -284,13 +305,15 @@ const MenuQuestions = () => {
           >
             Centre d’aide
           </MenuItem>
-          <MenuItem
-            as="a"
-            href="/referencement-organisme"
-            onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
-          >
-            Référencement de votre organisme
-          </MenuItem>
+          {organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && (
+            <MenuItem
+              as="a"
+              href="/referencement-organisme"
+              onClick={() => trackPlausibleEvent("clic_homepage_referencement_organisme")}
+            >
+              Référencement de votre organisme
+            </MenuItem>
+          )}
           <MenuItem as="a" href="/glossaire">
             Glossaire
           </MenuItem>

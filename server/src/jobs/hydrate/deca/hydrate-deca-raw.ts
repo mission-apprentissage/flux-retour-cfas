@@ -299,11 +299,12 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   };
 
   const certification = await getEffectifCertification(effectif);
+  const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
 
   return withComputedFields(
     {
       ...effectif,
-      formation: fiabilisationEffectifFormation(effectif, certification),
+      formation: computedFormation,
       is_deca_compatible: !organisme.is_transmission_target,
     },
     { organisme, certification }

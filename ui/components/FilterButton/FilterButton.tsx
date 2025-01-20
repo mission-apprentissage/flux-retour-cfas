@@ -14,8 +14,8 @@ export function FilterButton(props: FilterButtonProps) {
     <Button
       variant="unstyled"
       w="100%"
-      h={14}
-      px={4}
+      h={12}
+      px={3}
       py={2}
       _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
       onClick={() => props.setIsOpen(!props.isOpen)}

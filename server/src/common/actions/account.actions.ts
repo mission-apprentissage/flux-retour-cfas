@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { STATUT_FIABILISATION_ORGANISME } from "shared";
+import { IOrganisme, STATUT_FIABILISATION_ORGANISME } from "shared";
 
 import logger from "@/common/logger";
 import { auditLogsDb, invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
@@ -23,6 +23,7 @@ export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
 }> {
   const alreadyExists = await getUserByEmail(registration.user.email);
+  let registrationExtraData: { organisme_id?: string } = {};
   if (alreadyExists) {
     throw Boom.conflict("Cet email est déjà utilisé.");
   }
@@ -30,9 +31,10 @@ export async function register(registration: RegistrationSchema): Promise<{
   // on s'assure que l'organisme existe pour un OF
   const type = registration.organisation.type;
   if (type === "ORGANISME_FORMATION") {
+    let organisme: IOrganisme | undefined;
     const { uai, siret } = registration.organisation;
     try {
-      await getOrganismeByUAIAndSIRET(uai, siret);
+      organisme = await getOrganismeByUAIAndSIRET(uai, siret);
     } catch (err) {
       // si pas d'organisme en base (et donc le référentiel), on en crée un à partir depuis API entreprise
       logger.warn({ action: "register", uai, siret }, "organisme inconnu créé");
@@ -40,7 +42,7 @@ export async function register(registration: RegistrationSchema): Promise<{
       const data = await getOrganismeInfosFromSiret(siret);
 
       // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
-      await createOrganisme({
+      organisme = await createOrganisme({
         ...data,
         ...(uai ? { uai } : {}),
         siret,
@@ -48,11 +50,17 @@ export async function register(registration: RegistrationSchema): Promise<{
         organismesFormateurs: [],
         organismesResponsables: [],
       });
+    } finally {
+      registrationExtraData = { organisme_id: organisme?._id.toString() };
     }
   }
-
   const organisation = await organisationsDb().findOne(registration.organisation);
-  const organisationId = organisation ? organisation._id : await createOrganisation(registration.organisation);
+  const organisationId = organisation
+    ? organisation._id
+    : await createOrganisation({
+        ...registration.organisation,
+        ...registrationExtraData,
+      });
 
   const userId = await createUser(registration.user, organisationId);
 

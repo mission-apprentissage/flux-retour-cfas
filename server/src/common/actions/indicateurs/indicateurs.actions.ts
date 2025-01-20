@@ -14,6 +14,7 @@ import {
   hasRecentTransmissions,
   shouldDisplayContactInEffectifNominatif,
 } from "shared";
+import { StatutApprenant } from "shared/constants/effectifs";
 
 import {
   DateFilters,
@@ -23,7 +24,6 @@ import {
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
-import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -31,30 +31,53 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(
+export const createDernierStatutFieldPipeline = (date: Date) => [
+  {
+    $addFields: {
+      dernierStatut: {
+        $arrayElemAt: [
+          {
+            $filter: {
+              input: "$_computed.statut.parcours",
+              as: "statut",
+              cond: {
+                $lte: ["$$statut.date", date],
+              },
+            },
+          },
+          -1,
+        ],
+      },
+    },
+  },
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
+      },
+    },
+  },
+];
+
+export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
+  statut.length
+    ? [
+        ...createDernierStatutFieldPipeline(date),
+        {
+          $match: {
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+          },
+        },
+      ]
+    : [];
+
+export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
   extraAccumulator: Record<string, unknown> = {}
 ) {
   return [
-    {
-      $addFields: {
-        dernierStatut: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$_computed.statut.parcours",
-                as: "statut",
-                cond: {
-                  $lte: ["$$statut.date", currentDate],
-                },
-              },
-            },
-            -1,
-          ],
-        },
-      },
-    },
+    ...createDernierStatutFieldPipeline(currentDate),
     {
       $group: {
         _id: groupBy,
@@ -488,30 +511,7 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
     ])
     .toArray();
 
-  // Fix temporaire en attendant la V2
-  // Correction des intitulés de formation manquants, à partir du CFD / RNCP
-  return Promise.all(
-    indicateurs.map(async (indicateur) => {
-      if (indicateur.rncp_code === null && indicateur.cfd_code === null) {
-        return indicateur;
-      }
-
-      if (indicateur.intitule && indicateur.niveau_europeen) {
-        return indicateur;
-      }
-
-      const [cfdInfo, rncpInfo] = await Promise.all([
-        indicateur.cfd_code ? getCfdInfo(indicateur.cfd_code) : null,
-        indicateur.rncp_code ? getRncpInfo(indicateur.rncp_code) : null,
-      ]);
-
-      return {
-        ...indicateur,
-        intitule: indicateur.intitule ?? cfdInfo?.intitule_long ?? rncpInfo?.intitule ?? null,
-        niveau_europeen: indicateur.niveau_europeen ?? rncpInfo?.niveau ?? cfdInfo?.niveau ?? null,
-      };
-    })
-  );
+  return indicateurs;
 }
 
 export async function getEffectifsNominatifsGenerique(

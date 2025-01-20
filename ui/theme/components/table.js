@@ -129,5 +129,35 @@ export const Table = {
         },
       },
     },
+    list: {
+      th: {
+        fontWeight: "bold",
+        fontSize: "sm",
+        color: "grey.800",
+        textTransform: "none",
+        whiteSpace: "nowrap",
+      },
+      tbody: {
+        tr: {
+          fontSize: "sm",
+          color: "grey.800",
+          backgroundColor: "transparent",
+          "&:nth-of-type(even)": {
+            backgroundColor: "transparent",
+          },
+          _hover: {
+            backgroundColor: "transparent",
+          },
+        },
+        td: {
+          paddingY: "2",
+          paddingX: "0",
+          "&:first-of-type": {
+            width: "400px",
+            whiteSpace: "nowrap",
+          },
+        },
+      },
+    },
   },
 };

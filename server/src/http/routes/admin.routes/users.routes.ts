@@ -1,9 +1,11 @@
 import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
+import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
 import { z } from "zod";
 
-import { rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
+import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
+import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
   getAllUsers,
   getDetailedUserById,
@@ -11,6 +13,7 @@ import {
   resendConfirmationEmail,
   updateUser,
 } from "@/common/actions/users.actions";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";
@@ -116,6 +119,19 @@ export default () => {
     }),
     returnResult(async (req) => {
       await resendConfirmationEmail(req.params.id as string);
+    })
+  );
+
+  router.post(
+    "/mission-locale/membre",
+    returnResult(async (req) => {
+      const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToMissionLocale);
+      const { email, mission_locale_id } = body;
+      const organisation = await getOrCreateMissionLocaleById(mission_locale_id);
+      if (!organisation) {
+        throw Boom.notFound("Mission locale not found");
+      }
+      await inviteUserToOrganisation(req.user, email, organisation._id);
     })
   );
 
