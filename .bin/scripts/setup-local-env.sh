@@ -15,7 +15,7 @@ MSYS_NO_PATHCONV=1 docker run -it --rm \
   -e ANSIBLE_CONFIG="/root/.infra/ansible/ansible.cfg" \
   alpine/ansible sh -c 'chmod 0600 /root/.vault_pwd.txt && ansible all \
     --limit "local" \
-    -m flux-retour-cfas \
+    -m template \
     -a "src=\"/root/.infra/.env_server\" dest=\"/root/server/.env\"" \
     --extra-vars "@root/.infra/vault/vault.yml" \
     --vault-password-file="/root/.vault_pwd.txt"'
@@ -25,7 +25,7 @@ MSYS_NO_PATHCONV=1 docker run -it --rm \
   -e ANSIBLE_CONFIG="/root/.infra/ansible/ansible.cfg" \
   alpine/ansible sh -c 'chmod 0600 /root/.vault_pwd.txt && ansible all \
     --limit "local" \
-    -m flux-retour-cfas \
+    -m template \
     -a "src=\"/root/.infra/.env_ui\" dest=\"/root/ui/.env\"" \
     --extra-vars "@root/.infra/vault/vault.yml" \
     --vault-password-file="/root/.vault_pwd.txt"'
