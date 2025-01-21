@@ -3,13 +3,18 @@ import { MOTIF_SUPPRESSION } from "shared/constants";
 import { IEffectif } from "shared/models";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import {
   fiabilisationEffectifFormation,
   getEffectifCertification,
 } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 export const tmpFiabilisationCertification = async (job, signal) => {
+  await generiqueFiabilisationCertification(effectifsDb(), job, signal, true);
+  await generiqueFiabilisationCertification(effectifsDECADb(), job, signal);
+};
+
+const generiqueFiabilisationCertification = async (db, job, signal, withDeletionDoublon = false) => {
   const processEffectif = async (effectif: IEffectif) => {
     const certification = await getEffectifCertification(effectif);
     const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
@@ -17,23 +22,24 @@ export const tmpFiabilisationCertification = async (job, signal) => {
       formation: computedFormation,
     };
 
-    await effectifsDb()
-      .updateOne({ _id: effectif._id }, { $set: update })
-      .catch(async (err) => {
-        // If the document is a duplicated effectif, we can safely remove the older document
-        if (err instanceof MongoError && err.code === 11000) {
-          await softDeleteEffectif(effectif._id, null, {
-            motif: MOTIF_SUPPRESSION.Doublon,
-            description: "Suppression du doublon suite à la migration des formations",
-          });
-          return;
-        }
+    await db.updateOne({ _id: effectif._id }, { $set: update }).catch(async (err) => {
+      // If the document is a duplicated effectif, we can safely remove the older document
+      if (err instanceof MongoError && err.code === 11000 && withDeletionDoublon) {
+        await softDeleteEffectif(effectif._id, null, {
+          motif: MOTIF_SUPPRESSION.Doublon,
+          description: "Suppression du doublon suite à la migration des formations",
+        });
+        return;
+      }
 
-        throw err;
-      });
+      throw err;
+    });
   };
 
-  const cursorEffectif = effectifsDb().find({ created_at: { $lte: job.created_at } }, { sort: { created_at: -1 } });
+  const cursorEffectif = db.find(
+    { created_at: { $lte: job.created_at }, "formation.libelle_long": { $exists: false } },
+    { sort: { created_at: -1 } }
+  );
   let bulkEffectifs: IEffectif[] = [];
   for await (const effectif of cursorEffectif) {
     bulkEffectifs.push(effectif);
