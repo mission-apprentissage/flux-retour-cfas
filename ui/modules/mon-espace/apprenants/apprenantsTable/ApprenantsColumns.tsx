@@ -1,7 +1,11 @@
-import { Box, HStack, Link, Select, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
-const apprenantsTableColumnsDefs = [
+import { _post } from "@/common/httpClient";
+
+import ApprenantsSituationSelect from "./ApprenantsSituationSelect";
+
+const apprenantsTableColumnsDefs = (updateSituationState: (effectifId: string, newSituation: string) => void) => [
   {
     accessorKey: "apprenant.nom",
     header: () => "Nom",
@@ -48,16 +52,19 @@ const apprenantsTableColumnsDefs = [
   {
     accessorKey: "apprenant.situation",
     header: () => "Situation",
-    cell: () => (
-      <Select placeholder="Choisir" onClick={(event) => event.stopPropagation()}>
-        <option value="contacte_soutien">Contacté, soutien nécessaire</option>
-        <option value="contacte_pas_de_suivi">Contacté, pas de suivi nécessaire</option>
-        <option value="deja_accompagne">Déjà accompagné par ML</option>
-        <option value="injoignable">Injoignable</option>
-        <option value="non_contacte">Non contacté</option>
-      </Select>
-    ),
-    size: 160,
+    cell: ({ row }) => {
+      const effectifId = row.original._id;
+      const situation = row.original.situation_data?.situation || "";
+
+      return (
+        <ApprenantsSituationSelect
+          effectifId={effectifId}
+          situation={situation}
+          updateSituationState={updateSituationState}
+        />
+      );
+    },
+    size: 300,
   },
 ];
 

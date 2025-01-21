@@ -157,20 +157,22 @@ function EffectifsPage() {
         </VStack>
 
         <Box mt={10} mb={16}>
-          <ApprenantsTable
-            apprenants={apprenants?.data || []}
-            communes={apprenants?.filter}
-            filters={filters}
-            pagination={pagination}
-            search={search}
-            onSearchChange={handleSearchChange}
-            onFilterChange={handleFilterChange}
-            onTableChange={handleTableChange}
-            total={apprenants?.pagination.total || 0}
-            availableFilters={apprenants?.filters || {}}
-            resetFilters={resetFilters}
-            isFetching={isFetching}
-          />
+          {apprenants?.data && (
+            <ApprenantsTable
+              apprenants={apprenants?.data || []}
+              communes={apprenants?.filter}
+              filters={filters}
+              pagination={pagination}
+              search={search}
+              onSearchChange={handleSearchChange}
+              onFilterChange={handleFilterChange}
+              onTableChange={handleTableChange}
+              total={apprenants?.pagination.total || 0}
+              availableFilters={apprenants?.filters || {}}
+              resetFilters={resetFilters}
+              isFetching={isFetching}
+            />
+          )}
         </Box>
         <Flex gap={12} mt={16} mb={6}>
           <Box flex="3">
