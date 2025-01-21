@@ -12,9 +12,8 @@ readonly BIN_DIR="$(dirname "${SCRIPT_DIR}")"
 readonly ROOT_DIR="$(dirname "${BIN_DIR}")"
 readonly VAULT_DIR="${ROOT_DIR}/.infra/vault"
 readonly VAULT_FILE="${VAULT_DIR}/vault.yml"
-readonly PRODUCT_NAME="tdb"
 
-DOCUMENT_CONTENT=$(op --account mission-apprentissage document get ".vault-password-${PRODUCT_NAME}" --vault "mna-vault-passwords-common" || echo "")
+DOCUMENT_CONTENT=$(op document get .vault-password-tdb --vault "mna-vault-passwords-common" --account mission-apprentissage.1password.com || echo "")
 vault_password_file="${VAULT_DIR}/.vault-password.gpg"
 previous_vault_password_file="${VAULT_DIR}/.vault-password-previous.gpg"
 
@@ -27,7 +26,7 @@ elif [ ! -z "$DOCUMENT_CONTENT" ] && [ "$DOCUMENT_CONTENT" != "$(cat "${vault_pa
     # Renommer l'ancien fichier
     mv "$vault_password_file" "$previous_vault_password_file"
     # echo "vault-password existant renommé en .vault-password-previous.gpg."
-    
+
     # Créer un nouveau fichier avec le contenu actuel
     echo "$DOCUMENT_CONTENT" > "$vault_password_file"
     # echo "Nouveau vault-password créé avec succès."
@@ -42,7 +41,7 @@ elif [ ! -z "$DOCUMENT_CONTENT" ] && [ "$DOCUMENT_CONTENT" != "$(cat "${vault_pa
 
     gpg --quiet --batch --use-agent --decrypt "${previous_vault_password_file}" > "${previous_vault_password_file_clear_text}"
     gpg --quiet --batch --use-agent --decrypt "${vault_password_file}" > "${vault_password_file_clear_text}"
-    
+
     ansible-vault rekey \
     --vault-id "${previous_vault_password_file_clear_text}" \
     --new-vault-id "${vault_password_file_clear_text}" \
