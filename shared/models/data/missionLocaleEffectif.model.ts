@@ -4,7 +4,9 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "missionLocaleEffectif";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ mission_locale_id: 1, effectif_id: 1 }, { unique: true }],
+];
 
 export enum SITUATION_ENUM {
   CONTACTE_AVEC_SUIVI = "CONTACTE_AVEC_SUIVI",
