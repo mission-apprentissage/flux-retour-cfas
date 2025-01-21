@@ -2,7 +2,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
-import { Commune } from "shared";
+import { Commune, IEffectif } from "shared";
 import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import TableWithApi from "@/components/Table/TableWithApi";
@@ -11,8 +11,15 @@ import apprenantsTableColumnsDefs from "./ApprenantsColumns";
 import ApprenantsDetails from "./ApprenantsDetails";
 import ApprenantsFilterPanel from "./ApprenantsFilterPanel";
 
+type IEffectifWithSituation = IEffectif & {
+  situation_data?: {
+    situation?: string;
+    situation_updated_at?: string;
+  };
+};
+
 interface ApprenantsTableProps {
-  apprenants: any[];
+  apprenants: IEffectifWithSituation[];
   communes: Commune[];
   filters: Record<string, string[]>;
   pagination: IPaginationFilters;
@@ -40,12 +47,17 @@ const ApprenantsTable = ({
   resetFilters,
   isFetching,
 }: ApprenantsTableProps) => {
+  const [data, setData] = useState<IEffectifWithSituation[]>([]);
   const [localSearch, setLocalSearch] = useState(search || "");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   useEffect(() => {
     setLocalSearch(search || "");
   }, [search]);
+
+  useEffect(() => {
+    setData(apprenants);
+  }, [apprenants]);
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearch(event.target.value);
@@ -63,6 +75,16 @@ const ApprenantsTable = ({
 
   const executeSearch = () => {
     onSearchChange(localSearch);
+  };
+
+  const updateSituationState = (effectifId: string, newSituation: string) => {
+    setData((prevData) =>
+      prevData.map((apprenant) =>
+        apprenant._id.toString() === effectifId
+          ? { ...apprenant, situation_data: { ...apprenant.situation_data, situation: newSituation } }
+          : apprenant
+      )
+    );
   };
 
   return (
@@ -114,10 +136,10 @@ const ApprenantsTable = ({
       </Text>
 
       <TableWithApi
-        data={apprenants}
+        data={data}
         paginationState={pagination}
         total={total}
-        columns={apprenantsTableColumnsDefs}
+        columns={apprenantsTableColumnsDefs(updateSituationState)}
         enableRowExpansion={true}
         onTableChange={onTableChange}
         isLoading={isFetching}
