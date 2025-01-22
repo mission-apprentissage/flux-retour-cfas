@@ -187,7 +187,6 @@ export async function getOrganismeEffectifs(
     ...searchConditions,
   };
   const sortConditions = computeSort(sort, order);
-  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
 
   const pipeline = [
     ...computeSifaAggregation(sifa, only_sifa_missing_fields, organismeId),
