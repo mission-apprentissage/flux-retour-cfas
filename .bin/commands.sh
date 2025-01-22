@@ -79,8 +79,8 @@ function preprod:sync() {
 
 function vault:init() {
   # Ensure Op is connected
-  op --account mission-apprentissage account account get > /dev/null
-  op --account mission-apprentissage account document get ".vault-password-tmpl" --vault "mna-vault-passwords-common" > "${ROOT_DIR}/.infra/vault/.vault-password.gpg"
+  op --account mission-apprentissage account get > /dev/null
+  op --account mission-apprentissage document get ".vault-password-tmpl" --vault "mna-vault-passwords-common" > "${ROOT_DIR}/.infra/vault/.vault-password.gpg"
 }
 
 function vault:edit() {

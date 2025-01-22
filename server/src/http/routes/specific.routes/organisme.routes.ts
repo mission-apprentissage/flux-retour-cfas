@@ -8,18 +8,20 @@ import {
   requiredApprenantAdresseFieldsSifa,
   requiredFieldsSifa,
 } from "shared";
+import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
+import { WithPagination } from "shared/models/routes/pagination";
 
 import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 
 const FIELD_MAP: Record<string, string> = {
   nom: "apprenant.nom",
   prenom: "apprenant.prenom",
-  formation: "formation.libelle_long",
+  formation_libelle_long: "formation.libelle_long",
   statut_courant: "_computed.statut.en_cours",
   annee_scolaire: "annee_scolaire",
 };
 
-const computeSort = (sortField: string | null, sortOrder: string | null) => {
+const computeSort = (sortField?: string | null, sortOrder?: string | null) => {
   if (!sortField || !sortOrder) {
     return { annee_scolaire: -1, "apprenant.nom": 1 };
   }
@@ -32,6 +34,33 @@ const computeSort = (sortField: string | null, sortOrder: string | null) => {
   }
 };
 
+const computeFormation = (formation_libelle_long?: string[] | null) => {
+  return formation_libelle_long?.length ? { "formation.libelle_long": { $in: formation_libelle_long } } : {};
+};
+
+const computeStatut = (statut?: string[] | null) => {
+  return statut?.length ? { "_computed.statut.en_cours": { $in: statut } } : {};
+};
+
+const computeAnneeScolaire = (annee_scolaire?: string[] | null) => {
+  return annee_scolaire?.length ? { annee_scolaire: { $in: annee_scolaire } } : {};
+};
+
+const computeSource = (source?: string[] | null) => {
+  return source?.length ? { source: { $in: source } } : {};
+};
+
+const computeSearch = (search?: string | null) => {
+  return search && search.trim()
+    ? {
+        $or: [
+          { "apprenant.nom": { $regex: search.trim(), $options: "i" } },
+          { "apprenant.prenom": { $regex: search.trim(), $options: "i" } },
+        ],
+      }
+    : {};
+};
+
 const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
   organisme_id: organismeId,
   ...(sifa && {
@@ -40,6 +69,34 @@ const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
     },
   }),
 });
+
+const computeSifaMissingFieldsFilter = () => {
+  return [
+    {
+      $match: {
+        $or: [
+          ...[...requiredFieldsSifa].map((field) => {
+            return {
+              [field]: null,
+            };
+          }),
+          {
+            $and: [
+              { "apprenant.adresse.complete": null },
+              {
+                $or: requiredApprenantAdresseFieldsSifa.map((field) => {
+                  return {
+                    [field]: null,
+                  };
+                }),
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ];
+};
 
 const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, currentDate: Date) => {
   return sifa
@@ -64,109 +121,75 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
         },
         {
           $match: {
-            "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+            $or: [
+              {
+                "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
+              },
+              {
+                "dernierStatut.valeur": STATUT_APPRENANT.RUPTURANT,
+              },
+            ],
           },
         },
-        ...(only_sifa_missing_fields
-          ? [
-              {
-                $match: {
-                  $or: [
-                    ...[...requiredFieldsSifa].map((field) => {
-                      return {
-                        [field]: null,
-                      };
-                    }),
-                    {
-                      $and: [
-                        { "apprenant.adresse.complete": null },
-                        {
-                          $or: requiredApprenantAdresseFieldsSifa.map((field) => {
-                            return {
-                              [field]: null,
-                            };
-                          }),
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ]
-          : []),
+        ...(only_sifa_missing_fields ? computeSifaMissingFieldsFilter() : []),
       ]
     : [];
 };
 
-export async function getOrganismeEffectifs(
-  organismeId: ObjectId,
-  sifa: boolean = false,
-  only_sifa_missing_fields: boolean = false,
-  options: {
-    pageIndex: number;
-    pageSize: number;
-    search: string;
-    filters: any;
-    sortField: string | null;
-    sortOrder: string | null;
-  } = { pageIndex: 0, pageSize: 10, search: "", filters: {}, sortField: null, sortOrder: null }
-) {
-  const organisme = await organismesDb().findOne({ _id: organismeId });
-  const { pageIndex, pageSize, search, filters, sortField, sortOrder } = options;
-  const isDeca = !organisme?.is_transmission_target;
-  const db = isDeca ? effectifsDECADb() : effectifsDb();
-
-  const parsedFilters = Object.entries(filters).reduce(
-    (acc, [key, value]) => {
-      if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
-        try {
-          const parsed = JSON.parse(value);
-          acc[key] = Array.isArray(parsed) ? parsed : [parsed];
-        } catch {
-          acc[key] = [value];
-        }
-      } else if (Array.isArray(value)) {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
-
-  const matchConditions = {
-    ...Object.keys(parsedFilters).reduce((acc, key) => {
-      if (parsedFilters[key]?.length > 0) {
-        const fieldKey =
-          key === "formation_libelle_long"
-            ? "formation.libelle_long"
-            : key === "statut_courant"
-              ? "_computed.statut.en_cours"
-              : key;
-        acc[fieldKey] = { $in: parsedFilters[key] };
-      }
-      return acc;
-    }, {}),
-    ...(typeof search === "string" &&
-      search.trim() && {
-        $or: [
-          { "apprenant.nom": { $regex: search.trim(), $options: "i" } },
-          { "apprenant.prenom": { $regex: search.trim(), $options: "i" } },
-        ],
-      }),
-  };
-
-  const sortConditions = computeSort(sortField, sortOrder);
-
+const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean, organismeId: ObjectId) => {
   const currentDate = sifa ? getSIFADate(new Date()) : new Date();
 
-  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
-  const pipeline = [
+  return [
     {
       $match: {
         ...matchOrgaAndAnneScolaire(sifa, organismeId),
       },
     },
     ...addSifaFilter(sifa, only_sifa_missing_fields, currentDate),
+  ];
+};
+
+export async function getOrganismeEffectifs(
+  organismeId: ObjectId,
+  options: WithPagination<typeof zGetEffectifsForOrganismeApi>
+) {
+  const organisme = await organismesDb().findOne({ _id: organismeId });
+  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
+
+  const {
+    sifa = false,
+    only_sifa_missing_fields = false,
+    search,
+    formation_libelle_long,
+    statut_courant,
+    annee_scolaire,
+    source,
+    limit = 10,
+    page = 0,
+    sort,
+    order,
+  } = options;
+
+  const isDeca = !organisme?.is_transmission_target;
+  const db = isDeca ? effectifsDECADb() : effectifsDb();
+
+  const formationConditions = computeFormation(formation_libelle_long);
+  const statutConditions = computeStatut(statut_courant);
+  const anneeScolaireConditions = computeAnneeScolaire(annee_scolaire);
+  const sourceConditions = computeSource(source);
+  const searchConditions = computeSearch(search);
+
+  const matchConditions = {
+    ...formationConditions,
+    ...statutConditions,
+    ...anneeScolaireConditions,
+    ...sourceConditions,
+    ...searchConditions,
+  };
+  const sortConditions = computeSort(sort, order);
+
+  const pipeline = [
+    ...computeSifaAggregation(sifa, only_sifa_missing_fields, organismeId),
     {
       $facet: {
         allFilters: [
@@ -189,14 +212,16 @@ export async function getOrganismeEffectifs(
             },
           },
         ],
-        results: [
-          { $match: matchConditions },
-          { $sort: sortConditions },
-          { $skip: pageIndex * pageSize },
-          { $limit: pageSize },
-        ],
+        results: [{ $match: matchConditions }, { $sort: sortConditions }, { $skip: page * limit }, { $limit: limit }],
         totalCount: [
           { $match: matchConditions },
+          {
+            $count: "count",
+          },
+        ],
+        missingRequiredFieldsCount: [
+          { $match: matchConditions },
+          ...computeSifaMissingFieldsFilter(),
           {
             $count: "count",
           },
@@ -213,6 +238,7 @@ export async function getOrganismeEffectifs(
         },
         results: "$results",
         total: { $arrayElemAt: ["$totalCount.count", 0] },
+        missingRequiredFieldsCount: { $arrayElemAt: ["$missingRequiredFieldsCount.count", 0] },
       },
     },
   ];
@@ -247,6 +273,7 @@ export async function getOrganismeEffectifs(
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
+    missingRequiredFieldsTotal: data?.missingRequiredFieldsCount || 0,
     filters: {
       ...data?.filters,
       annee_scolaire: Array.from(
@@ -263,35 +290,7 @@ export async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = 
   const db = isDeca ? effectifsDECADb() : effectifsDb();
 
   const pipeline = [
-    {
-      $match: {
-        organisme_id: organismeId,
-        ...(sifa && {
-          annee_scolaire: {
-            $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
-          },
-          "_computed.statut.parcours": {
-            $elemMatch: {
-              valeur: STATUT_APPRENANT.APPRENTI,
-              date: {
-                $eq: {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: "$_computed.statut.parcours",
-                        as: "parcours",
-                        cond: { $eq: ["$$parcours.valeur", STATUT_APPRENANT.APPRENTI] },
-                      },
-                    },
-                    -1,
-                  ],
-                },
-              },
-            },
-          },
-        }),
-      },
-    },
+    ...computeSifaAggregation(sifa, false, organismeId),
     {
       $project: {
         id: { $toString: "$_id" },

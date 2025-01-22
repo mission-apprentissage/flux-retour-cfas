@@ -13,11 +13,12 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DuplicateEffectifGroupPagination, SIFA_GROUP } from "shared";
+import { DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate, getSIFADate, SIFA_GROUP } from "shared";
+import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
+import { z } from "zod";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -45,18 +46,23 @@ interface SIFAPageProps {
   modePublique: boolean;
 }
 
+const DEFAULT_PAGINATION: IPaginationFilters = {
+  page: 0,
+  limit: 10,
+  sort: "annee_scolaire",
+  order: "desc",
+};
+
 function SIFAPage(props: SIFAPageProps) {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-  const [currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
-  const [sifaInvalidCount, setSifaInvalidCount] = useState<number>(0);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<SIFAFilterType>({});
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
+  const [_currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
 
   useEffect(() => {
     const defaultFilterParser = (value) => {
@@ -87,8 +93,11 @@ function SIFAPage(props: SIFAPageProps) {
     };
 
     const filters: SIFAFilterType = {};
+    const mergedPagination = { ...pagination };
+    const searchFilter = router.query.search;
 
     const filterKeys = ["formation_libelle_long", "source", "only_sifa_missing_fields"];
+    const paginationKeys = ["limit", "page", "order", "sort"];
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -97,26 +106,43 @@ function SIFAPage(props: SIFAPageProps) {
       }
     });
 
+    paginationKeys.forEach((key) => {
+      const parsedValue = router.query[key];
+      if (parsedValue) {
+        mergedPagination[key] = parsedValue;
+      }
+    });
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
+
     setFilters(filters);
+    const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
+
+    setPagination(zodPagination);
   }, [router.query]);
 
   const { data, isFetching, refetch } = useQuery(
-    ["organismes", props.organisme._id, "effectifs", pagination, search, filters, sort],
+    ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
     async () => {
+      const { page, limit, sort, order } = pagination;
+      const { source, formation_libelle_long, only_sifa_missing_fields } = filters;
       const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
         params: {
-          pageIndex: pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          search,
-          sortField: sort[0]?.id,
-          sortOrder: sort[0]?.desc ? "desc" : "asc",
-          annee_scolaire: ["2024-2025"],
+          page: page ?? DEFAULT_PAGINATION.page,
+          limit: limit ?? DEFAULT_PAGINATION.limit,
+          sort: sort ?? DEFAULT_PAGINATION.sort,
+          order: order ?? DEFAULT_PAGINATION.order,
+          formation_libelle_long,
+          source,
+          only_sifa_missing_fields,
+          annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
           sifa: true,
-          ...filters,
         },
       });
 
-      const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
+      const { fromDECA, total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs } = response;
 
       setCurrentEffectifsState(
         organismesEffectifs.reduce((acc, { id, validation_errors, requiredSifa }) => {
@@ -127,17 +153,10 @@ function SIFAPage(props: SIFAPageProps) {
 
       setEffectifFromDecaState(fromDECA);
 
-      return { total, filters: returnedFilters, organismesEffectifs };
+      return { total, missingRequiredFieldsTotal, filters: returnedFilters, organismesEffectifs };
     },
     { keepPreviousData: true }
   );
-
-  useEffect(() => {
-    const invalidCount = Array.from(currentEffectifsState.values()).filter(
-      (effectif) => effectif.requiredSifa.length > 0
-    ).length;
-    setSifaInvalidCount(invalidCount);
-  }, [currentEffectifsState]);
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -145,23 +164,6 @@ function SIFAPage(props: SIFAPageProps) {
 
   const handleToggle = () => {
     setShow(!show);
-  };
-
-  const handlePaginationChange = (newPagination) => {
-    setPagination(newPagination);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
   };
 
   const handleSearchChange = (value: string) => {
@@ -177,8 +179,21 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
+  const handleTableChange = (newPagination: IPaginationFilters) => {
+    setPagination(newPagination);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, ...newPagination },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const handleFilterChange = (newFilters: SIFAFilterType) => {
-    setPagination({ ...pagination, pageIndex: 0 });
+    setPagination({ ...pagination, page: 0 });
 
     const mergedFilters = {
       ...(newFilters.source && newFilters.source.length ? { source: newFilters.source } : {}),
@@ -218,24 +233,6 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    setSort(newSort);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          sortField: newSort[0]?.id,
-          sortOrder: newSort[0]?.desc ? "desc" : "asc",
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
   const resetFilters = () => {
     setFilters({});
     setSearch("");
@@ -254,12 +251,14 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
-  const handleToastOnSifaDownload = () => {
-    const organismesEffectifs = data?.organismesEffectifs || [];
+  const handleToastOnSifaDownload = async () => {
+    const { total, missingRequiredFieldsTotal } = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
+      params: { sifa: true },
+    });
 
-    sifaInvalidCount > 0
+    missingRequiredFieldsTotal > 0
       ? toastWarning(
-          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${sifaInvalidCount} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          `Parmi les ${total} effectifs que vous avez déclarés, ${missingRequiredFieldsTotal} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
           {
             isClosable: true,
             duration: 20000,
@@ -455,11 +454,9 @@ function SIFAPage(props: SIFAPageProps) {
           filters={filters}
           pagination={pagination}
           search={search}
-          sort={sort}
-          onPaginationChange={handlePaginationChange}
           onSearchChange={handleSearchChange}
           onFilterChange={handleFilterChange}
-          onSortChange={handleSortChange}
+          onTableChange={handleTableChange}
           total={data?.total || 0}
           availableFilters={data?.filters || {}}
           resetFilters={resetFilters}

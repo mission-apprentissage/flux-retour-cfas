@@ -180,6 +180,11 @@ export async function setupJobProcessor() {
           return hydrateDecaRaw();
         },
       },
+      "hydrate:effectifs:update_all_computed_statut": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes();
+        },
+      },
       "hydrate:effectifs:update_computed_statut": {
         handler: async (job, signal) => {
           const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
