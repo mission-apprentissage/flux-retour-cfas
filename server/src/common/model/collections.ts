@@ -12,6 +12,9 @@ import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
+import missionLocaleEffectifLogsDescriptor, {
+  IMissionLocaleEffectifLogs,
+} from "shared/models/data/missionLocaleEffectifLogs.model";
 import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
@@ -61,6 +64,7 @@ export const modelDescriptors = [
   personV2ModelDescriptor,
   transmissionV2Descriptor,
   missionLocaleEffectifDescriptor,
+  missionLocaleEffectifLogsDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -92,6 +96,9 @@ export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+export const missionLocaleEffectifsLogsDb = () =>
+  getDbCollection<IMissionLocaleEffectifLogs>(missionLocaleEffectifLogsDescriptor.collectionName);
+
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
