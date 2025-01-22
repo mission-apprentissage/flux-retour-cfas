@@ -13,7 +13,7 @@ import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/App
 
 const DEFAULT_PAGINATION: IPaginationFilters = {
   page: 0,
-  limit: 5,
+  limit: 20,
   sort: "rupture",
   order: "desc",
 };
@@ -198,9 +198,9 @@ function EffectifsPage() {
                   travaillons chaque jour à récolter plus de données fraîches en connectant les CFA à la plateforme.
                 </Text>
               </Accordion.Item>
-              <Accordion.Item title="Puis-je partager le fichier à des collaborateurs ?">
+              <Accordion.Item title="Puis-je partager la liste à des collaborateurs ?">
                 <Text>
-                  L’accès à cette liste est strictement personnelle et ne peut en aucun cas être partagée.Un compte
+                  L’accès à cette liste est strictement personnel et ne peut en aucun cas être partagé. Un compte
                   utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
                   aux données.
                 </Text>

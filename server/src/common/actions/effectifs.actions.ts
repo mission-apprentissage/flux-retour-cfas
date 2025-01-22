@@ -481,7 +481,7 @@ export const buildEffectifForMissionLocale = (
     fonction,
   }));
   const result = {
-    _id: effectif._id,
+    id: effectif._id,
     apprenant: {
       nom: effectif.apprenant.nom,
       prenom: effectif.apprenant.prenom,

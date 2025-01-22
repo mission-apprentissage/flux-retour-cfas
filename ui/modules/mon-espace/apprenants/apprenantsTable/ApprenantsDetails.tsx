@@ -1,25 +1,11 @@
-import {
-  Box,
-  Button,
-  HStack,
-  Text,
-  Table,
-  Tbody,
-  Tr,
-  Td,
-  TableContainer,
-  Flex,
-  Heading,
-  Select,
-  Textarea,
-  Radio,
-  RadioGroup,
-} from "@chakra-ui/react";
-import React, { useState } from "react";
+import { Box, HStack, Text, Table, Tbody, Tr, Td, TableContainer, Flex, Heading } from "@chakra-ui/react";
+import React from "react";
 
 import { calculateAge } from "@/common/utils/dateUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
+
+import ApprenantsDetailsForm from "./ApprenantsDetailsForm";
 
 type Value = string | number | null | undefined;
 
@@ -37,11 +23,8 @@ const getLastStatut = (statut: any) => {
   return lastStatut;
 };
 
-const ApprenantsDetails = ({ row }) => {
-  const [statutCorrect, setStatutCorrect] = useState("");
-  const [franceTravail, setFranceTravail] = useState("");
-  const [apprenantStatut, setApprenantStatut] = useState<boolean>(false);
-
+const ApprenantsDetails = ({ row, updateSituationState }) => {
+  const id = row.original.id;
   const apprenant = row.original.apprenant;
   const statut = row.original.statut;
   const organisme = row.original.organisme;
@@ -113,78 +96,11 @@ const ApprenantsDetails = ({ row }) => {
             </Tbody>
           </Table>
         </Box>
-        <Box p={6} flex="1" maxW="600px" mx="auto" bg="#F9F8F6">
-          <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={4}>
-            Vos commentaires et retours
-          </Heading>
-
-          <Text as="span" fontWeight="bold" color="bluefrance" mb={4}>
-            Il a été indiqué que le jeune a été contacté le 21/11/2024 .
-          </Text>
-
-          <Box my={4}>
-            <Text fontSize="md" mb={3}>
-              1. Le statut du jeune affiché est-il correct ?
-            </Text>
-            <RadioGroup
-              onChange={(value) => {
-                setStatutCorrect(value);
-                setApprenantStatut(value === "non");
-              }}
-              value={statutCorrect}
-            >
-              <HStack spacing={4}>
-                <Radio value="oui">Oui</Radio>
-                <Radio value="non">Non</Radio>
-              </HStack>
-            </RadioGroup>
-
-            {apprenantStatut && (
-              <>
-                <Text fontSize="sm" mt={4} mb={2}>
-                  Veuillez préciser son statut actuel.
-                </Text>
-                <Select placeholder="Sélectionner une option">
-                  <option value="contacte_soutien">Contrat signé non démarré</option>
-                  <option value="contacte_pas_de_suivi">Retour en voie scolaire initiale</option>
-                  <option value="deja_accompagne">Abandon de la formation</option>
-                  <option value="injoignable">Rupture de contrat d’apprentissage</option>
-                  <option value="non_contacte">Décrochage (abandon)</option>
-                  <option value="non_contacte">Autre raison</option>
-                </Select>
-              </>
-            )}
-          </Box>
-
-          <Box mb={6}>
-            <Text fontSize="md" mb={3}>
-              2. Le jeune est-il inscrit à France Travail ?
-            </Text>
-            <RadioGroup onChange={setFranceTravail} value={franceTravail}>
-              <HStack spacing={4}>
-                <Radio value="oui">Oui</Radio>
-                <Radio value="non">Non</Radio>
-                <Radio value="je_ne_sais_pas">Je ne sais pas</Radio>
-              </HStack>
-            </RadioGroup>
-          </Box>
-
-          <Box mb={6}>
-            <Text fontSize="md" mb={3}>
-              3. Notez ici des informations recueillies auprès du jeune et sa situation, que vous jugez utiles de
-              partager.{" "}
-              <Text as="span" fontSize="sm" color="gray.500">
-                (200 caractères maximum)
-              </Text>
-            </Text>
-            <Textarea placeholder="Vos retours sur l’accompagnement du jeune" maxLength={200} />
-          </Box>
-          <Flex justifyContent="flex-end">
-            <Button variant="secondary" size={"sm"}>
-              Enregistrer
-            </Button>
-          </Flex>
-        </Box>
+        <ApprenantsDetailsForm
+          effectifId={id}
+          situationData={row.original.situation_data}
+          updateSituationState={updateSituationState}
+        />
       </Flex>
 
       <CustomAccordion collapsible>
