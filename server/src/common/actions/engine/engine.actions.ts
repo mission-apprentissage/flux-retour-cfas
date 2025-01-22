@@ -73,7 +73,10 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
   }
   const effectifDataWithAddress = cloneDeep(effectifData);
 
-  const communeInfo = await getCommune(codePostalOrCodeInsee);
+  const communeInfo = await getCommune({
+    codeInsee: effectifData.apprenant?.adresse?.code_insee,
+    codePostal: effectifData.apprenant?.adresse?.code_postal,
+  });
   if (!communeInfo) {
     return effectifData;
   }

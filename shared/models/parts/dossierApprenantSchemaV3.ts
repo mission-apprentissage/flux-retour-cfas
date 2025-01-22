@@ -38,7 +38,7 @@ export const dossierApprenantSchemaV3Base = () =>
     tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
     // The following field is missing in V3
     // siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
-    // code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
+    code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
     // The following field are missing in V3
     // libelle_long_formation: primitivesV1.formation.libelle_long.optional(),

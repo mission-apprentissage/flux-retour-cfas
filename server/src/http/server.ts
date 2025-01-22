@@ -786,7 +786,7 @@ function setupRoutes(app: Application) {
             .trim()
             .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
         });
-        return await getCommune(codePostal);
+        return await getCommune({ codePostal });
       })
     )
     .get(
