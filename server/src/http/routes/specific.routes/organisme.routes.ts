@@ -138,6 +138,7 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
 
 const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean, organismeId: ObjectId) => {
   const currentDate = sifa ? getSIFADate(new Date()) : new Date();
+
   return [
     {
       $match: {
@@ -153,6 +154,7 @@ export async function getOrganismeEffectifs(
   options: WithPagination<typeof zGetEffectifsForOrganismeApi>
 ) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
+  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
 
   const {
     sifa = false,

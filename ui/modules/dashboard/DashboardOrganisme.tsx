@@ -323,7 +323,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
               <Heading textStyle="h2" color="grey.800" size="md">
                 <DashboardWelcome mr="2" />
-                Bienvenue sur{" "}
+                Vous êtes sur{" "}
                 {modePublique
                   ? "le tableau de bord de"
                   : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
