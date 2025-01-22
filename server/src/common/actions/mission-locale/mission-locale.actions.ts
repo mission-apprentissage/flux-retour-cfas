@@ -13,7 +13,12 @@ import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
-import { effectifsDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogsDb,
+  organisationsDb,
+} from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
@@ -305,24 +310,38 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
     statut_correct,
   } = data;
 
-  return missionLocaleEffectifsDb().updateOne(
+  const setObject = {
+    ...(situation !== undefined ? { situation } : {}),
+    ...(statut_reel !== undefined ? { statut_reel } : {}),
+    ...(statut_reel_text !== undefined ? { statut_reel_text } : {}),
+    ...(inscrit_france_travail !== undefined ? { inscrit_france_travail } : {}),
+    ...(commentaires !== undefined ? { commentaires } : {}),
+    ...(statut_correct !== undefined ? { statut_correct } : {}),
+  };
+
+  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
       effectif_id: new ObjectId(effectif_id),
     },
     {
       $set: {
-        ...(situation !== undefined ? { situation } : {}),
-        ...(statut_reel !== undefined ? { statut_reel } : {}),
-        ...(statut_reel_text !== undefined ? { statut_reel_text } : {}),
-        ...(inscrit_france_travail !== undefined ? { inscrit_france_travail } : {}),
-        ...(commentaires !== undefined ? { commentaires } : {}),
-        ...(statut_correct !== undefined ? { statut_correct } : {}),
+        ...setObject,
         ...(situation !== undefined ? { situation_updated_at: new Date() } : {}),
       },
     },
     { upsert: true }
   );
+
+  const toUpdateId = updated.lastErrorObject?.upserted || updated.value?._id;
+  if (toUpdateId) {
+    await missionLocaleEffectifsLogsDb().insertOne({
+      created_at: new Date(),
+      _id: new ObjectId(),
+      mission_locale_effectif_id: toUpdateId,
+      payload: setObject,
+    });
+  }
 };
 
 export const getOrCreateMissionLocaleById = async (id: number) => {
