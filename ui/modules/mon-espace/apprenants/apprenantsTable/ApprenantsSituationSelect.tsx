@@ -1,13 +1,13 @@
 import { Select } from "@chakra-ui/react";
-import { SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
+import { IMissionLocaleEffectif, SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 
 import { _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
 
 interface ApprenantsSituationSelectProps {
   effectifId: string;
-  situation: string;
-  updateSituationState: (effectifId: string, newSituation: string) => void;
+  situation?: SITUATION_ENUM;
+  updateSituationState: (effectifId: string, newSituation: Partial<IMissionLocaleEffectif>) => void;
 }
 
 const ApprenantsSituationSelect: React.FC<ApprenantsSituationSelectProps> = ({
@@ -18,31 +18,29 @@ const ApprenantsSituationSelect: React.FC<ApprenantsSituationSelectProps> = ({
   const { toastError } = useToaster();
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newValue = e.target.value;
-    updateSituationState(effectifId, newValue);
+    const newValue = e.target.value as SITUATION_ENUM | "";
+
+    updateSituationState(effectifId, { situation: newValue as SITUATION_ENUM });
 
     try {
       const payload = {
         effectif_id: effectifId,
-        situation: newValue,
+        situation: newValue || null,
       };
 
       await _post(`/api/v1/organisation/mission-locale/effectif`, payload);
     } catch (error: unknown) {
       console.error("Erreur de mise à jour :", error);
       toastError("Impossible de mettre à jour la situation de l'apprenant. Veuillez réessayer.");
-      updateSituationState(effectifId, situation);
+      updateSituationState(effectifId, { situation });
     }
   };
 
   return (
-    <Select
-      placeholder="Choisir"
-      value={situation}
-      fontSize="sm"
-      onClick={(e) => e.stopPropagation()}
-      onChange={handleChange}
-    >
+    <Select fontSize="sm" onClick={(e) => e.stopPropagation()} onChange={handleChange} value={situation || ""}>
+      <option value="" disabled={!!situation}>
+        Choisir
+      </option>
       {Object.entries(SITUATION_ENUM).map(([key, value]) => (
         <option key={value} value={value}>
           {SITUATION_LABEL_ENUM[key as keyof typeof SITUATION_LABEL_ENUM]}

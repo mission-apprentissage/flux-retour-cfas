@@ -316,7 +316,7 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
     ...(statut_reel_text !== undefined ? { statut_reel_text } : {}),
     ...(inscrit_france_travail !== undefined ? { inscrit_france_travail } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
-    ...(statut_correct !== undefined ? { statut_correct } : {}),
+    ...(statut_correct !== undefined && statut_correct !== null ? { statut_correct } : {}),
   };
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(

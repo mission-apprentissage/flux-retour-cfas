@@ -8,7 +8,7 @@ export const updateMissionLocaleEffectifApi = {
   statut_reel_text: zMissionLocaleEffectif.zod.shape.statut_reel_text.optional(),
   inscrit_france_travail: zMissionLocaleEffectif.zod.shape.inscrit_france_travail.optional(),
   commentaires: zMissionLocaleEffectif.zod.shape.commentaires.optional(),
-  statut_correct: z.boolean().optional(),
+  statut_correct: z.boolean().nullish(),
 };
 
 export type IUpdateMissionLocaleEffectif = z.output<z.ZodObject<typeof updateMissionLocaleEffectifApi>>;

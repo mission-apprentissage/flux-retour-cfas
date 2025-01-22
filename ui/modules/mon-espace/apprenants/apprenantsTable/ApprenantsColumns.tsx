@@ -1,11 +1,14 @@
 import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
+import { IMissionLocaleEffectif } from "shared";
 
 import { _post } from "@/common/httpClient";
 
 import ApprenantsSituationSelect from "./ApprenantsSituationSelect";
 
-const apprenantsTableColumnsDefs = (updateSituationState: (effectifId: string, newSituation: string) => void) => [
+const apprenantsTableColumnsDefs = (
+  updateSituationState: (effectifId: string, newSituation: Partial<IMissionLocaleEffectif>) => void
+) => [
   {
     accessorKey: "apprenant.nom",
     header: () => "Nom",
@@ -53,7 +56,7 @@ const apprenantsTableColumnsDefs = (updateSituationState: (effectifId: string, n
     accessorKey: "apprenant.situation",
     header: () => "Situation",
     cell: ({ row }) => {
-      const effectifId = row.original._id;
+      const effectifId = row.original.id;
       const situation = row.original.situation_data?.situation || "";
 
       return (

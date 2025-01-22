@@ -2,7 +2,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
-import { Commune, IEffectif } from "shared";
+import { Commune, IEffectif, IMissionLocaleEffectif } from "shared";
 import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import TableWithApi from "@/components/Table/TableWithApi";
@@ -11,7 +11,8 @@ import apprenantsTableColumnsDefs from "./ApprenantsColumns";
 import ApprenantsDetails from "./ApprenantsDetails";
 import ApprenantsFilterPanel from "./ApprenantsFilterPanel";
 
-type IEffectifWithSituation = IEffectif & {
+type IEffectifWithSituation = Omit<IEffectif, "_id"> & {
+  id: string;
   situation_data?: {
     situation?: string;
     situation_updated_at?: string;
@@ -77,11 +78,18 @@ const ApprenantsTable = ({
     onSearchChange(localSearch);
   };
 
-  const updateSituationState = (effectifId: string, newSituation: string) => {
+  const updateSituationState = (effectifId: string, newSituation: Partial<IMissionLocaleEffectif>) => {
     setData((prevData) =>
       prevData.map((apprenant) =>
-        apprenant._id.toString() === effectifId
-          ? { ...apprenant, situation_data: { ...apprenant.situation_data, situation: newSituation } }
+        apprenant.id === effectifId
+          ? ({
+              ...apprenant,
+              situation_data: {
+                ...apprenant.situation_data,
+                ...newSituation,
+                situation_updated_at: new Date().toISOString(),
+              },
+            } as IEffectifWithSituation)
           : apprenant
       )
     );
@@ -143,7 +151,9 @@ const ApprenantsTable = ({
         enableRowExpansion={true}
         onTableChange={onTableChange}
         isLoading={isFetching}
-        renderSubComponent={(row: Row<any>) => <ApprenantsDetails row={row} />}
+        renderSubComponent={(row: Row<any>) => (
+          <ApprenantsDetails row={row} updateSituationState={updateSituationState} />
+        )}
       />
     </Box>
   );
