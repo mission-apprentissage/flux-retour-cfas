@@ -35,7 +35,7 @@ export const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
-const A_RISQUE_FILTER = [
+const buildARisqueFilter = (a_risque: boolean | null = false) => [
   {
     $addFields: {
       a_risque: {
@@ -63,8 +63,7 @@ const A_RISQUE_FILTER = [
       },
     },
   },
-
-  { $match: { a_risque: true } },
+  ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
@@ -138,7 +137,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
           : {}),
       },
     },
-    ...(a_risque ? A_RISQUE_FILTER : []),
+    ...buildARisqueFilter(a_risque),
   ];
 
   return filter;
@@ -263,7 +262,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         as: "cfa_users",
       },
     },
-    ...A_RISQUE_FILTER,
     {
       $sort: buildSortFilter(sort, order),
     },
