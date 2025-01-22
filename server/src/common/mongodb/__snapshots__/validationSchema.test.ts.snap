@@ -8965,7 +8965,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "properties": {
         "commentaires": {
           "bsonType": "string",
-          "maxLength": 500,
+          "maxLength": 200,
         },
         "inscrit_france_travail": {
           "bsonType": "string",
@@ -8989,14 +8989,21 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "bsonType": "bool",
         },
         "statut_reel": {
-          "bsonType": "string",
-          "enum": [
-            "CONTRAT_SIGNE_NON_DEMARRE",
-            "RETOUR_EN_VOIE_SCOLAIRE",
-            "ABANDON",
-            "RUPTURE",
-            "DECROCHAGE",
-            "AUTRE",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "enum": [
+                "CONTRAT_SIGNE_NON_DEMARRE",
+                "RETOUR_EN_VOIE_SCOLAIRE",
+                "ABANDON",
+                "RUPTURE",
+                "DECROCHAGE",
+                "AUTRE",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
           ],
         },
         "statut_reel_text": {
