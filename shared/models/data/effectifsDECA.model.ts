@@ -25,8 +25,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       organisme_id: 1,
       annee_scolaire: 1,
       id_erp_apprenant: 1,
-      "formation.cfd": 1,
-      "formation.rncp": 1,
     },
     {
       unique: true,
