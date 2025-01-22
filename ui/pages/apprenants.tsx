@@ -14,7 +14,7 @@ import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/App
 const DEFAULT_PAGINATION: IPaginationFilters = {
   page: 0,
   limit: 20,
-  sort: "rupture",
+  sort: "statut",
   order: "desc",
 };
 
@@ -157,22 +157,20 @@ function EffectifsPage() {
         </VStack>
 
         <Box mt={10} mb={16}>
-          {apprenants?.data && (
-            <ApprenantsTable
-              apprenants={apprenants?.data || []}
-              communes={apprenants?.filter}
-              filters={filters}
-              pagination={pagination}
-              search={search}
-              onSearchChange={handleSearchChange}
-              onFilterChange={handleFilterChange}
-              onTableChange={handleTableChange}
-              total={apprenants?.pagination.total || 0}
-              availableFilters={apprenants?.filters || {}}
-              resetFilters={resetFilters}
-              isFetching={isFetching}
-            />
-          )}
+          <ApprenantsTable
+            apprenants={isFetching ? [] : apprenants?.data}
+            communes={apprenants?.filter}
+            filters={filters}
+            pagination={pagination}
+            search={search}
+            onSearchChange={handleSearchChange}
+            onFilterChange={handleFilterChange}
+            onTableChange={handleTableChange}
+            total={apprenants?.pagination.total || 0}
+            availableFilters={apprenants?.filters || {}}
+            resetFilters={resetFilters}
+            isFetching={isFetching}
+          />
         </Box>
         <Flex gap={12} mt={16} mb={6}>
           <Box flex="3">

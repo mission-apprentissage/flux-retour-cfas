@@ -37,14 +37,34 @@ export const EFF_MISSION_LOCALE_FILTER = [
 
 const A_RISQUE_FILTER = [
   {
-    $match: {
-      $or: [
-        { dernierStatut: STATUT_APPRENANT.ABANDON },
-        { $and: [{ "dernierStatut.valeur": STATUT_APPRENANT.RUPTURANT }, { dernierStatutDureeInDay: { $gt: 150 } }] }, // 5 mois en jours
-        { $and: [{ "dernierStatut.valeur": STATUT_APPRENANT.INSCRIT }, { dernierStatutDureeInDay: { $gt: 60 } }] }, // 2 mois en
-      ],
+    $addFields: {
+      a_risque: {
+        $cond: {
+          if: {
+            $or: [
+              { $eq: ["$dernierStatut", STATUT_APPRENANT.ABANDON] },
+              {
+                $and: [
+                  { $eq: [{ $getField: { field: "valeur", input: "$dernierStatut" } }, STATUT_APPRENANT.RUPTURANT] },
+                  { $gt: ["$dernierStatutDureeInDay", 150] },
+                ],
+              }, // 5 mois en jours
+              {
+                $and: [
+                  { $eq: [{ $getField: { field: "valeur", input: "$dernierStatut" } }, STATUT_APPRENANT.INSCRIT] },
+                  { $gt: ["$dernierStatutDureeInDay", 60] },
+                ],
+              }, // 2 mois en jours
+            ],
+          },
+          then: true,
+          else: false,
+        },
+      },
     },
   },
+
+  { $match: { a_risque: true } },
 ];
 
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
@@ -243,6 +263,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         as: "cfa_users",
       },
     },
+    // ...A_RISQUE_FILTER,
     {
       $sort: buildSortFilter(sort, order),
     },
@@ -259,6 +280,8 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     pagination: any;
     data: Array<
       IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+        a_risque: boolean;
+      } & {
         ml_effectif: IMissionLocaleEffectif;
       }
     >;

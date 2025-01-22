@@ -1,5 +1,5 @@
 import { SearchIcon } from "@chakra-ui/icons";
-import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
+import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import { Commune, IEffectif, IMissionLocaleEffectif } from "shared";
@@ -48,9 +48,9 @@ const ApprenantsTable = ({
   resetFilters,
   isFetching,
 }: ApprenantsTableProps) => {
+  console.log("CONSOLE LOG ~ apprenants:", apprenants);
   const [data, setData] = useState<IEffectifWithSituation[]>([]);
   const [localSearch, setLocalSearch] = useState(search || "");
-  const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   useEffect(() => {
     setLocalSearch(search || "");
@@ -125,16 +125,6 @@ const ApprenantsTable = ({
             onFilterChange={onFilterChange}
             resetFilters={resetFilters}
             communes={communes}
-          />
-        </HStack>
-        <HStack mt={6} spacing={4} alignItems="center">
-          <Text>Afficher les jeunes “à risque”</Text>
-          <Switch
-            variant="icon"
-            isChecked={showOnlyErrors}
-            onChange={(e) => {
-              setShowOnlyErrors(e.target.checked);
-            }}
           />
         </HStack>
       </Box>

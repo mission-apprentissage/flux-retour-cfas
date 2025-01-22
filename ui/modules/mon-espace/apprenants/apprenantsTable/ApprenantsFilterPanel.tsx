@@ -1,4 +1,4 @@
-import { Button, Stack, Text } from "@chakra-ui/react";
+import { Button, HStack, Stack, Switch, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
 
@@ -8,7 +8,7 @@ interface ApprenantsFilterPanelProps {
   filters: Record<string, string[]>;
   availableFilters: Record<string, string[]>;
   communes: Commune[];
-  onFilterChange: (filters: Record<string, string[]>) => void;
+  onFilterChange: (filters: Record<string, string[] | boolean>) => void;
   resetFilters: () => void;
 }
 
@@ -19,9 +19,22 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
   resetFilters,
 }) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
+  const [aRisque, setARisque] = useState<boolean>(Boolean(filters["a_risque"]));
 
   const handleCheckboxChange = (filterKey: string, selectedValues: string[]) => {
     const updatedFilters = { ...filters, [filterKey]: selectedValues };
+    onFilterChange(updatedFilters);
+  };
+
+  const handleRiskToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.checked;
+    setARisque(newValue);
+
+    const updatedFilters = {
+      ...filters,
+      a_risque: newValue,
+    };
+
     onFilterChange(updatedFilters);
   };
 
@@ -108,19 +121,6 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           sortOrder="desc"
         />
 
-        {/*        <FilterList
-          key="last_update_value"
-          filterKey="last_update_value"
-          displayName={"Fraîcheur de la donnée"}
-          options={["< 1 semaine", "> 1 semaine"]}
-          selectedValues={filters["last_update_value"] || []}
-          onChange={(values) => handleCheckboxChange("last_update_value", values)}
-          isOpen={openFilter === "last_update_value"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "last_update_value" : null)}
-          sortOrder="asc"
-        />
-        */}
-
         <FilterList
           key="situation"
           filterKey="situation"
@@ -142,6 +142,11 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           Réinitialiser
         </Button>
       </Stack>
+
+      <HStack mt={6} spacing={4} alignItems="center">
+        <Text>Afficher les jeunes &quot;à risque&quot;</Text>
+        <Switch variant="icon" isChecked={aRisque} onChange={handleRiskToggle} />
+      </HStack>
     </Stack>
   );
 };
