@@ -12,15 +12,18 @@ const apprenantsTableColumnsDefs = (
   {
     accessorKey: "apprenant.nom",
     header: () => "Nom",
-    cell: ({ row, getValue }) => <ShowErrorInCell item={row.original} fieldName="apprenant.nom" value={getValue()} />,
+    cell: ({ row, getValue }) => (
+      <HStack>
+        {row.original.a_risque && <Box as="i" className="ri-alert-fill" color="warning" mt="0.5px" />}
+        <Text>{getValue()}</Text>
+      </HStack>
+    ),
     size: 160,
   },
   {
     accessorKey: "apprenant.prenom",
     header: () => "Prénom",
-    cell: ({ row, getValue }) => (
-      <ShowErrorInCell item={row.original} fieldName="apprenant.prenom" value={getValue()} />
-    ),
+    cell: ({ getValue }) => <Text>{getValue()}</Text>,
     size: 160,
   },
   {
@@ -112,7 +115,7 @@ const ShowErrorInCell = ({ item, fieldName, value }) => {
     return (
       <HStack color="flaterror">
         <Text fontSize="1rem" color="flaterror">
-          {validation_error.inputValue || "VIDE"}
+          {validation_error.inputValue || "Non renseigné"}
         </Text>
       </HStack>
     );

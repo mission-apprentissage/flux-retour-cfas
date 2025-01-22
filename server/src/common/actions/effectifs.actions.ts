@@ -470,6 +470,8 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
 
 export const buildEffectifForMissionLocale = (
   effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+    a_risque: boolean;
+  } & {
     ml_effectif: IMissionLocaleEffectif;
   }
 ): IEffecifMissionLocale => {
@@ -507,6 +509,7 @@ export const buildEffectifForMissionLocale = (
     organisme_id: effectif.organisme_id,
     annee_scolaire: effectif.annee_scolaire,
     source: effectif.source,
+    a_risque: effectif.a_risque,
   };
   return result as IEffecifMissionLocale;
 };
