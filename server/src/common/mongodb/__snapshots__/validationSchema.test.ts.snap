@@ -8938,6 +8938,76 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleEffectifLogs > missionLocaleEffectifLogs 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "mission_locale_effectif_id": {
+      "bsonType": "objectId",
+    },
+    "payload": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "commentaires": {
+          "bsonType": "string",
+          "maxLength": 500,
+        },
+        "inscrit_france_travail": {
+          "bsonType": "string",
+          "enum": [
+            "OUI",
+            "NON",
+            "INCONNU",
+          ],
+        },
+        "situation": {
+          "bsonType": "string",
+          "enum": [
+            "CONTACTE_AVEC_SUIVI",
+            "CONTACT_SANS_SUIVI",
+            "DEJA_SUIVI",
+            "INJOIGNABLE",
+            "NON_CONTACTE",
+          ],
+        },
+        "statut_correct": {
+          "bsonType": "bool",
+        },
+        "statut_reel": {
+          "bsonType": "string",
+          "enum": [
+            "CONTRAT_SIGNE_NON_DEMARRE",
+            "RETOUR_EN_VOIE_SCOLAIRE",
+            "ABANDON",
+            "RUPTURE",
+            "DECROCHAGE",
+            "AUTRE",
+          ],
+        },
+        "statut_reel_text": {
+          "bsonType": "string",
+          "maxLength": 150,
+        },
+      },
+    },
+  },
+  "required": [
+    "_id",
+    "created_at",
+    "mission_locale_effectif_id",
+    "payload",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for opcoRncp > opcoRncp 1`] = `
 {
   "additionalProperties": false,
