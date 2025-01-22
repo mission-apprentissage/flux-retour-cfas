@@ -134,7 +134,7 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
     {
       $unionWith: {
         coll: "effectifsDECA",
-        pipeline: [generateMissionLocaleMatchStage(missionLocaleId)],
+        pipeline: [generateMissionLocaleMatchStage(missionLocaleId), { $match: { is_deca_compatible: true } }],
       },
     },
   ];
