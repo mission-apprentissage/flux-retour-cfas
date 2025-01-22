@@ -263,7 +263,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         as: "cfa_users",
       },
     },
-    // ...A_RISQUE_FILTER,
     {
       $sort: buildSortFilter(sort, order),
     },
