@@ -209,6 +209,7 @@ describe("Processus d'ingestion", () => {
               academie: "02",
               region: "93",
             },
+            adresse_naissance: {},
           },
           contrats: [],
           formation: {
@@ -746,6 +747,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -943,6 +945,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,

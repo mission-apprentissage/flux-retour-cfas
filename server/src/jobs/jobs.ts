@@ -41,6 +41,7 @@ import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organis
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
+import { tmpMigrateAdresseNaissance } from "./patches/adresse/migrate-adresse-naissance";
 import { tmpFiabilisationCertification } from "./patches/certification/fiabilisation-certification";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
@@ -488,6 +489,9 @@ export async function setupJobProcessor() {
       "tmp:migration:formation-certification": {
         handler: tmpFiabilisationCertification,
         resumable: true,
+      },
+      "tmp:migration:adresse-naissance": {
+        handler: tmpMigrateAdresseNaissance,
       },
     },
   });

@@ -374,6 +374,21 @@ function buildEffectifResult(effectif) {
           customizerPath
         ),
       },
+      adresse_naissance: {
+        ...mergeWith(
+          mergeWith(
+            mergeWith(
+              cloneDeep(effectifSchema.apprenant.properties.adresse_naissance.properties),
+              effectif.apprenant.adresse_naissance,
+              customizer
+            ),
+            effectif.is_lock.apprenant.adresse_naissance,
+            customizerLock
+          ),
+          paths.apprenant.adresse_naissance,
+          customizerPath
+        ),
+      },
       representant_legal: {
         ...mergeWith(
           mergeWith(

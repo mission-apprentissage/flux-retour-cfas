@@ -105,7 +105,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           )
         : undefined,
 
-      LIEU_NAIS: wrapNumString(effectif.apprenant.code_postal_de_naissance),
+      LIEU_NAIS: wrapNumString(effectif.apprenant.adresse_naissance?.code_insee),
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
       ADRESSE: effectifAddress?.slice(0, 200) || "",
       SIT_N_1: effectif.apprenant.derniere_situation,
