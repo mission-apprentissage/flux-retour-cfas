@@ -118,17 +118,14 @@ export const getCommune = async ({
     if (commune) {
       return commune;
     }
+  }
 
+  // Partial match code insee
+  if (codeInsee) {
     const communeByInsee = communeList.find(({ code }) => code.insee === codeInsee);
 
     if (communeByInsee) {
       return communeByInsee;
-    }
-
-    const communeByPostal = communeList.find(({ code }) => code.postaux.includes(codePostal));
-
-    if (communeByPostal) {
-      return communeByPostal;
     }
 
     return null;
@@ -140,17 +137,6 @@ export const getCommune = async ({
 
     if (communeByPostal) {
       return communeByPostal;
-    }
-
-    return null;
-  }
-
-  // Partial match code insee
-  if (codeInsee) {
-    const communeByInsee = communeList.find(({ code }) => code.insee === codeInsee);
-
-    if (communeByInsee) {
-      return communeByInsee;
     }
 
     return null;
