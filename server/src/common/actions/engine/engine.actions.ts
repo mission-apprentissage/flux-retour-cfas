@@ -75,7 +75,7 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
       ? {
           commune: communeInfo.nom,
           code_insee: communeInfo.code.insee,
-          code_postal: communeInfo.code.postaux[0],
+          code_postal: postal ?? communeInfo.code.postaux[0],
           departement: communeInfo.departement.codeInsee,
           academie: communeInfo.academie.code,
           region: communeInfo.region.codeInsee,
