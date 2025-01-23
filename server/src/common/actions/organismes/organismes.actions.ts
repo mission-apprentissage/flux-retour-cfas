@@ -57,7 +57,6 @@ export type IOrganismeCreate = Partial<
     | "fiabilisation_statut"
     | "ferme"
     | "qualiopi"
-    | "prepa_apprentissage"
     | "created_at"
     | "updated_at"
   >
@@ -966,7 +965,6 @@ export function getOrganismeProjection(
       $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
     },
     qualiopi: 1,
-    prepa_apprentissage: 1,
     enseigne: 1,
     raison_sociale: 1,
     reseaux: 1,
@@ -1009,7 +1007,6 @@ function getOrganismeListProjection(
       $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
     },
     qualiopi: 1,
-    prepa_apprentissage: 1,
     enseigne: 1,
     raison_sociale: 1,
     reseaux: 1,

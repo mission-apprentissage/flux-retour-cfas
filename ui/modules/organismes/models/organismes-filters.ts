@@ -4,7 +4,6 @@ import { OrganismeNormalized } from "../ListeOrganismesPage";
 
 export interface OrganismesFiltersQuery {
   qualiopi: string;
-  prepa_apprentissage: string;
   transmission: string;
   nature: string;
   ferme: string;
@@ -16,7 +15,6 @@ export interface OrganismesFiltersQuery {
 export interface OrganismesFilters {
   qualiopi: boolean[];
   transmission: string[];
-  prepa_apprentissage: boolean[];
   nature: string[];
   ferme: boolean[];
   regions: string[];
@@ -27,7 +25,6 @@ export interface OrganismesFilters {
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
   return {
     qualiopi: query.qualiopi?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
-    prepa_apprentissage: query.prepa_apprentissage?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     transmission:
       query.transmission?.split(",").filter((item) => ["recent", "1_3_mois", "arrete", "jamais"].includes(item)) ?? [],
     nature: query.nature?.split(",") ?? [],
@@ -43,7 +40,6 @@ export function convertOrganismesFiltersToQuery(
 ): Partial<OrganismesFiltersQuery> {
   return stripEmptyFields({
     qualiopi: organismesFilters.qualiopi?.join(","),
-    prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
     transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
     ferme: organismesFilters.ferme?.join(","),
@@ -64,12 +60,6 @@ export function filterOrganismesArrayFromOrganismesFilters(
       if (item.qualiopi !== undefined) return organismesFilters.qualiopi?.includes(item.qualiopi);
     });
   }
-
-  if (organismesFilters.prepa_apprentissage?.length && organismesFilters.prepa_apprentissage?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter((item) => {
-      if (item.prepa_apprentissage !== undefined)
-        return organismesFilters.prepa_apprentissage?.includes(item.prepa_apprentissage);
-    });
 
   if (organismesFilters.ferme?.length && organismesFilters.ferme?.length > 0)
     filteredOrganismes = filteredOrganismes?.filter((item) => {

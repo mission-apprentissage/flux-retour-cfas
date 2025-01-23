@@ -44,7 +44,6 @@ const sampleOrganismeWithoutUAIOutput: IOrganisme = {
   relatedFormations: [],
   fiabilisation_statut: "NON_FIABLE",
   ferme: false,
-  prepa_apprentissage: false,
   qualiopi: false,
   _id: new ObjectId(),
   created_at: new Date(),

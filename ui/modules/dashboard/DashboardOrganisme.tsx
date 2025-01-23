@@ -553,35 +553,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           />
                         )}
                       />
-                      <Text>Prépa-apprentissage&nbsp;:</Text>
-                      <Tag
-                        primaryText={organisme.prepa_apprentissage ? "Oui" : "Non"}
-                        variant="badge"
-                        colorScheme="grey_tag"
-                        size="lg"
-                        fontSize="epsilon"
-                        borderRadius="0"
-                        rightIcon={() => (
-                          <InfoTooltip
-                            contentComponent={() => (
-                              <Box>
-                                La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
-                                d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                                bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et
-                                que votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
-                                <Link
-                                  isExternal
-                                  href="mailto:tableau-de-bord@apprentissage.gouv.fr"
-                                  textDecoration="underline"
-                                  display="inline"
-                                >
-                                  tableau-de-bord@apprentissage.gouv.fr
-                                </Link>
-                              </Box>
-                            )}
-                          />
-                        )}
-                      />
                     </HStack>
                   )}
                 </Wrap>
