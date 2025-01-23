@@ -461,7 +461,7 @@ describe("Processus d'ingestion", () => {
         has_nir: true,
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75001",
-        code_postal_de_naissance_apprenant: "44000",
+        code_postal_de_naissance_apprenant: "75001",
         sexe_apprenant: "F",
         rqth_apprenant: true,
         date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
@@ -580,7 +580,7 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
-            code_postal_de_naissance: "44000",
+            code_postal_de_naissance: "75001",
             courriel: "johndoe@example.org",
             telephone: "0123456789",
             adresse: {
