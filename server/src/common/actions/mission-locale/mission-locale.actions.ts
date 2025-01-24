@@ -2,7 +2,7 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -244,6 +244,23 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     ...EFF_MISSION_LOCALE_FILTER,
     {
       $lookup: {
+        from: "organismes",
+        let: { id: "$organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          { $project: { _id: 0, contacts_from_referentiel: 1 } },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
         from: "usersMigration",
         localField: "organisation._id",
         foreignField: "organisation_id",
@@ -265,7 +282,9 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const resultEffectif = (await effectifsDb().aggregate(effectifsAggregation).next()) as {
     pagination: any;
     data: Array<
-      IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+      IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+        cfa_users: Array<IUsersMigration>;
+      } & {
         a_risque: boolean;
       } & {
         ml_effectif: IMissionLocaleEffectif;

@@ -6,7 +6,6 @@ import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
 import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
@@ -52,7 +51,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     const formationOrganisme = organisme.relatedFormations?.find(
       (f) => f.formation_id?.toString() === effectif.formation?.formation_id?.toString()
     );
-    const communeInfo = await getCommune(effectif.apprenant.code_postal_de_naissance);
 
     let organismeResponsableUai = organisme.uai;
     let organismeFormateurUai = "";
@@ -107,7 +105,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           )
         : undefined,
 
-      LIEU_NAIS: wrapNumString(communeInfo?.code.insee),
+      LIEU_NAIS: wrapNumString(effectif.apprenant.adresse_naissance?.code_insee),
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
       ADRESSE: effectifAddress?.slice(0, 200) || "",
       SIT_N_1: effectif.apprenant.derniere_situation,
