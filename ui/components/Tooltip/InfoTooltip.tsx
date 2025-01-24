@@ -16,16 +16,22 @@ import { InfoCircle } from "@/theme/components/icons";
 interface InfoTooltipProps {
   contentComponent: () => ReactNode;
   headerComponent?: () => ReactNode;
+  popoverWidth?: string | number;
+  popoverMaxWidth?: string | number;
   [key: string]: any;
 }
 
-export const InfoTooltip: React.FC<InfoTooltipProps> = ({ headerComponent, contentComponent, ...rest }) => {
+export const InfoTooltip: React.FC<InfoTooltipProps> = ({
+  headerComponent,
+  contentComponent,
+  popoverWidth,
+  popoverMaxWidth,
+  ...rest
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Utilisation de cette méthode dans le cadre des tableaux avec défilement (scroll)
-    // afin que le tooltip disparaisse lors d'un clic (mousedown) à l'extérieur.
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         onClose();
@@ -58,7 +64,14 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ headerComponent, conte
         />
       </PopoverTrigger>
       <Portal>
-        <PopoverContent ref={popoverRef} boxShadow="md" whiteSpace="normal" zIndex={100}>
+        <PopoverContent
+          ref={popoverRef}
+          boxShadow="md"
+          whiteSpace="normal"
+          zIndex={100}
+          width={popoverWidth}
+          maxWidth={popoverMaxWidth}
+        >
           <PopoverArrow />
           {headerComponent && (
             <PopoverHeader border="none" pt={3} px={5} color="black" fontSize={16} fontWeight="bold" lineHeight={1.5}>

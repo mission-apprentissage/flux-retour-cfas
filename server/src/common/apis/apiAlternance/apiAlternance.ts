@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import type { ICommune } from "api-alternance-sdk";
+import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -143,4 +143,14 @@ export const getCommune = async ({
   }
 
   return null;
+};
+
+export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
+  try {
+    const result = await apiAlternanceClient.geographie.listMissionLocales();
+    return result;
+  } catch (error: any) {
+    captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));
+    return null;
+  }
 };

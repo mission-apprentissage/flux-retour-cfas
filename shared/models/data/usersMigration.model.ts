@@ -11,7 +11,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisation_id: 1 }, {}],
 ];
 
-const zUsersMigration = z.object({
+export const zUsersMigration = z.object({
   _id: zObjectId,
   email: z.string().describe("Email utilisateur"),
   password: z.string().describe("Le mot de passe hashé"),

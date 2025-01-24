@@ -32,6 +32,7 @@ import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
+import DashboardMissionLocale from "@/modules/dashboard/DashboardMissionLocale";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
 import { useIndicateurNational } from "@/modules/dashboard/hooks/useIndicateursNational";
@@ -50,6 +51,10 @@ function getDashboardComponent(organisationType: IOrganisationType) {
   switch (organisationType) {
     case "ORGANISME_FORMATION": {
       return <DashboardOwnOrganisme />;
+    }
+
+    case "MISSION_LOCALE": {
+      return <DashboardMissionLocale />;
     }
 
     case "TETE_DE_RESEAU":

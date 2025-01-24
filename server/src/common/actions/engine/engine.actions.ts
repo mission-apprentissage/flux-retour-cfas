@@ -79,6 +79,7 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
           departement: communeInfo.departement.codeInsee,
           academie: communeInfo.academie.code,
           region: communeInfo.region.codeInsee,
+          mission_locale_id: communeInfo.mission_locale?.id,
         }
       : {};
   };

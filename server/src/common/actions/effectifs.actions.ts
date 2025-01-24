@@ -2,9 +2,10 @@ import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, type WithoutId } from "mongodb";
-import { IOpcos, IRncp } from "shared/models";
+import { IEffecifMissionLocale, IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
@@ -480,4 +481,61 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
       }
     )
   );
+};
+
+export const buildEffectifForMissionLocale = (
+  effectif: IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+    cfa_users: Array<IUsersMigration>;
+  } & {
+    a_risque: boolean;
+  } & {
+    ml_effectif: IMissionLocaleEffectif;
+  }
+): IEffecifMissionLocale => {
+  const usersCfa = effectif.cfa_users.map(({ nom, prenom, email, telephone, fonction }) => ({
+    nom,
+    prenom,
+    email,
+    telephone,
+    fonction,
+  }));
+
+  const usersReferentiel =
+    effectif.organisme.contacts_from_referentiel
+      ?.filter(({ confirmé }) => confirmé)
+      .map(({ email }) => ({
+        email,
+      })) || [];
+
+  const result = {
+    id: effectif._id,
+    apprenant: {
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      date_de_naissance: effectif.apprenant.date_de_naissance,
+      adresse: effectif.apprenant.adresse,
+      telephone: effectif.apprenant.telephone,
+      courriel: effectif.apprenant.courriel,
+      rqth: effectif.apprenant.rqth,
+    },
+    situation_data: {
+      situation: effectif.ml_effectif?.situation,
+      situation_updated_at: effectif.ml_effectif?.situation_updated_at,
+      statut_correct: effectif.ml_effectif?.statut_correct,
+      statut_reel: effectif.ml_effectif?.statut_reel,
+      statut_reel_text: effectif.ml_effectif?.statut_reel_text,
+      inscrit_france_travail: effectif.ml_effectif?.inscrit_france_travail,
+      commentaires: effectif.ml_effectif?.commentaires,
+    },
+    statut: effectif._computed?.statut,
+    formation: effectif.formation,
+    organisme: effectif._computed?.organisme,
+    users: usersCfa,
+    users_referentiel: usersReferentiel,
+    organisme_id: effectif.organisme_id,
+    annee_scolaire: effectif.annee_scolaire,
+    source: effectif.source,
+    a_risque: effectif.a_risque,
+  };
+  return result as IEffecifMissionLocale;
 };

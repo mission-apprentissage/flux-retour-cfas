@@ -6,7 +6,7 @@ import {
   DERNIER_ORGANISME_UAI_REGEX,
 } from "../../../constants";
 import { zodLiteralUnion } from "../../../utils/zodHelper";
-import { zAdresse } from "../../parts/adresseSchema";
+import { zAdresse, zAdresseWithMissionLocale } from "../../parts/adresseSchema";
 import { zodOpenApi } from "../../zodOpenApi";
 
 export const zApprenant = zodOpenApi.object({
@@ -80,8 +80,9 @@ export const zApprenant = zodOpenApi.object({
     .openapi({ example: "+33908070605" })
     .regex(/^([+])?(\d{7,12})$/)
     .nullish(),
-  adresse: zAdresse.nullish(),
-  adresse_naissance: zAdresse.nullish(),
+
+  adresse: zAdresseWithMissionLocale.nullish(),
+  adresse_naissance: zAdresseWithMissionLocale.nullish(),
   historique_statut: zodOpenApi.array(
     zodOpenApi.object({
       valeur_statut: zodOpenApi.nativeEnum(CODES_STATUT_APPRENANT, {
