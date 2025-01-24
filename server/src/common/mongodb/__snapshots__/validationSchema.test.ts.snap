@@ -9940,6 +9940,30 @@ exports[`validation-schema > should create validation schema for organismes > or
       ],
       "description": "Version de l'api utilisée (v2 ou v3)",
     },
+    "contacts_from_referentiel": {
+      "bsonType": "array",
+      "items": {
+        "additionalProperties": true,
+        "bsonType": "object",
+        "properties": {
+          "confirmé": {
+            "bsonType": "bool",
+          },
+          "date_collecte": {
+            "bsonType": "string",
+          },
+          "email": {
+            "bsonType": "string",
+          },
+          "sources": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+            },
+          },
+        },
+      },
+    },
     "created_at": {
       "bsonType": "date",
       "description": "Date d'ajout en base de données",
@@ -11144,7 +11168,7 @@ exports[`validation-schema > should create validation schema for organismesRefer
     },
     "contacts": {
       "bsonType": "array",
-      "description": "Formations de cet organisme",
+      "description": "Contacts du referentiel",
       "items": {
         "additionalProperties": true,
         "bsonType": "object",

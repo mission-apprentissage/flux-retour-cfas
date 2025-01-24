@@ -244,6 +244,23 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     ...EFF_MISSION_LOCALE_FILTER,
     {
       $lookup: {
+        from: "organismes",
+        let: { id: "$organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          { $project: { _id: 0, contacts_from_referentiel: 1 } },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
         from: "usersMigration",
         localField: "organisation._id",
         foreignField: "organisation_id",
