@@ -81,6 +81,7 @@ export const zApprenant = zodOpenApi.object({
     .regex(/^([+])?(\d{7,12})$/)
     .nullish(),
   adresse: zAdresse.nullish(),
+  adresse_naissance: zAdresse.nullish(),
   historique_statut: zodOpenApi.array(
     zodOpenApi.object({
       valeur_statut: zodOpenApi.nativeEnum(CODES_STATUT_APPRENANT, {
