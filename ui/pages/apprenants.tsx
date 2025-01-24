@@ -157,7 +157,7 @@ function EffectifsPage() {
               isExternal
               textDecoration="underLine"
               color="bluefrance"
-              href="https://efpconnect.emploi.gouv.fr/auth"
+              href="https://efpconnect.emploi.gouv.fr/auth/realms/efp/protocol/cas/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
             >
               DECA
             </Link>
