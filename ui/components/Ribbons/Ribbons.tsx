@@ -1,5 +1,5 @@
 import { CloseIcon } from "@chakra-ui/icons";
-import { Flex, Box, Spinner, IconButton } from "@chakra-ui/react";
+import { Flex, Box, Spinner, IconButton, ResponsiveValue } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "@/theme/components/icons/index";
@@ -40,7 +40,24 @@ const Icon = ({ variant, ...rest }) => {
   }
 };
 
-const Ribbons = ({ variant = "info", oneLiner = true, children, px = 3, py = 3, showClose = false, ...rest }) => {
+interface RibbonsProps {
+  variant?: keyof typeof stylesMap;
+  oneLiner?: boolean;
+  children: React.ReactNode;
+  px?: ResponsiveValue<string | number>;
+  py?: ResponsiveValue<string | number>;
+  showClose?: boolean;
+}
+
+const Ribbons = ({
+  variant = "info",
+  oneLiner = true,
+  children,
+  px = 3,
+  py = 3,
+  showClose = false,
+  ...rest
+}: RibbonsProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   if (!isVisible) return null;
