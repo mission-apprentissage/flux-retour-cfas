@@ -210,6 +210,7 @@ describe("Processus d'ingestion", () => {
               region: "93",
               mission_locale_id: 211,
             },
+            adresse_naissance: {},
           },
           contrats: [],
           formation: {
@@ -460,7 +461,7 @@ describe("Processus d'ingestion", () => {
         has_nir: true,
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75001",
-        code_postal_de_naissance_apprenant: "44000",
+        code_postal_de_naissance_apprenant: "75001",
         sexe_apprenant: "F",
         rqth_apprenant: true,
         date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
@@ -579,7 +580,6 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
-            code_postal_de_naissance: "44000",
             courriel: "johndoe@example.org",
             telephone: "0123456789",
             adresse: {
@@ -591,6 +591,14 @@ describe("Processus d'ingestion", () => {
               academie: "01",
               region: "11",
               mission_locale_id: 609,
+            },
+            adresse_naissance: {
+              code_postal: "75001",
+              commune: "Paris",
+              code_insee: "75056",
+              departement: "75",
+              academie: "01",
+              region: "11",
             },
             sexe: "F",
             rqth: true,
@@ -747,6 +755,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -944,6 +953,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,

@@ -38,7 +38,6 @@ export const dossierApprenantSchemaV3Base = () =>
     tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
     // The following field is missing in V3
     // siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
-    // code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
     // The following field are missing in V3
     // libelle_long_formation: primitivesV1.formation.libelle_long.optional(),
@@ -53,8 +52,12 @@ export const dossierApprenantSchemaV3Base = () =>
     // OPTIONAL FIELDS
     has_nir: primitivesV3.apprenant.has_nir.optional(),
     adresse_apprenant: primitivesV3.apprenant.adresse.optional(),
+
     code_postal_apprenant: primitivesV3.apprenant.code_postal.optional(),
     code_postal_de_naissance_apprenant: primitivesV3.apprenant.code_postal.optional(),
+    code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
+    code_commune_insee_de_naissance_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
+
     sexe_apprenant: primitivesV3.apprenant.sexe.optional(),
     rqth_apprenant: primitivesV3.apprenant.rqth.optional(),
     date_rqth_apprenant: primitivesV3.apprenant.date_rqth.optional(),
