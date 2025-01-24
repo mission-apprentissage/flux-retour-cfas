@@ -147,9 +147,10 @@ function EffectifsPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes et leurs coordonnées,
-            susceptibles d&apos;être intéressés par une mise en relation avec une Mission Locale. Cliquez sur chaque
-            jeune pour plus d’informations sur son parcours.
+            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (identifiés comme inscrit
+            sans contrat, en rupture de contrat ou en abandon/sortie d’apprentissage) et leurs coordonnées, susceptibles
+            d&apos;être intéressés par une mise en relation et accompagnement avec une Mission Locale. Cliquez sur
+            chaque jeune pour plus d’informations sur son parcours.
           </Text>
           <Text fontStyle="italic">
             Sources : CFA et{" "}
@@ -174,7 +175,7 @@ function EffectifsPage() {
                     </ListItem>
                     <ListItem>
                       soit de la plateforme DECA (DEpôt des Contrats en Alternance) : concerne les effectifs en rupture
-                      de contrat ou en abandon.
+                      de contrat ou sèche (abandons).
                     </ListItem>
                   </UnorderedList>
                 </Box>
