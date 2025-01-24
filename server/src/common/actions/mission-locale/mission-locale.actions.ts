@@ -2,7 +2,7 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
+import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -282,7 +282,9 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const resultEffectif = (await effectifsDb().aggregate(effectifsAggregation).next()) as {
     pagination: any;
     data: Array<
-      IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+      IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+        cfa_users: Array<IUsersMigration>;
+      } & {
         a_risque: boolean;
       } & {
         ml_effectif: IMissionLocaleEffectif;
