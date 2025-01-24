@@ -174,7 +174,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
 
       <HStack mt={6} spacing={4} alignItems="center">
         <Text>Afficher les jeunes &quot;à risque&quot;</Text>
-        <Switch variant="icon" isChecked={aRisque} onChange={(e) => handleRiskToggle(e)} />
+        <Switch variant="icon" isChecked={aRisque} onChange={handleRiskToggle} />
       </HStack>
     </Stack>
   );

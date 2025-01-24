@@ -20,7 +20,7 @@ const ApprenantsSituationSelect: React.FC<ApprenantsSituationSelectProps> = ({
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value as SITUATION_ENUM | "";
 
-    updateSituationState(effectifId, { situation: newValue as SITUATION_ENUM });
+    updateSituationState(effectifId, { situation: newValue as SITUATION_ENUM, situation_updated_at: new Date() });
 
     try {
       const payload = {

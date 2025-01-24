@@ -78,7 +78,7 @@ const ApprenantsTable = ({
     onSearchChange(localSearch);
   };
 
-  const updateSituationState = (effectifId: string, newSituation: Partial<IMissionLocaleEffectif>) => {
+  const updateSituationState = (effectifId: string, newSituation: IMissionLocaleEffectif) => {
     setData((prevData) =>
       prevData.map((apprenant) =>
         apprenant.id === effectifId
@@ -87,7 +87,6 @@ const ApprenantsTable = ({
               situation_data: {
                 ...apprenant.situation_data,
                 ...newSituation,
-                situation_updated_at: new Date().toISOString(),
               },
             } as IEffectifWithSituation)
           : apprenant

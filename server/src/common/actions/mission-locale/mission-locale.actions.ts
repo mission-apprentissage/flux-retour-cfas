@@ -358,7 +358,7 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
         ...(situation !== undefined ? { situation_updated_at: new Date() } : {}),
       },
     },
-    { upsert: true }
+    { upsert: true, returnDocument: "after" }
   );
 
   const toUpdateId = updated.lastErrorObject?.upserted || updated.value?._id;
@@ -370,6 +370,8 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
       payload: setObject,
     });
   }
+
+  return updated;
 };
 
 export const getOrCreateMissionLocaleById = async (id: number) => {
