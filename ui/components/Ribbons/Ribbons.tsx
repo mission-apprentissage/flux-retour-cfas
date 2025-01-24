@@ -1,5 +1,5 @@
 import { CloseIcon } from "@chakra-ui/icons";
-import { Flex, Box, Spinner, IconButton, ResponsiveValue } from "@chakra-ui/react";
+import { Flex, Box, Spinner, IconButton, ResponsiveValue, BoxProps } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "@/theme/components/icons/index";
@@ -40,7 +40,7 @@ const Icon = ({ variant, ...rest }) => {
   }
 };
 
-interface RibbonsProps {
+interface RibbonsProps extends BoxProps {
   variant?: keyof typeof stylesMap;
   oneLiner?: boolean;
   children: React.ReactNode;
