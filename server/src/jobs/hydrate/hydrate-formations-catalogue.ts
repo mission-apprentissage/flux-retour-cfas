@@ -1,15 +1,13 @@
 import { IncomingMessage } from "node:http";
 
 import axios from "axios";
-import { ObjectId } from "mongodb";
-import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import { IFormationCatalogue, zFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { default as StreamChain } from "stream-chain";
 import { default as StreamJson } from "stream-json";
 import { default as StreamArrayPick } from "stream-json/streamers/StreamArray.js";
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
-import { WithStringId } from "@/common/model/types";
 import config from "@/config";
 
 const { chain } = StreamChain;
@@ -71,11 +69,8 @@ export const hydrateFormationsCatalogue = async () => {
   return new Promise<void>((resolve, reject) => {
     const pipeline = chain([parser(), streamArray()]);
     res.data.pipe(pipeline);
-    pipeline.on("data", ({ value }: { value: WithStringId<IFormationCatalogue> }) => {
-      pendingFormations.push({
-        ...value,
-        _id: new ObjectId(value._id),
-      });
+    pipeline.on("data", ({ value }: { value: unknown }) => {
+      pendingFormations.push(zFormationCatalogue.parse(value));
       if (pendingFormations.length === INSERT_BATCH_SIZE) {
         flushPendingFormations();
       }
