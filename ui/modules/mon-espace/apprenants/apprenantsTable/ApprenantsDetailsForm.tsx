@@ -60,39 +60,23 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
     setStatus("saving");
 
     try {
-      let payloadValue: string | boolean | null = value;
-      if (name === "statut_correct") {
-        payloadValue = value === "true";
-      }
-
       const payload: Record<string, string | boolean | null> = {
         effectif_id: effectifId,
-        [name]: payloadValue,
+        [name]: name === "statut_correct" ? value === "true" : value,
       };
 
       if (name === "statut_correct" && value === "true") {
-        payload.statut_reel = null;
-        payload.statut_reel_text = "";
+        Object.assign(payload, { statut_reel: null, statut_reel_text: "" });
       }
 
       if (name === "statut_reel" && value !== STATUT_JEUNE_MISSION_LOCALE.AUTRE) {
         payload.statut_reel_text = "";
       }
 
-      await _post("/api/v1/organisation/mission-locale/effectif", payload);
+      const updatedData = await _post("/api/v1/organisation/mission-locale/effectif", payload);
 
-      updateSituationState(effectifId, {
-        [name]: payloadValue,
-        ...(name === "statut_correct" && value === "true" ? { statut_reel: null, statut_reel_text: "" } : {}),
-        ...(name === "statut_reel" && value !== STATUT_JEUNE_MISSION_LOCALE.AUTRE ? { statut_reel_text: "" } : {}),
-      });
-
-      setFormState((prev) => ({
-        ...prev,
-        [name]: payloadValue,
-        ...(name === "statut_correct" && value === "true" ? { statut_reel: null, statut_reel_text: "" } : {}),
-        ...(name === "statut_reel" && value !== STATUT_JEUNE_MISSION_LOCALE.AUTRE ? { statut_reel_text: "" } : {}),
-      }));
+      updateSituationState(effectifId, updatedData.value);
+      setFormState((prev) => ({ ...prev, ...updatedData.value }));
 
       if (name === "statut_correct") {
         setApprenantStatut(value === "false");
@@ -127,7 +111,7 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
         ) : null}
       </Flex>
 
-      {situationData.situation_updated_at && (
+      {situationData.situation && situationData.situation_updated_at && (
         <Text as="span" fontWeight="bold" color="bluefrance" mb={4}>
           Il a été indiqué que le jeune a été{" "}
           {situationData.situation && _SITUATION_LABELS[situationData.situation]
