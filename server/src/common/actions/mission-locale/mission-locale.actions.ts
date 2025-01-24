@@ -1,7 +1,7 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
@@ -68,65 +68,53 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
 
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
-    statut = null,
-    rqth = null,
-    mineur = null,
-    niveaux = null,
-    code_insee = null,
-    search = null,
-    situation = null,
-    a_risque = null,
-    last_update_value = null,
-    last_update_order = null,
+    statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
+    rqth,
+    mineur,
+    niveaux,
+    code_insee,
+    search,
+    situation,
+    a_risque,
+    last_update_value,
+    last_update_order,
   } = effectifFilters;
 
   const today = new Date();
-  const adultThreshold = new Date(today.setFullYear(today.getFullYear() - 18));
+  const adultThreshold = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
 
-  const filter = [
-    ...filterByDernierStatutPipeline(
-      (statut as Array<StatutApprenant>) ?? [
-        STATUT_APPRENANT.ABANDON,
-        STATUT_APPRENANT.RUPTURANT,
-        STATUT_APPRENANT.INSCRIT,
-      ],
-      new Date()
-    ),
+  const filter: Array<any> = [
+    ...filterByDernierStatutPipeline(statut as any, new Date()),
     {
       $match: {
-        ...(search !== null
+        ...(search
           ? {
               $or: search
                 .trim()
                 .split(" ")
-                .reduce((acc: Array<object>, currentSearch) => {
-                  return [
-                    ...acc,
+                .map((currentSearch) => ({
+                  $or: [
                     { "apprenant.nom": { $regex: currentSearch, $options: "i" } },
                     { "apprenant.prenom": { $regex: currentSearch, $options: "i" } },
-                  ];
-                }, []),
+                  ],
+                })),
             }
           : {}),
-        ...(rqth !== null && rqth.length > 0
+        ...(rqth !== undefined
           ? {
-              $or: [
-                { "apprenant.rqth": { $in: rqth } },
-                ...(rqth.includes(false) ? [{ "apprenant.rqth": { $exists: false } }] : []),
-              ],
+              $or: [{ "apprenant.rqth": rqth }, ...(rqth === false ? [{ "apprenant.rqth": { $exists: false } }] : [])],
             }
           : {}),
-        ...(mineur !== null && mineur.length > 0
-          ? mineur.includes(true) && mineur.includes(false)
-            ? {}
-            : mineur.includes(true)
-              ? { "apprenant.date_de_naissance": { $gte: adultThreshold } }
-              : { "apprenant.date_de_naissance": { $lt: adultThreshold } }
+        ...(mineur !== undefined
+          ? mineur
+            ? { "apprenant.date_de_naissance": { $gte: adultThreshold } }
+            : { "apprenant.date_de_naissance": { $lt: adultThreshold } }
           : {}),
-        ...(niveaux !== null ? { "formation.niveau": { $in: niveaux } } : {}),
-        ...(code_insee !== null ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
-        ...(situation !== null ? { "ml_effectif.situation": { $in: situation } } : {}),
-        ...(last_update_value !== null && last_update_order !== null
+        ...(niveaux ? { "formation.niveau": { $in: niveaux } } : {}),
+        ...(code_insee ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
+        ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
+
+        ...(last_update_value !== undefined && last_update_order
           ? {
               updated_at: {
                 [last_update_order === "AFTER" ? "$gte" : "$lte"]: new Date(

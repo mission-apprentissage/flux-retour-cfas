@@ -3,6 +3,7 @@ import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Tex
 import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import { Commune, IEffectif, IMissionLocaleEffectif } from "shared";
+import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import TableWithApi from "@/components/Table/TableWithApi";
@@ -22,7 +23,7 @@ type IEffectifWithSituation = Omit<IEffectif, "_id"> & {
 interface ApprenantsTableProps {
   apprenants: IEffectifWithSituation[];
   communes: Commune[];
-  filters: Record<string, string[]>;
+  filters: IEffectifsFiltersMissionLocale;
   pagination: IPaginationFilters;
   search: string;
   onSearchChange: (search: string) => void;
@@ -48,7 +49,6 @@ const ApprenantsTable = ({
   resetFilters,
   isFetching,
 }: ApprenantsTableProps) => {
-  console.log("CONSOLE LOG ~ apprenants:", apprenants);
   const [data, setData] = useState<IEffectifWithSituation[]>([]);
   const [localSearch, setLocalSearch] = useState(search || "");
 
