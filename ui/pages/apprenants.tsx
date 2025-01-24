@@ -7,6 +7,7 @@ import { IPaginationFilters, paginationFiltersSchema } from "shared/models/route
 import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
+import Accordion from "@/components/Accordion/Accordion";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -206,6 +207,40 @@ function EffectifsPage() {
             isFetching={isFetching}
           />
         </Box>
+        <Flex gap={12} mt={16} mb={6}>
+          <Box flex="3">
+            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+              Informations sur les données exposées ci-dessus
+            </Heading>
+
+            <Accordion defaultIndex={undefined} useCustomIcons={true} w={2 / 3}>
+              <Accordion.Item title="Qu’est-il attendu des Missions Locales concernant cette mise à disposition des listes ?">
+                <Text>
+                  L’objectif du Tableau de bord de l’apprentissage est l’accompagnement des jeunes apprenants en
+                  difficulté par différents acteurs, dont les Missions Locales. En contactant directement les jeunes,
+                  vous qualifiez leur situation, et identifiez potentiellement un accompagnement à mettre en place. Vos
+                  remontées sur le Tableau de bord permettent à notre équipe de mesurer l’impact de la plateforme et
+                  d’améliorer la qualité des données exposées.
+                </Text>
+              </Accordion.Item>
+              <Accordion.Item title="D’où viennent les données exposées ci-dessus ?">
+                <Text>
+                  Le Tableau de bord expose les données issues des CFA, qui nous partagent les informations sur leurs
+                  apprenants, leur formation et leur statut. Ces données sont envoyées soit par ERP (outil de gestion
+                  des effectifs, comme Ypareo), soit téléversement d’un fichier Excel rempli par leurs soins. Nous
+                  travaillons chaque jour à récolter plus de données fraîches en connectant les CFA à la plateforme.
+                </Text>
+              </Accordion.Item>
+              <Accordion.Item title="Puis-je partager la liste à des collaborateurs ?">
+                <Text>
+                  L’accès à cette liste est strictement personnel et ne peut en aucun cas être partagé. Un compte
+                  utilisateur unique et nominatif doit être créé sur le Tableau de bord de l’apprentissage pour accéder
+                  aux données.
+                </Text>
+              </Accordion.Item>
+            </Accordion>
+          </Box>
+        </Flex>
       </Container>
     </SimplePage>
   );
