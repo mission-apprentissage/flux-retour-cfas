@@ -6,7 +6,6 @@ import {
   findOrganismeById,
   getAllOrganismes,
   getDetailedOrganismeById,
-  updateOneOrganismeRelatedFormations,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesSupportInfoBySiret } from "@/common/actions/organismes/organismes.admin.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
@@ -128,24 +127,6 @@ export default () => {
             }
           : {}),
       });
-    }
-  );
-
-  router.put(
-    "/:id/hydrate",
-    validateRequestMiddleware({
-      params: objectIdSchema("id"),
-    }),
-    async ({ params }, res) => {
-      const { id } = params;
-      const organisme = await findOrganismeById(id as string);
-      if (!organisme) {
-        throw Boom.notFound(`Organisme with id ${id} not found`);
-      }
-
-      const updated = await updateOneOrganismeRelatedFormations(organisme);
-
-      res.json(updated);
     }
   );
 

@@ -35,5 +35,3 @@ export const UAI_REGEX = new RegExp(UAI_REGEX_PATTERN);
 export const YEAR_RANGE_REGEX = new RegExp(YEAR_RANGE_PATTERN);
 export const DERNIER_ORGANISME_UAI_REGEX = new RegExp(DERNIER_ORGANISME_UAI_PATTERN);
 export const YEAR_REGEX = new RegExp(YEAR_PATTERN);
-// TODO: create proper CFD type
-export const isValidCFD = (cfd: unknown): cfd is string => typeof cfd === "string" && CFD_REGEX.test(cfd);
