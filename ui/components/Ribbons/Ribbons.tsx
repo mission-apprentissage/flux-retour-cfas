@@ -1,5 +1,6 @@
-import { Flex, Box, Spinner, BoxProps } from "@chakra-ui/react";
-import React from "react";
+import { CloseIcon } from "@chakra-ui/icons";
+import { Flex, Box, Spinner, IconButton } from "@chakra-ui/react";
+import React, { useState } from "react";
 
 import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "@/theme/components/icons/index";
 
@@ -28,7 +29,6 @@ const Icon = ({ variant, ...rest }) => {
     case "loading":
       return <Spinner {...rest} />;
     case "alert_clear":
-      return <Alert {...rest} />;
     case "alert":
       return <Alert {...rest} />;
     case "info":
@@ -40,13 +40,11 @@ const Icon = ({ variant, ...rest }) => {
   }
 };
 
-type RibbonsProps = {
-  variant?: "success" | "error" | "warning" | "info" | "info_clear" | "loading" | "alert_clear" | "alert" | "unstyled";
-  oneLiner?: boolean;
-  children: React.ReactNode;
-} & BoxProps;
+const Ribbons = ({ variant = "info", oneLiner = true, children, px = 3, py = 3, showClose = false, ...rest }) => {
+  const [isVisible, setIsVisible] = useState(true);
 
-const Ribbons = ({ variant = "info", oneLiner = true, children, px, py, ...rest }: RibbonsProps) => {
+  if (!isVisible) return null;
+
   return (
     <Box width={2 / 3} {...rest}>
       <Flex
@@ -55,6 +53,7 @@ const Ribbons = ({ variant = "info", oneLiner = true, children, px, py, ...rest 
         borderLeftWidth={"4px"}
         borderStyle={"solid"}
         bg={stylesMap[variant].bg}
+        position="relative"
       >
         {oneLiner && (
           <Box h="auto" py={3} px={2} bg={stylesMap[variant].color}>
@@ -68,10 +67,25 @@ const Ribbons = ({ variant = "info", oneLiner = true, children, px, py, ...rest 
           justifyContent="center"
           flexDirection="column"
           py={py || 3}
-          px={px || 3}
+          pl={px || 3}
+          pr={showClose ? 8 : px || 3}
         >
           {children}
         </Flex>
+        {showClose && (
+          <IconButton
+            aria-label="Close ribbon"
+            icon={<CloseIcon w={2} h={2} />}
+            size="xs"
+            position="absolute"
+            top={4}
+            right={1}
+            transform="translateY(-50%)"
+            onClick={() => setIsVisible(false)}
+            variant="ghost"
+            color="black"
+          />
+        )}
       </Flex>
     </Box>
   );

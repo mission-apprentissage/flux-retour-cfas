@@ -46,7 +46,8 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
   const totalPages = useMemo(() => {
     if (!props.total) return 1;
     return Math.ceil(props.total / limit);
-  }, [props.total, page]);
+  }, [props.total, limit]);
+
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set<string>();

@@ -1,14 +1,16 @@
 import { Button, HStack, Stack, Switch, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
+import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import FilterList from "@/components/Filter/FilterList";
+import FilterRadioList from "@/components/Filter/FilterRadioList";
 
 interface ApprenantsFilterPanelProps {
-  filters: Record<string, string[]>;
+  filters: IEffectifsFiltersMissionLocale;
   availableFilters: Record<string, string[]>;
   communes: Commune[];
-  onFilterChange: (filters: Record<string, string[] | boolean>) => void;
+  onFilterChange: (filters: IEffectifsFiltersMissionLocale) => void;
   resetFilters: () => void;
 }
 
@@ -21,21 +23,18 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [aRisque, setARisque] = useState<boolean>(Boolean(filters["a_risque"]));
 
-  const handleCheckboxChange = (filterKey: string, selectedValues: string[]) => {
-    const updatedFilters = { ...filters, [filterKey]: selectedValues };
-    onFilterChange(updatedFilters);
+  const handleCheckboxChange = (filterKey: keyof IEffectifsFiltersMissionLocale, selectedValues: string[]) => {
+    onFilterChange({ ...filters, [filterKey]: selectedValues });
+  };
+
+  const handleRadioChange = (filterKey: keyof IEffectifsFiltersMissionLocale, selectedValue: string | null) => {
+    onFilterChange({ ...filters, [filterKey]: selectedValue ?? undefined });
   };
 
   const handleRiskToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.checked;
     setARisque(newValue);
-
-    const updatedFilters = {
-      ...filters,
-      a_risque: newValue,
-    };
-
-    onFilterChange(updatedFilters);
+    onFilterChange({ ...filters, a_risque: newValue });
   };
 
   return (
@@ -53,14 +52,14 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
             [STATUT_APPRENANT.RUPTURANT]: STATUT_NAME[STATUT_APPRENANT.RUPTURANT],
             [STATUT_APPRENANT.ABANDON]: STATUT_NAME[STATUT_APPRENANT.ABANDON],
           }}
-          selectedValues={filters["statut"] || []}
+          selectedValues={(filters["statut"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("statut", values)}
           isOpen={openFilter === "statut"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "statut" : null)}
           sortOrder="desc"
         />
 
-        <FilterList
+        <FilterRadioList
           key="rqth"
           filterKey="rqth"
           displayName="RQTH"
@@ -68,14 +67,13 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
             true: "Oui",
             false: "Non",
           }}
-          selectedValues={filters["rqth"]?.map(String) || []}
-          onChange={(values) => handleCheckboxChange("rqth", values)}
+          selectedValue={filters["rqth"]?.toString() || ""}
+          onChange={(value) => handleRadioChange("rqth", value)}
           isOpen={openFilter === "rqth"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "rqth" : null)}
-          sortOrder="desc"
         />
 
-        <FilterList
+        <FilterRadioList
           key="mineur"
           filterKey="mineur"
           displayName="Mineur"
@@ -83,11 +81,10 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
             true: "Oui",
             false: "Non",
           }}
-          selectedValues={filters["mineur"] || []}
-          onChange={(values) => handleCheckboxChange("mineur", values)}
+          selectedValue={filters["mineur"]?.toString() || ""}
+          onChange={(value) => handleRadioChange("mineur", value)}
           isOpen={openFilter === "mineur"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "mineur" : null)}
-          sortOrder="desc"
         />
 
         <FilterList
@@ -102,7 +99,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
             7: "Master...",
             8: "Doctorat",
           }}
-          selectedValues={filters["niveaux"] || []}
+          selectedValues={(filters["niveaux"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("niveaux", values)}
           isOpen={openFilter === "niveaux"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "niveaux" : null)}
@@ -114,11 +111,44 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           filterKey="code_insee"
           displayName={"Commune de résidence"}
           options={Object.fromEntries((communes || []).map(({ code_insee, commune }) => [code_insee, commune]))}
-          selectedValues={filters["code_insee"] || []}
+          selectedValues={(filters["code_insee"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("code_insee", values)}
           isOpen={openFilter === "code_insee"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_insee" : null)}
           sortOrder="desc"
+        />
+
+        <FilterRadioList
+          key="last_update_value"
+          filterKey="last_update_value"
+          displayName="Fraîcheur de la donnée"
+          options={{
+            "7-BEFORE": "< 1 semaine",
+            "7-AFTER": "> 1 semaine",
+          }}
+          selectedValue={
+            filters["last_update_value"] && filters["last_update_order"]
+              ? `${filters["last_update_value"]}-${filters["last_update_order"]}`
+              : ""
+          }
+          onChange={(value) => {
+            if (value) {
+              const [lastUpdateValue, lastUpdateOrder] = value.split("-");
+              onFilterChange({
+                ...filters,
+                last_update_value: Number(lastUpdateValue),
+                last_update_order: lastUpdateOrder as "BEFORE" | "AFTER",
+              });
+            } else {
+              onFilterChange({
+                ...filters,
+                last_update_value: undefined,
+                last_update_order: undefined,
+              });
+            }
+          }}
+          isOpen={openFilter === "last_update_value"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "last_update_value" : null)}
         />
 
         <FilterList
@@ -131,13 +161,12 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
               SITUATION_LABEL_ENUM[key as keyof typeof SITUATION_LABEL_ENUM],
             ])
           )}
-          selectedValues={filters["situation"] || []}
+          selectedValues={(filters["situation"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("situation", values)}
           isOpen={openFilter === "situation"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "situation" : null)}
           sortOrder="asc"
         />
-
         <Button variant="link" onClick={resetFilters} fontSize="omega">
           Réinitialiser
         </Button>
@@ -145,7 +174,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
 
       <HStack mt={6} spacing={4} alignItems="center">
         <Text>Afficher les jeunes &quot;à risque&quot;</Text>
-        <Switch variant="icon" isChecked={aRisque} onChange={handleRiskToggle} />
+        <Switch variant="icon" isChecked={aRisque} onChange={(e) => handleRiskToggle(e)} />
       </HStack>
     </Stack>
   );

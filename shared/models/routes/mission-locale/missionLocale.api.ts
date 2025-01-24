@@ -8,8 +8,8 @@ export const effectifsFiltersMissionLocaleSchema = {
   statut: z
     .array(z.enum([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT]).optional())
     .optional(),
-  rqth: z.array(zBooleanStringSchema).optional(),
-  mineur: z.array(zBooleanStringSchema).optional(),
+  rqth: zBooleanStringSchema.optional(),
+  mineur: zBooleanStringSchema.optional(),
   niveaux: z.array(z.string()).optional(),
   code_insee: z.array(z.string()).optional(),
   search: z.string().optional(),

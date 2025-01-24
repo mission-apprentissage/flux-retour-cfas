@@ -75,6 +75,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ source: 1 }, { name: "source" }],
   [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ updated_at: 1 }, { name: "updated_at" }],
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
