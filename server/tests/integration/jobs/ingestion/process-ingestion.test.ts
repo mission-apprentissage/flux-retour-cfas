@@ -386,7 +386,7 @@ describe("Processus d'ingestion", () => {
         ]);
       });
 
-      it("Vérifie l'ingestion et la non mise à jour d'un dossier dont la clé d'unicité est différente d'un dossier déja existant", async () => {
+      it("Vérifie l'ingestion et la mise à jour d'un dossier pour une formation differente", async () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
@@ -419,17 +419,15 @@ describe("Processus d'ingestion", () => {
         await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        await expect(effectifsDb().countDocuments({})).resolves.toBe(2);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check historiques des effectifs
-        const effectifInserted = await effectifsDb().findOne({ "formation.cfd": "50033616" });
+        const effectifInserted = await effectifsDb().findOne({});
         expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.inscrit,
           },
-        ]);
-        expect(effectifForInput?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-30T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.apprenti,

@@ -92,36 +92,14 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
 };
 
 export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>(
-  effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire" | "formation">,
+  effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire">,
   db: Collection<any>
 ): Promise<E | null> => {
-  const effectifs = await db
-    .find({
-      id_erp_apprenant: effectif.id_erp_apprenant,
-      organisme_id: effectif.organisme_id,
-      annee_scolaire: effectif.annee_scolaire,
-    })
-    .toArray();
-
-  const newCfd = effectif.formation?.cfd ?? null;
-  const newRncp = effectif.formation?.rncp ?? null;
-
-  const macthingEffectifs = effectifs.filter((eff) => {
-    const currentCfd = eff.formation?.cfd ?? null;
-    const currentRncp = eff.formation?.rncp ?? null;
-
-    // Si le CFD est null, on considère qu'on met à jour l'effectif
-    const isSameCfd = currentCfd === newCfd || currentCfd === null || newCfd === null;
-    const isSameRncp = currentRncp === newRncp || currentRncp === null || newRncp === null;
-
-    return isSameCfd && isSameRncp;
+  return db.findOne({
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    organisme_id: effectif.organisme_id,
+    annee_scolaire: effectif.annee_scolaire,
   });
-
-  if (macthingEffectifs.length === 0) {
-    return null;
-  }
-
-  return macthingEffectifs[0];
 };
 
 /**
