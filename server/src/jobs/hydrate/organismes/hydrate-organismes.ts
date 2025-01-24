@@ -54,7 +54,7 @@ export const hydrateOrganismesFromReferentiel = async () => {
  * @param {*} organismeFromReferentiel
  */
 const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
-  const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi, enseigne } =
+  const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi, enseigne, contacts } =
     organismeFromReferentiel;
 
   // On insère uniquement les organismes fiable (ayant un SIRET & UAI validé)
@@ -82,6 +82,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         adresse: adresseFormatted,
         ferme: isFerme,
         qualiopi: qualiopi || false,
+        contacts_from_referentiel: contacts,
         // L'organisme sera fiabilisé par le job de fiabilisation qui intervient après
         fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
         est_dans_le_referentiel: uaiMultiplesInTdb
@@ -111,6 +112,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
+      contacts_from_referentiel: contacts,
       est_dans_le_referentiel: uaiMultiplesInTdb
         ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
         : STATUT_PRESENCE_REFERENTIEL.PRESENT,

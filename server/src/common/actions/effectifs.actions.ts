@@ -469,19 +469,29 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
 };
 
 export const buildEffectifForMissionLocale = (
-  effectif: IEffectif & { organisation: IOrganisation } & { cfa_users: Array<IUsersMigration> } & {
+  effectif: IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+    cfa_users: Array<IUsersMigration>;
+  } & {
     a_risque: boolean;
   } & {
     ml_effectif: IMissionLocaleEffectif;
   }
 ): IEffecifMissionLocale => {
-  const users = effectif.cfa_users.map(({ nom, prenom, email, telephone, fonction }) => ({
+  const usersCfa = effectif.cfa_users.map(({ nom, prenom, email, telephone, fonction }) => ({
     nom,
     prenom,
     email,
     telephone,
     fonction,
   }));
+
+  const usersReferentiel =
+    effectif.organisme.contacts_from_referentiel
+      ?.filter(({ confirmé }) => confirmé)
+      .map(({ email }) => ({
+        email,
+      })) || [];
+
   const result = {
     id: effectif._id,
     apprenant: {
@@ -505,7 +515,8 @@ export const buildEffectifForMissionLocale = (
     statut: effectif._computed?.statut,
     formation: effectif.formation,
     organisme: effectif._computed?.organisme,
-    users,
+    users: usersCfa,
+    users_referentiel: usersReferentiel,
     organisme_id: effectif.organisme_id,
     annee_scolaire: effectif.annee_scolaire,
     source: effectif.source,
