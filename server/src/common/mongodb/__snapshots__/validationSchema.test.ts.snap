@@ -986,6 +986,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
+                "mission_locale_id": {
+                  "bsonType": "number",
+                  "description": "Id de mission locale",
+                },
                 "numero": {
                   "bsonType": "int",
                   "description": "N° de la voie",
@@ -3802,6 +3806,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
+                "mission_locale_id": {
+                  "bsonType": "number",
+                  "description": "Id de mission locale",
+                },
                 "numero": {
                   "bsonType": "int",
                   "description": "N° de la voie",
@@ -6086,6 +6094,10 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                 "departement": {
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
+                },
+                "mission_locale_id": {
+                  "bsonType": "number",
+                  "description": "Id de mission locale",
                 },
                 "numero": {
                   "bsonType": "int",

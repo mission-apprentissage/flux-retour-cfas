@@ -597,6 +597,7 @@ describe("Processus d'ingestion", () => {
               commune: "Paris",
               code_insee: "75056",
               departement: "75",
+              mission_locale_id: 609,
               academie: "01",
               region: "11",
             },
