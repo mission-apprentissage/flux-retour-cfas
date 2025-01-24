@@ -8940,7 +8940,6 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "_id",
     "mission_locale_id",
     "effectif_id",
-    "situation_updated_at",
   ],
 }
 `;
