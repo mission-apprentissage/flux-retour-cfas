@@ -211,7 +211,7 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
         <Box>
           <Textarea
             name="commentaires"
-            placeholder="Vos retours sur l’accompagnement du jeune"
+            placeholder="Vos retours précis sur l’accompagnement du jeune"
             maxLength={MAX_CHARACTERS}
             onChange={(e) => handleChange(e.target.value, "commentaires")}
             value={formState.commentaires || ""}

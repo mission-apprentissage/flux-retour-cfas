@@ -4,7 +4,6 @@ import { capitalize } from "lodash-es";
 import { z } from "zod";
 
 import {
-  CODES_STATUT_APPRENANT_ENUM,
   EFFECTIF_DERNIER_SITUATION,
   CFD_REGEX,
   CODE_NAF_REGEX,
@@ -14,6 +13,7 @@ import {
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
   PHONE_REGEX_PATTERN,
+  CODES_STATUT_APPRENANT_ENUM,
 } from "shared";
 
 import { telephoneConverter } from "../../utils/frenchTelephoneNumber";

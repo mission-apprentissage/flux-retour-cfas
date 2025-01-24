@@ -1,8 +1,23 @@
-import { Box, HStack, Text, Table, Tbody, Tr, Td, TableContainer, Flex, Heading } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Text,
+  Table,
+  Tbody,
+  Tr,
+  Td,
+  TableContainer,
+  Flex,
+  Heading,
+  ListItem,
+  UnorderedList,
+} from "@chakra-ui/react";
 import React from "react";
+import { STATUT_NAME } from "shared";
 
 import { calculateAge } from "@/common/utils/dateUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
 
 import ApprenantsDetailsForm from "./ApprenantsDetailsForm";
@@ -39,59 +54,105 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
           <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={3}>
             Ses informations
           </Heading>
-          <Table variant="list">
+          <Table variant="list" width="100%">
             <Tbody>
               <Tr>
-                <Td fontWeight="bold">Nom</Td>
-                <Td>{getValueOrFallback(apprenant.nom)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Nom
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.nom)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Prénom</Td>
-                <Td>{getValueOrFallback(apprenant.prenom)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Prénom
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.prenom)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Date de naissance</Td>
-                <Td>{getValueOrFallback(new Date(apprenant.date_de_naissance).toLocaleDateString())}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Date de naissance
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(new Date(apprenant.date_de_naissance).toLocaleDateString())}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Sexe</Td>
-                <Td>{getValueOrFallback(apprenant.sexe)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Sexe
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.sexe)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Âge</Td>
-                <Td>{getValueOrFallback(calculateAge(apprenant.date_de_naissance))}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Âge
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(calculateAge(apprenant.date_de_naissance))}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Code postal et ville de résidence</Td>
-                <Td>
+                <Td fontWeight="bold" width="50%">
+                  Code postal et ville de résidence
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
                   {getValueOrFallback(
                     apprenant.adresse ? `${apprenant.adresse.code_postal} ${apprenant.adresse.commune}` : null
                   )}
                 </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Téléphone</Td>
-                <Td>{getValueOrFallback(apprenant.telephone)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Téléphone
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.telephone)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Email</Td>
-                <Td>{getValueOrFallback(apprenant.courriel)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Email
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.courriel)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Téléphone du responsable légal</Td>
-                <Td>{getValueOrFallback(apprenant.representant_legal?.telephone)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Téléphone du responsable légal
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.representant_legal?.telephone)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Email du responsable légal</Td>
-                <Td>{getValueOrFallback(apprenant.representant_legal?.courriel)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Email du responsable légal
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.representant_legal?.courriel)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">RQTH</Td>
-                <Td>{getValueOrFallback(apprenant.rqth)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  RQTH
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(apprenant.rqth)}
+                </Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">Dernier statut déclaré</Td>
-                <Td>{getValueOrFallback(lastStatut.valeur)}</Td>
+                <Td fontWeight="bold" width="50%">
+                  Dernier statut déclaré
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  {getValueOrFallback(STATUT_NAME[lastStatut.valeur])}
+                </Td>
               </Tr>
             </Tbody>
           </Table>
@@ -115,7 +176,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                 <Tbody>
                   <Tr>
                     <Td fontWeight="bold">Raison sociale</Td>
-                    <Td>{getValueOrFallback(organisme.nom)}</Td>
+                    <Td whiteSpace="nowrap">{getValueOrFallback(organisme.nom)}</Td>
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Code postal et ville</Td>
@@ -124,7 +185,20 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                   {users.map((user, index) => (
                     <>
                       <Tr>
-                        <Td fontWeight="bold">Compte utilisateur {index}</Td>
+                        <Td fontWeight="bold">
+                          Compte utilisateur {index}{" "}
+                          <InfoTooltip
+                            headerComponent={() => "Compte utilisateur du CFA"}
+                            contentComponent={() => (
+                              <Box>
+                                <Text>
+                                  Coordonnées de la personne ayant créé un compte utilisateur pour son CFA sur le
+                                  Tableau de bord de l’apprentissage.
+                                </Text>
+                              </Box>
+                            )}
+                          />
+                        </Td>
                         <Td>{getValueOrFallback(`${user.prenom} ${user.nom}`)}</Td>
                       </Tr>
                       <Tr>
@@ -185,8 +259,30 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                     </Td>
                   </Tr>
                   <Tr>
-                    <Td fontWeight="bold">Niveau</Td>
-                    <Td>{getValueOrFallback(formation.niveau)}</Td>
+                    <Td fontWeight="bold">
+                      Niveau{" "}
+                      <InfoTooltip
+                        popoverWidth="lg"
+                        headerComponent={() => "Niveaux de formation"}
+                        contentComponent={() => (
+                          <Box>
+                            <Text>Nomenclature des diplômes par niveau :</Text>
+                            <UnorderedList mt={4}>
+                              <ListItem>3 : CAP, BEP</ListItem>
+                              <ListItem>4 : Baccalauréat</ListItem>
+                              <ListItem>5 : DEUG, BTS, DUT, DEUST</ListItem>
+                              <ListItem>6 : Licence, licence professionnelle, BUT, Maîtrise</ListItem>
+                              <ListItem>
+                                7 : Master, diplôme d’études approfondies, diplôme d’études supérieures spécialisées,
+                                diplôme d’ingénieur
+                              </ListItem>
+                              <ListItem>8 : Doctorat, habilitation à diriger des recherches</ListItem>
+                            </UnorderedList>
+                          </Box>
+                        )}
+                      />
+                    </Td>
+                    <Td>{getValueOrFallback(`${formation.niveau ?? ""} ${formation.niveau_libelle ?? ""}`)}</Td>
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Durée théorique en mois</Td>

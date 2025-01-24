@@ -1,7 +1,8 @@
-import { Box, Container, Heading, HStack, VStack, Text, Link, Flex } from "@chakra-ui/react";
+import { Box, Container, Heading, HStack, VStack, Text, Link, Flex, ListItem, UnorderedList } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
 import { z } from "zod";
 
@@ -9,11 +10,12 @@ import { _get } from "@/common/httpClient";
 import Accordion from "@/components/Accordion/Accordion";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/ApprenantsTable";
 
 const DEFAULT_PAGINATION: IPaginationFilters = {
   page: 0,
-  limit: 20,
+  limit: 10,
   sort: "statut",
   order: "desc",
 };
@@ -22,12 +24,12 @@ function EffectifsPage() {
   const router = useRouter();
   const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
-  const [filters, setFilters] = useState<Record<string, string[]>>({
-    rupture: [],
+  const [filters, setFilters] = useState<IEffectifsFiltersMissionLocale>({
+    statut: [],
   });
 
   useEffect(() => {
-    const parseFilter = (key: string, value: string | string[] | undefined) => {
+    const defaultFilterParser = (value) => {
       if (value) {
         const values = Array.isArray(value) ? value : [value];
         try {
@@ -41,20 +43,46 @@ function EffectifsPage() {
           return values.map((v) => decodeURIComponent(v));
         }
       }
-      return undefined;
+    };
+    const parseFilter = (key: string, value: string | string[] | undefined) => {
+      switch (key) {
+        case "rqth":
+        case "mineur":
+        case "last_update_value":
+        case "last_update_order":
+        case "a_risque":
+          return value;
+        case "statut":
+        case "niveaux":
+        case "code_insee":
+        case "situation":
+          return defaultFilterParser(value)?.flat();
+        default:
+          return undefined;
+      }
     };
 
-    const mergedFilters: Record<string, string[]> = { ...filters };
+    const filters: IEffectifsFiltersMissionLocale = {};
     const mergedPagination = { ...pagination };
 
-    const filterKeys = ["statut", "rqth", "mineur", "niveaux", "code_insee", "last_update_value", "situation"];
+    const filterKeys = [
+      "statut",
+      "rqth",
+      "mineur",
+      "niveaux",
+      "code_insee",
+      "last_update_value",
+      "last_update_order",
+      "situation",
+      "a_risque",
+    ];
     const paginationKeys = ["limit", "page", "order", "sort"];
     const searchFilter = router.query.search;
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
       if (parsedFilter) {
-        mergedFilters[key] = parsedFilter.flat();
+        filters[key] = parsedFilter;
       }
     });
 
@@ -65,14 +93,11 @@ function EffectifsPage() {
       }
     });
 
-    if (JSON.stringify(mergedFilters) !== JSON.stringify(filters)) {
-      setFilters(mergedFilters);
-    }
-
     if (searchFilter) {
       setSearch(searchFilter as string);
     }
 
+    setFilters(filters);
     const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
 
     setPagination(zodPagination);
@@ -145,8 +170,27 @@ function EffectifsPage() {
             >
               DECA
             </Link>
+            <InfoTooltip
+              popoverWidth="lg"
+              headerComponent={() => "Source des effectifs en apprentissage"}
+              contentComponent={() => (
+                <Box>
+                  <Text>Les données affichées sur votre espace proviennent :</Text>
+                  <UnorderedList mt={4}>
+                    <ListItem>
+                      soit des CFA qui partagent leurs effectifs au Tableau de bord (via API ou partage de fichier
+                      Excel)
+                    </ListItem>
+                    <ListItem>
+                      soit de la plateforme DECA (DEpôt des Contrats en Alternance) : concerne les effectifs en rupture
+                      de contrat ou sèche (abandons).
+                    </ListItem>
+                  </UnorderedList>
+                </Box>
+              )}
+            />
           </Text>
-          <Ribbons variant="alert">
+          <Ribbons variant="alert" showClose>
             <Flex direction="column" ml={3} gap={2} justifyContent="flexstart">
               <Text color="grey.800">
                 Nous vous mettons à disposition les contacts des jeunes et leur CFA : vous êtes encouragé à les
@@ -158,7 +202,7 @@ function EffectifsPage() {
 
         <Box mt={10} mb={16}>
           <ApprenantsTable
-            apprenants={isFetching ? [] : apprenants?.data}
+            apprenants={apprenants?.data}
             communes={apprenants?.filter}
             filters={filters}
             pagination={pagination}
