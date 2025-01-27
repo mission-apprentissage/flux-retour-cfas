@@ -35,11 +35,6 @@ const organismeResponsable: IOrganisme = {
     bassinEmploi: "7505",
   },
   nom: "MON ORGANISME FORMATEUR",
-  organismesFormateurs: [
-    {
-      _id: idForm,
-    },
-  ],
 };
 
 const organismeFormateur: IOrganisme = {
@@ -62,12 +57,14 @@ const organismeFormateur: IOrganisme = {
     bassinEmploi: "7505",
   },
   nom: "MON ORGANISME RESPONSABLE",
-  organismesResponsables: [
-    {
-      _id: idResp,
-    },
-  ],
 };
+
+organismeResponsable.organismesFormateurs = [
+  { _id: organismeFormateur._id, siret: organismeFormateur.siret, uai: organismeFormateur.uai },
+];
+organismeFormateur.organismesResponsables = [
+  { _id: organismeResponsable._id, siret: organismeResponsable.siret, uai: organismeResponsable.uai },
+];
 
 const organisation = {
   _id: idResp,

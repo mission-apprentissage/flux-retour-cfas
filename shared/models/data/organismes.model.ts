@@ -26,12 +26,8 @@ export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}$
 
 const relationOrganismeSchema = z
   .object({
-    // infos référentiel
-    siret: z.string().optional(),
+    siret: z.string(),
     uai: z.string().nullable().optional(),
-    referentiel: z.boolean().optional(),
-    label: z.string().optional(),
-    sources: z.array(z.string()).optional(),
 
     // infos TDB
     _id: zObjectId.nullable().optional(),
@@ -62,7 +58,7 @@ const organismesCountSchema = z.object({
   uaiNonDeterminee: z.number(),
 });
 
-type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
+export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
 
 export type IOrganismesCount = z.output<typeof organismesCountSchema>;
@@ -92,7 +88,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
-const zOrganisme = z
+export const zOrganisme = z
   .object({
     _id: zObjectId,
     uai: z

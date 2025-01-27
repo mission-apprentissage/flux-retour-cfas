@@ -10632,9 +10632,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "fiable": {
             "bsonType": "bool",
           },
-          "label": {
-            "bsonType": "string",
-          },
           "last_transmission_date": {
             "anyOf": [
               {
@@ -10658,9 +10655,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "raison_sociale": {
             "bsonType": "string",
           },
-          "referentiel": {
-            "bsonType": "bool",
-          },
           "region": {
             "bsonType": "string",
           },
@@ -10676,12 +10670,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "siret": {
             "bsonType": "string",
           },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
           "uai": {
             "bsonType": [
               "string",
@@ -10689,6 +10677,9 @@ exports[`validation-schema > should create validation schema for organismes > or
             ],
           },
         },
+        "required": [
+          "siret",
+        ],
       },
     },
     "organismesResponsables": {
@@ -10732,9 +10723,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "fiable": {
             "bsonType": "bool",
           },
-          "label": {
-            "bsonType": "string",
-          },
           "last_transmission_date": {
             "anyOf": [
               {
@@ -10758,9 +10746,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "raison_sociale": {
             "bsonType": "string",
           },
-          "referentiel": {
-            "bsonType": "bool",
-          },
           "region": {
             "bsonType": "string",
           },
@@ -10776,12 +10761,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "siret": {
             "bsonType": "string",
           },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
           "uai": {
             "bsonType": [
               "string",
@@ -10789,6 +10768,9 @@ exports[`validation-schema > should create validation schema for organismes > or
             ],
           },
         },
+        "required": [
+          "siret",
+        ],
       },
     },
     "qualiopi": {
