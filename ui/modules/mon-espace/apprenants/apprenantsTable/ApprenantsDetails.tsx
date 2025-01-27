@@ -180,7 +180,11 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Code postal et ville</Td>
-                    <Td>{getValueOrFallback(organisme.departement)}</Td>
+                    <Td>
+                      {getValueOrFallback(
+                        organisme.adresse ? `${organisme.adresse.code_postal} ${organisme.adresse.commune}` : null
+                      )}
+                    </Td>
                   </Tr>
                   {users.map((user, index) => (
                     <>

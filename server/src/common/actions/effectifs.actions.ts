@@ -500,13 +500,6 @@ export const buildEffectifForMissionLocale = (
     fonction,
   }));
 
-  const usersReferentiel =
-    effectif.organisme.contacts_from_referentiel
-      ?.filter(({ confirmé }) => confirmé)
-      .map(({ email }) => ({
-        email,
-      })) || [];
-
   const result = {
     id: effectif._id,
     apprenant: {
@@ -529,9 +522,13 @@ export const buildEffectifForMissionLocale = (
     },
     statut: effectif._computed?.statut,
     formation: effectif.formation,
-    organisme: effectif._computed?.organisme,
+    organisme: {
+      nom: effectif.organisme.nom,
+      raison_sociale: effectif.organisme.raison_sociale,
+      adresse: effectif.organisme.adresse,
+      contacts_from_referentiel: effectif.organisme.contacts_from_referentiel,
+    },
     users: usersCfa,
-    users_referentiel: usersReferentiel,
     organisme_id: effectif.organisme_id,
     annee_scolaire: effectif.annee_scolaire,
     source: effectif.source,
