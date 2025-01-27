@@ -290,7 +290,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Code RNCP</Td>
-                    <Td>{getValueOrFallback(formation.code_rncp)}</Td>
+                    <Td>{getValueOrFallback(formation.rncp)}</Td>
                   </Tr>
                 </Tbody>
               </Table>
