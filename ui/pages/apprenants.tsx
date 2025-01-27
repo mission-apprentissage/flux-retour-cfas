@@ -225,17 +225,16 @@ function EffectifsPage() {
                 </Text>
               </Accordion.Item>
               <Accordion.Item title="Quels sont les critères de sélection pour figurer sur la liste des jeunes ?">
-                <Text>
-                  La sélection des jeunes repose sur les critères suivants : Critères géographiques et d&apos;âge :
-                </Text>
-                <UnorderedList pt={2} pb={3} pl={3}>
+                <Text>La sélection des jeunes repose sur les critères suivants :</Text>
+                <Text>Critères géographiques et d&apos;âge :</Text>
+                <UnorderedList pb={2} pl={3}>
                   <ListItem>
                     Être domicilié dans l&apos;un des codes postaux relevant du périmètre de la Mission Locale.
                   </ListItem>
                   <ListItem>Avoir moins de 26 ans (ou plus de 26 ans avec une RQTH).</ListItem>
                 </UnorderedList>
                 <Text>Situation scolaire :</Text>
-                <UnorderedList pt={2} pb={3} pl={3}>
+                <UnorderedList pb={2} pl={3}>
                   <ListItem>Être inscrit sans contrat d’apprentissage.</ListItem>
                   <ListItem>Être en rupture de contrat ou en abandon (après 6 mois sans contrat).</ListItem>
                   <ListItem>Être inscrit sur l’année scolaire en cours.</ListItem>
