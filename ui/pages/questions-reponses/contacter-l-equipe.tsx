@@ -27,7 +27,7 @@ export default function ContacterLequipeDuTdb() {
             Une question ? Quelques éléments de réponse.
           </Heading>
           <Box marginTop="2w">
-            <Link href="/questions-reponses" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            <Link href="/questions-reponses" isUnderlined>
               <Box as="i" className="ri-arrow-left-line" /> Revenir à la page principale
             </Link>
           </Box>
@@ -46,7 +46,13 @@ export default function ContacterLequipeDuTdb() {
                       <Text>
                         Si vous êtes un organisme de formation, vérifiez le paramétrage du logiciel de gestion que vous
                         utilisez, si celui-ci est correct ou si vous avez un doute contactez nous :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -62,7 +68,13 @@ export default function ContacterLequipeDuTdb() {
                       <Text>
                         Merci de votre implication, nous avons régulièrement des tests en cours afin d’améliorer notre
                         produit, n’hésitez pas à nous écrire :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -78,7 +90,13 @@ export default function ContacterLequipeDuTdb() {
                         Cette page d’aide n’est pas exhaustive et sera enrichie grâce à vos questions et vos retours.
                         Vous pouvez nous contacter via le chat lorsqu’il est disponible (en bas à gauche de votre écran)
                         ou nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -93,7 +111,13 @@ export default function ContacterLequipeDuTdb() {
                       <Text>
                         Vous pouvez nous contacter via le chat lorsqu’il est disponible (en bas à gauche de votre écran)
                         ou nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                         .

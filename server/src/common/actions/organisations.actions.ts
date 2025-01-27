@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
-import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
+import { IOrganisationCreate, IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
@@ -32,6 +32,20 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<IOr
     throw Boom.notFound(`missing organisation ${organisationId}`);
   }
   return organisation;
+}
+
+export async function getMissionLocaleByUniqueId(missionLocaleUniqueId: number): Promise<IOrganisationMissionLocale> {
+  const ml = await organisationsDb().findOne<IOrganisationMissionLocale>({
+    ml_id: missionLocaleUniqueId,
+  });
+
+  if (!ml) {
+    throw Boom.notFound(`Mission locale not found`);
+  }
+  if (ml.type !== "MISSION_LOCALE") {
+    throw Boom.notFound(`Organisation is not a mission locale`);
+  }
+  return ml as IOrganisationMissionLocale;
 }
 
 export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<IUsersMigration[]>> {
@@ -92,12 +106,16 @@ export async function listOrganisationPendingInvitations(ctx: AuthContext): Prom
     .toArray();
 }
 
-export async function inviteUserToOrganisation(ctx: AuthContext, email: string): Promise<void> {
+export async function inviteUserToOrganisation(
+  ctx: AuthContext,
+  email: string,
+  organisation_id: ObjectId
+): Promise<void> {
   const existingUser = await usersMigrationDb().findOne({
     email: email,
   });
   if (existingUser) {
-    const sameOrganisation = existingUser.organisation_id.equals(ctx.organisation_id);
+    const sameOrganisation = existingUser.organisation_id.equals(organisation_id);
     throw Boom.badRequest(
       sameOrganisation
         ? "Cet utilisateur est déjà présent dans votre organisation..."
@@ -107,7 +125,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
   const invitationToken = generateKey(50, "hex");
   await invitationsDb().insertOne({
     _id: new ObjectId(),
-    organisation_id: ctx.organisation_id,
+    organisation_id,
     email,
     token: invitationToken,
     author_id: ctx._id,
@@ -323,6 +341,8 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {
   const organisation = await getOrganisationById(organisationId);
   switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return `Mission locale ${organisation.nom}`;
     case "ORGANISME_FORMATION": {
       const organisme = await organismesDb().findOne({
         siret: organisation.siret,

@@ -83,7 +83,6 @@ const zEffectifQueue = z.object({
   ine_apprenant: z.any({ description: apprenantProps.ine.description }),
   email_contact: z.any({ description: apprenantProps.courriel.description }),
   tel_apprenant: z.any({ description: apprenantProps.telephone.description }),
-  code_commune_insee_apprenant: z.any({ description: zAdresse.shape.code_insee.description }), // This field is missing in V3
   siret_etablissement: z.any({ description: organismeProps.siret.description }), // This field is missing in V3
   libelle_court_formation: z.any(), // This field is missing in V3
   libelle_long_formation: z.any({ description: formationProps.libelle_long.description }), // This field is missing in V3
@@ -99,8 +98,13 @@ const zEffectifQueue = z.object({
   // OPTIONAL FIELDS
   has_nir: z.boolean({ description: "Identification nationale securité social" }).nullish(),
   adresse_apprenant: z.any({ description: "Adresse de l'apprenant" }),
+
   code_postal_apprenant: z.any({ description: "Code postal de l'apprenant" }),
   code_postal_de_naissance_apprenant: z.any({ description: apprenantProps.code_postal_de_naissance.description }),
+  code_commune_insee_apprenant: z.any({ description: zAdresse.shape.code_insee.description }),
+  code_commune_insee_de_naissance_apprenant: z.any({
+    description: zAdresse.shape.code_insee.description,
+  }),
   sexe_apprenant: z.any({ description: apprenantProps.sexe.description }),
   rqth_apprenant: z.any({ description: "Reconnaissance de la Qualité de Travailleur Handicapé de l'apprenant" }),
   date_rqth_apprenant: z.any({ description: "Date de reconnaissance du RQTH de l'apprenant" }),

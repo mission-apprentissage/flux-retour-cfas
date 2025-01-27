@@ -15,6 +15,8 @@ fileignoreconfig:
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
   checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
+- filename: server/tests/jest/setupNock.ts
+  checksum: 206a5da7f948759335ac5d4ffe6e9eb45d00b8c142bc984cddbc10ccb7f6282b
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
 - filename: ui/common/utils/televersement.ts
@@ -34,11 +36,11 @@ fileignoreconfig:
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 3bcfa6a077baaf2011d152e3a0c44175f2a44d6f83c4486575cccc3f93f4b2e4
 - filename: ui/modules/dashboard/IndicateursOrganisme.tsx
-  checksum: 7be002672d4416488c495035efee32ace010bf48346f0b1562487db6d84f2c9c
+  checksum: 60ea265023cfe6901c8223a7414bf4c2382a0890f5a549e4b1803010af72af42
 - filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
   checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx
-  checksum: 9cb75a32b1fb7c42d111aa642b679d8506be96df46a6f80b5a748abd128472d8
+  checksum: fc5102f0eb920c874e57dbb8eb3c0bee09fd1ec7da1414a39654d8cff7134cda
 - filename: ui/modules/organismes/OrganismesTable.tsx
   checksum: c7ff0a828fc1a5e11d8aba340333231ecb9ad5a58a1dcbfeb055ca7c45c03902
 - filename: ui/modules/organismes/Televersement.tsx

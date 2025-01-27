@@ -24,6 +24,15 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   ],
 ];
 
+export const zContactReferentiel = z
+  .object({
+    email: z.string().optional(),
+    confirmé: z.boolean().optional(),
+    date_collecte: z.string().optional(),
+    sources: z.array(z.string()).optional(),
+  })
+  .nonstrict();
+
 const zOrganismeReferentiel = z.object({
   _id: zObjectId,
   siret: z.string(),
@@ -79,19 +88,7 @@ const zOrganismeReferentiel = z.object({
     .optional(),
   qualiopi: z.boolean().optional(),
   lieux_de_formation: z.array(z.object({ uai: z.string().optional(), uai_fiable: z.boolean().optional() }).nonstrict()),
-  contacts: z
-    .array(
-      z
-        .object({
-          email: z.string().optional(),
-          confirmé: z.boolean().optional(),
-          date_collecte: z.string().optional(),
-          sources: z.array(z.string()).optional(),
-        })
-        .nonstrict()
-    )
-    .describe("Formations de cet organisme")
-    .optional(),
+  contacts: z.array(zContactReferentiel).describe("Contacts du referentiel").optional(),
   relations: z
     .array(
       z
@@ -108,6 +105,7 @@ const zOrganismeReferentiel = z.object({
     .optional(),
 });
 
+export type IContactReferentiel = z.output<typeof zContactReferentiel>;
 export type IOrganismeReferentiel = z.output<typeof zOrganismeReferentiel>;
 
 export default { zod: zOrganismeReferentiel, indexes, collectionName };
