@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: ui/modules/dashboard/IndicateursOrganisme.tsx
+  checksum: 60ea265023cfe6901c8223a7414bf4c2382a0890f5a549e4b1803010af72af42
+- filename: ui/modules/organismes/ListeOrganismesPage.tsx
+  checksum: fc5102f0eb920c874e57dbb8eb3c0bee09fd1ec7da1414a39654d8cff7134cda
 - filename: .bin/commands.sh
   checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
 - filename: .bin/scripts/get-vault-password-client.sh

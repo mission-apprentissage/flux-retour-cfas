@@ -82,7 +82,7 @@ export default function QuestionsReponses() {
                       Transformation publique, en terme de visibilité sur les chiffres clés de l’apprentissage. <br />{" "}
                       <br />
                       Pour en savoir plus sur les utilisateurs du tableau de bord de l’apprentissage, consultez{" "}
-                      <Link href="/organisme-formation/aide" color="bluefrance" textDecoration="underLine">
+                      <Link href="/organisme-formation/aide" color="bluefrance" isUnderlined>
                         Qui peut consulter les données de votre organisme ? <Box as="i" className="ri-links-line" />{" "}
                       </Link>
                     </Text>
@@ -110,7 +110,7 @@ export default function QuestionsReponses() {
                         simple paramétrage suffit pour vous brancher au tableau de bord. La démarche n’est à faire
                         qu’une seule fois et est estimée à 10 minutes. Pour ce faire, [sélectionner l’ERP que vous
                         utilisez] et
-                        <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation/transmettre" color="bluefrance" isUnderlined>
                           {" "}
                           téléchargez le pas à pas correspondant <Box as="i" className="ri-links-line" />
                         </Link>
@@ -120,7 +120,13 @@ export default function QuestionsReponses() {
                         Agate Les travaux de développement sont en cours, vous pourrez prochainement transmettre
                         directement via votre ERP, n’hésitez pas à nous transmettre vos coordonnées pour que nous vous
                         tenions informés dès que cette fonctionnalité sera disponible :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                       </ListItem>
@@ -130,7 +136,13 @@ export default function QuestionsReponses() {
                         acteurs publics, celle-ci vous sera proposée dès le quatrième trimestre 2022. Nous avons besoin
                         d’organismes pour tester cette solution, pour vous inscrire ou simplement pour être informé de
                         l’ouverture de ce service, n’hésitez pas à nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                       </ListItem>

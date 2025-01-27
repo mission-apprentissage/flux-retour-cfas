@@ -62,7 +62,7 @@ function ImposturesPage() {
             href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
             color="action-high-blue-france"
             isExternal
-            borderBottom="1px"
+            isUnderlined
           >
             référentiel
             <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />

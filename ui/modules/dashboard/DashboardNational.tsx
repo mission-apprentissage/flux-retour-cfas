@@ -124,7 +124,7 @@ const DashboardTransverse = () => {
           <IndicateursGrid loading />
         )}
 
-        <Link href="/indicateurs" color="action-high-blue-france" borderBottom="1px">
+        <Link href="/indicateurs" color="action-high-blue-france" isUnderlined>
           Explorer plus d’indicateurs
           <ArrowForwardIcon />
         </Link>

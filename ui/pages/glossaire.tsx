@@ -12,8 +12,8 @@ import {
   UnorderedList,
   ListItem,
 } from "@chakra-ui/react";
-import Link from "next/link";
 
+import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 
 export default function Glossaire() {
@@ -62,7 +62,7 @@ export default function Glossaire() {
                 <Flex gap="2" flexDirection="column" alignItems="left">
                   <Text as="p">
                     Les codes INSEE des communes françaises sont consultables sur{" "}
-                    <Link href="https://www.insee.fr/fr/accueil" target="_blank" rel="noopener noreferrer">
+                    <Link href="https://www.insee.fr/fr/accueil" isExternal isUnderlined color="blueFrance">
                       www.insee.fr
                     </Link>
                     . Cette nomenclature est mise à jour chaque année.
@@ -79,8 +79,9 @@ export default function Glossaire() {
                     Le{" "}
                     <Link
                       href="https://catalogue-apprentissage.intercariforef.org"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       Code Formation Diplôme
                     </Link>{" "}
@@ -109,9 +110,10 @@ export default function Glossaire() {
                   <Text as="p">
                     La{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       plateforme DECA
                     </Link>
@@ -154,9 +156,10 @@ export default function Glossaire() {
                   <Text as="p">
                     La donnée “lieu de formation” provient des Carif-Oref. Si cette donnée est inconnue ou incorrecte,{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       contactez votre Carif-Oref
                     </Link>
@@ -173,9 +176,10 @@ export default function Glossaire() {
                   <Text as="p">
                     Trois natures d’organismes peuvent être observées via le{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       Catalogue des offres de formation en apprentissage
                     </Link>{" "}
@@ -229,9 +233,10 @@ export default function Glossaire() {
                     Si la nature d’un organisme est affichée “Inconnue” sur le Tableau de bord de l’apprentissage, ce
                     dernier doit se rapprocher de son Carif-Oref Régional pour faire{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       référencer son offre de formation en apprentissage
                     </Link>
@@ -252,17 +257,19 @@ export default function Glossaire() {
                   <Text as="p">
                     La donnée &quot;NDA&quot; est disponible sur le{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://referentiel.apprentissage.onisep.fr/organismes"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       Référentiel UAI-SIRET
                     </Link>{" "}
                     de l’ONISEP et provient de la{" "}
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://www.data.gouv.fr/fr/datasets/liste-publique-des-organismes-de-formation-l-6351-7-1-du-code-du-travail/"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       Liste Publique des Organismes de Formations
                     </Link>
@@ -299,17 +306,19 @@ export default function Glossaire() {
                     <ListItem>
                       répertoriés dans le{" "}
                       <Link
-                        target="_blank"
-                        rel="noopener noreferrer"
                         href="https://catalogue-apprentissage.intercariforef.org"
+                        isExternal
+                        isUnderlined
+                        color="blueFrance"
                       >
                         Catalogue des ofrres de formations en apprentissage
                       </Link>{" "}
                       (base des Carif-Oref) et{" "}
                       <Link
-                        target="_blank"
-                        rel="noopener noreferrer"
                         href="https://referentiel.apprentissage.onisep.fr/organismes"
+                        isExternal
+                        isUnderlined
+                        color="blueFrance"
                       >
                         Référentiel UAI-SIRET
                       </Link>
@@ -342,7 +351,7 @@ export default function Glossaire() {
                   </Text>
                   <Text as="p">
                     Pour savoir si un organisme de formation est certifié Qualiopi, consultez l’
-                    <Link target="_blank" rel="noopener noreferrer" href="https://annuaire-entreprises.data.gouv.fr/">
+                    <Link isExternal isUnderlined color="blueFrance" href="https://annuaire-entreprises.data.gouv.fr/">
                       Annuaire des Entreprises
                     </Link>
                     , dans l’onglet “Labels et certificats”.
@@ -402,9 +411,10 @@ export default function Glossaire() {
                     Pour plus d’information sur la certification et son éligibilité à l’apprentissage, consulter le site
                     Internet de France Compétences (
                     <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
                       href="https://www.francecompetences.fr/reguler-le-marche/certification-professionnelle/"
+                      isExternal
+                      isUnderlined
+                      color="blueFrance"
                     >
                       www.francecompetences.fr/reguler-le-marche/certification-professionnelle
                     </Link>
@@ -418,9 +428,10 @@ export default function Glossaire() {
               <Td>
                 Notre nomenclature se base sur le{" "}
                 <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
                   href="https://www.francetravail.fr/employeur/vos-recrutements/le-rome-et-les-fiches-metiers.html"
+                  isExternal
+                  isUnderlined
+                  color="blueFrance"
                 >
                   Code ROME
                 </Link>
@@ -440,19 +451,20 @@ export default function Glossaire() {
                 administrations et organismes publics. Lorsqu’un organisme de formation change de domiciliation, il doit
                 obtenir un nouveau Siret, qu’il devra mettre à jour sur son compte{" "}
                 <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
                   href="https://info.monactiviteformation.emploi.gouv.fr/"
+                  isExternal
+                  isUnderlined
+                  color="blueFrance"
                 >
                   Mon Activité Formation
                 </Link>
                 , et le signaler à son Carif-Oref, la DREETS, le Rectorat de son Académie et OPCO. Pour plus
                 d’informations, contacter l’{" "}
-                <Link target="_blank" rel="noopener noreferrer" href="https://www.insee.fr/fr/accueil">
+                <Link isExternal isUnderlined color="blueFrance" href="https://www.insee.fr/fr/accueil">
                   INSEE
                 </Link>{" "}
                 ou se connecter via le{" "}
-                <Link target="_blank" rel="noopener noreferrer" href="https://procedures.inpi.fr/?/">
+                <Link isExternal isUnderlined color="blueFrance" href="https://procedures.inpi.fr/?/">
                   Guichet Unique
                 </Link>{" "}
                 (INPI).
@@ -466,14 +478,15 @@ export default function Glossaire() {
                 universités, etc.). Il est utilisé pour les identifier dans différentes bases de données et systèmes
                 administratifs. La donnée “UAI” affichée sur le Tableau de bord provient du{" "}
                 <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
                   href="https://referentiel.apprentissage.onisep.fr/organismes"
+                  isExternal
+                  isUnderlined
+                  color="blueFrance"
                 >
                   Référentiel UAI-SIRET
                 </Link>{" "}
                 des OFA-CFA (ONISEP) et de la base de données{" "}
-                <Link target="_blank" rel="noopener noreferrer" href="https://dep.adc.education.fr/acce/index.php">
+                <Link isExternal isUnderlined color="blueFrance" href="https://dep.adc.education.fr/acce/index.php">
                   RAMSESE
                 </Link>{" "}
                 et notamment exploité par la DEC avant d’être validée au niveau de chaque territoire.
