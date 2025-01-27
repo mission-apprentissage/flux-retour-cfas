@@ -180,7 +180,11 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Code postal et ville</Td>
-                    <Td>{getValueOrFallback(organisme.departement)}</Td>
+                    <Td>
+                      {getValueOrFallback(
+                        organisme.adresse ? `${organisme.adresse.code_postal} ${organisme.adresse.commune}` : null
+                      )}
+                    </Td>
                   </Tr>
                   {users.map((user, index) => (
                     <>
@@ -290,7 +294,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Code RNCP</Td>
-                    <Td>{getValueOrFallback(formation.code_rncp)}</Td>
+                    <Td>{getValueOrFallback(formation.rncp)}</Td>
                   </Tr>
                 </Tbody>
               </Table>

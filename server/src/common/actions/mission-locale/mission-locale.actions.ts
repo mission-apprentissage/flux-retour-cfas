@@ -248,7 +248,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         let: { id: "$organisme_id" },
         pipeline: [
           { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          { $project: { _id: 0, contacts_from_referentiel: 1 } },
+          { $project: { _id: 0, contacts_from_referentiel: 1, nom: 1, raison_sociale: 1, adresse: 1 } },
         ],
         as: "organisme",
       },
