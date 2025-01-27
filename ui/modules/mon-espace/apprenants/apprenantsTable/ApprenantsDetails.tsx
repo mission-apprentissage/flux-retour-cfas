@@ -236,7 +236,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                 <Tbody>
                   <Tr>
                     <Td fontWeight="bold">Intitulé</Td>
-                    <Td>{getValueOrFallback(formation.intitule)}</Td>
+                    <Td>{getValueOrFallback(formation.libelle_long)}</Td>
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Date d&apos;entrée en formation</Td>

@@ -510,6 +510,8 @@ export const buildEffectifForMissionLocale = (
       telephone: effectif.apprenant.telephone,
       courriel: effectif.apprenant.courriel,
       rqth: effectif.apprenant.rqth,
+      sexe: effectif.apprenant.sexe,
+      representant_legal: effectif.apprenant.representant_legal,
     },
     situation_data: {
       situation: effectif.ml_effectif?.situation,
