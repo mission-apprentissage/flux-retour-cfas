@@ -30,9 +30,8 @@ const SuggestFeature = () => {
           display="inline-flex"
           alignItems="center"
           href={AUTRE_AMELIORATION_ELEMENT_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
           isExternal
+          isUnderlined
         >
           <Box as="i" className="ri-send-plane-fill" verticalAlign="middle" marginRight="1w" />
           Nous écrire

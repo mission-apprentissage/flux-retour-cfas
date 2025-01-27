@@ -155,7 +155,7 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
               </Text>
               <Text color="#3A3A3A">
                 Veuillez{" "}
-                <Link variant="link" color="bluefrance" href={EFF_EDITION_ELEMENT_LINK} isExternal>
+                <Link variant="link" color="bluefrance" href={EFF_EDITION_ELEMENT_LINK} isExternal isUnderlined>
                   contacter
                 </Link>{" "}
                 l&apos;équipe du Tableau de bord de l&apos;apprentissage.

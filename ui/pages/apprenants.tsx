@@ -1,4 +1,4 @@
-import { Box, Container, Heading, HStack, VStack, Text, Link, Flex, ListItem, UnorderedList } from "@chakra-ui/react";
+import { Box, Container, Heading, HStack, VStack, Text, Flex, ListItem, UnorderedList } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
 import Accordion from "@/components/Accordion/Accordion";
+import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -156,7 +157,7 @@ function EffectifsPage() {
             Sources : CFA et{" "}
             <Link
               isExternal
-              textDecoration="underLine"
+              isUnderlined
               color="bluefrance"
               href="https://efpconnect.emploi.gouv.fr/auth/realms/efp/protocol/cas/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
             >

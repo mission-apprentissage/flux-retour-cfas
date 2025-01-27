@@ -316,6 +316,7 @@ function SIFAPage(props: SIFAPageProps) {
                     isExternal
                     aria-label="Plateforme SIFA (nouvelle fenêtre)"
                     plausibleGoal="clic_depot_plateforme_sifa"
+                    isUnderlined
                   >
                     plateforme SIFA
                     <ExternalLinkLine w=".7rem" h=".7rem" ml={1} />
@@ -341,6 +342,7 @@ function SIFAPage(props: SIFAPageProps) {
                 variant="link"
                 href="/InstructionsSIFA_31122024.pdf"
                 isExternal
+                isUnderlined
                 aria-label="Télécharger le fichier d'instruction SIFA pour 2024 (PDF, 1.5 Mo)"
                 plausibleGoal="telechargement_fichier_instruction_sifa"
               >
@@ -426,8 +428,8 @@ function SIFAPage(props: SIFAPageProps) {
                       href={
                         "https://aide.cfas.apprentissage.beta.gouv.fr/fr/category/organisme-de-formation-cfa-fhh03f/"
                       }
-                      textDecoration={"underline"}
                       isExternal
+                      isUnderlined
                       plausibleGoal="clic_sifa_faq"
                     >
                       FAQ dédiée

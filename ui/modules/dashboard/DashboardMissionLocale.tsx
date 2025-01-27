@@ -72,7 +72,7 @@ const DashboardMissionLocale = () => {
           effectifs issus de la base{" "}
           <Link
             isExternal
-            textDecoration="underLine"
+            isUnderlined
             color="bluefrance"
             href="https://efpconnect.emploi.gouv.fr/auth/realms/efp/protocol/cas/login?TARGET=https%3A%2F%2Fdeca.alternance.emploi.gouv.fr%3A443%2Fdeca-app%2F"
           >
@@ -136,9 +136,9 @@ const DashboardMissionLocale = () => {
             />
           </GridItem>
         </Grid>
-        <Link href="/apprenants" color="action-high-blue-france" borderBottom="1px" mt={6}>
+        <Link isUnderlined href="/apprenants" color="action-high-blue-france" mt={6}>
           Voir la liste nominative des apprenants
-          <ArrowForwardIcon />
+          <ArrowForwardIcon ml={1} />
         </Link>
       </Container>
     </Box>
