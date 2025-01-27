@@ -12,7 +12,7 @@ const updateEffectifWithMissionLocale = async (effectif: WithId<IEffectif | IEff
     return null;
   }
 
-  const communeInfo = await getCommune(codePostalOrCodeInsee);
+  const communeInfo = await getCommune({ codeInsee: code_insee, codePostal: code_postal });
   if (!communeInfo?.mission_locale) {
     return null;
   }
