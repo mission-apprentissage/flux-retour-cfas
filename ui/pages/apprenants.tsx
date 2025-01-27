@@ -224,6 +224,32 @@ function EffectifsPage() {
                   d’améliorer la qualité des données exposées.
                 </Text>
               </Accordion.Item>
+              <Accordion.Item title="Quels sont les critères de sélection pour figurer sur la liste des jeunes ?">
+                <Text>
+                  La sélection des jeunes repose sur les critères suivants : Critères géographiques et d&apos;âge :
+                </Text>
+                <UnorderedList pt={2} pb={3} pl={3}>
+                  <ListItem>
+                    Être domicilié dans l&apos;un des codes postaux relevant du périmètre de la Mission Locale.
+                  </ListItem>
+                  <ListItem>Avoir moins de 26 ans (ou plus de 26 ans avec une RQTH).</ListItem>
+                </UnorderedList>
+                <Text>Situation scolaire :</Text>
+                <UnorderedList pt={2} pb={3} pl={3}>
+                  <ListItem>Être inscrit sans contrat d’apprentissage.</ListItem>
+                  <ListItem>Être en rupture de contrat ou en abandon (après 6 mois sans contrat).</ListItem>
+                  <ListItem>Être inscrit sur l’année scolaire en cours.</ListItem>
+                </UnorderedList>
+                <Text>
+                  Les informations peuvent provenir soit du CFA (transmission directe), soit via la plateforme DECA
+                  (Dépôt des Contrats d’Alternance).
+                </Text>
+                <Text>
+                  Veuillez noter que certains jeunes peuvent être enlevés de la liste si leur statut est modifié dans
+                  l&apos;ERP du CFA. Par exemple, un jeune est indiqué comme “sans contrat” à la date du jour mais peut
+                  démarrer un contrat demain et être en statut “apprenti” : il n’apparaîtra alors plus dans la liste.
+                </Text>
+              </Accordion.Item>
               <Accordion.Item title="D’où viennent les données exposées ci-dessus ?">
                 <Text>
                   Le Tableau de bord expose les données issues des CFA, qui nous partagent les informations sur leurs
