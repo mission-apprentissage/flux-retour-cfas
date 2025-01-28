@@ -630,20 +630,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     Vous ne trouvez pas la réponse à vos questions ?
                   </Text>
                   <Flex gap={6}>
-                    <Link variant="link" display="inline-flex" href={CRISP_FAQ} isExternal width={"fit-content"}>
+                    <Link display="inline-flex" href={CRISP_FAQ} isExternal isUnderlined width={"fit-content"}>
                       Aide
-                      <Box className="ri-arrow-right-line" />
                     </Link>
-                    <Link
-                      variant="link"
-                      display="inline-flex"
-                      href="/referencement-organisme"
-                      isExternal
-                      isUnderlined
-                      width={"fit-content"}
-                    >
+                    <Link display="inline-flex" href="/referencement-organisme" isUnderlined width={"fit-content"}>
                       Voir la page de référencement
-                      <Box className="ri-arrow-right-line" />
+                      <Box className="ri-arrow-right-line" ml={1} />
                     </Link>
                   </Flex>
                 </Flex>

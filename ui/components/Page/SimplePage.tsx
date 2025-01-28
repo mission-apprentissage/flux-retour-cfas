@@ -1,9 +1,8 @@
-import { Box, Container } from "@chakra-ui/react";
+import { Box, Container, Link } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 import { CRISP_FAQ } from "shared";
 
-import Link from "@/components/Links/Link";
 import { Interrogation } from "@/theme/components/icons";
 
 import Footer from "./components/Footer";
