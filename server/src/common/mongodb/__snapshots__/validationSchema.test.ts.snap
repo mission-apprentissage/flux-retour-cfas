@@ -708,7 +708,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "mission_locale_id": {
-                  "bsonType": "number",
+                  "bsonType": [
+                    "number",
+                    "null",
+                  ],
                   "description": "Id de mission locale",
                 },
                 "numero": {
@@ -987,7 +990,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "mission_locale_id": {
-                  "bsonType": "number",
+                  "bsonType": [
+                    "number",
+                    "null",
+                  ],
                   "description": "Id de mission locale",
                 },
                 "numero": {
@@ -3528,7 +3534,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "mission_locale_id": {
-                  "bsonType": "number",
+                  "bsonType": [
+                    "number",
+                    "null",
+                  ],
                   "description": "Id de mission locale",
                 },
                 "numero": {
@@ -3807,7 +3816,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "mission_locale_id": {
-                  "bsonType": "number",
+                  "bsonType": [
+                    "number",
+                    "null",
+                  ],
                   "description": "Id de mission locale",
                 },
                 "numero": {
@@ -6096,7 +6108,10 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
                 "mission_locale_id": {
-                  "bsonType": "number",
+                  "bsonType": [
+                    "number",
+                    "null",
+                  ],
                   "description": "Id de mission locale",
                 },
                 "numero": {
