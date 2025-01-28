@@ -35,7 +35,7 @@ export default function CommentFonctionneLeTdb() {
             Une question ? Quelques éléments de réponse.
           </Heading>
           <Box marginTop="2w">
-            <Link href="/questions-reponses" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            <Link href="/questions-reponses" isUnderlined>
               <Box as="i" className="ri-arrow-left-line" /> Revenir à la page principale
             </Link>
           </Box>
@@ -80,7 +80,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consultez{" "}
-                        <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation/transmettre" color="bluefrance" isUnderlined>
                           Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                           <Box as="i" className="ri-links-line" />
                         </Link>
@@ -103,14 +103,20 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consultez le détail sur la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                         <br />
                         <br />
                         L’AIPD (Analyse d’Impact Relative à la Protection des Données) est disponible sur simple demande
                         à l’équipe du tableau de bord :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -136,7 +142,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -161,7 +167,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -190,7 +196,13 @@ export default function CommentFonctionneLeTdb() {
                         {PRODUCT_NAME} , l’équipe est à votre écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -215,7 +227,7 @@ export default function CommentFonctionneLeTdb() {
                           simple paramétrage suffit pour vous brancher au tableau de bord. La démarche n’est à faire
                           qu’une seule fois et est estimée à 10 minutes. Pour ce faire, [sélectionner l’ERP que vous
                           utilisez] et téléchargez le pas à pas correspondant :{" "}
-                          <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
+                          <Link href="/organisme-formation/transmettre" color="bluefrance" isUnderlined>
                             Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                             <Box as="i" className="ri-links-line" />
                           </Link>
@@ -225,7 +237,13 @@ export default function CommentFonctionneLeTdb() {
                           Valsoftware, Agate Les travaux de développement sont en cours, vous pourrez prochainement
                           transmettre directement via votre ERP, n’hésitez pas à nous transmettre vos coordonnées pour
                           que nous vous tenions informés dès que cette fonctionnalité sera disponible :{" "}
-                          <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          <Link
+                            href={SUPPORT_PAGE_ACCUEIL}
+                            color="bluefrance"
+                            whiteSpace="nowrap"
+                            isExternal
+                            isUnderlined
+                          >
                             contactez-nous
                           </Link>
                           .
@@ -236,7 +254,13 @@ export default function CommentFonctionneLeTdb() {
                           acteurs publics, celle-ci vous sera proposée dès le quatrième trimestre 2022. Nous avons
                           besoin d’organismes pour tester cette solution, pour vous inscrire ou simplement pour être
                           informé de l’ouverture de ce service, n’hésitez pas à nous contacter :{" "}
-                          <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                          <Link
+                            href={SUPPORT_PAGE_ACCUEIL}
+                            color="bluefrance"
+                            whiteSpace="nowrap"
+                            isExternal
+                            isUnderlined
+                          >
                             contactez-nous
                           </Link>
                         </ListItem>
@@ -250,7 +274,7 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation/transmettre" color="bluefrance" isUnderlined>
                           Consultez le pas à pas pour vous accompagner dans le paramétrage de votre ERP.
                           <Box as="i" className="ri-links-line" />
                         </Link>
@@ -295,7 +319,8 @@ export default function CommentFonctionneLeTdb() {
                         <Link
                           href="https://referentiel.apprentissage.beta.gouv.fr/"
                           color="bluefrance"
-                          textDecoration="underLine"
+                          isUnderlined
+                          isExternal
                         >
                           https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
@@ -323,7 +348,8 @@ export default function CommentFonctionneLeTdb() {
                         <Link
                           href="https://referentiel.apprentissage.beta.gouv.fr/"
                           color="bluefrance"
-                          textDecoration="underLine"
+                          isUnderlined
+                          isExternal
                         >
                           https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
@@ -378,7 +404,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus consulter{" "}
-                        <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation/transmettre" color="bluefrance" isUnderlined>
                           Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                           <Box as="i" className="ri-links-line" />
                         </Link>
@@ -405,7 +431,13 @@ export default function CommentFonctionneLeTdb() {
                         Nous avons actuellement plusieurs travaux et recherches en cours afin d’améliorer le tableau de
                         bord et les fonctionnalités à disposition. Si vous souhaitez y participer ou nous faire un
                         retour, vous pouvez nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                       </Text>
@@ -427,7 +459,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour plus d’informations, consultez la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -447,7 +479,13 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Si toutefois vous n’aviez pas reçu ou n’aviez pas accès à cette URL, vous pouvez en faire la
                         demande en contactant l’équipe du tableau de bord :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isExternal
+                          isUnderlined
+                        >
                           contactez-nous
                         </Link>{" "}
                         en précisant l’UAI de votre établissement et l’adresse courriel enregistrée auprès de nos
@@ -476,7 +514,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>

@@ -29,12 +29,37 @@ import { ExitIcon } from "@/theme/components/icons/ExitIcon";
 import { Parametre } from "@/theme/components/icons/Parametre";
 import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
+enum MENU_ENTRIES {
+  INFOS = "INFOS",
+  ROLES = "ROLES",
+  TRANSMISSIONS = "TRANSMISSIONS",
+  ADMIN = "ADMIN",
+  ALL_TRANSMISSIONS = "ALL_TRANSMISSIONS",
+  USERS = "USERS",
+  SEARCH_ORGANISME = "SEARCH_ORGANISME",
+  FUSION_ORGANISMES = "FUSION_ORGANISMES",
+  MAINTENANCE = "MAINTENANCE",
+  IMPOSTURES = "IMPOSTURES",
+}
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
 
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
+  };
+
+  const hasRight = (entry) => {
+    switch (entry) {
+      case MENU_ENTRIES.ROLES:
+        return organisationType !== "MISSION_LOCALE";
+      case MENU_ENTRIES.TRANSMISSIONS:
+        return organisationType === "ORGANISME_FORMATION";
+      case MENU_ENTRIES.ADMIN:
+        return organisationType === "ADMINISTRATEUR";
+      default:
+        false;
+    }
   };
 
   return (
@@ -72,15 +97,17 @@ const UserMenu = () => {
               <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
                 Informations
               </MenuItem>
-              <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
-                Rôles et habilitations
-              </MenuItem>
-              {organisationType === "ORGANISME_FORMATION" && (
+              {hasRight(MENU_ENTRIES.ROLES) && (
+                <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
+                  Rôles et habilitations
+                </MenuItem>
+              )}
+              {hasRight(MENU_ENTRIES.TRANSMISSIONS) && (
                 <MenuItem href="/transmissions" icon={<Parametre boxSize={4} />}>
                   Transmissions
                 </MenuItem>
               )}
-              {organisationType === "ADMINISTRATEUR" && (
+              {hasRight(MENU_ENTRIES.ADMIN) && (
                 <MenuGroup title="Administration">
                   <MenuItem href="/admin/transmissions" icon={<Parametre boxSize={4} />}>
                     Toutes les transmissions

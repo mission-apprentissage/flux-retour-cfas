@@ -55,6 +55,7 @@ export type IOrganismeCreate = Partial<
     | "fiabilisation_statut"
     | "ferme"
     | "qualiopi"
+    | "contacts_from_referentiel"
     | "prepa_apprentissage"
     | "created_at"
     | "updated_at"

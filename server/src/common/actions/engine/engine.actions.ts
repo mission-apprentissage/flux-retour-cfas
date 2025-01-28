@@ -62,66 +62,57 @@ export const buildNewHistoriqueStatutApprenant = (
 export const completeEffectifAddress = async <T extends { apprenant: Partial<IEffectif["apprenant"]> }>(
   effectifData: T
 ): Promise<T> => {
-  if (!effectifData.apprenant?.adresse) {
-    return effectifData;
-  }
-  const codePostalOrCodeInsee =
-    effectifData.apprenant?.adresse?.code_insee || effectifData.apprenant?.adresse?.code_postal;
+  const computeAdresse = async (insee, postal) => {
+    if (!insee && !postal) {
+      return {};
+    }
+    const communeInfo = await getCommune({
+      codeInsee: insee,
+      codePostal: postal,
+    });
 
-  if (!codePostalOrCodeInsee) {
-    return effectifData;
-  }
+    return communeInfo
+      ? {
+          commune: communeInfo.nom,
+          code_insee: communeInfo.code.insee,
+          code_postal: postal ?? communeInfo.code.postaux[0],
+          departement: communeInfo.departement.codeInsee,
+          academie: communeInfo.academie.code,
+          region: communeInfo.region.codeInsee,
+          mission_locale_id: communeInfo.mission_locale?.id,
+        }
+      : {};
+  };
+
   const effectifDataWithAddress = cloneDeep(effectifData);
 
-  const communeInfo = await getCommune(codePostalOrCodeInsee);
-  if (!communeInfo) {
-    return effectifData;
-  }
-
-  effectifDataWithAddress.apprenant.adresse = stripEmptyFields({
+  effectifDataWithAddress.apprenant.adresse = {
     ...effectifDataWithAddress.apprenant.adresse,
-    commune: communeInfo.nom,
-    code_insee: communeInfo.code.insee,
-    code_postal: communeInfo.code.postaux[0],
-    departement: communeInfo.departement.codeInsee,
-    academie: communeInfo.academie.code,
-    region: communeInfo.region.codeInsee,
-  });
+    ...(await computeAdresse(
+      effectifData.apprenant?.adresse?.code_insee,
+      effectifData.apprenant?.adresse?.code_postal
+    )),
+  };
 
+  effectifDataWithAddress.apprenant.adresse_naissance = {
+    ...effectifDataWithAddress.apprenant.adresse_naissance,
+    ...(await computeAdresse(
+      effectifData.apprenant?.adresse_naissance?.code_insee,
+      effectifData.apprenant?.adresse_naissance?.code_postal
+    )),
+  };
   return effectifDataWithAddress;
 };
 
 export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>(
-  effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire" | "formation">,
+  effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire">,
   db: Collection<any>
 ): Promise<E | null> => {
-  const effectifs = await db
-    .find({
-      id_erp_apprenant: effectif.id_erp_apprenant,
-      organisme_id: effectif.organisme_id,
-      annee_scolaire: effectif.annee_scolaire,
-    })
-    .toArray();
-
-  const newCfd = effectif.formation?.cfd ?? null;
-  const newRncp = effectif.formation?.rncp ?? null;
-
-  const macthingEffectifs = effectifs.filter((eff) => {
-    const currentCfd = eff.formation?.cfd ?? null;
-    const currentRncp = eff.formation?.rncp ?? null;
-
-    // Si le CFD est null, on considère qu'on met à jour l'effectif
-    const isSameCfd = currentCfd === newCfd || currentCfd === null || newCfd === null;
-    const isSameRncp = currentRncp === newRncp || currentRncp === null || newRncp === null;
-
-    return isSameCfd && isSameRncp;
+  return db.findOne({
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    organisme_id: effectif.organisme_id,
+    annee_scolaire: effectif.annee_scolaire,
   });
-
-  if (macthingEffectifs.length === 0) {
-    return null;
-  }
-
-  return macthingEffectifs[0];
 };
 
 /**
@@ -187,13 +178,16 @@ export const mapEffectifQueueToEffectif = (
       nom: dossierApprenant.nom_apprenant,
       prenom: dossierApprenant.prenom_apprenant,
       date_de_naissance: dossierApprenant.date_de_naissance_apprenant,
-      code_postal_de_naissance: dossierApprenant.code_postal_de_naissance_apprenant,
       courriel: dossierApprenant.email_contact,
       telephone: dossierApprenant.tel_apprenant,
       adresse: stripEmptyFields({
         code_insee: dossierApprenant.code_commune_insee_apprenant,
         code_postal: dossierApprenant.code_postal_apprenant,
         complete: dossierApprenant.adresse_apprenant,
+      }),
+      adresse_naissance: stripEmptyFields({
+        code_insee: dossierApprenant.code_commune_insee_de_naissance_apprenant,
+        code_postal: dossierApprenant.code_postal_de_naissance_apprenant,
       }),
       // Optional v3 fields
       ...stripEmptyFields<PartialDeep<IEffectif["apprenant"]>>({

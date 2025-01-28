@@ -1,10 +1,11 @@
-import { Box, Heading, Flex, Divider, Link, Button, Text } from "@chakra-ui/react";
+import { Box, Heading, Flex, Divider, Button, Text, Link as ChakraLink } from "@chakra-ui/react";
 import React, { ReactNode } from "react";
 
 import { BonusAvatar, DocumentFile, InformationAvatar } from "@/theme/components/icons";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
 import InformationMessage from "../InformationMessage/InformationMessage";
+import Link from "../Links/Link";
 import { BasicModal } from "../Modals/BasicModal";
 import Ribbons from "../Ribbons/Ribbons";
 import Tag from "../Tag/Tag";
@@ -102,20 +103,20 @@ const AidePageDataResponsibility = ({
   <Flex justify="space-between" align="center" my={4}>
     <Flex align="center" gap={4}>
       Responsable de la donnée :
-      <Link
+      <ChakraLink
         href={dataResponsibilityLink}
         isExternal
         _hover={{ textDecoration: "none" }}
         onClick={onDataResponsibilityClick}
       >
         <Tag colorScheme="bluelight_tag" primaryText={dataResponsibilityText} rounded="full" isLink />
-      </Link>{" "}
+      </ChakraLink>{" "}
     </Flex>
     <Flex align="center" gap={4}>
       Modification de la donnée :
-      <Link href={modificationLink} isExternal _hover={{ textDecoration: "none" }} onClick={onModificationClick}>
+      <ChakraLink href={modificationLink} isExternal _hover={{ textDecoration: "none" }} onClick={onModificationClick}>
         <Tag colorScheme="bluelight_tag" primaryText={modificationText} rounded="full" isLink />
-      </Link>
+      </ChakraLink>
     </Flex>
   </Flex>
 );
@@ -178,7 +179,7 @@ const AidePageLink = ({ href, children, ...props }: AideLinkProps) => {
   const isExternal = href.startsWith("https") || props.isExternal;
 
   return (
-    <Link href={href} isExternal={isExternal} textDecoration="underLine" display="inline" {...props}>
+    <Link href={href} isExternal={isExternal} isUnderlined display="inline" {...props}>
       {children}
     </Link>
   );

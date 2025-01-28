@@ -66,7 +66,7 @@ export const apprenantSchema = {
     label: "Date de naissance :",
     showInfo: true,
   },
-  "apprenant.code_postal_de_naissance": {
+  "apprenant.adresse_naissance.code_postal": {
     label: "Code postal de naissance :",
     validateMessage: "n'est pas un code postal valide",
     showInfo: true,
