@@ -192,6 +192,8 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     {
       $match: {
         "apprenant.adresse.code_insee": { $exists: true },
+        "apprenant.adresse.code_postal": { $exists: true },
+        "apprenant.adresse.commune": { $exists: true },
       },
     },
     {
