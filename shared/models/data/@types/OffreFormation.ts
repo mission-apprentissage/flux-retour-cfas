@@ -14,7 +14,6 @@ type OptionalAdresse = {
 };
 
 interface Etablissement {
-  id_catalogue: string | null;
   siret: string;
   uai: string | null;
   enseigne: string | null;
@@ -23,7 +22,6 @@ interface Etablissement {
   adresse: OptionalAdresse;
   raison_sociale: string | null | undefined;
   date_creation: string | null | undefined;
-  reference: boolean;
 }
 
 export interface OffreFormation {
