@@ -46,8 +46,6 @@ import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/
 import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
-import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
-
 export type IOrganismeCreate = Partial<
   Pick<
     IOrganisme,
@@ -136,17 +134,6 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
 };
 
 /**
- * Méthode de récupération d'un organisme depuis un uai
- * Previously getFromUai
- */
-export const findOrganismeByUai = async (uai: string, projection = {}) => {
-  if (!uai) {
-    throw Error("missing parameter `uai`");
-  }
-  return await organismesDb().findOne({ uai }, { projection });
-};
-
-/**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
  */
 export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
@@ -181,25 +168,6 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) 
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
-  );
-
-  return updated.value as WithId<IOrganisme>;
-};
-
-/**
- * Fonction de MAJ d'un organisme en appelant les API externes
- */
-export const updateOneOrganismeRelatedFormations = async (organisme: WithId<IOrganisme>) => {
-  // Construction de l'arbre des formations de l'organisme
-  const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
-
-  // Eventuellement on pourrait récupérer des informations via API Entreprise
-  // const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
-
-  const updated = await organismesDb().findOneAndUpdate(
-    { _id: organisme._id },
-    { $set: { relatedFormations, updated_at: new Date() } },
     { returnDocument: "after" }
   );
 

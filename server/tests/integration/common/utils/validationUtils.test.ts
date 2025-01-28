@@ -1,25 +1,7 @@
-import { isValidCFD } from "shared";
 import { telephoneConverter } from "shared/utils/frenchTelephoneNumber";
 import { it, expect, describe } from "vitest";
 
 describe("Validation Utils", () => {
-  describe("validation du CFD", () => {
-    [
-      { input: null, output: false },
-      { input: undefined, output: false },
-      { input: 0, output: false },
-      { input: "", output: false },
-      { input: "ABC123", output: false },
-      { input: "ABC123456", output: false },
-      { input: "12345678", output: true },
-      { input: "ABCDEFGH", output: true },
-    ].forEach(({ input, output }) => {
-      it(`Vérifie qu'un CFD de valeur ${JSON.stringify(input)} est ${output ? "valide" : "invalide"}`, () => {
-        expect(isValidCFD(input)).toBe(output);
-      });
-    });
-  });
-
   describe("validation des numeros de telephone", () => {
     const testCases = [
       { input: null, output: null },
