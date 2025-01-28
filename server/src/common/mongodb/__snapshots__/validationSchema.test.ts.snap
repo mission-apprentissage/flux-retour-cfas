@@ -11211,10 +11211,6 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date de la première transmission de données",
     },
-    "formations": {
-      "bsonType": "array",
-      "maxItems": 0,
-    },
     "has_transmission_errors": {
       "bsonType": "bool",
       "description": "Indique si cet organisme a une transmissions d'effectif en erreur",
@@ -11272,9 +11268,6 @@ exports[`validation-schema > should create validation schema for organismes > or
         "lieu_formation",
         "inconnue",
       ],
-    },
-    "natureValidityWarning": {
-      "bsonType": "bool",
     },
     "nom": {
       "bsonType": "string",
@@ -11490,10 +11483,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           },
         },
       },
-    },
-    "prepa_apprentissage": {
-      "bsonType": "bool",
-      "description": "fait de la prépa apprentissage",
     },
     "qualiopi": {
       "bsonType": "bool",

@@ -30,7 +30,6 @@ export interface OrganismeFiltersListVisibilityProps {
   showFilterNature?: boolean;
   showFilterTransmission?: boolean;
   showFilterQualiopi?: boolean;
-  showFilterPrepaApprentissage?: boolean;
   showFilterLocalisation?: boolean;
   showFilterEtat?: boolean;
 }
@@ -171,16 +170,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
             filterLabel="Certification qualiopi"
             value={organismesFilters.qualiopi}
             onChange={(qualiopi) => updateState({ qualiopi })}
-          />
-        )}
-
-        {/* FILTRE PREPA APPRENTISSAGE */}
-        {props?.showFilterPrepaApprentissage && (
-          <FiltreYesNo
-            fieldName="prepa_apprentissage"
-            filterLabel="Prépa-apprentissage"
-            value={organismesFilters.prepa_apprentissage}
-            onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
           />
         )}
 
