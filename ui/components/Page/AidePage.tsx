@@ -195,7 +195,7 @@ const AidePageFileCard = ({
   onClick,
 }: AidePageFileCardProps) => {
   return (
-    <Link href={downloadLink} isExternal width="37%" _hover={{ textDecoration: "none" }} onClick={onClick}>
+    <ChakraLink href={downloadLink} isExternal width="37%" _hover={{ textDecoration: "none" }} onClick={onClick}>
       <Flex
         borderWidth="1px"
         borderBottomWidth="3px"
@@ -223,7 +223,7 @@ const AidePageFileCard = ({
           </Flex>
         </Flex>
       </Flex>
-    </Link>
+    </ChakraLink>
   );
 };
 
