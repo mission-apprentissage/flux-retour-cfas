@@ -1043,7 +1043,17 @@
                     "code_postal_de_naissance_apprenant": {
                       "type": "string",
                       "pattern": "^[0-9]{5}$",
-                      "description": "Code postal de l'apprenant"
+                      "description": "Code postal de naissance de l'apprenant"
+                    },
+                    "code_commune_insee_apprenant": {
+                      "type": "string",
+                      "pattern": "^[0-9]{5}$",
+                      "description": "Code commune insee de l'apprenant"
+                    },
+                    "code_commune_insee_de_naissance_apprenant": {
+                      "type": "string",
+                      "pattern": "^[0-9]{5}$",
+                      "description": "Code commune insee de naissance de l'apprenant"
                     },
                     "sexe_apprenant": {
                       "type": "string",
@@ -1475,6 +1485,16 @@
                             "type": "string",
                             "pattern": "^[0-9]{5}$",
                             "description": "Code postal de l'apprenant"
+                          },
+                          "code_commune_insee_apprenant": {
+                            "type": "string",
+                            "pattern": "^[0-9]{5}$",
+                            "description": "Code commune insee de l'apprenant"
+                          },
+                          "code_commune_insee_de_naissance_apprenant": {
+                            "type": "string",
+                            "pattern": "^[0-9]{5}$",
+                            "description": "Code commune insee de naissance de l'apprenant"
                           },
                           "sexe_apprenant": {
                             "type": "string",
