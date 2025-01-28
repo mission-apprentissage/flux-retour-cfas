@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import type { ICommune } from "api-alternance-sdk";
+import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -82,10 +82,18 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
   }
 };
 
-export const getCommune = async (codePostal: string | null | undefined): Promise<ICommune | null> => {
-  if (!codePostal) return null;
+export const getCommune = async ({
+  codePostal,
+  codeInsee,
+}: {
+  codePostal?: string | null;
+  codeInsee?: string | null;
+}): Promise<ICommune | null> => {
+  const code = codePostal || codeInsee;
 
-  const result = await apiAlternanceClient.geographie.rechercheCommune({ code: codePostal }).catch((error) => {
+  if (!code) return null;
+
+  const communeList = await apiAlternanceClient.geographie.rechercheCommune({ code }).catch((error) => {
     if (config.env === "test") throw error;
 
     logger.error(`getCommune: something went wrong while requesting code postal "${codePostal}": ${error.message}`, {
@@ -100,6 +108,49 @@ export const getCommune = async (codePostal: string | null | undefined): Promise
     return [];
   });
 
-  // Returns the first commune
-  return result[0] ?? null;
+  if (!communeList || communeList.length === 0) {
+    return null;
+  }
+
+  // Full match
+  if (codePostal && codeInsee) {
+    const commune = communeList.find(({ code }) => code.postaux.includes(codePostal) && code.insee === codeInsee);
+    if (commune) {
+      return commune;
+    }
+  }
+
+  // Partial match code insee
+  if (codeInsee) {
+    const communeByInsee = communeList.find(({ code }) => code.insee === codeInsee);
+
+    if (communeByInsee) {
+      return communeByInsee;
+    }
+
+    return null;
+  }
+
+  // Partial match code postal
+  if (codePostal) {
+    const communeByPostal = communeList.find(({ code }) => code.postaux.includes(codePostal));
+
+    if (communeByPostal) {
+      return communeByPostal;
+    }
+
+    return null;
+  }
+
+  return null;
+};
+
+export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
+  try {
+    const result = await apiAlternanceClient.geographie.listMissionLocales();
+    return result;
+  } catch (error: any) {
+    captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));
+    return null;
+  }
 };

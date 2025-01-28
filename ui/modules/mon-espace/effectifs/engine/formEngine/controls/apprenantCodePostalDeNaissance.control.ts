@@ -4,9 +4,9 @@ import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.s
 
 export const apprenantCodePostalDeNaissanceControl = [
   {
-    deps: ["apprenant.code_postal_de_naissance"],
+    deps: ["apprenant.adresse_naissance.code_postal"],
     process: async ({ values, signal }) => {
-      const codePostal = values.apprenant.code_postal_de_naissance;
+      const codePostal = values.apprenant.adresse_naissance.code_postal;
 
       // l'api table_correspondance ne gère pas les codes postaux de type 99XXX
       // solution de contournement afin d'accepter ces valeurs

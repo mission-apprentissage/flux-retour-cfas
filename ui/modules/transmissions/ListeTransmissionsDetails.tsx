@@ -33,12 +33,7 @@ const ListeTransmissionsDetails = ({ organisme, date, modePublique = false }: Li
           Rapport du {formatDateNumericDayMonthYear(date)}
         </Heading>
         <HStack mt={10} mb={10}>
-          <Link
-            href={computeBackLinkUrl()}
-            color="action-high-blue-france"
-            borderBottom="1px"
-            _hover={{ textDecoration: "none" }}
-          >
+          <Link href={computeBackLinkUrl()} color="action-high-blue-france" isUnderlined>
             <ArrowBackIcon mr={2} />
             Retour au tableau des rapports
           </Link>
@@ -61,7 +56,7 @@ const ListeTransmissionsDetails = ({ organisme, date, modePublique = false }: Li
                   <InfoIcon mr={2} />
                   Les établissements ci-dessous sont rattachés aux vôtres. Si vous avez une question, ou constatez une
                   anomalie, veuillez{" "}
-                  <Link variant="link" color="inherit" href={EFFECTIFS_GROUP} isExternal>
+                  <Link variant="link" color="inherit" href={EFFECTIFS_GROUP} isExternal isUnderlined>
                     nous contacter
                   </Link>
                   .

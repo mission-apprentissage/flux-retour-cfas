@@ -2,7 +2,7 @@ export const requiredFieldsSifa = [
   "apprenant.nom",
   "apprenant.prenom",
   "apprenant.date_de_naissance",
-  "apprenant.code_postal_de_naissance",
+  "apprenant.adresse_naissance.code_postal",
   "apprenant.sexe",
   "apprenant.derniere_situation",
   "apprenant.dernier_organisme_uai",

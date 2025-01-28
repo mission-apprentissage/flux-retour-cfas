@@ -21,7 +21,7 @@ const BandeauDuplicatsEffectifs: React.FC<BandeauDuplicatsEffectifsProps> = ({ t
         <Text color="grey.600" mr={6} mb={4}>
           Une action de suppression des doublons d&apos;effectifs est nécessaire.
         </Text>
-        <Link variant="whiteBg" href="effectifs/doublons" plausibleGoal="clic_verifier_doublons_effectifs">
+        <Link variant="whiteBg" href="effectifs/doublons" plausibleGoal="clic_verifier_doublons_effectifs" isUnderlined>
           Vérifier et supprimer
         </Link>
       </Box>

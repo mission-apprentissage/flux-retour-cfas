@@ -312,12 +312,7 @@ function Indicateurs({
             <Box>
               <Text as="p">
                 La donnée «&nbsp;Nature&nbsp;» est déduite des relations entre les organismes (base des Carif-Oref). Le{" "}
-                <Link
-                  isExternal
-                  href="https://catalogue-apprentissage.intercariforef.org/"
-                  textDecoration="underLine"
-                  display="inline"
-                >
+                <Link isExternal href="https://catalogue-apprentissage.intercariforef.org/" isUnderlined>
                   Catalogue des offres de formations en apprentissage
                 </Link>{" "}
                 identifie trois natures :
@@ -331,16 +326,11 @@ function Indicateurs({
                 Une nature “inconnue” signifie que l’organisme n’a pas déclaré (ou de manière incomplète) son offre de
                 formation dans la base de son Carif-Oref : l’organisme doit référencer ses formations en apprentissage
                 auprès du{" "}
-                <Link
-                  isExternal
-                  href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                  textDecoration="underLine"
-                  display="inline"
-                >
+                <Link isExternal href="https://www.intercariforef.org/referencer-son-offre-de-formation" isUnderlined>
                   Carif-Oref régional{" "}
                 </Link>{" "}
                 ou se rapprocher du{" "}
-                <Link isExternal href="/pdf/Carif-Oref-contacts.pdf" textDecoration="underLine" display="inline">
+                <Link isExternal href="/pdf/Carif-Oref-contacts.pdf" isUnderlined display="inline">
                   service dédié aux formations
                 </Link>
                 .
@@ -378,7 +368,7 @@ function Indicateurs({
               </Text>
               <Text>
                 En cas de déménagement, une demande d’un nouveau Siret (via le{" "}
-                <Link isExternal href="https://procedures.inpi.fr/?/" textDecoration="underLine" display="inline">
+                <Link isExternal href="https://procedures.inpi.fr/?/" isUnderlined display="inline">
                   Guichet Unique
                 </Link>
                 ) doit être réalisée et ce dernier doit être communiqué aux différents acteurs publics.
@@ -388,7 +378,7 @@ function Indicateurs({
                 <Link
                   isExternal
                   href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organismez"
-                  textDecoration="underLine"
+                  isUnderlined
                   display="inline"
                 >
                   page de Référencement
@@ -424,13 +414,7 @@ function Indicateurs({
               <ListItem>
                 Si l&apos;Unité Administrative Immatriculée (UAI) est répertoriée comme « Non déterminée » alors que
                 l&apos;organisme en possède une, veuillez la communiquer en écrivant à{" "}
-                <Link
-                  href="mailto:referentiel-uai-siret@onisep.fr"
-                  target="_blank"
-                  textDecoration="underline"
-                  isExternal
-                  whiteSpace="nowrap"
-                >
+                <Link href="mailto:referentiel-uai-siret@onisep.fr" isUnderlined isExternal whiteSpace="nowrap">
                   referentiel-uai-siret@onisep.fr
                 </Link>{" "}
                 avec la fiche UAI, afin qu&apos;elle soit mise à jour. L&apos;absence de ce numéro bloque
@@ -442,8 +426,7 @@ function Indicateurs({
                 de l&apos;académie où se situe le CFA. Plus d&apos;informations dans la{" "}
                 <Link
                   href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organisme"
-                  target="_blank"
-                  textDecoration="underline"
+                  isUnderlined
                   isExternal
                   whiteSpace="nowrap"
                 >

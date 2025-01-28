@@ -27,13 +27,7 @@ const ReseauAutre = () => {
           Merci de votre patience et de l’intérêt que vous portez au tableau de bord de l’apprentissage.
         </Text>
         <HStack>
-          <Link
-            href="/"
-            color="bluefrance"
-            borderBottom="1px solid"
-            mt={8}
-            _hover={{ cursor: "pointer", textDecoration: "none", borderBottom: "2px solid" }}
-          >
+          <Link href="/" color="bluefrance" isUnderlined mt={8}>
             <Box as="i" className="ri-arrow-left-line" marginRight="1w" />
             Retour à l’accueil
           </Link>
