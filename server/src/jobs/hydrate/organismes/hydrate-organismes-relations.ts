@@ -3,7 +3,6 @@ import { ObjectId, type AnyBulkWriteOperation } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import { IOrganisme, type IFormationCatalogue, type IRelatedOrganisme } from "shared/models";
 
-import { isOrganismeFiable } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
@@ -147,8 +146,8 @@ export const hydrateOrganismesRelations = async () => {
       departement: organisme.adresse?.departement,
       academie: organisme.adresse?.academie,
       reseaux: organisme.reseaux,
-      fiable: isOrganismeFiable(organisme),
-      nature: organisme.nature,
+      fiable: organisme.fiabilisation_statut === "FIABLE",
+      nature: getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap),
       last_transmission_date: organisme.last_transmission_date,
       ferme: organisme.ferme,
     });
@@ -195,13 +194,7 @@ function getOrganismeRelationBulkWriteOperation(
     throw Boom.internal(`Organisme ${organismeKey} not found in organismeInfosBySIRETAndUAI`);
   }
 
-  const sesFormateurs = responsableToFormateursMap.get(organismeKey)?.formateurs ?? [];
-  const sesResponsables = formateurToResponsablesMap.get(organismeKey)?.responsables ?? [];
-
-  const nature = getNature({
-    sesFormateursCount: sesFormateurs.length,
-    sesResponsablesCount: sesResponsables.length,
-  });
+  const nature = getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap);
 
   const organismesFormateurs = buildOrganismeFormateurs(
     organisme,
@@ -231,22 +224,24 @@ function getOrganismeRelationBulkWriteOperation(
   };
 }
 
-function getNature({
-  sesFormateursCount,
-  sesResponsablesCount,
-}: {
-  sesFormateursCount: number;
-  sesResponsablesCount: number;
-}): IOrganisme["nature"] {
-  if (sesFormateursCount > 0 && sesResponsablesCount > 0) {
+function getNature(
+  organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>,
+  responsableToFormateursMap: Map<string, IReponsableToFormateurs>
+): IOrganisme["nature"] {
+  const organismeKey = getOrganismeKey(organisme);
+  const sesFormateurs = responsableToFormateursMap.get(organismeKey)?.formateurs ?? [];
+  const sesResponsables = formateurToResponsablesMap.get(organismeKey)?.responsables ?? [];
+
+  if (sesFormateurs.length > 0 && sesResponsables.length > 0) {
     return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR;
   }
 
-  if (sesResponsablesCount > 0) {
+  if (sesResponsables.length > 0) {
     return NATURE_ORGANISME_DE_FORMATION.FORMATEUR;
   }
 
-  if (sesFormateursCount > 0) {
+  if (sesFormateurs.length > 0) {
     return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
   }
 
