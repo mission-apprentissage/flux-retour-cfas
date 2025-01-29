@@ -8,7 +8,7 @@ import {
   effectifsFiltersMissionLocaleSchema,
   IEffectifsFiltersMissionLocale,
 } from "shared/models/routes/mission-locale/missionLocale.api";
-import { WithPagination } from "shared/models/routes/pagination";
+import { IPaginationFilters, WithPagination } from "shared/models/routes/pagination";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -399,4 +399,139 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
   });
 
   return organisationsDb().findOne({ _id: orga.insertedId });
+};
+
+export const getPaginatedOrganismesByMissionLocaleId = async (
+  missionLocaleId: number,
+  organismesFiltersMissionLocale: IPaginationFilters
+) => {
+  const { page = 0, limit = 20 } = organismesFiltersMissionLocale;
+  const statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT];
+  const organismeMissionLocaleAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    {
+      $group: {
+        _id: "$organisme_id",
+        inscrits: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] }, 1, 0],
+          },
+        },
+        abandons: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] }, 1, 0],
+          },
+        },
+        rupturants: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
+          },
+        },
+      },
+    },
+    {
+      $facet: {
+        pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+        data: [
+          { $skip: page * limit },
+          { $limit: limit },
+          { $addFields: { stringify_organisme_id: { $toString: "$_id" } } },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "stringify_organisme_id",
+              foreignField: "organisme_id",
+              as: "organisation",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisation",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "organismes",
+              localField: "_id",
+              foreignField: "_id",
+              as: "organisme",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              let: { id: "$organisation._id" },
+              from: "usersMigration",
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ["$organisation_id", "$$id"],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    nom: 1,
+                    prenom: 1,
+                    email: 1,
+                    telephone: 1,
+                    fonction: 1,
+                  },
+                },
+              ],
+              as: "cfa_users",
+            },
+          },
+          {
+            $addFields: {
+              formationsCount: {
+                $cond: {
+                  if: { $isArray: "$organisme.relatedFormations" },
+                  then: { $size: "$organisme.relatedFormations" },
+                  else: 0,
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              nom: "$organisme.nom",
+              enseigne: "$organisme.enseigne",
+              siret: "$organisme.siret",
+              formationsCount: "$formationsCount",
+              users: "$cfa_users",
+              inscrits: 1,
+              abandons: 1,
+              rupturants: 1,
+              contacts_from_referentiel: "$organisme.contacts_from_referentiel",
+            },
+          },
+        ],
+      },
+    },
+  ];
+
+  const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
+
+  if (!resultOrganismes) {
+    return { pagination: { total: 0, page, limit }, data: [] };
+  }
+
+  const { pagination, data } = resultOrganismes;
+
+  if (pagination) {
+    pagination.lastPage = Math.ceil(pagination.total / limit);
+  }
+
+  return { pagination, data };
 };
