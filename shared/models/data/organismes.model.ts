@@ -18,8 +18,6 @@ import {
 } from "../../constants";
 import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
 
-import { zContactReferentiel } from "./organismesReferentiel.model";
-
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
@@ -193,7 +191,13 @@ export const zOrganisme = z
       .optional(),
     ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
     qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
-    contacts_from_referentiel: z.array(zContactReferentiel).optional(),
+    contacts_from_referentiel: z.array(
+      z.object({
+        email: z.string().email(),
+        confirmation_referentiel: z.boolean(),
+        sources: z.array(z.string()),
+      })
+    ),
     // TODO [tech] TO REMOVE LATER
     access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
     api_key: z.string({ description: "API key pour envoi de données" }).optional(),

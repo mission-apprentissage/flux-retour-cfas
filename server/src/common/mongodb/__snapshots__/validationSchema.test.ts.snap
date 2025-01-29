@@ -10209,14 +10209,11 @@ exports[`validation-schema > should create validation schema for organismes > or
     "contacts_from_referentiel": {
       "bsonType": "array",
       "items": {
-        "additionalProperties": true,
+        "additionalProperties": false,
         "bsonType": "object",
         "properties": {
-          "confirmé": {
+          "confirmation_referentiel": {
             "bsonType": "bool",
-          },
-          "date_collecte": {
-            "bsonType": "string",
           },
           "email": {
             "bsonType": "string",
@@ -10228,6 +10225,11 @@ exports[`validation-schema > should create validation schema for organismes > or
             },
           },
         },
+        "required": [
+          "email",
+          "confirmation_referentiel",
+          "sources",
+        ],
       },
     },
     "created_at": {
@@ -10266,7 +10268,6 @@ exports[`validation-schema > should create validation schema for organismes > or
       "enum": [
         "absent",
         "present",
-        "present_uai_multiples_dans_tdb",
       ],
     },
     "ferme": {
@@ -11283,6 +11284,7 @@ exports[`validation-schema > should create validation schema for organismes > or
   "required": [
     "_id",
     "siret",
+    "contacts_from_referentiel",
     "updated_at",
     "created_at",
   ],
