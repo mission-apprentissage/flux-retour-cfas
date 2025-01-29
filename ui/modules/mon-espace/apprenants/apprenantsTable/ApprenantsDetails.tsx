@@ -38,8 +38,8 @@ const getLastStatut = (statut: any) => {
   return lastStatut;
 };
 
-const getSourceText = (source: SourceApprenant, updatedAt: Date) => {
-  const formattedDate = new Date(updatedAt).toLocaleDateString("fr-FR");
+const getSourceText = (source: SourceApprenant, transmittedAt: Date) => {
+  const formattedDate = new Date(transmittedAt).toLocaleDateString("fr-FR");
   const sourceLabel = source === SOURCE_APPRENANT.DECA ? "API DECA" : "CFA";
   const prefix = source === SOURCE_APPRENANT.DECA ? "l’" : "le ";
 
@@ -48,11 +48,16 @@ const getSourceText = (source: SourceApprenant, updatedAt: Date) => {
       Données transmises par {prefix}
       <Text as="span" fontWeight="bold">
         {sourceLabel}
-      </Text>{" "}
-      le{" "}
-      <Text as="span" fontWeight="bold">
-        {formattedDate}
       </Text>
+      {transmittedAt && (
+        <>
+          {" "}
+          le{" "}
+          <Text as="span" fontWeight="bold">
+            {formattedDate}
+          </Text>
+        </>
+      )}
       .
     </Text>
   ) : (
@@ -68,7 +73,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
   const formation = row.original.formation;
   const users = row.original.users;
   const lastStatut = getLastStatut(statut);
-  const sourceText = getSourceText(row.original.source, row.original.updated_at);
+  const sourceText = getSourceText(row.original.source, row.original.transmitted_at);
 
   return (
     <Box borderWidth="2px" borderStyle="solid" borderColor="#E3E3FD" p={4} mt={3}>
