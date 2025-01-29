@@ -12,9 +12,6 @@ import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 
 export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
-  // On reset tous les organismes comme non présents dans le référentiel
-  await resetOrganismesReferentielPresence();
-
   let nbOrganismeCreated = 0;
   let nbOrganismeUpdated = 0;
 
@@ -30,13 +27,18 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
     }
   }
 
+  // On reset tous les organismes comme non présents dans le référentiel
+  let nbOrganismesSuppr = await resetOrganismesReferentielPresence(startTime);
+
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
+  logger.info(`----> ${nbOrganismesSuppr} organismes supprimés de l'API`);
 
   return {
     nbOrganismesCrees: nbOrganismeCreated,
     nbOrganismesMaj: nbOrganismeUpdated,
+    nbOrganismesSuppr,
   };
 };
 
@@ -109,7 +111,23 @@ const generateBulkOperation = (
 /**
  * Reset du flag est_dans_le_referentiel pour tous les organismes
  */
-const resetOrganismesReferentielPresence = async () => {
+const resetOrganismesReferentielPresence = async (startTime: Date): Promise<number> => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
-  await organismesDb().updateMany({}, { $set: { est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT } });
+  const { modifiedCount } = await organismesDb().updateMany(
+    {
+      updated_at: { $ne: startTime },
+      $or: [
+        { est_dans_le_referentiel: { $ne: STATUT_PRESENCE_REFERENTIEL.ABSENT } },
+        { fiabilisation_statut: { $ne: STATUT_FIABILISATION_ORGANISME.NON_FIABLE } },
+      ],
+    },
+    {
+      $set: {
+        est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
+        updated_at: startTime,
+      },
+    }
+  );
+  return modifiedCount;
 };

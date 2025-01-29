@@ -279,7 +279,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       expectedOrganismes.map((o) => ({ ...o, _id: expect.any(ObjectId), created_at: now, updated_at: now }))
     );
 
-    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 0 });
+    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 0, nbOrganismesSuppr: 0 });
   });
 
   it("doit mettre à jour les organismes présents dans le référentiel", async () => {
@@ -324,11 +324,11 @@ describe("hydrateOrganismesFromReferentiel", () => {
       },
     ]);
 
-    expect(result).toEqual({ nbOrganismesCrees: 0, nbOrganismesMaj: 2 });
+    expect(result).toEqual({ nbOrganismesCrees: 0, nbOrganismesMaj: 2, nbOrganismesSuppr: 0 });
   });
 
-  it("doit préserver les organismes supprimé du référentiel mais en réinitialisant le ", async () => {
-    const oldOrganisme = generateOrganismeFixture({
+  it("doit préserver les organismes supprimé du référentiel mais en réinitialisant le statut", async () => {
+    const oldOrganismePresent = generateOrganismeFixture({
       created_at: lastYear,
       siret: organismesApi[1][0].identifiant.siret,
       uai: organismesApi[1][0].identifiant.uai!,
@@ -351,8 +351,22 @@ describe("hydrateOrganismesFromReferentiel", () => {
       qualiopi: true,
       raison_sociale: "RANDOM",
     });
+    const oldOrganismeAbsent = generateOrganismeFixture({
+      created_at: lastYear,
+      siret: "98222438800016",
+      uai: "0597114M",
+      updated_at: yesterday,
+      nature: "formateur",
+      fiabilisation_statut: "FIABLE",
+      est_dans_le_referentiel: "present",
+      ferme: false,
+      enseigne: null,
+      nom: "RANDOM",
+      qualiopi: true,
+      raison_sociale: "RANDOM",
+    });
 
-    await organismesDb().insertOne(oldOrganisme);
+    await organismesDb().insertMany([oldOrganismePresent, oldOrganismeAbsent]);
 
     const result = await hydrateOrganismesFromApiAlternance(now);
 
@@ -360,7 +374,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       .find({}, { sort: { siret: 1 } })
       .toArray();
 
-    expect(organismes).toHaveLength(3);
+    expect(organismes).toHaveLength(4);
     expect(organismes).toEqual([
       {
         ...expectedOrganismes[0],
@@ -375,7 +389,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
         updated_at: now,
       },
       {
-        ...oldOrganisme,
+        ...oldOrganismePresent,
         _id: expect.any(ObjectId),
         updated_at: now,
         adresse: null,
@@ -387,8 +401,94 @@ describe("hydrateOrganismesFromReferentiel", () => {
         fiabilisation_statut: "NON_FIABLE",
         est_dans_le_referentiel: "absent",
       },
+      {
+        ...oldOrganismeAbsent,
+        _id: expect.any(ObjectId),
+        updated_at: now,
+        fiabilisation_statut: "NON_FIABLE",
+        est_dans_le_referentiel: "absent",
+      },
     ]);
 
-    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 1 });
+    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 1, nbOrganismesSuppr: 1 });
+  });
+
+  it("doit préserver les organismes si une erreur api alternance", async () => {
+    const oldOrganismePresent = generateOrganismeFixture({
+      created_at: lastYear,
+      siret: organismesApi[1][0].identifiant.siret,
+      uai: organismesApi[1][0].identifiant.uai!,
+      updated_at: yesterday,
+      nature: "formateur",
+      fiabilisation_statut: "FIABLE",
+      est_dans_le_referentiel: "present",
+      adresse: {
+        academie: "14",
+        code_insee: "22362",
+        code_postal: "22220",
+        commune: "Tréguier",
+        complete: "TOUR SAINT MICHEL 22220 Tréguier",
+        departement: "22",
+        region: "53",
+      },
+      ferme: false,
+      enseigne: null,
+      nom: "RANDOM",
+      qualiopi: true,
+      raison_sociale: "RANDOM",
+    });
+    const oldOrganismeAbsent = generateOrganismeFixture({
+      created_at: lastYear,
+      siret: "98222438800016",
+      uai: "0597114M",
+      updated_at: yesterday,
+      nature: "formateur",
+      fiabilisation_statut: "FIABLE",
+      est_dans_le_referentiel: "present",
+      ferme: false,
+      enseigne: null,
+      nom: "RANDOM",
+      qualiopi: true,
+      raison_sociale: "RANDOM",
+    });
+
+    await organismesDb().insertMany([oldOrganismePresent, oldOrganismeAbsent]);
+
+    vi.mocked(apiAlternanceClient.organisme.export).mockReset();
+    vi.mocked(apiAlternanceClient.organisme.export).mockImplementation(async function* () {
+      yield organismesApi[0];
+
+      throw new Error("Erreur API Alternance");
+    });
+
+    await expect(() => hydrateOrganismesFromApiAlternance(now)).rejects.toThrow("Erreur API Alternance");
+
+    const organismes = await organismesDb()
+      .find({}, { sort: { siret: 1 } })
+      .toArray();
+
+    expect(organismes).toHaveLength(4);
+    expect(organismes).toEqual([
+      {
+        ...expectedOrganismes[0],
+        _id: expect.any(ObjectId),
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        ...expectedOrganismes[1],
+        _id: expect.any(ObjectId),
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        ...oldOrganismePresent,
+        _id: expect.any(ObjectId),
+      },
+      {
+        ...oldOrganismeAbsent,
+        _id: expect.any(ObjectId),
+      },
+    ]);
   });
 });
