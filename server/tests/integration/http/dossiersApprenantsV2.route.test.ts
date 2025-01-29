@@ -5,8 +5,7 @@ import { SOURCE_APPRENANT } from "shared/constants";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
-import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
-import { effectifsQueueDb, usersDb } from "@/common/model/collections";
+import { effectifsQueueDb, organismesDb, usersDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -52,7 +51,7 @@ describe("Dossiers Apprenants Route", () => {
     randomOrganisme = createRandomOrganisme({ uai, siret });
 
     try {
-      await createOrganisme(randomOrganisme);
+      await organismesDb().insertOne(randomOrganisme);
     } catch (err: any) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);
