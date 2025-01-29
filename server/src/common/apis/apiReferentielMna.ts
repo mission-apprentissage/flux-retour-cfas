@@ -1,4 +1,4 @@
-import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
+import { IOrganismeReferentiel, zOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import config from "@/config";
 
@@ -10,47 +10,22 @@ const axiosClient = getApiClient({
   baseURL: config.mnaReferentielApi.endpoint,
 });
 
-const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
-  "adresse",
-  "enseigne",
-  "contacts",
-  "etat_administratif",
-  "forme_juridique",
-  "nature",
-  "numero_declaration_activite",
-  "qualiopi",
-  "raison_sociale",
-  "siret",
-  "siege_social",
-  "uai",
-  "lieux_de_formation",
-  "relations",
-];
+const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = Object.keys(zOrganismeReferentiel.shape);
 
-export const fetchOrganismes = async () => {
-  const {
-    data: { organismes },
-  } = await axiosClient.get<{ organismes: IOrganismeReferentiel[] }>("/organismes", {
-    params: {
-      items_par_page: 50000,
-      champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
-    },
-  });
-
-  // comme le référentiel n'expose pas l'UAI directement dans les relations mais seulement le SIRET,
-  // on complète l'UAI des relations avec l'UAI stockées dans les organismes
-  const uaiBySiret = organismes.reduce((acc, organisme) => {
-    acc[organisme.siret] = organisme.uai;
-    return acc;
-  }, {});
-
-  organismes.forEach((organisme) => {
-    organisme?.relations?.forEach((relation) => {
-      if (relation.siret) {
-        relation.uai = uaiBySiret[relation.siret];
+export const fetchOrganismeReferentielBySiret = async (siret: string): Promise<IOrganismeReferentiel | null> => {
+  return axiosClient
+    .get<unknown>(`/organismes/${siret}`, {
+      params: {
+        champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
+      },
+    })
+    .then((d) => zOrganismeReferentiel.parse(d.data))
+    .catch((error) => {
+      // Return null if the organism is not found
+      if (error.response?.status === 404) {
+        return null;
       }
-    });
-  });
 
-  return organismes;
+      throw error;
+    });
 };

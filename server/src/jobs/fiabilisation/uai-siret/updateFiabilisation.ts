@@ -59,14 +59,14 @@ export async function updateOrganismesFiabilisationStatut() {
   // Reduce the bacth size to prevent idle cursor timeout
   // MongoDB will close the cursor after a period of inactivity
   // Reducing the batch size will make sure the cursor timeout is reset more often
-  const cursor = organismesDb().find({}, { batchSize: 10 });
+  const cursor = organismesDb().find({ est_dans_le_referentiel: "absent" }, { batchSize: 10 });
 
   for await (const organisme of cursor) {
     if (!organisme.uai || !organisme.siret) {
       // Dans le future, ce cas ne devrait pas arriver car tous les organismes devraient avoir un UAI et un SIRET
       await organismesDb().updateOne(
         { _id: organisme._id },
-        { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE, fiabilisation_api_response: null } }
+        { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE } }
       );
       continue;
     }
@@ -82,7 +82,6 @@ export async function updateOrganismesFiabilisationStatut() {
       {
         $set: {
           fiabilisation_statut: result.statut,
-          fiabilisation_api_response: result.api_response,
         },
       }
     );
