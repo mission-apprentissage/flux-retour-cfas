@@ -9,6 +9,7 @@ import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifIndicateursForMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
+  getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
@@ -21,6 +22,7 @@ export default () => {
   router.get("/indicateurs", returnResult(getIndicateursMissionLocale));
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
   router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
+  router.get("/organismes", returnResult(getOrganismesMissionLocale));
   return router;
 };
 
@@ -49,4 +51,10 @@ const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
     throw Boom.forbidden("Accès non autorisé");
   }
   return await setEffectifMissionLocaleData(missionLocale._id, data);
+};
+
+const getOrganismesMissionLocale = async (req, { locals }) => {
+  const filters = await validateFullZodObjectSchema(req.query, withPaginationSchema({}));
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  return await getPaginatedOrganismesByMissionLocaleId(missionLocale.ml_id, filters);
 };
