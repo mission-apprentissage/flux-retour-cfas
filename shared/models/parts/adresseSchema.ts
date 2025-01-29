@@ -33,7 +33,7 @@ export const zAdresse = zodOpenApi.object({
     })
     .regex(CODE_POSTAL_REGEX)
     .openapi({ example: "75001" })
-    .optional(),
+    .nullish(),
   code_insee: zodOpenApi
     .string({
       description: "Le code insee doit contenir 5 caractères",
