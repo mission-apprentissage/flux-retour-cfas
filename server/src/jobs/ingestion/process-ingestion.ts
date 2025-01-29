@@ -473,6 +473,7 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffe
     },
     updated_at: new Date(),
     created_at: effectifDb.created_at, // Preserve the original created_at date
+    transmitted_at: new Date(),
   };
 }
 
@@ -508,7 +509,7 @@ const createOrUpdateEffectif = async (
         }
       );
     } else {
-      effectifDb = { ...effectifWithComputedFields, _id: new ObjectId() };
+      effectifDb = { ...effectifWithComputedFields, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
       await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
     }
