@@ -535,6 +535,7 @@ export const buildEffectifForMissionLocale = (
     annee_scolaire: effectif.annee_scolaire,
     source: effectif.source,
     a_risque: effectif.a_risque,
+    updated_at: effectif.updated_at,
   };
   return result as IEffecifMissionLocale;
 };

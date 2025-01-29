@@ -13,7 +13,7 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import React from "react";
-import { STATUT_NAME } from "shared";
+import { SOURCE_APPRENANT, STATUT_NAME, SourceApprenant } from "shared";
 
 import { calculateAge } from "@/common/utils/dateUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
@@ -38,6 +38,28 @@ const getLastStatut = (statut: any) => {
   return lastStatut;
 };
 
+const getSourceText = (source: SourceApprenant, updatedAt: Date) => {
+  const formattedDate = new Date(updatedAt).toLocaleDateString("fr-FR");
+  const sourceLabel = source === SOURCE_APPRENANT.DECA ? "API DECA" : "CFA";
+  const prefix = source === SOURCE_APPRENANT.DECA ? "l’" : "le ";
+
+  return source in SOURCE_APPRENANT ? (
+    <Text color="plaininfo" my={4}>
+      Données transmises par {prefix}
+      <Text as="span" fontWeight="bold">
+        {sourceLabel}
+      </Text>{" "}
+      le{" "}
+      <Text as="span" fontWeight="bold">
+        {formattedDate}
+      </Text>
+      .
+    </Text>
+  ) : (
+    <></>
+  );
+};
+
 const ApprenantsDetails = ({ row, updateSituationState }) => {
   const id = row.original.id;
   const apprenant = row.original.apprenant;
@@ -46,6 +68,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
   const formation = row.original.formation;
   const users = row.original.users;
   const lastStatut = getLastStatut(statut);
+  const sourceText = getSourceText(row.original.source, row.original.updated_at);
 
   return (
     <Box borderWidth="2px" borderStyle="solid" borderColor="#E3E3FD" p={4} mt={3}>
@@ -54,6 +77,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
           <Heading as="h3" color="gray.900" fontSize="gamma" fontWeight="700" mb={3}>
             Ses informations
           </Heading>
+          {sourceText}
           <Table variant="list" width="100%">
             <Tbody>
               <Tr>
