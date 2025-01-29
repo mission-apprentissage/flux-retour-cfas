@@ -135,6 +135,7 @@ function SIFAPage(props: SIFAPageProps) {
           sort: sort ?? DEFAULT_PAGINATION.sort,
           order: order ?? DEFAULT_PAGINATION.order,
           formation_libelle_long,
+          search,
           source,
           only_sifa_missing_fields,
           annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),

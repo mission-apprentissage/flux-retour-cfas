@@ -1,9 +1,11 @@
-import { Box, HStack, Text, Image, Button, Link } from "@chakra-ui/react";
+import { Box, HStack, Text, Image, Button, Link as ChakraLink } from "@chakra-ui/react";
 import { useSearchParams } from "next/navigation";
 
 import { Organisme } from "@/common/internal/Organisme";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import Edition from "@/theme/components/icons/Edition";
+
+import Link from "../Links/Link";
 
 const style = {
   width: "330px",
@@ -77,19 +79,19 @@ const CerfaLink = (props: CerfaLinkProps) => {
           <Text mb={"12px"} fontSize={14} style={contentStyle}>
             Remplissez vos prochains contrats CERFA : simple, rapide et sans erreur.
           </Text>
-          <Link href={buildUrlWithUtm()} onClick={onLinkClicked} isExternal>
+          <ChakraLink href={buildUrlWithUtm()} onClick={onLinkClicked} isExternal _hover={{ textDecoration: "none" }}>
             <Button variant="primary" padding={"8px 24px"} mr={1}>
               <Edition></Edition>
               <Text ml={2} style={buttonStyle}>
                 Démarrer un contrat CERFA
               </Text>
             </Button>
-          </Link>
+          </ChakraLink>
           <HStack mt={3}>
             <Image src="/images/landing-cards/city-hall.svg" w={10} alt="" />
             <Text fontSize="omega">
               Vous formez un apprenti en contrat chez un employeur public ? Utilisez{" "}
-              <Link href="https://celia.emploi.gouv.fr/" isExternal textDecoration="underline" display="inline">
+              <Link href="https://celia.emploi.gouv.fr/" isExternal isUnderlined>
                 CELIA
               </Link>
               .
