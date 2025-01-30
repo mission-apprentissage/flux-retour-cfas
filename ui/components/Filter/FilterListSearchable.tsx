@@ -1,10 +1,11 @@
-import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
+import { Checkbox, CheckboxGroup, Stack, Input } from "@chakra-ui/react";
+import { useState } from "react";
 
 import { capitalizeWords } from "@/common/utils/stringUtils";
 import { FilterButton } from "@/components/FilterButton/FilterButton";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-interface FilterListProps {
+interface FilterListSearchableProps {
   filterKey: string;
   displayName: string;
   options: Record<string, string>;
@@ -15,7 +16,22 @@ interface FilterListProps {
   sortOrder?: "asc" | "desc";
 }
 
-export const FilterList: React.FC<FilterListProps> = ({
+const FilterInput: React.FC<{ searchQuery: string; setSearchQuery: (query: string) => void }> = ({
+  searchQuery,
+  setSearchQuery,
+}) => {
+  return (
+    <Input
+      placeholder="Rechercher..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      size="sm"
+      mb={2}
+    />
+  );
+};
+
+export const FilterListSearchable: React.FC<FilterListSearchableProps> = ({
   filterKey,
   displayName,
   options,
@@ -25,12 +41,13 @@ export const FilterList: React.FC<FilterListProps> = ({
   setIsOpen,
   sortOrder = "asc",
 }) => {
-  const sortedOptions = Object.entries(options).sort(([_keyA, valA], [_keyB, valB]) => {
-    if (sortOrder === "asc") {
-      return valA.localeCompare(valB);
-    }
-    return valB.localeCompare(valA);
-  });
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const sortedOptions = Object.entries(options)
+    .filter(([_key, value]) => value.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort(([_keyA, valA], [_keyB, valB]) => {
+      return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
 
   return (
     <div key={filterKey}>
@@ -42,8 +59,9 @@ export const FilterList: React.FC<FilterListProps> = ({
       />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
+          <FilterInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           <CheckboxGroup defaultValue={selectedValues} size="sm" onChange={onChange}>
-            <Stack>
+            <Stack mt={2}>
               {sortedOptions.map(([key, value]) => (
                 <Checkbox key={key} value={key} iconSize="0.5rem">
                   {capitalizeWords(value)}

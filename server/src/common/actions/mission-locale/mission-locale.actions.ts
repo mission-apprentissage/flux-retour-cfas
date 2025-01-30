@@ -72,14 +72,13 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     rqth,
     mineur,
     niveaux,
-    code_insee,
+    code_adresse,
     search,
     situation,
     a_risque,
     last_update_value,
     last_update_order,
   } = effectifFilters;
-
   const today = new Date();
   const adultThreshold = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
 
@@ -111,7 +110,17 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
             : { "apprenant.date_de_naissance": { $lt: adultThreshold } }
           : {}),
         ...(niveaux ? { "formation.niveau": { $in: niveaux } } : {}),
-        ...(code_insee ? { "apprenant.adresse.code_insee": { $in: code_insee } } : {}),
+        ...(code_adresse && code_adresse.length > 0
+          ? {
+              $or: code_adresse.map((adresse) => {
+                const [code_insee, code_postal] = adresse.split("-");
+                return {
+                  "apprenant.adresse.code_insee": code_insee,
+                  "apprenant.adresse.code_postal": code_postal,
+                };
+              }),
+            }
+          : {}),
         ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
 
         ...(last_update_value !== undefined && last_update_order
@@ -198,7 +207,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
     {
       $group: {
-        _id: "$apprenant.adresse.code_insee",
+        _id: {
+          code_insee: "$apprenant.adresse.code_insee",
+          code_postal: "$apprenant.adresse.code_postal",
+        },
         commune: {
           $addToSet: {
             code_insee: "$apprenant.adresse.code_insee",
@@ -221,6 +233,9 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         code_postal: "$commune.code_postal",
         commune: "$commune.commune",
       },
+    },
+    {
+      $sort: { commune: 1 },
     },
   ];
 
