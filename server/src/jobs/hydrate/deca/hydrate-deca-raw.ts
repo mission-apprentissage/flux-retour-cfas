@@ -1,6 +1,7 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisme } from "shared/models";
@@ -121,14 +122,23 @@ async function upsertEffectifDeca(
 }
 
 async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
-  const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
-  const organismesId = new Set<string>();
-  for (const newDocument of newDocuments) {
-    await upsertEffectifDeca(newDocument, count);
-    organismesId.add(newDocument.organisme_id.toString());
-  }
+  return Sentry.startSpan(
+    {
+      name: "DECA Update Effectif",
+      op: "deca.item",
+      forceTransaction: true,
+    },
+    async () => {
+      const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
+      const organismesId = new Set<string>();
+      for (const newDocument of newDocuments) {
+        await upsertEffectifDeca(newDocument, count);
+        organismesId.add(newDocument.organisme_id.toString());
+      }
 
-  return { count, organismesId };
+      return { count, organismesId };
+    }
+  );
 }
 
 async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
