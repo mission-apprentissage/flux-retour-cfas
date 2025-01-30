@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
 import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 
-import FilterList from "@/components/Filter/FilterList";
-import FilterRadioList from "@/components/Filter/FilterRadioList";
+import { FilterList } from "@/components/Filter/FilterList";
+import { FilterListSearchable } from "@/components/Filter/FilterListSearchable";
+import { FilterRadioList } from "@/components/Filter/FilterRadioList";
 
 interface ApprenantsFilterPanelProps {
   filters: IEffectifsFiltersMissionLocale;
@@ -106,16 +107,17 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           sortOrder="asc"
         />
 
-        <FilterList
+        <FilterListSearchable
           key="code_insee"
           filterKey="code_insee"
           displayName={"Commune de résidence"}
-          options={Object.fromEntries((communes || []).map(({ code_insee, commune }) => [code_insee, commune]))}
+          options={Object.fromEntries(
+            (communes || []).map(({ code_insee, commune, code_postal }) => [code_insee, `${commune} (${code_postal})`])
+          )}
           selectedValues={(filters["code_insee"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("code_insee", values)}
           isOpen={openFilter === "code_insee"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_insee" : null)}
-          sortOrder="desc"
         />
 
         <FilterRadioList
