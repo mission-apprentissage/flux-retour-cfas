@@ -286,12 +286,15 @@ function SIFAPage(props: SIFAPageProps) {
           <DownloadButton
             variant="primary"
             action={async () => {
+              const { data, extension } = await _getBlob(
+                `/api/v1/organismes/${props.organisme._id}/sifa-export?type=xlsx`
+              );
               trackPlausibleEvent("telechargement_sifa");
               downloadObject(
-                await _getBlob(`/api/v1/organismes/${props.organisme._id}/sifa-export`),
+                data,
                 `tdb-données-sifa-${
                   props.organisme.enseigne ?? props.organisme.raison_sociale ?? "Organisme inconnu"
-                }-${new Date().toLocaleDateString()}.csv`,
+                }-${new Date().toLocaleDateString()}.${extension}`,
                 "text/plain"
               );
               handleToastOnSifaDownload();

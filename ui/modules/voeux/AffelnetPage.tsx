@@ -229,11 +229,8 @@ function VoeuxAffelnetPage() {
                             const params = organisme_departements
                               ? `?organisme_departements=${organisme_departements}`
                               : "";
-                            downloadObject(
-                              await _getBlob(`/api/v1/affelnet/export/non-concretise${params}`),
-                              `voeux_affelnet_non_concretise.csv`,
-                              "text/plain"
-                            );
+                            const { data } = await _getBlob(`/api/v1/affelnet/export/non-concretise${params}`);
+                            downloadObject(data, `voeux_affelnet_non_concretise.csv`, "text/plain");
                           }}
                           isLoading={false}
                         >
@@ -300,11 +297,8 @@ function VoeuxAffelnetPage() {
                     variant="link"
                     action={async () => {
                       const params = organisme_departements ? `?organisme_departements=${organisme_departements}` : "";
-                      downloadObject(
-                        await _getBlob(`/api/v1/affelnet/export/concretise${params}`),
-                        `voeux_affelnet_concretise.csv`,
-                        "text/plain"
-                      );
+                      const { data } = await _getBlob(`/api/v1/affelnet/export/concretise${params}`);
+                      downloadObject(data, `voeux_affelnet_concretise.csv`, "text/plain");
                     }}
                     p={0}
                   >

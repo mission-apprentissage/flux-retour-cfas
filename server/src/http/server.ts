@@ -594,11 +594,16 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
-          const { csv, effectifsIds } = await generateSifa(organismeId as any as ObjectId);
-          res.attachment(`tdb-données-sifa-${organismeId}.csv`);
+          const organisme = await getOrganismeById(organismeId);
+          const filters = await validateFullZodObjectSchema(req.query, { type: z.enum(["csv", "xlsx"]) });
+
+          const { file, effectifsIds, extension } = await generateSifa(organismeId as any as ObjectId, filters.type);
+          res.attachment(
+            `tdb-donnees-sifa-${organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}-${new Date().toISOString().split("T")[0]}.${extension}`
+          );
 
           await createTelechargementListeNomLog("sifa", effectifsIds, new Date(), req.user?._id, organismeId);
-          return csv;
+          return file;
         })
       )
       .put(
