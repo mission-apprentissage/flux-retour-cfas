@@ -11,7 +11,7 @@ export const effectifsFiltersMissionLocaleSchema = {
   rqth: zBooleanStringSchema.optional(),
   mineur: zBooleanStringSchema.optional(),
   niveaux: z.array(z.string()).optional(),
-  code_insee: z.array(z.string()).optional(),
+  code_adresse: z.array(z.string().regex(/^([0-9]{1}[0-9A-Z]{1}[0-9]{3})-([0-9]{5})$/)).optional(),
   search: z.string().optional(),
   situation: z.array(zSituationEnum.optional()).optional(),
   a_risque: zBooleanStringSchema.optional(),

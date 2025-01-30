@@ -108,16 +108,19 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
         />
 
         <FilterListSearchable
-          key="code_insee"
-          filterKey="code_insee"
+          key="code_adresse"
+          filterKey="code_adresse"
           displayName={"Commune de résidence"}
           options={Object.fromEntries(
-            (communes || []).map(({ code_insee, commune, code_postal }) => [code_insee, `${commune} (${code_postal})`])
+            (communes || []).map(({ code_insee, commune, code_postal }) => [
+              `${code_insee}-${code_postal}`,
+              `${commune} (${code_postal})`,
+            ])
           )}
-          selectedValues={(filters["code_insee"] as string[]) || []}
-          onChange={(values) => handleCheckboxChange("code_insee", values)}
-          isOpen={openFilter === "code_insee"}
-          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_insee" : null)}
+          selectedValues={(filters["code_adresse"] as string[]) || []}
+          onChange={(values) => handleCheckboxChange("code_adresse", values)}
+          isOpen={openFilter === "code_adresse"}
+          setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_adresse" : null)}
         />
 
         <FilterRadioList
