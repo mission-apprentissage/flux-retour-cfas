@@ -198,6 +198,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...filterByDernierStatutPipeline(
+      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
+      new Date()
+    ),
     {
       $match: {
         "apprenant.adresse.code_insee": { $exists: true },
