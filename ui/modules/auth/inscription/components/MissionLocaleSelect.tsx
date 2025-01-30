@@ -1,27 +1,18 @@
 import { Box, Input, List, ListItem, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import type { IMissionLocale } from "api-alternance-sdk";
 import { useState, useRef, useEffect } from "react";
 
 import { _get } from "@/common/httpClient";
 
 import { SetterOrganisation } from "../common";
 
-interface MissionLocale {
-  id: number;
-  nom: string;
-  siret: string;
-  localisation: {
-    ville: string;
-    cp: string;
-  };
-}
-
 interface MissionLocaleSelectProps {
   setOrganisation: SetterOrganisation;
 }
 
 export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProps) => {
-  const { data: missionLocales, isLoading } = useQuery<MissionLocale[]>(["mission-locale"], async () =>
+  const { data: missionLocales, isLoading } = useQuery<IMissionLocale[]>(["mission-locale"], async () =>
     _get("/api/v1/mission-locale")
   );
 
@@ -40,7 +31,7 @@ export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProp
         .sort((a, b) => a.localisation.ville.localeCompare(b.localisation.ville))
     : [];
 
-  const handleSelect = (ml: MissionLocale) => {
+  const handleSelect = (ml: IMissionLocale) => {
     setSelectedValue(`${ml.nom} (${ml.localisation.ville} - ${ml.localisation.cp})`);
     setSearchTerm("");
     setIsOpen(false);
