@@ -35,7 +35,7 @@ export const generateSifa = async (
   organisme_id: ObjectId,
   type: "xlsx" | "csv"
 ): Promise<{
-  file: string | Buffer<ArrayBufferLike>;
+  file: string | Buffer;
   extension: string;
   effectifsIds: string[];
 }> => {
