@@ -15,6 +15,8 @@ fileignoreconfig:
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
   checksum: aca9111611fe6cdbd3a9d5d144687339ea161e2375c158a38cec48ff11f359a4
+- filename: server/src/jobs/hydrate/organismes/organisme-cleanup.test.ts
+  checksum: 96e3019b32d45f6b184601bed1641eb34b28885e7841b2590eb06d5992584cfe
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
   checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
 - filename: server/tests/jest/setupNock.ts

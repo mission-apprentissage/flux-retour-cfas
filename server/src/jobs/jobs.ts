@@ -37,6 +37,7 @@ import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-ef
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
+import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
@@ -90,6 +91,8 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "computed:update", queued });
 
+  await addJob({ name: "organisme:cleanup", queued });
+
   return 0;
 };
 
@@ -104,6 +107,11 @@ export async function setupJobProcessor() {
             "Run daily jobs each day at 02h30": {
               cron_string: "30 2 * * *",
               handler: async () => dailyJobs(true),
+            },
+
+            "Cleanup organismes": {
+              cron_string: "0 3 * * *",
+              handler: cleanupOrganismes,
             },
 
             "Send reminder emails at 7h": {
@@ -173,6 +181,9 @@ export async function setupJobProcessor() {
         handler: async () => {
           return hydrateDecaRaw();
         },
+      },
+      "organisme:cleanup": {
+        handler: cleanupOrganismes,
       },
       "hydrate:effectifs:update_all_computed_statut": {
         handler: async () => {
