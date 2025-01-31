@@ -125,7 +125,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
 
         ...(last_update_value !== undefined && last_update_order
           ? {
-              updated_at: {
+              transmitted_at: {
                 [last_update_order === "AFTER" ? "$gte" : "$lte"]: new Date(
                   new Date().setDate(new Date().getDate() - last_update_value)
                 ),
