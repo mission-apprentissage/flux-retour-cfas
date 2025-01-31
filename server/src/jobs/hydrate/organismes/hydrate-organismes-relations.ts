@@ -166,7 +166,6 @@ export const hydrateOrganismesRelations = async () => {
     );
 
     if (bulk.length >= 1000) {
-      logger.info("Bulk write", { count: bulk.length });
       await organismesDb().bulkWrite(bulk);
       bulk.length = 0;
     }
