@@ -1448,7 +1448,7 @@ function isAcademieCode(code: string | number): code is IAcademieCode {
   return code in ACADEMIES_BY_CODE;
 }
 
-export function normalizeAcademieCode(code: string | number): IAcademieCode | null {
+function normalizeAcademieCode(code: string | number): IAcademieCode | null {
   const normalizedCode = code.toString().padStart(2, "0");
   if (isAcademieCode(normalizedCode)) {
     return normalizedCode;

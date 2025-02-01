@@ -31,7 +31,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-export const createDernierStatutFieldPipeline = (date: Date) => [
+const createDernierStatutFieldPipeline = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {

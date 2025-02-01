@@ -200,8 +200,7 @@ const zOrganisme = z
     ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
     qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
     contacts_from_referentiel: z.array(zContactReferentiel).optional(),
-    // TODO [tech] TO REMOVE LATER
-    access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
+
     api_key: z.string({ description: "API key pour envoi de données" }).optional(),
     api_uai: z.string({ description: "Uai envoyé par l'erp" }).optional(),
     api_siret: z.string({ description: "Siret envoyé par l'erp" }).optional(),

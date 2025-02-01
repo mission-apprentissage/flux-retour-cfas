@@ -14,7 +14,7 @@ fileignoreconfig:
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
-  checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
+  checksum: d5a9d1bd6e0d7f23349caf946c5d2a535253213a612fcaa841cbe704acd8d87f
 - filename: server/tests/jest/setupNock.ts
   checksum: 206a5da7f948759335ac5d4ffe6e9eb45d00b8c142bc984cddbc10ccb7f6282b
 - filename: shared/constants/aide.ts

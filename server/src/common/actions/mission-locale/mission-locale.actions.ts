@@ -24,7 +24,7 @@ import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
 
-export const EFF_MISSION_LOCALE_FILTER = [
+const EFF_MISSION_LOCALE_FILTER = [
   {
     $match: {
       $or: [
@@ -66,7 +66,7 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
-export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
     rqth,

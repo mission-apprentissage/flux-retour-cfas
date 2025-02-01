@@ -105,7 +105,6 @@ const zOrganismeReferentiel = z.object({
     .optional(),
 });
 
-export type IContactReferentiel = z.output<typeof zContactReferentiel>;
 export type IOrganismeReferentiel = z.output<typeof zOrganismeReferentiel>;
 
 export default { zod: zOrganismeReferentiel, indexes, collectionName };

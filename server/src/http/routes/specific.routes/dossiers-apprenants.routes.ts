@@ -10,7 +10,6 @@ import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatError } from "@/common/utils/errorUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -22,14 +21,11 @@ export default () => {
    * Une prévalidation des données est effectuée, afin de faire un retour immédiat à l'utilisateur
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
-  router.post("/", async ({ user, body, originalUrl }, res) => {
+  router.post("/", async ({ user, body }, res) => {
     const bodyItems = (
       await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
     ).map((e) => stripNullProperties(e));
-    const isV3 = originalUrl.includes("/v3");
-    const v2Schema = dossierApprenantSchemaV1V2();
-    const v3Schema = dossierApprenantSchemaV3Input();
-    const validationSchema = isV3 ? v3Schema : v2Schema;
+    const validationSchema = dossierApprenantSchemaV3Input();
 
     const source = user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
@@ -47,8 +43,6 @@ export default () => {
       // Nous ne pouvons pas garder le `nir_apprenant` en base
       const { nir_apprenant, ...rest } = cleansedData;
 
-      const user_erp_id = isV3 ? undefined : user._id.toString();
-
       return {
         ...rest,
         has_nir: Boolean(nir_apprenant),
@@ -57,13 +51,12 @@ export default () => {
         validation_errors: prettyValidationError || [],
         source,
         ...(user.source_organisme_id ? { source_organisme_id: user.source_organisme_id } : {}),
-        api_version: isV3 ? "v3" : "v2",
-        ...(user_erp_id ? { user_erp_id } : {}),
+        api_version: "v3",
       };
     });
 
     try {
-      if (isV3 && user.source_organisme_id) {
+      if (user.source_organisme_id) {
         // Si une erreur est détectée, on met à jour l'organisme pour indiquer qu'il y a des erreurs de transmission
         const hasError = effectifsToQueue.find((effectif) => effectif.validation_errors?.length);
         if (hasError) {

@@ -14,7 +14,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "shared/models/parts/dossierApprenantSchemaV3";
-import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
+import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
 import { lockEffectif, mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
@@ -36,9 +36,6 @@ import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
 import { validateContrat } from "@/common/validation/contratsDossierApprenantSchemaV3";
-import dossierApprenantSchemaV1V2, {
-  DossierApprenantSchemaV1V2ZodType,
-} from "@/common/validation/dossierApprenantSchemaV1V2";
 
 import {
   fiabilisationEffectifFormation,
@@ -167,9 +164,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
     //Process du nouveau schéma de données
     handleEffectifTransmission(effectifQueue);
     // Phase de transformation d'une donnée de queue
-    const { result, itemProcessingInfos, organismeTarget } = await (effectifQueue.api_version === "v3"
-      ? transformEffectifQueueV3ToEffectif(effectifQueue)
-      : transformEffectifQueueV1V2ToEffectif(effectifQueue));
+    const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
 
@@ -376,71 +371,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
   };
 }
 
-async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
-  result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
-  itemProcessingInfos: ItemProcessingInfos;
-  organismeTarget: any;
-}> {
-  const itemProcessingInfos: ItemProcessingInfos = {};
-  let organismeTarget;
-
-  const result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }> =
-    await dossierApprenantSchemaV1V2()
-      .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
-        let [effectif, organisme] = await Promise.all([
-          transformEffectifQueueToEffectif(effectifQueued),
-          (async () => {
-            const { organisme, stats } = await findOrganismeWithStats(
-              effectifQueued.uai_etablissement,
-              effectifQueued.siret_etablissement
-            );
-            organismeTarget = organisme;
-            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
-            return organisme;
-          })(),
-        ]);
-
-        if (!organisme) {
-          ctx.addIssue({
-            code: ZodIssueCode.custom,
-            message: "organisme non trouvé",
-            path: ["uai_etablissement", "siret_etablissement"],
-            params: {
-              uai: effectifQueued.uai_etablissement,
-              siret: effectifQueued.siret_etablissement,
-            },
-          });
-          return NEVER;
-        }
-
-        const certification = await getEffectifCertification(effectif);
-        const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
-        return {
-          effectif: await withComputedFields(
-            {
-              ...effectif,
-              organisme_id: organisme?._id,
-              formation: computedFormation,
-              _raw: {
-                formation: effectif.formation,
-              },
-            },
-            { organisme, certification }
-          ),
-          organisme: organisme,
-        };
-      })
-      .safeParseAsync(rawEffectifQueued);
-  return {
-    result,
-    itemProcessingInfos,
-    organismeTarget,
-  };
-}
-
-async function transformEffectifQueueToEffectif(
-  effectifQueue: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
-): Promise<IEffectif> {
+async function transformEffectifQueueToEffectif(effectifQueue: DossierApprenantSchemaV3ZodType): Promise<IEffectif> {
   return await completeEffectifAddress(
     mergeEffectifWithDefaults(
       mapEffectifQueueToEffectif(effectifQueue as any) as any,
@@ -483,7 +414,7 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffe
 const createOrUpdateEffectif = async (
   effectif: IEffectif,
   retryCount = 0,
-  uai: string
+  uai: string | undefined
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
   const effectifWithComputedFields = {
     ...effectif,
