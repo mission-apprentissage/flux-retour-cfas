@@ -2,7 +2,7 @@ import { effectifsDECADb } from "@/common/model/collections";
 
 export const up = async () => {
   try {
-    const cursor = effectifsDECADb().find({ transmitted_at: { $exists: false } });
+    const cursor = effectifsDECADb().find({});
 
     const CHUNK_SIZE = 1000;
     let bulkUpdates: Array<{ updateOne: { filter: { _id: any }; update: { $set: { transmitted_at: any } } } }> = [];
