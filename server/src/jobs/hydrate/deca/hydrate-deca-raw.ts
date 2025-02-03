@@ -116,7 +116,7 @@ async function upsertEffectifDeca(
       }
     }
   } else {
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif });
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at: new Date() });
     count.updated++;
   }
 }
@@ -306,6 +306,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     validation_errors: [],
     created_at: new Date(),
     updated_at: new Date(),
+    transmitted_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
     source: SOURCE_APPRENANT.DECA,
     annee_scolaire: anneeScolaire,

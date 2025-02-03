@@ -7982,6 +7982,18 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       ],
       "description": "Identifiant de l'organisme id source transmettant",
     },
+    "transmitted_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de transmission de l'effectif",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de transmission de l'effectif",
+    },
     "updated_at": {
       "anyOf": [
         {
