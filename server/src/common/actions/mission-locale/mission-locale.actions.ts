@@ -526,6 +526,8 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               _id: 0,
               nom: "$organisme.nom",
               enseigne: "$organisme.enseigne",
+              raison_sociale: "$organisme.raison_sociale",
+              adresse: "$organisme.adresse",
               siret: "$organisme.siret",
               formationsCount: "$formationsCount",
               users: "$cfa_users",
@@ -538,6 +540,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
         ],
       },
     },
+    { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
 
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
