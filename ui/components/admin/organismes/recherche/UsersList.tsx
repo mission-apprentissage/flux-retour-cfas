@@ -1,17 +1,17 @@
 import { Text } from "@chakra-ui/react";
-import { OrganismeSupportInfoJson } from "shared";
+import { type IUsersMigrationJson } from "shared";
 
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import NewTable from "@/modules/indicateurs/NewTable";
 
 type UsersListInfoProps = {
-  organisation: null | OrganismeSupportInfoJson["organisation"];
+  users: null | IUsersMigrationJson[];
 };
 
-export function UsersList({ organisation }: UsersListInfoProps) {
+export function UsersList({ users }: UsersListInfoProps) {
   return (
     <NewTable
-      data={organisation?.users ?? []}
+      data={users ?? []}
       columns={[
         {
           header: "Nom",
