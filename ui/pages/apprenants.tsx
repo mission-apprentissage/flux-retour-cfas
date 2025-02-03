@@ -50,7 +50,7 @@ function EffectifsPage() {
 
     const parseFilter = (key: string, value: string | string[] | undefined) => {
       const directFilters = ["rqth", "mineur", "last_update_value", "last_update_order", "a_risque"];
-      const parsedFilters = ["statut", "niveaux", "code_insee", "situation"];
+      const parsedFilters = ["statut", "niveaux", "code_adresse", "situation"];
 
       if (directFilters.includes(key)) return value;
       if (parsedFilters.includes(key)) return defaultFilterParser(value);
@@ -62,7 +62,7 @@ function EffectifsPage() {
       "rqth",
       "mineur",
       "niveaux",
-      "code_insee",
+      "code_adresse",
       "last_update_value",
       "last_update_order",
       "situation",

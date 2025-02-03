@@ -56,16 +56,11 @@ export const buildNewHistoriqueStatutApprenant = (
   return newHistoriqueStatutApprenant;
 };
 
-/**
- * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
- */
-export const completeEffectifAddress = async <T extends { apprenant: Partial<IEffectif["apprenant"]> }>(
-  effectifData: T
-): Promise<T> => {
-  const computeAdresse = async (insee, postal) => {
-    if (!insee && !postal) {
-      return {};
-    }
+export const getAndFormatCommuneFromCode = async (insee, postal) => {
+  if (!insee && !postal) {
+    return {};
+  }
+  try {
     const communeInfo = await getCommune({
       codeInsee: insee,
       codePostal: postal,
@@ -82,13 +77,21 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
           mission_locale_id: communeInfo.mission_locale?.id,
         }
       : {};
-  };
-
+  } catch (e) {
+    return {};
+  }
+};
+/**
+ * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
+ */
+export const completeEffectifAddress = async <T extends { apprenant: Partial<IEffectif["apprenant"]> }>(
+  effectifData: T
+): Promise<T> => {
   const effectifDataWithAddress = cloneDeep(effectifData);
 
   effectifDataWithAddress.apprenant.adresse = {
     ...effectifDataWithAddress.apprenant.adresse,
-    ...(await computeAdresse(
+    ...(await getAndFormatCommuneFromCode(
       effectifData.apprenant?.adresse?.code_insee,
       effectifData.apprenant?.adresse?.code_postal
     )),
@@ -96,7 +99,7 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
 
   effectifDataWithAddress.apprenant.adresse_naissance = {
     ...effectifDataWithAddress.apprenant.adresse_naissance,
-    ...(await computeAdresse(
+    ...(await getAndFormatCommuneFromCode(
       effectifData.apprenant?.adresse_naissance?.code_insee,
       effectifData.apprenant?.adresse_naissance?.code_postal
     )),
