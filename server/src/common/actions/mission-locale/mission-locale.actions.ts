@@ -162,7 +162,15 @@ const generateMissionLocaleMatchStage = (missionLocaleId: number) => {
 };
 
 const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
-  return [generateMissionLocaleMatchStage(missionLocaleId)];
+  return [
+    generateMissionLocaleMatchStage(missionLocaleId),
+    {
+      $unionWith: {
+        coll: "effectifsDECA",
+        pipeline: [generateMissionLocaleMatchStage(missionLocaleId), { $match: { is_deca_compatible: true } }],
+      },
+    },
+  ];
 };
 
 export const getPaginatedEffectifsByMissionLocaleId = async (

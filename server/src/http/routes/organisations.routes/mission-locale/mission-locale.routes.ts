@@ -1,7 +1,8 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { IOrganisationMissionLocale } from "shared/models";
+import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { effectifsFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { withPaginationSchema } from "shared/models/routes/pagination";
 
@@ -13,7 +14,7 @@ import {
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
@@ -42,7 +43,11 @@ const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
 
-  const effectif = await effectifsDb().findOne({ _id: new ObjectId(data.effectif_id) });
+  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(data.effectif_id) });
+
+  if (!effectif) {
+    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(data.effectif_id) });
+  }
 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
