@@ -54,7 +54,8 @@ export const up = async () => {
   await organismesDb().updateMany(
     // @ts-expect-error
     { est_dans_le_referentiel: "present_uai_multiples_dans_tdb" },
-    { $set: { est_dans_le_referentiel: "present" } }
+    { $set: { est_dans_le_referentiel: "present" } },
+    { bypassDocumentValidation: true }
   );
 
   await organismesDb().updateMany(
