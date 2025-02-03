@@ -109,6 +109,13 @@ const organismesTableColumnsDefs: ColumnDef<IArchivableOrganismeJson, any>[] = [
     ),
   },
   {
+    accessorKey: "nature",
+    header: () => <>Nature</>,
+    cell: ({ row }: CellContext<IArchivableOrganismeJson, any>) => (
+      <Label value={row.original.nature} level={row.original.nature === "inconnue" ? "error" : "info"} />
+    ),
+  },
+  {
     accessorKey: "ferme",
     header: () => <>État</>,
     cell: ({ row }: CellContext<IArchivableOrganismeJson, any>) => (
@@ -184,7 +191,7 @@ const Organisme = () => {
 
   return (
     <SimplePage title={title}>
-      <Container maxW="xl" p="8">
+      <Container maxW="full" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
           {title}
         </Heading>
@@ -207,7 +214,7 @@ const Organisme = () => {
         {result.isSuccess && (
           <Stack spacing="4w">
             <Text>
-              <strong>{result.data.length} organismes</strong>
+              <strong>{result.data.length} organismes non référencés</strong>
             </Text>
 
             <Table
@@ -335,6 +342,26 @@ const Organisme = () => {
                                     <InfoTransmissionDonnees
                                       lastTransmissionDate={row.original.last_transmission_date}
                                       permissionInfoTransmissionEffectifs
+                                    />
+                                  ),
+                                },
+                                {
+                                  accessorKey: "est_dans_le_referentiel",
+                                  header: () => <>Référentiel</>,
+                                  cell: ({ row }: CellContext<IOrganismeJson, any>) => (
+                                    <Label
+                                      value={row.original.est_dans_le_referentiel}
+                                      level={row.original.est_dans_le_referentiel !== "present" ? "error" : "success"}
+                                    />
+                                  ),
+                                },
+                                {
+                                  accessorKey: "nature",
+                                  header: () => <>Nature</>,
+                                  cell: ({ row }: CellContext<IOrganismeJson, any>) => (
+                                    <Label
+                                      value={row.original.nature}
+                                      level={row.original.nature === "inconnue" ? "error" : "info"}
                                     />
                                   ),
                                 },
