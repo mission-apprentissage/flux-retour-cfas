@@ -22,7 +22,7 @@ const MAX_CHARACTERS = 200;
 const _SITUATION_LABELS: Record<SITUATION_ENUM, string> = {
   [SITUATION_ENUM.CONTACTE_AVEC_SUIVI]: "contacté avec suivi",
   [SITUATION_ENUM.CONTACT_SANS_SUIVI]: "contacté sans suivi",
-  [SITUATION_ENUM.DEJA_SUIVI]: "déjà accompagné par la Mission Locale",
+  [SITUATION_ENUM.DEJA_SUIVI]: "déjà accompagné par la ML",
   [SITUATION_ENUM.INJOIGNABLE]: "injoignable",
   [SITUATION_ENUM.NON_CONTACTE]: "non contacté",
 };
@@ -112,12 +112,16 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
       </Flex>
 
       {situationData.situation && situationData.situation_updated_at && (
-        <Text as="span" fontWeight="bold" color="bluefrance" mb={4}>
+        <Text as="span" color="plaininfo" mt={4}>
           Il a été indiqué que le jeune a été{" "}
           {situationData.situation && _SITUATION_LABELS[situationData.situation]
             ? `${_SITUATION_LABELS[situationData.situation]}`
             : "contacté"}{" "}
-          le {new Date(situationData.situation_updated_at).toLocaleDateString("fr-FR")}.
+          le{" "}
+          <Text as="span" fontWeight="bold">
+            {new Date(situationData.situation_updated_at).toLocaleDateString("fr-FR")}
+          </Text>
+          .
         </Text>
       )}
 

@@ -3,7 +3,7 @@ import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { FilterButton } from "@/components/FilterButton/FilterButton";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-interface FilterRadioProps {
+interface FilterRadioListProps {
   filterKey: string;
   displayName: string;
   options: Record<string, string>;
@@ -13,7 +13,7 @@ interface FilterRadioProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const FilterRadio: React.FC<FilterRadioProps> = ({
+export const FilterRadioList: React.FC<FilterRadioListProps> = ({
   filterKey,
   displayName,
   options,
@@ -47,5 +47,3 @@ const FilterRadio: React.FC<FilterRadioProps> = ({
     </div>
   );
 };
-
-export default FilterRadio;

@@ -42,6 +42,7 @@ import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-qu
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { tmpMigrateAdresseNaissance } from "./patches/adresse/migrate-adresse-naissance";
 import { tmpFiabilisationCertification } from "./patches/certification/fiabilisation-certification";
+import { tmpMigrateEffectifsTransmittedAt } from "./patches/effectifs/migrate-transmitted-at";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
@@ -511,6 +512,9 @@ export async function setupJobProcessor() {
       },
       "tmp:migration:adresse-naissance": {
         handler: tmpMigrateAdresseNaissance,
+      },
+      "tmp:migration:effectifs-transmitted-at": {
+        handler: tmpMigrateEffectifsTransmittedAt,
       },
     },
   });

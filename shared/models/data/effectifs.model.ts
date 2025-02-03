@@ -163,6 +163,7 @@ export const zEffectif = z.object({
   is_lock: z.any(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
+  transmitted_at: z.date({ description: "Date de transmission de l'effectif" }).nullish(),
   archive: z
     .boolean({
       description: "Dossier apprenant est archivé (rétention maximum 5 ans)",

@@ -237,6 +237,7 @@ describe("Processus d'ingestion", () => {
           _id: expect.anything(),
           created_at: expect.any(Date),
           updated_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           organisme_id: expect.any(ObjectId),
           _raw: {
             formation: {
@@ -303,6 +304,7 @@ describe("Processus d'ingestion", () => {
         source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
+        transmitted_at: new Date(),
       };
 
       beforeEach(async () => {
@@ -683,6 +685,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -809,6 +812,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -1009,6 +1013,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2022-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
