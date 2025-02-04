@@ -15,15 +15,7 @@ const organismesTableColumnsDefs = [
     accessorKey: "nom",
     cell: ({ row }) => (
       <>
-        <Link
-          href={`/organismes/${(row.original as any)?._id}`}
-          display="block"
-          fontSize="1rem"
-          width="var(--chakra-sizes-lg)"
-          title={row.original.raison_sociale ?? row.original.enseigne ?? row.original.nom}
-        >
-          {row.original.nom ?? "Organisme inconnu"}
-        </Link>
+        <Text fontSize="1rem">{row.original.nom ?? "Organisme inconnu"}</Text>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
           SIRET&nbsp;: {(row.original as any).siret}
         </Text>
@@ -223,8 +215,13 @@ const organismesTableColumnsDefs = [
             <Text>{row.original.adresse.complete}</Text>
           </Flex>
 
-          {row.original.users.length > 0 && (
+          {row.original.users.length > 0 ? (
             <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
+          ) : (
+            <Text>
+              À ce jour, ni compte utilisateur sur le Tableau de bord de l’apprentissage ni email générique ne sont
+              retrouvés pour ce CFA.
+            </Text>
           )}
           <UnorderedList spacing={3}>
             {row.original.users.map((user, index) => (
