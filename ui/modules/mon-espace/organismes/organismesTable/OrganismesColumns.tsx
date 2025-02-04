@@ -216,35 +216,37 @@ const organismesTableColumnsDefs = [
           </Flex>
 
           {row.original.users.length > 0 ? (
-            <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
+            <>
+              <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
+              <UnorderedList spacing={3}>
+                {row.original.users.map((user, index) => (
+                  <ListItem key={index}>
+                    <Flex align="center" gap={2}>
+                      <Text fontWeight="bold">
+                        {user.prenom} {user.nom}
+                      </Text>
+                      {user.last_connection && (
+                        <Badge variant={"purple"} borderRadius="full" px={3} py={1} fontSize="sm">
+                          <Flex align="center" gap={1}>
+                            <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion :{" "}
+                            {format(new Date(user.last_connection), "dd/MM/yyyy")}
+                          </Flex>
+                        </Badge>
+                      )}
+                    </Flex>
+                    {user.fonction && <Text>{user.fonction}</Text>}
+                    {user.email && <Text>{user.email}</Text>}
+                    {user.telephone && <Text>{user.telephone}</Text>}
+                  </ListItem>
+                ))}
+              </UnorderedList>
+            </>
           ) : (
             <Text>
               À ce jour, ni compte utilisateur sur le Tableau de bord de l’apprentissage ni email générique ne sont
               retrouvés pour ce CFA.
             </Text>
           )}
-          <UnorderedList spacing={3}>
-            {row.original.users.map((user, index) => (
-              <ListItem key={index}>
-                <Flex align="center" gap={2}>
-                  <Text fontWeight="bold">
-                    {user.prenom} {user.nom}
-                  </Text>
-                  {user.last_connection && (
-                    <Badge variant={"purple"} borderRadius="full" px={3} py={1} fontSize="sm">
-                      <Flex align="center" gap={1}>
-                        <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion :{" "}
-                        {format(new Date(user.last_connection), "dd/MM/yyyy")}
-                      </Flex>
-                    </Badge>
-                  )}
-                </Flex>
-                {user.fonction && <Text>{user.fonction}</Text>}
-                {user.email && <Text>{user.email}</Text>}
-                {user.telephone && <Text>{user.telephone}</Text>}
-              </ListItem>
-            ))}
-          </UnorderedList>
         </Flex>
       </BasicModal>
     ),
