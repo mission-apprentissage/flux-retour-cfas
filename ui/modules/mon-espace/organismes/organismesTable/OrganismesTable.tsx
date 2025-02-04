@@ -12,22 +12,29 @@ interface OrganismesTableProps {
   pagination: IPaginationFilters;
   onTableChange: (pagination: IPaginationFilters) => void;
   total: number;
+  totalFormations: number;
   isFetching: boolean;
 }
 
-const OrganismesTable = ({ organismes, pagination, onTableChange, total, isFetching }: OrganismesTableProps) => {
+const OrganismesTable = ({
+  organismes,
+  pagination,
+  onTableChange,
+  total,
+  totalFormations,
+  isFetching,
+}: OrganismesTableProps) => {
   const [data, setData] = useState<Organisme[]>([]);
 
   useEffect(() => {
     setData(organismes);
   }, [organismes]);
 
-  const formationsTotal = organismes.reduce((acc, org) => acc + (org.formationsCount || 0), 0);
-
   return (
     <Box mt={4}>
       <Text my={10} fontWeight="bold">
-        {total} organismes et {formationsTotal} formations associées
+        {total} {total <= 1 ? "organisme" : "organismes"} et {totalFormations}{" "}
+        {totalFormations <= 1 ? "formation" : "formations"} associée{totalFormations <= 1 ? "" : "s"}.
       </Text>
 
       <TableWithApi

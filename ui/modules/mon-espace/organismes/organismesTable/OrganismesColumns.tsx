@@ -1,5 +1,6 @@
 import { CheckCircleIcon } from "@chakra-ui/icons";
-import { Badge, Box, Button, Flex, Icon, List, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Badge, Box, Button, Flex, Icon, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { format } from "date-fns";
 
 import { _post } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
@@ -11,7 +12,7 @@ import { ArrowDropRightLine } from "@/theme/components/icons";
 const organismesTableColumnsDefs = [
   {
     header: () => "Nom de l’organisme",
-    accessorKey: "normalizedName",
+    accessorKey: "nom",
     cell: ({ row }) => (
       <>
         <Link
@@ -28,6 +29,7 @@ const organismesTableColumnsDefs = [
         </Text>
       </>
     ),
+    size: 400,
   },
   {
     accessorKey: "adresse",
@@ -40,6 +42,7 @@ const organismesTableColumnsDefs = [
       <>
         Localisation
         <InfoTooltip
+          headerComponent={() => "Localisation"}
           contentComponent={() => (
             <Box>
               <Text as="p">
@@ -48,8 +51,7 @@ const organismesTableColumnsDefs = [
               </Text>
             </Box>
           )}
-          aria-label="Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille
-        physiquement les apprentis et les forme."
+          aria-label="Localisation"
         />
       </>
     ),
@@ -64,18 +66,20 @@ const organismesTableColumnsDefs = [
         </Text>
       </Box>
     ),
+    size: 200,
   },
   {
-    accessorKey: "formationsCount",
+    accessorKey: "formations_count",
     header: () => (
       <>
         Formations
         <InfoTooltip
+          headerComponent={() => "Formations en apprentissage"}
           contentComponent={() => (
             <Box>
-              <b>Formations de l’établissement</b>
+              <Text>Il s’agit du nombre de formations en apprentissage associées à cet organisme.</Text>
               <Text>
-                Le nombre de formations associées à cet organisme provient du{" "}
+                Source :{" "}
                 <Link
                   href="https://catalogue-apprentissage.intercariforef.org/"
                   isExternal
@@ -84,34 +88,11 @@ const organismesTableColumnsDefs = [
                 >
                   Catalogue des offres de formations en apprentissage
                 </Link>{" "}
-                (Carif-Oref) dont votre établissement à la gestion. Si une erreur est constatée, écrivez à{" "}
-                <Link
-                  href="mailto:pole-apprentissage@intercariforef.org"
-                  isExternal
-                  textDecoration="underline"
-                  display="inline"
-                >
-                  pole-apprentissage@intercariforef.org
-                </Link>{" "}
-                avec les informations suivantes :
-              </Text>
-              <UnorderedList mt={4} mb={4}>
-                <ListItem>votre SIRET ;</ListItem>
-                <ListItem>RNCP et/ou le code diplôme ;</ListItem>
-                <ListItem>
-                  la période d&apos;inscription telle que mentionnée dans le catalogue Carif-Oref (exprimée en AAAA-MM)
-                  ;
-                </ListItem>
-                <ListItem>le lieu de la formation (code commune INSEE ou à défaut code postal) ;</ListItem>
-                <ListItem>mail de la personne signalant l’erreur ;</ListItem>
-              </UnorderedList>
-              <Text>
-                Une investigation sera menée par le Réseau des Carif-Oref pour le traitement de cette anomalie.
+                (Carif-Oref)
               </Text>
             </Box>
           )}
-          aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
-    sur l’INSEE."
+          aria-label="Formations en apprentissage"
         />
       </>
     ),
@@ -127,6 +108,7 @@ const organismesTableColumnsDefs = [
         </Link>
       </Text>
     ),
+    size: 150,
   },
   {
     accessorKey: "inscrits",
@@ -138,9 +120,22 @@ const organismesTableColumnsDefs = [
     header: () => (
       <Flex gap={2}>
         <InscritsSansContratsIcon w={4} h={4} /> JSC
+        <InfoTooltip
+          headerComponent={() => "Jeunes inscrits sans contrat d’apprentissage"}
+          contentComponent={() => (
+            <Box>
+              <Text as="p">
+                Un jeune sans contrat est un jeune inscrit qui débute sa formation sans contrat signé en entreprise. Le
+                jeune dispose d&apos;un délai de 3 mois pour trouver son entreprise et continuer sereinement sa
+                formation.
+              </Text>
+            </Box>
+          )}
+          aria-label="Jeunes inscrits sans contrat d’apprentissage"
+        />
       </Flex>
     ),
-    size: 600,
+    size: 150,
   },
   {
     accessorKey: "rupturants",
@@ -152,9 +147,22 @@ const organismesTableColumnsDefs = [
     header: () => (
       <Flex gap={2}>
         <RupturantsIcon w={4} h={4} /> Ruptures
+        <InfoTooltip
+          headerComponent={() => "Jeunes en rupture de contrat"}
+          contentComponent={() => (
+            <Box>
+              <Text as="p">
+                Un jeune est considéré en rupture lorsqu’il ne travaille plus dans l’entreprise qui l&apos;accueillait
+                car il a rompu un contrat d’apprentissage. Néanmoins, il reste inscrit dans le centre de formation et
+                dispose d&apos;un délai de 6 mois pour retrouver une entreprise auprès de qui se former.
+              </Text>
+            </Box>
+          )}
+          aria-label="Jeunes en rupture de contrat"
+        />
       </Flex>
     ),
-    size: 600,
+    size: 150,
   },
   {
     accessorKey: "abandons",
@@ -166,9 +174,24 @@ const organismesTableColumnsDefs = [
     header: () => (
       <Flex gap={2}>
         <AbandonsIcon w={4} h={4} /> Sorties
+        <InfoTooltip
+          headerComponent={() => "Sorties d’apprentissage (anciennement “abandons”)"}
+          contentComponent={() => (
+            <Box>
+              <Text as="p">
+                Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à la
+                date affichée. Cette indication est basée sur un statut transmis par les organismes de formation. Ces
+                situations peuvent être consécutives à une rupture de contrat d’apprentissage avec départ du centre de
+                formation, à un départ du centre de formation sans que l’apprenant n’ait jamais eu de contrat, à un
+                départ du centre de formation pour intégrer une entreprise en CDI ou CDD plus rémunérateur.
+              </Text>
+            </Box>
+          )}
+          aria-label="Sorties d’apprentissage (anciennement “abandons”)"
+        />
       </Flex>
     ),
-    size: 600,
+    size: 150,
   },
   {
     accessorKey: "more",
@@ -203,16 +226,19 @@ const organismesTableColumnsDefs = [
           {row.original.users.length > 0 && (
             <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
           )}
-          <List spacing={3}>
+          <UnorderedList spacing={3}>
             {row.original.users.map((user, index) => (
               <ListItem key={index}>
                 <Flex align="center" gap={2}>
                   <Text fontWeight="bold">
                     {user.prenom} {user.nom}
                   </Text>
-                  {user.lastLogin && (
-                    <Badge colorScheme="blue" borderRadius="full" px={3} py={1} fontSize="sm">
-                      <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion : {user.lastLogin}
+                  {user.last_connection && (
+                    <Badge variant={"purple"} borderRadius="full" px={3} py={1} fontSize="sm">
+                      <Flex align="center" gap={1}>
+                        <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion :{" "}
+                        {format(new Date(user.last_connection), "dd/MM/yyyy")}
+                      </Flex>
                     </Badge>
                   )}
                 </Flex>
@@ -221,10 +247,11 @@ const organismesTableColumnsDefs = [
                 {user.telephone && <Text>{user.telephone}</Text>}
               </ListItem>
             ))}
-          </List>
+          </UnorderedList>
         </Flex>
       </BasicModal>
     ),
+    size: 70,
   },
 ];
 

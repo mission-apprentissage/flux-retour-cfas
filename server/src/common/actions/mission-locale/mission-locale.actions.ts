@@ -502,12 +502,18 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
                   },
                 },
                 {
+                  $addFields: {
+                    last_connection: { $max: "$connection_history" },
+                  },
+                },
+                {
                   $project: {
                     nom: 1,
                     prenom: 1,
                     email: 1,
                     telephone: 1,
                     fonction: 1,
+                    last_connection: 1,
                   },
                 },
               ],
@@ -533,7 +539,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               raison_sociale: "$organisme.raison_sociale",
               adresse: "$organisme.adresse",
               siret: "$organisme.siret",
-              formationsCount: "$formationsCount",
+              formations_count: "$formationsCount",
               users: "$cfa_users",
               inscrits: 1,
               abandons: 1,
@@ -542,22 +548,56 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
             },
           },
         ],
+        totalFormations: [
+          {
+            $lookup: {
+              from: "organismes",
+              localField: "_id",
+              foreignField: "_id",
+              as: "organisme",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $addFields: {
+              formationsCount: {
+                $cond: {
+                  if: { $isArray: "$organisme.relatedFormations" },
+                  then: { $size: "$organisme.relatedFormations" },
+                  else: 0,
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalFormations: { $sum: "$formationsCount" },
+            },
+          },
+        ],
       },
     },
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$totalFormations", preserveNullAndEmptyArrays: true } },
   ];
 
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
 
   if (!resultOrganismes) {
-    return { pagination: { total: 0, page, limit }, data: [] };
+    return { pagination: { total: 0, page, limit }, data: [], totalFormations: 0 };
   }
 
-  const { pagination, data } = resultOrganismes;
+  const { pagination, data, totalFormations } = resultOrganismes;
 
   if (pagination) {
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
 
-  return { pagination, data };
+  return { pagination, data, totalFormations: totalFormations?.totalFormations || 0 };
 };
