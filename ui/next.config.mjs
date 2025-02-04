@@ -77,6 +77,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/mission-locale",
+        destination: "/",
+        permanent: true,
+      },
+      {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
         permanent: true,
