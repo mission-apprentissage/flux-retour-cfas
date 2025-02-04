@@ -60,7 +60,7 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     code_postal_apprenant: fakerFr.helpers.fromRegExp("[0-9]{5}"),
     ine_apprenant: optional(fakerFr.helpers.fromRegExp("[0-9]{10}[a-z]")),
     nir_apprenant: optional(fakerFr.helpers.fromRegExp("[0-9]{13}")),
-    tel_apprenant: optional("0".concat(fakerFr.string.numeric(9))),
+    tel_apprenant: optional(fakerFr.helpers.fromRegExp("0[6-7][0-9]{8}")),
     rqth_apprenant: "",
     date_rqth_apprenant: "",
     responsable_apprenant_mail1: optional(
@@ -99,7 +99,7 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     email_referent_handicap_formation: "",
     contrat_date_debut: "",
     contrat_date_fin: "",
-    siret_employeur: optional("##############".replace(/#+/g, (m) => fakerEn.string.numeric(m.length))),
+    siret_employeur: optional(fakerEn.helpers.replaceSymbolWithNumber("##############")),
     contrat_date_rupture: "",
     cause_rupture_contrat: "",
     contrat_date_debut_2: "",
