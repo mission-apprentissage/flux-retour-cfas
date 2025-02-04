@@ -1,5 +1,5 @@
 import { Box, Text, UnorderedList, ListItem, HStack, Link } from "@chakra-ui/react";
-import { REFERENTIEL_ONISEP } from "shared";
+import { FICHIER_AIDE_DECLARATION_OFA, REFERENTIEL_ONISEP } from "shared";
 
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -33,8 +33,8 @@ const TransmissionsErrorSummary = (props: TransmissionsErrorSummaryProps) => {
               contentComponent={() => (
                 <Box>
                   <Text>
-                    Cette erreur signifie que vous envoyez certains effectifs vers un organisme (UAI-SIRET) qui n’existe
-                    pas chez nous.
+                    Cette erreur signifie que vous envoyez des effectifs vers un organisme (UAI-SIRET) qui n’existe pas
+                    sur le Tableau de bord de l’apprentissage.
                   </Text>
                   <Text>
                     Vérifiez l’UAI-SIRET de votre organisme sur le{" "}
@@ -44,8 +44,11 @@ const TransmissionsErrorSummary = (props: TransmissionsErrorSummaryProps) => {
                     et corrigez-les dans votre ERP.
                   </Text>
                   <Text>
-                    Si vous ne trouvez pas votre organisme sur le Référentiel UAI-SIRET, c’est qu’il n’est pas reconnu
-                    OFA. Si c’est le cas, laissez l’erreur, nous travaillons dessus actuellement. Merci.
+                    Si vous ne trouvez pas votre organisme sur le Référentiel UAI-SIRET, c’est qu’il n’est pas déclaré
+                    OFA. Si c’est le cas vous devez obligatoirement le déclarer,{" "}
+                    <Link isExternal href={FICHIER_AIDE_DECLARATION_OFA} textDecoration="underline">
+                      consultez cette procédure.
+                    </Link>
                   </Text>
                 </Box>
               )}
