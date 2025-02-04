@@ -13,12 +13,12 @@ export type StatutApprenant = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPR
 
 export const STATUT_APPRENANT_VALUES = Object.values(STATUT_APPRENANT);
 
-const STATUT_NAME: { [key in StatutApprenant]: string } = {
+export const STATUT_NAME: { [key in StatutApprenant]: string } = {
   ABANDON: "Abandon",
   PRE_INSCRIT: "Pré-inscrit",
-  INSCRIT: "Sans contrat",
+  INSCRIT: "Inscrit sans contrat",
   APPRENTI: "Apprenti",
-  RUPTURANT: "Rupturant",
+  RUPTURANT: "Rupture de contrat",
   FIN_DE_FORMATION: "Fin de formation",
 };
 
@@ -44,6 +44,7 @@ export enum MOTIF_SUPPRESSION {
   Autre = "AUTRE",
   Doublon = "DOUBLON",
 }
+
 export const MOTIF_SUPPRESSION_LABEL = [
   {
     id: MOTIF_SUPPRESSION.MauvaiseManip,

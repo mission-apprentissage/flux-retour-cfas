@@ -44,6 +44,7 @@ describe("mergeEffectif", () => {
       annee_scolaire: "2024-2025",
       created_at: new Date("2021-09-28T04:05:47.647Z"),
       updated_at: new Date("2021-09-28T04:05:47.647Z"),
+      transmitted_at: new Date("2021-09-28T04:05:47.647Z"),
       organisme_id: new ObjectId("6152d7d3e6b5a5a5a5a5a5a5"),
     };
 
@@ -74,6 +75,7 @@ describe("mergeEffectif", () => {
         },
       },
       updated_at: expect.any(Date),
+      transmitted_at: expect.any(Date),
       organisme_id: new ObjectId("6152d7d3e6b5a5a5a5a5a5a5"),
     });
   });

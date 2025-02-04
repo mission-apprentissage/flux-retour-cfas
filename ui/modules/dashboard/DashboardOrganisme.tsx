@@ -322,7 +322,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
               <Heading textStyle="h2" color="grey.800" size="md">
                 <DashboardWelcome mr="2" />
-                Bienvenue sur{" "}
+                Vous êtes sur{" "}
                 {modePublique
                   ? "le tableau de bord de"
                   : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
@@ -547,35 +547,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   Liste Publique des Organismes de Formations
                                 </Link>
                                 . Si cette information est erronée, merci de leur signaler.
-                              </Box>
-                            )}
-                          />
-                        )}
-                      />
-                      <Text>Prépa-apprentissage&nbsp;:</Text>
-                      <Tag
-                        primaryText={organisme.prepa_apprentissage ? "Oui" : "Non"}
-                        variant="badge"
-                        colorScheme="grey_tag"
-                        size="lg"
-                        fontSize="epsilon"
-                        borderRadius="0"
-                        rightIcon={() => (
-                          <InfoTooltip
-                            contentComponent={() => (
-                              <Box>
-                                La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
-                                d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                                bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et
-                                que votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
-                                <Link
-                                  isExternal
-                                  href="mailto:tableau-de-bord@apprentissage.gouv.fr"
-                                  textDecoration="underline"
-                                  display="inline"
-                                >
-                                  tableau-de-bord@apprentissage.gouv.fr
-                                </Link>
                               </Box>
                             )}
                           />
@@ -1060,6 +1031,8 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
     case "CARIF_OREF_NATIONAL":
       return false;
     case "ADMINISTRATEUR":
+      return false;
+    default:
       return false;
   }
 }

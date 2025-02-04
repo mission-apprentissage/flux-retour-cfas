@@ -2,7 +2,6 @@ import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } fro
 import { CRISP_FAQ } from "shared";
 
 import Link from "@/components/Links/Link";
-import { ExternalLinkLine } from "@/theme/components/icons";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
@@ -33,11 +32,7 @@ const Footer = () => {
             <Box alignSelf="center" flex="1">
               <Text>
                 Mandatée par plusieurs ministères, la{" "}
-                <Link
-                  href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"}
-                  textDecoration={"underline"}
-                  isExternal
-                >
+                <Link href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"} isExternal isUnderlined>
                   Mission interministérielle pour l’apprentissage
                 </Link>{" "}
                 développe plusieurs services destinés à faciliter les entrées en apprentissage.
@@ -100,9 +95,7 @@ const Footer = () => {
                 <Link href={"/cgu"}>Conditions générales d’utilisation</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="/stats" plausibleGoal="clic_statistiques">
-                  Statistiques
-                </Link>
+                <Link href="/stats">Statistiques</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link target="_blank" rel="noopener noreferrer" href={CRISP_FAQ}>
@@ -115,7 +108,6 @@ const Footer = () => {
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>
                   À propos
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
@@ -124,13 +116,11 @@ const Footer = () => {
                   isExternal
                 >
                   Journal des évolutions
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "''", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://github.com/mission-apprentissage/flux-retour-cfas" isExternal>
                   Code source
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Link>
               </ListItem>
             </List>

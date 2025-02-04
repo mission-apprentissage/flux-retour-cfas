@@ -7,14 +7,19 @@ import config from "../../../config";
 function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions {
   return {
     tracesSampler: (samplingContext) => {
-      // Continue trace decision, if there is any parentSampled information
-      if (samplingContext.parentSampled != null) {
-        return samplingContext.parentSampled;
-      }
-
       if (samplingContext.transactionContext?.op === "queue.item") {
         // We want to sample the process effectif transaction at a rate of 1/1_000
         return 1 / 1_000;
+      }
+
+      if (samplingContext.transactionContext?.op === "deca.item") {
+        // We want to sample the process effectif transaction at a rate of 1/1_000
+        return 1 / 1_000;
+      }
+
+      // Continue trace decision, if there is any parentSampled information
+      if (samplingContext.parentSampled != null) {
+        return samplingContext.parentSampled;
       }
 
       if (samplingContext.transactionContext?.op === "processor.job") {
@@ -22,7 +27,7 @@ function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions 
         return 1.0;
       }
 
-      return config.env === "production" ? 0.01 : 1.0;
+      return 0.01;
     },
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,

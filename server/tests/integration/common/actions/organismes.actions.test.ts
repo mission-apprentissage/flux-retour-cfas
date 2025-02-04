@@ -12,7 +12,6 @@ import {
   getOrganismeInfosFromSiret,
   updateOrganismeTransmission,
   updateOrganisme,
-  updateOneOrganismeRelatedFormations,
   IOrganismeCreate,
 } from "@/common/actions/organismes/organismes.actions";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
@@ -44,7 +43,6 @@ const sampleOrganismeWithoutUAIOutput: IOrganisme = {
   relatedFormations: [],
   fiabilisation_statut: "NON_FIABLE",
   ferme: false,
-  prepa_apprentissage: false,
   qualiopi: false,
   _id: new ObjectId(),
   created_at: new Date(),
@@ -137,7 +135,6 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganismeWithUAI,
         ...dataFromApiEntreprise,
       });
-      await updateOneOrganismeRelatedFormations(organisme);
       const created = await findOrganismeById(organisme._id);
 
       expect(created).toStrictEqual({
@@ -155,7 +152,6 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganismeWithoutUai,
         ...dataFromApiEntreprise,
       });
-      await updateOneOrganismeRelatedFormations(organisme);
 
       const created = await findOrganismeById(organisme._id);
 
@@ -243,9 +239,8 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganisme,
         ...dataFromApiEntreprise,
       });
-      const updatedOrganisme = await updateOneOrganismeRelatedFormations(createdOrganisme);
 
-      expect(updatedOrganisme?.ferme).toBe(false);
+      expect(createdOrganisme?.ferme).toBe(false);
     });
   });
 

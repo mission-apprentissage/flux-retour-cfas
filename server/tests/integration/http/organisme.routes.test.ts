@@ -257,7 +257,6 @@ describe("Routes /organismes/:id", () => {
         "ferme",
         "nature",
         "qualiopi",
-        "prepa_apprentissage",
         "enseigne",
         "raison_sociale",
         "reseaux",

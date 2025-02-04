@@ -13,11 +13,12 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate, getSIFADate, SIFA_GROUP } from "shared";
+import { IPaginationFilters, paginationFiltersSchema } from "shared/models/routes/pagination";
+import { z } from "zod";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -45,15 +46,21 @@ interface SIFAPageProps {
   modePublique: boolean;
 }
 
+const DEFAULT_PAGINATION: IPaginationFilters = {
+  page: 0,
+  limit: 10,
+  sort: "annee_scolaire",
+  order: "desc",
+};
+
 function SIFAPage(props: SIFAPageProps) {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
   const [filters, setFilters] = useState<SIFAFilterType>({});
-  const [sort, setSort] = useState<SortingState>([{ desc: true, id: "annee_scolaire" }]);
   const [show, setShow] = useState(false);
   const [_currentEffectifsState, setCurrentEffectifsState] = useRecoilState(effectifsStateAtom);
 
@@ -86,8 +93,11 @@ function SIFAPage(props: SIFAPageProps) {
     };
 
     const filters: SIFAFilterType = {};
+    const mergedPagination = { ...pagination };
+    const searchFilter = router.query.search;
 
     const filterKeys = ["formation_libelle_long", "source", "only_sifa_missing_fields"];
+    const paginationKeys = ["limit", "page", "order", "sort"];
 
     filterKeys.forEach((key) => {
       const parsedFilter = parseFilter(key, router.query[key]);
@@ -96,22 +106,40 @@ function SIFAPage(props: SIFAPageProps) {
       }
     });
 
+    paginationKeys.forEach((key) => {
+      const parsedValue = router.query[key];
+      if (parsedValue) {
+        mergedPagination[key] = parsedValue;
+      }
+    });
+
+    if (searchFilter) {
+      setSearch(searchFilter as string);
+    }
+
     setFilters(filters);
+    const zodPagination = z.object(paginationFiltersSchema).parse(mergedPagination);
+
+    setPagination(zodPagination);
   }, [router.query]);
 
   const { data, isFetching, refetch } = useQuery(
-    ["organismes", props.organisme._id, "effectifs", pagination, search, filters, sort],
+    ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
     async () => {
+      const { page, limit, sort, order } = pagination;
+      const { source, formation_libelle_long, only_sifa_missing_fields } = filters;
       const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
         params: {
-          pageIndex: pagination.pageIndex,
-          pageSize: pagination.pageSize,
+          page: page ?? DEFAULT_PAGINATION.page,
+          limit: limit ?? DEFAULT_PAGINATION.limit,
+          sort: sort ?? DEFAULT_PAGINATION.sort,
+          order: order ?? DEFAULT_PAGINATION.order,
+          formation_libelle_long,
           search,
-          sortField: sort[0]?.id,
-          sortOrder: sort[0]?.desc ? "desc" : "asc",
+          source,
+          only_sifa_missing_fields,
           annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
           sifa: true,
-          ...filters,
         },
       });
 
@@ -139,23 +167,6 @@ function SIFAPage(props: SIFAPageProps) {
     setShow(!show);
   };
 
-  const handlePaginationChange = (newPagination) => {
-    setPagination(newPagination);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          pageIndex: newPagination.pageIndex,
-          pageSize: newPagination.pageSize,
-        },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
   const handleSearchChange = (value: string) => {
     setSearch(value);
 
@@ -169,8 +180,21 @@ function SIFAPage(props: SIFAPageProps) {
     );
   };
 
+  const handleTableChange = (newPagination: IPaginationFilters) => {
+    setPagination(newPagination);
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, ...newPagination },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const handleFilterChange = (newFilters: SIFAFilterType) => {
-    setPagination({ ...pagination, pageIndex: 0 });
+    setPagination({ ...pagination, page: 0 });
 
     const mergedFilters = {
       ...(newFilters.source && newFilters.source.length ? { source: newFilters.source } : {}),
@@ -204,24 +228,6 @@ function SIFAPage(props: SIFAPageProps) {
       {
         pathname: router.pathname,
         query: updatedQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  const handleSortChange = (newSort: SortingState) => {
-    setPagination({ ...pagination, pageIndex: 0 });
-    setSort(newSort);
-
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          sortField: newSort[0]?.id,
-          sortOrder: newSort[0]?.desc ? "desc" : "asc",
-        },
       },
       undefined,
       { shallow: true }
@@ -311,6 +317,7 @@ function SIFAPage(props: SIFAPageProps) {
                     isExternal
                     aria-label="Plateforme SIFA (nouvelle fenêtre)"
                     plausibleGoal="clic_depot_plateforme_sifa"
+                    isUnderlined
                   >
                     plateforme SIFA
                     <ExternalLinkLine w=".7rem" h=".7rem" ml={1} />
@@ -336,6 +343,7 @@ function SIFAPage(props: SIFAPageProps) {
                 variant="link"
                 href="/InstructionsSIFA_31122024.pdf"
                 isExternal
+                isUnderlined
                 aria-label="Télécharger le fichier d'instruction SIFA pour 2024 (PDF, 1.5 Mo)"
                 plausibleGoal="telechargement_fichier_instruction_sifa"
               >
@@ -421,8 +429,8 @@ function SIFAPage(props: SIFAPageProps) {
                       href={
                         "https://aide.cfas.apprentissage.beta.gouv.fr/fr/category/organisme-de-formation-cfa-fhh03f/"
                       }
-                      textDecoration={"underline"}
                       isExternal
+                      isUnderlined
                       plausibleGoal="clic_sifa_faq"
                     >
                       FAQ dédiée
@@ -449,11 +457,9 @@ function SIFAPage(props: SIFAPageProps) {
           filters={filters}
           pagination={pagination}
           search={search}
-          sort={sort}
-          onPaginationChange={handlePaginationChange}
           onSearchChange={handleSearchChange}
           onFilterChange={handleFilterChange}
-          onSortChange={handleSortChange}
+          onTableChange={handleTableChange}
           total={data?.total || 0}
           availableFilters={data?.filters || {}}
           resetFilters={resetFilters}

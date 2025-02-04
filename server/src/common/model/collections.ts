@@ -9,6 +9,12 @@ import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
+import missionLocaleEffectifDescriptor, {
+  IMissionLocaleEffectif,
+} from "shared/models/data/missionLocaleEffectif.model";
+import missionLocaleEffectifLogsDescriptor, {
+  IMissionLocaleEffectifLogs,
+} from "shared/models/data/missionLocaleEffectifLogs.model";
 import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
@@ -59,6 +65,8 @@ export const modelDescriptors = [
   personV2ModelDescriptor,
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
+  missionLocaleEffectifDescriptor,
+  missionLocaleEffectifLogsDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -88,6 +96,12 @@ export const erpDb = () => getDbCollection<IErp>(erpModelDescriptor.collectionNa
 export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
 export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
 export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.collectionName);
+
+export const missionLocaleEffectifsDb = () =>
+  getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+export const missionLocaleEffectifsLogsDb = () =>
+  getDbCollection<IMissionLocaleEffectifLogs>(missionLocaleEffectifLogsDescriptor.collectionName);
+
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);

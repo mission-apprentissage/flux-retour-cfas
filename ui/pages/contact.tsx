@@ -21,14 +21,7 @@ export default function CentreDAidePage() {
               répondre dans les meilleurs délais, veuillez indiquer vos coordonnées et sélectionner ci-dessous le sujet
               pour lequel vous souhaitez nous contacter.
             </p>
-            <Link
-              href={CRISP_FAQ}
-              textDecoration={"underline"}
-              isExternal
-              plausibleGoal="clic_sifa_faq"
-              my={8}
-              color="bluefrance"
-            >
+            <Link href={CRISP_FAQ} isUnderlined isExternal plausibleGoal="clic_sifa_faq" my={8} color="bluefrance">
               <Box as="i" className="ri-arrow-right-line" />
               <Text>Avez-vous consulté notre FAQ ?</Text>
             </Link>

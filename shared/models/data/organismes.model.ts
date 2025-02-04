@@ -17,6 +17,8 @@ import {
 } from "../../constants";
 import { zodEnumFromObjValues } from "../../utils/zodHelper";
 
+import { zContactReferentiel } from "./organismesReferentiel.model";
+
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
@@ -196,8 +198,7 @@ const zOrganisme = z
       .optional(),
     ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
     qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
-    prepa_apprentissage: z.boolean({ description: "fait de la prépa apprentissage" }).optional(),
-
+    contacts_from_referentiel: z.array(zContactReferentiel).optional(),
     // TODO [tech] TO REMOVE LATER
     access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
     api_key: z.string({ description: "API key pour envoi de données" }).optional(),
@@ -230,8 +231,6 @@ const zOrganisme = z
       .optional(),
     updated_at: z.date({ description: "Date de mise à jour en base de données" }),
     created_at: z.date({ description: "Date d'ajout en base de données" }),
-    natureValidityWarning: z.boolean().optional(),
-    formations: z.array(z.any()).max(0).optional(),
     has_transmission_errors: z
       .boolean({
         description: "Indique si cet organisme a une transmissions d'effectif en erreur",
@@ -261,15 +260,7 @@ export type IOrganismeJson = Jsonify<IOrganisme>;
 // Default value
 export function defaultValuesOrganisme(): Pick<
   IOrganisme,
-  | "reseaux"
-  | "erps"
-  | "relatedFormations"
-  | "fiabilisation_statut"
-  | "ferme"
-  | "qualiopi"
-  | "prepa_apprentissage"
-  | "created_at"
-  | "updated_at"
+  "reseaux" | "erps" | "relatedFormations" | "fiabilisation_statut" | "ferme" | "qualiopi" | "created_at" | "updated_at"
 > {
   return {
     reseaux: [],
@@ -278,7 +269,6 @@ export function defaultValuesOrganisme(): Pick<
     fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
     ferme: false,
     qualiopi: false,
-    prepa_apprentissage: false,
     created_at: new Date(),
     updated_at: new Date(),
   };

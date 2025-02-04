@@ -8,18 +8,20 @@ import {
   requiredApprenantAdresseFieldsSifa,
   requiredFieldsSifa,
 } from "shared";
+import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
+import { WithPagination } from "shared/models/routes/pagination";
 
 import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 
 const FIELD_MAP: Record<string, string> = {
   nom: "apprenant.nom",
   prenom: "apprenant.prenom",
-  formation: "formation.libelle_long",
+  formation_libelle_long: "formation.libelle_long",
   statut_courant: "_computed.statut.en_cours",
   annee_scolaire: "annee_scolaire",
 };
 
-const computeSort = (sortField: string | null, sortOrder: string | null) => {
+const computeSort = (sortField?: string | null, sortOrder?: string | null) => {
   if (!sortField || !sortOrder) {
     return { annee_scolaire: -1, "apprenant.nom": 1 };
   }
@@ -30,6 +32,33 @@ const computeSort = (sortField: string | null, sortOrder: string | null) => {
     default:
       return { [FIELD_MAP[sortField] || sortField]: sortOrder === "desc" ? -1 : 1 };
   }
+};
+
+const computeFormation = (formation_libelle_long?: string[] | null) => {
+  return formation_libelle_long?.length ? { "formation.libelle_long": { $in: formation_libelle_long } } : {};
+};
+
+const computeStatut = (statut?: string[] | null) => {
+  return statut?.length ? { "_computed.statut.en_cours": { $in: statut } } : {};
+};
+
+const computeAnneeScolaire = (annee_scolaire?: string[] | null) => {
+  return annee_scolaire?.length ? { annee_scolaire: { $in: annee_scolaire } } : {};
+};
+
+const computeSource = (source?: string[] | null) => {
+  return source?.length ? { source: { $in: source } } : {};
+};
+
+const computeSearch = (search?: string | null) => {
+  return search && search.trim()
+    ? {
+        $or: [
+          { "apprenant.nom": { $regex: search.trim(), $options: "i" } },
+          { "apprenant.prenom": { $regex: search.trim(), $options: "i" } },
+        ],
+      }
+    : {};
 };
 
 const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
@@ -109,6 +138,7 @@ const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, current
 
 const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean, organismeId: ObjectId) => {
   const currentDate = sifa ? getSIFADate(new Date()) : new Date();
+
   return [
     {
       $match: {
@@ -121,62 +151,42 @@ const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean
 
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
-  sifa: boolean = false,
-  only_sifa_missing_fields: boolean = false,
-  options: {
-    pageIndex: number;
-    pageSize: number;
-    search: string;
-    filters: any;
-    sortField: string | null;
-    sortOrder: string | null;
-  } = { pageIndex: 0, pageSize: 10, search: "", filters: {}, sortField: null, sortOrder: null }
+  options: WithPagination<typeof zGetEffectifsForOrganismeApi>
 ) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
-  const { pageIndex, pageSize, search, filters, sortField, sortOrder } = options;
+  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
+
+  const {
+    sifa = false,
+    only_sifa_missing_fields = false,
+    search,
+    formation_libelle_long,
+    statut_courant,
+    annee_scolaire,
+    source,
+    limit = 10,
+    page = 0,
+    sort,
+    order,
+  } = options;
+
   const isDeca = !organisme?.is_transmission_target;
   const db = isDeca ? effectifsDECADb() : effectifsDb();
 
-  const parsedFilters = Object.entries(filters).reduce(
-    (acc, [key, value]) => {
-      if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
-        try {
-          const parsed = JSON.parse(value);
-          acc[key] = Array.isArray(parsed) ? parsed : [parsed];
-        } catch {
-          acc[key] = [value];
-        }
-      } else if (Array.isArray(value)) {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
+  const formationConditions = computeFormation(formation_libelle_long);
+  const statutConditions = computeStatut(statut_courant);
+  const anneeScolaireConditions = computeAnneeScolaire(annee_scolaire);
+  const sourceConditions = computeSource(source);
+  const searchConditions = computeSearch(search);
 
   const matchConditions = {
-    ...Object.keys(parsedFilters).reduce((acc, key) => {
-      if (parsedFilters[key]?.length > 0) {
-        const fieldKey =
-          key === "formation_libelle_long"
-            ? "formation.libelle_long"
-            : key === "statut_courant"
-              ? "_computed.statut.en_cours"
-              : key;
-        acc[fieldKey] = { $in: parsedFilters[key] };
-      }
-      return acc;
-    }, {}),
-    ...(typeof search === "string" &&
-      search.trim() && {
-        $or: [
-          { "apprenant.nom": { $regex: search.trim(), $options: "i" } },
-          { "apprenant.prenom": { $regex: search.trim(), $options: "i" } },
-        ],
-      }),
+    ...formationConditions,
+    ...statutConditions,
+    ...anneeScolaireConditions,
+    ...sourceConditions,
+    ...searchConditions,
   };
-
-  const sortConditions = computeSort(sortField, sortOrder);
+  const sortConditions = computeSort(sort, order);
 
   const pipeline = [
     ...computeSifaAggregation(sifa, only_sifa_missing_fields, organismeId),
@@ -195,19 +205,14 @@ export async function getOrganismeEffectifs(
           {
             $project: {
               _id: 0,
-              annee_scolaire: 1,
-              source: 1,
-              statut_courant: 1,
-              formation_libelle_long: 1,
+              annee_scolaire: filterNotNull("annee_scolaire"),
+              source: filterNotNull("source"),
+              statut_courant: filterNotNull("statut_courant"),
+              formation_libelle_long: filterNotNull("formation_libelle_long"),
             },
           },
         ],
-        results: [
-          { $match: matchConditions },
-          { $sort: sortConditions },
-          { $skip: pageIndex * pageSize },
-          { $limit: pageSize },
-        ],
+        results: [{ $match: matchConditions }, { $sort: sortConditions }, { $skip: page * limit }, { $limit: limit }],
         totalCount: [
           { $match: matchConditions },
           {

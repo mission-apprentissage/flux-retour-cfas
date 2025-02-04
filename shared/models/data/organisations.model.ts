@@ -18,11 +18,18 @@ import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 
 const collectionName = "organisations";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1 }, {}]];
 
 const zOrganisationBase = z.object({
   _id: zObjectId,
-  created_at: z.date({ description: "Date de création en base de données" }),
+  created_at: z.coerce.date({ description: "Date de création en base de données" }),
+});
+
+const zOrganisationMissionLocaleCreate = z.object({
+  type: z.literal("MISSION_LOCALE"),
+  nom: z.string({ description: "Nom de la mission locale" }),
+  siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
+  ml_id: z.number({ description: "Identifiant de la mission locale" }),
 });
 
 const zOrganisationOrganismeCreate = z.object({
@@ -74,6 +81,7 @@ const zOrganisationAdminCreate = z.object({
   type: z.literal("ADMINISTRATEUR"),
 });
 
+export const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
 const zOrganisationOrganisme = zOrganisationBase.merge(zOrganisationOrganismeCreate);
 const zOrganisationReaseau = zOrganisationBase.merge(zOrganisationReaseauCreate);
 const zOrganisationRegional = zOrganisationBase.merge(zOrganisationRegionalCreate);
@@ -84,6 +92,7 @@ const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCre
 const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
 
 const zOrganisation = z.discriminatedUnion("type", [
+  zOrganisationMissionLocale,
   zOrganisationOrganisme,
   zOrganisationReaseau,
   zOrganisationRegional,
@@ -95,6 +104,7 @@ const zOrganisation = z.discriminatedUnion("type", [
 ]);
 
 export const zOrganisationCreate = z.discriminatedUnion("type", [
+  zOrganisationMissionLocaleCreate,
   zOrganisationOrganismeCreate,
   zOrganisationReaseauCreate,
   zOrganisationRegionalCreate,
@@ -104,6 +114,7 @@ export const zOrganisationCreate = z.discriminatedUnion("type", [
   zOrganisationCarifOrefCreate,
   zOrganisationAdminCreate,
 ]);
+export type IOrganisationMissionLocale = z.output<typeof zOrganisationMissionLocale>;
 
 export type IOrganisationOrganismeFormation = z.output<typeof zOrganisationOrganisme>;
 
@@ -130,6 +141,7 @@ export const TYPES_ORGANISATION = [
   { key: "DDETS", nom: "DDETS" },
   { key: "DRAAF", nom: "DRAAF" },
   { key: "DREETS", nom: "DREETS" },
+  { key: "MISSION_LOCALE", nom: "Mission locale" },
   { key: "OPERATEUR_PUBLIC_NATIONAL", nom: "Opérateur public national" },
   { key: "ORGANISME_FORMATION", nom: "Organisme de formation" },
   { key: "TETE_DE_RESEAU", nom: "Tête de réseau" },
@@ -137,6 +149,9 @@ export const TYPES_ORGANISATION = [
 
 export function getOrganisationLabel(organisation: IOrganisationCreate): string {
   switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return `Mission locale ${organisation.nom}`;
+
     case "ORGANISME_FORMATION": {
       return `OFA UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
     }

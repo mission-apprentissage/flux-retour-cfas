@@ -343,11 +343,12 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         );
       }
 
+      const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
       return {
         effectif: await withComputedFields(
           {
             ...effectif,
-            formation: fiabilisationEffectifFormation(effectif, certification),
+            formation: computedFormation,
             organisme_id: organismeFormateur?._id,
             organisme_formateur_id: organismeFormateur?._id,
             organisme_responsable_id: organismeResponsable?._id,
@@ -413,13 +414,13 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
         }
 
         const certification = await getEffectifCertification(effectif);
-
+        const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
         return {
           effectif: await withComputedFields(
             {
               ...effectif,
               organisme_id: organisme?._id,
-              formation: fiabilisationEffectifFormation(effectif, certification),
+              formation: computedFormation,
               _raw: {
                 formation: effectif.formation,
               },
@@ -472,6 +473,7 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffe
     },
     updated_at: new Date(),
     created_at: effectifDb.created_at, // Preserve the original created_at date
+    transmitted_at: new Date(),
   };
 }
 
@@ -507,7 +509,7 @@ const createOrUpdateEffectif = async (
         }
       );
     } else {
-      effectifDb = { ...effectifWithComputedFields, _id: new ObjectId() };
+      effectifDb = { ...effectifWithComputedFields, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
       await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
     }

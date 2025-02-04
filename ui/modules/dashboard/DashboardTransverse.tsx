@@ -35,6 +35,8 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
   }
 
   switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return `Votre périmètre correspond à la mission locale ${organisation.nom}`;
     case "ORGANISME_FORMATION": {
       return "Votre périmètre correspond à votre organisme et vos organismes formateurs";
     }
@@ -162,7 +164,7 @@ const DashboardTransverse = () => {
 
         <IndicateursGrid indicateursEffectifs={indicateursEffectifs.total} loading={indicateursEffectifs.isLoading} />
 
-        <Link href="/indicateurs" color="action-high-blue-france" borderBottom="1px">
+        <Link href="/indicateurs" color="action-high-blue-france" isUnderlined>
           Explorer plus d’indicateurs
           <ArrowForwardIcon />
         </Link>

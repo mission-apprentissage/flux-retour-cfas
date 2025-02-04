@@ -18,8 +18,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       organisme_id: 1,
       annee_scolaire: 1,
       id_erp_apprenant: 1,
-      "formation.cfd": 1,
-      "formation.rncp": 1,
     },
     {
       unique: true,
@@ -69,6 +67,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ source: 1 }, { name: "source" }],
   [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ transmitted_at: 1 }, {}],
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
@@ -79,6 +78,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.fiable": 1, annee_scolaire: 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
+  [{ "apprenant.adresse.mission_locale_id": 1, annee_scolaire: 1 }, {}],
 ];
 
 const zodOverride = {
@@ -146,6 +146,7 @@ const zEffectifDECA = z.object({
 
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
+  transmitted_at: z.date({ description: "Date de transmission de l'effectif" }).nullish(),
   archive: z
     .boolean({
       description: "Dossier apprenant est archivé (rétention maximum 5 ans)",

@@ -208,7 +208,9 @@ describe("Processus d'ingestion", () => {
               departement: "05",
               academie: "02",
               region: "93",
+              mission_locale_id: 211,
             },
+            adresse_naissance: {},
           },
           contrats: [],
           formation: {
@@ -237,6 +239,7 @@ describe("Processus d'ingestion", () => {
                 departement: true,
                 region: true,
                 academie: true,
+                mission_locale_id: true,
               },
               historique_statut: true,
             },
@@ -259,6 +262,7 @@ describe("Processus d'ingestion", () => {
           _id: expect.anything(),
           created_at: expect.any(Date),
           updated_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           organisme_id: expect.any(ObjectId),
           _raw: {
             formation: {
@@ -325,6 +329,7 @@ describe("Processus d'ingestion", () => {
         source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
+        transmitted_at: new Date(),
       };
 
       beforeEach(async () => {
@@ -386,7 +391,7 @@ describe("Processus d'ingestion", () => {
         ]);
       });
 
-      it("Vérifie l'ingestion et la non mise à jour d'un dossier dont la clé d'unicité est différente d'un dossier déja existant", async () => {
+      it("Vérifie l'ingestion et la mise à jour d'un dossier pour une formation differente", async () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
@@ -419,17 +424,15 @@ describe("Processus d'ingestion", () => {
         await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        await expect(effectifsDb().countDocuments({})).resolves.toBe(2);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check historiques des effectifs
-        const effectifInserted = await effectifsDb().findOne({ "formation.cfd": "50033616" });
+        const effectifInserted = await effectifsDb().findOne({});
         expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.inscrit,
           },
-        ]);
-        expect(effectifForInput?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-30T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.apprenti,
@@ -460,7 +463,7 @@ describe("Processus d'ingestion", () => {
         has_nir: true,
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75001",
-        code_postal_de_naissance_apprenant: "44000",
+        code_postal_de_naissance_apprenant: "75001",
         sexe_apprenant: "F",
         rqth_apprenant: true,
         date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
@@ -579,7 +582,6 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
-            code_postal_de_naissance: "44000",
             courriel: "johndoe@example.org",
             telephone: "0123456789",
             adresse: {
@@ -588,6 +590,16 @@ describe("Processus d'ingestion", () => {
               commune: "Paris",
               code_insee: "75056",
               departement: "75",
+              academie: "01",
+              region: "11",
+              mission_locale_id: 609,
+            },
+            adresse_naissance: {
+              code_postal: "75001",
+              commune: "Paris",
+              code_insee: "75056",
+              departement: "75",
+              mission_locale_id: 609,
               academie: "01",
               region: "11",
             },
@@ -637,6 +649,9 @@ describe("Processus d'ingestion", () => {
             formation_presentielle: true,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            libelle_long: "Coiffure",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -695,6 +710,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -743,6 +759,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -820,6 +837,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -940,6 +958,7 @@ describe("Processus d'ingestion", () => {
           _id: effectifForInput?._id,
           apprenant: {
             adresse: {},
+            adresse_naissance: {},
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -1019,6 +1038,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2022-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,

@@ -187,15 +187,13 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     cell: ({ getValue, row: { original } }) => (
       <Text>
         <Link
-          variant="link"
-          display="inline-flex"
           href={`https://catalogue-apprentissage.intercariforef.org/etablissement/${original?.siret || ""}`}
           isExternal
-          width={"fit-content"}
+          isUnderlined
+          color="bluefrance"
         >
           {getValue()}
-          <Box className="ri-arrow-right-line" ml={1} />
-        </Link>{" "}
+        </Link>
       </Text>
     ),
   },

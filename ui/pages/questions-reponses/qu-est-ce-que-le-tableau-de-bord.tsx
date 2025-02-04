@@ -35,7 +35,7 @@ export default function QuestCeQueLeTdb() {
             Une question ? Quelques éléments de réponse.
           </Heading>
           <Box marginTop="2w">
-            <Link href="/questions-reponses" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            <Link href="/questions-reponses" isUnderlined>
               <Box as="i" className="ri-arrow-left-line" /> Revenir à la page principale
             </Link>
           </Box>
@@ -57,11 +57,7 @@ export default function QuestCeQueLeTdb() {
                         les organismes de formation, permettant aux pouvoirs publics de piloter au mieux la politique de
                         l’apprentissage nationalement et localement. <br />
                         Il est hébergé sur{" "}
-                        <Link
-                          href="https://cfas.apprentissage.beta.gouv.fr"
-                          color="bluefrance"
-                          textDecoration="underLine"
-                        >
+                        <Link href="https://cfas.apprentissage.beta.gouv.fr" color="bluefrance" isUnderlined>
                           https://cfas.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -85,7 +81,8 @@ export default function QuestCeQueLeTdb() {
                       <Link
                         href="https://mission-apprentissage.gitbook.io/general/la-mission-apprentissage/les-services-attendus-de-la-mission-apprentissage"
                         color="bluefrance"
-                        textDecoration="underLine"
+                        isUnderlined
+                        isExternal
                       >
                         consulter le Gitbook de la mission. <Box as="i" className="ri-links-line" />
                       </Link>
@@ -102,7 +99,7 @@ export default function QuestCeQueLeTdb() {
                         de visibilité sur les chiffres clés de l’apprentissage. <br />
                         Pour en savoir plus sur les utilisateurs du le {PRODUCT_NAME} , <br />
                         consultez{" "}
-                        <Link href="/organisme-formation/aide" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation/aide" color="bluefrance" isUnderlined>
                           Qui peut consulter les données de votre organisme ? <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -140,7 +137,7 @@ export default function QuestCeQueLeTdb() {
                         <br />
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
-                        <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
+                        <Link href="/comprendre-les-donnees" color="bluefrance" isUnderlined>
                           Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -169,7 +166,13 @@ export default function QuestCeQueLeTdb() {
                         {PRODUCT_NAME} , l’équipe est à votre écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                         .
@@ -258,17 +261,23 @@ export default function QuestCeQueLeTdb() {
                     <Box>
                       <Text>
                         Vous pouvez effectuer une demande via le{" "}
-                        <Link href="/auth/connexion" color="bluefrance" textDecoration="underLine">
+                        <Link href="/auth/connexion" color="bluefrance" isUnderlined>
                           formulaire dédié <Box as="i" className="ri-links-line" />
                         </Link>{" "}
                         ou nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                         <br />
                         <br />
                         Si vous êtes un organisme de formation,{" "}
-                        <Link href="/organisme-formation" color="bluefrance" textDecoration="underLine">
+                        <Link href="/organisme-formation" color="bluefrance" isUnderlined>
                           consultez la page dédiée <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -285,7 +294,13 @@ export default function QuestCeQueLeTdb() {
                         établissements. <br />
                         Si vous avez des besoins spécifiques liés par exemple à la cellule apprentissage locale, vous
                         pouvez nous contacter :{" "}
-                        <Link href={SUPPORT_PAGE_ACCUEIL} color="bluefrance" whiteSpace="nowrap">
+                        <Link
+                          href={SUPPORT_PAGE_ACCUEIL}
+                          color="bluefrance"
+                          whiteSpace="nowrap"
+                          isUnderlined
+                          isExternal
+                        >
                           contactez-nous
                         </Link>
                       </Text>

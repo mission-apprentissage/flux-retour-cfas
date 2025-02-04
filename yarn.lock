@@ -4986,9 +4986,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-alternance-sdk@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "api-alternance-sdk@npm:2.1.0"
+"api-alternance-sdk@npm:^2.1.0, api-alternance-sdk@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "api-alternance-sdk@npm:2.2.0"
   dependencies:
     "@asteasolutions/zod-to-openapi": ^7.2.0
     jsonwebtoken: ^9.0.2
@@ -4998,7 +4998,7 @@ __metadata:
     openapi3-ts: ^4.4.0
     safe-stable-stringify: ^2.5.0
     zod: ^3.23.8
-  checksum: 44d744237da7e2113cf5fc8e0f78b6838222f9569750e139f4f11e46c04e02fb577a9e05c47630c0942de23248c0a737ecddab45358c007b5c1f823061777064
+  checksum: 51efb8d16f21231ed9902da1b4400b76b1369f5e422f2a1a2e8606ca71ee7a8c99c195c3135411801d9c257d0030f2175a81477c34e8349df81ca9627fa4e2f7
   languageName: node
   linkType: hard
 
@@ -10564,9 +10564,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"job-processor@npm:^1.6.3":
-  version: 1.6.3
-  resolution: "job-processor@npm:1.6.3"
+"job-processor@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "job-processor@npm:1.8.0"
   dependencies:
     cron-parser: ^4.9.0
     date-fns: ^2.30.0
@@ -10589,7 +10589,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 80c12c7b1a583968400628662f5a0c3195bca2ffcaccf0ec37975f1091adecf83fdd0a9a178a7cc24d05ef488c47dd0a0c14052caa7fea3a0884371eebd5ab22
+  checksum: c570f60a9ca075d7757978975ae5df6c2ae70654f32cbf655dd249001d607569393537c35a5b6027287cd5f51f9dbb78f2fd78d243e65a9b0d355031587ed712
   languageName: node
   linkType: hard
 
@@ -16204,7 +16204,7 @@ __metadata:
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
-    api-alternance-sdk: ^2.1.0
+    api-alternance-sdk: ^2.2.0
     axios: 0.28.1
     axios-cache-interceptor: ^0.10.7
     axios-retry: 3.3.1
@@ -16229,7 +16229,7 @@ __metadata:
     express: ^4.21.1
     express-async-errors: 3.1.1
     fast-xml-parser: ^4.5.0
-    job-processor: ^1.6.3
+    job-processor: ^1.8.0
     joi: ^17.13.3
     joi-password: ^4.2.0
     json2csv: 5.0.7

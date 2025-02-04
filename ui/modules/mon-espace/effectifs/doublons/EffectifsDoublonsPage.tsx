@@ -61,13 +61,7 @@ const EffectifsDoublonsPage = ({ isMine }) => {
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
             {isMine ? "Mes duplicats d'effectifs" : "Ses duplicats d'effectifs"}
           </Heading>
-          <Link
-            href={`/organismes/${organisme?._id}/effectifs`}
-            color="bluefrance"
-            borderBottom="1px solid"
-            mt={4}
-            _hover={{ cursor: "pointer", textDecoration: "none", borderBottom: "2px solid" }}
-          >
+          <Link href={`/organismes/${organisme?._id}/effectifs`} color="bluefrance" isUnderlined mt={4}>
             <Box as="i" className="ri-arrow-left-line" marginRight="1w" />
             Retour au tableau des effectifs
           </Link>
@@ -115,24 +109,11 @@ const EffectifsDoublonsPage = ({ isMine }) => {
             </Text>
             <Text mt={2}>
               En cas de difficulté, lisez la{" "}
-              <Link
-                href={CRISP_FAQ}
-                textDecoration={"underline"}
-                isExternal
-                plausibleGoal="clic_sifa_faq"
-                color="bluefrance"
-              >
+              <Link href={CRISP_FAQ} isExternal isUnderlined plausibleGoal="clic_sifa_faq" color="bluefrance">
                 FAQ dédiée
               </Link>{" "}
               ou{" "}
-              <Link
-                href={SUPPORT_PAGE_ACCUEIL}
-                target="_blank"
-                textDecoration="underline"
-                isExternal
-                whiteSpace="nowrap"
-                color="bluefrance"
-              >
+              <Link href={SUPPORT_PAGE_ACCUEIL} isExternal isUnderlined whiteSpace="nowrap" color="bluefrance">
                 contactez-nous
               </Link>
               .

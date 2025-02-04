@@ -1,12 +1,12 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { MongoError, ObjectId, WithId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
-import type { IEffectif } from "shared/models";
+import type { IEffectif, IOrganisation, IOrganisationOrganismeFormation } from "shared/models";
 import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -41,7 +41,11 @@ import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organis
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
+import { tmpMigrateAdresseNaissance } from "./patches/adresse/migrate-adresse-naissance";
+import { tmpFiabilisationCertification } from "./patches/certification/fiabilisation-certification";
+import { tmpMigrateEffectifsTransmittedAt } from "./patches/effectifs/migrate-transmitted-at";
 import { validationTerritoires } from "./territoire/validationTerritoire";
+import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
 const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "hydrate:organismes-referentiel", queued });
@@ -174,6 +178,11 @@ export async function setupJobProcessor() {
       "hydrate:contrats-deca-raw": {
         handler: async () => {
           return hydrateDecaRaw();
+        },
+      },
+      "hydrate:effectifs:update_all_computed_statut": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes();
         },
       },
       "hydrate:effectifs:update_computed_statut": {
@@ -424,6 +433,26 @@ export async function setupJobProcessor() {
         },
         resumable: true,
       },
+      "tmp:migration:organisation-organisme": {
+        handler: async () => {
+          const organisations: Array<IOrganisation> = await organisationsDb()
+            .find({
+              type: "ORGANISME_FORMATION",
+            })
+            .toArray();
+
+          for (let i = 0; i < organisations.length; i++) {
+            const orga = organisations[i] as IOrganisationOrganismeFormation;
+            const organisme = await organismesDb().findOne({ siret: orga.siret, uai: orga.uai ?? undefined });
+            if (organisme) {
+              await organisationsDb().updateOne(
+                { _id: orga._id },
+                { $set: { organisme_id: organisme._id.toString() } }
+              );
+            }
+          }
+        },
+      },
       "tmp:migration:effectifs:duree_formation_relle": {
         handler: async () => {
           const batchSize = 100;
@@ -475,6 +504,22 @@ export async function setupJobProcessor() {
 
           console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
         },
+      },
+      "tmp:migration:hydrate-mission-locale": {
+        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDb()),
+      },
+      "tmp:migration:hydrate-mission-locale-deca": {
+        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDECADb()),
+      },
+      "tmp:migration:formation-certification": {
+        handler: tmpFiabilisationCertification,
+        resumable: true,
+      },
+      "tmp:migration:adresse-naissance": {
+        handler: tmpMigrateAdresseNaissance,
+      },
+      "tmp:migration:effectifs-transmitted-at": {
+        handler: tmpMigrateEffectifsTransmittedAt,
       },
     },
   });
