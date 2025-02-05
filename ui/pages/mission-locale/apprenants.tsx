@@ -113,6 +113,7 @@ function EffectifsPage() {
     },
     { keepPreviousData: true }
   );
+  console.log("CONSOLE LOG ~ EffectifsPage ~ apprenants:", apprenants);
 
   const updateState = (key: string, value: any) => {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -152,7 +153,7 @@ function EffectifsPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (identifiés comme inscrit
+            Retrouvez ci-dessous les <strong>{apprenants?.totalApprenants}</strong> jeunes (identifiés comme inscrit
             sans contrat, en rupture de contrat ou en abandon/sortie d’apprentissage) et leurs coordonnées, susceptibles
             d&apos;être intéressés par une mise en relation et accompagnement avec une Mission Locale. Cliquez sur
             chaque jeune pour plus d’informations sur son parcours.

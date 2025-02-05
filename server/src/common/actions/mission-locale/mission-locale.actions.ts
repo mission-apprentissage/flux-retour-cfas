@@ -313,33 +313,47 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
 
-  const resultEffectif = (await effectifsDb().aggregate(effectifsAggregation).next()) as {
-    pagination: any;
-    data: Array<
-      IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
-        cfa_users: Array<IUsersMigration>;
-      } & {
-        a_risque: boolean;
-      } & {
-        ml_effectif: IMissionLocaleEffectif;
-      }
-    >;
-  };
+  const totalApprenantsAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    {
+      $count: "totalApprenants",
+    },
+  ];
+
+  const [resultEffectif, totalApprenantsResult] = await Promise.all([
+    (await effectifsDb().aggregate(effectifsAggregation).next()) as {
+      pagination: IPaginationFilters;
+      data: Array<
+        IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+          cfa_users: Array<IUsersMigration>;
+        } & {
+          a_risque: boolean;
+          x;
+        } & {
+          ml_effectif: IMissionLocaleEffectif;
+        }
+      >;
+    },
+    effectifsDb().aggregate(totalApprenantsAggregation).next(),
+  ]);
 
   const resultAdresse = await effectifsDb().aggregate(adresseFilterAggregation).toArray();
 
+  const totalApprenants = totalApprenantsResult?.totalApprenants || 0;
+
   if (!resultEffectif || resultEffectif?.data.length === 0) {
-    return { pagination: { total: 0, page, limit }, data: [], filter: resultAdresse };
+    return { pagination: { total: 0, page, limit }, data: [], filter: resultAdresse, totalApprenants };
   }
 
   const { pagination, data } = resultEffectif;
 
-  if (pagination) {
+  if (pagination && pagination.total) {
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
+
   const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
 
-  return { pagination, data: effectifs, filter: resultAdresse };
+  return { pagination, data: effectifs, filter: resultAdresse, totalApprenants };
 };
 
 export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: number) => {
