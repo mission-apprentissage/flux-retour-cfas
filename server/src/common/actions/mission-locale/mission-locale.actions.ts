@@ -79,10 +79,14 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
     last_update_value,
     last_update_order,
   } = effectifFilters;
+
   const today = new Date();
   const adultThreshold = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const updateDateThreshold =
+    typeof last_update_value === "number" && last_update_value >= 0
+      ? new Date(today.setDate(today.getDate() - last_update_value))
+      : null;
 
-  const thresholdData = last_update_value && new Date(new Date().setDate(new Date().getDate() - last_update_value));
   const filter: Array<any> = [
     ...filterByDernierStatutPipeline(statut as any, new Date()),
     {
@@ -124,13 +128,13 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
           : {}),
         ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
 
-        ...(last_update_value !== undefined && last_update_order
+        ...(updateDateThreshold && last_update_order
           ? last_update_order === "AFTER"
             ? {
                 $or: [
                   {
                     transmitted_at: {
-                      $gte: thresholdData,
+                      $lt: updateDateThreshold,
                     },
                   },
                   {
@@ -140,7 +144,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
               }
             : {
                 transmitted_at: {
-                  $lte: thresholdData,
+                  $gte: updateDateThreshold,
                 },
               }
           : {}),
