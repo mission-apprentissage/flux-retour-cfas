@@ -681,14 +681,30 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -700,7 +716,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -963,14 +982,30 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -982,7 +1017,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -1587,14 +1625,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -1606,7 +1660,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -2083,14 +2140,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -2102,7 +2175,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -2351,7 +2427,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -2454,9 +2538,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -3519,14 +3600,30 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -3538,7 +3635,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -3801,14 +3901,30 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -3820,7 +3936,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -4425,14 +4544,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -4444,7 +4579,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -4921,14 +5059,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -4940,7 +5094,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -5189,7 +5346,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -5292,9 +5457,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -6105,14 +6267,30 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -6124,7 +6302,10 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -6718,14 +6899,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -6737,7 +6934,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -7188,14 +7388,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -7207,7 +7423,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -7456,7 +7675,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -7535,9 +7762,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 ],
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -8302,12 +8526,24 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "bsonType": "object",
             "properties": {
               "message": {
+                "bsonType": "string",
                 "description": "message d'erreur",
               },
               "path": {
+                "bsonType": "array",
                 "description": "champ en erreur",
+                "items": {
+                  "bsonType": [
+                    "string",
+                    "number",
+                  ],
+                },
               },
             },
+            "required": [
+              "message",
+              "path",
+            ],
           },
         },
         {
@@ -9874,14 +10110,30 @@ exports[`validation-schema > should create validation schema for organismes > or
           "description": "Code Bassin d'emploi",
         },
         "code_insee": {
-          "bsonType": "string",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "description": "Le code insee doit contenir 5 caractères",
+              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
           "description": "Le code insee doit contenir 5 caractères",
-          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
         },
         "code_postal": {
-          "bsonType": "string",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "description": "Le code postal doit contenir 5 caractères",
+              "pattern": "^[0-9]{5}$",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
           "description": "Le code postal doit contenir 5 caractères",
-          "pattern": "^[0-9]{5}$",
         },
         "commune": {
           "bsonType": "string",
@@ -9893,7 +10145,10 @@ exports[`validation-schema > should create validation schema for organismes > or
           "description": "Complément d'adresse",
         },
         "complete": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Adresse complète",
         },
         "departement": {
@@ -10900,14 +11155,30 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "description": "Code Bassin d'emploi",
                     },
                     "code_insee": {
-                      "bsonType": "string",
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code insee doit contenir 5 caractères",
+                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                       "description": "Le code insee doit contenir 5 caractères",
-                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                     },
                     "code_postal": {
-                      "bsonType": "string",
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code postal doit contenir 5 caractères",
+                          "pattern": "^[0-9]{5}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                       "description": "Le code postal doit contenir 5 caractères",
-                      "pattern": "^[0-9]{5}$",
                     },
                     "commune": {
                       "bsonType": "string",
@@ -10919,7 +11190,10 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "description": "Complément d'adresse",
                     },
                     "complete": {
-                      "bsonType": "string",
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
                       "description": "Adresse complète",
                     },
                     "departement": {

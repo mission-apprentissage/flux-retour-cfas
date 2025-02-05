@@ -45,7 +45,7 @@ function shouldUpdateStatut(effectif: IEffectif): boolean {
  * @returns {IEffectifComputedStatut} L'objet de statut calculé pour l'effectif.
  */
 export function createComputedStatutObject(
-  effectif: IEffectif | WithoutId<IEffectifDECA>,
+  effectif: WithoutId<IEffectif | IEffectifDECA>,
   evaluationDate: Date
 ): IEffectifComputedStatut | null {
   try {
@@ -102,7 +102,7 @@ function handleUpdateError(err: unknown, effectif: IEffectif) {
 }
 
 const generateUnifiedParcours = (
-  effectif: IEffectif | WithoutId<IEffectifDECA>,
+  effectif: WithoutId<IEffectif | IEffectifDECA>,
   evaluationDate: Date
 ): { valeur: StatutApprenant; date: Date }[] => {
   let parcours: { valeur: StatutApprenant; date: Date }[] = [];
@@ -144,7 +144,7 @@ function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: D
 }
 
 function determineStatutsByContrats(
-  effectif: IEffectif | WithoutId<IEffectifDECA>,
+  effectif: WithoutId<IEffectif | IEffectifDECA>,
   evaluationDate?: Date
 ): { valeur: StatutApprenant; date: Date }[] {
   if (!effectif.formation?.date_entree && !effectif.formation?.date_fin) {
