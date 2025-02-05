@@ -113,7 +113,6 @@ function EffectifsPage() {
     },
     { keepPreviousData: true }
   );
-  console.log("CONSOLE LOG ~ EffectifsPage ~ apprenants:", apprenants);
 
   const updateState = (key: string, value: any) => {
     setState((prev) => ({ ...prev, [key]: value }));
