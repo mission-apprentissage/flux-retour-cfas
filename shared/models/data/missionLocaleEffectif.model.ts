@@ -45,7 +45,7 @@ const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
-  situation: zSituationEnum.optional(),
+  situation: zSituationEnum.nullish(),
   situation_updated_at: z.date().optional(),
   statut_correct: z.boolean().optional(),
   statut_reel: z.nativeEnum(STATUT_JEUNE_MISSION_LOCALE).nullish(),

@@ -9096,13 +9096,20 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "bsonType": "objectId",
     },
     "situation": {
-      "bsonType": "string",
-      "enum": [
-        "CONTACTE_AVEC_SUIVI",
-        "CONTACT_SANS_SUIVI",
-        "DEJA_SUIVI",
-        "INJOIGNABLE",
-        "NON_CONTACTE",
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "CONTACTE_AVEC_SUIVI",
+            "CONTACT_SANS_SUIVI",
+            "DEJA_SUIVI",
+            "INJOIGNABLE",
+            "NON_CONTACTE",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "situation_updated_at": {
@@ -9173,13 +9180,20 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           ],
         },
         "situation": {
-          "bsonType": "string",
-          "enum": [
-            "CONTACTE_AVEC_SUIVI",
-            "CONTACT_SANS_SUIVI",
-            "DEJA_SUIVI",
-            "INJOIGNABLE",
-            "NON_CONTACTE",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "enum": [
+                "CONTACTE_AVEC_SUIVI",
+                "CONTACT_SANS_SUIVI",
+                "DEJA_SUIVI",
+                "INJOIGNABLE",
+                "NON_CONTACTE",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
           ],
         },
         "statut_correct": {
