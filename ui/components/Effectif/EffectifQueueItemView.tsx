@@ -109,7 +109,7 @@ const DescriptionErrorListComponent = ({ errorList }) => (
 const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps) => {
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
   const computeRequired = (value) => {
-    return !(dossierApprenantSchemaV3Base().shape[value] instanceof z.ZodOptional) ? (
+    return !(dossierApprenantSchemaV3Base.shape[value] instanceof z.ZodOptional) ? (
       <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
         *
       </Box>
