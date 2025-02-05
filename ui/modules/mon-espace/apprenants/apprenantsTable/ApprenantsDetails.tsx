@@ -49,14 +49,20 @@ const getSourceText = (source: SourceApprenant, transmittedAt: Date) => {
     <Text color="plaininfo" my={4}>
       Données transmises par {prefix}
       <Text as="span" fontWeight="bold">
-        {sourceLabel}
+        {sourceLabel}{" "}
       </Text>
-      {transmittedAt && (
+      {transmittedAt ? (
         <>
-          {" "}
           le{" "}
           <Text as="span" fontWeight="bold">
             {formattedDate}
+          </Text>
+        </>
+      ) : (
+        <>
+          il y a{" "}
+          <Text as="span" fontWeight="bold">
+            plus de 2 semaines
           </Text>
         </>
       )}
