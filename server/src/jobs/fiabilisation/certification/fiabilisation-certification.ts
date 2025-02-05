@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import type { ICertification } from "api-alternance-sdk";
 import { zCfd, zRncp } from "api-alternance-sdk/internal";
 import Boom from "boom";
@@ -7,6 +6,7 @@ import type { IEffectif } from "shared/models";
 import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
 import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import logger from "@/common/logger";
 
 function isWithRange(date: Date | null, range: { debut: Date | null; fin: Date | null }): boolean {
   // If date is null, we assume it's valid
@@ -89,22 +89,18 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
   const cfd = rawCfd.padStart(8, "0");
 
   if (!zCfd.safeParse(cfd).success) {
-    captureException(
-      Boom.internal("fiabilisation-certification: invalid cfd", { cfd, formation: effectif.formation }),
-      { level: "warning" }
-    );
+    logger.warn(Boom.internal("fiabilisation-certification: invalid cfd", { cfd, formation: effectif.formation }));
     return rawCfd;
   }
 
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
 
   if (certifications.length === 0) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: cfd non found on API alternance", {
         cfd,
         formation: effectif.formation,
-      }),
-      { level: "warning" }
+      })
     );
     return rawCfd;
   }
@@ -119,24 +115,22 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
   const continuite = filterCertificationContinuiteValidity(certifications[0].continuite, session);
 
   if (!continuite.cfd || continuite.cfd.length === 0) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: no replacement found for cfd", {
         cfd,
         formation: effectif.formation,
-      }),
-      { level: "warning" }
+      })
     );
     return cfd;
   }
 
   if (continuite.cfd.length > 1) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: multiple replacement found for cfd", {
         cfd,
         continuite,
         formation: effectif.formation,
-      }),
-      { level: "warning" }
+      })
     );
     return cfd;
   }
@@ -162,12 +156,11 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
 
   if (certifications.length === 0) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: rncp non found on API alternance", {
         rncp,
         formation: effectif.formation,
-      }),
-      { level: "warning" }
+      })
     );
     return rncp;
   }
@@ -182,25 +175,23 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
   const continuite = filterCertificationContinuiteValidity(certifications[0].continuite, session);
 
   if (!continuite.rncp || continuite.rncp.length === 0) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: no replacement found for rncp", {
         rncp,
         formation: effectif.formation,
         continuite,
-      }),
-      { level: "warning" }
+      })
     );
     return rncp;
   }
 
   if (continuite.rncp.length > 1) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: multiple replacement found for rncp", {
         rncp,
         continuite,
         formation: effectif.formation,
-      }),
-      { level: "warning" }
+      })
     );
     return rncp;
   }
@@ -220,13 +211,12 @@ export function getSessionCertification<C extends Pick<ICertification, "periode_
   );
 
   if (candidats.length > 1) {
-    captureException(
+    logger.warn(
       Boom.internal("fiabilisation-certification: multiple certification found for session", {
         session,
         candidats,
         certifications: certifications.map((c) => c.identifiant),
-      }),
-      { level: "warning" }
+      })
     );
   }
 
