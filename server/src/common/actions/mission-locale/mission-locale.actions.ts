@@ -321,7 +321,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const [resultEffectif, totalApprenantsResult] = await Promise.all([
     (await effectifsDb().aggregate(effectifsAggregation).next()) as {
-      pagination: any;
+      pagination: IPaginationFilters;
       data: Array<
         IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
           cfa_users: Array<IUsersMigration>;
@@ -346,7 +346,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const { pagination, data } = resultEffectif;
 
-  if (pagination) {
+  if (pagination && pagination.total) {
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
 
