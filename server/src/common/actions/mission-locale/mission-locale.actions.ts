@@ -128,7 +128,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
           : {}),
         ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
 
-        ...(updateDateThreshold
+        ...(updateDateThreshold && last_update_order
           ? last_update_order === "AFTER"
             ? {
                 $or: [
