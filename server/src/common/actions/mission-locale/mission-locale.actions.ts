@@ -42,7 +42,7 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
         $cond: {
           if: {
             $or: [
-              { $eq: ["$dernierStatut", STATUT_APPRENANT.ABANDON] },
+              { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] },
               {
                 $and: [
                   { $eq: [{ $getField: { field: "valeur", input: "$dernierStatut" } }, STATUT_APPRENANT.RUPTURANT] },
