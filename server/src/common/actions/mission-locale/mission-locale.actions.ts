@@ -318,6 +318,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const totalApprenantsAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...filterByDernierStatutPipeline(
+      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
+      new Date()
+    ),
     {
       $count: "totalApprenants",
     },
