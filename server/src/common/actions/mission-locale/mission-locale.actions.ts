@@ -212,7 +212,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
   ];
 
-  const adresseFilterAggregation = [
+  const effectifsMatchAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...filterByDernierStatutPipeline(
       [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
@@ -225,6 +225,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         "apprenant.adresse.commune": { $exists: true },
       },
     },
+  ];
+
+  const adresseFilterAggregation = [
+    ...effectifsMatchAggregation,
     {
       $group: {
         _id: {
@@ -317,11 +321,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   ];
 
   const totalApprenantsAggregation = [
-    ...generateUnionWithEffectifDECA(missionLocaleId),
-    ...filterByDernierStatutPipeline(
-      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
-      new Date()
-    ),
+    ...effectifsMatchAggregation,
     {
       $count: "totalApprenants",
     },
@@ -335,7 +335,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
           cfa_users: Array<IUsersMigration>;
         } & {
           a_risque: boolean;
-          x;
         } & {
           ml_effectif: IMissionLocaleEffectif;
         }
