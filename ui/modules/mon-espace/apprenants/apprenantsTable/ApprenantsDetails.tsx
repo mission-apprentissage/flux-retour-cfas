@@ -332,7 +332,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                         )}
                       />
                     </Td>
-                    <Td>{getValueOrFallback(`${formation.niveau ?? ""} ${formation.niveau_libelle ?? ""}`)}</Td>
+                    <Td>{getValueOrFallback(formation.niveau_libelle)}</Td>
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Durée théorique en mois</Td>
