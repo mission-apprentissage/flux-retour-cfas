@@ -1,7 +1,7 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { STATUT_APPRENANT } from "shared/constants";
+import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
@@ -22,7 +22,7 @@ import {
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
-import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
+import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
 export const EFF_MISSION_LOCALE_FILTER = [
   {
@@ -66,6 +66,35 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
+const createDernierStatutFieldPipelineMl = (date: Date) => [
+  {
+    $addFields: {
+      dernierStatut: {
+        $arrayElemAt: ["$_computed.statut.parcours", -1],
+      },
+    },
+  },
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
+      },
+    },
+  },
+];
+
+const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
+  statut.length
+    ? [
+        ...createDernierStatutFieldPipelineMl(date),
+        {
+          $match: {
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+          },
+        },
+      ]
+    : [];
+
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
@@ -88,7 +117,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
       : null;
 
   const filter: Array<any> = [
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $match: {
         ...(search
@@ -212,9 +241,9 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
   ];
 
-  const adresseFilterAggregation = [
+  const effectifsMatchAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
-    ...filterByDernierStatutPipeline(
+    ...filterByDernierStatutPipelineMl(
       [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
       new Date()
     ),
@@ -225,6 +254,10 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         "apprenant.adresse.commune": { $exists: true },
       },
     },
+  ];
+
+  const adresseFilterAggregation = [
+    ...effectifsMatchAggregation,
     {
       $group: {
         _id: {
@@ -317,11 +350,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   ];
 
   const totalApprenantsAggregation = [
-    ...generateUnionWithEffectifDECA(missionLocaleId),
-    ...filterByDernierStatutPipeline(
-      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
-      new Date()
-    ),
+    ...effectifsMatchAggregation,
     {
       $count: "totalApprenants",
     },
@@ -335,7 +364,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
           cfa_users: Array<IUsersMigration>;
         } & {
           a_risque: boolean;
-          x;
         } & {
           ml_effectif: IMissionLocaleEffectif;
         }
@@ -463,7 +491,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $group: {
         _id: "$organisme_id",
