@@ -66,7 +66,7 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
-const createDernierStatutFieldPipeline = (date: Date) => [
+const createDernierStatutFieldPipelineMl = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {
@@ -83,10 +83,10 @@ const createDernierStatutFieldPipeline = (date: Date) => [
   },
 ];
 
-const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
+const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
   statut.length
     ? [
-        ...createDernierStatutFieldPipeline(date),
+        ...createDernierStatutFieldPipelineMl(date),
         {
           $match: {
             $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
@@ -117,7 +117,7 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
       : null;
 
   const filter: Array<any> = [
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $match: {
         ...(search
@@ -243,7 +243,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const effectifsMatchAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
-    ...filterByDernierStatutPipeline(
+    ...filterByDernierStatutPipelineMl(
       [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
       new Date()
     ),
@@ -491,7 +491,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $group: {
         _id: "$organisme_id",
