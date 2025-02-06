@@ -1,7 +1,7 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { STATUT_APPRENANT } from "shared/constants";
+import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
@@ -22,7 +22,7 @@ import {
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
-import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
+import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
 export const EFF_MISSION_LOCALE_FILTER = [
   {
@@ -65,6 +65,35 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   },
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
+
+const createDernierStatutFieldPipeline = (date: Date) => [
+  {
+    $addFields: {
+      dernierStatut: {
+        $arrayElemAt: ["$_computed.statut.parcours", -1],
+      },
+    },
+  },
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
+      },
+    },
+  },
+];
+
+const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
+  statut.length
+    ? [
+        ...createDernierStatutFieldPipeline(date),
+        {
+          $match: {
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+          },
+        },
+      ]
+    : [];
 
 export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {

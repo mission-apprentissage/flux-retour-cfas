@@ -35,7 +35,18 @@ export const createDernierStatutFieldPipeline = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {
-        $arrayElemAt: ["$_computed.statut.parcours", -1],
+        $arrayElemAt: [
+          {
+            $filter: {
+              input: "$_computed.statut.parcours",
+              as: "statut",
+              cond: {
+                $lte: ["$$statut.date", date],
+              },
+            },
+          },
+          -1,
+        ],
       },
     },
   },
