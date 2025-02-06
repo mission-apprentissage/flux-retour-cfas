@@ -9360,6 +9360,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "bsonType": "string",
           "enum": [
             "CONTRAT_SIGNE_NON_DEMARRE",
+            "CONTRAT_EN_COURS",
             "RETOUR_EN_VOIE_SCOLAIRE",
             "ABANDON",
             "RUPTURE",
@@ -9441,6 +9442,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
               "bsonType": "string",
               "enum": [
                 "CONTRAT_SIGNE_NON_DEMARRE",
+                "CONTRAT_EN_COURS",
                 "RETOUR_EN_VOIE_SCOLAIRE",
                 "ABANDON",
                 "RUPTURE",
