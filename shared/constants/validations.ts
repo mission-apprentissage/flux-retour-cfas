@@ -10,7 +10,7 @@ const YEAR_PATTERN = "^[12][0-9]{3}$";
 // Basé sur les recommandations SIFA
 export const DERNIER_ORGANISME_UAI_PATTERN =
   "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$";
-export const PHONE_REGEX_PATTERN = "^(?:+(d{1,3})[-.s]?)?(?:(?(d{1,4}))?[-.s]?)?(d{2,4}[-.s]?d{2,4}[-.s]?d{2,4})$";
+export const PHONE_REGEX_PATTERN = "^(?:\+(\d{1,3})[-.\s]?)?(?:\(?(\d{1,4})\)?[-.\s]?)?(\d{2,4}[-.\s]?\d{2,4}[-.\s]?\d{2,4})$";
 
 // Numero INE (Identifiant National Elève)
 // Le numero INE composé de 11 caractères,
