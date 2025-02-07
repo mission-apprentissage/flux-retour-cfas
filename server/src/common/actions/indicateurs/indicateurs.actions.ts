@@ -14,7 +14,6 @@ import {
   hasRecentTransmissions,
   shouldDisplayContactInEffectifNominatif,
 } from "shared";
-import { StatutApprenant } from "shared/constants/effectifs";
 
 import {
   DateFilters,
@@ -58,18 +57,6 @@ const createDernierStatutFieldPipeline = (date: Date) => [
     },
   },
 ];
-
-export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length
-    ? [
-        ...createDernierStatutFieldPipeline(date),
-        {
-          $match: {
-            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
-          },
-        },
-      ]
-    : [];
 
 export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,

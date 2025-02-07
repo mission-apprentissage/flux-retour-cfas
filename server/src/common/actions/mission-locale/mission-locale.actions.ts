@@ -95,7 +95,7 @@ const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: D
       ]
     : [];
 
-export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
     rqth,

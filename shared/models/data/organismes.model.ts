@@ -251,23 +251,6 @@ export const zOrganisme = z
 export type IOrganisme = z.output<typeof zOrganisme>;
 export type IOrganismeJson = Jsonify<IOrganisme>;
 
-// Default value
-export function defaultValuesOrganisme(): Pick<
-  IOrganisme,
-  "reseaux" | "erps" | "relatedFormations" | "fiabilisation_statut" | "ferme" | "qualiopi" | "created_at" | "updated_at"
-> {
-  return {
-    reseaux: [],
-    erps: [],
-    relatedFormations: [],
-    fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
-    ferme: false,
-    qualiopi: false,
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-}
-
 export const hasRecentTransmissions = (last_transmission_date: Date | null | undefined) =>
   last_transmission_date && !isBefore(new Date(last_transmission_date), subMonths(new Date(), 3));
 
