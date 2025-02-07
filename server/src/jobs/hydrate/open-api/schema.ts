@@ -3,7 +3,7 @@ import { SourceApprenantEnum, TD_API_ELEMENT_LINK } from "shared/constants";
 import { dossierApprenantSchemaV3Base } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
 
-const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base().extend({
+const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base.extend({
   validation_errors: z
     .array(
       z.object({
@@ -77,7 +77,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchemaV3Base().omit({ has_nir: true })),
+          schema: z.array(dossierApprenantSchemaV3Base.omit({ has_nir: true })),
         },
       },
     },

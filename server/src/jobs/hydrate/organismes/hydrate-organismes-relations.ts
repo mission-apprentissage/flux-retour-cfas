@@ -1,11 +1,10 @@
-import { PromisePool } from "@supercharge/promise-pool";
-import { ArrayElement, ObjectId } from "mongodb";
-import { IOrganisme } from "shared/models";
-import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
+import Boom from "boom";
+import { ObjectId, type AnyBulkWriteOperation } from "mongodb";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import { IOrganisme, type IFormationCatalogue, type IRelatedOrganisme } from "shared/models";
 
-import { isOrganismeFiable } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
+import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 const logger = parentLogger.child({
@@ -27,83 +26,91 @@ interface OrganismeInfos {
   ferme: boolean | undefined;
 }
 
-/**
- * Ce job peuple le champ organisme.organismesFormateurs et organismesResponsables avec les relations du référentiel
- * stockées dans la collection organismeReferentiel.
- * Ces relations sont complétées avec quelques données de l'organisme (collection organismes).
- * La région, département, académie et réseaux sont notamment enregistrés afin qu'un utilisateur puisse savoir sur l'UI
- * s'il a les droits d'accès aux organismes formateurs liés (indiquer que les effectifs agrégés sont partiels).
- */
+type IFormateurToResponsables = {
+  _id: {
+    etablissement_formateur_siret: IFormationCatalogue["etablissement_formateur_siret"];
+    etablissement_formateur_uai: IFormationCatalogue["etablissement_formateur_uai"];
+  };
+  responsables: Array<{
+    etablissement_gestionnaire_siret: IFormationCatalogue["etablissement_gestionnaire_siret"];
+    etablissement_gestionnaire_uai: IFormationCatalogue["etablissement_gestionnaire_uai"];
+  }>;
+};
+
+type IReponsableToFormateurs = {
+  _id: {
+    etablissement_gestionnaire_siret: IFormationCatalogue["etablissement_gestionnaire_siret"];
+    etablissement_gestionnaire_uai: IFormationCatalogue["etablissement_gestionnaire_uai"];
+  };
+  formateurs: Array<{
+    etablissement_formateur_siret: IFormationCatalogue["etablissement_formateur_siret"];
+    etablissement_formateur_uai: IFormationCatalogue["etablissement_formateur_uai"];
+  }>;
+};
+
 export const hydrateOrganismesRelations = async () => {
-  // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
-  const organismeResponsablePartiels = await organismesReferentielDb()
-    .aggregate([
-      {
-        $addFields: {
-          siren: {
-            $substr: ["$siret", 0, 9],
-          },
+  logger.info("Hydratation des relations entre organismes");
+  const [formateurToResponsables, responsableToFormateurs] = await Promise.all([
+    formationsCatalogueDb()
+      .aggregate<IFormateurToResponsables>([
+        {
+          $match: { published: true },
         },
-      },
-      {
-        $addFields: {
-          responsablesRelations: {
-            $filter: {
-              input: "$relations",
-              cond: {
-                $and: [
-                  {
-                    $eq: ["$$this.type", "formateur->responsable"],
-                  },
-                ],
+        {
+          $group: {
+            _id: {
+              etablissement_formateur_siret: "$etablissement_formateur_siret",
+              etablissement_formateur_uai: "$etablissement_formateur_uai",
+            },
+            responsables: {
+              $addToSet: {
+                etablissement_gestionnaire_siret: "$etablissement_gestionnaire_siret",
+                etablissement_gestionnaire_uai: "$etablissement_gestionnaire_uai",
               },
             },
           },
         },
-      },
-      {
-        $addFields: {
-          sameSiren: {
-            $allElementsTrue: {
-              $map: {
-                input: "$responsablesRelations",
-                in: {
-                  $eq: ["$siren", { $substr: ["$$this.siret", 0, 9] }],
-                },
+      ])
+      .toArray(),
+    formationsCatalogueDb()
+      .aggregate<IReponsableToFormateurs>([
+        {
+          $match: { published: true },
+        },
+        {
+          $group: {
+            _id: {
+              etablissement_gestionnaire_siret: "$etablissement_gestionnaire_siret",
+              etablissement_gestionnaire_uai: "$etablissement_gestionnaire_uai",
+            },
+            formateurs: {
+              $addToSet: {
+                etablissement_formateur_siret: "$etablissement_formateur_siret",
+                etablissement_formateur_uai: "$etablissement_formateur_uai",
               },
             },
           },
         },
-      },
-      {
-        $match: {
-          $and: [
-            {
-              sameSiren: false,
-            },
-            {
-              $or: [
-                {
-                  "responsablesRelations.1": {
-                    $exists: true,
-                  },
-                },
-                {
-                  nature: "responsable_formateur",
-                  "responsablesRelations.0": {
-                    $exists: true,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        $project: { uai: 1, siret: 1 },
-      },
+      ])
+      .toArray(),
+  ]);
+
+  const formateurToResponsablesMap: Map<string, IFormateurToResponsables> = new Map(
+    formateurToResponsables.map((item) => [
+      getOrganismeKey({ siret: item._id.etablissement_formateur_siret, uai: item._id.etablissement_formateur_uai }),
+      item,
     ])
-    .toArray();
+  );
+
+  const responsableToFormateursMap: Map<string, IReponsableToFormateurs> = new Map(
+    responsableToFormateurs.map((item) => [
+      getOrganismeKey({
+        siret: item._id.etablissement_gestionnaire_siret,
+        uai: item._id.etablissement_gestionnaire_uai,
+      }),
+      item,
+    ])
+  );
 
   const organismes = await organismesDb()
     .find(
@@ -129,8 +136,8 @@ export const hydrateOrganismesRelations = async () => {
     )
     .toArray();
 
-  const organismeInfosBySIRETAndUAI = organismes.reduce<{ [organismeId: string]: OrganismeInfos }>((acc, organisme) => {
-    acc[getOrganismeKey(organisme)] = {
+  const organismeInfosBySIRETAndUAI = organismes.reduce<Record<string, OrganismeInfos>>((acc, organisme) => {
+    acc[getOrganismeKey(organisme)] = stripEmptyFields({
       _id: organisme._id,
       enseigne: organisme.enseigne,
       raison_sociale: organisme.raison_sociale,
@@ -139,127 +146,202 @@ export const hydrateOrganismesRelations = async () => {
       departement: organisme.adresse?.departement,
       academie: organisme.adresse?.academie,
       reseaux: organisme.reseaux,
-      fiable: isOrganismeFiable(organisme),
-      nature: organisme.nature,
+      fiable: organisme.fiabilisation_statut === "FIABLE",
+      nature: getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap),
       last_transmission_date: organisme.last_transmission_date,
       ferme: organisme.ferme,
-    };
+    });
     return acc;
   }, {});
 
-  await PromisePool.for(organismes)
-    .handleError(async (err, { _id, siret, uai }) => {
-      logger.error({ _id, siret, uai, err }, "erreur traitement organisme");
-      // throwing errors will stop PromisePool
-      throw err;
-    })
-    .process(async (organisme) => {
-      const organismesLiés = await organismesReferentielDb()
-        .aggregate<ArrayElement<IOrganismeReferentiel["relations"]>>([
-          {
-            $match: {
-              siret: organisme.siret,
-              uai: organisme.uai,
-            },
-          },
-          {
-            $unwind: "$relations",
-          },
-          {
-            $replaceRoot: {
-              newRoot: "$relations",
-            },
-          },
-        ])
-        .toArray();
+  const bulk: AnyBulkWriteOperation<IOrganisme>[] = [];
+  for (const organisme of organismes) {
+    bulk.push(
+      getOrganismeRelationBulkWriteOperation(
+        organisme,
+        organismeInfosBySIRETAndUAI,
+        formateurToResponsablesMap,
+        responsableToFormateursMap
+      )
+    );
 
-      const organismesFormateurs = organismesLiés.filter(
-        (organismeLié) => organismeLié.type === "responsable->formateur"
-      );
-      const organismesResponsables = organismesLiés.filter(
-        (organismeLié) => organismeLié.type === "formateur->responsable"
-      );
+    if (bulk.length >= 1000) {
+      await organismesDb().bulkWrite(bulk);
+      bulk.length = 0;
+    }
+  }
 
-      function addOrganismesInfos({
-        type,
-        ...relatedOrganismeData
-      }: ArrayElement<IOrganismeReferentiel["relations"]>): ArrayElement<IOrganismeReferentiel["relations"]> &
-        OrganismeInfos & { responsabilitePartielle: boolean } {
-        const {
-          _id,
-          enseigne,
-          raison_sociale,
-          commune,
-          region,
-          departement,
-          academie,
-          reseaux,
-          fiable,
-          nature,
-          last_transmission_date,
-          ferme,
-        } = organismeInfosBySIRETAndUAI[getOrganismeKey(relatedOrganismeData)] ?? {};
-
-        // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
-        let responsabilitePartielle = false;
-        if (type === "responsable->formateur") {
-          // Le formateur pour lequel on est responsable a plusieurs responsable
-          // Nous sommes donc résponsable partiellement
-          responsabilitePartielle = organismeResponsablePartiels.some(
-            (o) => o.siret === relatedOrganismeData.siret && o.uai === relatedOrganismeData.uai
-          );
-        } else if (type === "formateur->responsable") {
-          // Nous avons plusieurs résponsables (nous inclus).
-          // Nos responsables sont donc partiels
-          responsabilitePartielle = organismeResponsablePartiels.some(
-            (o) => o.siret === organisme.siret && o.uai === organisme.uai
-          );
-        }
-
-        return stripEmptyFields({
-          ...relatedOrganismeData,
-          _id,
-          enseigne,
-          raison_sociale,
-          commune,
-          region,
-          departement,
-          academie,
-          reseaux,
-          responsabilitePartielle,
-          fiable,
-          nature,
-          last_transmission_date,
-          ferme,
-        });
-      }
-
-      logger.info(
-        {
-          uai: organisme.uai,
-          siret: organisme.siret,
-          organismesFormateurs: organismesFormateurs.length,
-          organismesResponsables: organismesResponsables.length,
-        },
-        "updating organisme relations"
-      );
-      await organismesDb().updateOne(
-        { _id: organisme._id },
-        {
-          $set: {
-            organismesFormateurs: organismesFormateurs
-              .map((organismeFormateur) => addOrganismesInfos(organismeFormateur))
-              .filter((organisme) => organisme._id !== undefined),
-            organismesResponsables: organismesResponsables
-              .map((organismeResponsable) => addOrganismesInfos(organismeResponsable))
-              .filter((organisme) => organisme._id !== undefined),
-            updated_at: new Date(),
-          },
-        }
-      );
-    });
+  if (bulk.length > 0) {
+    await organismesDb().bulkWrite(bulk);
+  }
 };
 
 function getOrganismeKey(organisme: { siret?: string; uai?: string | null }): string {
   return `${organisme.siret ?? null}-${organisme.uai ?? null}`; // null permet d'harmoniser undefined et null
+}
+
+function getOrganismeRelationBulkWriteOperation(
+  organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
+  organismeInfosBySIRETAndUAI: Record<string, OrganismeInfos>,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>,
+  responsableToFormateursMap: Map<string, IReponsableToFormateurs>
+): AnyBulkWriteOperation<IOrganisme> {
+  const organismeKey = getOrganismeKey(organisme);
+  const organismeInfos = organismeInfosBySIRETAndUAI[organismeKey];
+
+  if (!organismeInfos) {
+    throw Boom.internal(`Organisme ${organismeKey} not found in organismeInfosBySIRETAndUAI`);
+  }
+
+  const nature = getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap);
+
+  const organismesFormateurs = buildOrganismeFormateurs(
+    organisme,
+    organismeInfosBySIRETAndUAI,
+    formateurToResponsablesMap,
+    responsableToFormateursMap
+  );
+
+  const organismesResponsables = buildOrganismeResponsables(
+    organisme,
+    organismeInfosBySIRETAndUAI,
+    formateurToResponsablesMap
+  );
+
+  return {
+    updateOne: {
+      filter: { _id: organismeInfos._id },
+      update: {
+        $set: {
+          organismesFormateurs,
+          organismesResponsables,
+          nature,
+          updated_at: new Date(),
+        },
+      },
+    },
+  };
+}
+
+function getNature(
+  organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>,
+  responsableToFormateursMap: Map<string, IReponsableToFormateurs>
+): IOrganisme["nature"] {
+  const organismeKey = getOrganismeKey(organisme);
+  const sesFormateurs = responsableToFormateursMap.get(organismeKey)?.formateurs ?? [];
+  const sesResponsables = formateurToResponsablesMap.get(organismeKey)?.responsables ?? [];
+
+  if (sesFormateurs.length > 0 && sesResponsables.length > 0) {
+    return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR;
+  }
+
+  if (sesResponsables.length > 0) {
+    return NATURE_ORGANISME_DE_FORMATION.FORMATEUR;
+  }
+
+  if (sesFormateurs.length > 0) {
+    return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
+  }
+
+  return NATURE_ORGANISME_DE_FORMATION.INCONNUE;
+}
+
+// Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+function isResponsablePartiel(
+  formateur: IFormateurToResponsables["_id"],
+  responsableSiret: string,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>
+): boolean {
+  if (areSameCompany(formateur.etablissement_formateur_siret, responsableSiret)) {
+    // Si le formateur et le responsable sont de la même entreprise, alors le responsable peut accéder à toutes les formations du formateur
+    return false;
+  }
+
+  const formateurKey = getOrganismeKey({
+    siret: formateur.etablissement_formateur_siret,
+    uai: formateur.etablissement_formateur_uai,
+  });
+  const allResponsables = formateurToResponsablesMap.get(formateurKey)?.responsables ?? [];
+
+  const uniqueResponsablesSiren = new Set(
+    allResponsables.map((r) => getSirenFromSiret(r.etablissement_gestionnaire_siret))
+  );
+
+  // Si tous les responsables du formateur sont de la même entreprise, alors le responsable peut accéder à toutes les formations du formateur
+  return uniqueResponsablesSiren.size > 1;
+}
+
+function getSirenFromSiret(siret: string): string {
+  return siret.slice(0, 9);
+}
+
+function areSameCompany(siret1: string, siret2: string): boolean {
+  return getSirenFromSiret(siret1) === getSirenFromSiret(siret2);
+}
+
+function buildOrganismeFormateurs(
+  organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
+  organismeInfosBySIRETAndUAI: Record<string, OrganismeInfos>,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>,
+  responsableToFormateursMap: Map<string, IReponsableToFormateurs>
+): IOrganisme["organismesFormateurs"] {
+  const organismeKey = getOrganismeKey(organisme);
+  const formateurs = responsableToFormateursMap.get(organismeKey)?.formateurs ?? [];
+
+  return formateurs
+    .map((formateur) => {
+      const result: IRelatedOrganisme = {
+        siret: formateur.etablissement_formateur_siret,
+        uai: formateur.etablissement_formateur_uai,
+        responsabilitePartielle: isResponsablePartiel(formateur, organisme.siret, formateurToResponsablesMap),
+      };
+
+      const formateurKey = getOrganismeKey(result);
+      const formateurInfo = organismeInfosBySIRETAndUAI[formateurKey] ?? null;
+
+      if (formateurInfo) {
+        Object.assign(result, formateurInfo);
+      }
+
+      return stripEmptyFields(result);
+    })
+    .filter((f) => f._id != null && f._id !== organisme._id)
+    .toSorted((a, b) => a.siret.localeCompare(b.siret));
+}
+
+function buildOrganismeResponsables(
+  organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
+  organismeInfosBySIRETAndUAI: Record<string, OrganismeInfos>,
+  formateurToResponsablesMap: Map<string, IFormateurToResponsables>
+): IOrganisme["organismesResponsables"] {
+  const organismeKey = getOrganismeKey(organisme);
+  const responsables = formateurToResponsablesMap.get(organismeKey)?.responsables ?? [];
+
+  return responsables
+    .map((responsable) => {
+      const result: IRelatedOrganisme = {
+        siret: responsable.etablissement_gestionnaire_siret,
+        uai: responsable.etablissement_gestionnaire_uai,
+        responsabilitePartielle: isResponsablePartiel(
+          {
+            etablissement_formateur_siret: organisme.siret,
+            etablissement_formateur_uai: organisme.uai ?? null,
+          },
+          responsable.etablissement_gestionnaire_siret,
+          formateurToResponsablesMap
+        ),
+      };
+
+      const responsableKey = getOrganismeKey(result);
+      const responsableInfo = organismeInfosBySIRETAndUAI[responsableKey] ?? null;
+
+      if (responsableInfo) {
+        Object.assign(result, responsableInfo);
+      }
+
+      return stripEmptyFields(result);
+    })
+    .filter((r) => r._id != null && r._id !== organisme._id)
+    .toSorted((a, b) => a.siret.localeCompare(b.siret));
 }

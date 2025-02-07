@@ -1,9 +1,10 @@
+import type { IApiGetRoutes, IApiResponse } from "api-alternance-sdk";
 import nock from "nock";
 import { beforeAll, beforeEach, afterEach, afterAll } from "vitest";
 
 import { nockExternalApis } from "../utils/nockApis/index";
 
-const communes = {
+const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commune/search"]>> = {
   "05109": [
     {
       nom: "Puy-Saint-Pierre",
@@ -61,6 +62,8 @@ const communes = {
           siteWeb: "https://www.mj05.fr",
         },
       },
+      anciennes: [],
+      arrondissements: [],
     },
   ],
   "75001": [
@@ -142,6 +145,8 @@ const communes = {
           siteWeb: "https://www.missionlocale.paris/",
         },
       },
+      anciennes: [],
+      arrondissements: [],
     },
   ],
 };

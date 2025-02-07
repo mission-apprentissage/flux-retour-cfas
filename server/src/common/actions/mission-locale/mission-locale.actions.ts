@@ -1,7 +1,7 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { STATUT_APPRENANT } from "shared/constants";
+import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
@@ -22,7 +22,7 @@ import {
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
-import { buildIndicateursEffectifsPipeline, filterByDernierStatutPipeline } from "../indicateurs/indicateurs.actions";
+import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
 const EFF_MISSION_LOCALE_FILTER = [
   {
@@ -42,7 +42,7 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
         $cond: {
           if: {
             $or: [
-              { $eq: ["$dernierStatut", STATUT_APPRENANT.ABANDON] },
+              { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] },
               {
                 $and: [
                   { $eq: [{ $getField: { field: "valeur", input: "$dernierStatut" } }, STATUT_APPRENANT.RUPTURANT] },
@@ -66,7 +66,36 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
-const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+const createDernierStatutFieldPipelineMl = (date: Date) => [
+  {
+    $addFields: {
+      dernierStatut: {
+        $arrayElemAt: ["$_computed.statut.parcours", -1],
+      },
+    },
+  },
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
+      },
+    },
+  },
+];
+
+const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
+  statut.length
+    ? [
+        ...createDernierStatutFieldPipelineMl(date),
+        {
+          $match: {
+            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+          },
+        },
+      ]
+    : [];
+
+export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
     rqth,
@@ -79,12 +108,16 @@ const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionL
     last_update_value,
     last_update_order,
   } = effectifFilters;
+
   const today = new Date();
   const adultThreshold = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const updateDateThreshold =
+    typeof last_update_value === "number" && last_update_value >= 0
+      ? new Date(today.setDate(today.getDate() - last_update_value))
+      : null;
 
-  const thresholdData = last_update_value && new Date(new Date().setDate(new Date().getDate() - last_update_value));
   const filter: Array<any> = [
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $match: {
         ...(search
@@ -124,13 +157,13 @@ const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionL
           : {}),
         ...(situation ? { "ml_effectif.situation": { $in: situation } } : {}),
 
-        ...(last_update_value !== undefined && last_update_order
+        ...(updateDateThreshold && last_update_order
           ? last_update_order === "AFTER"
             ? {
                 $or: [
                   {
                     transmitted_at: {
-                      $gte: thresholdData,
+                      $lt: updateDateThreshold,
                     },
                   },
                   {
@@ -140,7 +173,7 @@ const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionL
               }
             : {
                 transmitted_at: {
-                  $lte: thresholdData,
+                  $gte: updateDateThreshold,
                 },
               }
           : {}),
@@ -162,7 +195,15 @@ const generateMissionLocaleMatchStage = (missionLocaleId: number) => {
 };
 
 const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
-  return [generateMissionLocaleMatchStage(missionLocaleId)];
+  return [
+    generateMissionLocaleMatchStage(missionLocaleId),
+    {
+      $unionWith: {
+        coll: "effectifsDECA",
+        pipeline: [generateMissionLocaleMatchStage(missionLocaleId), { $match: { is_deca_compatible: true } }],
+      },
+    },
+  ];
 };
 
 export const getPaginatedEffectifsByMissionLocaleId = async (
@@ -202,7 +243,8 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
-    ...filterByDernierStatutPipeline(
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(
       [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
       new Date()
     ),
@@ -304,33 +346,51 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
   ];
 
-  const resultEffectif = (await effectifsDb().aggregate(effectifsAggregation).next()) as {
-    pagination: any;
-    data: Array<
-      IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
-        cfa_users: Array<IUsersMigration>;
-      } & {
-        a_risque: boolean;
-      } & {
-        ml_effectif: IMissionLocaleEffectif;
-      }
-    >;
-  };
+  const totalApprenantsAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(
+      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
+      new Date()
+    ),
+    {
+      $count: "totalApprenants",
+    },
+  ];
+
+  const [resultEffectif, totalApprenantsResult] = await Promise.all([
+    (await effectifsDb().aggregate(effectifsAggregation).next()) as {
+      pagination: IPaginationFilters;
+      data: Array<
+        IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+          cfa_users: Array<IUsersMigration>;
+        } & {
+          a_risque: boolean;
+        } & {
+          ml_effectif: IMissionLocaleEffectif;
+        }
+      >;
+    },
+    effectifsDb().aggregate(totalApprenantsAggregation).next(),
+  ]);
 
   const resultAdresse = await effectifsDb().aggregate(adresseFilterAggregation).toArray();
 
+  const totalApprenants = totalApprenantsResult?.totalApprenants || 0;
+
   if (!resultEffectif || resultEffectif?.data.length === 0) {
-    return { pagination: { total: 0, page, limit }, data: [], filter: resultAdresse };
+    return { pagination: { total: 0, page, limit }, data: [], filter: resultAdresse, totalApprenants };
   }
 
   const { pagination, data } = resultEffectif;
 
-  if (pagination) {
+  if (pagination && pagination.total) {
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
+
   const effectifs: Array<IEffecifMissionLocale> = data.map((effectif) => buildEffectifForMissionLocale(effectif));
 
-  return { pagination, data: effectifs, filter: resultAdresse };
+  return { pagination, data: effectifs, filter: resultAdresse, totalApprenants };
 };
 
 export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilters, missionLocaleId: number) => {
@@ -433,7 +493,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipeline(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     {
       $group: {
         _id: "$organisme_id",
@@ -502,12 +562,18 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
                   },
                 },
                 {
+                  $addFields: {
+                    last_connection: { $max: "$connection_history" },
+                  },
+                },
+                {
                   $project: {
                     nom: 1,
                     prenom: 1,
                     email: 1,
                     telephone: 1,
                     fonction: 1,
+                    last_connection: 1,
                   },
                 },
               ],
@@ -530,8 +596,10 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               _id: 0,
               nom: "$organisme.nom",
               enseigne: "$organisme.enseigne",
+              raison_sociale: "$organisme.raison_sociale",
+              adresse: "$organisme.adresse",
               siret: "$organisme.siret",
-              formationsCount: "$formationsCount",
+              formations_count: "$formationsCount",
               users: "$cfa_users",
               inscrits: 1,
               abandons: 1,
@@ -540,21 +608,56 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
             },
           },
         ],
+        totalFormations: [
+          {
+            $lookup: {
+              from: "organismes",
+              localField: "_id",
+              foreignField: "_id",
+              as: "organisme",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $addFields: {
+              formationsCount: {
+                $cond: {
+                  if: { $isArray: "$organisme.relatedFormations" },
+                  then: { $size: "$organisme.relatedFormations" },
+                  else: 0,
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalFormations: { $sum: "$formationsCount" },
+            },
+          },
+        ],
       },
     },
+    { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$totalFormations", preserveNullAndEmptyArrays: true } },
   ];
 
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
 
   if (!resultOrganismes) {
-    return { pagination: { total: 0, page, limit }, data: [] };
+    return { pagination: { total: 0, page, limit }, data: [], totalFormations: 0 };
   }
 
-  const { pagination, data } = resultOrganismes;
+  const { pagination, data, totalFormations } = resultOrganismes;
 
   if (pagination) {
     pagination.lastPage = Math.ceil(pagination.total / limit);
   }
 
-  return { pagination, data };
+  return { pagination, data, totalFormations: totalFormations?.totalFormations || 0 };
 };

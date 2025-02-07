@@ -136,7 +136,7 @@ const DashboardMissionLocale = () => {
             />
           </GridItem>
         </Grid>
-        <Link isUnderlined href="/apprenants" color="action-high-blue-france" mt={6}>
+        <Link isUnderlined href="/mission-locale/apprenants" color="action-high-blue-france" mt={6}>
           Voir la liste nominative des apprenants
           <ArrowForwardIcon ml={1} />
         </Link>

@@ -25,7 +25,7 @@ export default () => {
     const bodyItems = (
       await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
     ).map((e) => stripNullProperties(e));
-    const validationSchema = dossierApprenantSchemaV3Input();
+    const validationSchema = dossierApprenantSchemaV3Input;
 
     const source = user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {

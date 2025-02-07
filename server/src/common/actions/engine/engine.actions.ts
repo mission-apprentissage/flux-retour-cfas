@@ -3,11 +3,9 @@ import { cloneDeep } from "lodash-es";
 import { Collection } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import { PartialDeep } from "type-fest";
+import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -123,57 +121,56 @@ export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>
  * Fonctionne pour l'API v2 et v3.
  */
 export const mapEffectifQueueToEffectif = (
-  // devrait être le schéma validé
-  // dossierApprenant: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
-  dossierApprenant: IEffectifQueue
-): PartialDeep<IEffectif> => {
+  dossierApprenant: IDossierApprenantSchemaV3
+): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   // Ne pas remplir l'historique statut en cas de v3
   const { statut_apprenant, date_metier_mise_a_jour_statut } = dossierApprenant;
-  const historiqueStatut =
+  const historiqueStatut: IEffectif["apprenant"]["historique_statut"] =
     statut_apprenant && date_metier_mise_a_jour_statut
       ? [
           {
-            valeur_statut: dossierApprenant.statut_apprenant,
-            date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
+            valeur_statut: statut_apprenant,
+            date_statut: new Date(date_metier_mise_a_jour_statut),
             date_reception: new Date(),
           },
         ]
       : [];
-  const contrats: PartialDeep<IEffectif["contrats"]> = [
-    stripEmptyFields({
+
+  const contrats: IEffectif["contrats"] = [
+    {
       date_debut: dossierApprenant.contrat_date_debut,
       date_fin: dossierApprenant.contrat_date_fin,
       date_rupture: dossierApprenant.contrat_date_rupture,
-      cause_rupture: dossierApprenant.cause_rupture_contrat,
-      siret: dossierApprenant.siret_employeur,
-    }),
-    stripEmptyFields({
-      date_debut: dossierApprenant.contrat_date_debut_2,
-      date_fin: dossierApprenant.contrat_date_fin_2,
-      date_rupture: dossierApprenant.contrat_date_rupture_2,
-      cause_rupture: dossierApprenant.cause_rupture_contrat_2,
-      siret: dossierApprenant.siret_employeur_2,
-    }),
-    stripEmptyFields({
-      date_debut: dossierApprenant.contrat_date_debut_3,
-      date_fin: dossierApprenant.contrat_date_fin_3,
-      date_rupture: dossierApprenant.contrat_date_rupture_3,
-      cause_rupture: dossierApprenant.cause_rupture_contrat_3,
-      siret: dossierApprenant.siret_employeur_3,
-    }),
-    stripEmptyFields({
-      date_debut: dossierApprenant.contrat_date_debut_4,
-      date_fin: dossierApprenant.contrat_date_fin_4,
-      date_rupture: dossierApprenant.contrat_date_rupture_4,
-      cause_rupture: dossierApprenant.cause_rupture_contrat_4,
-      siret: dossierApprenant.siret_employeur_4,
-    }),
+      cause_rupture: "cause_rupture_contrat" in dossierApprenant ? dossierApprenant.cause_rupture_contrat : null,
+      siret: "siret_employeur" in dossierApprenant ? dossierApprenant.siret_employeur : null,
+    },
+    {
+      date_debut: "contrat_date_debut_2" in dossierApprenant ? dossierApprenant.contrat_date_debut_2 : null,
+      date_fin: "contrat_date_fin_2" in dossierApprenant ? dossierApprenant.contrat_date_fin_2 : null,
+      date_rupture: "contrat_date_rupture_2" in dossierApprenant ? dossierApprenant.contrat_date_rupture_2 : null,
+      cause_rupture: "cause_rupture_contrat_2" in dossierApprenant ? dossierApprenant.cause_rupture_contrat_2 : null,
+      siret: "siret_employeur_2" in dossierApprenant ? dossierApprenant.siret_employeur_2 : null,
+    },
+    {
+      date_debut: "contrat_date_debut_3" in dossierApprenant ? dossierApprenant.contrat_date_debut_3 : null,
+      date_fin: "contrat_date_fin_3" in dossierApprenant ? dossierApprenant.contrat_date_fin_3 : null,
+      date_rupture: "contrat_date_rupture_3" in dossierApprenant ? dossierApprenant.contrat_date_rupture_3 : null,
+      cause_rupture: "cause_rupture_contrat_3" in dossierApprenant ? dossierApprenant.cause_rupture_contrat_3 : null,
+      siret: "siret_employeur_3" in dossierApprenant ? dossierApprenant.siret_employeur_3 : null,
+    },
+    {
+      date_debut: "contrat_date_debut_4" in dossierApprenant ? dossierApprenant.contrat_date_debut_4 : null,
+      date_fin: "contrat_date_fin_4" in dossierApprenant ? dossierApprenant.contrat_date_fin_4 : null,
+      date_rupture: "contrat_date_rupture_4" in dossierApprenant ? dossierApprenant.contrat_date_rupture_4 : null,
+      cause_rupture: "cause_rupture_contrat_4" in dossierApprenant ? dossierApprenant.cause_rupture_contrat_4 : null,
+      siret: "siret_employeur_4" in dossierApprenant ? dossierApprenant.siret_employeur_4 : null,
+    },
   ].filter((contrat) => contrat.date_debut || contrat.date_fin || contrat.date_rupture);
 
-  return stripEmptyFields<PartialDeep<IEffectif>>({
+  return {
     annee_scolaire: dossierApprenant.annee_scolaire,
     source: dossierApprenant.source,
-    source_organisme_id: dossierApprenant.source_organisme_id,
+    source_organisme_id: "source_organisme_id" in dossierApprenant ? dossierApprenant.source_organisme_id : null,
     id_erp_apprenant: dossierApprenant.id_erp_apprenant,
     apprenant: {
       historique_statut: historiqueStatut,
@@ -183,64 +180,78 @@ export const mapEffectifQueueToEffectif = (
       date_de_naissance: dossierApprenant.date_de_naissance_apprenant,
       courriel: dossierApprenant.email_contact,
       telephone: dossierApprenant.tel_apprenant,
-      adresse: stripEmptyFields({
+      adresse: {
         code_insee: dossierApprenant.code_commune_insee_apprenant,
-        code_postal: dossierApprenant.code_postal_apprenant,
-        complete: dossierApprenant.adresse_apprenant,
-      }),
-      adresse_naissance: stripEmptyFields({
-        code_insee: dossierApprenant.code_commune_insee_de_naissance_apprenant,
-        code_postal: dossierApprenant.code_postal_de_naissance_apprenant,
-      }),
-      // Optional v3 fields
-      ...stripEmptyFields<PartialDeep<IEffectif["apprenant"]>>({
-        sexe: dossierApprenant.sexe_apprenant,
-        rqth: dossierApprenant.rqth_apprenant,
-        date_rqth: dossierApprenant.date_rqth_apprenant,
-        has_nir: dossierApprenant.has_nir,
-        responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
-        responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
-        derniere_situation: dossierApprenant.derniere_situation,
-        dernier_organisme_uai: dossierApprenant.dernier_organisme_uai?.toString(),
-        type_cfa: dossierApprenant.type_cfa,
-      }),
+        code_postal: "code_postal_apprenant" in dossierApprenant ? dossierApprenant.code_postal_apprenant : null,
+        complete: "adresse_apprenant" in dossierApprenant ? dossierApprenant.adresse_apprenant : null,
+      },
+      adresse_naissance: {
+        code_insee:
+          "code_commune_insee_de_naissance_apprenant" in dossierApprenant
+            ? dossierApprenant.code_commune_insee_de_naissance_apprenant
+            : null,
+        code_postal:
+          "code_postal_de_naissance_apprenant" in dossierApprenant
+            ? dossierApprenant.code_postal_de_naissance_apprenant
+            : null,
+      },
+      sexe: "sexe_apprenant" in dossierApprenant ? dossierApprenant.sexe_apprenant : null,
+      rqth: "rqth_apprenant" in dossierApprenant ? dossierApprenant.rqth_apprenant : null,
+      date_rqth: "date_rqth_apprenant" in dossierApprenant ? dossierApprenant.date_rqth_apprenant : null,
+      has_nir: "has_nir" in dossierApprenant ? dossierApprenant.has_nir : null,
+      responsable_mail1:
+        "responsable_apprenant_mail1" in dossierApprenant ? dossierApprenant.responsable_apprenant_mail1 : null,
+      responsable_mail2:
+        "responsable_apprenant_mail2" in dossierApprenant ? dossierApprenant.responsable_apprenant_mail2 : null,
+      derniere_situation: "derniere_situation" in dossierApprenant ? dossierApprenant.derniere_situation : null,
+      dernier_organisme_uai:
+        "dernier_organisme_uai" in dossierApprenant ? dossierApprenant.dernier_organisme_uai?.toString() : null,
+      type_cfa: "type_cfa" in dossierApprenant ? dossierApprenant.type_cfa : null,
     },
     contrats,
     formation: {
-      cfd: dossierApprenant.formation_cfd || dossierApprenant.id_formation,
+      cfd: "formation_cfd" in dossierApprenant ? dossierApprenant.formation_cfd : null,
       rncp: dossierApprenant.formation_rncp,
-      libelle_long: dossierApprenant.libelle_long_formation,
-      periode: dossierApprenant.periode_formation,
+      libelle_long: null,
+      periode: [],
       annee: dossierApprenant.annee_formation,
-      ...stripEmptyFields<PartialDeep<NonNullable<IEffectif["formation"]>>>({
-        obtention_diplome: dossierApprenant.obtention_diplome_formation,
-        date_obtention_diplome: dossierApprenant.date_obtention_diplome_formation,
-        date_exclusion: dossierApprenant.date_exclusion_formation,
-        cause_exclusion: dossierApprenant.cause_exclusion_formation,
-        referent_handicap:
-          dossierApprenant.email_referent_handicap_formation ||
-          dossierApprenant.prenom_referent_handicap_formation ||
-          dossierApprenant.email_referent_handicap_formation
-            ? stripEmptyFields({
-                nom: dossierApprenant.nom_referent_handicap_formation,
-                prenom: dossierApprenant.prenom_referent_handicap_formation,
-                email: dossierApprenant.email_referent_handicap_formation,
-              })
-            : undefined,
-        date_inscription: dossierApprenant.date_inscription_formation,
-        // Les ERPs (ou les anciens fichiers de téléversement) peuvent continuer à utiliser duree_theorique_formation
-        // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
-        // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
-        // en mettant dans le bon champ.
-        duree_theorique_mois: dossierApprenant.duree_theorique_formation_mois
+
+      obtention_diplome:
+        "obtention_diplome_formation" in dossierApprenant ? dossierApprenant.obtention_diplome_formation : null,
+      date_obtention_diplome:
+        "date_obtention_diplome_formation" in dossierApprenant
+          ? dossierApprenant.date_obtention_diplome_formation
+          : null,
+      date_exclusion: "date_exclusion_formation" in dossierApprenant ? dossierApprenant.date_exclusion_formation : null,
+      cause_exclusion:
+        "cause_exclusion_formation" in dossierApprenant ? dossierApprenant.cause_exclusion_formation : null,
+      referent_handicap:
+        ("email_referent_handicap_formation" in dossierApprenant &&
+          dossierApprenant.email_referent_handicap_formation) ||
+        ("prenom_referent_handicap_formation" in dossierApprenant &&
+          dossierApprenant.prenom_referent_handicap_formation) ||
+        ("email_referent_handicap_formation" in dossierApprenant && dossierApprenant.email_referent_handicap_formation)
+          ? {
+              nom: dossierApprenant.nom_referent_handicap_formation,
+              prenom: dossierApprenant.prenom_referent_handicap_formation,
+              email: dossierApprenant.email_referent_handicap_formation,
+            }
+          : undefined,
+      date_inscription: dossierApprenant.date_inscription_formation,
+      // Les ERPs (ou les anciens fichiers de téléversement) peuvent continuer à utiliser duree_theorique_formation
+      // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
+      // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
+      // en mettant dans le bon champ.
+      duree_theorique_mois:
+        "duree_theorique_formation_mois" in dossierApprenant
           ? dossierApprenant.duree_theorique_formation_mois
-          : dossierApprenant.duree_theorique_formation
+          : "duree_theorique_formation" in dossierApprenant && dossierApprenant.duree_theorique_formation
             ? dossierApprenant.duree_theorique_formation * 12
             : undefined,
-        formation_presentielle: dossierApprenant.formation_presentielle,
-        date_fin: dossierApprenant.date_fin_formation,
-        date_entree: dossierApprenant.date_entree_formation,
-      }),
+      formation_presentielle:
+        "formation_presentielle" in dossierApprenant ? dossierApprenant.formation_presentielle : null,
+      date_fin: dossierApprenant.date_fin_formation,
+      date_entree: dossierApprenant.date_entree_formation,
     },
-  });
+  };
 };

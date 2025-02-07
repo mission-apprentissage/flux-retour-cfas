@@ -2,7 +2,7 @@ import { AxiosInstance } from "axiosist";
 import { v4 as uuidv4 } from "uuid";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createRandomDossierApprenantApiInputV3 } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
@@ -20,7 +20,7 @@ describe("Dossier Apprenants Route V3", () => {
   beforeEach(async () => {
     const app = await initTestApp();
     randomOrganisme = createRandomOrganisme({ uai, siret, api_key });
-    await createOrganisme(randomOrganisme);
+    await organismesDb().insertOne(randomOrganisme);
     httpClient = app.httpClient;
   });
 

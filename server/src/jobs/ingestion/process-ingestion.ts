@@ -1,7 +1,7 @@
 import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
-import { Filter, ObjectId, WithId } from "mongodb";
+import { Filter, ObjectId, WithId, type WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import {
   IEffectif,
@@ -11,9 +11,7 @@ import {
 } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import dossierApprenantSchemaV3, {
-  DossierApprenantSchemaV3ZodType,
-} from "shared/models/parts/dossierApprenantSchemaV3";
+import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
@@ -137,6 +135,7 @@ function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) 
         id_erp_apprenant: effectifQueue.id_erp_apprenant,
       };
       scope.setContext("ctx", ctx);
+      scope.setExtra("effectif_queue_id", effectifQueue._id.toString());
     });
     const start = Date.now();
     try {
@@ -264,15 +263,15 @@ type ItemProcessingInfos = {
   AddPrefix<"organisme_responsable_", OrganismeSearchStatsInfos>;
 
 async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
-  result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
+  result: SafeParseReturnType<IEffectifQueue, { effectif: WithoutId<IEffectif>; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
   organismeTarget: IOrganisme;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
   let organismeTarget: any;
 
-  const result = await dossierApprenantSchemaV3()
-    .transform(async (effectifQueued, ctx): Promise<{ effectif: IEffectif; organisme: IOrganisme }> => {
+  const result = await dossierApprenantSchemaV3
+    .transform(async (effectifQueued, ctx): Promise<{ effectif: WithoutId<IEffectif>; organisme: IOrganisme }> => {
       let [effectif, organismeFormateur, organismeResponsable] = await Promise.all([
         transformEffectifQueueToEffectif(effectifQueued),
         (async () => {
@@ -339,26 +338,24 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       }
 
       const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
+      const effectifData: WithoutId<IEffectif> = {
+        ...effectif,
+        formation: computedFormation,
+        organisme_id: organismeFormateur?._id,
+        organisme_formateur_id: organismeFormateur?._id,
+        organisme_responsable_id: organismeResponsable?._id,
+        lieu_de_formation: {
+          uai: effectifQueued.etablissement_lieu_de_formation_uai,
+          siret: effectifQueued.etablissement_lieu_de_formation_siret,
+          adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
+          code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
+        },
+        _raw: {
+          formation: effectif.formation,
+        },
+      };
       return {
-        effectif: await withComputedFields(
-          {
-            ...effectif,
-            formation: computedFormation,
-            organisme_id: organismeFormateur?._id,
-            organisme_formateur_id: organismeFormateur?._id,
-            organisme_responsable_id: organismeResponsable?._id,
-            lieu_de_formation: {
-              uai: effectifQueued.etablissement_lieu_de_formation_uai,
-              siret: effectifQueued.etablissement_lieu_de_formation_siret,
-              adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
-              code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
-            },
-            _raw: {
-              formation: effectif.formation,
-            },
-          },
-          { organisme: organismeFormateur, certification }
-        ),
+        effectif: await withComputedFields(effectifData, { organisme: organismeFormateur, certification }),
         organisme: organismeFormateur,
       };
     })
@@ -371,10 +368,12 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
   };
 }
 
-async function transformEffectifQueueToEffectif(effectifQueue: DossierApprenantSchemaV3ZodType): Promise<IEffectif> {
+async function transformEffectifQueueToEffectif(
+  effectifQueue: IDossierApprenantSchemaV3
+): Promise<Omit<IEffectif, "_id" | "_computed" | "organisme_id">> {
   return await completeEffectifAddress(
     mergeEffectifWithDefaults(
-      mapEffectifQueueToEffectif(effectifQueue as any) as any,
+      mapEffectifQueueToEffectif(effectifQueue),
       effectifQueue.source !== SOURCE_APPRENANT.FICHIER
     )
   );
@@ -390,7 +389,7 @@ async function transformEffectifQueueToEffectif(effectifQueue: DossierApprenantS
  *  - On préfèrera toujours les valeurs non vides (null, undefined ou "") quelles que soient leur provenance.
  *  - On préfèrera toujours les tableaux de newObject aux tablea  ux de previousObject (pas de fusion de tableau)
  */
-export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffectif {
+export function mergeEffectif(effectifDb: IEffectif, effectif: WithoutId<IEffectif>): IEffectif {
   return {
     ...mergeIgnoringNullPreferringNewArray(effectifDb, effectif),
     apprenant: {
@@ -412,24 +411,18 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffe
  * Fonction de création ou de MAJ de l'effectif depuis la queue
  */
 const createOrUpdateEffectif = async (
-  effectif: IEffectif,
+  effectif: WithoutId<IEffectif>,
   retryCount = 0,
-  uai: string | undefined
+  uai: string | undefined | null
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
-  const effectifWithComputedFields = {
-    ...effectif,
-    _computed: {
-      ...effectif._computed,
-    },
-  };
   const itemProcessingInfos: ItemProcessingInfos = {};
-  let effectifDb = await checkIfEffectifExists<IEffectif>(effectifWithComputedFields, effectifsDb());
+  let effectifDb = await checkIfEffectifExists<IEffectif>(effectif, effectifsDb());
   itemProcessingInfos.effectif_new = !effectifDb;
 
   try {
     // Gestion des MAJ d'effectif
     if (effectifDb) {
-      const mergedEffectif = mergeEffectif(effectifDb, effectifWithComputedFields);
+      const mergedEffectif = mergeEffectif(effectifDb, effectif);
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
@@ -440,7 +433,7 @@ const createOrUpdateEffectif = async (
         }
       );
     } else {
-      effectifDb = { ...effectifWithComputedFields, transmitted_at: new Date(), _id: new ObjectId() };
+      effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
       await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
     }

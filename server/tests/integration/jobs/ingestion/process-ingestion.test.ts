@@ -4,8 +4,8 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
-import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
+import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { mockApiApprentissageCertificationApi } from "@tests/data/api.apprentissage.beta.gouv.fr/certification/apiApprentissage.certification.mock";
 import { createRandomOrganisme, getRandomSourceOrganismeId } from "@tests/data/randomizedSample";
@@ -15,21 +15,18 @@ import { useNock } from "@tests/jest/setupNock";
 const UAI = "0802004U";
 const SIRET = "77937827200016";
 
-const UAI_REFERENTIEL_FERME = "4422672E";
-const SIRET_REFERENTIEL_FERME = "44370584100099";
-
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
 const ORGANISME_SOURCE_ID = getRandomSourceOrganismeId();
-const sortByPath = (array: { path?: string[] }[] | undefined | null) =>
+const sortByPath = (array: { path?: Array<string | number> }[] | undefined | null) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
 describe("Processus d'ingestion", () => {
   useNock();
   useMongo();
 
-  const commonSampleData: WithoutId<IEffectifQueue> = {
+  const commonSampleData = {
     nom_apprenant: "Doe",
     prenom_apprenant: "John",
     date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
@@ -90,38 +87,16 @@ describe("Processus d'ingestion", () => {
     created_at: new Date(),
     source: SOURCE_APPRENANT.FICHIER,
     source_organisme_id: ORGANISME_SOURCE_ID,
-  };
+  } as const satisfies WithoutId<IEffectifQueue>;
 
   beforeEach(async () => {
-    await organismesReferentielDb().insertMany([
+    await organismesDb().insertMany([
+      { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET, reseaux: [] }) },
       {
         _id: new ObjectId(),
-        uai: UAI,
-        siret: SIRET,
-        nature: "formateur",
-        lieux_de_formation: [{ uai: UAI }],
-        relations: [],
-      },
-      {
-        _id: new ObjectId(),
-        uai: UAI_RESPONSABLE,
-        siret: SIRET_RESPONSABLE,
-        nature: "responsable",
-        lieux_de_formation: [{ uai: UAI_RESPONSABLE }],
-        relations: [],
-      },
-      {
-        _id: new ObjectId(),
-        uai: UAI_REFERENTIEL_FERME,
-        siret: SIRET_REFERENTIEL_FERME,
-        nature: "formateur",
-        lieux_de_formation: [{ uai: UAI_REFERENTIEL_FERME }],
-        relations: [],
-        etat_administratif: "fermé",
+        ...createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE, reseaux: [] }),
       },
     ]);
-    await createOrganisme(createRandomOrganisme({ uai: UAI, siret: SIRET }));
-    await createOrganisme(createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE }));
 
     mockApiApprentissageCertificationApi();
   });
@@ -305,6 +280,7 @@ describe("Processus d'ingestion", () => {
                 prenom: "John",
               },
               rncp: "RNCP5364",
+              libelle_long: null,
             },
           },
           _computed: {
@@ -381,8 +357,16 @@ describe("Processus d'ingestion", () => {
         expect(insertedDossier).toStrictEqual({
           _id: effectifForInput?._id,
           apprenant: {
-            adresse: {},
-            adresse_naissance: {},
+            adresse: {
+              code_insee: null,
+              code_postal: null,
+              complete: null,
+            },
+            adresse_naissance: {
+              code_insee: null,
+              code_postal: null,
+            },
+            courriel: null,
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -393,6 +377,17 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
+            responsable_mail1: null,
+            responsable_mail2: null,
+            rqth: null,
+            sexe: null,
+            telephone: null,
+            type_cfa: null,
+            ine: null,
+            date_rqth: null,
+            dernier_organisme_uai: null,
+            derniere_situation: null,
+            has_nir: null,
           },
           contrats: [],
           formation: {
@@ -409,6 +404,12 @@ describe("Processus d'ingestion", () => {
             duree_formation_relle: 10,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            cause_exclusion: null,
+            date_exclusion: null,
+            date_obtention_diplome: null,
+            formation_presentielle: null,
+            obtention_diplome: null,
+            referent_handicap: null,
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -428,6 +429,14 @@ describe("Processus d'ingestion", () => {
               duree_theorique_mois: 24,
               periode: [],
               rncp: "RNCP5364",
+              cfd: null,
+              cause_exclusion: null,
+              date_exclusion: null,
+              date_obtention_diplome: null,
+              formation_presentielle: null,
+              libelle_long: null,
+              obtention_diplome: null,
+              referent_handicap: null,
             },
           },
           _computed: {
@@ -580,8 +589,15 @@ describe("Processus d'ingestion", () => {
         expect(insertedDossier).toStrictEqual({
           _id: effectifForInput?._id,
           apprenant: {
-            adresse: {},
-            adresse_naissance: {},
+            adresse: {
+              code_insee: null,
+              code_postal: null,
+              complete: null,
+            },
+            adresse_naissance: {
+              code_insee: null,
+              code_postal: null,
+            },
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -594,6 +610,16 @@ describe("Processus d'ingestion", () => {
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
             has_nir: true,
             sexe: "F",
+            courriel: null,
+            date_rqth: null,
+            dernier_organisme_uai: null,
+            derniere_situation: null,
+            ine: null,
+            responsable_mail1: null,
+            responsable_mail2: null,
+            rqth: null,
+            telephone: null,
+            type_cfa: null,
           },
           contrats: [],
           formation: {
@@ -610,6 +636,12 @@ describe("Processus d'ingestion", () => {
             duree_theorique_mois: 24,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            cause_exclusion: null,
+            date_exclusion: null,
+            date_obtention_diplome: null,
+            formation_presentielle: null,
+            obtention_diplome: null,
+            referent_handicap: null,
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -629,6 +661,14 @@ describe("Processus d'ingestion", () => {
               duree_theorique_mois: 24,
               periode: [],
               rncp: "RNCP34670",
+              cause_exclusion: null,
+              cfd: null,
+              date_exclusion: null,
+              date_obtention_diplome: null,
+              formation_presentielle: null,
+              libelle_long: null,
+              obtention_diplome: null,
+              referent_handicap: null,
             },
           },
           _computed: {

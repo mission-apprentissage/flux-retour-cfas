@@ -140,53 +140,55 @@ const FiabilisationInfo = () => {
 };
 const natureOrganismeDeFormationTooltip = {
   responsable: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organismes responsables
+    <Box>
+      <Text>
+        <strong>Organisme responsable</strong>
       </Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
-        </ListItem>
-        <ListItem>Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
-        <ListItem>
-          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l’UFA.
-        </ListItem>
-      </UnorderedList>
-    </>
+      <Text mt="2w">
+        Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations. </Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
   formateur: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organisme formateur
-      </Text>
+    <Box>
       <Text>
-        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-        d’activité (NDA))
+        <strong>Organisme formateur</strong>
       </Text>
-    </>
+      <Text mt="2w">
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA)).
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations.</Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
   responsable_formateur: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organismes responsables et formateurs
+    <Box>
+      <Text>
+        <strong>Organisme responsable et formateur</strong>
       </Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA)).
-        </ListItem>
-        <ListItem>Est signataire de la convention de formation.</ListItem>
-        <ListItem>Demande et reçoit les financements de l’OPCO.</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
-        <ListItem>
-          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l’UFA.
-        </ListItem>
-      </UnorderedList>
-    </>
+      <Text mt="2w">
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA)).
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations.</Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
 };
 

@@ -681,14 +681,30 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -700,7 +716,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -963,14 +982,30 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -982,7 +1017,10 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -1587,14 +1625,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -1606,7 +1660,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -2083,14 +2140,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -2102,7 +2175,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -2351,7 +2427,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -2454,9 +2538,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -3519,14 +3600,30 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -3538,7 +3635,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -3801,14 +3901,30 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -3820,7 +3936,10 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -4425,14 +4544,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -4444,7 +4579,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -4921,14 +5059,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -4940,7 +5094,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -5189,7 +5346,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -5292,9 +5457,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -6105,14 +6267,30 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "description": "Code Bassin d'emploi",
                 },
                 "code_insee": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code insee doit contenir 5 caractères",
+                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code insee doit contenir 5 caractères",
-                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                 },
                 "code_postal": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Le code postal doit contenir 5 caractères",
+                      "pattern": "^[0-9]{5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Le code postal doit contenir 5 caractères",
-                  "pattern": "^[0-9]{5}$",
                 },
                 "commune": {
                   "bsonType": "string",
@@ -6124,7 +6302,10 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "description": "Complément d'adresse",
                 },
                 "complete": {
-                  "bsonType": "string",
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                   "description": "Adresse complète",
                 },
                 "departement": {
@@ -6718,14 +6899,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Code Bassin d'emploi",
                         },
                         "code_insee": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code insee doit contenir 5 caractères",
+                              "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                         },
                         "code_postal": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Le code postal doit contenir 5 caractères",
+                              "pattern": "^[0-9]{5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
                         },
                         "commune": {
                           "bsonType": "string",
@@ -6737,7 +6934,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Complément d'adresse",
                         },
                         "complete": {
-                          "bsonType": "string",
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
                           "description": "Adresse complète",
                         },
                         "departement": {
@@ -7188,14 +7388,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Code Bassin d'emploi",
                       },
                       "code_insee": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code insee doit contenir 5 caractères",
+                            "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code insee doit contenir 5 caractères",
-                        "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                       },
                       "code_postal": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Le code postal doit contenir 5 caractères",
+                            "pattern": "^[0-9]{5}$",
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Le code postal doit contenir 5 caractères",
-                        "pattern": "^[0-9]{5}$",
                       },
                       "commune": {
                         "bsonType": "string",
@@ -7207,7 +7423,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Complément d'adresse",
                       },
                       "complete": {
-                        "bsonType": "string",
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
                         "description": "Adresse complète",
                       },
                       "departement": {
@@ -7456,7 +7675,15 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "description": "Cause de rupture du contrat",
               },
               "date_debut": {
-                "bsonType": "date",
+                "anyOf": [
+                  {
+                    "bsonType": "date",
+                    "description": "Date de début du contrat",
+                  },
+                  {
+                    "bsonType": "null",
+                  },
+                ],
                 "description": "Date de début du contrat",
               },
               "date_fin": {
@@ -7535,9 +7762,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 ],
               },
             },
-            "required": [
-              "date_debut",
-            ],
           },
         },
         {
@@ -8302,12 +8526,24 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "bsonType": "object",
             "properties": {
               "message": {
+                "bsonType": "string",
                 "description": "message d'erreur",
               },
               "path": {
+                "bsonType": "array",
                 "description": "champ en erreur",
+                "items": {
+                  "bsonType": [
+                    "string",
+                    "number",
+                  ],
+                },
               },
             },
+            "required": [
+              "message",
+              "path",
+            ],
           },
         },
         {
@@ -9096,13 +9332,20 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "bsonType": "objectId",
     },
     "situation": {
-      "bsonType": "string",
-      "enum": [
-        "CONTACTE_AVEC_SUIVI",
-        "CONTACT_SANS_SUIVI",
-        "DEJA_SUIVI",
-        "INJOIGNABLE",
-        "NON_CONTACTE",
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "CONTACTE_AVEC_SUIVI",
+            "CONTACT_SANS_SUIVI",
+            "DEJA_SUIVI",
+            "INJOIGNABLE",
+            "NON_CONTACTE",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "situation_updated_at": {
@@ -9117,6 +9360,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "bsonType": "string",
           "enum": [
             "CONTRAT_SIGNE_NON_DEMARRE",
+            "CONTRAT_EN_COURS",
             "RETOUR_EN_VOIE_SCOLAIRE",
             "ABANDON",
             "RUPTURE",
@@ -9173,13 +9417,20 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           ],
         },
         "situation": {
-          "bsonType": "string",
-          "enum": [
-            "CONTACTE_AVEC_SUIVI",
-            "CONTACT_SANS_SUIVI",
-            "DEJA_SUIVI",
-            "INJOIGNABLE",
-            "NON_CONTACTE",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "enum": [
+                "CONTACTE_AVEC_SUIVI",
+                "CONTACT_SANS_SUIVI",
+                "DEJA_SUIVI",
+                "INJOIGNABLE",
+                "NON_CONTACTE",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
           ],
         },
         "statut_correct": {
@@ -9191,6 +9442,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
               "bsonType": "string",
               "enum": [
                 "CONTRAT_SIGNE_NON_DEMARRE",
+                "CONTRAT_EN_COURS",
                 "RETOUR_EN_VOIE_SCOLAIRE",
                 "ABANDON",
                 "RUPTURE",
@@ -9843,280 +10095,310 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "objectId",
     },
     "adresse": {
-      "additionalProperties": false,
-      "bsonType": "object",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "description": "Adresse de l'établissement",
+          "properties": {
+            "academie": {
+              "bsonType": "string",
+              "pattern": "^[0-9]{2}$",
+            },
+            "bassinEmploi": {
+              "bsonType": "string",
+              "description": "Code Bassin d'emploi",
+            },
+            "code_insee": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Le code insee doit contenir 5 caractères",
+                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Le code insee doit contenir 5 caractères",
+            },
+            "code_postal": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Le code postal doit contenir 5 caractères",
+                  "pattern": "^[0-9]{5}$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Le code postal doit contenir 5 caractères",
+            },
+            "commune": {
+              "bsonType": "string",
+              "description": "Commune",
+              "maxLength": 80,
+            },
+            "complement": {
+              "bsonType": "string",
+              "description": "Complément d'adresse",
+            },
+            "complete": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse complète",
+            },
+            "departement": {
+              "bsonType": "string",
+              "pattern": "^(2A|2B|[0-9]{2,3})$",
+            },
+            "numero": {
+              "bsonType": "int",
+              "description": "N° de la voie",
+            },
+            "pays": {
+              "bsonType": "string",
+              "description": "Pays",
+              "enum": [
+                "AF",
+                "ZA",
+                "AL",
+                "DZ",
+                "DE",
+                "AD",
+                "AO",
+                "AG",
+                "SA",
+                "AR",
+                "AM",
+                "AU",
+                "AT",
+                "AZ",
+                "BS",
+                "BH",
+                "BD",
+                "BB",
+                "BE",
+                "BZ",
+                "BJ",
+                "BT",
+                "BY",
+                "MM",
+                "BO",
+                "BQ",
+                "BA",
+                "BW",
+                "BR",
+                "BN",
+                "BG",
+                "BF",
+                "BI",
+                "KH",
+                "CM",
+                "CA",
+                "CV",
+                "CF",
+                "CL",
+                "CN",
+                "CY",
+                "CO",
+                "KM",
+                "CG",
+                "CD",
+                "KR",
+                "KP",
+                "CR",
+                "CI",
+                "HR",
+                "CU",
+                "CW",
+                "DK",
+                "DJ",
+                "DO",
+                "DM",
+                "EG",
+                "SV",
+                "AE",
+                "EC",
+                "ER",
+                "ES",
+                "EE",
+                "SZ",
+                "US",
+                "ET",
+                "MK",
+                "FJ",
+                "FI",
+                "FR",
+                "GA",
+                "GM",
+                "GE",
+                "GH",
+                "GR",
+                "GD",
+                "GT",
+                "GN",
+                "GQ",
+                "GW",
+                "GY",
+                "HT",
+                "HN",
+                "HU",
+                "IN",
+                "ID",
+                "IR",
+                "IQ",
+                "IE",
+                "IS",
+                "IL",
+                "IT",
+                "JM",
+                "JP",
+                "JO",
+                "KZ",
+                "KE",
+                "KG",
+                "KI",
+                "XK",
+                "KW",
+                "LA",
+                "LS",
+                "LV",
+                "LB",
+                "LR",
+                "LY",
+                "LI",
+                "LT",
+                "LU",
+                "MG",
+                "MY",
+                "MW",
+                "MV",
+                "ML",
+                "MT",
+                "MA",
+                "MH",
+                "MU",
+                "MR",
+                "MX",
+                "FM",
+                "MD",
+                "MC",
+                "MN",
+                "ME",
+                "MZ",
+                "NA",
+                "NR",
+                "NP",
+                "NI",
+                "NE",
+                "NG",
+                "NO",
+                "NZ",
+                "OM",
+                "UG",
+                "UZ",
+                "PK",
+                "PW",
+                "PS",
+                "PA",
+                "PG",
+                "PY",
+                "NL",
+                "PE",
+                "PH",
+                "PL",
+                "PT",
+                "QA",
+                "RO",
+                "GB",
+                "RU",
+                "RW",
+                "KN",
+                "SM",
+                "SX",
+                "VC",
+                "LC",
+                "SB",
+                "WS",
+                "ST",
+                "SN",
+                "RS",
+                "SC",
+                "SL",
+                "SG",
+                "SK",
+                "SI",
+                "SO",
+                "SD",
+                "SS",
+                "LK",
+                "SE",
+                "CH",
+                "SR",
+                "SY",
+                "TJ",
+                "TZ",
+                "TD",
+                "CZ",
+                "TH",
+                "TL",
+                "TG",
+                "TO",
+                "TT",
+                "TN",
+                "TM",
+                "TR",
+                "TV",
+                "UA",
+                "UY",
+                "VU",
+                "VA",
+                "VE",
+                "VN",
+                "YE",
+                "ZM",
+                "ZW",
+              ],
+            },
+            "region": {
+              "bsonType": "string",
+              "pattern": "^[0-9]{2,3}$",
+            },
+            "repetition_voie": {
+              "bsonType": "string",
+              "description": "Indice de répétition du numéro de voie",
+              "enum": [
+                "B",
+                "T",
+                "Q",
+                "C",
+              ],
+            },
+            "voie": {
+              "bsonType": "string",
+              "description": "Nom de voie",
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
       "description": "Adresse de l'établissement",
-      "properties": {
-        "academie": {
-          "bsonType": "string",
-          "pattern": "^[0-9]{2}$",
-        },
-        "bassinEmploi": {
-          "bsonType": "string",
-          "description": "Code Bassin d'emploi",
-        },
-        "code_insee": {
-          "bsonType": "string",
-          "description": "Le code insee doit contenir 5 caractères",
-          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
-        },
-        "code_postal": {
-          "bsonType": "string",
-          "description": "Le code postal doit contenir 5 caractères",
-          "pattern": "^[0-9]{5}$",
-        },
-        "commune": {
-          "bsonType": "string",
-          "description": "Commune",
-          "maxLength": 80,
-        },
-        "complement": {
-          "bsonType": "string",
-          "description": "Complément d'adresse",
-        },
-        "complete": {
-          "bsonType": "string",
-          "description": "Adresse complète",
-        },
-        "departement": {
-          "bsonType": "string",
-          "pattern": "^(2A|2B|[0-9]{2,3})$",
-        },
-        "numero": {
-          "bsonType": "int",
-          "description": "N° de la voie",
-        },
-        "pays": {
-          "bsonType": "string",
-          "description": "Pays",
-          "enum": [
-            "AF",
-            "ZA",
-            "AL",
-            "DZ",
-            "DE",
-            "AD",
-            "AO",
-            "AG",
-            "SA",
-            "AR",
-            "AM",
-            "AU",
-            "AT",
-            "AZ",
-            "BS",
-            "BH",
-            "BD",
-            "BB",
-            "BE",
-            "BZ",
-            "BJ",
-            "BT",
-            "BY",
-            "MM",
-            "BO",
-            "BQ",
-            "BA",
-            "BW",
-            "BR",
-            "BN",
-            "BG",
-            "BF",
-            "BI",
-            "KH",
-            "CM",
-            "CA",
-            "CV",
-            "CF",
-            "CL",
-            "CN",
-            "CY",
-            "CO",
-            "KM",
-            "CG",
-            "CD",
-            "KR",
-            "KP",
-            "CR",
-            "CI",
-            "HR",
-            "CU",
-            "CW",
-            "DK",
-            "DJ",
-            "DO",
-            "DM",
-            "EG",
-            "SV",
-            "AE",
-            "EC",
-            "ER",
-            "ES",
-            "EE",
-            "SZ",
-            "US",
-            "ET",
-            "MK",
-            "FJ",
-            "FI",
-            "FR",
-            "GA",
-            "GM",
-            "GE",
-            "GH",
-            "GR",
-            "GD",
-            "GT",
-            "GN",
-            "GQ",
-            "GW",
-            "GY",
-            "HT",
-            "HN",
-            "HU",
-            "IN",
-            "ID",
-            "IR",
-            "IQ",
-            "IE",
-            "IS",
-            "IL",
-            "IT",
-            "JM",
-            "JP",
-            "JO",
-            "KZ",
-            "KE",
-            "KG",
-            "KI",
-            "XK",
-            "KW",
-            "LA",
-            "LS",
-            "LV",
-            "LB",
-            "LR",
-            "LY",
-            "LI",
-            "LT",
-            "LU",
-            "MG",
-            "MY",
-            "MW",
-            "MV",
-            "ML",
-            "MT",
-            "MA",
-            "MH",
-            "MU",
-            "MR",
-            "MX",
-            "FM",
-            "MD",
-            "MC",
-            "MN",
-            "ME",
-            "MZ",
-            "NA",
-            "NR",
-            "NP",
-            "NI",
-            "NE",
-            "NG",
-            "NO",
-            "NZ",
-            "OM",
-            "UG",
-            "UZ",
-            "PK",
-            "PW",
-            "PS",
-            "PA",
-            "PG",
-            "PY",
-            "NL",
-            "PE",
-            "PH",
-            "PL",
-            "PT",
-            "QA",
-            "RO",
-            "GB",
-            "RU",
-            "RW",
-            "KN",
-            "SM",
-            "SX",
-            "VC",
-            "LC",
-            "SB",
-            "WS",
-            "ST",
-            "SN",
-            "RS",
-            "SC",
-            "SL",
-            "SG",
-            "SK",
-            "SI",
-            "SO",
-            "SD",
-            "SS",
-            "LK",
-            "SE",
-            "CH",
-            "SR",
-            "SY",
-            "TJ",
-            "TZ",
-            "TD",
-            "CZ",
-            "TH",
-            "TL",
-            "TG",
-            "TO",
-            "TT",
-            "TN",
-            "TM",
-            "TR",
-            "TV",
-            "UA",
-            "UY",
-            "VU",
-            "VA",
-            "VE",
-            "VN",
-            "YE",
-            "ZM",
-            "ZW",
-          ],
-        },
-        "region": {
-          "bsonType": "string",
-          "pattern": "^[0-9]{2,3}$",
-        },
-        "repetition_voie": {
-          "bsonType": "string",
-          "description": "Indice de répétition du numéro de voie",
-          "enum": [
-            "B",
-            "T",
-            "Q",
-            "C",
-          ],
-        },
-        "voie": {
-          "bsonType": "string",
-          "description": "Nom de voie",
-        },
-      },
     },
     "api_configuration_date": {
       "bsonType": "date",
       "description": "Date de l'interfaçage",
     },
     "api_key": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
       "description": "API key pour envoi de données",
     },
     "api_siret": {
@@ -10137,14 +10419,11 @@ exports[`validation-schema > should create validation schema for organismes > or
     "contacts_from_referentiel": {
       "bsonType": "array",
       "items": {
-        "additionalProperties": true,
+        "additionalProperties": false,
         "bsonType": "object",
         "properties": {
-          "confirmé": {
+          "confirmation_referentiel": {
             "bsonType": "bool",
-          },
-          "date_collecte": {
-            "bsonType": "string",
           },
           "email": {
             "bsonType": "string",
@@ -10156,6 +10435,11 @@ exports[`validation-schema > should create validation schema for organismes > or
             },
           },
         },
+        "required": [
+          "email",
+          "confirmation_referentiel",
+          "sources",
+        ],
       },
     },
     "created_at": {
@@ -10194,349 +10478,11 @@ exports[`validation-schema > should create validation schema for organismes > or
       "enum": [
         "absent",
         "present",
-        "present_uai_multiples_dans_tdb",
       ],
     },
     "ferme": {
       "bsonType": "bool",
       "description": "Le siret est fermé",
-    },
-    "fiabilisation_api_response": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "description": "Statut du siret et uai venant de l'API de l'organisme",
-          "properties": {
-            "candidats": {
-              "bsonType": "array",
-              "items": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "correspondances": {
-                    "additionalProperties": false,
-                    "bsonType": "object",
-                    "properties": {
-                      "siret": {
-                        "anyOf": [
-                          {
-                            "additionalProperties": false,
-                            "bsonType": "object",
-                            "properties": {
-                              "lui_meme": {
-                                "bsonType": "bool",
-                              },
-                              "son_formateur": {
-                                "bsonType": "bool",
-                              },
-                              "son_responsable": {
-                                "bsonType": "bool",
-                              },
-                            },
-                            "required": [
-                              "son_formateur",
-                              "son_responsable",
-                              "lui_meme",
-                            ],
-                          },
-                          {
-                            "bsonType": "null",
-                          },
-                        ],
-                      },
-                      "uai": {
-                        "anyOf": [
-                          {
-                            "additionalProperties": false,
-                            "bsonType": "object",
-                            "properties": {
-                              "lui_meme": {
-                                "bsonType": "bool",
-                              },
-                              "son_lieu": {
-                                "bsonType": "bool",
-                              },
-                            },
-                            "required": [
-                              "lui_meme",
-                              "son_lieu",
-                            ],
-                          },
-                          {
-                            "bsonType": "null",
-                          },
-                        ],
-                      },
-                    },
-                    "required": [
-                      "uai",
-                      "siret",
-                    ],
-                  },
-                  "organisme": {
-                    "additionalProperties": false,
-                    "bsonType": "object",
-                    "properties": {
-                      "identifiant": {
-                        "additionalProperties": false,
-                        "bsonType": "object",
-                        "properties": {
-                          "siret": {
-                            "bsonType": "string",
-                            "pattern": "^\\d{9,14}$",
-                          },
-                          "uai": {
-                            "anyOf": [
-                              {
-                                "bsonType": "string",
-                                "pattern": "^\\d{1,7}[A-Z]$",
-                              },
-                              {
-                                "bsonType": "null",
-                              },
-                            ],
-                          },
-                        },
-                        "required": [
-                          "uai",
-                          "siret",
-                        ],
-                      },
-                    },
-                    "required": [
-                      "identifiant",
-                    ],
-                  },
-                  "status": {
-                    "additionalProperties": false,
-                    "bsonType": "object",
-                    "properties": {
-                      "declaration_catalogue": {
-                        "bsonType": "bool",
-                      },
-                      "ouvert": {
-                        "bsonType": "bool",
-                      },
-                      "validation_uai": {
-                        "bsonType": "bool",
-                      },
-                    },
-                    "required": [
-                      "ouvert",
-                      "declaration_catalogue",
-                      "validation_uai",
-                    ],
-                  },
-                },
-                "required": [
-                  "status",
-                  "correspondances",
-                  "organisme",
-                ],
-              },
-            },
-            "metadata": {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "siret": {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "status": {
-                          "bsonType": "string",
-                          "enum": [
-                            "inconnu",
-                            "fermé",
-                            "ok",
-                          ],
-                        },
-                      },
-                      "required": [
-                        "status",
-                      ],
-                    },
-                    {
-                      "bsonType": "null",
-                    },
-                  ],
-                },
-                "uai": {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "status": {
-                          "bsonType": "string",
-                          "enum": [
-                            "inconnu",
-                            "ok",
-                          ],
-                        },
-                      },
-                      "required": [
-                        "status",
-                      ],
-                    },
-                    {
-                      "bsonType": "null",
-                    },
-                  ],
-                },
-              },
-              "required": [
-                "uai",
-                "siret",
-              ],
-            },
-            "resultat": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "correspondances": {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "siret": {
-                          "anyOf": [
-                            {
-                              "additionalProperties": false,
-                              "bsonType": "object",
-                              "properties": {
-                                "lui_meme": {
-                                  "bsonType": "bool",
-                                },
-                                "son_formateur": {
-                                  "bsonType": "bool",
-                                },
-                                "son_responsable": {
-                                  "bsonType": "bool",
-                                },
-                              },
-                              "required": [
-                                "son_formateur",
-                                "son_responsable",
-                                "lui_meme",
-                              ],
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                        },
-                        "uai": {
-                          "anyOf": [
-                            {
-                              "additionalProperties": false,
-                              "bsonType": "object",
-                              "properties": {
-                                "lui_meme": {
-                                  "bsonType": "bool",
-                                },
-                                "son_lieu": {
-                                  "bsonType": "bool",
-                                },
-                              },
-                              "required": [
-                                "lui_meme",
-                                "son_lieu",
-                              ],
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                        },
-                      },
-                      "required": [
-                        "uai",
-                        "siret",
-                      ],
-                    },
-                    "organisme": {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "identifiant": {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "siret": {
-                              "bsonType": "string",
-                              "pattern": "^\\d{9,14}$",
-                            },
-                            "uai": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "string",
-                                  "pattern": "^\\d{1,7}[A-Z]$",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                            },
-                          },
-                          "required": [
-                            "uai",
-                            "siret",
-                          ],
-                        },
-                      },
-                      "required": [
-                        "identifiant",
-                      ],
-                    },
-                    "status": {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "declaration_catalogue": {
-                          "bsonType": "bool",
-                        },
-                        "ouvert": {
-                          "bsonType": "bool",
-                        },
-                        "validation_uai": {
-                          "bsonType": "bool",
-                        },
-                      },
-                      "required": [
-                        "ouvert",
-                        "declaration_catalogue",
-                        "validation_uai",
-                      ],
-                    },
-                  },
-                  "required": [
-                    "status",
-                    "correspondances",
-                    "organisme",
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-          "required": [
-            "metadata",
-            "resultat",
-            "candidats",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Statut du siret et uai venant de l'API de l'organisme",
     },
     "fiabilisation_statut": {
       "bsonType": "string",
@@ -10664,9 +10610,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "fiable": {
             "bsonType": "bool",
           },
-          "label": {
-            "bsonType": "string",
-          },
           "last_transmission_date": {
             "anyOf": [
               {
@@ -10690,9 +10633,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "raison_sociale": {
             "bsonType": "string",
           },
-          "referentiel": {
-            "bsonType": "bool",
-          },
           "region": {
             "bsonType": "string",
           },
@@ -10708,12 +10648,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "siret": {
             "bsonType": "string",
           },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
           "uai": {
             "bsonType": [
               "string",
@@ -10721,6 +10655,9 @@ exports[`validation-schema > should create validation schema for organismes > or
             ],
           },
         },
+        "required": [
+          "siret",
+        ],
       },
     },
     "organismesResponsables": {
@@ -10764,9 +10701,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "fiable": {
             "bsonType": "bool",
           },
-          "label": {
-            "bsonType": "string",
-          },
           "last_transmission_date": {
             "anyOf": [
               {
@@ -10790,9 +10724,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "raison_sociale": {
             "bsonType": "string",
           },
-          "referentiel": {
-            "bsonType": "bool",
-          },
           "region": {
             "bsonType": "string",
           },
@@ -10808,12 +10739,6 @@ exports[`validation-schema > should create validation schema for organismes > or
           "siret": {
             "bsonType": "string",
           },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
           "uai": {
             "bsonType": [
               "string",
@@ -10821,6 +10746,9 @@ exports[`validation-schema > should create validation schema for organismes > or
             ],
           },
         },
+        "required": [
+          "siret",
+        ],
       },
     },
     "qualiopi": {
@@ -10882,14 +10810,30 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "description": "Code Bassin d'emploi",
                     },
                     "code_insee": {
-                      "bsonType": "string",
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code insee doit contenir 5 caractères",
+                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                       "description": "Le code insee doit contenir 5 caractères",
-                      "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                     },
                     "code_postal": {
-                      "bsonType": "string",
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code postal doit contenir 5 caractères",
+                          "pattern": "^[0-9]{5}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                       "description": "Le code postal doit contenir 5 caractères",
-                      "pattern": "^[0-9]{5}$",
                     },
                     "commune": {
                       "bsonType": "string",
@@ -10901,7 +10845,10 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "description": "Complément d'adresse",
                     },
                     "complete": {
-                      "bsonType": "string",
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
                       "description": "Adresse complète",
                     },
                     "departement": {
@@ -11209,9 +11156,17 @@ exports[`validation-schema > should create validation schema for organismes > or
       "description": "Date d'erreur de transmission",
     },
     "uai": {
-      "bsonType": "string",
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "description": "Code UAI de l'établissement",
+          "pattern": "^[0-9]{7}[a-zA-Z]$",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
       "description": "Code UAI de l'établissement",
-      "pattern": "^[0-9]{7}[a-zA-Z]$",
     },
     "updated_at": {
       "bsonType": "date",
@@ -11221,274 +11176,9 @@ exports[`validation-schema > should create validation schema for organismes > or
   "required": [
     "_id",
     "siret",
+    "contacts_from_referentiel",
     "updated_at",
     "created_at",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for organismesReferentiel > organismesReferentiel 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "adresse": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "academie": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "code": {
-              "bsonType": "string",
-            },
-            "nom": {
-              "bsonType": "string",
-            },
-          },
-          "required": [
-            "code",
-            "nom",
-          ],
-        },
-        "code_insee": {
-          "bsonType": "string",
-        },
-        "code_postal": {
-          "bsonType": "string",
-        },
-        "departement": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "code": {
-              "bsonType": "string",
-            },
-            "nom": {
-              "bsonType": "string",
-            },
-          },
-          "required": [
-            "code",
-            "nom",
-          ],
-        },
-        "geojson": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "geometry": {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "coordinates": {
-                  "bsonType": "array",
-                },
-                "type": {
-                  "bsonType": "string",
-                },
-              },
-              "required": [
-                "type",
-                "coordinates",
-              ],
-            },
-            "properties": {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "score": {
-                  "bsonType": "number",
-                },
-                "source": {
-                  "bsonType": "string",
-                },
-              },
-            },
-            "type": {
-              "bsonType": "string",
-            },
-          },
-          "required": [
-            "type",
-            "geometry",
-          ],
-        },
-        "label": {
-          "bsonType": "string",
-        },
-        "localite": {
-          "bsonType": "string",
-        },
-        "region": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "code": {
-              "bsonType": "string",
-            },
-            "nom": {
-              "bsonType": "string",
-            },
-          },
-          "required": [
-            "code",
-            "nom",
-          ],
-        },
-      },
-      "required": [
-        "code_postal",
-        "code_insee",
-        "localite",
-        "region",
-        "academie",
-      ],
-    },
-    "contacts": {
-      "bsonType": "array",
-      "description": "Contacts du referentiel",
-      "items": {
-        "additionalProperties": true,
-        "bsonType": "object",
-        "properties": {
-          "confirmé": {
-            "bsonType": "bool",
-          },
-          "date_collecte": {
-            "bsonType": "string",
-          },
-          "email": {
-            "bsonType": "string",
-          },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
-        },
-      },
-    },
-    "enseigne": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "etat_administratif": {
-      "bsonType": "string",
-      "enum": [
-        "actif",
-        "fermé",
-      ],
-    },
-    "forme_juridique": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "code": {
-          "bsonType": "string",
-        },
-        "label": {
-          "bsonType": "string",
-        },
-      },
-      "required": [
-        "code",
-        "label",
-      ],
-    },
-    "lieux_de_formation": {
-      "bsonType": "array",
-      "items": {
-        "additionalProperties": true,
-        "bsonType": "object",
-        "properties": {
-          "uai": {
-            "bsonType": "string",
-          },
-          "uai_fiable": {
-            "bsonType": "bool",
-          },
-        },
-      },
-    },
-    "nature": {
-      "bsonType": "string",
-      "enum": [
-        "responsable",
-        "formateur",
-        "responsable_formateur",
-        "inconnue",
-      ],
-    },
-    "numero_declaration_activite": {
-      "bsonType": "string",
-    },
-    "qualiopi": {
-      "bsonType": "bool",
-    },
-    "raison_sociale": {
-      "bsonType": "string",
-    },
-    "relations": {
-      "bsonType": "array",
-      "items": {
-        "additionalProperties": true,
-        "bsonType": "object",
-        "properties": {
-          "label": {
-            "bsonType": "string",
-          },
-          "referentiel": {
-            "bsonType": "bool",
-          },
-          "siret": {
-            "bsonType": "string",
-          },
-          "sources": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-            },
-          },
-          "type": {
-            "bsonType": "string",
-            "enum": [
-              "formateur->responsable",
-              "responsable->formateur",
-              "entreprise",
-            ],
-          },
-          "uai": {
-            "bsonType": [
-              "string",
-              "null",
-            ],
-          },
-        },
-      },
-    },
-    "siege_social": {
-      "bsonType": "bool",
-    },
-    "siret": {
-      "bsonType": "string",
-    },
-    "uai": {
-      "bsonType": "string",
-    },
-  },
-  "required": [
-    "_id",
-    "siret",
-    "nature",
-    "lieux_de_formation",
   ],
 }
 `;

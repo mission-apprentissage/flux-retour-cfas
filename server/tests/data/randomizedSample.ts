@@ -5,7 +5,7 @@ import RandExp from "randexp";
 import { CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import { DossierApprenantSchemaV3ZodType } from "shared/models/parts/dossierApprenantSchemaV3";
+import { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import type { PartialDeep } from "type-fest";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
@@ -80,6 +80,7 @@ export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): Without
   return {
     ...etablissement,
     ...params,
+    contacts_from_referentiel: [],
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -126,9 +127,7 @@ export const createSampleEffectif = async ({
   return fullEffectif as WithoutId<IEffectif>;
 };
 
-export const createRandomDossierApprenantApiInputV3 = (
-  params?: Partial<DossierApprenantSchemaV3ZodType>
-): DossierApprenantSchemaV3ZodType => {
+export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {
   const anneeScolaire = getRandomAnneeScolaire();
   const date_inscription_formation = new Date(new Date().setFullYear(parseInt(anneeScolaire.split("-")[0]), 8, 1));
   const date_entree_formation = new Date(date_inscription_formation);
