@@ -1,7 +1,13 @@
 import { type AnyBulkWriteOperation } from "mongodb";
-import type { IContactReferentiel, IOrganisme } from "shared/models";
+import type { IOrganisme } from "shared/models";
 
 import { organismesDb } from "@/common/model/collections";
+
+type IContactReferentiel = {
+  confirmé?: boolean;
+  email?: string;
+  sources?: string[];
+};
 
 export const up = async () => {
   const cursor = organismesDb().find({ contacts_from_referentiel: { $exists: true } });
