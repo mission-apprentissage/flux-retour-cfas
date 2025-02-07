@@ -6684,20 +6684,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cyclist@npm:1.0.1":
-  version: 1.0.1
-  resolution: "cyclist@npm:1.0.1"
-  checksum: 3cc2fdeb358599ca0ea96f5ecf2fc530ccab7ed1f8aa1a894aebfacd2009281bd7380cb9b30db02a18cdd00b3ed1d7ce81a3b11fe56e33a6a0fe4424dc592fbe
-  languageName: node
-  linkType: hard
-
-"cyclist@npm:^1.0.1":
-  version: 1.0.2
-  resolution: "cyclist@npm:1.0.2"
-  checksum: d7c0336565b9b72ee72347831cbd05fadcc59cc9ab89dcf38293b1a64c2c5fb777c9ce44967390dabe8235f9898f5cb222cd6672f4920b757da8861310082716
-  languageName: node
-  linkType: hard
-
 "d3-array@npm:2":
   version: 2.12.1
   resolution: "d3-array@npm:2.12.1"
@@ -14049,16 +14035,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oleoduc@npm:0.7.0":
-  version: 0.7.0
-  resolution: "oleoduc@npm:0.7.0"
-  dependencies:
-    cyclist: 1.0.1
-    parallel-transform: 1.2.0
-  checksum: 4e873c6202628b3651974d492de2dd596de0b4687c74ff3dc80f0fc03eb9ec9e6fb306959ba53c29d9ee27fa0ab2ef17286983e7106ccef0e95893be1506d323
-  languageName: node
-  linkType: hard
-
 "omit-deep@npm:0.3.0":
   version: 0.3.0
   resolution: "omit-deep@npm:0.3.0"
@@ -14348,17 +14324,6 @@ __metadata:
   bin:
     pacote: lib/bin.js
   checksum: c731572be2bf226b117eba076d242bd4cd8be7aa01e004af3374a304ad7ab330539e22644bc33de12d2a7d45228ccbcbf4d710f59c84414f3d09a1a95ee6f0bf
-  languageName: node
-  linkType: hard
-
-"parallel-transform@npm:1.2.0":
-  version: 1.2.0
-  resolution: "parallel-transform@npm:1.2.0"
-  dependencies:
-    cyclist: ^1.0.1
-    inherits: ^2.0.3
-    readable-stream: ^2.1.5
-  checksum: ab6ddc1a662cefcfb3d8d546a111763d3b223f484f2e9194e33aefd8f6760c319d0821fd22a00a3adfbd45929b50d2c84cc121389732f013c2ae01c226269c27
   languageName: node
   linkType: hard
 
@@ -15556,7 +15521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^2.0.0, readable-stream@npm:^2.0.2, readable-stream@npm:^2.1.5, readable-stream@npm:^2.2.2, readable-stream@npm:~2.3.6":
+"readable-stream@npm:^2.0.0, readable-stream@npm:^2.0.2, readable-stream@npm:^2.2.2, readable-stream@npm:~2.3.6":
   version: 2.3.8
   resolution: "readable-stream@npm:2.3.8"
   dependencies:
@@ -16367,7 +16332,6 @@ __metadata:
     nock: ^14.0.0-beta.15
     nodemailer: ^6.9.15
     nodemailer-html-to-text: 3.2.0
-    oleoduc: 0.7.0
     omit-deep: 0.3.0
     passport: 0.5.2
     passport-jwt: ^4.0.1
