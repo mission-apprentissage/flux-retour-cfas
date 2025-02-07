@@ -1,8 +1,8 @@
 import { captureException } from "@sentry/node";
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
 import Boom from "boom";
-import { ObjectId } from "bson";
 import type { IOrganisme } from "shared/models";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { describe, it, vi, beforeEach, expect } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -249,57 +249,33 @@ describe("updateOrganismesFiabilisationStatut", () => {
   const siret2 = "77562556900014";
   const uai2 = "8844672E";
 
-  const organisme1_0: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme1_0: IOrganisme = generateOrganismeFixture({
     uai: uai1,
     siret: siret1_0,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "FIABLE",
-  };
+  });
 
-  const organisme1_1: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme1_1: IOrganisme = generateOrganismeFixture({
     uai: uai1,
     siret: siret1_1,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "NON_FIABLE",
-  };
+  });
 
-  const organisme2: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme2: IOrganisme = generateOrganismeFixture({
     uai: uai2,
     siret: siret2,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "NON_FIABLE",
-  };
+  });
 
-  const organisme3: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme3: IOrganisme = generateOrganismeFixture({
     uai: uai2,
     siret: siret1_0,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "FIABLE",
-  };
+  });
 
   const response1_0: IRechercheOrganismeResponse = {
     metadata: {

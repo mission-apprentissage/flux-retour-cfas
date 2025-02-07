@@ -219,6 +219,7 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof IOrganisme]: IOrgan
     est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
     first_transmission_date: startOfDay(subMonths(new Date(), 3)),
     last_transmission_date: startOfDay(subMonths(new Date(), 1)),
+    contacts_from_referentiel: [],
   };
 
 export const organismesByLabel = {

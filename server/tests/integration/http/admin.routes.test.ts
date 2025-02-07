@@ -4,9 +4,9 @@ import { AxiosInstance } from "axiosist";
 import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
+import type { IOrganisme } from "shared/models";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
@@ -21,7 +21,10 @@ import {
   testPasswordHash,
 } from "@tests/utils/testUtils";
 
-import { sampleOrganismeWithUAI, sampleOrganismeWithoutUai } from "../common/actions/organismes.actions.test";
+import {
+  sampleOrganismeWithUAIOutput,
+  sampleOrganismeWithoutUAIOutput,
+} from "../common/actions/organismes.actions.test";
 
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
@@ -104,8 +107,7 @@ describe("Routes administrateur", () => {
     });
 
     it("Vérifie qu'on renvoie 2 organismes si 2 organismes en base : un avec UAI et un sans", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
 
       let response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -115,45 +117,44 @@ describe("Routes administrateur", () => {
 
       expect(response.status).toBe(200);
 
-      expect(response.data[0]._id).toEqual({ siret: createdWithUai.siret });
+      expect(response.data[0]._id).toEqual({ siret: sampleOrganismeWithUAIOutput.siret });
       expect(response.data[0].count).toEqual(2);
       expect(new Set(response.data[0].duplicates)).toEqual(
         new Set([
           {
-            id: createdWithoutUai._id.toString(),
-            siret: createdWithoutUai.siret,
-            nom: createdWithoutUai.nom,
-            ferme: createdWithoutUai.ferme,
-            nature: createdWithoutUai.nature,
+            id: sampleOrganismeWithoutUAIOutput._id.toString(),
+            siret: sampleOrganismeWithoutUAIOutput.siret,
+            nom: sampleOrganismeWithoutUAIOutput.nom,
+            ferme: sampleOrganismeWithoutUAIOutput.ferme,
+            nature: sampleOrganismeWithoutUAIOutput.nature,
             nbUsers: 0,
-            created_at: createdWithoutUai.created_at.toISOString(),
-            updated_at: createdWithoutUai.updated_at.toISOString(),
+            created_at: sampleOrganismeWithoutUAIOutput.created_at.toISOString(),
+            updated_at: sampleOrganismeWithoutUAIOutput.updated_at.toISOString(),
           },
           {
-            id: createdWithUai._id.toString(),
-            uai: createdWithUai.uai,
-            siret: createdWithUai.siret,
-            nom: createdWithUai.nom,
-            ferme: createdWithUai.ferme,
-            nature: createdWithUai.nature,
+            id: sampleOrganismeWithUAIOutput._id.toString(),
+            uai: sampleOrganismeWithUAIOutput.uai,
+            siret: sampleOrganismeWithUAIOutput.siret,
+            nom: sampleOrganismeWithUAIOutput.nom,
+            ferme: sampleOrganismeWithUAIOutput.ferme,
+            nature: sampleOrganismeWithUAIOutput.nature,
             nbUsers: 0,
-            created_at: createdWithUai.created_at.toISOString(),
-            updated_at: createdWithUai.updated_at.toISOString(),
+            created_at: sampleOrganismeWithUAIOutput.created_at.toISOString(),
+            updated_at: sampleOrganismeWithUAIOutput.updated_at.toISOString(),
           },
         ])
       );
     });
 
     it("Vérifie qu'on renvoie 2 organismes et 2 utilisateurs liés sur l'organisme fiable", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
 
       await Promise.all([
         organisationsDb().insertOne({
           _id: new ObjectId(id(1)),
           type: "ORGANISME_FORMATION",
-          uai: createdWithUai.uai as string,
-          siret: createdWithUai.siret,
+          uai: sampleOrganismeWithUAIOutput.uai as string,
+          siret: sampleOrganismeWithUAIOutput.siret,
           created_at: getCurrentTime(),
         }),
         usersMigrationDb().insertMany([
@@ -204,31 +205,31 @@ describe("Routes administrateur", () => {
 
       expect(response.status).toBe(200);
 
-      expect(response.data[0]._id).toEqual({ siret: createdWithUai.siret });
+      expect(response.data[0]._id).toEqual({ siret: sampleOrganismeWithUAIOutput.siret });
       expect(response.data[0].count).toEqual(2);
       expect(new Set(response.data[0].duplicates)).toEqual(
         new Set([
           {
-            id: createdWithoutUai._id.toString(),
-            siret: createdWithoutUai.siret,
-            nom: createdWithoutUai.nom,
-            ferme: createdWithoutUai.ferme,
-            nature: createdWithoutUai.nature,
+            id: sampleOrganismeWithoutUAIOutput._id.toString(),
+            siret: sampleOrganismeWithoutUAIOutput.siret,
+            nom: sampleOrganismeWithoutUAIOutput.nom,
+            ferme: sampleOrganismeWithoutUAIOutput.ferme,
+            nature: sampleOrganismeWithoutUAIOutput.nature,
             nbUsers: 0,
-            created_at: createdWithoutUai.created_at.toISOString(),
-            updated_at: createdWithoutUai.updated_at.toISOString(),
+            created_at: sampleOrganismeWithoutUAIOutput.created_at.toISOString(),
+            updated_at: sampleOrganismeWithoutUAIOutput.updated_at.toISOString(),
           },
           {
-            id: createdWithUai._id.toString(),
-            uai: createdWithUai.uai,
-            siret: createdWithUai.siret,
-            nom: createdWithUai.nom,
-            ferme: createdWithUai.ferme,
-            nature: createdWithUai.nature,
+            id: sampleOrganismeWithUAIOutput._id.toString(),
+            uai: sampleOrganismeWithUAIOutput.uai,
+            siret: sampleOrganismeWithUAIOutput.siret,
+            nom: sampleOrganismeWithUAIOutput.nom,
+            ferme: sampleOrganismeWithUAIOutput.ferme,
+            nature: sampleOrganismeWithUAIOutput.nature,
             // nbUsers: 2,
             nbUsers: 0,
-            created_at: createdWithUai.created_at.toISOString(),
-            updated_at: createdWithUai.updated_at.toISOString(),
+            created_at: sampleOrganismeWithUAIOutput.created_at.toISOString(),
+            updated_at: sampleOrganismeWithUAIOutput.updated_at.toISOString(),
           },
         ])
       );
@@ -250,32 +251,30 @@ describe("Routes administrateur", () => {
     });
 
     it("Vérifie la fusion de 2 organismes sans effectifs ni comptes utilisateurs", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
 
       let response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",
         "/api/v1/admin/fusion-organismes",
-        { organismeFiableId: createdWithUai._id, organismeSansUaiId: createdWithoutUai._id }
+        { organismeFiableId: sampleOrganismeWithUAIOutput._id, organismeSansUaiId: sampleOrganismeWithoutUAIOutput._id }
       );
 
       expect(response.status).toBe(200);
 
-      expect(await organismesDb().countDocuments({ _id: createdWithoutUai._id })).toBe(0);
-      expect(await organismesDb().countDocuments({ _id: createdWithUai._id })).toBe(1);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithUAIOutput._id })).toBe(1);
     });
 
     it("Vérifie la fusion de 2 organismes avec effectifs sur le non fiable et avec comptes utilisateurs", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
 
       await Promise.all([
         organisationsDb().insertOne({
           _id: new ObjectId(id(1)),
           type: "ORGANISME_FORMATION",
           uai: null,
-          siret: createdWithUai.siret,
+          siret: sampleOrganismeWithUAIOutput.siret,
           created_at: getCurrentTime(),
         }),
         usersMigrationDb().insertMany([
@@ -320,7 +319,7 @@ describe("Routes administrateur", () => {
           // effectifs sur le non fiable
           ...(await generate(5, async () => ({
             _id: new ObjectId(),
-            ...(await createSampleEffectif({ organisme_id: createdWithoutUai._id })),
+            ...(await createSampleEffectif({ organisme_id: sampleOrganismeWithoutUAIOutput._id })),
           }))),
         ]),
       ]);
@@ -329,14 +328,16 @@ describe("Routes administrateur", () => {
         { type: "ADMINISTRATEUR" },
         "post",
         "/api/v1/admin/fusion-organismes",
-        { organismeFiableId: createdWithUai._id, organismeSansUaiId: createdWithoutUai._id }
+        { organismeFiableId: sampleOrganismeWithUAIOutput._id, organismeSansUaiId: sampleOrganismeWithoutUAIOutput._id }
       );
 
       expect(response.status).toBe(200);
 
-      expect(await organismesDb().countDocuments({ _id: createdWithoutUai._id })).toBe(0);
-      expect(await organismesDb().countDocuments({ _id: createdWithUai._id })).toBe(1);
-      expect((await getUsersLinkedToOrganismeId(createdWithUai._id)).map(({ _id, ...user }) => user)).toStrictEqual([
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithUAIOutput._id })).toBe(1);
+      expect(
+        (await getUsersLinkedToOrganismeId(sampleOrganismeWithUAIOutput._id)).map(({ _id, ...user }) => user)
+      ).toStrictEqual([
         {
           civility: "Madame",
           nom: "Boucher",
@@ -352,15 +353,15 @@ describe("Routes administrateur", () => {
           telephone: "0102030406",
         },
       ]);
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithUai._id })).toBe(5);
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithoutUai._id })).toBe(0);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithUAIOutput._id })).toBe(5);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
 
     it("Vérifie la fusion de 2 organismes avec effectifs sur le non fiable et le fiable et avec comptes utilisateurs", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
+
       const anneeScolaire = "2022-2023";
 
       await Promise.all([
@@ -368,7 +369,7 @@ describe("Routes administrateur", () => {
           _id: new ObjectId(id(1)),
           type: "ORGANISME_FORMATION",
           uai: null,
-          siret: createdWithUai.siret,
+          siret: sampleOrganismeWithUAIOutput.siret,
           created_at: getCurrentTime(),
         }),
         usersMigrationDb().insertMany([
@@ -414,7 +415,7 @@ describe("Routes administrateur", () => {
           ...(await generate(5, async () => ({
             _id: new ObjectId(),
             ...(await createSampleEffectif({
-              organisme_id: createdWithoutUai._id,
+              organisme_id: sampleOrganismeWithoutUAIOutput._id,
               annee_scolaire: anneeScolaire,
             })),
           }))),
@@ -423,7 +424,7 @@ describe("Routes administrateur", () => {
           ...(await generate(10, async () => ({
             _id: new ObjectId(),
             ...(await createSampleEffectif({
-              organisme_id: createdWithUai._id,
+              organisme_id: sampleOrganismeWithUAIOutput._id,
               annee_scolaire: anneeScolaire,
             })),
           }))),
@@ -434,14 +435,16 @@ describe("Routes administrateur", () => {
         { type: "ADMINISTRATEUR" },
         "post",
         "/api/v1/admin/fusion-organismes",
-        { organismeFiableId: createdWithUai._id, organismeSansUaiId: createdWithoutUai._id }
+        { organismeFiableId: sampleOrganismeWithUAIOutput._id, organismeSansUaiId: sampleOrganismeWithoutUAIOutput._id }
       );
 
       expect(response.status).toBe(200);
 
-      expect(await organismesDb().countDocuments({ _id: createdWithoutUai._id })).toBe(0);
-      expect(await organismesDb().countDocuments({ _id: createdWithUai._id })).toBe(1);
-      expect((await getUsersLinkedToOrganismeId(createdWithUai._id)).map(({ _id, ...user }) => user)).toStrictEqual([
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithUAIOutput._id })).toBe(1);
+      expect(
+        (await getUsersLinkedToOrganismeId(sampleOrganismeWithUAIOutput._id)).map(({ _id, ...user }) => user)
+      ).toStrictEqual([
         {
           civility: "Madame",
           nom: "Boucher",
@@ -457,15 +460,15 @@ describe("Routes administrateur", () => {
           telephone: "0102030406",
         },
       ]);
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithUai._id })).toBe(15);
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithoutUai._id })).toBe(0);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithUAIOutput._id })).toBe(15);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
 
     it("Vérifie la fusion de 2 organismes avec effectifs en doublons", async () => {
-      const createdWithUai = await createOrganisme(sampleOrganismeWithUAI);
-      const createdWithoutUai = await createOrganisme(sampleOrganismeWithoutUai);
+      await organismesDb().insertMany([sampleOrganismeWithUAIOutput, sampleOrganismeWithoutUAIOutput]);
+
       const anneeScolaire = "2022-2023";
       const commonEffectifs = [
         ...(await generate(
@@ -481,7 +484,7 @@ describe("Routes administrateur", () => {
           _id: new ObjectId(id(1)),
           type: "ORGANISME_FORMATION",
           uai: null,
-          siret: createdWithUai.siret,
+          siret: sampleOrganismeWithUAIOutput.siret,
           created_at: getCurrentTime(),
         }),
         usersMigrationDb().insertMany([
@@ -528,13 +531,13 @@ describe("Routes administrateur", () => {
             ...commonEffectifs.map((item) => ({
               ...item,
               _id: new ObjectId(),
-              organisme_id: createdWithUai._id,
+              organisme_id: sampleOrganismeWithUAIOutput._id,
               created_at: duplicateOldDate,
             })),
             ...commonEffectifs.map((item) => ({
               ...item,
               _id: new ObjectId(),
-              organisme_id: createdWithoutUai._id,
+              organisme_id: sampleOrganismeWithoutUAIOutput._id,
               created_at: duplicateRecentDate,
             })),
           ],
@@ -546,7 +549,7 @@ describe("Routes administrateur", () => {
             _id: new ObjectId(),
             ...(await createSampleEffectif({
               annee_scolaire: anneeScolaire,
-              organisme_id: createdWithUai._id,
+              organisme_id: sampleOrganismeWithUAIOutput._id,
               created_at: new Date(),
             })),
           }))),
@@ -554,7 +557,7 @@ describe("Routes administrateur", () => {
             _id: new ObjectId(),
             ...(await createSampleEffectif({
               annee_scolaire: anneeScolaire,
-              organisme_id: createdWithoutUai._id,
+              organisme_id: sampleOrganismeWithoutUAIOutput._id,
               created_at: new Date(),
             })),
           }))),
@@ -565,17 +568,19 @@ describe("Routes administrateur", () => {
         { type: "ADMINISTRATEUR" },
         "post",
         "/api/v1/admin/fusion-organismes",
-        { organismeFiableId: createdWithUai._id, organismeSansUaiId: createdWithoutUai._id }
+        { organismeFiableId: sampleOrganismeWithUAIOutput._id, organismeSansUaiId: sampleOrganismeWithoutUAIOutput._id }
       );
 
       expect(response.status).toBe(200);
 
       // Vérification des organismes
-      expect(await organismesDb().countDocuments({ _id: createdWithoutUai._id })).toBe(0);
-      expect(await organismesDb().countDocuments({ _id: createdWithUai._id })).toBe(1);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
+      expect(await organismesDb().countDocuments({ _id: sampleOrganismeWithUAIOutput._id })).toBe(1);
 
       // Vérification des utilisateurs liés
-      expect((await getUsersLinkedToOrganismeId(createdWithUai._id)).map(({ _id, ...user }) => user)).toStrictEqual([
+      expect(
+        (await getUsersLinkedToOrganismeId(sampleOrganismeWithUAIOutput._id)).map(({ _id, ...user }) => user)
+      ).toStrictEqual([
         {
           civility: "Madame",
           nom: "Boucher",
@@ -593,12 +598,12 @@ describe("Routes administrateur", () => {
       ]);
 
       // Vérification du nombre d'effectifs
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithUai._id })).toBe(9);
-      expect(await effectifsDb().countDocuments({ organisme_id: createdWithoutUai._id })).toBe(0);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithUAIOutput._id })).toBe(9);
+      expect(await effectifsDb().countDocuments({ organisme_id: sampleOrganismeWithoutUAIOutput._id })).toBe(0);
 
       // Vérification du nombre d'effectifs avec la date la plus récente
       const effectifsExDoublons = await effectifsDb()
-        .find({ organisme_id: createdWithUai._id, source: SOURCE_APPRENANT.ERP })
+        .find({ organisme_id: sampleOrganismeWithUAIOutput._id, source: SOURCE_APPRENANT.ERP })
         .toArray();
       expect(effectifsExDoublons.length).toBe(3);
       effectifsExDoublons
@@ -612,15 +617,13 @@ describe("Routes administrateur", () => {
 
   describe("GET / - organismes/id/parametrage-transmission", () => {
     describe("Vérification des droits d'accès", () => {
-      let organismeTest;
-
       beforeEach(async () => {
-        organismeTest = await createOrganisme(sampleOrganismeWithUAI);
+        await organismesDb().insertMany([sampleOrganismeWithUAIOutput]);
       });
 
       it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
         const response = await httpClient.post(
-          `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+          `/api/v1/admin/organismes/${sampleOrganismeWithUAIOutput._id}/parametrage-transmission`
         );
         expectUnauthorizedError(response);
       });
@@ -657,7 +660,7 @@ describe("Routes administrateur", () => {
           const response = await requestAsOrganisation(
             organisation,
             "get",
-            `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+            `/api/v1/admin/organismes/${sampleOrganismeWithUAIOutput._id}/parametrage-transmission`
           );
           expect(response.status).toStrictEqual(allowed ? 200 : 403);
         });
@@ -673,15 +676,16 @@ describe("Routes administrateur", () => {
       const sampleTransmissionDate = addDays(new Date(), -10);
       const sampleConfigurationDate = addDays(new Date(), -15);
 
-      const organismeTransmissionApiTest = await createOrganisme({
-        ...sampleOrganismeWithUAI,
+      const organismeTransmissionApiTest: IOrganisme = {
+        ...sampleOrganismeWithUAIOutput,
         erps: ["ERP_TEST"],
         last_transmission_date: sampleTransmissionDate,
         mode_de_transmission: "API",
         api_version: "V2",
         mode_de_transmission_configuration_date: sampleConfigurationDate,
         api_key: "SAMPLE_API_KEY",
-      });
+      };
+      await organismesDb().insertOne(organismeTransmissionApiTest);
 
       let response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -706,14 +710,15 @@ describe("Routes administrateur", () => {
       const sampleTransmissionDate = addDays(new Date(), -10);
       const sampleConfigurationDate = addDays(new Date(), -15);
 
-      const organismeTransmissionManuelleTest = await createOrganisme({
-        ...sampleOrganismeWithUAI,
+      const organismeTransmissionManuelleTest: IOrganisme = {
+        ...sampleOrganismeWithUAIOutput,
         erps: ["ERP_TEST2"],
         last_transmission_date: sampleTransmissionDate,
         mode_de_transmission: "MANUEL",
         mode_de_transmission_configuration_date: sampleConfigurationDate,
         api_key: "SAMPLE_API_KEY",
-      });
+      };
+      await organismesDb().insertOne(organismeTransmissionManuelleTest);
 
       let response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },

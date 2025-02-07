@@ -67,7 +67,6 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
 
   // Recherche de l'organisme via le couple UAI - SIRET
   const organismeInTdb = await findOrganismeByUaiAndSiret(uai, siret);
-  const uaiMultiplesInTdb = (await organismesDb().countDocuments({ siret })) > 1;
 
   // Ajout de l'organisme sans appels API si non existant dans le tdb
   if (!organismeInTdb) {
@@ -85,9 +84,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         contacts_from_referentiel: contacts,
         // L'organisme sera fiabilisé par le job de fiabilisation qui intervient après
         fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
-        est_dans_le_referentiel: uaiMultiplesInTdb
-          ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
-          : STATUT_PRESENCE_REFERENTIEL.PRESENT,
+        est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
         organismesFormateurs: [],
         organismesResponsables: [],
       });
@@ -113,9 +110,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       ferme: isFerme,
       qualiopi: qualiopi || false,
       contacts_from_referentiel: contacts,
-      est_dans_le_referentiel: uaiMultiplesInTdb
-        ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
-        : STATUT_PRESENCE_REFERENTIEL.PRESENT,
+      est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
     };
     try {
       await updateOrganisme(organismeInTdb._id, updatedOrganisme);

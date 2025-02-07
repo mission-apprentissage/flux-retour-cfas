@@ -18,36 +18,32 @@ import {
 } from "../../constants";
 import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
 
-import { zContactReferentiel } from "./organismesReferentiel.model";
-
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
 
-const relationOrganismeSchema = z
-  .object({
-    siret: z.string(),
-    uai: z.string().nullable().optional(),
+const relationOrganismeSchema = z.object({
+  siret: z.string(),
+  uai: z.string().nullable().optional(),
 
-    // infos TDB
-    _id: zObjectId.nullable().optional(),
-    enseigne: z.string().nullish(),
-    raison_sociale: z.string().optional(),
-    commune: z.string().optional(),
-    region: z.string().optional(),
-    departement: z.string().optional(),
-    academie: z.string().optional(),
-    reseaux: z.array(z.string()).optional(),
-    date_collecte: z.string().optional(),
-    fiable: z.boolean().optional(),
-    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
-    last_transmission_date: z.date().nullish(),
-    ferme: z.boolean().optional(),
+  // infos TDB
+  _id: zObjectId.nullable().optional(),
+  enseigne: z.string().nullish(),
+  raison_sociale: z.string().optional(),
+  commune: z.string().optional(),
+  region: z.string().optional(),
+  departement: z.string().optional(),
+  academie: z.string().optional(),
+  reseaux: z.array(z.string()).optional(),
+  date_collecte: z.string().optional(),
+  fiable: z.boolean().optional(),
+  nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
+  last_transmission_date: z.date().nullish(),
+  ferme: z.boolean().optional(),
 
-    // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
-    responsabilitePartielle: z.boolean().optional(),
-  })
-  .strict();
+  // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+  responsabilitePartielle: z.boolean().optional(),
+});
 
 const organismesCountSchema = z.object({
   organismes: z.number(),
@@ -134,7 +130,7 @@ export const zOrganisme = z
     nom: z.string({ description: "Nom de l'organisme de formation" }).optional(),
     enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).nullish(),
     raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
-    adresse: zAdresse.describe("Adresse de l'établissement").optional(),
+    adresse: zAdresse.describe("Adresse de l'établissement").nullish(),
     relatedFormations: z
       .array(
         z
@@ -195,7 +191,13 @@ export const zOrganisme = z
       .optional(),
     ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
     qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
-    contacts_from_referentiel: z.array(zContactReferentiel).optional(),
+    contacts_from_referentiel: z.array(
+      z.object({
+        email: z.string().email(),
+        confirmation_referentiel: z.boolean(),
+        sources: z.array(z.string()),
+      })
+    ),
     // TODO [tech] TO REMOVE LATER
     access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
     api_key: z.string({ description: "API key pour envoi de données" }).optional(),
