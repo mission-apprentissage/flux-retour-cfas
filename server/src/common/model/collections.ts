@@ -4,7 +4,6 @@ import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
-import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
@@ -37,7 +36,6 @@ import { getDbCollection } from "@/common/mongodb";
 export const modelDescriptors = [
   auditLogsModelDescriptor,
   usersModelDescriptor,
-  formationsModelDescriptor,
   formationsCatalogueModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
@@ -63,7 +61,6 @@ export const modelDescriptors = [
   missionLocaleEffectifLogsDescriptor,
 ];
 
-export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);

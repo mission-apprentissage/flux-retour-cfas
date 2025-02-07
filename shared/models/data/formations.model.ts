@@ -24,12 +24,6 @@ const zFormation = z.object({
       description: "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
     })
     .nullish(),
-  niveau: z.string({ description: "Niveau de formation récupéré via Tables de Correspondances" }).nullish(),
-  niveau_libelle: z
-    .string({
-      description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
-    })
-    .nullish(),
   metiers: z.array(z.string(), { description: "Les domaines métiers rattachés à la formation" }).nullish(),
   duree: z.string({ description: "Durée de la formation théorique" }).nullish(),
   annee: z.string({ description: "Année de la formation (cursus)" }).nullish(),
