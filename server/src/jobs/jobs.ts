@@ -34,9 +34,8 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
-import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
+import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
-import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
@@ -48,8 +47,6 @@ import { validationTerritoires } from "./territoire/validationTerritoire";
 import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
 const dailyJobs = async (queued: boolean) => {
-  await addJob({ name: "hydrate:organismes-referentiel", queued });
-
   // # Remplissage des formations issus du catalogue
   await addJob({ name: "hydrate:formations-catalogue", queued });
 
@@ -153,11 +150,6 @@ export async function setupJobProcessor() {
       "hydrate:daily": {
         handler: async () => dailyJobs(true),
       },
-      "hydrate:organismes-referentiel": {
-        handler: async () => {
-          return hydrateFromReferentiel();
-        },
-      },
       "hydrate:formations-catalogue": {
         handler: async () => {
           return hydrateFormationsCatalogue();
@@ -216,8 +208,8 @@ export async function setupJobProcessor() {
         },
       },
       "hydrate:organismes": {
-        handler: async () => {
-          return hydrateOrganismesFromReferentiel();
+        handler: async (job) => {
+          return hydrateOrganismesFromApiAlternance(job.started_at ?? new Date());
         },
       },
       "hydrate:organismes-effectifs-count": {

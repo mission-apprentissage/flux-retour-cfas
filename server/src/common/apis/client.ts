@@ -1,10 +1,11 @@
 import http from "http";
 import https from "https";
 
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 import { setupCache } from "axios-cache-interceptor";
+import type { AxiosCacheInstance } from "axios-cache-interceptor";
 
-const getApiClient = (options) =>
+const getApiClient = (options: AxiosRequestConfig): AxiosCacheInstance =>
   setupCache(
     axios.create({
       timeout: 5000,

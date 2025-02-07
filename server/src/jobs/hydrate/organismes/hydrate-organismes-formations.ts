@@ -23,10 +23,6 @@ export const hydrateOrganismesFormations = async () => {
   while (await organismesCursor.hasNext()) {
     const organisme = (await organismesCursor.next()) as IOrganisme;
     const formations = await getFormationsBySIRET(organisme.siret);
-    logger.info(
-      { uai: organisme.uai, siret: organisme.siret, formations: formations.length },
-      "updating organisme related formations"
-    );
     try {
       await organismesDb().updateOne(
         { _id: organisme._id },
@@ -105,17 +101,6 @@ async function buildOrganismesListFromFormationCatalogue(
       },
       { projection: { _id: 1 } }
     );
-
-    if (!organisme) {
-      logger.warn(
-        {
-          uai: formationCatalogue.etablissement_gestionnaire_uai,
-          siret: formationCatalogue.etablissement_gestionnaire_siret,
-          cfd: formationCatalogue.cfd,
-        },
-        "organisme non trouvé pour la formation"
-      );
-    }
 
     organismesLinkedToFormation.push({
       ...(organisme ? { organisme_id: organisme._id } : {}),

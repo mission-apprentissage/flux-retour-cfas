@@ -5370,35 +5370,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-cache-interceptor@npm:^0.10.7":
-  version: 0.10.7
-  resolution: "axios-cache-interceptor@npm:0.10.7"
+"axios-cache-interceptor@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "axios-cache-interceptor@npm:1.6.2"
   dependencies:
-    cache-parser: ^1.2.4
-    fast-defer: ^1.1.7
-    object-code: ^1.2.4
-  checksum: e7927101875a1e642f5459410c1bafba1e7b9fe69c5e488ece50b6e542eae24f2de025718d47aa17e3d3b9f27951e609b4aed8c7fe21d530d0e45be0cd1a04fd
+    cache-parser: 1.2.5
+    fast-defer: 1.1.8
+    object-code: 1.3.3
+  peerDependencies:
+    axios: ^1
+  checksum: 5ee863e85565a766eda66cffc71d0de21515d3ea8ea66a1e22f5547522b6fcfa83221a44a8e13a5a34e1243f77695ea1beee68e6a00374a9a7b6d51458f2ae8c
   languageName: node
   linkType: hard
 
-"axios-retry@npm:3.3.1":
-  version: 3.3.1
-  resolution: "axios-retry@npm:3.3.1"
+"axios-retry@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "axios-retry@npm:4.5.0"
   dependencies:
-    "@babel/runtime": ^7.15.4
     is-retry-allowed: ^2.2.0
-  checksum: 125c75e08048a28de5d0dfa9de9a1924185d863a4323a71472646a1d5a326f727ff59e75e1b557220da1aad7cba01222c47c26194c5940f295378668dd3b9163
-  languageName: node
-  linkType: hard
-
-"axios@npm:0.28.1":
-  version: 0.28.1
-  resolution: "axios@npm:0.28.1"
-  dependencies:
-    follow-redirects: ^1.15.0
-    form-data: ^4.0.0
-    proxy-from-env: ^1.1.0
-  checksum: 5115a38d79064d07437c5a28f15841e3607634040e3120ec06a2c4367a7d07cf213b16496eab53b6f58ebc5fb377a440ba9ed4782529b14449a1e285734bfb54
+  peerDependencies:
+    axios: 0.x || 1.x
+  checksum: ec831e566ed3a55d3c3c927c1d42c52f2c2f1a8ea99ff8521d3675c6313f8c77f704c7186299fda08b7dc0f771a2c5471e72d279789d5aade65ec3755ab3a1ff
   languageName: node
   linkType: hard
 
@@ -5411,14 +5403,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.7":
-  version: 1.7.7
-  resolution: "axios@npm:1.7.7"
+"axios@npm:^1.7.9":
+  version: 1.7.9
+  resolution: "axios@npm:1.7.9"
   dependencies:
     follow-redirects: ^1.15.6
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: 882d4fe0ec694a07c7f5c1f68205eb6dc5a62aecdb632cc7a4a3d0985188ce3030e0b277e1a8260ac3f194d314ae342117660a151fabffdc5081ca0b5a8b47fe
+  checksum: cb8ce291818effda09240cb60f114d5625909b345e10f389a945320e06acf0bc949d0f8422d25720f5dd421362abee302c99f5e97edec4c156c8939814b23d19
   languageName: node
   linkType: hard
 
@@ -5722,10 +5714,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cache-parser@npm:^1.2.4":
-  version: 1.2.4
-  resolution: "cache-parser@npm:1.2.4"
-  checksum: de9fc4ab7af318109f1e53474e674d43997bc7b8676157e4f28e7dc60fda2f434ee138aa9d9abb9f849c55e73202ee74865afaa4e00298de70c4326510680c19
+"cache-parser@npm:1.2.5":
+  version: 1.2.5
+  resolution: "cache-parser@npm:1.2.5"
+  checksum: ac6a15462e474a84b8830795aa3d34b63f09a2ef8ec1a3831e7941a7a7aece964df881da275dfc1e8e1874a3a56efd944de0a6bcd371e409d545ca49fd04cdd7
   languageName: node
   linkType: hard
 
@@ -8546,10 +8538,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-defer@npm:^1.1.7":
-  version: 1.1.7
-  resolution: "fast-defer@npm:1.1.7"
-  checksum: c0f816fe3f83ca7e12c56a6631c6819a50349fb7e1931cec88e883168b523c65605e6e0df32c8fba6c341860c29ecc6fe2531ba8a418d27d31da6544ad1bf45b
+"fast-defer@npm:1.1.8":
+  version: 1.1.8
+  resolution: "fast-defer@npm:1.1.8"
+  checksum: 2fbdcf385929b53a2299c83cfb9c0ac4c0f0c4d1c268e791ed8a97dad9c25a7f459e1475e8270f268d29541be0a8b14a764d77f18cc7caea95c1863cf87c471b
   languageName: node
   linkType: hard
 
@@ -8821,7 +8813,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.15.0, follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.15.6":
   version: 1.15.9
   resolution: "follow-redirects@npm:1.15.9"
   peerDependenciesMeta:
@@ -13993,10 +13985,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-code@npm:^1.2.4":
-  version: 1.3.0
-  resolution: "object-code@npm:1.3.0"
-  checksum: bc5e3df85ac54785b3d1d9b8a9b2e168eb5f69e02be3c958fc05aebaa85ec659c55903852bf15ebf44e98053212f88eb7d3a9e28a50f10c4d60d820f80aa8d64
+"object-code@npm:1.3.3":
+  version: 1.3.3
+  resolution: "object-code@npm:1.3.3"
+  checksum: 5f5602040a9d0e0f5e60e37340a21d8ab3d41309c7b7f63eeccf4d385686d8e1b408090f2a35899a84d740fbf6e243599208349027060b71f9911099a47714f8
   languageName: node
   linkType: hard
 
@@ -16370,9 +16362,9 @@ __metadata:
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
     api-alternance-sdk: ^2.7.0
-    axios: 0.28.1
-    axios-cache-interceptor: ^0.10.7
-    axios-retry: 3.3.1
+    axios: ^1.7.9
+    axios-cache-interceptor: ^1.6.2
+    axios-retry: ^4.5.0
     axiosist: 0.10.0
     body-parser: ^1.20.3
     boom: 7.3.0
@@ -17952,7 +17944,7 @@ __metadata:
     "@types/node": ^22.7.5
     "@types/react": ^18.3.11
     "@types/react-dom": ^18.3.1
-    axios: ^1.7.7
+    axios: ^1.7.9
     case-sensitive-paths-webpack-plugin: 2.4.0
     chakra-ui-markdown-renderer: 4.1.0
     chart.js: ^4.4.5

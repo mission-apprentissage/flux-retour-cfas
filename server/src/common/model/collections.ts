@@ -19,9 +19,6 @@ import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
-import OrganismesReferentielModelDescriptor, {
-  IOrganismeReferentiel,
-} from "shared/models/data/organismesReferentiel.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
@@ -48,7 +45,6 @@ export const modelDescriptors = [
   invitationsModelDescriptor,
   organisationsModelDescriptor,
   OrganismesModelDescriptor,
-  OrganismesReferentielModelDescriptor,
   effectifsModelDescriptor,
   effectifsQueueModelDescriptor,
   rncpModelDescriptor,
@@ -76,8 +72,6 @@ export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModel
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
-export const organismesReferentielDb = () =>
-  getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
