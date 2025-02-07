@@ -7,12 +7,16 @@ import { IPaginationFilters, paginationFiltersSchema } from "shared/models/route
 import { z } from "zod";
 
 import { _get } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Accordion from "@/components/Accordion/Accordion";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import withAuth from "@/components/withAuth";
 import ApprenantsTable from "@/modules/mon-espace/apprenants/apprenantsTable/ApprenantsTable";
+
+export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const DEFAULT_PAGINATION: IPaginationFilters = {
   page: 0,
@@ -148,7 +152,7 @@ function EffectifsPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les <strong>{apprenants?.pagination.total}</strong> jeunes (identifiés comme inscrit
+            Retrouvez ci-dessous les <strong>{apprenants?.totalApprenants}</strong> jeunes (identifiés comme inscrit
             sans contrat, en rupture de contrat ou en abandon/sortie d’apprentissage) et leurs coordonnées, susceptibles
             d&apos;être intéressés par une mise en relation et accompagnement avec une Mission Locale. Cliquez sur
             chaque jeune pour plus d’informations sur son parcours.
@@ -273,4 +277,4 @@ function EffectifsPage() {
   );
 }
 
-export default EffectifsPage;
+export default withAuth(EffectifsPage, ["MISSION_LOCALE"]);

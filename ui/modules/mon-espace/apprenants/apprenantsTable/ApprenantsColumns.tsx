@@ -101,7 +101,7 @@ const apprenantsTableColumnsDefs = (
         />
       );
     },
-    size: 300,
+    size: 200,
   },
 ];
 

@@ -152,6 +152,7 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
               value={formState.statut_reel}
             >
               <option value={STATUT_JEUNE_MISSION_LOCALE.CONTRAT_SIGNE_NON_DEMARRE}>Contrat signé non démarré</option>
+              <option value={STATUT_JEUNE_MISSION_LOCALE.CONTRAT_EN_COURS}>Actuellement sous contrat</option>
               <option value={STATUT_JEUNE_MISSION_LOCALE.RETOUR_EN_VOIE_SCOLAIRE}>
                 Retour en voie scolaire initiale
               </option>

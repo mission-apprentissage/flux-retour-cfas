@@ -27,8 +27,8 @@ export default () => {
       await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
     ).map((e) => stripNullProperties(e));
     const isV3 = originalUrl.includes("/v3");
-    const v2Schema = dossierApprenantSchemaV1V2();
-    const v3Schema = dossierApprenantSchemaV3Input();
+    const v2Schema = dossierApprenantSchemaV1V2;
+    const v3Schema = dossierApprenantSchemaV3Input;
     const validationSchema = isV3 ? v3Schema : v2Schema;
 
     const source = user.source;

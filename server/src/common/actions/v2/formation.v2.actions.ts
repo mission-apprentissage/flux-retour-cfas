@@ -3,8 +3,8 @@ import { ObjectId } from "mongodb";
 import { formationV2Db } from "@/common/model/collections";
 
 export const getOrCreateFormationV2 = async (
-  cfd: string,
-  rncp: string,
+  cfd: string | null,
+  rncp: string | null,
   organisme_responsable_id: ObjectId,
   organisme_formateur_id: ObjectId
 ) => {
@@ -19,23 +19,23 @@ export const getOrCreateFormationV2 = async (
 };
 
 const getFormationV2 = async (
-  cfd: string,
-  rncp: string,
+  cfd: string | null,
+  rncp: string | null,
   organisme_responsable_id: ObjectId,
   organisme_formateur_id: ObjectId
 ) => {
   // CFD & RNCP --> tjr en uppercase
   return formationV2Db().findOne({
-    cfd: cfd.replace(/\s/g, "").toLowerCase(),
-    rncp: rncp.replace(/\s/g, "").toLowerCase(),
+    cfd: cfd?.replace(/\s/g, "").toLowerCase() ?? null,
+    rncp: rncp?.replace(/\s/g, "").toLowerCase() ?? null,
     organisme_responsable_id,
     organisme_formateur_id,
   });
 };
 
 const insertFormationV2 = async (
-  cfd: string,
-  rncp: string,
+  cfd: string | null,
+  rncp: string | null,
   organisme_responsable_id: ObjectId,
   organisme_formateur_id: ObjectId
 ) => {
@@ -44,8 +44,8 @@ const insertFormationV2 = async (
     draft: true,
     created_at: new Date(),
     updated_at: new Date(),
-    cfd: cfd.replace(/\s/g, "").toLowerCase(),
-    rncp: rncp.replace(/\s/g, "").toLowerCase(),
+    cfd: cfd?.replace(/\s/g, "").toLowerCase() ?? null,
+    rncp: rncp?.replace(/\s/g, "").toLowerCase() ?? null,
     organisme_responsable_id,
     organisme_formateur_id,
   });

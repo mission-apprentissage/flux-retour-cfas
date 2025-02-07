@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
+  checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: .bin/commands.sh
   checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
 - filename: .bin/scripts/get-vault-password-client.sh
@@ -21,8 +23,6 @@ fileignoreconfig:
   checksum: 206a5da7f948759335ac5d4ffe6e9eb45d00b8c142bc984cddbc10ccb7f6282b
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
-- filename: shared/models/data/organismes.model.ts
-  checksum: 73cad26062ec79a4780e644efc62e919b9d5d9064cbae6fc4d1f3b2d58e699d9
 - filename: shared/models/fixtures/formationsCatalogue.fixture.ts
   checksum: 71544c620f9bdcfb56007be090ebfeabb1f7660116355244d6dd097d383f5dd3
 - filename: ui/common/utils/televersement.ts

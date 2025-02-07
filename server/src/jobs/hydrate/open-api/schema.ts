@@ -6,7 +6,7 @@ import { z } from "zod";
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 
-const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
+const dossierApprenantSchemaWithErrors = dossierApprenantSchema.extend({
   validation_errors: z
     .array(
       z.object({
@@ -25,7 +25,7 @@ const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
     .openapi({ description: "Erreurs de validation de cet effectif" }),
 });
 
-const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base().extend({
+const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base.extend({
   validation_errors: z
     .array(
       z.object({
@@ -142,7 +142,7 @@ const dossierApprenantPostRoute: Omit<RouteConfig, "path"> = {
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchema()),
+          schema: z.array(dossierApprenantSchema),
         },
       },
     },
@@ -188,7 +188,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchemaV3Base().omit({ has_nir: true })),
+          schema: z.array(dossierApprenantSchemaV3Base.omit({ has_nir: true })),
         },
       },
     },
