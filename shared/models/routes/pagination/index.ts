@@ -2,6 +2,8 @@ import { z, ZodRawShape } from "zod";
 
 export const paginationFiltersSchema = {
   page: z.coerce.number().int().nonnegative().optional(),
+  lastPage: z.coerce.number().int().nonnegative().optional(),
+  total: z.coerce.number().int().nonnegative().optional(),
   limit: z.coerce.number().int().nonnegative().optional(),
   sort: z.string().optional(),
   order: z.enum(["asc", "desc"]).optional(),

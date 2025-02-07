@@ -51,7 +51,7 @@ export const zContrat = zodOpenApi.object({
     .openapi({ example: 10 })
     .nullish(),
   adresse: zAdresse.nullish(),
-  date_debut: zodOpenApi.date({ description: "Date de début du contrat" }),
+  date_debut: zodOpenApi.date({ description: "Date de début du contrat" }).nullish(),
   date_fin: zodOpenApi.date({ description: "Date de fin du contrat" }).nullish(),
   date_rupture: zodOpenApi.date({ description: "Date de rupture du contrat" }).nullish(),
   cause_rupture: zodOpenApi.string({ description: "Cause de rupture du contrat" }).nullish(),
