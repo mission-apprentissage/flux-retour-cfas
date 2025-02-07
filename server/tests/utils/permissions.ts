@@ -231,12 +231,16 @@ export const organismesByLabel = {
       {
         _id: new ObjectId(id(2)),
         responsabilitePartielle: false,
+        siret: profilsPermissionByLabel["OF formateur"].siret,
+        uai: profilsPermissionByLabel["OF formateur"].uai,
       },
     ] satisfies IOrganisme["organismesFormateurs"],
     organismesResponsables: [
       {
         _id: new ObjectId(id(3)),
         responsabilitePartielle: false,
+        uai: profilsPermissionByLabel["OF responsable"].uai,
+        siret: profilsPermissionByLabel["OF responsable"].siret,
       },
     ] satisfies IOrganisme["organismesResponsables"],
   },
@@ -249,6 +253,8 @@ export const organismesByLabel = {
       {
         _id: new ObjectId(id(1)),
         responsabilitePartielle: false,
+        uai: profilsPermissionByLabel["OF cible"].uai,
+        siret: profilsPermissionByLabel["OF cible"].siret,
       },
     ] satisfies IOrganisme["organismesResponsables"],
   },
@@ -261,6 +267,8 @@ export const organismesByLabel = {
       {
         _id: new ObjectId(id(1)),
         responsabilitePartielle: false,
+        uai: profilsPermissionByLabel["OF cible"].uai,
+        siret: profilsPermissionByLabel["OF cible"].siret,
       },
     ] satisfies IOrganisme["organismesFormateurs"],
   },
