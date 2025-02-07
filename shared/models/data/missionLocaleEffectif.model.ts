@@ -26,6 +26,7 @@ export enum SITUATION_LABEL_ENUM {
 
 export enum STATUT_JEUNE_MISSION_LOCALE {
   CONTRAT_SIGNE_NON_DEMARRE = "CONTRAT_SIGNE_NON_DEMARRE",
+  CONTRAT_EN_COURS = "CONTRAT_EN_COURS",
   RETOUR_EN_VOIE_SCOLAIRE = "RETOUR_EN_VOIE_SCOLAIRE",
   ABANDON = "ABANDON",
   RUPTURE = "RUPTURE",
@@ -45,7 +46,7 @@ const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
-  situation: zSituationEnum.optional(),
+  situation: zSituationEnum.nullish(),
   situation_updated_at: z.date().optional(),
   statut_correct: z.boolean().optional(),
   statut_reel: z.nativeEnum(STATUT_JEUNE_MISSION_LOCALE).nullish(),

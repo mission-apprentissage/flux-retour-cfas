@@ -914,8 +914,8 @@ function getOrganismeListProjection(
 export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const uais = new Set<string>();
   for (const dossier of data) {
-    if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
-    if (dossier.etablissement_responsable_uai) uais.add(dossier.etablissement_responsable_uai);
+    if (typeof dossier.etablissement_formateur_uai === "string") uais.add(dossier.etablissement_formateur_uai);
+    if (typeof dossier.etablissement_responsable_uai === "string") uais.add(dossier.etablissement_responsable_uai);
   }
   const invalidsUais: string[] = [];
   for (const uai of uais) {
@@ -930,8 +930,9 @@ export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectif
 export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const sirets = new Set<string>();
   for (const dossier of data) {
-    if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);
-    if (dossier.etablissement_responsable_siret) sirets.add(dossier.etablissement_responsable_siret);
+    if (typeof dossier.etablissement_formateur_siret === "string") sirets.add(dossier.etablissement_formateur_siret);
+    if (typeof dossier.etablissement_responsable_siret === "string")
+      sirets.add(dossier.etablissement_responsable_siret);
   }
   const invalidsSirets: string[] = [];
   for (const siret of sirets) {
