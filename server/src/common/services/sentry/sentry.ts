@@ -32,7 +32,7 @@ function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions 
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,
     release: config.version,
-    enabled: true, // config.env !== "local" && config.env !== "test",
+    enabled: config.env !== "local" && config.env !== "test",
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),
