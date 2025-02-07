@@ -144,10 +144,10 @@ function NavBarMissionLocale(): React.ReactElement {
       <NavItem to="/" exactMatch>
         Mon tableau de bord
       </NavItem>
-      <NavItem to="/apprenants" exactMatch>
+      <NavItem to="/mission-locale/apprenants" exactMatch>
         Apprenants
       </NavItem>
-      <NavItem to="/cfa" exactMatch isDisabled>
+      <NavItem to="/mission-locale/cfa" exactMatch>
         CFA
       </NavItem>
       <MenuQuestions />
