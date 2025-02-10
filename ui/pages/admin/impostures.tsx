@@ -9,6 +9,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
 import SearchBySIRETForm from "@/modules/auth/inscription/components/SearchBySIRETForm";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
+import { InscriptionMissionLocale } from "@/modules/auth/inscription/InscriptionMissionLocale";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import { ExternalLinkLine } from "@/theme/components/icons";
@@ -61,13 +62,17 @@ function ImposturesPage() {
             href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
             color="action-high-blue-france"
             isExternal
-            borderBottom="1px"
+            isUnderlined
           >
             référentiel
             <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />
           </Link>
           .
           <SearchBySIRETForm organisation={organisation} setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            Mission Locale
+          </Heading>
+          <InscriptionMissionLocale setOrganisation={setOrganisation} />
         </Box>
       </Container>
     </SimplePage>

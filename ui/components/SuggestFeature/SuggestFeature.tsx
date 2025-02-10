@@ -1,7 +1,5 @@
-import { Box, Container, Image, Text } from "@chakra-ui/react";
+import { Box, Container, Image, Text, Link } from "@chakra-ui/react";
 import { AUTRE_AMELIORATION_ELEMENT_LINK } from "shared";
-
-import Link from "@/components/Links/Link";
 
 const SuggestFeature = () => {
   return (
@@ -30,8 +28,6 @@ const SuggestFeature = () => {
           display="inline-flex"
           alignItems="center"
           href={AUTRE_AMELIORATION_ELEMENT_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
           isExternal
         >
           <Box as="i" className="ri-send-plane-fill" verticalAlign="middle" marginRight="1w" />

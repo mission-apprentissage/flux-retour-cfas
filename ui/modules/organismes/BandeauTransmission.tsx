@@ -54,7 +54,7 @@ function getContenuBandeauTransmission({
         {modeIndicateurs ? "Les indicateurs sont nuls, car les " : "Les "}
         effectifs ne sont pas encore transmis. Votre CFA ou les organismes dont vous avez la gestion peuvent transmettre
         les effectifs. Si vous souhaitez démarrer le partage, cliquez sur “
-        <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
+        <Link href="/parametres" isUnderlined>
           paramétrer
         </Link>
         ” et laissez-vous guider. Le couple UAI/SIRET de chaque établissement doit être bien renseigné pour éviter les
@@ -79,7 +79,7 @@ function getContenuBandeauTransmission({
         Votre outil de gestion est {erpName}. Le tableau de bord ne reçoit pas vos effectifs. Veuillez vérifier à
         nouveau le paramétrage de votre ERP fait le{" "}
         {formatDateDayMonthYear(organisme.mode_de_transmission_configuration_date as string)}. En cas de difficultés,{" "}
-        <Link variant="link" color="inherit" href={TRANSMISSION_DONNEES_GROUP} isExternal>
+        <Link variant="link" color="inherit" href={TRANSMISSION_DONNEES_GROUP} isExternal isUnderlined>
           contactez-nous
         </Link>{" "}
         pour obtenir de l’aide.

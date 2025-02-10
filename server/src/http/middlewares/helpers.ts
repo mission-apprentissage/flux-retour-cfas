@@ -1,11 +1,11 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
+import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme, zOrganisationMissionLocale } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
-import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -38,6 +38,19 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   if (req.user.organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès non autorisé");
   }
+  next();
+}
+
+export async function requireMissionLocale(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+  if (user.organisation.type !== "MISSION_LOCALE") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = await zOrganisationMissionLocale.parse(user.organisation);
+
+  res.locals.missionLocale = orga;
   next();
 }
 

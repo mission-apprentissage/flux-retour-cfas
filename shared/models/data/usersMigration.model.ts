@@ -1,4 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { Jsonify } from "type-fest";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
@@ -11,7 +12,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisation_id: 1 }, {}],
 ];
 
-const zUsersMigration = z.object({
+export const zUsersMigration = z.object({
   _id: zObjectId,
   email: z.string().describe("Email utilisateur"),
   password: z.string().describe("Le mot de passe hashé"),
@@ -68,5 +69,6 @@ const zUsersMigration = z.object({
 });
 
 export type IUsersMigration = z.output<typeof zUsersMigration>;
+export type IUsersMigrationJson = Jsonify<IUsersMigration>;
 
 export default { zod: zUsersMigration, indexes, collectionName };

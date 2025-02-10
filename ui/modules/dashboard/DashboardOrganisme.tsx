@@ -140,53 +140,55 @@ const FiabilisationInfo = () => {
 };
 const natureOrganismeDeFormationTooltip = {
   responsable: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organismes responsables
+    <Box>
+      <Text>
+        <strong>Organisme responsable</strong>
       </Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
-        </ListItem>
-        <ListItem>Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
-        <ListItem>
-          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l’UFA.
-        </ListItem>
-      </UnorderedList>
-    </>
+      <Text mt="2w">
+        Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations. </Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
   formateur: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organisme formateur
-      </Text>
+    <Box>
       <Text>
-        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-        d’activité (NDA))
+        <strong>Organisme formateur</strong>
       </Text>
-    </>
+      <Text mt="2w">
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA)).
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations.</Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
   responsable_formateur: (
-    <>
-      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
-        Organismes responsables et formateurs
+    <Box>
+      <Text>
+        <strong>Organisme responsable et formateur</strong>
       </Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA)).
-        </ListItem>
-        <ListItem>Est signataire de la convention de formation.</ListItem>
-        <ListItem>Demande et reçoit les financements de l’OPCO.</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
-        <ListItem>
-          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l’UFA.
-        </ListItem>
-      </UnorderedList>
-    </>
+      <Text mt="2w">
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA)).
+      </Text>
+      <Text mt="2w">Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Demande et reçoit les financements de l’OPCO.</Text>
+      <Text mt="2w">Est responsable auprès de l’administration du respect de ses missions et obligations.</Text>
+      <Text mt="2w">
+        Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au sein
+        de l’UFA.
+      </Text>
+    </Box>
   ),
 };
 
@@ -323,7 +325,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
               <Heading textStyle="h2" color="grey.800" size="md">
                 <DashboardWelcome mr="2" />
-                Bienvenue sur{" "}
+                Vous êtes sur{" "}
                 {modePublique
                   ? "le tableau de bord de"
                   : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
@@ -548,35 +550,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   Liste Publique des Organismes de Formations
                                 </Link>
                                 . Si cette information est erronée, merci de leur signaler.
-                              </Box>
-                            )}
-                          />
-                        )}
-                      />
-                      <Text>Prépa-apprentissage&nbsp;:</Text>
-                      <Tag
-                        primaryText={organisme.prepa_apprentissage ? "Oui" : "Non"}
-                        variant="badge"
-                        colorScheme="grey_tag"
-                        size="lg"
-                        fontSize="epsilon"
-                        borderRadius="0"
-                        rightIcon={() => (
-                          <InfoTooltip
-                            contentComponent={() => (
-                              <Box>
-                                La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
-                                d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                                bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et
-                                que votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
-                                <Link
-                                  isExternal
-                                  href="mailto:tableau-de-bord@apprentissage.gouv.fr"
-                                  textDecoration="underline"
-                                  display="inline"
-                                >
-                                  tableau-de-bord@apprentissage.gouv.fr
-                                </Link>
                               </Box>
                             )}
                           />
@@ -1061,6 +1034,8 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
     case "CARIF_OREF_NATIONAL":
       return false;
     case "ADMINISTRATEUR":
+      return false;
+    default:
       return false;
   }
 }

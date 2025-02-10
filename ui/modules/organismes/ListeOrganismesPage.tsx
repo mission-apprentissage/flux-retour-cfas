@@ -23,7 +23,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import TextHighlight from "@/components/Text/Highlight";
 import { useOrganismesFiltered, useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import { BonusAvatar, ExternalLinkLine } from "@/theme/components/icons";
+import { BonusAvatar } from "@/theme/components/icons";
 
 import { IndicateursOrganisme, IndicateursOrganisationsOrganismes } from "../dashboard/IndicateursOrganisme";
 
@@ -66,14 +66,23 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </Text>
         <Text fontStyle="italic" mb={8}>
           Sources :{" "}
-          <Link href="https://catalogue-apprentissage.intercariforef.org/" isExternal color="action-high-blue-france">
+          <Link
+            href="https://catalogue-apprentissage.intercariforef.org/"
+            isExternal
+            isUnderlined
+            color="action-high-blue-france"
+          >
             Catalogue des offres de formations en apprentissage
-            <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} mr={1} />
           </Link>{" "}
           et{" "}
-          <Link href="https://referentiel.apprentissage.onisep.fr/" isExternal color="action-high-blue-france" ml={1}>
+          <Link
+            href="https://referentiel.apprentissage.onisep.fr/"
+            isExternal
+            isUnderlined
+            color="action-high-blue-france"
+            ml={1}
+          >
             Référentiel UAI-SIRET des OFA-CFA
-            <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
           </Link>
         </Text>
         {organisationType === "ORGANISME_FORMATION" && (
@@ -126,13 +135,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <Text>
                     Si l&apos;UAI est répertoriée comme &quot;Non déterminée&quot; alors que l&apos;organisme en possède
                     une, il doit la communiquer en écrivant à{" "}
-                    <Link
-                      href={`mailto:referentiel-uai-siret@onisep.fr`}
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href={`mailto:referentiel-uai-siret@onisep.fr`} isExternal isUnderlined whiteSpace="nowrap">
                       referentiel-uai-siret@onisep.fr
                     </Link>{" "}
                     avec la fiche descriptive UAI, pour mise à jour. L&apos;absence de ce numéro bloque
@@ -164,9 +167,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     s&apos;adresser auprès de son{" "}
                     <Link
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       Carif-Oref régional
@@ -174,9 +176,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     pour référencer ses offres et obtenir un ID formation, que l&apos;on retrouve notamment dans le{" "}
                     <Link
                       href="https://catalogue-apprentissage.intercariforef.org/recherche/etablissements"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       Catalogue des offres de formations en apprentissage
@@ -201,13 +202,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <Text>
                     Cette information est tirée de la base INSEE. Un établissement est affiché &quot;Fermé&quot; suite à
                     une cessation d&apos;activité ou un déménagement. Si un changement d&apos;adresse a été déclaré (via
-                    <Link
-                      href="https://procedures.inpi.fr/?/"
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href="https://procedures.inpi.fr/?/" isExternal isUnderlined whiteSpace="nowrap">
                       Guichet unique des entreprises
                     </Link>
                     ), un nouveau Siret a été délivré par l&apos;INSEE. L&apos;ancien Siret est alors fermé.
@@ -234,9 +229,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       et le mettre à jour sur{" "}
                       <Link
                         href="https://info.monactiviteformation.emploi.gouv.fr/"
-                        target="_blank"
-                        textDecoration="underline"
                         isExternal
+                        isUnderlined
                         whiteSpace="nowrap"
                       >
                         Mon Activité Formation
@@ -259,9 +253,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     situation par mail :
                     <Link
                       href={`mailto:pole-apprentissage@intercariforef.org`}
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       pole-apprentissage@intercariforef.org
@@ -302,9 +295,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       soit il n’est pas référencé sur le{" "}
                       <Link
                         href="https://referentiel.apprentissage.onisep.fr/"
-                        target="_blank"
-                        textDecoration="underline"
                         isExternal
+                        isUnderlined
                         whiteSpace="nowrap"
                       >
                         Référentiel UAI-SIRET des OFA-CFA
@@ -315,9 +307,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       n’indiquent pas le bon établissement responsable sur le{" "}
                       <Link
                         href="https://catalogue-apprentissage.intercariforef.org/"
-                        target="_blank"
-                        textDecoration="underline"
                         isExternal
+                        isUnderlined
                         whiteSpace="nowrap"
                       >
                         Catalogue des offres de formations en apprentissage
@@ -331,9 +322,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                         référencer via son compte{" "}
                         <Link
                           href="https://info.monactiviteformation.emploi.gouv.fr/"
-                          target="_blank"
-                          textDecoration="underline"
                           isExternal
+                          isUnderlined
                           whiteSpace="nowrap"
                         >
                           MAF
@@ -351,9 +341,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                         sur votre
                         <Link
                           href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                          target="_blank"
-                          textDecoration="underline"
                           isExternal
+                          isUnderlined
                           whiteSpace="nowrap"
                         >
                           plateforme Carif Oref
@@ -384,13 +373,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   </p>
                   <p>
                     Si la liste des organismes de votre réseau ci-dessus est incomplète ou erronée ,{" "}
-                    <Link
-                      href={SUPPORT_PAGE_ACCUEIL}
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href={SUPPORT_PAGE_ACCUEIL} isExternal isUnderlined whiteSpace="nowrap">
                       contactez-nous
                     </Link>{" "}
                     en indiquant la liste des établissements à rattacher à votre réseau, et en précisant pour chacun sa
@@ -413,13 +396,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <p>
                     Si l&apos;UAI est répertoriée comme « Non déterminée » alors que l’organisme en possède une, il doit
                     la communiquer en écrivant à{" "}
-                    <Link
-                      href="mailto:referentiel-uai-siret@onisep.fr"
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href="mailto:referentiel-uai-siret@onisep.fr" isExternal isUnderlined whiteSpace="nowrap">
                       referentiel-uai-siret@onisep.fr
                     </Link>{" "}
                     avec la fiche descriptive UAI, pour mise à jour. L&apos;absence de ce numéro bloque
@@ -446,9 +423,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     son{" "}
                     <Link
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       Carif-Oref régional
@@ -456,9 +432,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     pour référencer ses offres et obtenir un ID formation, que l’on retrouve notamment dans le
                     <Link
                       href="https://catalogue-apprentissage.intercariforef.org/"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       {" "}
@@ -515,9 +490,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       et le mettre à jour sur{" "}
                       <Link
                         href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https://www.monactiviteformation.emploi.gouv.fr/mon-activite-formation/"
-                        target="_blank"
-                        textDecoration="underline"
                         isExternal
+                        isUnderlined
                         whiteSpace="nowrap"
                       >
                         Mon Activité Formation
@@ -553,13 +527,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <p>
                     Si l&apos;UAI est répertoriée comme « Non déterminée » alors que l’organisme en possède une, il doit
                     la communiquer en écrivant à{" "}
-                    <Link
-                      href="mailto:referentiel-uai-siret@onisep.fr"
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href="mailto:referentiel-uai-siret@onisep.fr" isExternal isUnderlined whiteSpace="nowrap">
                       referentiel-uai-siret@onisep.fr
                     </Link>{" "}
                     avec la fiche descriptive UAI, pour mise à jour. L&apos;absence de ce numéro bloque
@@ -578,9 +546,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     son{" "}
                     <Link
                       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       Carif-Oref régional
@@ -588,9 +555,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     pour référencer ses offres et obtenir un ID formation, que l’on retrouve notamment dans le
                     <Link
                       href="https://catalogue-apprentissage.intercariforef.org/"
-                      target="_blank"
-                      textDecoration="underline"
                       isExternal
+                      isUnderlined
                       whiteSpace="nowrap"
                     >
                       {" "}
@@ -609,13 +575,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <p>
                     Cette information est tirée de la base INSEE. Un établissement est affiché &quot;Fermé&quot; suite à
                     une cessation d&apos;activité ou un déménagement. Si un changement d&apos;adresse a été déclaré (via
-                    <Link
-                      href="https://procedures.inpi.fr/?/"
-                      target="_blank"
-                      textDecoration="underline"
-                      isExternal
-                      whiteSpace="nowrap"
-                    >
+                    <Link href="https://procedures.inpi.fr/?/" isExternal isUnderlined whiteSpace="nowrap">
                       Guichet unique des entreprises
                     </Link>
                     ), un nouveau Siret a été délivré par l’INSEE. L&apos;ancien Siret est alors fermé.
@@ -642,9 +602,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                       et le mettre à jour sur{" "}
                       <Link
                         href="https://mesdemarches.emploi.gouv.fr/identification/login?TARGET=https://www.monactiviteformation.emploi.gouv.fr/mon-activite-formation/"
-                        target="_blank"
-                        textDecoration="underline"
                         isExternal
+                        isUnderlined
                         whiteSpace="nowrap"
                       >
                         Mon Activité Formation
@@ -671,19 +630,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     Vous ne trouvez pas la réponse à vos questions ?
                   </Text>
                   <Flex gap={6}>
-                    <Link variant="link" display="inline-flex" href={CRISP_FAQ} isExternal width={"fit-content"}>
+                    <Link display="inline-flex" href={CRISP_FAQ} isExternal isUnderlined width={"fit-content"}>
                       Aide
-                      <Box className="ri-arrow-right-line" />
                     </Link>
-                    <Link
-                      variant="link"
-                      display="inline-flex"
-                      href="/referencement-organisme"
-                      isExternal
-                      width={"fit-content"}
-                    >
+                    <Link display="inline-flex" href="/referencement-organisme" isUnderlined width={"fit-content"}>
                       Voir la page de référencement
-                      <Box className="ri-arrow-right-line" />
+                      <Box className="ri-arrow-right-line" ml={1} />
                     </Link>
                   </Flex>
                 </Flex>
@@ -707,6 +659,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                     target="_blank"
                     textDecoration="underline"
                     isExternal
+                    isUnderlined
                     whiteSpace="nowrap"
                   >
                     Contactez-nous

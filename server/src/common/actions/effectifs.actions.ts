@@ -2,9 +2,10 @@ import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, type WithoutId } from "mongodb";
-import { IOpcos, IRncp } from "shared/models";
+import { IEffecifMissionLocale, IOpcos, IOrganisation, IRncp, IUsersMigration } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
@@ -23,7 +24,10 @@ import { generateOrganismeComputed } from "./organismes/organismes.actions";
  * Dans le cas d'un effectif téléversé, on ne veut pas verrouiller les champs, même ceux dits "par défaut" (nom, prénom, etc.)
  * Voir aussi la méthode lockEffectif
  */
-export const mergeEffectifWithDefaults = <T extends Partial<IEffectif>>(effectifData: T, lockData: boolean = true) => {
+export const mergeEffectifWithDefaults = (
+  effectifData: Omit<IEffectif, "_id" | "_computed" | "organisme_id">,
+  lockData: boolean = true
+): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   const defaultValues = defaultValuesEffectif();
   // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
@@ -127,7 +131,7 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>({
+export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({
   organisme,
   effectif,
   certification,
@@ -161,7 +165,7 @@ export const addComputedFields = async <T extends IEffectif | WithoutId<IEffecti
   return computedFields;
 };
 
-export const withComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>(
+export const withComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>(
   effectif: T,
   {
     organisme,
@@ -374,6 +378,21 @@ function buildEffectifResult(effectif) {
           customizerPath
         ),
       },
+      adresse_naissance: {
+        ...mergeWith(
+          mergeWith(
+            mergeWith(
+              cloneDeep(effectifSchema.apprenant.properties.adresse_naissance.properties),
+              effectif.apprenant.adresse_naissance,
+              customizer
+            ),
+            effectif.is_lock.apprenant.adresse_naissance,
+            customizerLock
+          ),
+          paths.apprenant.adresse_naissance,
+          customizerPath
+        ),
+      },
       representant_legal: {
         ...mergeWith(
           mergeWith(
@@ -465,4 +484,61 @@ export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) 
       }
     )
   );
+};
+
+export const buildEffectifForMissionLocale = (
+  effectif: IEffectif & { organisation: IOrganisation } & { organisme: IOrganisme } & {
+    cfa_users: Array<IUsersMigration>;
+  } & {
+    a_risque: boolean;
+  } & {
+    ml_effectif: IMissionLocaleEffectif;
+  }
+): IEffecifMissionLocale => {
+  const usersCfa = effectif.cfa_users.map(({ nom, prenom, email, telephone, fonction }) => ({
+    nom,
+    prenom,
+    email,
+    telephone,
+    fonction,
+  }));
+
+  const result = {
+    id: effectif._id,
+    apprenant: {
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      date_de_naissance: effectif.apprenant.date_de_naissance,
+      adresse: effectif.apprenant.adresse,
+      telephone: effectif.apprenant.telephone,
+      courriel: effectif.apprenant.courriel,
+      rqth: effectif.apprenant.rqth,
+      sexe: effectif.apprenant.sexe,
+      representant_legal: effectif.apprenant.representant_legal,
+    },
+    situation_data: {
+      situation: effectif.ml_effectif?.situation,
+      situation_updated_at: effectif.ml_effectif?.situation_updated_at,
+      statut_correct: effectif.ml_effectif?.statut_correct,
+      statut_reel: effectif.ml_effectif?.statut_reel,
+      statut_reel_text: effectif.ml_effectif?.statut_reel_text,
+      inscrit_france_travail: effectif.ml_effectif?.inscrit_france_travail,
+      commentaires: effectif.ml_effectif?.commentaires,
+    },
+    statut: effectif._computed?.statut,
+    formation: effectif.formation,
+    organisme: {
+      nom: effectif.organisme.nom,
+      raison_sociale: effectif.organisme.raison_sociale,
+      adresse: effectif.organisme.adresse,
+      contacts_from_referentiel: effectif.organisme.contacts_from_referentiel,
+    },
+    users: usersCfa,
+    organisme_id: effectif.organisme_id,
+    annee_scolaire: effectif.annee_scolaire,
+    source: effectif.source,
+    a_risque: effectif.a_risque,
+    transmitted_at: effectif.transmitted_at,
+  };
+  return result as IEffecifMissionLocale;
 };

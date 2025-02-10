@@ -1,8 +1,8 @@
 import { captureException } from "@sentry/node";
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
 import Boom from "boom";
-import { ObjectId } from "bson";
 import type { IOrganisme } from "shared/models";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { describe, it, vi, beforeEach, expect } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -249,57 +249,48 @@ describe("updateOrganismesFiabilisationStatut", () => {
   const siret2 = "77562556900014";
   const uai2 = "8844672E";
 
-  const organisme1_0: IOrganisme = {
-    _id: new ObjectId(),
+  const siret3 = "13002975400020";
+  const uai3 = "0597114M";
+
+  const organisme1_0: IOrganisme = generateOrganismeFixture({
     uai: uai1,
     siret: siret1_0,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "FIABLE",
-  };
+    est_dans_le_referentiel: "absent",
+  });
 
-  const organisme1_1: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme1_1: IOrganisme = generateOrganismeFixture({
     uai: uai1,
     siret: siret1_1,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "NON_FIABLE",
-  };
+    est_dans_le_referentiel: "absent",
+  });
 
-  const organisme2: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme2: IOrganisme = generateOrganismeFixture({
     uai: uai2,
     siret: siret2,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "NON_FIABLE",
-  };
+    est_dans_le_referentiel: "absent",
+  });
 
-  const organisme3: IOrganisme = {
-    _id: new ObjectId(),
+  const organisme3: IOrganisme = generateOrganismeFixture({
     uai: uai2,
     siret: siret1_0,
     nature: "responsable",
-    relatedFormations: [],
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at: new Date(),
-    updated_at: new Date(),
     fiabilisation_statut: "FIABLE",
-  };
+    est_dans_le_referentiel: "absent",
+  });
+
+  const organisme4: IOrganisme = generateOrganismeFixture({
+    uai: uai3,
+    siret: siret3,
+    nature: "responsable",
+    fiabilisation_statut: "FIABLE",
+    est_dans_le_referentiel: "present",
+  });
 
   const response1_0: IRechercheOrganismeResponse = {
     metadata: {
@@ -350,14 +341,14 @@ describe("updateOrganismesFiabilisationStatut", () => {
   };
 
   beforeEach(async () => {
-    await organismesDb().insertMany([organisme1_0, organisme1_1, organisme2, organisme3]);
+    await organismesDb().insertMany([organisme1_0, organisme1_1, organisme2, organisme3, organisme4]);
 
     return () => {
       return organismesDb().deleteMany({});
     };
   });
 
-  it("should update organismes fiabilisation statut", async () => {
+  it("should update organismes fiabilisation statut only on organisme not in referentiel", async () => {
     vi.mocked(apiAlternanceClient.organisme.recherche).mockImplementation(async ({ siret, uai }) => {
       if (organisme1_0.siret === siret && organisme1_0.uai === uai) {
         return response1_0;
@@ -378,13 +369,10 @@ describe("updateOrganismesFiabilisationStatut", () => {
     expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledTimes(4);
     const updatedOrganisme1_0 = await organismesDb().findOne({ _id: organisme1_0._id });
     expect(updatedOrganisme1_0?.fiabilisation_statut).toBe("FIABLE");
-    expect(updatedOrganisme1_0?.fiabilisation_api_response).toEqual(response1_0);
     const updatedOrganisme1_1 = await organismesDb().findOne({ _id: organisme1_1._id });
     expect(updatedOrganisme1_1?.fiabilisation_statut).toBe("FIABLE");
-    expect(updatedOrganisme1_1?.fiabilisation_api_response).toEqual(response1_1);
     const updatedOrganisme2 = await organismesDb().findOne({ _id: organisme2._id });
     expect(updatedOrganisme2?.fiabilisation_statut).toBe("FIABLE");
-    expect(updatedOrganisme2?.fiabilisation_api_response).toEqual(response2);
     const updatedOrganisme3 = await organismesDb().findOne({ _id: organisme3._id });
     // Should not reset the fiabilisation_statut if an error occurs
     expect(updatedOrganisme3?.fiabilisation_statut).toBe("FIABLE");

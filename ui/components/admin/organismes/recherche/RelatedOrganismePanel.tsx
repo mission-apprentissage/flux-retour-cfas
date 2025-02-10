@@ -148,7 +148,9 @@ function RelatedOrganisme({ organisme, relatedOrganisme, formations }: RelatedOr
   }, [organisme, relatedOrganisme._id, formationByCleMe]);
 
   return (
-    <CardInfo title={`${relatedOrganisme.label ?? ""} (${relatedFormations.length} formations)`}>
+    <CardInfo
+      title={`${relatedOrganisme.enseigne ?? relatedOrganisme.raison_sociale ?? ""} (${relatedFormations.length} formations)`}
+    >
       <HStack>
         <Text fontSize="zeta">UAI :</Text>
         <Label value={relatedOrganisme.uai ?? ""} />

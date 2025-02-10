@@ -1,12 +1,12 @@
 import {
   CODES_STATUT_APPRENANT,
-  EFFECTIF_DERNIER_SITUATION,
   SEXE_APPRENANT_ENUM,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
+  zEffectifDernierSituation,
 } from "../../../constants";
 import { zodLiteralUnion } from "../../../utils/zodHelper";
-import { zAdresse } from "../../parts/adresseSchema";
+import { zAdresse, zAdresseWithMissionLocale } from "../../parts/adresseSchema";
 import { zodOpenApi } from "../../zodOpenApi";
 
 export const zApprenant = zodOpenApi.object({
@@ -80,7 +80,9 @@ export const zApprenant = zodOpenApi.object({
     .openapi({ example: "+33908070605" })
     .regex(/^([+])?(\d{7,12})$/)
     .nullish(),
-  adresse: zAdresse.nullish(),
+
+  adresse: zAdresseWithMissionLocale.nullish(),
+  adresse_naissance: zAdresseWithMissionLocale.nullish(),
   historique_statut: zodOpenApi.array(
     zodOpenApi.object({
       valeur_statut: zodOpenApi.nativeEnum(CODES_STATUT_APPRENANT, {
@@ -101,9 +103,7 @@ export const zApprenant = zodOpenApi.object({
   situation_avant_contrat: zodLiteralUnion([11, 12, 21, 31, 41, 51, 52, 53, 54, 90, 99], {
     description: "Situation de l'apprenant avant le contrat",
   }).nullish(),
-  derniere_situation: zodLiteralUnion(EFFECTIF_DERNIER_SITUATION, {
-    description: "Situation de l'apprenant N-1",
-  }).nullish(),
+  derniere_situation: zEffectifDernierSituation.describe("Situation de l'apprenant N-1").nullish(),
   dernier_organisme_uai: zodOpenApi
     .string({
       description: `Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation

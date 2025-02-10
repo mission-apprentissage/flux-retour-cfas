@@ -1,9 +1,10 @@
+import type { IApiGetRoutes, IApiResponse } from "api-alternance-sdk";
 import nock from "nock";
 import { beforeAll, beforeEach, afterEach, afterAll } from "vitest";
 
 import { nockExternalApis } from "../utils/nockApis/index";
 
-const communes = {
+const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commune/search"]>> = {
   "05109": [
     {
       nom: "Puy-Saint-Pierre",
@@ -42,6 +43,27 @@ const communes = {
           type: "Polygon",
         },
       },
+      mission_locale: {
+        id: 211,
+        nom: "JEUNES HAUTES-ALPES",
+        siret: "18053700300048",
+        localisation: {
+          geopoint: {
+            coordinates: [6.0895089, 44.5622719],
+            type: "Point",
+          },
+          adresse: "1 Cours du Vieux Moulin",
+          cp: "05000",
+          ville: "GAP ",
+        },
+        contact: {
+          email: "info@mlj05.org",
+          telephone: "04 92 53 00 00",
+          siteWeb: "https://www.mj05.fr",
+        },
+      },
+      anciennes: [],
+      arrondissements: [],
     },
   ],
   "75001": [
@@ -104,6 +126,27 @@ const communes = {
           type: "Polygon",
         },
       },
+      mission_locale: {
+        id: 609,
+        nom: "DE PARIS",
+        siret: "53132862300149",
+        localisation: {
+          geopoint: {
+            coordinates: [2.3740736, 48.8848179],
+            type: "Point",
+          },
+          adresse: "22 rue Pajol",
+          cp: "75018",
+          ville: "PARIS",
+        },
+        contact: {
+          email: "contact@missionlocaledeparis.fr",
+          telephone: "0179970000",
+          siteWeb: "https://www.missionlocale.paris/",
+        },
+      },
+      anciennes: [],
+      arrondissements: [],
     },
   ],
 };

@@ -1,11 +1,7 @@
-import { DossierApprenantSchemaV3BaseWithApiDataType } from "shared/models/parts/dossierApprenantSchemaV3";
+import { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z, ZodIssueCode } from "zod";
 
-export const validateContrat = (
-  contrat: DossierApprenantSchemaV3BaseWithApiDataType,
-  suffix: string,
-  ctx: z.RefinementCtx
-) => {
+export const validateContrat = (contrat: IDossierApprenantSchemaV3, suffix: string, ctx: z.RefinementCtx) => {
   const withSuffix = (str: string) => `${str}${suffix}`;
   const contrat_date_fin = withSuffix("contrat_date_fin");
   const cause_rupture_contrat = withSuffix("cause_rupture_contrat");

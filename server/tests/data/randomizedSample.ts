@@ -5,10 +5,11 @@ import RandExp from "randexp";
 import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import type { PartialDeep } from "type-fest";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
-import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
+import { type DossierApprenantSchemaV1V2ZodTypeInput } from "@/common/validation/dossierApprenantSchemaV1V2";
 
 import sampleEtablissements, { SampleEtablissement } from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
@@ -81,6 +82,7 @@ export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): Without
   return {
     ...etablissement,
     ...params,
+    contacts_from_referentiel: [],
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -128,8 +130,8 @@ export const createSampleEffectif = async ({
 };
 
 export const createRandomDossierApprenantApiInput = (
-  params: Partial<DossierApprenantSchemaV1V2ZodType> = {}
-): DossierApprenantSchemaV1V2ZodType => {
+  params: Partial<DossierApprenantSchemaV1V2ZodTypeInput> = {}
+): DossierApprenantSchemaV1V2ZodTypeInput => {
   const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
   const formation = createRandomFormation(annee_scolaire);
@@ -159,5 +161,33 @@ export const createRandomDossierApprenantApiInput = (
     source: SOURCE_APPRENANT.ERP,
     api_version: "v2",
     ...params,
+  };
+};
+
+export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {
+  const anneeScolaire = getRandomAnneeScolaire();
+  const date_inscription_formation = new Date(new Date().setFullYear(parseInt(anneeScolaire.split("-")[0]), 8, 1));
+  const date_entree_formation = new Date(date_inscription_formation);
+  const date_fin_formation = new Date(
+    new Date(date_inscription_formation).setFullYear(parseInt(anneeScolaire.split("-")[1]), 5)
+  );
+  const { uai, siret } = getRandomEtablissement();
+  return {
+    nom_apprenant: faker.person.lastName().toUpperCase(),
+    prenom_apprenant: faker.person.firstName(),
+    date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
+    annee_scolaire: anneeScolaire,
+    id_erp_apprenant: faker.string.uuid(),
+    date_inscription_formation,
+    date_entree_formation,
+    date_fin_formation,
+    etablissement_responsable_uai: uai,
+    etablissement_responsable_siret: siret,
+    etablissement_formateur_uai: uai,
+    etablissement_formateur_siret: siret,
+    ...params,
+    api_version: "v3",
+    source: SOURCE_APPRENANT.ERP,
+    source_organisme_id: faker.database.mongodbObjectId(),
   };
 };

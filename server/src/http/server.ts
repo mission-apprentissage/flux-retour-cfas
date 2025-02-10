@@ -45,7 +45,6 @@ import {
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
   getEffectifsNominatifsWithoutId,
@@ -60,7 +59,7 @@ import {
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
+// import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
@@ -109,17 +108,18 @@ import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
-import { apiRoles } from "@/common/roles";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+// import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-import { createUserToken } from "@/common/utils/jwtUtils";
+// import { createUserToken } from "@/common/utils/jwtUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
+// import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
@@ -130,14 +130,15 @@ import errorMiddleware from "./middlewares/errorMiddleware";
 import {
   requireAdministrator,
   requireEffectifOrganismePermission,
+  requireMissionLocale,
   requireOrganismePermission,
   returnResult,
 } from "./middlewares/helpers";
-import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
+// import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
-import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+// import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -149,7 +150,9 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
+import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
+import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -364,39 +367,40 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await rejectInvitation(req.params.token);
       })
-    );
+    )
+    .use("/api/v1/mission-locale", missionLocalePublicRoutes());
 
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
    *****************************************************************************/
-  app.post(
-    "/api/login",
-    validateRequestMiddleware({
-      body: loginSchemaLegacy.strict(),
-    }),
-    returnResult(async (req) => {
-      const { username, password } = req.body;
-      const authenticatedUser = await authenticateLegacy(username, password);
-      if (!authenticatedUser) {
-        throw Boom.unauthorized();
-      }
-      return { access_token: createUserToken(authenticatedUser) };
-    })
-  );
+  // app.post(
+  //   "/api/login",
+  //   validateRequestMiddleware({
+  //     body: loginSchemaLegacy.strict(),
+  //   }),
+  //   returnResult(async (req) => {
+  //     const { username, password } = req.body;
+  //     const authenticatedUser = await authenticateLegacy(username, password);
+  //     if (!authenticatedUser) {
+  //       throw Boom.unauthorized();
+  //     }
+  //     return { access_token: createUserToken(authenticatedUser) };
+  //   })
+  // );
 
-  app.use(
-    [
-      "/api/statut-candidats", // @deprecated to /dossiers-apprenants
-      "/api/dossiers-apprenants",
-    ],
-    requireJwtAuthenticationMiddleware(),
-    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    async (req, res, next) => {
-      req.user.source = SOURCE_APPRENANT.ERP;
-      next();
-    },
-    dossierApprenantRouter()
-  );
+  // app.use(
+  //   [
+  //     "/api/statut-candidats", // @deprecated to /dossiers-apprenants
+  //     "/api/dossiers-apprenants",
+  //   ],
+  //   requireJwtAuthenticationMiddleware(),
+  //   legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+  //   async (req, res, next) => {
+  //     req.user.source = SOURCE_APPRENANT.ERP;
+  //     next();
+  //   },
+  //   dossierApprenantRouter()
+  // );
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
@@ -508,14 +512,10 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/effectifs/:type",
+        requireOrganismePermission("effectifsNominatifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const permissions = await getOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
-          if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
-            throw Boom.forbidden("Permissions invalides");
-          }
-
           const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
             req.user,
             filters,
@@ -786,7 +786,7 @@ function setupRoutes(app: Application) {
             .trim()
             .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
         });
-        return await getCommune(codePostal);
+        return await getCommune({ codePostal });
       })
     )
     .get(
@@ -872,7 +872,11 @@ function setupRoutes(app: Application) {
       .post(
         "/membres",
         returnResult(async (req) => {
-          await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+          await inviteUserToOrganisation(
+            req.user,
+            req.body.email.toLowerCase(),
+            (req.user as AuthContext).organisation_id
+          );
         })
       )
       .delete(
@@ -911,6 +915,7 @@ function setupRoutes(app: Application) {
           await resendInvitationEmail(req.user, req.params.invitationId);
         })
       )
+      .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
   );
 
   /********************************

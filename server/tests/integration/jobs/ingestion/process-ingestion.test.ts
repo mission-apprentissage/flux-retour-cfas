@@ -4,8 +4,8 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
-import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
+import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { mockApiApprentissageCertificationApi } from "@tests/data/api.apprentissage.beta.gouv.fr/certification/apiApprentissage.certification.mock";
 import {
@@ -19,14 +19,11 @@ import { useNock } from "@tests/jest/setupNock";
 const UAI = "0802004U";
 const SIRET = "77937827200016";
 
-const UAI_REFERENTIEL_FERME = "4422672E";
-const SIRET_REFERENTIEL_FERME = "44370584100099";
-
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
 const ORGANISME_SOURCE_ID = getRandomSourceOrganismeId();
-const sortByPath = (array: { path?: string[] }[] | undefined | null) =>
+const sortByPath = (array: { path?: Array<string | number> }[] | undefined | null) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
 describe("Processus d'ingestion", () => {
@@ -34,35 +31,13 @@ describe("Processus d'ingestion", () => {
   useMongo();
 
   beforeEach(async () => {
-    await organismesReferentielDb().insertMany([
+    await organismesDb().insertMany([
+      { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET, reseaux: [] }) },
       {
         _id: new ObjectId(),
-        uai: UAI,
-        siret: SIRET,
-        nature: "formateur",
-        lieux_de_formation: [{ uai: UAI }],
-        relations: [],
-      },
-      {
-        _id: new ObjectId(),
-        uai: UAI_RESPONSABLE,
-        siret: SIRET_RESPONSABLE,
-        nature: "responsable",
-        lieux_de_formation: [{ uai: UAI_RESPONSABLE }],
-        relations: [],
-      },
-      {
-        _id: new ObjectId(),
-        uai: UAI_REFERENTIEL_FERME,
-        siret: SIRET_REFERENTIEL_FERME,
-        nature: "formateur",
-        lieux_de_formation: [{ uai: UAI_REFERENTIEL_FERME }],
-        relations: [],
-        etat_administratif: "fermé",
+        ...createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE, reseaux: [] }),
       },
     ]);
-    await createOrganisme(createRandomOrganisme({ uai: UAI, siret: SIRET }));
-    await createOrganisme(createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE }));
 
     mockApiApprentissageCertificationApi();
   });
@@ -208,7 +183,22 @@ describe("Processus d'ingestion", () => {
               departement: "05",
               academie: "02",
               region: "93",
+              mission_locale_id: 211,
+              complete: null,
             },
+            adresse_naissance: {
+              code_insee: null,
+              code_postal: null,
+            },
+            responsable_mail1: null,
+            responsable_mail2: null,
+            rqth: null,
+            sexe: null,
+            type_cfa: null,
+            date_rqth: null,
+            dernier_organisme_uai: null,
+            derniere_situation: null,
+            has_nir: null,
           },
           contrats: [],
           formation: {
@@ -220,6 +210,16 @@ describe("Processus d'ingestion", () => {
             niveau: "3",
             niveau_libelle: "3 (CAP...)",
             rncp: "RNCP34670", // RNCP associé au CFD
+            cause_exclusion: null,
+            date_entree: null,
+            date_exclusion: null,
+            date_fin: null,
+            date_inscription: null,
+            date_obtention_diplome: null,
+            duree_theorique_mois: null,
+            formation_presentielle: null,
+            obtention_diplome: null,
+            referent_handicap: null,
           },
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           is_lock: {
@@ -237,6 +237,7 @@ describe("Processus d'ingestion", () => {
                 departement: true,
                 region: true,
                 academie: true,
+                mission_locale_id: true,
               },
               historique_statut: true,
             },
@@ -259,13 +260,26 @@ describe("Processus d'ingestion", () => {
           _id: expect.anything(),
           created_at: expect.any(Date),
           updated_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           organisme_id: expect.any(ObjectId),
+          source_organisme_id: null,
           _raw: {
             formation: {
               annee: 0,
               cfd: "50033610",
               libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
               periode: [2021, 2023],
+              cause_exclusion: null,
+              date_entree: null,
+              date_exclusion: null,
+              date_fin: null,
+              date_inscription: null,
+              date_obtention_diplome: null,
+              duree_theorique_mois: null,
+              formation_presentielle: null,
+              obtention_diplome: null,
+              referent_handicap: null,
+              rncp: null,
             },
           },
           _computed: {
@@ -325,6 +339,7 @@ describe("Processus d'ingestion", () => {
         source: SOURCE_APPRENANT.FICHIER,
         source_organisme_id: ORGANISME_SOURCE_ID,
         created_at: new Date(),
+        transmitted_at: new Date(),
       };
 
       beforeEach(async () => {
@@ -386,7 +401,7 @@ describe("Processus d'ingestion", () => {
         ]);
       });
 
-      it("Vérifie l'ingestion et la non mise à jour d'un dossier dont la clé d'unicité est différente d'un dossier déja existant", async () => {
+      it("Vérifie l'ingestion et la mise à jour d'un dossier pour une formation differente", async () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
@@ -419,17 +434,15 @@ describe("Processus d'ingestion", () => {
         await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        await expect(effectifsDb().countDocuments({})).resolves.toBe(2);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check historiques des effectifs
-        const effectifInserted = await effectifsDb().findOne({ "formation.cfd": "50033616" });
+        const effectifInserted = await effectifsDb().findOne({});
         expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.inscrit,
           },
-        ]);
-        expect(effectifForInput?.apprenant.historique_statut).toMatchObject([
           {
             date_statut: new Date("2022-12-30T04:05:47.647Z"),
             valeur_statut: CODES_STATUT_APPRENANT.apprenti,
@@ -460,7 +473,7 @@ describe("Processus d'ingestion", () => {
         has_nir: true,
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75001",
-        code_postal_de_naissance_apprenant: "44000",
+        code_postal_de_naissance_apprenant: "75001",
         sexe_apprenant: "F",
         rqth_apprenant: true,
         date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
@@ -579,7 +592,6 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
-            code_postal_de_naissance: "44000",
             courriel: "johndoe@example.org",
             telephone: "0123456789",
             adresse: {
@@ -588,6 +600,16 @@ describe("Processus d'ingestion", () => {
               commune: "Paris",
               code_insee: "75056",
               departement: "75",
+              academie: "01",
+              region: "11",
+              mission_locale_id: 609,
+            },
+            adresse_naissance: {
+              code_postal: "75001",
+              commune: "Paris",
+              code_insee: "75056",
+              departement: "75",
+              mission_locale_id: 609,
               academie: "01",
               region: "11",
             },
@@ -637,6 +659,9 @@ describe("Processus d'ingestion", () => {
             formation_presentielle: true,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            libelle_long: "Coiffure",
+            niveau: "3",
+            niveau_libelle: "3 (CAP...)",
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -667,6 +692,7 @@ describe("Processus d'ingestion", () => {
                 prenom: "John",
               },
               rncp: "RNCP5364",
+              libelle_long: null,
             },
           },
           _computed: {
@@ -695,6 +721,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -742,7 +769,16 @@ describe("Processus d'ingestion", () => {
         expect(insertedDossier).toStrictEqual({
           _id: effectifForInput?._id,
           apprenant: {
-            adresse: {},
+            adresse: {
+              code_insee: null,
+              code_postal: null,
+              complete: null,
+            },
+            adresse_naissance: {
+              code_insee: null,
+              code_postal: null,
+            },
+            courriel: null,
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -753,6 +789,17 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
+            responsable_mail1: null,
+            responsable_mail2: null,
+            rqth: null,
+            sexe: null,
+            telephone: null,
+            type_cfa: null,
+            ine: null,
+            date_rqth: null,
+            dernier_organisme_uai: null,
+            derniere_situation: null,
+            has_nir: null,
           },
           contrats: [],
           formation: {
@@ -769,6 +816,12 @@ describe("Processus d'ingestion", () => {
             duree_formation_relle: 10,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            cause_exclusion: null,
+            date_exclusion: null,
+            date_obtention_diplome: null,
+            formation_presentielle: null,
+            obtention_diplome: null,
+            referent_handicap: null,
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -788,6 +841,14 @@ describe("Processus d'ingestion", () => {
               duree_theorique_mois: 24,
               periode: [],
               rncp: "RNCP5364",
+              cfd: null,
+              cause_exclusion: null,
+              date_exclusion: null,
+              date_obtention_diplome: null,
+              formation_presentielle: null,
+              libelle_long: null,
+              obtention_diplome: null,
+              referent_handicap: null,
             },
           },
           _computed: {
@@ -820,6 +881,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2021-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -939,7 +1001,15 @@ describe("Processus d'ingestion", () => {
         expect(insertedDossier).toStrictEqual({
           _id: effectifForInput?._id,
           apprenant: {
-            adresse: {},
+            adresse: {
+              code_insee: null,
+              code_postal: null,
+              complete: null,
+            },
+            adresse_naissance: {
+              code_insee: null,
+              code_postal: null,
+            },
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -952,6 +1022,16 @@ describe("Processus d'ingestion", () => {
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
             has_nir: true,
             sexe: "F",
+            courriel: null,
+            date_rqth: null,
+            dernier_organisme_uai: null,
+            derniere_situation: null,
+            ine: null,
+            responsable_mail1: null,
+            responsable_mail2: null,
+            rqth: null,
+            telephone: null,
+            type_cfa: null,
           },
           contrats: [],
           formation: {
@@ -968,6 +1048,12 @@ describe("Processus d'ingestion", () => {
             duree_theorique_mois: 24,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
+            cause_exclusion: null,
+            date_exclusion: null,
+            date_obtention_diplome: null,
+            formation_presentielle: null,
+            obtention_diplome: null,
+            referent_handicap: null,
           },
           is_lock: expect.any(Object),
           lieu_de_formation: {
@@ -987,6 +1073,14 @@ describe("Processus d'ingestion", () => {
               duree_theorique_mois: 24,
               periode: [],
               rncp: "RNCP34670",
+              cause_exclusion: null,
+              cfd: null,
+              date_exclusion: null,
+              date_obtention_diplome: null,
+              formation_presentielle: null,
+              libelle_long: null,
+              obtention_diplome: null,
+              referent_handicap: null,
             },
           },
           _computed: {
@@ -1019,6 +1113,7 @@ describe("Processus d'ingestion", () => {
           },
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
+          transmitted_at: expect.any(Date),
           annee_scolaire: "2022-2022",
           source: SOURCE_APPRENANT.FICHIER,
           source_organisme_id: ORGANISME_SOURCE_ID,
@@ -1314,7 +1409,7 @@ describe("Processus d'ingestion", () => {
     });
 
     describe("Ingestion de mises à jour de données invalides", () => {
-      const commonSampleData: WithoutId<IEffectifQueue> = {
+      const commonSampleData = {
         ine_apprenant: "772957826QH",
         nom_apprenant: "MBAPPE",
         prenom_apprenant: "Kylian",

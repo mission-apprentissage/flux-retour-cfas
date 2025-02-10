@@ -1,6 +1,7 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisme } from "shared/models";
@@ -12,7 +13,7 @@ import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
 import { withComputedFields } from "@/common/actions/effectifs.actions";
-import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
+import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
@@ -115,20 +116,29 @@ async function upsertEffectifDeca(
       }
     }
   } else {
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif });
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at: new Date() });
     count.updated++;
   }
 }
 
 async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
-  const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
-  const organismesId = new Set<string>();
-  for (const newDocument of newDocuments) {
-    await upsertEffectifDeca(newDocument, count);
-    organismesId.add(newDocument.organisme_id.toString());
-  }
+  return Sentry.startSpan(
+    {
+      name: "DECA Update Effectif",
+      op: "deca.item",
+      forceTransaction: true,
+    },
+    async () => {
+      const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
+      const organismesId = new Set<string>();
+      for (const newDocument of newDocuments) {
+        await upsertEffectifDeca(newDocument, count);
+        organismesId.add(newDocument.organisme_id.toString());
+      }
 
-  return { count, organismesId };
+      return { count, organismesId };
+    }
+  );
 }
 
 async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
@@ -244,6 +254,8 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
+  const commune = await getAndFormatCommuneFromCode(null, adresseAlternant.code_postal);
+
   const effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: new ObjectId(document._id),
     apprenant: {
@@ -261,6 +273,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
         numero: adresseAlternant.numero ? parseInt(adresseAlternant.numero, 10) : undefined,
         voie: adresseAlternant.voie,
         code_postal: adresseAlternant.code_postal,
+        ...commune,
       },
       situation_avant_contrat: derniere_classe as zodOpenApi.TypeOf<typeof zApprenant>["situation_avant_contrat"],
     },
@@ -293,17 +306,19 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     validation_errors: [],
     created_at: new Date(),
     updated_at: new Date(),
+    transmitted_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
     source: SOURCE_APPRENANT.DECA,
     annee_scolaire: anneeScolaire,
   };
 
   const certification = await getEffectifCertification(effectif);
+  const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
 
   return withComputedFields(
     {
       ...effectif,
-      formation: fiabilisationEffectifFormation(effectif, certification),
+      formation: computedFormation,
       is_deca_compatible: !organisme.is_transmission_target,
     },
     { organisme, certification }

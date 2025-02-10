@@ -4,8 +4,6 @@ import { capitalize } from "lodash-es";
 import { z } from "zod";
 
 import {
-  CODES_STATUT_APPRENANT_ENUM,
-  EFFECTIF_DERNIER_SITUATION,
   CFD_REGEX,
   CODE_NAF_REGEX,
   RNCP_REGEX,
@@ -14,6 +12,9 @@ import {
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
   PHONE_REGEX_PATTERN,
+  zCodeStatutApprenant,
+  CODES_STATUT_APPRENANT_ENUM,
+  zEffectifDernierSituation,
 } from "shared";
 
 import { telephoneConverter } from "../../utils/frenchTelephoneNumber";
@@ -114,17 +115,7 @@ export const primitivesV1 = {
       example: "2000-10-28T00:00:00.000Z",
     }),
     statut: z
-      .preprocess(
-        (v: any) => (CODES_STATUT_APPRENANT_ENUM.includes(parseInt(v, 10) as any) ? parseInt(v, 10) : v),
-        z
-          .number({
-            invalid_type_error: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
-          })
-          .int()
-          .refine((value) => (CODES_STATUT_APPRENANT_ENUM as number[]).includes(value), {
-            message: `Valeurs valides: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
-          })
-      )
+      .preprocess((v: unknown) => (typeof v === "string" ? parseInt(v, 10) : v), zCodeStatutApprenant)
       .openapi({
         description: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
         enum: CODES_STATUT_APPRENANT_ENUM,
@@ -237,7 +228,7 @@ export const primitivesV1 = {
     periode: z
       .preprocess(
         // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020,2022]
-        (v: any) => (typeof v === "string" ? v.trim().split("-").map(Number) : v),
+        (v: unknown) => (typeof v === "string" ? v.trim().split("-").map(Number) : v),
         z.array(z.number().int().min(2000).max(2100)).length(2)
       )
       .describe("Période de la formation, en année (peut être sur plusieurs années)")
@@ -320,15 +311,13 @@ export const primitivesV3 = {
         .describe("Code postal de l'apprenant")
     ),
     sexe: z.preprocess(
-      (v: any) => (v ? String(v).trim().replace("H", "M").replace("1", "M").replace("2", "F") : v),
-      z
-        .string()
-        .trim()
-        .regex(/^[MF]$/, "M, H ou F attendu")
-        .describe("Sexe de l'apprenant")
-        .openapi({
-          example: "M",
-        })
+      (v: unknown) =>
+        typeof v === "string" || typeof v === "number"
+          ? String(v).trim().replace("H", "M").replace("1", "M").replace("2", "F")
+          : v,
+      z.enum(["M", "F"], { message: "M, H ou F attendu" }).describe("Sexe de l'apprenant").openapi({
+        example: "M",
+      })
     ),
     rqth: z.boolean().describe("Reconnaissance de la Qualité de Travailleur Handicapé").openapi({ example: true }),
     date_rqth: extensions
@@ -439,20 +428,8 @@ export const primitivesV3 = {
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
   derniere_situation: z
-    .preprocess(
-      (v: any) => (v ? Number(v) : v),
-      z.coerce
-        .number()
-        .int()
-        .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
-          message: "Format invalide (ex : 1003, 3111, 4017)",
-        })
-    )
-    .describe("Situation de l'apprenant N-1")
-    .openapi({
-      type: "integer",
-      enum: EFFECTIF_DERNIER_SITUATION as any,
-    }),
+    .preprocess((v: unknown) => (typeof v === "string" ? parseInt(v, 10) : v), zEffectifDernierSituation)
+    .describe("Situation de l'apprenant N-1"),
   dernier_organisme_uai: z.coerce
     .string()
     .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")
@@ -464,23 +441,32 @@ export const primitivesV3 = {
     }),
   type_cfa: z.preprocess(
     (input) => {
-      if (input) {
-        // Vérifie si l'entrée est un nombre entre 1 et 10 sans le zéro initial
-        const match = String(input).match(/^(1|2|3|4|5|6|7|8|9|10)$/);
-        if (match) {
-          // Rajoute un zéro devant si nécessaire
-          return match[0].length === 1 ? "0" + match[0] : match[0];
-        }
+      if (typeof input === "string") {
+        return input.padStart(2, "0");
       }
+
+      if (typeof input === "number") {
+        return input.toString().padStart(2, "0");
+      }
+
       return input;
     },
     z
-      .string()
-      .regex(/^(01|02|03|04|05|06|07|08|09|10)$/, "01 à 10")
-      .describe("Type de CFA")
+      .enum(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"], {
+        description: "Type de CFA",
+      })
       .openapi({
         enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
         description: "Type de CFA",
       })
   ),
 };
+
+export const zBooleanStringSchema = z.preprocess((v) => {
+  if (typeof v == "boolean") return v;
+  if (v === "true") {
+    return true;
+  } else if (v === "false") {
+    return false;
+  }
+}, z.boolean());

@@ -1,15 +1,16 @@
 import { IncomingMessage } from "node:http";
 
+import { captureException } from "@sentry/node";
 import axios from "axios";
-import { ObjectId } from "mongodb";
-import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import Boom from "boom";
+import type { AnyBulkWriteOperation } from "mongodb";
+import { IFormationCatalogue, zFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { default as StreamChain } from "stream-chain";
 import { default as StreamJson } from "stream-json";
 import { default as StreamArrayPick } from "stream-json/streamers/StreamArray.js";
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
-import { WithStringId } from "@/common/model/types";
 import config from "@/config";
 
 const { chain } = StreamChain;
@@ -20,7 +21,7 @@ const logger = parentLogger.child({
   module: "job:hydrate:formations-catalogue",
 });
 
-const INSERT_BATCH_SIZE = 100;
+const INSERT_BATCH_SIZE = 1_000;
 
 /**
  * Ce job récupère toutes les formations du catalogue et les insert en brut dans la collection formationsCatalogue
@@ -43,26 +44,29 @@ export const hydrateFormationsCatalogue = async () => {
     totalFormations += pendingFormations.length;
     logger.debug({ count: pendingFormations.length }, "insert formations");
     if (pendingFormations.length > 0) {
+      const ops = pendingFormations.map(
+        ({ _id, ...formation }): AnyBulkWriteOperation<IFormationCatalogue> => ({
+          updateOne: {
+            filter: {
+              cle_ministere_educatif: formation.cle_ministere_educatif,
+            },
+            update: {
+              $set: formation,
+              $setOnInsert: { _id },
+            },
+            upsert: true,
+          },
+        })
+      );
       queriesInProgress.push(
-        ...pendingFormations.map(({ _id, ...formation }) =>
-          formationsCatalogueDb()
-            .updateOne(
-              {
-                cle_ministere_educatif: formation.cle_ministere_educatif,
-              },
-              {
-                $set: formation,
-                $setOnInsert: { _id },
-              },
-              {
-                upsert: true,
-              }
-            )
-            .catch((err) => {
-              console.error(JSON.stringify(err));
-              logger.error({ err: err }, "insertion formation échouée", formation.cle_ministere_educatif);
-            })
-        )
+        formationsCatalogueDb()
+          .bulkWrite(ops, { ordered: false })
+          .catch((err) => {
+            const error = Boom.internal("Échec de l'insertion des formations", err.toJSON());
+            error.cause = err;
+            captureException(error);
+            logger.error({ err: error }, "insertion formation échouée");
+          })
       );
     }
     pendingFormations = [];
@@ -71,11 +75,8 @@ export const hydrateFormationsCatalogue = async () => {
   return new Promise<void>((resolve, reject) => {
     const pipeline = chain([parser(), streamArray()]);
     res.data.pipe(pipeline);
-    pipeline.on("data", ({ value }: { value: WithStringId<IFormationCatalogue> }) => {
-      pendingFormations.push({
-        ...value,
-        _id: new ObjectId(value._id),
-      });
+    pipeline.on("data", ({ value }: { value: unknown }) => {
+      pendingFormations.push(zFormationCatalogue.parse(value));
       if (pendingFormations.length === INSERT_BATCH_SIZE) {
         flushPendingFormations();
       }

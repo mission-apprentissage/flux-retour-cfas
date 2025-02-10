@@ -67,12 +67,7 @@ const AideSiret = () => {
 
               <Text as="i">
                 Source : Base INSEE (
-                <AidePage.Link
-                  href="https://annuaire-entreprises.data.gouv.fr/"
-                  isExternal
-                  textDecoration="underLine"
-                  display="inline"
-                >
+                <AidePage.Link href="https://annuaire-entreprises.data.gouv.fr/" isExternal display="inline">
                   Annuaire des entreprises
                 </AidePage.Link>
                 )
@@ -174,7 +169,7 @@ const AideSiret = () => {
               établissement considéré &quot;Fermé&quot;, aucun effectif en apprentissage ne devrait être transmis sur ce
               dernier. Si votre établissement a déménagé et possède un nouveau Siret, veuillez suivre les démarches
               mentionnées ci-dessus (
-              <Link as="button" onClick={() => setExpandedIndex(0)} textDecoration="underLine" display="inline">
+              <Link as="button" onClick={() => setExpandedIndex(0)} display="inline">
                 &quot;Mon établissement a déménagé. Que dois-je faire ?&quot;
               </Link>
               ).

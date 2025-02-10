@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { it, afterEach, describe, beforeEach } from "vitest";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -18,30 +19,23 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
 
     beforeEach(async () => {
       // Ajout de 2 organismes test
-      const organisme1Created = await organismesDb().insertOne({
-        _id: new ObjectId(),
-        uai: "1133672E",
-        siret: "99370584100099",
-        nature: "responsable",
-        relatedFormations: [],
-        organismesFormateurs: [],
-        organismesResponsables: [],
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
+      const organisme1Created = await organismesDb().insertOne(
+        generateOrganismeFixture({
+          uai: "1133672E",
+          siret: "99370584100099",
+          nature: "responsable",
+        })
+      );
       organisme1Id = organisme1Created.insertedId;
 
-      const organisme2Created = await organismesDb().insertOne({
-        _id: new ObjectId(),
-        uai: "8844672E",
-        siret: "12340584100099",
-        nature: "responsable",
-        relatedFormations: [],
-        organismesFormateurs: [],
-        organismesResponsables: [],
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
+      const organisme2Created = await organismesDb().insertOne(
+        generateOrganismeFixture({
+          _id: new ObjectId(),
+          uai: "8844672E",
+          siret: "12340584100099",
+          nature: "responsable",
+        })
+      );
       organisme2Id = organisme2Created.insertedId;
 
       // Ajout de doublons : 2 effectifs sur les 2 mêmes organismes
