@@ -15,15 +15,7 @@ const organismesTableColumnsDefs = [
     accessorKey: "nom",
     cell: ({ row }) => (
       <>
-        <Link
-          href={`/organismes/${(row.original as any)?._id}`}
-          display="block"
-          fontSize="1rem"
-          width="var(--chakra-sizes-lg)"
-          title={row.original.raison_sociale ?? row.original.enseigne ?? row.original.nom}
-        >
-          {row.original.nom ?? "Organisme inconnu"}
-        </Link>
+        <Text fontSize="1rem">{row.original.nom ?? "Organisme inconnu"}</Text>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
           SIRET&nbsp;: {(row.original as any).siret}
         </Text>
@@ -223,31 +215,38 @@ const organismesTableColumnsDefs = [
             <Text>{row.original.adresse.complete}</Text>
           </Flex>
 
-          {row.original.users.length > 0 && (
-            <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
+          {row.original.users.length > 0 ? (
+            <>
+              <Text>Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :</Text>
+              <UnorderedList spacing={3}>
+                {row.original.users.map((user, index) => (
+                  <ListItem key={index}>
+                    <Flex align="center" gap={2}>
+                      <Text fontWeight="bold">
+                        {user.prenom} {user.nom}
+                      </Text>
+                      {user.last_connection && (
+                        <Badge variant={"purple"} borderRadius="full" px={3} py={1} fontSize="sm">
+                          <Flex align="center" gap={1}>
+                            <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion :{" "}
+                            {format(new Date(user.last_connection), "dd/MM/yyyy")}
+                          </Flex>
+                        </Badge>
+                      )}
+                    </Flex>
+                    {user.fonction && <Text>{user.fonction}</Text>}
+                    {user.email && <Text>{user.email}</Text>}
+                    {user.telephone && <Text>{user.telephone}</Text>}
+                  </ListItem>
+                ))}
+              </UnorderedList>
+            </>
+          ) : (
+            <Text>
+              À ce jour, ni compte utilisateur sur le Tableau de bord de l’apprentissage ni email générique ne sont
+              retrouvés pour ce CFA.
+            </Text>
           )}
-          <UnorderedList spacing={3}>
-            {row.original.users.map((user, index) => (
-              <ListItem key={index}>
-                <Flex align="center" gap={2}>
-                  <Text fontWeight="bold">
-                    {user.prenom} {user.nom}
-                  </Text>
-                  {user.last_connection && (
-                    <Badge variant={"purple"} borderRadius="full" px={3} py={1} fontSize="sm">
-                      <Flex align="center" gap={1}>
-                        <Icon as={CheckCircleIcon} mr={1} /> Dernière connexion :{" "}
-                        {format(new Date(user.last_connection), "dd/MM/yyyy")}
-                      </Flex>
-                    </Badge>
-                  )}
-                </Flex>
-                {user.fonction && <Text>{user.fonction}</Text>}
-                {user.email && <Text>{user.email}</Text>}
-                {user.telephone && <Text>{user.telephone}</Text>}
-              </ListItem>
-            ))}
-          </UnorderedList>
         </Flex>
       </BasicModal>
     ),

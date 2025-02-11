@@ -59,7 +59,7 @@ import {
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
+// import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
@@ -109,17 +109,17 @@ import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { apiRoles } from "@/common/roles";
+// import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-import { createUserToken } from "@/common/utils/jwtUtils";
+// import { createUserToken } from "@/common/utils/jwtUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
+// import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
@@ -134,11 +134,11 @@ import {
   requireOrganismePermission,
   returnResult,
 } from "./middlewares/helpers";
-import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
+// import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
-import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+// import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -376,34 +376,34 @@ function setupRoutes(app: Application) {
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
    *****************************************************************************/
-  app.post(
-    "/api/login",
-    validateRequestMiddleware({
-      body: loginSchemaLegacy.strict(),
-    }),
-    returnResult(async (req) => {
-      const { username, password } = req.body;
-      const authenticatedUser = await authenticateLegacy(username, password);
-      if (!authenticatedUser) {
-        throw Boom.unauthorized();
-      }
-      return { access_token: createUserToken(authenticatedUser) };
-    })
-  );
+  // app.post(
+  //   "/api/login",
+  //   validateRequestMiddleware({
+  //     body: loginSchemaLegacy.strict(),
+  //   }),
+  //   returnResult(async (req) => {
+  //     const { username, password } = req.body;
+  //     const authenticatedUser = await authenticateLegacy(username, password);
+  //     if (!authenticatedUser) {
+  //       throw Boom.unauthorized();
+  //     }
+  //     return { access_token: createUserToken(authenticatedUser) };
+  //   })
+  // );
 
-  app.use(
-    [
-      "/api/statut-candidats", // @deprecated to /dossiers-apprenants
-      "/api/dossiers-apprenants",
-    ],
-    requireJwtAuthenticationMiddleware(),
-    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    async (req, res, next) => {
-      req.user.source = SOURCE_APPRENANT.ERP;
-      next();
-    },
-    dossierApprenantRouter()
-  );
+  // app.use(
+  //   [
+  //     "/api/statut-candidats", // @deprecated to /dossiers-apprenants
+  //     "/api/dossiers-apprenants",
+  //   ],
+  //   requireJwtAuthenticationMiddleware(),
+  //   legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+  //   async (req, res, next) => {
+  //     req.user.source = SOURCE_APPRENANT.ERP;
+  //     next();
+  //   },
+  //   dossierApprenantRouter()
+  // );
 
   app.use(
     ["/api/v3/dossiers-apprenants"],

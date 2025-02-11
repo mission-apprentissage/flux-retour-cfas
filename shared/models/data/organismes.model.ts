@@ -1,4 +1,3 @@
-import { zApiOrganismesRoutes } from "api-alternance-sdk";
 import { isBefore, subMonths } from "date-fns";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
@@ -17,40 +16,32 @@ import {
 } from "../../constants";
 import { zodEnumFromObjValues } from "../../utils/zodHelper";
 
-import { zContactReferentiel } from "./organismesReferentiel.model";
-
 export const UAI_INCONNUE = "non déterminée";
 export const UAI_INCONNUE_TAG_FORMAT = UAI_INCONNUE.toUpperCase();
 export const UAI_INCONNUE_CAPITALIZE = `${UAI_INCONNUE.charAt(0).toUpperCase()}${UAI_INCONNUE.slice(1)}`;
 
-const relationOrganismeSchema = z
-  .object({
-    // infos référentiel
-    siret: z.string().optional(),
-    uai: z.string().nullable().optional(),
-    referentiel: z.boolean().optional(),
-    label: z.string().optional(),
-    sources: z.array(z.string()).optional(),
+const relationOrganismeSchema = z.object({
+  siret: z.string(),
+  uai: z.string().nullable().optional(),
 
-    // infos TDB
-    _id: zObjectId.nullable().optional(),
-    enseigne: z.string().nullish(),
-    raison_sociale: z.string().optional(),
-    commune: z.string().optional(),
-    region: z.string().optional(),
-    departement: z.string().optional(),
-    academie: z.string().optional(),
-    reseaux: z.array(z.string()).optional(),
-    date_collecte: z.string().optional(),
-    fiable: z.boolean().optional(),
-    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
-    last_transmission_date: z.date().nullish(),
-    ferme: z.boolean().optional(),
+  // infos TDB
+  _id: zObjectId.nullable().optional(),
+  enseigne: z.string().nullish(),
+  raison_sociale: z.string().optional(),
+  commune: z.string().optional(),
+  region: z.string().optional(),
+  departement: z.string().optional(),
+  academie: z.string().optional(),
+  reseaux: z.array(z.string()).optional(),
+  date_collecte: z.string().optional(),
+  fiable: z.boolean().optional(),
+  nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
+  last_transmission_date: z.date().nullish(),
+  ferme: z.boolean().optional(),
 
-    // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
-    responsabilitePartielle: z.boolean().optional(),
-  })
-  .strict();
+  // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+  responsabilitePartielle: z.boolean().optional(),
+});
 
 const organismesCountSchema = z.object({
   organismes: z.number(),
@@ -61,7 +52,7 @@ const organismesCountSchema = z.object({
   uaiNonDeterminee: z.number(),
 });
 
-type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
+export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
 export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
 
 export type IOrganismesCount = z.output<typeof organismesCountSchema>;
@@ -91,7 +82,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
-const zOrganisme = z
+export const zOrganisme = z
   .object({
     _id: zObjectId,
     uai: z
@@ -99,7 +90,7 @@ const zOrganisme = z
         description: "Code UAI de l'établissement",
       })
       .regex(UAI_REGEX)
-      .optional(),
+      .nullish(),
     siret: z
       .string({
         description: "N° SIRET de l'établissement",
@@ -137,7 +128,7 @@ const zOrganisme = z
     nom: z.string({ description: "Nom de l'organisme de formation" }).optional(),
     enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).nullish(),
     raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
-    adresse: zAdresse.describe("Adresse de l'établissement").optional(),
+    adresse: zAdresse.describe("Adresse de l'établissement").nullish(),
     relatedFormations: z
       .array(
         z
@@ -198,10 +189,16 @@ const zOrganisme = z
       .optional(),
     ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
     qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
-    contacts_from_referentiel: z.array(zContactReferentiel).optional(),
+    contacts_from_referentiel: z.array(
+      z.object({
+        email: z.string().email(),
+        confirmation_referentiel: z.boolean(),
+        sources: z.array(z.string()),
+      })
+    ),
     // TODO [tech] TO REMOVE LATER
     access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
-    api_key: z.string({ description: "API key pour envoi de données" }).optional(),
+    api_key: z.string({ description: "API key pour envoi de données" }).nullish(),
     api_uai: z.string({ description: "Uai envoyé par l'erp" }).optional(),
     api_siret: z.string({ description: "Siret envoyé par l'erp" }).optional(),
     api_configuration_date: z.date({ description: "Date de l'interfaçage" }).optional(),
@@ -210,9 +207,6 @@ const zOrganisme = z
     fiabilisation_statut: zodEnumFromObjValues(STATUT_FIABILISATION_ORGANISME)
       .describe("Statut de fiabilisation de l'organisme")
       .optional(),
-    fiabilisation_api_response: zApiOrganismesRoutes.get["/organisme/v1/recherche"].response["200"]
-      .describe("Statut du siret et uai venant de l'API de l'organisme")
-      .nullish(),
     mode_de_transmission: z.enum(["API", "MANUEL"]).describe("Mode de transmission des effectifs").optional(),
     mode_de_transmission_configuration_date: z
       .date({

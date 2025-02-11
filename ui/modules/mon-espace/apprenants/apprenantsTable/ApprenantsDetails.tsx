@@ -1,3 +1,4 @@
+import { WarningIcon } from "@chakra-ui/icons";
 import {
   Box,
   HStack,
@@ -17,6 +18,7 @@ import { SOURCE_APPRENANT, STATUT_NAME, SourceApprenant } from "shared";
 
 import { calculateAge } from "@/common/utils/dateUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
+import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
 
@@ -24,8 +26,8 @@ import ApprenantsDetailsForm from "./ApprenantsDetailsForm";
 
 type Value = string | number | null | undefined;
 
-const getValueOrFallback = (value: Value): React.ReactNode => {
-  return value ? <Text>{value}</Text> : <Text color="orange.500">Non renseignée</Text>;
+const getValueOrFallback = (value: Value): string => {
+  return value ? value.toString() : "Non renseignée";
 };
 
 const getLastStatut = (statut: any) => {
@@ -47,14 +49,20 @@ const getSourceText = (source: SourceApprenant, transmittedAt: Date) => {
     <Text color="plaininfo" my={4}>
       Données transmises par {prefix}
       <Text as="span" fontWeight="bold">
-        {sourceLabel}
+        {sourceLabel}{" "}
       </Text>
-      {transmittedAt && (
+      {transmittedAt ? (
         <>
-          {" "}
           le{" "}
           <Text as="span" fontWeight="bold">
             {formattedDate}
+          </Text>
+        </>
+      ) : (
+        <>
+          il y a{" "}
+          <Text as="span" fontWeight="bold">
+            plus de 2 semaines
           </Text>
         </>
       )}
@@ -85,6 +93,23 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
           {sourceText}
           <Table variant="list" width="100%">
             <Tbody>
+              <Tr>
+                <Td fontWeight="bold" width="50%">
+                  Dernier statut déclaré
+                </Td>
+                <Td width="50%" whiteSpace="nowrap">
+                  <Tag
+                    leftIcon={WarningIcon}
+                    primaryText={getValueOrFallback(STATUT_NAME[lastStatut.valeur] as Value)}
+                    colorScheme="redlight_tag"
+                    variant="badge"
+                    w="fit-content"
+                    rounded="full"
+                    pl={2}
+                    pr={4}
+                  />
+                </Td>
+              </Tr>
               <Tr>
                 <Td fontWeight="bold" width="50%">
                   Nom
@@ -173,14 +198,6 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                 </Td>
                 <Td width="50%" whiteSpace="nowrap">
                   {getValueOrFallback(apprenant.rqth)}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold" width="50%">
-                  Dernier statut déclaré
-                </Td>
-                <Td width="50%" whiteSpace="nowrap">
-                  {getValueOrFallback(STATUT_NAME[lastStatut.valeur])}
                 </Td>
               </Tr>
             </Tbody>
@@ -315,7 +332,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
                         )}
                       />
                     </Td>
-                    <Td>{getValueOrFallback(`${formation.niveau ?? ""} ${formation.niveau_libelle ?? ""}`)}</Td>
+                    <Td>{getValueOrFallback(formation.niveau_libelle)}</Td>
                   </Tr>
                   <Tr>
                     <Td fontWeight="bold">Durée théorique en mois</Td>

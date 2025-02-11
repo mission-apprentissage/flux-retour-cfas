@@ -12,12 +12,7 @@ import {
   IUsersMigration,
 } from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import {
-  IOrganisme,
-  defaultValuesOrganisme,
-  hasRecentTransmissions,
-  withOrganismeListSummary,
-} from "shared/models/data/organismes.model";
+import { IOrganisme, hasRecentTransmissions, withOrganismeListSummary } from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -26,7 +21,6 @@ import {
   findOrganismeFormateursIds,
   findOrganismeResponsablesIds,
 } from "@/common/actions/helpers/permissions";
-import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
 import logger from "@/common/logger";
 import {
@@ -37,101 +31,12 @@ import {
   effectifsDECADb,
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
-import { InfoSiret } from "../infoSiret.actions-struct";
-
-export type IOrganismeCreate = Partial<
-  Pick<
-    IOrganisme,
-    | "reseaux"
-    | "erps"
-    | "relatedFormations"
-    | "fiabilisation_statut"
-    | "ferme"
-    | "qualiopi"
-    | "contacts_from_referentiel"
-    | "created_at"
-    | "updated_at"
-  >
-> &
-  Omit<
-    IOrganisme,
-    | "_id"
-    | "reseaux"
-    | "erps"
-    | "relatedFormations"
-    | "fiabilisation_statut"
-    | "ferme"
-    | "qualiopi"
-    | "prepa_apprentissage"
-    | "created_at"
-    | "updated_at"
-  >;
-
-/**
- * Méthode de création d'un organisme
- * Checks uai format & existence
- */
-export const createOrganisme = async (data: IOrganismeCreate): Promise<IOrganisme> => {
-  if ((await organismesDb().countDocuments({ uai: data.uai, siret: data.siret })) > 0) {
-    throw new Error(`Un organisme avec l'UAI ${data.uai} et le siret ${data.siret} existe déjà`);
-  }
-
-  const organisme: IOrganisme = {
-    _id: new ObjectId(),
-    ...defaultValuesOrganisme(),
-    ...stripEmptyFields(data),
-  };
-  await organismesDb().insertOne(organisme);
-  return organisme;
-};
-
-type OrganismeInfoFromSiret = Pick<IOrganisme, "nom" | "enseigne" | "raison_sociale" | "adresse" | "ferme">;
-
-/**
- * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
- */
-export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial<OrganismeInfoFromSiret>> => {
-  let organismeInfos: Partial<OrganismeInfoFromSiret> = {};
-
-  if (siret) {
-    const dataSiret: InfoSiret = await findDataFromSiret(siret);
-
-    if (dataSiret.messages.api_entreprise_status === "OK") {
-      organismeInfos.ferme = !!dataSiret.result.ferme;
-
-      if (dataSiret.result.enseigne) {
-        organismeInfos.enseigne = dataSiret.result.enseigne;
-        organismeInfos.nom = dataSiret.result.enseigne;
-      }
-
-      if (dataSiret.result.raison_sociale) organismeInfos.raison_sociale = dataSiret.result.raison_sociale;
-
-      organismeInfos.adresse = {
-        ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
-        ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
-        ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
-        ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
-        ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
-        ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
-        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement as any } : {}),
-        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region as any } : {}),
-        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie as any } : {}),
-        ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
-      };
-    } else {
-      logger.error(`getOrganismeInfosFromSiret > Erreur > ${dataSiret.messages.api_entreprise_info}`);
-    }
-  }
-
-  return organismeInfos;
-};
 
 /**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
@@ -1009,8 +914,8 @@ function getOrganismeListProjection(
 export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const uais = new Set<string>();
   for (const dossier of data) {
-    if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
-    if (dossier.etablissement_responsable_uai) uais.add(dossier.etablissement_responsable_uai);
+    if (typeof dossier.etablissement_formateur_uai === "string") uais.add(dossier.etablissement_formateur_uai);
+    if (typeof dossier.etablissement_responsable_uai === "string") uais.add(dossier.etablissement_responsable_uai);
   }
   const invalidsUais: string[] = [];
   for (const uai of uais) {
@@ -1025,8 +930,9 @@ export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectif
 export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const sirets = new Set<string>();
   for (const dossier of data) {
-    if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);
-    if (dossier.etablissement_responsable_siret) sirets.add(dossier.etablissement_responsable_siret);
+    if (typeof dossier.etablissement_formateur_siret === "string") sirets.add(dossier.etablissement_formateur_siret);
+    if (typeof dossier.etablissement_responsable_siret === "string")
+      sirets.add(dossier.etablissement_responsable_siret);
   }
   const invalidsSirets: string[] = [];
   for (const siret of sirets) {

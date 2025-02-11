@@ -24,7 +24,10 @@ import { generateOrganismeComputed } from "./organismes/organismes.actions";
  * Dans le cas d'un effectif téléversé, on ne veut pas verrouiller les champs, même ceux dits "par défaut" (nom, prénom, etc.)
  * Voir aussi la méthode lockEffectif
  */
-export const mergeEffectifWithDefaults = <T extends Partial<IEffectif>>(effectifData: T, lockData: boolean = true) => {
+export const mergeEffectifWithDefaults = (
+  effectifData: Omit<IEffectif, "_id" | "_computed" | "organisme_id">,
+  lockData: boolean = true
+): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   const defaultValues = defaultValuesEffectif();
   // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
@@ -128,7 +131,7 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>({
+export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({
   organisme,
   effectif,
   certification,
@@ -162,7 +165,7 @@ export const addComputedFields = async <T extends IEffectif | WithoutId<IEffecti
   return computedFields;
 };
 
-export const withComputedFields = async <T extends IEffectif | WithoutId<IEffectifDECA>>(
+export const withComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>(
   effectif: T,
   {
     organisme,

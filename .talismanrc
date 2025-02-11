@@ -19,12 +19,18 @@ fileignoreconfig:
   checksum: 796635402459cd6f6edb18a01b54bb2ecbb75067335ec7b3a6fd291dfd25e806
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
+- filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
+  checksum: aca9111611fe6cdbd3a9d5d144687339ea161e2375c158a38cec48ff11f359a4
+- filename: server/src/jobs/hydrate/organismes/organisme-cleanup.test.ts
+  checksum: 96e3019b32d45f6b184601bed1641eb34b28885e7841b2590eb06d5992584cfe
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
   checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
 - filename: server/tests/jest/setupNock.ts
   checksum: 206a5da7f948759335ac5d4ffe6e9eb45d00b8c142bc984cddbc10ccb7f6282b
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
+- filename: shared/models/fixtures/formationsCatalogue.fixture.ts
+  checksum: 71544c620f9bdcfb56007be090ebfeabb1f7660116355244d6dd097d383f5dd3
 - filename: ui/common/utils/televersement.ts
   checksum: a6097b52f42a834065f03b2852bcd9f90c48ea18c0757d473ca80f5c838240a2
 - filename: ui/components/Page/components/Footer.tsx

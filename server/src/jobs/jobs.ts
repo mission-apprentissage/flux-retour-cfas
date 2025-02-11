@@ -34,10 +34,10 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
-import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
+import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
-import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
+import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
@@ -48,8 +48,6 @@ import { validationTerritoires } from "./territoire/validationTerritoire";
 import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
 const dailyJobs = async (queued: boolean) => {
-  await addJob({ name: "hydrate:organismes-referentiel", queued });
-
   // # Remplissage des formations issus du catalogue
   await addJob({ name: "hydrate:formations-catalogue", queued });
 
@@ -91,6 +89,8 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "computed:update", queued });
 
+  await addJob({ name: "organisme:cleanup", queued });
+
   return 0;
 };
 
@@ -105,6 +105,11 @@ export async function setupJobProcessor() {
             "Run daily jobs each day at 02h30": {
               cron_string: "30 2 * * *",
               handler: async () => dailyJobs(true),
+            },
+
+            "Cleanup organismes": {
+              cron_string: "0 3 * * *",
+              handler: cleanupOrganismes,
             },
 
             "Send reminder emails at 7h": {
@@ -150,11 +155,6 @@ export async function setupJobProcessor() {
       "hydrate:daily": {
         handler: async () => dailyJobs(true),
       },
-      "hydrate:organismes-referentiel": {
-        handler: async () => {
-          return hydrateFromReferentiel();
-        },
-      },
       "hydrate:formations-catalogue": {
         handler: async () => {
           return hydrateFormationsCatalogue();
@@ -179,6 +179,9 @@ export async function setupJobProcessor() {
         handler: async () => {
           return hydrateDecaRaw();
         },
+      },
+      "organisme:cleanup": {
+        handler: cleanupOrganismes,
       },
       "hydrate:effectifs:update_all_computed_statut": {
         handler: async () => {
@@ -213,8 +216,8 @@ export async function setupJobProcessor() {
         },
       },
       "hydrate:organismes": {
-        handler: async () => {
-          return hydrateOrganismesFromReferentiel();
+        handler: async (job) => {
+          return hydrateOrganismesFromApiAlternance(job.started_at ?? new Date());
         },
       },
       "hydrate:organismes-effectifs-count": {

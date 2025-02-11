@@ -301,7 +301,7 @@ const Organisme = () => {
                         </SimpleGrid>
                       </TabPanel>
                       <TabPanel>
-                        <UsersList organisation={row.original.organisation} />
+                        <UsersList users={row.original.organisation?.users ?? null} />
                       </TabPanel>
                       <TabPanel>
                         <RelatedOrganismePanel

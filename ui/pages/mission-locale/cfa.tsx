@@ -1,4 +1,4 @@
-import { Container, Heading, HStack, VStack, Text, Box } from "@chakra-ui/react";
+import { Container, Heading, HStack, VStack, Text, Box, ListItem, UnorderedList } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -57,10 +57,17 @@ function CfaPage() {
         </HStack>
         <VStack spacing={4} alignItems="flex-start" w={2 / 3}>
           <Text>
-            Retrouvez ci-dessous les {organismes?.pagination?.total} établissements domiciliés sur votre périmètre
-            géographique et qui forment des jeunes (identifiés comme inscrit sans contrat, en rupture de contrat ou en
-            abandon/sortie d’apprentissage)
+            Retrouvez ci-dessous les <strong>{organismes?.pagination?.total}</strong> établissements formant (ou ayant
+            formé) des jeunes identifiés comme :
           </Text>
+          <UnorderedList pl={6}>
+            <ListItem>
+              <Text>en difficulté (sans contrat d’apprentissage, en rupture de contrat, abandons)</Text>
+            </ListItem>
+            <ListItem>
+              <Text>domiciliés sur l’une des communes de votre périmètre géographique.</Text>
+            </ListItem>
+          </UnorderedList>
           <Text fontStyle="italic">Cliquez sur un organisme pour voir ses contacts.</Text>
         </VStack>
         <Box mt={10} mb={16}>

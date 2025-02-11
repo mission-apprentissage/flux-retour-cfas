@@ -489,7 +489,7 @@ export interface Organisme {
   /**
    * Est dans le referentiel onisep des organismes
    */
-  est_dans_le_referentiel?: "absent" | "present" | "present_uai_multiples_dans_tdb";
+  est_dans_le_referentiel?: "absent" | "present";
   /**
    * Le siret est fermé
    */

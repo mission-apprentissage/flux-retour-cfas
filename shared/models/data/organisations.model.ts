@@ -91,7 +91,7 @@ const zOrganisationNational = zOrganisationBase.merge(zOrganisationNationalCreat
 const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCreate);
 const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
 
-const zOrganisation = z.discriminatedUnion("type", [
+export const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationMissionLocale,
   zOrganisationOrganisme,
   zOrganisationReaseau,
