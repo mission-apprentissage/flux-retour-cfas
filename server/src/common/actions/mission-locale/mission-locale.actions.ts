@@ -129,6 +129,10 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
                   $or: [
                     { "apprenant.nom": { $regex: currentSearch, $options: "i" } },
                     { "apprenant.prenom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.siret": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.nom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.raison_sociale": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.enseigne": { $regex: currentSearch, $options: "i" } },
                   ],
                 })),
             }
@@ -291,6 +295,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const effectifsAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
@@ -307,15 +312,23 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     ...effectifMissionLocaleLookupAggregation,
-    ...buildFiltersForMissionLocale(effectifFilters),
-    ...EFF_MISSION_LOCALE_FILTER,
     {
       $lookup: {
         from: "organismes",
         let: { id: "$organisme_id" },
         pipeline: [
           { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          { $project: { _id: 0, contacts_from_referentiel: 1, nom: 1, raison_sociale: 1, adresse: 1 } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
         ],
         as: "organisme",
       },
@@ -326,6 +339,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...buildFiltersForMissionLocale(effectifFilters),
     {
       $lookup: {
         from: "usersMigration",
