@@ -1,4 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { Jsonify } from "type-fest";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
@@ -68,5 +69,6 @@ export const zUsersMigration = z.object({
 });
 
 export type IUsersMigration = z.output<typeof zUsersMigration>;
+export type IUsersMigrationJson = Jsonify<IUsersMigration>;
 
 export default { zod: zUsersMigration, indexes, collectionName };

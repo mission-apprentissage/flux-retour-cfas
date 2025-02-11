@@ -91,7 +91,7 @@ export const zOrganisme = z
         description: "Code UAI de l'établissement",
       })
       .regex(UAI_REGEX)
-      .optional(),
+      .nullish(),
     siret: z
       .string({
         description: "N° SIRET de l'établissement",
@@ -199,7 +199,7 @@ export const zOrganisme = z
     ),
     // TODO [tech] TO REMOVE LATER
     access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
-    api_key: z.string({ description: "API key pour envoi de données" }).optional(),
+    api_key: z.string({ description: "API key pour envoi de données" }).nullish(),
     api_uai: z.string({ description: "Uai envoyé par l'erp" }).optional(),
     api_siret: z.string({ description: "Siret envoyé par l'erp" }).optional(),
     api_configuration_date: z.date({ description: "Date de l'interfaçage" }).optional(),
