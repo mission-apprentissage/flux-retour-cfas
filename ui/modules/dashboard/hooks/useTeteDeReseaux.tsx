@@ -9,7 +9,7 @@ type UseTeteDeReseaux = {
 };
 
 export function useTeteDeReseaux(): UseTeteDeReseaux {
-  const { data, isLoading } = useQuery<IReseau[]>(["reseau"], () => _get(`/api/v1/reseaux`), {});
+  const { data, isLoading } = useQuery<IReseau[]>(["tete_de_reseaux"], () => _get(`/api/v1/reseaux`), {});
 
   return {
     data: data || null,
