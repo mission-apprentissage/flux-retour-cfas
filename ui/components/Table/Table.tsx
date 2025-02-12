@@ -65,13 +65,16 @@ export default function Table({
     return columnHelper.accessor(key as any, columnsDef[key]);
   });
 
+  const pageSize = pagination?.limit || 10;
+  const pageCount = pagination?.total || Math.ceil(data.length / pageSize);
+
   const table = useReactTable({
     data,
     columns,
     getRowCanExpand,
     // pagination
     manualPagination,
-    pageCount: pagination?.total || data?.length,
+    pageCount,
     ...(onPaginationChange
       ? {
           onPaginationChange: (updater: any) => {
@@ -110,7 +113,7 @@ export default function Table({
       ...(pagination
         ? {
             pagination: {
-              pageSize: pagination?.limit || 10,
+              pageSize: pageSize,
               pageIndex: (pagination?.page || 1) - 1,
             },
           }

@@ -162,7 +162,6 @@ const hydrateReseauFile = async (filename: string) => {
 
   logger.info(`Organismes de ${filename} trouvés en base ${organismesFound.length} sur ${reseauFile.length}`);
   logger.info(`Organismes de ${filename} non trouvés en base ${organismesNotFound.length} sur ${reseauFile.length}`);
-  if (organismesNotFound.length > 0) logger.info(`Organismes non trouvés : ${JSON.stringify(organismesNotFound)}`);
   logger.info("Organismes en base TDB dont les réseaux ont été mis à jour :", organismeUpdatedCount);
   logger.info("Organismes en base TDB n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
 

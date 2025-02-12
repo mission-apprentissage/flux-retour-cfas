@@ -1,5 +1,4 @@
 import Boom from "boom";
-import { IOrganisme, STATUT_FIABILISATION_ORGANISME } from "shared";
 
 import logger from "@/common/logger";
 import { auditLogsDb, invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
@@ -11,11 +10,7 @@ import config from "@/config";
 import { AuthContext } from "../model/internal/AuthContext.js";
 
 import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
-import {
-  createOrganisme,
-  getOrganismeByUAIAndSIRET,
-  getOrganismeInfosFromSiret,
-} from "./organismes/organismes.actions";
+import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
 
@@ -31,27 +26,10 @@ export async function register(registration: RegistrationSchema): Promise<{
   // on s'assure que l'organisme existe pour un OF
   const type = registration.organisation.type;
   if (type === "ORGANISME_FORMATION") {
-    let organisme: IOrganisme | undefined;
     const { uai, siret } = registration.organisation;
-    try {
-      organisme = await getOrganismeByUAIAndSIRET(uai, siret);
-    } catch (err) {
-      // si pas d'organisme en base (et donc le référentiel), on en crée un à partir depuis API entreprise
-      logger.warn({ action: "register", uai, siret }, "organisme inconnu créé");
-      // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
-      const data = await getOrganismeInfosFromSiret(siret);
-
-      // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
-      organisme = await createOrganisme({
-        ...data,
-        ...(uai ? { uai } : {}),
-        siret,
-        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
-        organismesFormateurs: [],
-        organismesResponsables: [],
-      });
-    } finally {
-      registrationExtraData = { organisme_id: organisme?._id.toString() };
+    const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
+    if (!organisme) {
+      throw Boom.badRequest("L'organisme de formation n'existe pas.");
     }
   }
   const organisation = await organisationsDb().findOne(registration.organisation);

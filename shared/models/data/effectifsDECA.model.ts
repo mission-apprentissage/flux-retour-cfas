@@ -74,6 +74,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ source: 1 }, { name: "source" }],
   [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ transmitted_at: 1 }, {}],
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
@@ -152,6 +153,7 @@ const zEffectifDECA = z.object({
 
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
+  transmitted_at: z.date({ description: "Date de transmission de l'effectif" }).nullish(),
   archive: z
     .boolean({
       description: "Dossier apprenant est archivé (rétention maximum 5 ans)",

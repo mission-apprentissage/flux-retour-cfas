@@ -15,7 +15,7 @@ interface FilterListProps {
   sortOrder?: "asc" | "desc";
 }
 
-const FilterList: React.FC<FilterListProps> = ({
+export const FilterList: React.FC<FilterListProps> = ({
   filterKey,
   displayName,
   options,
@@ -56,5 +56,3 @@ const FilterList: React.FC<FilterListProps> = ({
     </div>
   );
 };
-
-export default FilterList;

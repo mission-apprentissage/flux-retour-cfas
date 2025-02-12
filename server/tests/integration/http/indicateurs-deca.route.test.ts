@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
@@ -15,12 +16,10 @@ let requestAsOrganisation: RequestAsOrganisationFunc;
 const idResp = new ObjectId();
 const idForm = new ObjectId();
 
-const organismeResponsable: IOrganisme = {
+const organismeResponsable: IOrganisme = generateOrganismeFixture({
   _id: idResp,
   fiabilisation_statut: "FIABLE",
   ferme: false,
-  created_at: new Date(),
-  updated_at: new Date(),
   uai: "0000000A",
   siret: "00000000000018",
   nature: "responsable",
@@ -35,19 +34,12 @@ const organismeResponsable: IOrganisme = {
     bassinEmploi: "7505",
   },
   nom: "MON ORGANISME FORMATEUR",
-  organismesFormateurs: [
-    {
-      _id: idForm,
-    },
-  ],
-};
+});
 
-const organismeFormateur: IOrganisme = {
+const organismeFormateur: IOrganisme = generateOrganismeFixture({
   _id: idForm,
   fiabilisation_statut: "FIABLE",
   ferme: false,
-  created_at: new Date(),
-  updated_at: new Date(),
   uai: "0000000B",
   siret: "00000000000019",
   nature: "formateur",
@@ -62,12 +54,14 @@ const organismeFormateur: IOrganisme = {
     bassinEmploi: "7505",
   },
   nom: "MON ORGANISME RESPONSABLE",
-  organismesResponsables: [
-    {
-      _id: idResp,
-    },
-  ],
-};
+});
+
+organismeResponsable.organismesFormateurs = [
+  { _id: organismeFormateur._id, siret: organismeFormateur.siret, uai: organismeFormateur.uai },
+];
+organismeFormateur.organismesResponsables = [
+  { _id: organismeResponsable._id, siret: organismeResponsable.siret, uai: organismeResponsable.uai },
+];
 
 const organisation = {
   _id: idResp,

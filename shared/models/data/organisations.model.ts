@@ -23,7 +23,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 
 
 const zOrganisationBase = z.object({
   _id: zObjectId,
-  created_at: z.date({ description: "Date de création en base de données" }),
+  created_at: z.coerce.date({ description: "Date de création en base de données" }),
 });
 
 const zOrganisationMissionLocaleCreate = z.object({
@@ -82,7 +82,7 @@ const zOrganisationAdminCreate = z.object({
   type: z.literal("ADMINISTRATEUR"),
 });
 
-const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
+export const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
 const zOrganisationOrganisme = zOrganisationBase.merge(zOrganisationOrganismeCreate);
 const zOrganisationReaseau = zOrganisationBase.merge(zOrganisationReaseauCreate);
 const zOrganisationRegional = zOrganisationBase.merge(zOrganisationRegionalCreate);
@@ -92,7 +92,7 @@ const zOrganisationNational = zOrganisationBase.merge(zOrganisationNationalCreat
 const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCreate);
 const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
 
-const zOrganisation = z.discriminatedUnion("type", [
+export const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationMissionLocale,
   zOrganisationOrganisme,
   zOrganisationReaseau,

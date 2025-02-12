@@ -12,7 +12,7 @@ type TransmissionsPanelProps = {
 };
 
 type OrganismeRefProps = {
-  self: IOrganismeJson;
+  self: Pick<IOrganismeJson, "siret" | "uai">;
   organismeRef:
     | OrganismeSupportInfo["transmissions"][number]["source_organisme"]
     | OrganismeSupportInfo["transmissions"][number]["organisme"]
@@ -20,7 +20,7 @@ type OrganismeRefProps = {
     | null;
 };
 
-function OrganismeRef({ organismeRef, self }: OrganismeRefProps) {
+export function OrganismeRef({ organismeRef, self }: OrganismeRefProps) {
   if (organismeRef == null) {
     return <Label level="error" value={"inconnu"} />;
   }

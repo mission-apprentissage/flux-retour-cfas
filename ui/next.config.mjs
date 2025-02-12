@@ -53,7 +53,6 @@ const nextConfig = {
       ".mjs": [".mts", ".mjs"],
       ".cjs": [".cts", ".cjs"],
     };
-    console.log(config);
     return config;
   },
   async headers() {
@@ -74,6 +73,11 @@ const nextConfig = {
       {
         source: "/cfa/:path*",
         destination: "/reinscription",
+        permanent: true,
+      },
+      {
+        source: "/mission-locale",
+        destination: "/",
         permanent: true,
       },
       {

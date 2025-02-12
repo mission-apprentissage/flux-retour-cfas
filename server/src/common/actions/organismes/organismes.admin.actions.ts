@@ -1,21 +1,19 @@
 import { ObjectId } from "bson";
 import escapeStringRegexp from "escape-string-regexp";
+import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import { OrganismeSupportInfo } from "shared/models";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
+import { zArchivableOrganismesResponse } from "shared/models/routes/admin/organismes.api";
+import type { IArchivableOrganismesResponse } from "shared/models/routes/admin/organismes.api";
 
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
+import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
-import {
-  effectifsDb,
-  formationsCatalogueDb,
-  organisationsDb,
-  organismesDb,
-  organismesReferentielDb,
-} from "@/common/model/collections";
+import { effectifsDb, formationsCatalogueDb, organisationsDb, organismesDb } from "@/common/model/collections";
 
 import { getTransmissionRelatedToOrganismeByDate } from "../indicateurs/transmissions/transmission.action";
 
@@ -214,7 +212,7 @@ async function findOrganismesSupportInfoBySiret(siret: string): Promise<Organism
       return null;
     }),
     organismesDb().find({ siret }).toArray(),
-    organismesReferentielDb().find({ siret }).toArray(),
+    fetchOrganismeReferentielBySiret(siret),
     getOffreFormations(siret),
     organisationsDb()
       .aggregate<IOrganisationOrganismeFormation & { users: IUsersMigration[] }>([
@@ -237,7 +235,6 @@ async function findOrganismesSupportInfoBySiret(siret: string): Promise<Organism
   ]);
 
   const tdbByUai = new Map(tdb.map((o) => [o.uai ?? null, o]));
-  const referentielByUai = new Map(referentiel.map((o) => [o.uai ?? null, o]));
   const organisationByUai = new Map(organisations.map((o) => [o.uai ?? null, o]));
 
   const formationsByUai = new Map();
@@ -251,7 +248,11 @@ async function findOrganismesSupportInfoBySiret(siret: string): Promise<Organism
     }
   }
 
-  const uais = new Set([...tdbByUai.keys(), ...referentielByUai.keys(), ...formationsByUai.keys()]);
+  const uais = new Set([...tdbByUai.keys(), ...formationsByUai.keys()]);
+
+  if (referentiel) {
+    uais.add(referentiel.uai);
+  }
 
   if (apiEntreprise && uais.size === 0) {
     uais.add(null);
@@ -260,7 +261,7 @@ async function findOrganismesSupportInfoBySiret(siret: string): Promise<Organism
   const organismes: OrganismeSupportInfo[] = [];
   for (const uai of uais) {
     const tdbOrganisme = tdbByUai.get(uai);
-    const referentielOrganisme = referentielByUai.get(uai);
+    const referentielOrganisme = referentiel?.uai === uai ? referentiel : null;
 
     const etat = new Set<"fermé" | "actif" | "inconnu">();
     if (tdbOrganisme) {
@@ -300,7 +301,7 @@ async function findOrganismesSupportInfoBySiret(siret: string): Promise<Organism
         apiEntreprise?.unite_legale?.personne_morale_attributs?.raison_sociale ??
         "Organisme inconnu",
       tdb: tdbByUai.get(uai) ?? null,
-      referentiel: referentielByUai.get(uai) ?? null,
+      referentiel: referentiel?.uai === uai ? referentiel : null,
       formations,
       apiEntreprise: apiEntreprise,
       organisation: organisationByUai.get(uai) ?? null,
@@ -340,4 +341,80 @@ export async function searchOrganismesSupportInfoBySiret(search: string): Promis
   const results = await Promise.all(uniqueSirets.map(findOrganismesSupportInfoBySiret));
 
   return results.flat();
+}
+
+export async function getArchivableOrganismes(): Promise<IArchivableOrganismesResponse> {
+  const data = await organismesDb()
+    .aggregate([
+      { $match: { est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT } },
+      { $sort: { siret: 1, uai: 1 } },
+      {
+        $lookup: {
+          from: "organisations",
+          as: "organisation",
+          let: { organisme_id: { $toString: "$_id" } },
+          pipeline: [{ $match: { $expr: { $eq: ["$organisme_id", "$$organisme_id"] } } }],
+        },
+      },
+      {
+        $unwind: {
+          path: "$organisation",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "usersMigration",
+          localField: "organisation._id",
+          foreignField: "organisation_id",
+          as: "users",
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          as: "organismes_transmis",
+          let: { organisme_id: { $toString: "$_id" }, organisme_id_raw: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$organisme_transmetteur_id", "$$organisme_id"] },
+                    { $ne: ["$_id", "$$organisme_id_raw"] },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          as: "organismes_duplicats",
+          let: { id: "$_id", siret: "$siret" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$siret", "$$siret"],
+                    },
+
+                    {
+                      $ne: ["$_id", "$$id"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ])
+    .toArray();
+
+  return zArchivableOrganismesResponse.parse(data);
 }
