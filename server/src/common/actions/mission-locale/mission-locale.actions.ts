@@ -502,7 +502,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   missionLocaleId: number,
   organismesFiltersMissionLocale: IPaginationFilters
 ) => {
-  const { page = 0, limit = 20 } = organismesFiltersMissionLocale;
+  const { page = 0, limit = 20, sort = "nom", order = "asc" } = organismesFiltersMissionLocale;
   const statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
@@ -532,23 +532,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [
-          { $skip: page * limit },
-          { $limit: limit },
           { $addFields: { stringify_organisme_id: { $toString: "$_id" } } },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "stringify_organisme_id",
-              foreignField: "organisme_id",
-              as: "organisation",
-            },
-          },
-          {
-            $unwind: {
-              path: "$organisation",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
           {
             $lookup: {
               from: "organismes",
@@ -560,6 +544,20 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
           {
             $unwind: {
               path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "stringify_organisme_id",
+              foreignField: "organisme_id",
+              as: "organisation",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisation",
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -605,6 +603,15 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               },
             },
           },
+          {
+            $sort: buildSortFilter(sort, order, {
+              nom: "organisme.nom",
+              adresse: "organisme.adresse.commune",
+              formations_count: "formationsCount",
+            }),
+          },
+          { $skip: page * limit },
+          { $limit: limit },
           {
             $project: {
               _id: 0,
@@ -660,7 +667,6 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
     { $unwind: { path: "$totalFormations", preserveNullAndEmptyArrays: true } },
   ];
-
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
 
   if (!resultOrganismes) {
