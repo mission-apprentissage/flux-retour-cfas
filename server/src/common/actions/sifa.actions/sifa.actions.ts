@@ -215,7 +215,7 @@ export const generateSifa = async (
 };
 
 const generateSifaCSV = async (items) => {
-  const json2csvParser = new Parser({ fields: SIFA_FIELDS, delimiter: ";", withBOM: true });
+  const json2csvParser = new Parser({ fields: SIFA_FIELDS, delimiter: ";", withBOM: true, header: false });
   const file = await json2csvParser.parse(items);
 
   return { file, extension: "csv" };
