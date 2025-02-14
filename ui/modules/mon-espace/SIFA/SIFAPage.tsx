@@ -1,8 +1,10 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Box,
+  Button,
   Collapse,
   Container,
+  Divider,
   Flex,
   Grid,
   Heading,
@@ -29,11 +31,12 @@ import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import Tag from "@/components/Tag/Tag";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useToaster from "@/hooks/useToaster";
 import BandeauDuplicatsEffectifs from "@/modules/effectifs/BandeauDuplicatsEffectifs";
 import InfoTeleversementSIFA from "@/modules/organismes/InfoTeleversementSIFA";
-import { ExternalLinkLine, DownloadLine } from "@/theme/components/icons";
+import { ExternalLinkLine, DownloadLine, ValidateIcon } from "@/theme/components/icons";
 import Eye from "@/theme/components/icons/Eye";
 
 import { effectifsStateAtom, effectifFromDecaAtom } from "../effectifs/engine/atoms";
@@ -283,25 +286,99 @@ function SIFAPage(props: SIFAPageProps) {
 
         <HStack gap={4}>
           <SupportLink href={SIFA_GROUP}></SupportLink>
-          <DownloadButton
-            variant="primary"
-            action={async () => {
-              const { data, extension } = await _getBlob(
-                `/api/v1/organismes/${props.organisme._id}/sifa-export?type=xlsx`
-              );
-              trackPlausibleEvent("telechargement_sifa");
-              downloadObject(
-                data,
-                `tdb-données-sifa-${
-                  props.organisme.enseigne ?? props.organisme.raison_sociale ?? "Organisme inconnu"
-                }-${new Date().toLocaleDateString()}.${extension}`,
-                "text/plain"
-              );
-              handleToastOnSifaDownload();
-            }}
+          <BasicModal
+            title="Choisissez le format du fichier"
+            size="4xl"
+            renderTrigger={(onOpen) => (
+              <Button variant="primary" onClick={() => onOpen()}>
+                Télécharger le fichier SIFA
+              </Button>
+            )}
           >
-            Télécharger le fichier SIFA
-          </DownloadButton>
+            <Box>
+              <Text>
+                Si votre fichier est complet (tous vos effectifs sont renseignés), il est préférable de télécharger le
+                format .csv. Vous pouvez ensuite le déposer tel quel sur la plateforme SIFA.
+              </Text>
+              <Text my={4}>
+                Si des données sont manquantes sur certains effectifs, téléchargez le format .xlsx et complétez-les à la
+                main. Ensuite, sauvegardez-le (Fichier {">"} Enregistrer sous) au format CSV (délimiteur point-virgule)
+                après suppression de la première ligne pour assurer la compatibilité avec l&apos;enquête SIFA.
+              </Text>
+              <Flex direction="column" mt={12} gap={6}>
+                <Divider />
+                <Flex justify="space-between" alignItems="end">
+                  <Flex alignItems="center">
+                    <Text fontSize="1.5rem" fontWeight="bold">
+                      .csv
+                    </Text>
+                    <Tag
+                      leftIcon={ValidateIcon}
+                      leftIconColor="green.500"
+                      primaryText="Recommandé si données complètes"
+                      variant="badge"
+                      colorScheme="grey_tag"
+                      borderRadius="full"
+                      size="sm"
+                      ml={4}
+                    />
+                  </Flex>
+                  <DownloadButton
+                    variant="primary"
+                    action={async () => {
+                      const { data, extension } = await _getBlob(
+                        `/api/v1/organismes/${props.organisme._id}/sifa-export?type=csv`
+                      );
+                      trackPlausibleEvent("telechargement_sifa", undefined, { format: "csv" });
+                      downloadObject(
+                        data,
+                        `tdb-données-sifa-${props.organisme.enseigne ?? props.organisme.raison_sociale ?? "Organisme inconnu"}-${new Date().toLocaleDateString()}.${extension}`,
+                        "text/plain"
+                      );
+                      handleToastOnSifaDownload();
+                    }}
+                  >
+                    <Text>Télécharger</Text>
+                  </DownloadButton>
+                </Flex>
+                <Divider />
+                <Flex justify="space-between" alignItems="end">
+                  <Flex alignItems="center">
+                    <Text fontSize="1.5rem" fontWeight="bold">
+                      .xlsx
+                    </Text>
+                    <Tag
+                      leftIcon={WarningTwoIcon}
+                      leftIconColor="#FF732C"
+                      primaryText=" Recommandé si données manquantes"
+                      variant="badge"
+                      colorScheme="grey_tag"
+                      borderRadius="full"
+                      size="md"
+                      ml={2}
+                    />
+                  </Flex>
+                  <DownloadButton
+                    variant="primary"
+                    action={async () => {
+                      const { data, extension } = await _getBlob(
+                        `/api/v1/organismes/${props.organisme._id}/sifa-export?type=xlsx`
+                      );
+                      trackPlausibleEvent("telechargement_sifa", undefined, { format: "csv" });
+                      downloadObject(
+                        data,
+                        `tdb-données-sifa-${props.organisme.enseigne ?? props.organisme.raison_sociale ?? "Organisme inconnu"}-${new Date().toLocaleDateString()}.${extension}`,
+                        "text/plain"
+                      );
+                      handleToastOnSifaDownload();
+                    }}
+                  >
+                    <Text>Télécharger</Text>
+                  </DownloadButton>
+                </Flex>
+              </Flex>
+            </Box>
+          </BasicModal>
         </HStack>
       </Flex>
 
