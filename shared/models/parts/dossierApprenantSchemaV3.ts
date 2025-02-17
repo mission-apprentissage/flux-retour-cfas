@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { zAdresse } from "./adresseSchema";
 import { primitivesV1, primitivesV3 } from "./zodPrimitives";
 
 export const stripModelAdditionalKeys = (validationSchema: any, data: any) => {
@@ -56,6 +57,8 @@ export const dossierApprenantSchemaV3Base = z.object({
   code_postal_de_naissance_apprenant: primitivesV3.apprenant.code_postal.optional(),
   code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
   code_commune_insee_de_naissance_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
+  nom_commune_apprenant: zAdresse.shape.commune, // optional
+  nom_commune_de_naissance_apprenant: zAdresse.shape.commune, //optyional
 
   sexe_apprenant: primitivesV3.apprenant.sexe.optional(),
   rqth_apprenant: primitivesV3.apprenant.rqth.optional(),

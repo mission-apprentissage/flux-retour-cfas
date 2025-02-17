@@ -1055,6 +1055,14 @@
                       "pattern": "^[0-9]{5}$",
                       "description": "Code commune insee de naissance de l'apprenant"
                     },
+                    "nom_commune_apprenant": {
+                      "type": "string",
+                      "description": "Nom de la commune de l'apprenant"
+                    },
+                    "nom_commune_de_naissance_apprenant": {
+                      "type": "string",
+                      "description": "Nom de la commune de naissance de l'apprenant"
+                    },
                     "sexe_apprenant": {
                       "type": "string",
                       "pattern": "^[MF]$",
@@ -1495,6 +1503,14 @@
                             "type": "string",
                             "pattern": "^[0-9]{5}$",
                             "description": "Code commune insee de naissance de l'apprenant"
+                          },
+                          "nom_commune_apprenant": {
+                            "type": "string",
+                            "description": "Nom de la commune de l'apprenant"
+                          },
+                          "nom_commune_de_naissance_apprenant": {
+                            "type": "string",
+                            "description": "Nom de la commune de naissance de l'apprenant"
                           },
                           "sexe_apprenant": {
                             "type": "string",
