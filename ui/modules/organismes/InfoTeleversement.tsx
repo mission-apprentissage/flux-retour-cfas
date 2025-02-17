@@ -1,5 +1,6 @@
 import { Box, Grid, HStack, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 
+import { MODEL_EXPORT_LAST_UPDATE } from "@/common/utils/exportUtils";
 import ButtonTeleversement from "@/components/buttons/ButtonTeleversement";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
@@ -7,7 +8,7 @@ export default function InfoTeleversement() {
   return (
     <>
       <VStack align="start">
-        <ButtonTeleversement href="/modele-import.xlsx">
+        <ButtonTeleversement href={`/modele-import-${MODEL_EXPORT_LAST_UPDATE}.xlsx`}>
           Télécharger le modèle Excel
           <DownloadSimple ml="2" />
         </ButtonTeleversement>
