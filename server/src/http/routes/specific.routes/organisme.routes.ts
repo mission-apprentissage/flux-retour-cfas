@@ -284,7 +284,7 @@ export async function getOrganismeEffectifs(
   };
 }
 
-export async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = false) {
+async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = false) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
   const isDeca = !organisme?.is_transmission_target;
   const db = isDeca ? effectifsDECADb() : effectifsDb();

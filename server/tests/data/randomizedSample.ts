@@ -2,14 +2,13 @@ import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
 import { ObjectId, WithoutId } from "mongodb";
 import RandExp from "randexp";
-import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
+import { CFD_REGEX, INE_REGEX, RNCP_REGEX, SOURCE_APPRENANT } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import type { PartialDeep } from "type-fest";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
-import { type DossierApprenantSchemaV1V2ZodTypeInput } from "@/common/validation/dossierApprenantSchemaV1V2";
 
 import sampleEtablissements, { SampleEtablissement } from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
@@ -21,7 +20,6 @@ const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
 const getRandomEtablissement = (siret?: string): SampleEtablissement =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
-const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomDateInRange = (start: Date, end: Date): Date => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
@@ -127,41 +125,6 @@ export const createSampleEffectif = async ({
   });
 
   return fullEffectif as WithoutId<IEffectif>;
-};
-
-export const createRandomDossierApprenantApiInput = (
-  params: Partial<DossierApprenantSchemaV1V2ZodTypeInput> = {}
-): DossierApprenantSchemaV1V2ZodTypeInput => {
-  const annee_scolaire = getRandomAnneeScolaire();
-  const { uai, siret } = getRandomEtablissement();
-  const formation = createRandomFormation(annee_scolaire);
-
-  return {
-    ine_apprenant: getRandomIne(),
-    nom_apprenant: faker.person.lastName().toUpperCase(),
-    prenom_apprenant: faker.person.firstName(),
-    date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
-
-    email_contact: faker.internet.email(),
-
-    id_formation: getRandomFormationCfd(),
-    libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
-    uai_etablissement: uai,
-    siret_etablissement: siret,
-    nom_etablissement: `ETABLISSEMENT ${faker.lorem.word()}`.toUpperCase(),
-
-    statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
-    annee_formation: formation.annee,
-    periode_formation: formation.periode.join("-"),
-    annee_scolaire,
-    id_erp_apprenant: faker.string.uuid(),
-    tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
-    code_commune_insee_apprenant: faker.location.zipCode(),
-    source: SOURCE_APPRENANT.ERP,
-    api_version: "v2",
-    ...params,
-  };
 };
 
 export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {

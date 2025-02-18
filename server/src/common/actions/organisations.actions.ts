@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
-import { IOrganisationCreate, IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
@@ -32,20 +32,6 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<IOr
     throw Boom.notFound(`missing organisation ${organisationId}`);
   }
   return organisation;
-}
-
-export async function getMissionLocaleByUniqueId(missionLocaleUniqueId: number): Promise<IOrganisationMissionLocale> {
-  const ml = await organisationsDb().findOne<IOrganisationMissionLocale>({
-    ml_id: missionLocaleUniqueId,
-  });
-
-  if (!ml) {
-    throw Boom.notFound(`Mission locale not found`);
-  }
-  if (ml.type !== "MISSION_LOCALE") {
-    throw Boom.notFound(`Organisation is not a mission locale`);
-  }
-  return ml as IOrganisationMissionLocale;
 }
 
 export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<IUsersMigration[]>> {

@@ -32,14 +32,6 @@ export function prettyFormatNumber(number: number): string {
   return `${number % 1 !== 0 ? number.toFixed(1) : number}`;
 }
 
-export const toPascalCase = (string) =>
-  `${string}`
-    .toLowerCase()
-    .replace(new RegExp(/[-_]+/, "g"), " ")
-    .replace(new RegExp(/[^\w\s]/, "g"), "")
-    .replace(new RegExp(/\s+(.)(\w*)/, "g"), ($1, $2, $3) => `${$2.toUpperCase() + $3}`)
-    .replace(new RegExp(/\w/), (s) => s.toUpperCase());
-
 export function capitalizeWords(str: string): string {
   const formattedString = str.toLowerCase().replace(/_/g, " ");
   return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);

@@ -20,7 +20,7 @@ type OrganismeRefProps = {
     | null;
 };
 
-export function OrganismeRef({ organismeRef, self }: OrganismeRefProps) {
+function OrganismeRef({ organismeRef, self }: OrganismeRefProps) {
   if (organismeRef == null) {
     return <Label level="error" value={"inconnu"} />;
   }

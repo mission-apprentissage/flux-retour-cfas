@@ -8,7 +8,7 @@ const UAI_REGEX_PATTERN = "^[0-9]{7}[a-zA-Z]$";
 const YEAR_RANGE_PATTERN = "^[12][0-9]{3}-[12][0-9]{3}$";
 const YEAR_PATTERN = "^[12][0-9]{3}$";
 // Basé sur les recommandations SIFA
-export const DERNIER_ORGANISME_UAI_PATTERN =
+const DERNIER_ORGANISME_UAI_PATTERN =
   "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$";
 
 // Numero INE (Identifiant National Elève)

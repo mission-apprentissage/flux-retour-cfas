@@ -24,7 +24,7 @@ import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
-export const EFF_MISSION_LOCALE_FILTER = [
+const EFF_MISSION_LOCALE_FILTER = [
   {
     $match: {
       $or: [
@@ -95,7 +95,7 @@ const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: D
       ]
     : [];
 
-export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
     rqth,

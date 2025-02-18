@@ -9,5 +9,3 @@ export const zGetEffectifsForOrganismeApi = {
   source: z.array(z.string()).optional(),
   search: z.string().optional(),
 };
-
-export type IGetEffectifsForOrganismeApi = z.infer<z.ZodObject<typeof zGetEffectifsForOrganismeApi>>;

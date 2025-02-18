@@ -1,16 +1,3 @@
-import crypto from "crypto";
-
-/**
- * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
- */
-export const generateRandomAlphanumericPhrase = (length = 20) => {
-  const alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-  return Array.from(crypto.randomFillSync(new Uint32Array(length)))
-    .map((x) => alphanumeric[x % alphanumeric.length])
-    .join("");
-};
-
 /**
  * @param  {any[]} array1
  * @param  {any[]} array2
@@ -25,14 +12,6 @@ export const arraysContainSameValues = (array1, array2) => {
     if (!array2.includes(item)) return false;
   });
   return true;
-};
-
-/**
- * Méthode de calcul de pourcentage
- */
-export const getPercentage = (count = 0, total = 0) => {
-  if (total === 0) return 0;
-  return Math.round((count * 100) / total);
 };
 
 export function stripEmptyFields<T extends object>(object: T): T {

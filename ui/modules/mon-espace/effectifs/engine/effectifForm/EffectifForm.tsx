@@ -329,7 +329,7 @@ export const EffectifForm = memo(
   }
 );
 
-export const WarningMessage = ({ modeSifa }: { modeSifa: boolean }) => {
+const WarningMessage = ({ modeSifa }: { modeSifa: boolean }) => {
   if (!modeSifa) return null;
 
   return (
