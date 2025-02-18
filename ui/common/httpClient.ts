@@ -1,6 +1,7 @@
 import * as https from "https";
 
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import mime from "mime";
 
 import { publicConfig } from "@/config.public";
 
@@ -105,7 +106,7 @@ export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) 
     responseType: "blob",
     ...options,
   });
-  return handleResponse(path, response);
+  return { data: handleResponse(path, response), extension: mime.getExtension(response.headers["content-type"]) };
 };
 
 export const _post = async <RequestBody = any, ResponseBody = any>(
