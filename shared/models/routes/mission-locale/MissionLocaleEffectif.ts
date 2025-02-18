@@ -12,7 +12,7 @@ import {
 import { zApprenant } from "../../data/effectifs/apprenant.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
 
-export const zEffectifMissionLocale = z.object({
+const zEffectifMissionLocale = z.object({
   id: zObjectId,
   apprenant: zApprenant.pick({
     nom: true,

@@ -3,14 +3,14 @@ import type { z } from "zod";
 
 import { zOrganisation, zOrganisme, zUsersMigration } from "../../data";
 
-export const zArchivableOrganisme = zOrganisme.extend({
+const zArchivableOrganisme = zOrganisme.extend({
   organisation: zOrganisation.nullable().default(null),
   users: zUsersMigration.array(),
   organismes_transmis: zOrganisme.array(),
   organismes_duplicats: zOrganisme.array(),
 });
 
-export type IArchivableOrganisme = z.output<typeof zArchivableOrganisme>;
+type IArchivableOrganisme = z.output<typeof zArchivableOrganisme>;
 export type IArchivableOrganismeJson = Jsonify<IArchivableOrganisme>;
 
 export const zArchivableOrganismesResponse = zArchivableOrganisme.array();

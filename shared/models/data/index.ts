@@ -12,7 +12,6 @@ export * from "./organisations.model";
 export * from "./organismes.model";
 export * from "./organismesReferentiel.model";
 export * from "./rncp.model";
-export * from "./users.model";
 export * from "./usersMigration.model";
 export * from "./erp.model";
 export * from "./v2";

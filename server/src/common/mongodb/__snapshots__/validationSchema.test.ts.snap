@@ -9740,10 +9740,6 @@ exports[`validation-schema > should create validation schema for organismes > or
     "_id": {
       "bsonType": "objectId",
     },
-    "access_token": {
-      "bsonType": "string",
-      "description": "Le token permettant l'accès au CFA à sa propre page",
-    },
     "adresse": {
       "anyOf": [
         {
@@ -11057,97 +11053,6 @@ exports[`validation-schema > should create validation schema for transmissionV2 
     "_id",
     "created_at",
     "formation_id",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for users > users 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "__v": {
-      "bsonType": "number",
-    },
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "archived_at": {
-      "bsonType": "date",
-    },
-    "created_at": {
-      "bsonType": "date",
-      "description": "La date de création de l'utilisateur",
-    },
-    "email": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Email de l'utilisateur",
-    },
-    "last_connection": {
-      "bsonType": "date",
-      "description": "Date de dernière connexion",
-    },
-    "network": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Le réseau de CFA de l'utilisateur s'il est précisé",
-    },
-    "organisme": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "L'organisme d'appartenance de l'utilisateur s'il est précisé",
-    },
-    "password": {
-      "bsonType": "string",
-      "description": "Le mot de passe hashed",
-    },
-    "password_update_token": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Token généré afin de sécuriser le changement de mot de passe",
-    },
-    "password_update_token_expiry": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
-    },
-    "permissions": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
-    },
-    "region": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "La région de l'utilisateur s'il est précisé",
-    },
-    "username": {
-      "bsonType": "string",
-      "description": "Le nom de l'utilisateur, utilisé pour l'authentification",
-    },
-  },
-  "required": [
-    "_id",
-    "username",
-    "created_at",
   ],
 }
 `;
