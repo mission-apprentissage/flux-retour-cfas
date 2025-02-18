@@ -1,4 +1,53 @@
-export const SIFA_FIELDS = [
+export type ISifaRow = {
+  INE?: string;
+  NUMERO_UAI?: string;
+  TYPE_CFA?: string;
+  SIT_FORM?: string;
+  UAI_EPLE?: string;
+  NAT_STR_JUR?: string;
+  STATUT?: string;
+  DIPLOME?: string;
+  RNCP?: string;
+  DUR_FORM_THEO?: string;
+  DUR_FORM_REELLE?: string;
+  AN_FORM?: string;
+  NOM?: string;
+  NOM2?: string;
+  PRENOM1?: string;
+  PRENOM2?: string;
+  PRENOM3?: string;
+  ADRESSE?: string;
+  COD_POST?: string;
+  COM_RESID?: string;
+  TEL_JEUNE?: string;
+  TEL_RESP1_PERSO?: string;
+  TEL_RESP1_PRO?: string;
+  TEL_RESP2_PERSO?: string;
+  TEL_RESP2_PRO?: string;
+  MAIL_JEUNE?: string;
+  MAIL_RESP1?: string;
+  MAIL_RESP2?: string;
+  DATE_NAIS?: string;
+  LIEU_NAIS?: string;
+  SEXE?: string;
+  REGIME_SCO?: string;
+  PCS?: string;
+  HANDI?: string;
+  NATIO?: string;
+  SIT_AV_APP?: string;
+  DIP_OBT?: string;
+  SIT_N_1?: string;
+  ETAB_N_1?: string;
+  TYPE_EMP?: string;
+  DATE_ENTREE_CFA?: string;
+  DATE_DEB_CONT?: string;
+  DATE_RUPT_CONT?: string;
+  COM_ETAB?: string;
+  NAF_ETAB?: string;
+  NBSAL_EMP?: string;
+  SIRET_EMP?: string;
+};
+export const SIFA_FIELDS: Array<{ label: keyof ISifaRow; value: keyof ISifaRow }> = [
   {
     label: "INE",
     value: "INE",
@@ -236,5 +285,5 @@ export const formatStringForSIFA = (str: string | undefined) => {
 
 export const wrapNumString = (str: string | number | null | undefined) => {
   if (str === null || str === undefined) return str;
-  return `="${str}"`;
+  return str;
 };

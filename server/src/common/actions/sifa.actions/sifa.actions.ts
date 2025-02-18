@@ -1,6 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
+import xlsx from "node-xlsx";
 import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT, StatutApprenant } from "shared";
 import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
@@ -8,7 +9,7 @@ import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb } from "@/common/model/collections";
 
-import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
+import { ISifaRow, SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA } from "./sifaCsvFields";
 
 const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
   if (!statut) return false;
@@ -30,7 +31,14 @@ const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
   return latestStatus === STATUT_APPRENANT.APPRENTI || latestStatus === STATUT_APPRENANT.RUPTURANT;
 };
 
-export const generateSifa = async (organisme_id: ObjectId) => {
+export const generateSifa = async (
+  organisme_id: ObjectId,
+  type: "xlsx" | "csv"
+): Promise<{
+  file: string | Buffer;
+  extension: string;
+  effectifsIds: string[];
+}> => {
   const organisme = await getOrganismeById(organisme_id);
 
   const effectifs = (
@@ -83,7 +91,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     }
 
     // Extraction du code diplome cfd
-    const codeDiplome = wrapNumString(formationCfd);
+    const codeDiplome = formationCfd;
     // Adresse de l'effectif
     const effectifAddress = effectif.apprenant.adresse
       ? (effectif.apprenant.adresse?.complete ??
@@ -97,22 +105,20 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       NOM: formatStringForSIFA(effectif.apprenant.nom)?.slice(0, 100),
       PRENOM1: formatStringForSIFA(effectif.apprenant.prenom)?.slice(0, 100),
       DATE_NAIS: effectif.apprenant.date_de_naissance
-        ? wrapNumString(
-            DateTime.fromJSDate(new Date(effectif.apprenant.date_de_naissance))
-              .setZone("Europe/Paris")
-              .setLocale("fr-FR")
-              .toFormat("ddMMyyyy")
-          )
+        ? DateTime.fromJSDate(new Date(effectif.apprenant.date_de_naissance))
+            .setZone("Europe/Paris")
+            .setLocale("fr-FR")
+            .toFormat("ddMMyyyy")
         : undefined,
 
-      LIEU_NAIS: wrapNumString(effectif.apprenant.adresse_naissance?.code_insee),
+      LIEU_NAIS: effectif.apprenant.adresse_naissance?.code_insee,
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
       ADRESSE: effectifAddress?.slice(0, 200) || "",
       SIT_N_1: effectif.apprenant.derniere_situation,
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai
         ? effectif.apprenant.dernier_organisme_uai.length === 8
           ? effectif.apprenant.dernier_organisme_uai
-          : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
+          : effectif.apprenant.dernier_organisme_uai.padStart(3, "0")
         : undefined,
       DIPLOME: codeDiplome,
       DUR_FORM_THEO: effectif.formation?.duree_theorique_mois
@@ -128,59 +134,53 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       AN_FORM: formatAN_FORM(effectif.formation?.annee),
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
-      TYPE_CFA: wrapNumString(String(effectif.apprenant.type_cfa).padStart(2, "0")),
+      TYPE_CFA: String(effectif.apprenant.type_cfa).padStart(2, "0"),
       UAI_EPLE: "NC",
       NAT_STR_JUR: "NC", // Unknown for now
     };
 
     const notRequiredFields = {
-      TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
+      TYPE_CFA: effectif.apprenant.type_cfa,
       // Si i n'y a pas de code displome on renseigne le RNCP
       RNCP: !codeDiplome ? effectif.formation?.rncp : "",
     };
 
     const apprenantFields = {
       INE: formatINE(effectif.apprenant.ine),
-      TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
+      TEL_JEUNE: effectif.apprenant.telephone?.replace("+33", "0"),
       MAIL_JEUNE: effectif.apprenant.courriel,
       HANDI: effectif.apprenant.rqth ? "1" : "0",
       NATIO: effectif.apprenant.nationalite,
-      COD_POST: wrapNumString(effectif.apprenant.adresse?.code_postal),
-      COM_RESID: wrapNumString(effectif.apprenant.adresse?.code_insee),
+      COD_POST: effectif.apprenant.adresse?.code_postal,
+      COM_RESID: effectif.apprenant.adresse?.code_insee,
       REGIME_SCO: effectif.apprenant.regime_scolaire,
-      TEL_RESP1_PERSO: wrapNumString(effectif.apprenant.representant_legal?.telephone?.replace("+33", "0")),
-      TEL_RESP1_PRO: wrapNumString(effectif.apprenant.representant_legal?.telephone?.replace("+33", "0")),
+      TEL_RESP1_PERSO: effectif.apprenant.representant_legal?.telephone?.replace("+33", "0"),
+      TEL_RESP1_PRO: effectif.apprenant.representant_legal?.telephone?.replace("+33", "0"),
       MAIL_RESP1: effectif.apprenant.representant_legal?.courriel,
       PCS: effectif.apprenant.representant_legal?.pcs,
       SIT_AV_APP: effectif.apprenant.situation_avant_contrat,
-      DIP_OBT: effectif.apprenant.dernier_diplome
-        ? wrapNumString(`${effectif.apprenant.dernier_diplome}`.padStart(2, "0"))
-        : "",
+      DIP_OBT: effectif.apprenant.dernier_diplome ? `${effectif.apprenant.dernier_diplome}`.padStart(2, "0") : "",
     };
 
     const dernierContratActif = effectif.contrats?.length ? effectif.contrats[effectif.contrats.length - 1] : undefined;
     const employeurFields = {
-      SIRET_EMP: wrapNumString(dernierContratActif?.siret),
+      SIRET_EMP: dernierContratActif?.siret,
       TYPE_EMP: dernierContratActif?.type_employeur,
       DATE_DEB_CONT: dernierContratActif?.date_debut
-        ? wrapNumString(
-            DateTime.fromJSDate(new Date(dernierContratActif.date_debut))
-              .setZone("Europe/Paris")
-              .setLocale("fr-FR")
-              .toFormat("ddMMyyyy")
-          )
+        ? DateTime.fromJSDate(new Date(dernierContratActif.date_debut))
+            .setZone("Europe/Paris")
+            .setLocale("fr-FR")
+            .toFormat("ddMMyyyy")
         : undefined,
       DATE_RUPT_CONT: dernierContratActif?.date_rupture
-        ? wrapNumString(
-            DateTime.fromJSDate(new Date(dernierContratActif.date_rupture))
-              .setZone("Europe/Paris")
-              .setLocale("fr-FR")
-              .toFormat("ddMMyyyy")
-          )
+        ? DateTime.fromJSDate(new Date(dernierContratActif.date_rupture))
+            .setZone("Europe/Paris")
+            .setLocale("fr-FR")
+            .toFormat("ddMMyyyy")
         : undefined,
       NAF_ETAB: dernierContratActif?.naf,
       NBSAL_EMP: dernierContratActif?.nombre_de_salaries,
-      COM_ETAB: wrapNumString(dernierContratActif?.adresse?.code_postal),
+      COM_ETAB: dernierContratActif?.adresse?.code_postal,
     };
 
     // date_obtention_diplome
@@ -204,10 +204,38 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       MAIL_RESP2: "", // Always empty
     });
   }
-
-  const json2csvParser = new Parser({ fields: SIFA_FIELDS, delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(items);
-
   const effectifsIds = effectifs.map((effectif) => effectif._id.toString());
-  return { csv, effectifsIds };
+
+  switch (type) {
+    case "csv":
+      return { effectifsIds, ...(await generateSifaCSV(items)) };
+    case "xlsx":
+      return { effectifsIds, ...generateSifaXLSX(items) };
+  }
+};
+
+const generateSifaCSV = async (items) => {
+  const json2csvParser = new Parser({ fields: SIFA_FIELDS, delimiter: ";", withBOM: true, header: false });
+  const file = await json2csvParser.parse(items);
+
+  return { file, extension: "csv" };
+};
+
+const generateSifaXLSX = (items) => {
+  const prepareDataForXLSX = (l: Array<ISifaRow>) => {
+    const keys: Array<keyof ISifaRow> = SIFA_FIELDS.map(({ value }) => value);
+
+    const data = l.map((item: ISifaRow) => {
+      const row: Array<any> = [];
+      keys.forEach((key) => {
+        row.push(item[key]);
+      });
+      return row;
+    });
+
+    return [keys, ...data];
+  };
+
+  const file = xlsx.build([{ name: "Data", data: prepareDataForXLSX(items), options: {} }]);
+  return { file, extension: "xlsx" };
 };

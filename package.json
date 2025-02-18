@@ -52,7 +52,8 @@
     "knip": "knip"
   },
   "dependencies": {
-    "husky": "^8.0.3"
+    "husky": "^8.0.3",
+    "libphonenumber-js": "^1.11.19"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
