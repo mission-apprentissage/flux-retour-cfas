@@ -129,6 +129,10 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
                   $or: [
                     { "apprenant.nom": { $regex: currentSearch, $options: "i" } },
                     { "apprenant.prenom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.siret": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.nom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.raison_sociale": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.enseigne": { $regex: currentSearch, $options: "i" } },
                   ],
                 })),
             }
@@ -291,6 +295,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const effectifsAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
@@ -307,15 +312,23 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     ...effectifMissionLocaleLookupAggregation,
-    ...buildFiltersForMissionLocale(effectifFilters),
-    ...EFF_MISSION_LOCALE_FILTER,
     {
       $lookup: {
         from: "organismes",
         let: { id: "$organisme_id" },
         pipeline: [
           { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          { $project: { _id: 0, contacts_from_referentiel: 1, nom: 1, raison_sociale: 1, adresse: 1 } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
         ],
         as: "organisme",
       },
@@ -326,6 +339,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...buildFiltersForMissionLocale(effectifFilters),
     {
       $lookup: {
         from: "usersMigration",
@@ -488,7 +502,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   missionLocaleId: number,
   organismesFiltersMissionLocale: IPaginationFilters
 ) => {
-  const { page = 0, limit = 20 } = organismesFiltersMissionLocale;
+  const { page = 0, limit = 20, sort = "nom", order = "asc" } = organismesFiltersMissionLocale;
   const statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
@@ -518,23 +532,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [
-          { $skip: page * limit },
-          { $limit: limit },
           { $addFields: { stringify_organisme_id: { $toString: "$_id" } } },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "stringify_organisme_id",
-              foreignField: "organisme_id",
-              as: "organisation",
-            },
-          },
-          {
-            $unwind: {
-              path: "$organisation",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
           {
             $lookup: {
               from: "organismes",
@@ -546,6 +544,20 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
           {
             $unwind: {
               path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "stringify_organisme_id",
+              foreignField: "organisme_id",
+              as: "organisation",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisation",
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -591,6 +603,15 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               },
             },
           },
+          {
+            $sort: buildSortFilter(sort, order, {
+              nom: "organisme.nom",
+              adresse: "organisme.adresse.commune",
+              formations_count: "formationsCount",
+            }),
+          },
+          { $skip: page * limit },
+          { $limit: limit },
           {
             $project: {
               _id: 0,
@@ -646,7 +667,6 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
     { $unwind: { path: "$totalFormations", preserveNullAndEmptyArrays: true } },
   ];
-
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
 
   if (!resultOrganismes) {

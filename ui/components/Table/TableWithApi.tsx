@@ -79,6 +79,7 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
       sorting: [{ id: paginationState?.sort || "", desc: paginationState?.order === "desc" }],
     },
     manualPagination: true,
+    manualSorting: true,
     onStateChange: (updater) => {
       const newState = functionalUpdate(updater, table.getState());
       const { pagination, sorting } = newState;

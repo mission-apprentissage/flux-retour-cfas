@@ -74,9 +74,10 @@ export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<
   };
 }
 
-export const buildSortFilter = (sort: string, order: "asc" | "desc") => {
+export const buildSortFilter = (sort: string, order: "asc" | "desc", mapping = {}) => {
+  const computedSort = mapping[sort] ?? sort;
   return {
-    [sort]: order === "asc" ? 1 : -1,
+    [computedSort]: order === "asc" ? 1 : -1,
   };
 };
 
