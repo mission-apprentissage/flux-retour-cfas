@@ -9,19 +9,30 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 export enum SITUATION_ENUM {
-  CONTACTE_AVEC_SUIVI = "CONTACTE_AVEC_SUIVI",
+  A_CONTACTER = "A_CONTACTER",
+  CONTACTE = "CONTACTE",
+  SUIVI_DEMARRE = "SUIVI_DEMARRE",
   CONTACT_SANS_SUIVI = "CONTACT_SANS_SUIVI",
-  DEJA_SUIVI = "DEJA_SUIVI",
   INJOIGNABLE = "INJOIGNABLE",
-  NON_CONTACTE = "NON_CONTACTE",
+  DEJA_SUIVI = "DEJA_SUIVI",
+}
+
+export enum API_SITUATION_ENUM {
+  NON_TRAITE = "NON_TRAITE",
+}
+
+export enum OLD_SITUATION_ENUM {
+  CONTACTE_AVEC_SUIVI = "CONTACTE_AVEC_SUIVI", //old
+  NON_CONTACTE = "NON_CONTACTE", //old
 }
 
 export enum SITUATION_LABEL_ENUM {
-  CONTACTE_AVEC_SUIVI = "Contacté, soutien nécessaire",
+  A_CONTACTER = "A contacter",
+  CONTACTE = "Contacté",
+  SUIVI_DEMARRE = "Suivi démarré",
+  INJOIGNABLE = "Injoignable",
   CONTACT_SANS_SUIVI = "Contacté, pas de suivi nécessaire",
   DEJA_SUIVI = "Déjà accompagné par ML",
-  INJOIGNABLE = "Injoignable",
-  NON_CONTACTE = "Non contacté",
 }
 
 export enum STATUT_JEUNE_MISSION_LOCALE {
@@ -40,7 +51,10 @@ export enum INSCRIPTION_FRANCE_TRAVAIL {
   INCONNU = "INCONNU",
 }
 
-export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
+export const zSituationEnum = z.nativeEnum({ ...SITUATION_ENUM, ...OLD_SITUATION_ENUM });
+export const zApiSituationEnum = z
+  .nativeEnum({ ...SITUATION_ENUM, ...API_SITUATION_ENUM })
+  .transform((arg) => (arg === API_SITUATION_ENUM.NON_TRAITE ? null : arg));
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,

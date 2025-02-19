@@ -1,6 +1,13 @@
 import { Button, HStack, Stack, Switch, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
+import {
+  API_SITUATION_ENUM,
+  Commune,
+  SITUATION_ENUM,
+  SITUATION_LABEL_ENUM,
+  STATUT_APPRENANT,
+  STATUT_NAME,
+} from "shared";
 import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import { FilterList } from "@/components/Filter/FilterList";
@@ -160,17 +167,19 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           key="situation"
           filterKey="situation"
           displayName="Situation"
-          options={Object.fromEntries(
-            Object.entries(SITUATION_ENUM).map(([key, value]) => [
+          options={Object.fromEntries([
+            ...Object.entries(SITUATION_ENUM).map(([key, value]) => [
               value,
               SITUATION_LABEL_ENUM[key as keyof typeof SITUATION_LABEL_ENUM],
-            ])
-          )}
+            ]),
+            [API_SITUATION_ENUM.NON_TRAITE, "Non traité"],
+          ])}
           selectedValues={(filters["situation"] as string[]) || []}
           onChange={(values) => handleCheckboxChange("situation", values)}
           isOpen={openFilter === "situation"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "situation" : null)}
           sortOrder="asc"
+          withSortedOptions={false}
         />
         <Button variant="link" onClick={resetFilters} fontSize="omega">
           Réinitialiser
