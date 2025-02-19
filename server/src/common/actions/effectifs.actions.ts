@@ -64,11 +64,11 @@ const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErro
         ...data,
         ...(opt.keepPreviousErrors
           ? {
-            validation_errors: uniqBy(
-              [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
-              "fieldName"
-            ),
-          }
+              validation_errors: uniqBy(
+                [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
+                "fieldName"
+              ),
+            }
           : {}),
         updated_at: new Date(),
       },
