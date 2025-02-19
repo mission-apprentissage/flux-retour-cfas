@@ -28,7 +28,7 @@ const EFF_MISSION_LOCALE_FILTER = [
   {
     $match: {
       $or: [
-        { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 27)) } },
+        { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)) } },
         { "apprenant.rqth": true },
       ],
     },
