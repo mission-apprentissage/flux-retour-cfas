@@ -64,11 +64,11 @@ const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErro
         ...data,
         ...(opt.keepPreviousErrors
           ? {
-              validation_errors: uniqBy(
-                [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
-                "fieldName"
-              ),
-            }
+            validation_errors: uniqBy(
+              [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
+              "fieldName"
+            ),
+          }
           : {}),
         updated_at: new Date(),
       },
@@ -527,6 +527,7 @@ export const buildEffectifForMissionLocale = (
     },
     statut: effectif._computed?.statut,
     formation: effectif.formation,
+    contrat: effectif.contrats && effectif.contrats.length ? effectif.contrats[effectif.contrats.length - 1] : null,
     organisme: {
       nom: effectif.organisme.nom,
       raison_sociale: effectif.organisme.raison_sociale,
