@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb } from "@/common/model/collections";
-import { createRandomOrganisme, createRandomDossierApprenantApiInput } from "@tests/data/randomizedSample";
+import { createRandomOrganisme, createRandomDossierApprenantApiInputV3 } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
 
@@ -27,7 +27,10 @@ describe("Dossier Apprenants Route V3", () => {
   describe("POST v3/dossiers-apprenants", () => {
     it("Vérifie que les données additionnelles ne mettent pas l'API en erreur", async () => {
       const dossier = {
-        ...createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }),
+        ...createRandomDossierApprenantApiInputV3({
+          etablissement_formateur_uai: uai,
+          etablissement_formateur_siret: siret,
+        }),
         bidule: "blabla",
       };
 

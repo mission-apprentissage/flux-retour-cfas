@@ -28,7 +28,7 @@ const zOrganisationBase = z.object({
 const zOrganisationMissionLocaleCreate = z.object({
   type: z.literal("MISSION_LOCALE"),
   nom: z.string({ description: "Nom de la mission locale" }),
-  siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
+  siret: z.string({ description: "N° SIRET" }).optional(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
 });
 

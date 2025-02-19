@@ -11,7 +11,7 @@ import { effectifsDb } from "@/common/model/collections";
 
 import { ISifaRow, SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA } from "./sifaCsvFields";
 
-export const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
+const isEligibleSIFA = (statut?: IEffectifComputedStatut | null): boolean => {
   if (!statut) return false;
 
   const endOfYear = getSIFADate(new Date()).getTime();

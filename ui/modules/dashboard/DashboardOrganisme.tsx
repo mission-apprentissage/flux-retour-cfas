@@ -191,7 +191,7 @@ const natureOrganismeDeFormationTooltip = {
   ),
 };
 
-export const useOrganismeData = (organismeId: string, permissions: Organisme["permissions"], modePublique: boolean) => {
+const useOrganismeData = (organismeId: string, permissions: Organisme["permissions"], modePublique: boolean) => {
   const queries = [
     {
       queryKey: ["organismes", organismeId, "contacts"],

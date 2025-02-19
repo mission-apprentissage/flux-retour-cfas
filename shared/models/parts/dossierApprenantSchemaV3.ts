@@ -206,6 +206,5 @@ const countContratWarning = (data: Array<IDossierApprenantSchemaV3>) => {
 };
 
 export type IDossierApprenantSchemaV3 = z.output<typeof dossierApprenantSchemaV3>;
-export type IDossierApprenantSchemaV3Input = z.input<typeof dossierApprenantSchemaV3>;
 
 export default dossierApprenantSchemaV3;

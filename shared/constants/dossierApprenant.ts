@@ -24,7 +24,7 @@ export const zCodeStatutApprenant = zodOpenApi.union(
   }
 );
 
-export type ICodeStatutApprenant = z.output<typeof zCodeStatutApprenant>;
+type ICodeStatutApprenant = z.output<typeof zCodeStatutApprenant>;
 
 export const CODES_STATUT_APPRENANT_ENUM = [
   CODES_STATUT_APPRENANT.abandon,
@@ -127,5 +127,3 @@ export const zEffectifDernierSituation = zodOpenApi.union([
   z.literal(9900),
   z.literal(9999),
 ]);
-
-export type IEffectifDernierSituation = z.output<typeof zEffectifDernierSituation>;

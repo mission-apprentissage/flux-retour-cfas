@@ -499,10 +499,6 @@ export interface Organisme {
    */
   qualiopi?: boolean;
   /**
-   * Le token permettant l'accès au CFA à sa propre page
-   */
-  access_token?: string;
-  /**
    * API key pour envoi de données
    */
   api_key?: string;

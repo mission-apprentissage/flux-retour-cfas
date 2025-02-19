@@ -20,15 +20,17 @@ fileignoreconfig:
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
-  checksum: aca9111611fe6cdbd3a9d5d144687339ea161e2375c158a38cec48ff11f359a4
+  checksum: 892d5a48023df3ea8c302d49ec85ec405792b14810e6bbb278851b9321089d5d
 - filename: server/src/jobs/hydrate/organismes/organisme-cleanup.test.ts
-  checksum: 96e3019b32d45f6b184601bed1641eb34b28885e7841b2590eb06d5992584cfe
+  checksum: 24ef62ac02078a6488cadaa87217405634109290b644228b835c06b006006d67
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
-  checksum: eefd40dc5159f5246beaefa4896d7f4935c7a7a9f684cf83d64d343b39bd4ba5
+  checksum: d5a9d1bd6e0d7f23349caf946c5d2a535253213a612fcaa841cbe704acd8d87f
 - filename: server/tests/jest/setupNock.ts
   checksum: 206a5da7f948759335ac5d4ffe6e9eb45d00b8c142bc984cddbc10ccb7f6282b
 - filename: shared/constants/aide.ts
   checksum: 70dcdce75bb98d7c5b05a34074ccef0412a7bbfb1755b472d66a74a144d0e882
+- filename: shared/models/data/organismes.model.ts
+  checksum: 545f87250b0d948ef8b1da8e3298080d3613e012ca35bfcc5e3ee376c28b5c0c
 - filename: shared/models/fixtures/formationsCatalogue.fixture.ts
   checksum: 71544c620f9bdcfb56007be090ebfeabb1f7660116355244d6dd097d383f5dd3
 - filename: ui/common/utils/televersement.ts
@@ -51,6 +53,8 @@ fileignoreconfig:
   checksum: 60ea265023cfe6901c8223a7414bf4c2382a0890f5a549e4b1803010af72af42
 - filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
   checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
+- filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
+  checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx
   checksum: fc5102f0eb920c874e57dbb8eb3c0bee09fd1ec7da1414a39654d8cff7134cda
 - filename: ui/modules/organismes/OrganismesTable.tsx

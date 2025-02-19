@@ -1029,7 +1029,3 @@ export const generateOrganismeComputed = (orga: IOrganisme) => {
     fiable: fiabilisation_statut === "FIABLE" && !ferme,
   };
 };
-
-export const isOrganismeFiable = (orga: IOrganisme) => {
-  return orga.fiabilisation_statut === "FIABLE" && !orga.ferme && orga.nature !== "inconnue";
-};
