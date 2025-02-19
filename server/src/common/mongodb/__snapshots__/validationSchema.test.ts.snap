@@ -9336,10 +9336,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         {
           "bsonType": "string",
           "enum": [
-            "CONTACTE_AVEC_SUIVI",
+            "A_CONTACTER",
+            "CONTACTE",
+            "SUIVI_DEMARRE",
             "CONTACT_SANS_SUIVI",
-            "DEJA_SUIVI",
             "INJOIGNABLE",
+            "DEJA_SUIVI",
+            "CONTACTE_AVEC_SUIVI",
             "NON_CONTACTE",
           ],
         },
@@ -9421,10 +9424,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             {
               "bsonType": "string",
               "enum": [
-                "CONTACTE_AVEC_SUIVI",
+                "A_CONTACTER",
+                "CONTACTE",
+                "SUIVI_DEMARRE",
                 "CONTACT_SANS_SUIVI",
-                "DEJA_SUIVI",
                 "INJOIGNABLE",
+                "DEJA_SUIVI",
+                "CONTACTE_AVEC_SUIVI",
                 "NON_CONTACTE",
               ],
             },
