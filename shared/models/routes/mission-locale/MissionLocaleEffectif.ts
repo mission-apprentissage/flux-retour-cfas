@@ -10,8 +10,8 @@ import {
   zUsersMigration,
 } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
-import { zFormationEffectif } from "../../data/effectifs/formation.part";
 import { zContrat } from "../../data/effectifs/contrat.part";
+import { zFormationEffectif } from "../../data/effectifs/formation.part";
 
 const zEffectifMissionLocale = z.object({
   id: zObjectId,
