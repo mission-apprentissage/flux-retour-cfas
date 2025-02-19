@@ -23,6 +23,7 @@ import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormation
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
+import { useTeteDeReseaux } from "../dashboard/hooks/useTeteDeReseaux";
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
@@ -54,6 +55,7 @@ function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
+  const { data: reseaux } = useTeteDeReseaux();
 
   const { organisme: ownOrganisme } = useOrganisationOrganisme(
     organisationType === "ORGANISME_FORMATION" && !!props.organismeId
@@ -275,6 +277,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           {auth.organisation.type !== "TETE_DE_RESEAU" && (
             <IndicateursFilter label="Réseau d’organismes" badge={effectifsFilters.organisme_reseaux.length}>
               <FiltreOrganismeReseau
+                reseaux={reseaux || []}
                 value={effectifsFilters.organisme_reseaux}
                 onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
               />

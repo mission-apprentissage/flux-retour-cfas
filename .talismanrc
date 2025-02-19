@@ -1,4 +1,10 @@
 fileignoreconfig:
+- filename: .infra/vault/vault.yml
+  checksum: 7251a80b1330ca953f19d7a7ecd661e9e7956da4aa37d761a4dbe3174a18dbf0
+- filename: ui/modules/organismes/ListeOrganismesPage.tsx
+  checksum: 90ab05ed5f959cfee9eb9c630e310c1ac76d189e1e922d8db86f6e15c16e70e2
+- filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
+  checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: .bin/commands.sh
   checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
 - filename: .bin/scripts/get-vault-password-client.sh

@@ -313,3 +313,41 @@ export function testPermissions<ExpectedResult, ExcludedCases extends ProfilLabe
     });
   });
 }
+
+const TETE_DE_RESEAUX = [
+  { nom: "ADEN", key: "ADEN", responsable: false },
+  { nom: "CMA", key: "CMA", responsable: false },
+  { nom: "AGRI", key: "AGRI", responsable: false },
+  { nom: "AGRI_CNEAP", key: "AGRI_CNEAP", responsable: false },
+  { nom: "AGRI_UNREP", key: "AGRI_UNREP", responsable: false },
+  { nom: "AGRI_UNMFREO", key: "AGRI_UNMFREO", responsable: false },
+  { nom: "ANASUP", key: "ANASUP", responsable: false },
+  { nom: "AMUE", key: "AMUE", responsable: false },
+  { nom: "CCI", key: "CCI", responsable: false },
+  { nom: "EXCELLENCE PRO", key: "CFA_EC", responsable: false },
+  { nom: "COMPAGNONS DU DEVOIR", key: "COMP_DU_DEVOIR", responsable: true },
+  { nom: "COMPAGNONS DU TOUR DE FRANCE", key: "COMP_DU_TOUR_DE_FRANCE", responsable: false },
+  { nom: "GRETA", key: "GRETA", responsable: false },
+  { nom: "UIMM", key: "UIMM", responsable: false },
+  { nom: "BTP CFA", key: "BTP_CFA", responsable: false },
+  { nom: "MFR", key: "MFR", responsable: false },
+  { nom: "AFTRAL", key: "AFTRAL", responsable: true },
+  { nom: "GRETA VAUCLUSE", key: "GRETA_VAUCLUSE", responsable: false },
+  { nom: "CFA SAT", key: "CFA_SAT", responsable: false },
+  { nom: "EN HORS MURS", key: "EN_HORS_MURS", responsable: false },
+  { nom: "EN CFA ACADEMIQUE", key: "EN_CFA_ACADEMIQUE", responsable: false },
+  { nom: "EN EPLE", key: "EN_EPLE", responsable: false },
+  { nom: "EDUSERVICES", key: "EDUSERVICES", responsable: false },
+  { nom: "AFPA", key: "AFPA", responsable: true },
+];
+
+const getDefaultReseauFields = () => ({
+  created_at: new Date(),
+  updated_at: new Date(),
+  organismes_ids: [],
+});
+
+export const reseaux = TETE_DE_RESEAUX.map((reseau) => ({
+  ...reseau,
+  ...getDefaultReseauFields(),
+}));

@@ -19,6 +19,7 @@ import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
+import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
@@ -57,6 +58,7 @@ export const modelDescriptors = [
   organismesV2ModelDescriptor,
   personV2ModelDescriptor,
   transmissionV2Descriptor,
+  ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   missionLocaleEffectifLogsDescriptor,
 ];
@@ -84,6 +86,7 @@ export const telechargementListesNominativesLogsDb = () =>
 export const erpDb = () => getDbCollection<IErp>(erpModelDescriptor.collectionName);
 export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
 export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
+export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.collectionName);
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);

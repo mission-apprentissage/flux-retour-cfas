@@ -141,12 +141,14 @@ import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
+import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
+import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -362,6 +364,7 @@ function setupRoutes(app: Application) {
         await rejectInvitation(req.params.token);
       })
     )
+    .use("/api/v1/reseaux", getAllReseauxRoutes())
     .use("/api/v1/mission-locale", missionLocalePublicRoutes());
 
   app.use(
@@ -909,6 +912,7 @@ function setupRoutes(app: Application) {
       .use(requireAdministrator)
       .use("/users", usersAdmin())
       .use("/organismes", organismesAdmin())
+      .use("/reseaux", reseauxAdmin())
       .use("/effectifs", effectifsAdmin())
       .use("/transmissions", transmissionRoutesAdmin())
       .use("/affelnet", affelnetRoutesAdmin())

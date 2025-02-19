@@ -21,7 +21,6 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import {
   natureOrganismeDeFormationLabel,
-  TETE_DE_RESEAUX_BY_ID,
   IOrganisationCreate,
   REFERENTIEL_ONISEP,
   CARIF_OREF,
@@ -567,7 +566,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     {organisme.reseaux.map((reseau) => (
                       <Tag
                         key={reseau}
-                        primaryText={TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
+                        primaryText={reseau}
                         variant="badge"
                         colorScheme="grey_tag"
                         size="lg"
