@@ -9573,7 +9573,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "siret": {
           "bsonType": "string",
           "description": "N° SIRET",
-          "pattern": "^[0-9]{14}$",
         },
         "type": {
           "bsonType": "string",
@@ -9584,7 +9583,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "created_at",
         "type",
         "nom",
-        "siret",
         "ml_id",
       ],
     },
