@@ -17,6 +17,7 @@ import React from "react";
 import { SOURCE_APPRENANT, STATUT_NAME, SourceApprenant } from "shared";
 
 import { calculateAge } from "@/common/utils/dateUtils";
+import { formatSiretSplitted } from "@/common/utils/stringUtils";
 import { CustomAccordion } from "@/components/Accordion/CustomAccordion";
 import Tag from "@/components/Tag/Tag";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -28,6 +29,10 @@ type Value = string | number | null | undefined;
 
 const getValueOrFallback = (value: Value): string => {
   return value ? value.toString() : "Non renseignée";
+};
+
+const getValueOrFallBackElement = (value: Value) => {
+  return value ? value.toString() : <Text color="orange.500">Non renseignée</Text>;
 };
 
 const getLastStatut = (statut: any) => {
@@ -44,18 +49,19 @@ const getRuptureText = (source: SourceApprenant, ruptureAt: Date) => {
   const formattedDate = new Date(ruptureAt).toLocaleDateString("fr-FR");
   const sourceLabel = source === SOURCE_APPRENANT.DECA ? "API DECA" : "CFA";
   const prefix = source === SOURCE_APPRENANT.DECA ? "l’" : "le ";
-  return  <Text color="plaininfo" my={4}>
-            Date de rupture du contrat déclarée par {prefix}
-            <Text as="span" fontWeight="bold">
-                  {sourceLabel}{" "}
-            </Text>
-            le{" "}
-            <Text as="span" fontWeight="bold">
-              {formattedDate}
-            </Text>
-          </Text>
-
-}
+  return (
+    <Text color="plaininfo" my={4}>
+      Date de rupture du contrat déclarée par {prefix}
+      <Text as="span" fontWeight="bold">
+        {sourceLabel}{" "}
+      </Text>
+      le{" "}
+      <Text as="span" fontWeight="bold">
+        {formattedDate}
+      </Text>
+    </Text>
+  );
+};
 const getSourceText = (source: SourceApprenant, transmittedAt: Date) => {
   const formattedDate = new Date(transmittedAt).toLocaleDateString("fr-FR");
   const sourceLabel = source === SOURCE_APPRENANT.DECA ? "API DECA" : "CFA";
@@ -364,47 +370,62 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
             </TableContainer>
           </CustomAccordion.Content>
         </CustomAccordion.Item>
-        <CustomAccordion.Item value="Son contrat d'apprentissage">
-          <CustomAccordion.Trigger bg="#F9F8F6" border={0}>
+        {contrat && (
+          <CustomAccordion.Item value="Son contrat d'apprentissage">
+            <CustomAccordion.Trigger bg="#F9F8F6" border={0}>
               {({ isExpanded }) => <TriggerHeader isExpanded={isExpanded} title="Son contrat d'apprentissage" />}
             </CustomAccordion.Trigger>
             <CustomAccordion.Content>
-            <TableContainer p={3}>
-              <Table variant="list">
-                <Tbody>
-                {contrat.date_rupture && 
-                  <Tr >
-                    {getRuptureText(row.original.source, contrat.date_rupture	)}
-                  </Tr>}
-                  <Tr>
-                    <Td fontWeight='bold'>Date d'exéctuion du contrat </Td>
-                    <Td>{getValueOrFallback(contrat.date_debut ? new Date(contrat.date_debut).toLocaleDateString() : null)}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>Date de fin du contrat </Td>
-                    <Td>{getValueOrFallback(contrat.date_fin ? new Date(contrat.date_fin).toLocaleDateString() : null)}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>Motif de rupture du contrat </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>N° SIRET de l'employeur </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>Dénomination </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>NAF </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight='bold'>Code postal et commune de l'employeur </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </CustomAccordion.Content>
+              <TableContainer p={3}>
+                <Table variant="list">
+                  <Tbody>
+                    {contrat.date_rupture && <Tr>{getRuptureText(row.original.source, contrat.date_rupture)}</Tr>}
+                    <Tr>
+                      <Td fontWeight="bold">Date d&apos;exéctuion du contrat </Td>
+                      <Td>
+                        {getValueOrFallBackElement(
+                          contrat.date_debut ? new Date(contrat.date_debut).toLocaleDateString() : null
+                        )}
+                      </Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">Date de fin du contrat </Td>
+                      <Td>
+                        {getValueOrFallBackElement(
+                          contrat.date_fin ? new Date(contrat.date_fin).toLocaleDateString() : null
+                        )}
+                      </Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">Motif de rupture du contrat </Td>
+                      <Td>{getValueOrFallBackElement(contrat.cause_rupture)}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">N° SIRET de l&apos;employeur </Td>
+                      <Td>{getValueOrFallBackElement(formatSiretSplitted(contrat.siret))}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">Dénomination </Td>
+                      <Td>{getValueOrFallBackElement(contrat.denomination)}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">NAF </Td>
+                      <Td>{getValueOrFallBackElement(contrat.naf)}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td fontWeight="bold">Code postal et commune de l&apos;employeur </Td>
+                      <Td>
+                        {getValueOrFallBackElement(
+                          `${contrat.adresse?.code_postal ?? ""} ${contrat.adresse?.commune ?? ""}`.trim()
+                        )}
+                      </Td>
+                    </Tr>
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            </CustomAccordion.Content>
           </CustomAccordion.Item>
-          
+        )}
       </CustomAccordion>
     </Box>
   );
