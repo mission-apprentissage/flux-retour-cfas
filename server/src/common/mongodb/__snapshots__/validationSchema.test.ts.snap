@@ -10310,6 +10310,12 @@ exports[`validation-schema > should create validation schema for organismes > or
             "bsonType": "int",
             "description": "Année millésime de la formation pour cet organisme",
           },
+          "cfd": {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
           "cle_ministere_educatif": {
             "bsonType": "string",
             "description": "Clé unique de la formation",
@@ -10650,7 +10656,17 @@ exports[`validation-schema > should create validation schema for organismes > or
               },
             },
           },
+          "rncp": {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
         },
+        "required": [
+          "rncp",
+          "cfd",
+        ],
       },
     },
     "reseaux": {

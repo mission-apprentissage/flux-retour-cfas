@@ -134,6 +134,8 @@ export const zOrganisme = z
         z
           .object({
             formation_id: zObjectId.optional(),
+            rncp: z.string().nullable(),
+            cfd: z.string().nullable(),
             cle_ministere_educatif: z
               .string({
                 description: "Clé unique de la formation",
