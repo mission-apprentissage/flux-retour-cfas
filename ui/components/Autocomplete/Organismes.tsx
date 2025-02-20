@@ -58,7 +58,6 @@ export const AutoCompleteOrganismes: React.FC<AutoCompleteProps> = ({ onSelect }
       enabled: query.length >= 3,
     }
   );
-  console.log("CONSOLE LOG ~ data:", data);
 
   const handleSelect = (organisme: ExtendedOrganisme) => {
     onSelect(organisme);
