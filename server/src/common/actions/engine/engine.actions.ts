@@ -54,7 +54,7 @@ export const buildNewHistoriqueStatutApprenant = (
   return newHistoriqueStatutApprenant;
 };
 
-export const getAndFormatCommuneFromCode = async (insee, postal, commune) => {
+export const getAndFormatCommuneFromCode = async (insee, postal, commune?) => {
   if (!insee && !postal) {
     return {};
   }
