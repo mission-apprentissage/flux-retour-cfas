@@ -361,10 +361,12 @@ describe("Processus d'ingestion", () => {
               code_insee: null,
               code_postal: null,
               complete: null,
+              commune: null,
             },
             adresse_naissance: {
               code_insee: null,
               code_postal: null,
+              commune: null,
             },
             courriel: null,
             historique_statut: [
@@ -593,10 +595,12 @@ describe("Processus d'ingestion", () => {
               code_insee: null,
               code_postal: null,
               complete: null,
+              commune: null,
             },
             adresse_naissance: {
               code_insee: null,
               code_postal: null,
+              commune: null,
             },
             historique_statut: [
               {

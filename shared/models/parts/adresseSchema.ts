@@ -47,7 +47,7 @@ export const zAdresse = zodOpenApi.object({
     })
     .openapi({ example: "PARIS" })
     .max(80)
-    .optional(),
+    .nullish(),
   departement: zodOpenApi
     .string()
     .regex(/^(2A|2B|[0-9]{2,3})$/)
