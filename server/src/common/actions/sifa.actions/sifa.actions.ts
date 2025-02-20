@@ -5,7 +5,6 @@ import xlsx from "node-xlsx";
 import { getAnneesScolaireListFromDate, getSIFADate, STATUT_APPRENANT, StatutApprenant } from "shared";
 import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
-import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb } from "@/common/model/collections";
 
@@ -55,10 +54,7 @@ export const generateSifa = async (
   const items: any[] = [];
   const organismesUaiCache: Record<string, string> = {};
   for (const effectif of effectifs) {
-    const formationCfd = await getFormationCfd(effectif);
-    const formationOrganisme = organisme.relatedFormations?.find(
-      (f) => f.formation_id?.toString() === effectif.formation?.formation_id?.toString()
-    );
+    const formationCfd = effectif.formation?.cfd ?? null;
 
     let organismeResponsableUai = organisme.uai;
     let organismeFormateurUai = "";
@@ -121,15 +117,7 @@ export const generateSifa = async (
           : effectif.apprenant.dernier_organisme_uai.padStart(3, "0")
         : undefined,
       DIPLOME: codeDiplome,
-      DUR_FORM_THEO: effectif.formation?.duree_theorique_mois
-        ? effectif.formation.duree_theorique_mois
-        : // Les ERPs (ou les anciens fichiers de téléversement) pouvaient envoyer duree_theorique_formation
-          // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
-          // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
-          // en mettant dans le bon champ.
-          formationOrganisme?.duree_formation_theorique
-          ? formationOrganisme?.duree_formation_theorique * 12
-          : undefined,
+      DUR_FORM_THEO: effectif.formation?.duree_theorique_mois ? effectif.formation.duree_theorique_mois : undefined,
       DUR_FORM_REELLE: effectif.formation?.duree_formation_relle,
       AN_FORM: formatAN_FORM(effectif.formation?.annee),
       SIT_FORM: organismeFormateurUai,

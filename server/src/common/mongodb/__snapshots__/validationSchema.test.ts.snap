@@ -469,18 +469,6 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                       ],
                       "description": "Durée théorique de la formation en mois",
                     },
-                    "formation_id": {
-                      "anyOf": [
-                        {
-                          "bsonType": "objectId",
-                          "description": "ID de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "ID de la formation",
-                    },
                     "formation_presentielle": {
                       "bsonType": [
                         "bool",
@@ -503,48 +491,16 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                       "description": "Libellé long de la formation visée",
                     },
                     "niveau": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Niveau de formation récupéré via Tables de Correspondances",
                     },
                     "niveau_libelle": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
                     },
@@ -2666,18 +2622,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -2700,48 +2644,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -3362,18 +3274,6 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       ],
                       "description": "Durée théorique de la formation en mois",
                     },
-                    "formation_id": {
-                      "anyOf": [
-                        {
-                          "bsonType": "objectId",
-                          "description": "ID de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "ID de la formation",
-                    },
                     "formation_presentielle": {
                       "bsonType": [
                         "bool",
@@ -3396,48 +3296,16 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       "description": "Libellé long de la formation visée",
                     },
                     "niveau": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Niveau de formation récupéré via Tables de Correspondances",
                     },
                     "niveau_libelle": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
                     },
@@ -5559,18 +5427,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -5593,48 +5449,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -7835,18 +7659,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -7869,48 +7681,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -8526,140 +8306,6 @@ exports[`validation-schema > should create validation schema for formationV2 > f
     "updated_at",
     "organisme_responsable_id",
     "organisme_formateur_id",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for formations > formations 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "annee": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Année de la formation (cursus)",
-    },
-    "cfd": {
-      "bsonType": "string",
-      "description": "Code CFD de la formation",
-      "pattern": "^[A-Z0-9]{8}$",
-    },
-    "cfd_end_date": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date de fermeture du CFD",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date de fermeture du CFD",
-    },
-    "cfd_start_date": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'ouverture du CFD",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'ouverture du CFD",
-    },
-    "created_at": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'ajout en base de données",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'ajout en base de données",
-    },
-    "duree": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Durée de la formation théorique",
-    },
-    "libelle": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Libellé normalisé depuis Tables de Correspondances",
-    },
-    "metiers": {
-      "anyOf": [
-        {
-          "bsonType": "array",
-          "description": "Les domaines métiers rattachés à la formation",
-          "items": {
-            "bsonType": "string",
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Les domaines métiers rattachés à la formation",
-    },
-    "niveau": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Niveau de formation récupéré via Tables de Correspondances",
-    },
-    "niveau_libelle": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-    },
-    "rncps": {
-      "anyOf": [
-        {
-          "bsonType": "array",
-          "description": "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
-          "items": {
-            "bsonType": "string",
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
-    },
-    "updated_at": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'update en base de données",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'update en base de données",
-    },
-  },
-  "required": [
-    "_id",
-    "cfd",
   ],
 }
 `;
