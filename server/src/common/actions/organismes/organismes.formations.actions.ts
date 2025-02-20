@@ -1,8 +1,10 @@
+import { IFormationSearchResponse } from "shared/models";
+
 import { formationsCatalogueDb } from "@/common/model/collections";
 
 export async function searchOrganismesFormations(searchTerm: string): Promise<any[]> {
   const formations = await formationsCatalogueDb()
-    .aggregate([
+    .aggregate<IFormationSearchResponse>([
       {
         $match: {
           $or: [
