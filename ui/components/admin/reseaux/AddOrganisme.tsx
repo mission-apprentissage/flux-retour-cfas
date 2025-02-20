@@ -10,8 +10,8 @@ import { AutoCompleteOrganismes } from "@/components/Autocomplete/Organismes";
 import { BasicModal } from "@/components/Modals/BasicModal";
 
 interface AddOrganismeProps {
-  reseauId: string; // e.g. "AGRI_UNREP"
-  reseauName: string; // e.g. "AGRI_UNREP"
+  reseauId: string;
+  reseauName: string;
   refetch: any;
 }
 
