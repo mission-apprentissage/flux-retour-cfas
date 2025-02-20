@@ -42,7 +42,9 @@ import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
-  await addJob({ name: "hydrate:formations-catalogue", queued });
+  // await addJob({ name: "hydrate:formations-catalogue", queued });
+
+  await addJob({ name: "import:formation", queued });
 
   await addJob({ name: "import:formation", queued });
 
