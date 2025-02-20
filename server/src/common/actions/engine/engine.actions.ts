@@ -6,7 +6,6 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
-import type { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -125,7 +124,7 @@ export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>
  * Fonctionne pour l'API v2 et v3.
  */
 export const mapEffectifQueueToEffectif = (
-  dossierApprenant: DossierApprenantSchemaV1V2ZodType | IDossierApprenantSchemaV3
+  dossierApprenant: IDossierApprenantSchemaV3
 ): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   // Ne pas remplir l'historique statut en cas de v3
   const { statut_apprenant, date_metier_mise_a_jour_statut } = dossierApprenant;
@@ -219,15 +218,10 @@ export const mapEffectifQueueToEffectif = (
     },
     contrats,
     formation: {
-      cfd:
-        "formation_cfd" in dossierApprenant
-          ? dossierApprenant.formation_cfd
-          : "id_formation" in dossierApprenant
-            ? dossierApprenant.id_formation
-            : null,
+      cfd: "formation_cfd" in dossierApprenant ? dossierApprenant.formation_cfd : null,
       rncp: dossierApprenant.formation_rncp,
-      libelle_long: "libelle_long_formation" in dossierApprenant ? dossierApprenant.libelle_long_formation : null,
-      periode: "periode_formation" in dossierApprenant ? dossierApprenant.periode_formation : [],
+      libelle_long: null,
+      periode: [],
       annee: dossierApprenant.annee_formation,
 
       obtention_diplome:

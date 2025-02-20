@@ -14,7 +14,6 @@ import {
   hasRecentTransmissions,
   shouldDisplayContactInEffectifNominatif,
 } from "shared";
-import { StatutApprenant } from "shared/constants/effectifs";
 
 import {
   DateFilters,
@@ -31,7 +30,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-export const createDernierStatutFieldPipeline = (date: Date) => [
+const createDernierStatutFieldPipeline = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {
@@ -58,18 +57,6 @@ export const createDernierStatutFieldPipeline = (date: Date) => [
     },
   },
 ];
-
-export const filterByDernierStatutPipeline = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length
-    ? [
-        ...createDernierStatutFieldPipeline(date),
-        {
-          $match: {
-            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
-          },
-        },
-      ]
-    : [];
 
 export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,

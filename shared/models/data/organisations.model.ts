@@ -12,7 +12,6 @@ import {
   ORGANISATIONS_NATIONALES,
   REGIONS_BY_CODE,
   SIRET_REGEX,
-  TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
 } from "../../constants";
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
@@ -29,7 +28,7 @@ const zOrganisationBase = z.object({
 const zOrganisationMissionLocaleCreate = z.object({
   type: z.literal("MISSION_LOCALE"),
   nom: z.string({ description: "Nom de la mission locale" }),
-  siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
+  siret: z.string({ description: "N° SIRET" }).optional(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
 });
 
@@ -47,7 +46,7 @@ const zOrganisationOrganismeCreate = z.object({
 
 const zOrganisationReaseauCreate = z.object({
   type: z.literal("TETE_DE_RESEAU"),
-  reseau: zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID).describe("Réseau du CFA, s'il existe"),
+  reseau: z.string().describe("Réseau du CFA, s'il existe"),
 });
 
 const zOrganisationRegionalCreate = z.object({
@@ -158,7 +157,7 @@ export function getOrganisationLabel(organisation: IOrganisationCreate): string 
     }
 
     case "TETE_DE_RESEAU":
-      return `Réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
+      return `Réseau ${organisation.reseau}`;
 
     case "DREETS":
     case "DRAAF":

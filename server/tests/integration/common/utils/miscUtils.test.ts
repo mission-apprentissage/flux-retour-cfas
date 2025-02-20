@@ -2,24 +2,7 @@ import { strict as assert } from "assert";
 
 import { it, describe } from "vitest";
 
-import { generateRandomAlphanumericPhrase, stripEmptyFields } from "@/common/utils/miscUtils";
-
-describe("generateRandomAlphanumericPhrase", () => {
-  it("crée une chaîne de caractère aléatoire de longueur demandée", () => {
-    const randomPhrase = generateRandomAlphanumericPhrase(13);
-    assert.equal(randomPhrase.length, 13);
-  });
-
-  it("crée une chaîne de caractère aléatoire de longueur 20 lorsqu'aucun longueur n'est passée", () => {
-    const randomPhrase = generateRandomAlphanumericPhrase();
-    assert.equal(randomPhrase.length, 20);
-  });
-
-  it("crée une chaîne de caractère aléatoire ne contenant que des caractères alphanumériques", () => {
-    const randomPhrase = generateRandomAlphanumericPhrase();
-    assert.equal(/^[a-zA-Z0-9]*$/.test(randomPhrase), true);
-  });
-});
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 describe("stripEmptyFields", () => {
   it('supprime les champs undefined, null, et "" à la racine et imbriqués', () => {

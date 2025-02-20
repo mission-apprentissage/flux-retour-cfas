@@ -59,7 +59,6 @@ import {
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-// import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
@@ -109,17 +108,14 @@ import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-// import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-// import { createUserToken } from "@/common/utils/jwtUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-// import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
@@ -134,11 +130,9 @@ import {
   requireOrganismePermission,
   returnResult,
 } from "./middlewares/helpers";
-// import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
-// import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -147,12 +141,14 @@ import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
+import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
+import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -368,39 +364,8 @@ function setupRoutes(app: Application) {
         await rejectInvitation(req.params.token);
       })
     )
+    .use("/api/v1/reseaux", getAllReseauxRoutes())
     .use("/api/v1/mission-locale", missionLocalePublicRoutes());
-
-  /*****************************************************************************
-   * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
-   *****************************************************************************/
-  // app.post(
-  //   "/api/login",
-  //   validateRequestMiddleware({
-  //     body: loginSchemaLegacy.strict(),
-  //   }),
-  //   returnResult(async (req) => {
-  //     const { username, password } = req.body;
-  //     const authenticatedUser = await authenticateLegacy(username, password);
-  //     if (!authenticatedUser) {
-  //       throw Boom.unauthorized();
-  //     }
-  //     return { access_token: createUserToken(authenticatedUser) };
-  //   })
-  // );
-
-  // app.use(
-  //   [
-  //     "/api/statut-candidats", // @deprecated to /dossiers-apprenants
-  //     "/api/dossiers-apprenants",
-  //   ],
-  //   requireJwtAuthenticationMiddleware(),
-  //   legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
-  //   async (req, res, next) => {
-  //     req.user.source = SOURCE_APPRENANT.ERP;
-  //     next();
-  //   },
-  //   dossierApprenantRouter()
-  // );
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
@@ -594,11 +559,16 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
-          const { csv, effectifsIds } = await generateSifa(organismeId as any as ObjectId);
-          res.attachment(`tdb-données-sifa-${organismeId}.csv`);
+          const organisme = await getOrganismeById(organismeId);
+          const filters = await validateFullZodObjectSchema(req.query, { type: z.enum(["csv", "xlsx"]) });
+
+          const { file, effectifsIds, extension } = await generateSifa(organismeId as any as ObjectId, filters.type);
+          res.attachment(
+            `tdb-donnees-sifa-${organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}-${new Date().toISOString().split("T")[0]}.${extension}`
+          );
 
           await createTelechargementListeNomLog("sifa", effectifsIds, new Date(), req.user?._id, organismeId);
-          return csv;
+          return file;
         })
       )
       .put(
@@ -942,6 +912,7 @@ function setupRoutes(app: Application) {
       .use(requireAdministrator)
       .use("/users", usersAdmin())
       .use("/organismes", organismesAdmin())
+      .use("/reseaux", reseauxAdmin())
       .use("/effectifs", effectifsAdmin())
       .use("/transmissions", transmissionRoutesAdmin())
       .use("/affelnet", affelnetRoutesAdmin())

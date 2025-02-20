@@ -232,7 +232,11 @@ export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null,
     ])
     .toArray();
 
-export const updateVoeuxAffelnetEffectif = async (effectif_id: ObjectId, effectif: IEffectif, uai: string) => {
+export const updateVoeuxAffelnetEffectif = async (
+  effectif_id: ObjectId,
+  effectif: IEffectif,
+  uai: string | undefined | null
+) => {
   const { apprenant, annee_scolaire } = effectif;
   const { nom, prenom } = apprenant;
   const filter = {

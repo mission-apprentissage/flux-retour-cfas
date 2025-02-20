@@ -7,11 +7,10 @@ import {
   STATUT_APPRENANT,
   STATUT_APPRENANT_VALUES,
   SourceApprenantEnum,
-  TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
   YEAR_RANGE_REGEX,
 } from "../../constants";
-import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { zodEnumFromArray } from "../../utils/zodHelper";
 import { zAdresse } from "../parts/adresseSchema";
 
 import { zApprenant } from "./effectifs/apprenant.part";
@@ -105,7 +104,7 @@ export const zEffectifComputedOrganisme = z.object({
   region: zAdresse.shape.region.nullish(),
   departement: zAdresse.shape.departement.nullish(),
   academie: zAdresse.shape.academie.nullish(),
-  reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").nullish(),
+  reseaux: z.array(z.string()).describe("Réseaux du CFA, s'ils existent").nullish(),
   bassinEmploi: z.string({}).nullish(),
 
   // 2 champs utiles seulement pour les indicateurs v1

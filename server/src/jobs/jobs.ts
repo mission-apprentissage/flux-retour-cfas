@@ -1,12 +1,8 @@
 import { addJob, initJobProcessor } from "job-processor";
-import { MongoError, ObjectId, WithId } from "mongodb";
-import { MOTIF_SUPPRESSION } from "shared/constants";
-import type { IEffectif, IOrganisation, IOrganisationOrganismeFormation } from "shared/models";
+import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
 
-import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
-import { effectifsDb, effectifsDECADb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -38,14 +34,10 @@ import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
-import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
+import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
-import { tmpMigrateAdresseNaissance } from "./patches/adresse/migrate-adresse-naissance";
-import { tmpFiabilisationCertification } from "./patches/certification/fiabilisation-certification";
-import { tmpMigrateEffectifsTransmittedAt } from "./patches/effectifs/migrate-transmitted-at";
 import { validationTerritoires } from "./territoire/validationTerritoire";
-import { tmpMigrationMissionLocaleEffectif } from "./tmp/mission-locale";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
@@ -62,9 +54,6 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Remplissage des OPCOs
   await addJob({ name: "hydrate:opcos", queued });
-
-  // # Remplissage des réseaux
-  await addJob({ name: "hydrate:reseaux", queued });
 
   // # Remplissage des ofa inconnus
   await addJob({ name: "hydrate:ofa-inconnus", queued });
@@ -233,11 +222,6 @@ export async function setupJobProcessor() {
           return hydrateOrganismesOPCOs();
         },
       },
-      "hydrate:reseaux": {
-        handler: async () => {
-          return hydrateReseaux();
-        },
-      },
       "hydrate:ofa-inconnus": {
         handler: async () => {
           return hydrateRaisonSocialeEtEnseigneOFAInconnus();
@@ -256,6 +240,11 @@ export async function setupJobProcessor() {
       "hydrate:voeux-effectifs-relations": {
         handler: async () => {
           return hydrateVoeuxEffectifsRelations();
+        },
+      },
+      "populate:reseaux": {
+        handler: async () => {
+          return populateReseauxCollection();
         },
       },
       "purge:queues": {
@@ -345,187 +334,6 @@ export async function setupJobProcessor() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
         },
-      },
-      "tmp:migration:duplicat-formation": {
-        handler: async (job, signal) => {
-          // In case of interruption, we can restart the job from the last processed effectif
-          // Any updated effectif has either been updated by the job or has been updated by the processing queue
-
-          const cursor = effectifsDb().aggregate<{
-            _id: {
-              annee_scolaire: IEffectif["annee_scolaire"];
-              id_erp_apprenant: IEffectif["id_erp_apprenant"];
-              organisme_id: IEffectif["organisme_id"];
-            };
-            count: number;
-            effectifs: IEffectif[];
-          }>([
-            {
-              $sort: {
-                organisme_id: 1,
-                id_erp_apprenant: 1,
-                annee_scolaire: 1,
-              },
-            },
-            {
-              $group: {
-                _id: {
-                  annee_scolaire: "$annee_scolaire",
-                  id_erp_apprenant: "$id_erp_apprenant",
-                  organisme_id: "$organisme_id",
-                },
-                count: { $sum: 1 },
-                effectifs: { $addToSet: "$$ROOT" },
-              },
-            },
-            { $match: { count: { $gt: 1 } } },
-          ]);
-
-          for await (const doc of cursor) {
-            const validEffectifs: IEffectif[] = [];
-            const duplicatedEffectifs: IEffectif[] = [];
-
-            // Sort effectifs in reverse updated_at order in order to keep the most recent effectif
-            const effectifs = doc.effectifs.toSorted((a, b) => {
-              if (a.updated_at == null) return 1;
-              if (b.updated_at == null) return -1;
-              return a.updated_at.getTime() > b.updated_at.getTime() ? -1 : 1;
-            });
-
-            for (const effectif of effectifs) {
-              if (validEffectifs.length === 0) {
-                validEffectifs.push(effectif);
-                continue;
-              }
-
-              const currentCfd = effectif.formation?.cfd ?? null;
-              const currentRncp = effectif.formation?.rncp ?? null;
-
-              if (!currentCfd && !currentRncp) {
-                duplicatedEffectifs.push(effectif);
-                continue;
-              }
-
-              const isDuplicated = validEffectifs.some((validEffectif) => {
-                const validCfd = validEffectif.formation?.cfd ?? null;
-                const validRncp = validEffectif.formation?.rncp ?? null;
-
-                const isSameCfd = validCfd === null || currentCfd === null || validCfd === currentCfd;
-                const isSameRncp = validRncp === null || currentRncp === null || validRncp === currentRncp;
-
-                return isSameCfd && isSameRncp;
-              });
-
-              if (isDuplicated) {
-                duplicatedEffectifs.push(effectif);
-              } else {
-                validEffectifs.push(effectif);
-              }
-            }
-
-            await Promise.all(
-              duplicatedEffectifs.map(async (effectif) =>
-                softDeleteEffectif(effectif._id, null, {
-                  motif: MOTIF_SUPPRESSION.Doublon,
-                  description: "Doublon de formation",
-                })
-              )
-            );
-
-            if (signal.aborted) {
-              return;
-            }
-          }
-        },
-        resumable: true,
-      },
-      "tmp:migration:organisation-organisme": {
-        handler: async () => {
-          const organisations: Array<IOrganisation> = await organisationsDb()
-            .find({
-              type: "ORGANISME_FORMATION",
-            })
-            .toArray();
-
-          for (let i = 0; i < organisations.length; i++) {
-            const orga = organisations[i] as IOrganisationOrganismeFormation;
-            const organisme = await organismesDb().findOne({ siret: orga.siret, uai: orga.uai ?? undefined });
-            if (organisme) {
-              await organisationsDb().updateOne(
-                { _id: orga._id },
-                { $set: { organisme_id: organisme._id.toString() } }
-              );
-            }
-          }
-        },
-      },
-      "tmp:migration:effectifs:duree_formation_relle": {
-        handler: async () => {
-          const batchSize = 100;
-          const collection = effectifsDb();
-          const cursor = collection.find(
-            { "formation.date_entree": { $exists: true }, "formation.date_fin": { $exists: true } },
-            { projection: { "formation.date_entree": 1, "formation.date_fin": 1 } }
-          );
-
-          let documentsProcessed = 0;
-
-          while (await cursor.hasNext()) {
-            const batch: WithId<IEffectif>[] = [];
-            for (let i = 0; i < batchSize && (await cursor.hasNext()); i++) {
-              const doc = await cursor.next();
-              if (doc) batch.push(doc);
-            }
-
-            const bulkOps = batch
-              .map((doc) => {
-                const { date_entree, date_fin } = doc.formation || {};
-                if (date_entree && date_fin) {
-                  const dureeFormationRelle = Math.round(
-                    (new Date(date_fin).getTime() - new Date(date_entree).getTime()) / 1000 / 60 / 60 / 24 / 30
-                  );
-                  return {
-                    updateOne: {
-                      filter: { _id: doc._id },
-                      update: { $set: { "formation.duree_formation_relle": dureeFormationRelle } },
-                    },
-                  };
-                }
-                return null;
-              })
-              .filter((op): op is Exclude<typeof op, null> => op !== null);
-
-            try {
-              const result = await collection.bulkWrite(bulkOps, { ordered: false });
-              documentsProcessed += result.modifiedCount;
-              console.log(`Documents traités jusqu'à présent : ${documentsProcessed}`);
-            } catch (err) {
-              if (err instanceof MongoError) {
-                console.error("Erreur MongoDB lors de l'opération bulkWrite :", err);
-              } else {
-                throw err;
-              }
-            }
-          }
-
-          console.log(`Migration terminée. Total de documents traités : ${documentsProcessed}`);
-        },
-      },
-      "tmp:migration:hydrate-mission-locale": {
-        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDb()),
-      },
-      "tmp:migration:hydrate-mission-locale-deca": {
-        handler: () => tmpMigrationMissionLocaleEffectif(effectifsDECADb()),
-      },
-      "tmp:migration:formation-certification": {
-        handler: tmpFiabilisationCertification,
-        resumable: true,
-      },
-      "tmp:migration:adresse-naissance": {
-        handler: tmpMigrateAdresseNaissance,
-      },
-      "tmp:migration:effectifs-transmitted-at": {
-        handler: tmpMigrateEffectifsTransmittedAt,
       },
     },
   });
