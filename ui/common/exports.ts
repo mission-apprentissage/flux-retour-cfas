@@ -175,6 +175,12 @@ export const organismesExportColumns = [
     width: 10,
   },
   {
+    label: "region",
+    key: "region",
+    xlsxType: "string",
+    width: 10,
+  },
+  {
     label: "commune",
     key: "commune",
     width: 40,
@@ -236,6 +242,7 @@ export function convertOrganismeToExport(
     enseigne: organisme.enseigne ?? "",
     nature: organisme.nature,
     departement: organisme.adresse?.departement ?? "",
+    region: organisme.adresse?.region ?? "",
     commune: organisme.adresse?.commune ?? "",
     adresse: organisme.adresse?.complete ?? "",
     last_transmission_date: organisme.last_transmission_date ?? "",

@@ -30,7 +30,7 @@ interface AutoCompleteProps {
 }
 
 interface ExtendedOrganisme extends OrganismeSupportInfoJson {
-  id: string;
+  _id: string;
 }
 
 export const AutoCompleteOrganismes: React.FC<AutoCompleteProps> = ({ onSelect }) => {
@@ -58,6 +58,7 @@ export const AutoCompleteOrganismes: React.FC<AutoCompleteProps> = ({ onSelect }
       enabled: query.length >= 3,
     }
   );
+  console.log("CONSOLE LOG ~ data:", data);
 
   const handleSelect = (organisme: ExtendedOrganisme) => {
     onSelect(organisme);
@@ -116,7 +117,7 @@ export const AutoCompleteOrganismes: React.FC<AutoCompleteProps> = ({ onSelect }
                   <List maxH="200px" overflowY="auto">
                     {data.map((organisme) => (
                       <ListItem
-                        key={organisme.id}
+                        key={organisme._id}
                         p={2}
                         _hover={{ bg: "gray.100", cursor: "pointer" }}
                         onClick={() => handleSelect(organisme)}
