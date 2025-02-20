@@ -57,6 +57,8 @@ export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProp
     }
   };
 
+  const isAlreadyInReseau = selectedOrganisme?.reseaux?.includes(reseauName);
+
   return (
     <BasicModal
       title={`Ajouter un organisme au réseau ${reseauName}`}
@@ -75,7 +77,7 @@ export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProp
               variant="primary"
               onClick={() => handleAdd(onClose)}
               isLoading={isAdding}
-              isDisabled={isAdding}
+              isDisabled={isAdding || isAlreadyInReseau}
             >
               Ajouter
             </Button>
@@ -98,7 +100,7 @@ export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProp
                 </Tag>
               </Flex>
               <Flex>
-                <Text mr={2}>Nom commercial:</Text>
+                <Text mr={2}>Enseigne:</Text>
                 <Tag variant="badge" colorScheme="grey_tag" size="lg" fontSize="epsilon" borderRadius="0">
                   {selectedOrganisme?.enseigne || "Inconnue"}
                 </Tag>
@@ -128,9 +130,16 @@ export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProp
                 </Tag>
               </Flex>
             </Flex>
-            <Text mt={4} fontStyle="italic">
-              Êtes-vous sûr.e de vouloir rajouter cet organisme de votre réseau ?
-            </Text>
+
+            {isAlreadyInReseau ? (
+              <Text mt={4} color="red.600">
+                Cet organisme fait déjà partie du réseau {reseauName}
+              </Text>
+            ) : (
+              <Text mt={4} fontStyle="italic">
+                Êtes-vous sûr.e de vouloir rajouter cet organisme à votre réseau ?
+              </Text>
+            )}
           </Box>
         )}
       </Box>
