@@ -1,7 +1,7 @@
 export type CfdInfo = {
   date_fermeture: Date | null;
   date_ouverture: Date | null;
-  niveau: string | null;
+  niveau: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | null;
   intitule_long: string;
   rncps: Array<{
     code_rncp: string;
