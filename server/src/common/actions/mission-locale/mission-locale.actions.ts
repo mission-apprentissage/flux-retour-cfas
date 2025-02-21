@@ -2,7 +2,15 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
+import {
+  IEffecifMissionLocale,
+  IEffectif,
+  IOrganisation,
+  IOrganisme,
+  IStatutApprenantEnum,
+  IUsersMigration,
+} from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -15,6 +23,7 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
 import {
   effectifsDb,
+  effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogsDb,
   organisationsDb,
@@ -461,12 +470,23 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
   );
 
   const toUpdateId = updated.lastErrorObject?.upserted || updated.value?._id;
+  let statut: IStatutApprenantEnum | null = null;
+  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(effectif_id) });
+  if (!effectif) {
+    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectif_id) });
+  }
+
+  if (effectif) {
+    statut = effectif._computed?.statut?.en_cours ?? null;
+  }
+
   if (toUpdateId) {
     await missionLocaleEffectifsLogsDb().insertOne({
       created_at: new Date(),
       _id: new ObjectId(),
       mission_locale_effectif_id: toUpdateId,
       payload: setObject,
+      statut,
     });
   }
 
