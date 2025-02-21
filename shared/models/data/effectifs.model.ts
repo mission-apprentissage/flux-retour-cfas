@@ -86,16 +86,16 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "apprenant.adresse.mission_locale_id": 1, annee_scolaire: 1 }, {}],
 ];
 
-const StatutApprenantEnum = zodEnumFromArray(
+export const zStatutApprenantEnum = zodEnumFromArray(
   STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
 );
 
 export const zEffectifComputedStatut = z.object({
-  en_cours: StatutApprenantEnum,
+  en_cours: zStatutApprenantEnum,
   parcours: z.array(
     z.object({
       date: z.date(),
-      valeur: StatutApprenantEnum,
+      valeur: zStatutApprenantEnum,
     })
   ),
 });
@@ -235,6 +235,7 @@ export const zEffectif = z.object({
 export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
 export type IEffectifApprenant = z.infer<typeof zApprenant>;
+export type IStatutApprenantEnum = z.infer<typeof zStatutApprenantEnum>;
 
 export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
 export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";

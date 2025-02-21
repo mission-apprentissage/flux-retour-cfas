@@ -9035,6 +9035,24 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "statut": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "ABANDON",
+            "PRE_INSCRIT",
+            "INSCRIT",
+            "APPRENTI",
+            "RUPTURANT",
+            "FIN_DE_FORMATION",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
   },
   "required": [
     "_id",
