@@ -194,6 +194,7 @@ export const zOrganisme = z
         email: z.string().email(),
         confirmation_referentiel: z.boolean(),
         sources: z.array(z.string()),
+        confirmation_tdb: z.boolean().nullish(),
       })
     ),
 
