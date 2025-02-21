@@ -1,4 +1,4 @@
-import { IOrganisation, IUsersMigration } from "shared";
+import { DEPARTEMENTS, IOrganisation, IUsersMigration } from "shared";
 
 import { Organisme } from "./internal/Organisme";
 import { ExportColumn } from "./utils/exportUtils";
@@ -175,6 +175,12 @@ export const organismesExportColumns = [
     width: 10,
   },
   {
+    label: "region",
+    key: "region",
+    xlsxType: "string",
+    width: 10,
+  },
+  {
     label: "commune",
     key: "commune",
     width: 40,
@@ -236,6 +242,7 @@ export function convertOrganismeToExport(
     enseigne: organisme.enseigne ?? "",
     nature: organisme.nature,
     departement: organisme.adresse?.departement ?? "",
+    region: DEPARTEMENTS.find((dept) => dept.region.code === String(organisme.adresse?.region))?.region.nom ?? "",
     commune: organisme.adresse?.commune ?? "",
     adresse: organisme.adresse?.complete ?? "",
     last_transmission_date: organisme.last_transmission_date ?? "",

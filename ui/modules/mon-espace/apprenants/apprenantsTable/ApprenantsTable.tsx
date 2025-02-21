@@ -102,7 +102,7 @@ const ApprenantsTable = ({
             <Input
               type="text"
               name="search_organisme"
-              placeholder="Rechercher un apprenant"
+              placeholder="Rechercher un apprenant par son nom, son prénom ou son CFA"
               value={localSearch}
               onChange={handleSearchInputChange}
               onKeyDown={handleKeyDown}

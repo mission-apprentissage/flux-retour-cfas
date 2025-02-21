@@ -53,7 +53,6 @@ const nextConfig = {
       ".mjs": [".mts", ".mjs"],
       ".cjs": [".cts", ".cjs"],
     };
-    console.log(config);
     return config;
   },
   async headers() {

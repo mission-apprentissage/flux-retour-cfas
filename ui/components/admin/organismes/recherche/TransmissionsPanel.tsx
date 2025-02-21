@@ -12,7 +12,7 @@ type TransmissionsPanelProps = {
 };
 
 type OrganismeRefProps = {
-  self: IOrganismeJson;
+  self: Pick<IOrganismeJson, "siret" | "uai">;
   organismeRef:
     | OrganismeSupportInfo["transmissions"][number]["source_organisme"]
     | OrganismeSupportInfo["transmissions"][number]["organisme"]

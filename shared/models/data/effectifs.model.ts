@@ -7,11 +7,10 @@ import {
   STATUT_APPRENANT,
   STATUT_APPRENANT_VALUES,
   SourceApprenantEnum,
-  TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
   YEAR_RANGE_REGEX,
 } from "../../constants";
-import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { zodEnumFromArray } from "../../utils/zodHelper";
 import { zAdresse } from "../parts/adresseSchema";
 
 import { zApprenant } from "./effectifs/apprenant.part";
@@ -87,16 +86,16 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "apprenant.adresse.mission_locale_id": 1, annee_scolaire: 1 }, {}],
 ];
 
-const StatutApprenantEnum = zodEnumFromArray(
+export const zStatutApprenantEnum = zodEnumFromArray(
   STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
 );
 
 export const zEffectifComputedStatut = z.object({
-  en_cours: StatutApprenantEnum,
+  en_cours: zStatutApprenantEnum,
   parcours: z.array(
     z.object({
       date: z.date(),
-      valeur: StatutApprenantEnum,
+      valeur: zStatutApprenantEnum,
     })
   ),
 });
@@ -105,7 +104,7 @@ export const zEffectifComputedOrganisme = z.object({
   region: zAdresse.shape.region.nullish(),
   departement: zAdresse.shape.departement.nullish(),
   academie: zAdresse.shape.academie.nullish(),
-  reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").nullish(),
+  reseaux: z.array(z.string()).describe("Réseaux du CFA, s'ils existent").nullish(),
   bassinEmploi: z.string({}).nullish(),
 
   // 2 champs utiles seulement pour les indicateurs v1
@@ -236,6 +235,7 @@ export const zEffectif = z.object({
 export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
 export type IEffectifApprenant = z.infer<typeof zApprenant>;
+export type IStatutApprenantEnum = z.infer<typeof zStatutApprenantEnum>;
 
 export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
 export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";

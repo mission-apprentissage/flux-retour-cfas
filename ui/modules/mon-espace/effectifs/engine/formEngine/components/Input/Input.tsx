@@ -8,10 +8,9 @@ import {
   HStack,
   InputGroup,
 } from "@chakra-ui/react";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo } from "react";
 
 import InputTooltip from "@/components/Tooltip/InputTooltip";
-import { validField } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/validField";
 
 import { ConsentInput } from "./ConsentInput";
 import { DateInput } from "./DateInput";
@@ -20,119 +19,6 @@ import { PhoneInput } from "./PhoneInput";
 import { RadioInput } from "./RadioInput";
 import { Select } from "./Select";
 import { TextInput } from "./TextInput";
-
-// eslint-disable-next-line react/display-name
-export const Input = memo(
-  ({
-    loading,
-    name,
-    locked,
-    options,
-    description,
-    placeholder,
-    warning,
-    label,
-    fieldType = "text",
-    value,
-    required,
-    min,
-    max,
-    minLength,
-    maxLength,
-    pattern,
-    mask,
-    maskBlocks,
-    onChange,
-    onError,
-    onSubmit,
-    validate,
-    precision,
-    error: externalError,
-    mt,
-    mb,
-    w,
-  }: any) => {
-    const props = useMemo(
-      () => ({
-        name,
-        options,
-        locked,
-        description,
-        placeholder,
-        warning,
-        label,
-        fieldType,
-        value,
-        required,
-        min,
-        max,
-        minLength,
-        maxLength,
-        pattern,
-        mask,
-        maskBlocks,
-        validate,
-        externalError,
-        precision,
-      }),
-      [
-        description,
-        placeholder,
-        options,
-        fieldType,
-        label,
-        locked,
-        mask,
-        maskBlocks,
-        max,
-        maxLength,
-        min,
-        minLength,
-        name,
-        pattern,
-        required,
-        value,
-        warning,
-        validate,
-        externalError,
-        precision,
-      ]
-    );
-    const [fieldState, setFieldState] = useState<{ value: any; error?: any }>({ value });
-
-    const handle = useCallback(
-      async (value, extra) => {
-        const { error } = await validField({
-          field: { ...props, extra },
-          value,
-        });
-        setFieldState({ error, value });
-        onChange?.(value, name, extra);
-        if (error) {
-          onError?.(value, name, extra);
-          return;
-        }
-        onSubmit?.(value, name, extra);
-      },
-      [props, onChange, name, onSubmit, onError]
-    );
-
-    return (
-      <InputField
-        {...props}
-        {...fieldState}
-        isRequired={required}
-        loading={loading}
-        value={value ?? fieldState.value}
-        error={fieldState.error || externalError}
-        onChange={handle}
-        mt={mt}
-        mb={mb}
-        w={w}
-      />
-    );
-  }
-);
 
 // eslint-disable-next-line react/display-name
 export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {

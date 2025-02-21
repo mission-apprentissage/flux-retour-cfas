@@ -10,9 +10,10 @@ import {
   zUsersMigration,
 } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
+import { zContrat } from "../../data/effectifs/contrat.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
 
-export const zEffectifMissionLocale = z.object({
+const zEffectifMissionLocale = z.object({
   id: zObjectId,
   apprenant: zApprenant.pick({
     nom: true,
@@ -25,6 +26,7 @@ export const zEffectifMissionLocale = z.object({
   }),
   statut: zEffectifComputedStatut,
   formation: zFormationEffectif,
+  contrat: zContrat.nullish(),
   organisme: zEffectifComputedOrganisme,
   users: z.array(zUsersMigration.pick({ nom: true, prenom: true, email: true, telephone: true, fonction: true })),
   organisme_id: zObjectId,

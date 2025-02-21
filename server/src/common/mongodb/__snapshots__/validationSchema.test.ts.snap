@@ -221,32 +221,6 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                           "description": "Réseaux du CFA, s'ils existent",
                           "items": {
                             "bsonType": "string",
-                            "enum": [
-                              "ADEN",
-                              "CMA",
-                              "AGRI",
-                              "AGRI_CNEAP",
-                              "AGRI_UNREP",
-                              "AGRI_UNMFREO",
-                              "ANASUP",
-                              "AMUE",
-                              "CCI",
-                              "CFA_EC",
-                              "COMP_DU_DEVOIR",
-                              "COMP_DU_TOUR_DE_FRANCE",
-                              "GRETA",
-                              "UIMM",
-                              "BTP_CFA",
-                              "MFR",
-                              "AFTRAL",
-                              "GRETA_VAUCLUSE",
-                              "CFA_SAT",
-                              "EN_HORS_MURS",
-                              "EN_CFA_ACADEMIQUE",
-                              "EN_EPLE",
-                              "EDUSERVICES",
-                              "AFPA",
-                            ],
                           },
                         },
                         {
@@ -495,18 +469,6 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                       ],
                       "description": "Durée théorique de la formation en mois",
                     },
-                    "formation_id": {
-                      "anyOf": [
-                        {
-                          "bsonType": "objectId",
-                          "description": "ID de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "ID de la formation",
-                    },
                     "formation_presentielle": {
                       "bsonType": [
                         "bool",
@@ -529,48 +491,16 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                       "description": "Libellé long de la formation visée",
                     },
                     "niveau": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Niveau de formation récupéré via Tables de Correspondances",
                     },
                     "niveau_libelle": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
                     },
@@ -2692,18 +2622,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -2726,48 +2644,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -3140,32 +3026,6 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                           "description": "Réseaux du CFA, s'ils existent",
                           "items": {
                             "bsonType": "string",
-                            "enum": [
-                              "ADEN",
-                              "CMA",
-                              "AGRI",
-                              "AGRI_CNEAP",
-                              "AGRI_UNREP",
-                              "AGRI_UNMFREO",
-                              "ANASUP",
-                              "AMUE",
-                              "CCI",
-                              "CFA_EC",
-                              "COMP_DU_DEVOIR",
-                              "COMP_DU_TOUR_DE_FRANCE",
-                              "GRETA",
-                              "UIMM",
-                              "BTP_CFA",
-                              "MFR",
-                              "AFTRAL",
-                              "GRETA_VAUCLUSE",
-                              "CFA_SAT",
-                              "EN_HORS_MURS",
-                              "EN_CFA_ACADEMIQUE",
-                              "EN_EPLE",
-                              "EDUSERVICES",
-                              "AFPA",
-                            ],
                           },
                         },
                         {
@@ -3414,18 +3274,6 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       ],
                       "description": "Durée théorique de la formation en mois",
                     },
-                    "formation_id": {
-                      "anyOf": [
-                        {
-                          "bsonType": "objectId",
-                          "description": "ID de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "ID de la formation",
-                    },
                     "formation_presentielle": {
                       "bsonType": [
                         "bool",
@@ -3448,48 +3296,16 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                       "description": "Libellé long de la formation visée",
                     },
                     "niveau": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Niveau de formation récupéré via Tables de Correspondances",
                     },
                     "niveau_libelle": {
-                      "anyOf": [
-                        {
-                          "anyOf": [
-                            {
-                              "not": {},
-                            },
-                            {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                            },
-                          ],
-                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
+                      "bsonType": [
+                        "string",
+                        "null",
                       ],
                       "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
                     },
@@ -5611,18 +5427,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -5645,48 +5449,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -6108,32 +5880,6 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                           "description": "Réseaux du CFA, s'ils existent",
                           "items": {
                             "bsonType": "string",
-                            "enum": [
-                              "ADEN",
-                              "CMA",
-                              "AGRI",
-                              "AGRI_CNEAP",
-                              "AGRI_UNREP",
-                              "AGRI_UNMFREO",
-                              "ANASUP",
-                              "AMUE",
-                              "CCI",
-                              "CFA_EC",
-                              "COMP_DU_DEVOIR",
-                              "COMP_DU_TOUR_DE_FRANCE",
-                              "GRETA",
-                              "UIMM",
-                              "BTP_CFA",
-                              "MFR",
-                              "AFTRAL",
-                              "GRETA_VAUCLUSE",
-                              "CFA_SAT",
-                              "EN_HORS_MURS",
-                              "EN_CFA_ACADEMIQUE",
-                              "EN_EPLE",
-                              "EDUSERVICES",
-                              "AFPA",
-                            ],
                           },
                         },
                         {
@@ -7913,18 +7659,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Durée théorique de la formation en mois",
             },
-            "formation_id": {
-              "anyOf": [
-                {
-                  "bsonType": "objectId",
-                  "description": "ID de la formation",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "ID de la formation",
-            },
             "formation_presentielle": {
               "bsonType": [
                 "bool",
@@ -7947,48 +7681,16 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "description": "Libellé long de la formation visée",
             },
             "niveau": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Niveau de formation récupéré via Tables de Correspondances",
             },
             "niveau_libelle": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "not": {},
-                    },
-                    {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                  ],
-                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                },
-                {
-                  "bsonType": "null",
-                },
+              "bsonType": [
+                "string",
+                "null",
               ],
               "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
             },
@@ -8608,140 +8310,6 @@ exports[`validation-schema > should create validation schema for formationV2 > f
 }
 `;
 
-exports[`validation-schema > should create validation schema for formations > formations 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "annee": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Année de la formation (cursus)",
-    },
-    "cfd": {
-      "bsonType": "string",
-      "description": "Code CFD de la formation",
-      "pattern": "^[A-Z0-9]{8}$",
-    },
-    "cfd_end_date": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date de fermeture du CFD",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date de fermeture du CFD",
-    },
-    "cfd_start_date": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'ouverture du CFD",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'ouverture du CFD",
-    },
-    "created_at": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'ajout en base de données",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'ajout en base de données",
-    },
-    "duree": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Durée de la formation théorique",
-    },
-    "libelle": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Libellé normalisé depuis Tables de Correspondances",
-    },
-    "metiers": {
-      "anyOf": [
-        {
-          "bsonType": "array",
-          "description": "Les domaines métiers rattachés à la formation",
-          "items": {
-            "bsonType": "string",
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Les domaines métiers rattachés à la formation",
-    },
-    "niveau": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Niveau de formation récupéré via Tables de Correspondances",
-    },
-    "niveau_libelle": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-    },
-    "rncps": {
-      "anyOf": [
-        {
-          "bsonType": "array",
-          "description": "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
-          "items": {
-            "bsonType": "string",
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
-    },
-    "updated_at": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-          "description": "Date d'update en base de données",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'update en base de données",
-    },
-  },
-  "required": [
-    "_id",
-    "cfd",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for formationsCatalogue > formationsCatalogue 1`] = `
 {
   "additionalProperties": false,
@@ -9336,10 +8904,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         {
           "bsonType": "string",
           "enum": [
-            "CONTACTE_AVEC_SUIVI",
+            "A_CONTACTER",
+            "CONTACTE",
+            "SUIVI_DEMARRE",
             "CONTACT_SANS_SUIVI",
-            "DEJA_SUIVI",
             "INJOIGNABLE",
+            "DEJA_SUIVI",
+            "CONTACTE_AVEC_SUIVI",
             "NON_CONTACTE",
           ],
         },
@@ -9421,10 +8992,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             {
               "bsonType": "string",
               "enum": [
-                "CONTACTE_AVEC_SUIVI",
+                "A_CONTACTER",
+                "CONTACTE",
+                "SUIVI_DEMARRE",
                 "CONTACT_SANS_SUIVI",
-                "DEJA_SUIVI",
                 "INJOIGNABLE",
+                "DEJA_SUIVI",
+                "CONTACTE_AVEC_SUIVI",
                 "NON_CONTACTE",
               ],
             },
@@ -9460,6 +9034,24 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "maxLength": 150,
         },
       },
+    },
+    "statut": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "ABANDON",
+            "PRE_INSCRIT",
+            "INSCRIT",
+            "APPRENTI",
+            "RUPTURANT",
+            "FIN_DE_FORMATION",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
   },
   "required": [
@@ -9573,7 +9165,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "siret": {
           "bsonType": "string",
           "description": "N° SIRET",
-          "pattern": "^[0-9]{14}$",
         },
         "type": {
           "bsonType": "string",
@@ -9584,7 +9175,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "created_at",
         "type",
         "nom",
-        "siret",
         "ml_id",
       ],
     },
@@ -9647,32 +9237,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "reseau": {
           "bsonType": "string",
           "description": "Réseau du CFA, s'il existe",
-          "enum": [
-            "ADEN",
-            "CMA",
-            "AGRI",
-            "AGRI_CNEAP",
-            "AGRI_UNREP",
-            "AGRI_UNMFREO",
-            "ANASUP",
-            "AMUE",
-            "CCI",
-            "CFA_EC",
-            "COMP_DU_DEVOIR",
-            "COMP_DU_TOUR_DE_FRANCE",
-            "GRETA",
-            "UIMM",
-            "BTP_CFA",
-            "MFR",
-            "AFTRAL",
-            "GRETA_VAUCLUSE",
-            "CFA_SAT",
-            "EN_HORS_MURS",
-            "EN_CFA_ACADEMIQUE",
-            "EN_EPLE",
-            "EDUSERVICES",
-            "AFPA",
-          ],
         },
         "type": {
           "bsonType": "string",
@@ -10094,10 +9658,6 @@ exports[`validation-schema > should create validation schema for organismes > or
     "_id": {
       "bsonType": "objectId",
     },
-    "access_token": {
-      "bsonType": "string",
-      "description": "Le token permettant l'accès au CFA à sa propre page",
-    },
     "adresse": {
       "anyOf": [
         {
@@ -10399,7 +9959,10 @@ exports[`validation-schema > should create validation schema for organismes > or
       "description": "Date de l'interfaçage",
     },
     "api_key": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
       "description": "API key pour envoi de données",
     },
     "api_siret": {
@@ -11119,32 +10682,6 @@ exports[`validation-schema > should create validation schema for organismes > or
       "description": "Réseaux du CFA, s'ils existent",
       "items": {
         "bsonType": "string",
-        "enum": [
-          "ADEN",
-          "CMA",
-          "AGRI",
-          "AGRI_CNEAP",
-          "AGRI_UNREP",
-          "AGRI_UNMFREO",
-          "ANASUP",
-          "AMUE",
-          "CCI",
-          "CFA_EC",
-          "COMP_DU_DEVOIR",
-          "COMP_DU_TOUR_DE_FRANCE",
-          "GRETA",
-          "UIMM",
-          "BTP_CFA",
-          "MFR",
-          "AFTRAL",
-          "GRETA_VAUCLUSE",
-          "CFA_SAT",
-          "EN_HORS_MURS",
-          "EN_CFA_ACADEMIQUE",
-          "EN_EPLE",
-          "EDUSERVICES",
-          "AFPA",
-        ],
       },
     },
     "siret": {
@@ -11157,9 +10694,17 @@ exports[`validation-schema > should create validation schema for organismes > or
       "description": "Date d'erreur de transmission",
     },
     "uai": {
-      "bsonType": "string",
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "description": "Code UAI de l'établissement",
+          "pattern": "^[0-9]{7}[a-zA-Z]$",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
       "description": "Code UAI de l'établissement",
-      "pattern": "^[0-9]{7}[a-zA-Z]$",
     },
     "updated_at": {
       "bsonType": "date",
@@ -11220,6 +10765,52 @@ exports[`validation-schema > should create validation schema for personV2 > pers
     "updated_at",
     "nom",
     "prenom",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for reseaux > reseaux 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+      "description": "Identifiant unique",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création du réseau",
+    },
+    "key": {
+      "bsonType": "string",
+      "description": "Clé du réseau",
+      "minLength": 1,
+    },
+    "nom": {
+      "bsonType": "string",
+      "description": "Nom du réseau",
+      "minLength": 1,
+    },
+    "organismes_ids": {
+      "bsonType": "array",
+      "description": "Liste des IDs des organismes associés au réseau",
+      "items": {
+        "bsonType": "objectId",
+      },
+    },
+    "responsable": {
+      "bsonType": "bool",
+      "description": "Le réseau est-il responsable ?",
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date de dernière mise à jour du réseau",
+    },
+  },
+  "required": [
+    "key",
+    "nom",
   ],
 }
 `;
@@ -11400,97 +10991,6 @@ exports[`validation-schema > should create validation schema for transmissionV2 
     "_id",
     "created_at",
     "formation_id",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for users > users 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "__v": {
-      "bsonType": "number",
-    },
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "archived_at": {
-      "bsonType": "date",
-    },
-    "created_at": {
-      "bsonType": "date",
-      "description": "La date de création de l'utilisateur",
-    },
-    "email": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Email de l'utilisateur",
-    },
-    "last_connection": {
-      "bsonType": "date",
-      "description": "Date de dernière connexion",
-    },
-    "network": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Le réseau de CFA de l'utilisateur s'il est précisé",
-    },
-    "organisme": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "L'organisme d'appartenance de l'utilisateur s'il est précisé",
-    },
-    "password": {
-      "bsonType": "string",
-      "description": "Le mot de passe hashed",
-    },
-    "password_update_token": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "Token généré afin de sécuriser le changement de mot de passe",
-    },
-    "password_update_token_expiry": {
-      "anyOf": [
-        {
-          "bsonType": "date",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
-    },
-    "permissions": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
-    },
-    "region": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-      "description": "La région de l'utilisateur s'il est précisé",
-    },
-    "username": {
-      "bsonType": "string",
-      "description": "Le nom de l'utilisateur, utilisé pour l'authentification",
-    },
-  },
-  "required": [
-    "_id",
-    "username",
-    "created_at",
   ],
 }
 `;
@@ -11774,32 +11274,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
                       "description": "Réseaux du CFA, s'ils existent",
                       "items": {
                         "bsonType": "string",
-                        "enum": [
-                          "ADEN",
-                          "CMA",
-                          "AGRI",
-                          "AGRI_CNEAP",
-                          "AGRI_UNREP",
-                          "AGRI_UNMFREO",
-                          "ANASUP",
-                          "AMUE",
-                          "CCI",
-                          "CFA_EC",
-                          "COMP_DU_DEVOIR",
-                          "COMP_DU_TOUR_DE_FRANCE",
-                          "GRETA",
-                          "UIMM",
-                          "BTP_CFA",
-                          "MFR",
-                          "AFTRAL",
-                          "GRETA_VAUCLUSE",
-                          "CFA_SAT",
-                          "EN_HORS_MURS",
-                          "EN_CFA_ACADEMIQUE",
-                          "EN_EPLE",
-                          "EDUSERVICES",
-                          "AFPA",
-                        ],
                       },
                     },
                     {

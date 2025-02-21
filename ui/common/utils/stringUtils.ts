@@ -6,6 +6,9 @@ export const formatNumber = (number) => {
 };
 
 export const formatSiretSplitted = (siret) => {
+  return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : siret;
+};
+export const formatSiretSplittedWithDefaultValue = (siret) => {
   if (!siret) return "SIRET INCONNU";
   return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";
 };
@@ -31,14 +34,6 @@ export function prettyFormatNumber(number: number): string {
   }
   return `${number % 1 !== 0 ? number.toFixed(1) : number}`;
 }
-
-export const toPascalCase = (string) =>
-  `${string}`
-    .toLowerCase()
-    .replace(new RegExp(/[-_]+/, "g"), " ")
-    .replace(new RegExp(/[^\w\s]/, "g"), "")
-    .replace(new RegExp(/\s+(.)(\w*)/, "g"), ($1, $2, $3) => `${$2.toUpperCase() + $3}`)
-    .replace(new RegExp(/\w/), (s) => s.toUpperCase());
 
 export function capitalizeWords(str: string): string {
   const formattedString = str.toLowerCase().replace(/_/g, " ");

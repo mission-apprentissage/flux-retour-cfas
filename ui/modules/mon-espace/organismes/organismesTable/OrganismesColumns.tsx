@@ -212,7 +212,7 @@ const organismesTableColumnsDefs = [
             <Text fontSize="lg" fontWeight="bold">
               {row.original.raison_sociale ?? row.original.enseigne ?? row.original.nom}
             </Text>
-            <Text>{row.original.adresse.complete}</Text>
+            <Text>{row.original.adresse?.complete || ""}</Text>
           </Flex>
 
           {row.original.users.length > 0 ? (

@@ -2,7 +2,15 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffecifMissionLocale, IEffectif, IOrganisation, IOrganisme, IUsersMigration } from "shared/models";
+import {
+  IEffecifMissionLocale,
+  IEffectif,
+  IOrganisation,
+  IOrganisme,
+  IStatutApprenantEnum,
+  IUsersMigration,
+} from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -15,6 +23,7 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
 import {
   effectifsDb,
+  effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogsDb,
   organisationsDb,
@@ -24,11 +33,11 @@ import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
-export const EFF_MISSION_LOCALE_FILTER = [
+const EFF_MISSION_LOCALE_FILTER = [
   {
     $match: {
       $or: [
-        { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 27)) } },
+        { "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)) } },
         { "apprenant.rqth": true },
       ],
     },
@@ -95,7 +104,7 @@ const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: D
       ]
     : [];
 
-export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
+const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
     statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
     rqth,
@@ -129,6 +138,10 @@ export const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersM
                   $or: [
                     { "apprenant.nom": { $regex: currentSearch, $options: "i" } },
                     { "apprenant.prenom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.siret": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.nom": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.raison_sociale": { $regex: currentSearch, $options: "i" } },
+                    { "organisme.enseigne": { $regex: currentSearch, $options: "i" } },
                   ],
                 })),
             }
@@ -291,6 +304,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
 
   const effectifsAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
     { $addFields: { stringify_organisme_id: { $toString: "$organisme_id" } } },
     {
       $lookup: {
@@ -307,15 +321,23 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     ...effectifMissionLocaleLookupAggregation,
-    ...buildFiltersForMissionLocale(effectifFilters),
-    ...EFF_MISSION_LOCALE_FILTER,
     {
       $lookup: {
         from: "organismes",
         let: { id: "$organisme_id" },
         pipeline: [
           { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          { $project: { _id: 0, contacts_from_referentiel: 1, nom: 1, raison_sociale: 1, adresse: 1 } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
         ],
         as: "organisme",
       },
@@ -326,6 +348,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...buildFiltersForMissionLocale(effectifFilters),
     {
       $lookup: {
         from: "usersMigration",
@@ -447,12 +470,23 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
   );
 
   const toUpdateId = updated.lastErrorObject?.upserted || updated.value?._id;
+  let statut: IStatutApprenantEnum | null = null;
+  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(effectif_id) });
+  if (!effectif) {
+    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectif_id) });
+  }
+
+  if (effectif) {
+    statut = effectif._computed?.statut?.en_cours ?? null;
+  }
+
   if (toUpdateId) {
     await missionLocaleEffectifsLogsDb().insertOne({
       created_at: new Date(),
       _id: new ObjectId(),
       mission_locale_effectif_id: toUpdateId,
       payload: setObject,
+      statut,
     });
   }
 
@@ -488,7 +522,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   missionLocaleId: number,
   organismesFiltersMissionLocale: IPaginationFilters
 ) => {
-  const { page = 0, limit = 20 } = organismesFiltersMissionLocale;
+  const { page = 0, limit = 20, sort = "nom", order = "asc" } = organismesFiltersMissionLocale;
   const statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
@@ -518,23 +552,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
       $facet: {
         pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
         data: [
-          { $skip: page * limit },
-          { $limit: limit },
           { $addFields: { stringify_organisme_id: { $toString: "$_id" } } },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "stringify_organisme_id",
-              foreignField: "organisme_id",
-              as: "organisation",
-            },
-          },
-          {
-            $unwind: {
-              path: "$organisation",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
           {
             $lookup: {
               from: "organismes",
@@ -546,6 +564,20 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
           {
             $unwind: {
               path: "$organisme",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "stringify_organisme_id",
+              foreignField: "organisme_id",
+              as: "organisation",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisation",
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -591,6 +623,15 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
               },
             },
           },
+          {
+            $sort: buildSortFilter(sort, order, {
+              nom: "organisme.nom",
+              adresse: "organisme.adresse.commune",
+              formations_count: "formationsCount",
+            }),
+          },
+          { $skip: page * limit },
+          { $limit: limit },
           {
             $project: {
               _id: 0,
@@ -646,7 +687,6 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
     { $unwind: { path: "$pagination", preserveNullAndEmptyArrays: true } },
     { $unwind: { path: "$totalFormations", preserveNullAndEmptyArrays: true } },
   ];
-
   const resultOrganismes = await effectifsDb().aggregate(organismeMissionLocaleAggregation).next();
 
   if (!resultOrganismes) {

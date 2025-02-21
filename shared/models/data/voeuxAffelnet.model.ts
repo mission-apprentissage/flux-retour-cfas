@@ -2,8 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX, YEAR_REGEX } from "../../constants";
-import { zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { SIRET_REGEX, UAI_REGEX, YEAR_REGEX } from "../../constants";
 import { zAdresse } from "../parts/adresseSchema";
 
 const collectionName = "voeuxAffelnet";
@@ -115,10 +114,7 @@ const zVoeuAffelnet = z.object({
         region: zAdresse.shape.region.nullish(),
         departement: zAdresse.shape.departement.nullish(),
         academie: zAdresse.shape.academie.nullish(),
-        reseaux: z
-          .array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID))
-          .describe("Réseaux du CFA, s'ils existent")
-          .nullish(),
+        reseaux: z.array(z.string()).describe("Réseaux du CFA, s'ils existent").nullish(),
         bassinEmploi: z.string({}).nullish(),
 
         // 2 champs utiles seulement pour les indicateurs v1

@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { it, expect, describe, beforeEach, beforeAll } from "vitest";
 
 import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb, reseauxDb } from "@/common/model/collections";
 import { historySequenceApprentiToAbandon } from "@tests/data/historySequenceSamples";
 import { createRandomFormation, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -11,6 +11,7 @@ import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
   organismes,
+  reseaux,
   testPermissions,
   userOrganisme,
 } from "@tests/utils/permissions";
@@ -35,6 +36,7 @@ describe("Route indicateurs", () => {
   });
   beforeEach(async () => {
     await organismesDb().insertMany(organismes);
+    await reseauxDb().insertMany(reseaux);
   });
 
   describe("GET /api/v1/indicateurs/effectifs/par-departement - indicateurs sur les effectifs par département", () => {

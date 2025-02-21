@@ -38,12 +38,12 @@ const ApprenantsSituationSelect: React.FC<ApprenantsSituationSelectProps> = ({
 
   return (
     <Select fontSize="sm" onClick={(e) => e.stopPropagation()} onChange={handleChange} value={situation || ""}>
-      <option value="">Choisir</option>
       {Object.entries(SITUATION_ENUM).map(([key, value]) => (
         <option key={value} value={value}>
           {SITUATION_LABEL_ENUM[key as keyof typeof SITUATION_LABEL_ENUM]}
         </option>
       ))}
+      <option value="">Non traité</option>
     </Select>
   );
 };

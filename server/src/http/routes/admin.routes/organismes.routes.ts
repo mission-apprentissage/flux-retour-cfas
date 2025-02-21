@@ -7,7 +7,10 @@ import {
   getAllOrganismes,
   getDetailedOrganismeById,
 } from "@/common/actions/organismes/organismes.actions";
-import { searchOrganismesSupportInfoBySiret } from "@/common/actions/organismes/organismes.admin.actions";
+import {
+  getArchivableOrganismes,
+  searchOrganismesSupportInfoBySiret,
+} from "@/common/actions/organismes/organismes.admin.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
@@ -39,6 +42,7 @@ export default () => {
       if (result) {
         result.filter = filter;
       }
+
       return res.json(result);
     }
   );
@@ -54,6 +58,10 @@ export default () => {
       res.json(await searchOrganismesSupportInfoBySiret(q));
     }
   );
+
+  router.get("/archivables", async (_req, res) => {
+    res.json(await getArchivableOrganismes());
+  });
 
   router.get(
     "/:id",

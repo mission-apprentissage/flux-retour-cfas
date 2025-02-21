@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { STATUT_APPRENANT } from "../../../constants";
-import { zSituationEnum } from "../../data/missionLocaleEffectif.model";
+import { zApiSituationEnum } from "../../data/missionLocaleEffectif.model";
 import { zBooleanStringSchema } from "../../parts/zodPrimitives";
 
 export const effectifsFiltersMissionLocaleSchema = {
@@ -13,7 +13,7 @@ export const effectifsFiltersMissionLocaleSchema = {
   niveaux: z.array(z.string()).optional(),
   code_adresse: z.array(z.string().regex(/^([0-9]{1}[0-9A-Z]{1}[0-9]{3})-([0-9]{5})$/)).optional(),
   search: z.string().optional(),
-  situation: z.array(zSituationEnum.optional()).optional(),
+  situation: z.array(zApiSituationEnum.optional()).optional(),
   a_risque: zBooleanStringSchema.optional(),
   last_update_value: z.coerce.number().int().positive().optional(),
   last_update_order: z.enum(["BEFORE", "AFTER"]).optional(),

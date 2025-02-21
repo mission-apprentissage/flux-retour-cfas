@@ -1,5 +1,6 @@
 import { Flex } from "@chakra-ui/react";
 
+import { MODEL_EXPORT_LAST_UPDATE } from "@/common/utils/exportUtils";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import InfoTeleversement from "@/modules/organismes/InfoTeleversement";
 import { Book } from "@/theme/components/icons";
@@ -16,7 +17,7 @@ export default function DocumentsActionButtons() {
   return (
     <Flex mt={4} gap={6} mb={5}>
       <ButtonTeleversement
-        href="/modele-import.xlsx"
+        href={`/modele-import-${MODEL_EXPORT_LAST_UPDATE}.xlsx`}
         onClick={() => trackPlausibleEvent("televersement_clic_telechargement_excel")}
       >
         <DownloadSimple mr={2} />

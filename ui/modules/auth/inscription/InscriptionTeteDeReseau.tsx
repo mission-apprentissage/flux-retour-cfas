@@ -2,10 +2,10 @@ import { Button, FormControl, FormErrorMessage, FormLabel, HStack, Input, Select
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
-import { ITeteDeReseauKey, TETE_DE_RESEAUX_SORTED } from "shared";
 import * as Yup from "yup";
 
 import { _post } from "@/common/httpClient";
+import { useTeteDeReseaux } from "@/modules/dashboard/hooks/useTeteDeReseaux";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
@@ -15,7 +15,8 @@ export const InscriptionTeteDeReseau = ({
   setHideBackNextButtons,
 }: InscriptionOrganistionChildProps) => {
   const router = useRouter();
-  const TETE_DE_RESEAUX_SORTED_WITH_OTHER_OPTION = [...TETE_DE_RESEAUX_SORTED, { nom: "Autre Réseau", key: "AUTRE" }];
+  const { data: reseaux } = useTeteDeReseaux();
+  const TETE_DE_RESEAUX_SORTED_WITH_OTHER_OPTION = [...(reseaux || []), { nom: "Autre Réseau", key: "AUTRE" }];
 
   const sendOtherReseauRegisterDemand = async (values, { setStatus }) => {
     try {
@@ -39,7 +40,7 @@ export const InscriptionTeteDeReseau = ({
           onChange={(e) => {
             setOrganisation({
               type: "TETE_DE_RESEAU",
-              reseau: e.target.value as ITeteDeReseauKey,
+              reseau: e.target.value,
             });
             setHideBackNextButtons?.(e.target.value === "AUTRE");
           }}

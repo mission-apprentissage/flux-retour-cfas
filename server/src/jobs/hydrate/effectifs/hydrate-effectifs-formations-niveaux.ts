@@ -1,8 +1,9 @@
 import { captureException } from "@sentry/node";
 
-import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
+import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
+import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import logger from "@/common/logger";
-import { effectifsDb, formationsCatalogueDb } from "@/common/model/collections";
+import { effectifsDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsFormationsNiveaux() {
   logger.info("Hydrating effectifs.formation.niveaux ...");
@@ -31,9 +32,9 @@ export async function hydrateEffectifsFormationsNiveaux() {
   // Pour chaque CFD qui a son niveau vide on appelle l'API TCO et on update tous les effectifs concernés avec le niveau récupéré
   for (const currentCfd of effectifsCfdWithoutNiveau) {
     try {
-      const formationInfo = await formationsCatalogueDb().findOne({ cfd: currentCfd });
+      const cfdInfo = await getCfdInfo(currentCfd);
 
-      if (formationInfo) {
+      if (cfdInfo) {
         // On MAJ le niveau pour les effectifs liés à ce CFD et n'ayant pas niveau
         const { modifiedCount } = await effectifsDb().updateMany(
           {
@@ -42,8 +43,8 @@ export async function hydrateEffectifsFormationsNiveaux() {
           },
           {
             $set: {
-              "formation.niveau": getNiveauFormationFromLibelle(formationInfo.niveau),
-              "formation.niveau_libelle": formationInfo.niveau,
+              "formation.niveau": cfdInfo.niveau,
+              "formation.niveau_libelle": getNiveauFormationLibelle(cfdInfo.niveau),
             },
           }
         );

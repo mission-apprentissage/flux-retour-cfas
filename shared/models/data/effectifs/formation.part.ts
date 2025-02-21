@@ -1,17 +1,9 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
-import { RNCP_REGEX } from "../../../constants";
-import formationsModel from "../formations.model";
-
-const formationsProps = formationsModel.zod.shape;
+import { CFD_REGEX, RNCP_REGEX } from "../../../constants";
 
 export const zFormationEffectif = z.object({
-  // TODO formation_id devrait être un objectId pointant vers la collection formations (à remplir au moment de l'import)
-  formation_id: zObjectId.describe("ID de la formation").nullish(),
-  // DEBUT champs collectés qui servent à retrouver le champ formation_id
-  // une fois le champs formation_id rempli, ces champs ne sont plus utile
-  cfd: formationsProps.cfd.nullish(),
+  cfd: z.string({ description: "Code CFD de la formation" }).regex(CFD_REGEX).nullish(),
   rncp: z
     .string({
       description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
@@ -20,8 +12,12 @@ export const zFormationEffectif = z.object({
     .nullish(),
   libelle_long: z.string({ description: "Libellé long de la formation visée" }).nullish(),
   libelle_court: z.string({ description: "Libellé court de la formation visée" }).nullish(),
-  niveau: formationsProps.niveau.nullish(),
-  niveau_libelle: formationsProps.niveau_libelle.nullish(),
+  niveau: z.string({ description: "Niveau de formation récupéré via Tables de Correspondances" }).nullish(),
+  niveau_libelle: z
+    .string({
+      description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
+    })
+    .nullish(),
   annee: z.number({ description: "Numéro de l'année dans la formation (promo)" }).int().nullish(),
   // FIN champs collectés
   date_obtention_diplome: z.date({ description: "Date d'obtention du diplôme" }).nullish(),

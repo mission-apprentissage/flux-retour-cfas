@@ -32,12 +32,3 @@ export function createActivationToken(email: string) {
 export function createUserTokenSimple(options = {}) {
   return createToken("user", null, options);
 }
-
-export const createUserToken = (user, options: any = {}) => {
-  const payload = {
-    is_admin: user.is_admin,
-    is_cross_organismes: user.is_cross_organismes,
-    network: user.network,
-  };
-  return createToken("user", user.username, { payload, ...options });
-};

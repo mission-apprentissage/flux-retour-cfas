@@ -1,5 +1,6 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
+import parsePhoneNumber from "libphonenumber-js";
 import { capitalize } from "lodash-es";
 import { z } from "zod";
 
@@ -11,7 +12,6 @@ import {
   UAI_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
-  PHONE_REGEX_PATTERN,
   zCodeStatutApprenant,
   CODES_STATUT_APPRENANT_ENUM,
   zEffectifDernierSituation,
@@ -43,8 +43,11 @@ export const extensions = {
       .transform((v: string) => (v ? telephoneConverter(v) : null))
       .refine(
         (v: string | null | undefined) => {
-          const phoneRegex = new RegExp(PHONE_REGEX_PATTERN, "g");
-          return v === null || v === undefined || phoneRegex.test(v);
+          if (v === null || v === undefined) {
+            return true;
+          }
+          const parsed = parsePhoneNumber(v, "FR"); // Default indicator if none provided
+          return parsed?.isValid();
         },
         {
           message: "Format invalide",

@@ -527,6 +527,7 @@ export const buildEffectifForMissionLocale = (
     },
     statut: effectif._computed?.statut,
     formation: effectif.formation,
+    contrat: effectif.contrats && effectif.contrats.length ? effectif.contrats[effectif.contrats.length - 1] : null,
     organisme: {
       nom: effectif.organisme.nom,
       raison_sociale: effectif.organisme.raison_sociale,

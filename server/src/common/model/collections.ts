@@ -4,7 +4,6 @@ import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
-import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
@@ -19,11 +18,11 @@ import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
+import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
 } from "shared/models/data/telechargementListesNomLogs.model";
-import usersModelDescriptor, { IUser } from "shared/models/data/users.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
@@ -36,8 +35,6 @@ import { getDbCollection } from "@/common/mongodb";
 
 export const modelDescriptors = [
   auditLogsModelDescriptor,
-  usersModelDescriptor,
-  formationsModelDescriptor,
   formationsCatalogueModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
@@ -59,14 +56,13 @@ export const modelDescriptors = [
   organismesV2ModelDescriptor,
   personV2ModelDescriptor,
   transmissionV2Descriptor,
+  ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   missionLocaleEffectifLogsDescriptor,
 ];
 
-export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
-export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
@@ -87,6 +83,7 @@ export const telechargementListesNominativesLogsDb = () =>
 export const erpDb = () => getDbCollection<IErp>(erpModelDescriptor.collectionName);
 export const opcosDb = () => getDbCollection<IOpcos>(opcosDescriptor.collectionName);
 export const opcosRncpDb = () => getDbCollection<IOpcoRncp>(opcosRncpDescriptor.collectionName);
+export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.collectionName);
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);

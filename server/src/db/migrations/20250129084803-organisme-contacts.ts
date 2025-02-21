@@ -41,18 +41,19 @@ export const up = async () => {
       });
 
       if (bulk.length >= 1_000) {
-        await organismesDb().bulkWrite(bulk);
+        await organismesDb().bulkWrite(bulk, { bypassDocumentValidation: true });
         bulk = [];
       }
     }
   }
 
   if (bulk.length > 0) {
-    await organismesDb().bulkWrite(bulk);
+    await organismesDb().bulkWrite(bulk, { bypassDocumentValidation: true });
   }
 
   await organismesDb().updateMany(
     { contacts_from_referentiel: { $exists: false } },
-    { $set: { contacts_from_referentiel: [] } }
+    { $set: { contacts_from_referentiel: [] } },
+    { bypassDocumentValidation: true }
   );
 };

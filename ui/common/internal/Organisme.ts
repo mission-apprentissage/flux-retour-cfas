@@ -1,4 +1,4 @@
-import { ITeteDeReseauKey, TypeEffectifNominatif } from "shared";
+import { TypeEffectifNominatif } from "shared";
 
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
 export interface Organisme {
@@ -14,7 +14,7 @@ export interface Organisme {
   /**
    * Réseaux du CFA, s'ils existent
    */
-  reseaux?: ITeteDeReseauKey[];
+  reseaux?: string[];
   /**
    * ERPs rattachés au CFA, s'ils existent
    */
@@ -498,10 +498,6 @@ export interface Organisme {
    * a la certification Qualiopi
    */
   qualiopi?: boolean;
-  /**
-   * Le token permettant l'accès au CFA à sa propre page
-   */
-  access_token?: string;
   /**
    * API key pour envoi de données
    */

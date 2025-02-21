@@ -30,7 +30,6 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import {
   natureOrganismeDeFormationLabel,
-  TETE_DE_RESEAUX_BY_ID,
   IOrganisationCreate,
   REFERENTIEL_ONISEP,
   CARIF_OREF,
@@ -51,7 +50,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
+import { formatCivility, formatSiretSplittedWithDefaultValue } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
 import CustomLink from "@/components/Links/Link";
@@ -205,7 +204,7 @@ const natureOrganismeDeFormationTooltip = {
   ),
 };
 
-export const useOrganismeData = (organismeId: string, permissions: Organisme["permissions"], modePublique: boolean) => {
+const useOrganismeData = (organismeId: string, permissions: Organisme["permissions"], modePublique: boolean) => {
   const queries = [
     {
       queryKey: ["organismes", organismeId, "contacts"],
@@ -473,7 +472,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <HStack>
                     <Text>SIRET&nbsp;:</Text>
                     <Tag
-                      primaryText={`${formatSiretSplitted(organisme.siret)} (${organisme.ferme ? "fermé" : "en activité"})`}
+                      primaryText={`${formatSiretSplittedWithDefaultValue(organisme.siret)} (${organisme.ferme ? "fermé" : "en activité"})`}
                       variant="badge"
                       colorScheme="grey_tag"
                       size="lg"
@@ -597,7 +596,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     {organisme.reseaux.map((reseau) => (
                       <Tag
                         key={reseau}
-                        primaryText={TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
+                        primaryText={reseau}
                         variant="badge"
                         colorScheme="grey_tag"
                         size="lg"

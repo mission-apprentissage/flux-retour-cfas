@@ -2,7 +2,6 @@ import { ArrowForwardIcon, InfoIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
-  Checkbox,
   Container,
   FormControl,
   FormLabel,
@@ -14,7 +13,6 @@ import {
   ListIcon,
   ListItem,
   Select,
-  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -38,7 +36,7 @@ import { useErp } from "@/hooks/useErp";
 import useToaster from "@/hooks/useToaster";
 import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import NewTable from "@/modules/indicateurs/NewTable";
-import { Check, DownloadLine, Checkbox as IconCheckbox } from "@/theme/components/icons";
+import { Checkbox as IconCheckbox } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -66,9 +64,9 @@ const desiredOrder = [
 const ParametresPage = () => {
   const router = useRouter();
   const { toastSuccess } = useToaster();
-  const [stepConfigurationERP, setStepConfigurationERP] = useState<
-    "none" | "choix_erp" | "unsupported_erp" | "v2" | "v3"
-  >("none");
+  const [stepConfigurationERP, setStepConfigurationERP] = useState<"none" | "choix_erp" | "unsupported_erp" | "v3">(
+    "none"
+  );
   const [selectedERPId, setSelectedERPId] = useState("");
   const [selectedERP, setSelectedERP] = useState({} as IErp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
@@ -301,9 +299,7 @@ const ParametresPage = () => {
                 px={6}
                 isDisabled={!selectedERPId}
                 onClick={() => {
-                  setStepConfigurationERP(
-                    selectedERPId === "other" ? "unsupported_erp" : selectedERP.apiV3 ? "v3" : "v2"
-                  );
+                  setStepConfigurationERP(selectedERP.apiV3 ? "v3" : "unsupported_erp");
                 }}
               >
                 Confirmer
@@ -355,25 +351,6 @@ const ParametresPage = () => {
             </HStack>
           </VStack>
         )}
-        {stepConfigurationERP === "v2" && (
-          <ConfigurationERPV2
-            erpsById={erpsById}
-            erpId={selectedERPId}
-            onBack={() => {
-              setStepConfigurationERP("choix_erp");
-              setSelectedERPId("");
-            }}
-            onSubmit={async () => {
-              await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
-                mode_de_transmission: "API",
-                erps: [selectedERPId],
-              });
-              await refetchOrganisme();
-              setStepConfigurationERP("none");
-              setSelectedERPId("");
-            }}
-          />
-        )}
 
         {stepConfigurationERP === "v3" && (
           <ConfigurationERPV3
@@ -410,72 +387,6 @@ const ParametresPage = () => {
 };
 
 export default withAuth(ParametresPage);
-
-interface ConfigurationERPV2Props {
-  erpId: string;
-  onBack: () => any;
-  onSubmit: () => any;
-  erpsById: Array<IErp>;
-}
-function ConfigurationERPV2(props: ConfigurationERPV2Props) {
-  const [configurationFinished, setConfigurationFinished] = useState(false);
-  const erp = props.erpsById[props.erpId];
-
-  return (
-    <VStack alignItems="start" gap={8}>
-      <Ribbons variant="success" fontSize="gamma" fontWeight="bold">
-        <Box color="grey.800">Votre établissement utilise {erp.name}.</Box>
-      </Ribbons>
-
-      <Heading as="h2" fontWeight="700" fontSize="24px">
-        Démarrer l’interfaçage avec {erp.name}.
-      </Heading>
-
-      {erp?.helpFilePath && (
-        <Stack>
-          <Link variant="link" href={erp.helpFilePath} isExternal>
-            Télécharger le pas-à-pas {erp.name}
-            <DownloadLine color="bluefrance" mb={1} ml={2} fontSize="xs" />
-          </Link>
-          {erp.helpFileSize && (
-            <Text color="grey.600" fontSize={"xs"}>
-              PDF – {erp.helpFileSize}
-            </Text>
-          )}
-        </Stack>
-      )}
-
-      <Text color="labelgrey">
-        <b>Temps estimé :</b> 5 minutes
-      </Text>
-      <Box color="labelgrey">
-        <b>Pré-requis :</b>
-        <p>La configuration doit être effectuée par un administrateur sur {erp.name}.</p>
-        <p>Votre logiciel doit être à jour.</p>
-        <p>Vous devez avoir renseigné votre UAI et votre SIRET dans {erp.name}.</p>
-      </Box>
-
-      <Checkbox
-        icon={<Check />}
-        onChange={(e) => {
-          setConfigurationFinished(e.target.checked);
-        }}
-      >
-        J’ai bien paramétré mon ERP avec le tableau de bord.
-      </Checkbox>
-
-      <HStack gap={3}>
-        <Button variant="secondary" px={6} onClick={props.onBack}>
-          Revenir en arrière
-        </Button>
-
-        <Button variant="primary" px={6} isDisabled={!configurationFinished} onClick={props.onSubmit}>
-          Finaliser la configuration
-        </Button>
-      </HStack>
-    </VStack>
-  );
-}
 
 interface ConfigurationERPV3Props {
   erpId: string;

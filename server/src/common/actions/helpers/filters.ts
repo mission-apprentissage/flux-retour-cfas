@@ -74,18 +74,9 @@ export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<
   };
 }
 
-export const buildSortFilter = (sort: string, order: "asc" | "desc") => {
+export const buildSortFilter = (sort: string, order: "asc" | "desc", mapping = {}) => {
+  const computedSort = mapping[sort] ?? sort;
   return {
-    [sort]: order === "asc" ? 1 : -1,
+    [computedSort]: order === "asc" ? 1 : -1,
   };
-};
-
-export const buildMineurFilter = (mineur: boolean) => {
-  return mineur
-    ? {
-        "apprenant.date_de_naissance": { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) },
-      }
-    : {
-        "apprenant.date_de_naissance": { $lt: new Date(new Date().setFullYear(new Date().getFullYear() - 18)) },
-      };
 };
