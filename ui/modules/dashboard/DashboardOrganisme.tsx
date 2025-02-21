@@ -41,7 +41,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
+import { formatCivility, formatSiretSplittedWithDefaultValue } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
 import NotificationTransmissionError from "@/components/Notifications/TransmissionErrors";
@@ -442,7 +442,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <HStack>
                     <Text>SIRET&nbsp;:</Text>
                     <Tag
-                      primaryText={`${formatSiretSplitted(organisme.siret)} (${organisme.ferme ? "fermé" : "en activité"})`}
+                      primaryText={`${formatSiretSplittedWithDefaultValue(organisme.siret)} (${organisme.ferme ? "fermé" : "en activité"})`}
                       variant="badge"
                       colorScheme="grey_tag"
                       size="lg"
