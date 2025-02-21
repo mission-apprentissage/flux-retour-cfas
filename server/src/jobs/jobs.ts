@@ -31,7 +31,7 @@ import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
-import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
+import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
@@ -49,8 +49,8 @@ const dailyJobs = async (queued: boolean) => {
   // # Mise à jour des relations
   await addJob({ name: "hydrate:organismes-relations", queued });
 
-  // # Remplissage des formations des organismes
-  await addJob({ name: "hydrate:organismes-formations", queued });
+  // # Mise à jour du compteur de formations par organisme
+  await addJob({ name: "hydrate:organismes-formations-count", queued });
 
   // # Remplissage des OPCOs
   await addJob({ name: "hydrate:opcos", queued });
@@ -157,10 +157,8 @@ export async function setupJobProcessor() {
           return hydrateRNCP();
         },
       },
-      "hydrate:organismes-formations": {
-        handler: async () => {
-          return hydrateOrganismesFormations();
-        },
+      "hydrate:organismes-formations-count": {
+        handler: hydrateOrganismesFormationsCount,
       },
       "hydrate:organismes-relations": {
         handler: async () => {

@@ -81,6 +81,7 @@ export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): Without
     ...etablissement,
     ...params,
     contacts_from_referentiel: [],
+    formations_count: 0,
     created_at: new Date(),
     updated_at: new Date(),
   };

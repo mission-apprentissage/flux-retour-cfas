@@ -613,21 +613,10 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
             },
           },
           {
-            $addFields: {
-              formationsCount: {
-                $cond: {
-                  if: { $isArray: "$organisme.relatedFormations" },
-                  then: { $size: "$organisme.relatedFormations" },
-                  else: 0,
-                },
-              },
-            },
-          },
-          {
             $sort: buildSortFilter(sort, order, {
               nom: "organisme.nom",
               adresse: "organisme.adresse.commune",
-              formations_count: "formationsCount",
+              formations_count: "organisme.formations_count",
             }),
           },
           { $skip: page * limit },
@@ -661,24 +650,13 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
           {
             $unwind: {
               path: "$organisme",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-          {
-            $addFields: {
-              formationsCount: {
-                $cond: {
-                  if: { $isArray: "$organisme.relatedFormations" },
-                  then: { $size: "$organisme.relatedFormations" },
-                  else: 0,
-                },
-              },
+              preserveNullAndEmptyArrays: false,
             },
           },
           {
             $group: {
               _id: null,
-              totalFormations: { $sum: "$formationsCount" },
+              totalFormations: { $sum: "$organisme.formations_count" },
             },
           },
         ],

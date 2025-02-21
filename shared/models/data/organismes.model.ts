@@ -129,57 +129,7 @@ export const zOrganisme = z
     enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).nullish(),
     raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
     adresse: zAdresse.describe("Adresse de l'établissement").nullish(),
-    relatedFormations: z
-      .array(
-        z
-          .object({
-            formation_id: zObjectId.optional(),
-            cle_ministere_educatif: z
-              .string({
-                description: "Clé unique de la formation",
-              })
-              .optional(),
-            annee_formation: z
-              .number({
-                description: "Année millésime de la formation pour cet organisme",
-              })
-              .int()
-              .optional(),
-            organismes: z
-              .array(
-                z
-                  .object({
-                    organisme_id: zObjectId.optional(),
-                    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
-                    uai: z
-                      .string({
-                        description: "Code UAI du lieu de formation (optionnel)",
-                      })
-                      .regex(UAI_REGEX)
-                      .optional(),
-                    siret: z
-                      .string({
-                        description: "Siret du lieu de formation (optionnel)",
-                      })
-                      .optional(),
-                    adresse: zAdresse.describe("Adresse du lieu de formation (optionnel)").optional(),
-                  })
-                  .strict()
-              )
-              .optional(),
-            duree_formation_theorique: z
-              .number({
-                description: "Durée théorique de la formation en mois pour cet organisme",
-              })
-              .int()
-              .nullish(),
-          })
-          .strict(),
-        {
-          description: "Formations de cet organisme",
-        }
-      )
-      .optional(),
+    formations_count: z.number(),
     organismesFormateurs: z.array(relationOrganismeSchema).optional(),
     organismesResponsables: z.array(relationOrganismeSchema).optional(),
     first_transmission_date: z.date({ description: "Date de la première transmission de données" }).optional(),
