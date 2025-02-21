@@ -13,6 +13,7 @@ interface FilterListProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   sortOrder?: "asc" | "desc";
+  withSortedOptions?: boolean;
 }
 
 export const FilterList: React.FC<FilterListProps> = ({
@@ -24,13 +25,17 @@ export const FilterList: React.FC<FilterListProps> = ({
   isOpen,
   setIsOpen,
   sortOrder = "asc",
+  withSortedOptions = true,
 }) => {
-  const sortedOptions = Object.entries(options).sort(([_keyA, valA], [_keyB, valB]) => {
-    if (sortOrder === "asc") {
-      return valA.localeCompare(valB);
-    }
-    return valB.localeCompare(valA);
-  });
+  const optionsEntries = Object.entries(options);
+  const computedOptions = withSortedOptions
+    ? optionsEntries.sort(([_keyA, valA], [_keyB, valB]) => {
+        if (sortOrder === "asc") {
+          return valA.localeCompare(valB);
+        }
+        return valB.localeCompare(valA);
+      })
+    : optionsEntries;
 
   return (
     <div key={filterKey}>
@@ -44,7 +49,7 @@ export const FilterList: React.FC<FilterListProps> = ({
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup defaultValue={selectedValues} size="sm" onChange={onChange}>
             <Stack>
-              {sortedOptions.map(([key, value]) => (
+              {computedOptions.map(([key, value]) => (
                 <Checkbox key={key} value={key} iconSize="0.5rem">
                   {capitalizeWords(value)}
                 </Checkbox>
