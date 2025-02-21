@@ -45,3 +45,5 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
 
   writeFileXLSX(workbook, filename, { compression: true });
 }
+
+export const MODEL_EXPORT_LAST_UPDATE = "29012025";
