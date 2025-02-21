@@ -2,6 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { zStatutApprenantEnum } from "./effectifs.model";
 import zEffectifMissionLocale from "./missionLocaleEffectif.model";
 
 const collectionName = "missionLocaleEffectifLogs";
@@ -19,6 +20,7 @@ const zMissionLocaleEffectifLogs = z.object({
     inscrit_france_travail: true,
     commentaires: true,
   }),
+  statut: zStatutApprenantEnum.nullish(),
 });
 
 export type IMissionLocaleEffectifLogs = z.output<typeof zMissionLocaleEffectifLogs>;

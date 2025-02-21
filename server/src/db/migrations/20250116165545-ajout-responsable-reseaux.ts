@@ -127,7 +127,22 @@ const TETE_DE_RESEAUX = [
 
 export const up = async () => {
   for (const reseau of TETE_DE_RESEAUX) {
-    await reseauxDb().insertOne({ ...reseau, created_at: new Date(), updated_at: new Date(), organismes_ids: [] });
+    await reseauxDb().updateOne(
+      {
+        key: reseau.key,
+      },
+      {
+        $set: {
+          ...reseau,
+          created_at: new Date(),
+          updated_at: new Date(),
+          organismes_ids: [],
+        },
+      },
+      {
+        upsert: true,
+      }
+    );
   }
   await addJob({
     name: "populate:reseaux",

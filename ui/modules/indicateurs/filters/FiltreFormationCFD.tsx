@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { IFormationSearchResponse } from "shared";
 
 import { _post } from "@/common/httpClient";
 import InputLegend from "@/components/InputLegend/InputLegend";
@@ -30,14 +31,13 @@ interface FiltreFormationCFDProps {
   value: string[];
   onChange: (value: string[]) => void;
 }
-
 const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
 
 const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: formations, isFetching: isLoading } = useQuery<any[]>(
+  const { data: formations, isFetching: isLoading } = useQuery<IFormationSearchResponse[]>(
     ["formations", searchTerm],
     () =>
       _post("/api/v1/formations/search", {

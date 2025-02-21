@@ -1,10 +1,3 @@
-export const getNiveauFormationFromLibelle = (niveauFormationLibelle?: string | null) => {
-  if (niveauFormationLibelle == null || niveauFormationLibelle === "") return null;
-
-  const niveau = niveauFormationLibelle.split(" ")[0];
-  return isNaN(parseInt(niveau, 10)) ? null : niveau;
-};
-
 // Rétrocompatibilité https://github.com/mission-apprentissage/tables-correspondances/blob/5cb4497165c9ed3e0433ef2f9fd52c38e98d606c/server/src/logic/controllers/bcn/Constants.js#L47-L54
 export const getNiveauFormationLibelle = (niveauFormation?: string | null) => {
   switch (niveauFormation) {

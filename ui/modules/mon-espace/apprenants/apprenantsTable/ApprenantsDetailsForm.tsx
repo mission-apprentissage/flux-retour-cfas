@@ -20,11 +20,12 @@ interface ApprenantsDetailsFormProps {
 const MAX_CHARACTERS = 200;
 
 const _SITUATION_LABELS: Record<SITUATION_ENUM, string> = {
-  [SITUATION_ENUM.CONTACTE_AVEC_SUIVI]: "contacté avec suivi",
-  [SITUATION_ENUM.CONTACT_SANS_SUIVI]: "contacté sans suivi",
-  [SITUATION_ENUM.DEJA_SUIVI]: "déjà accompagné par la ML",
-  [SITUATION_ENUM.INJOIGNABLE]: "injoignable",
-  [SITUATION_ENUM.NON_CONTACTE]: "non contacté",
+  [SITUATION_ENUM.A_CONTACTER]: "Ce jeune a été indiqué comme “à contacter”",
+  [SITUATION_ENUM.CONTACTE]: "Il a été indiqué que le jeune a été contacté",
+  [SITUATION_ENUM.SUIVI_DEMARRE]: "Il a été indiqué qu’un a suivi a été démarré pour ce jeune",
+  [SITUATION_ENUM.CONTACT_SANS_SUIVI]: "Il a été indiqué que le jeune n’avait pas besoin de suivi",
+  [SITUATION_ENUM.INJOIGNABLE]: "Il a été indiqué que le jeune était injoignable",
+  [SITUATION_ENUM.DEJA_SUIVI]: "Il a été indiqué que le jeune était déjà accompagné par la Mission Locale",
 };
 
 const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
@@ -113,11 +114,7 @@ const ApprenantsDetailsForm: React.FC<ApprenantsDetailsFormProps> = ({
 
       {situationData.situation && situationData.situation_updated_at && (
         <Text as="span" color="plaininfo" mt={4}>
-          Il a été indiqué que le jeune a été{" "}
-          {situationData.situation && _SITUATION_LABELS[situationData.situation]
-            ? `${_SITUATION_LABELS[situationData.situation]}`
-            : "contacté"}{" "}
-          le{" "}
+          {_SITUATION_LABELS[situationData.situation]} le{" "}
           <Text as="span" fontWeight="bold">
             {new Date(situationData.situation_updated_at).toLocaleDateString("fr-FR")}
           </Text>
