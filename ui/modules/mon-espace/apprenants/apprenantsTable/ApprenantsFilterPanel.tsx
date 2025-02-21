@@ -1,4 +1,4 @@
-import { Button, HStack, Stack, Switch, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, ListItem, Stack, Switch, Text, UnorderedList } from "@chakra-ui/react";
 import { useState } from "react";
 import { Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM, STATUT_APPRENANT, STATUT_NAME } from "shared";
 import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
@@ -6,6 +6,7 @@ import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-loc
 import { FilterList } from "@/components/Filter/FilterList";
 import { FilterListSearchable } from "@/components/Filter/FilterListSearchable";
 import { FilterRadioList } from "@/components/Filter/FilterRadioList";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 
 interface ApprenantsFilterPanelProps {
   filters: IEffectifsFiltersMissionLocale;
@@ -178,7 +179,32 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
       </Stack>
 
       <HStack mt={6} spacing={4} alignItems="center">
-        <Text>Afficher les jeunes &quot;à risque&quot;</Text>
+        <Text>
+          Afficher les jeunes &quot;à risque&quot;{" "}
+          <InfoTooltip
+            popoverWidth="lg"
+            headerComponent={() => "Nom du jeune identifié “à risque”"}
+            contentComponent={() => (
+              <Box>
+                <Text>
+                  L’icône rouge permet d’identifier un jeune comme étant dans l’une de ces situations et nécessite
+                  potentiellement un accompagnement urgent du CFA ou de la Mission Locale :{" "}
+                </Text>
+                <UnorderedList mt={4}>
+                  <ListItem>
+                    il est en formation, sans contrat depuis plus de 2 mois et 1 semaine, et arrive à la fin du délai
+                    des 3 mois{" "}
+                  </ListItem>
+                  <ListItem>
+                    il a rompu son contrat d’apprentissage depuis plus de 5 mois, et arrive à la fin de la période des 6
+                    mois sans nouveau contrat
+                  </ListItem>
+                  <ListItem>il a quitté la formation et son employeur (considéré comme en abandon).</ListItem>
+                </UnorderedList>
+              </Box>
+            )}
+          />
+        </Text>
         <Switch variant="icon" isChecked={aRisque} onChange={handleRiskToggle} />
       </HStack>
     </Stack>
