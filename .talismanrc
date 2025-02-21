@@ -1,10 +1,4 @@
 fileignoreconfig:
-- filename: .infra/vault/vault.yml
-  checksum: 7251a80b1330ca953f19d7a7ecd661e9e7956da4aa37d761a4dbe3174a18dbf0
-- filename: ui/modules/organismes/ListeOrganismesPage.tsx
-  checksum: 90ab05ed5f959cfee9eb9c630e310c1ac76d189e1e922d8db86f6e15c16e70e2
-- filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
-  checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: .bin/commands.sh
   checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
 - filename: .bin/scripts/get-vault-password-client.sh
@@ -14,9 +8,9 @@ fileignoreconfig:
 - filename: .bin/scripts/setup-local-env.sh
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
 - filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: b28ed98d8847151cf88eb36d3f7f45804138789ada46b2c00964f35b86f5c609
+  checksum: b0b306f4d3167c6bf2f70352fd6fd0e282f13a4e6ba409f2e1a97b427da242fc
 - filename: .infra/vault/vault.yml
-  checksum: 796635402459cd6f6edb18a01b54bb2ecbb75067335ec7b3a6fd291dfd25e806
+  checksum: db7e77746a11ecf69130abc062b34078e94edfc7f422e39609604588c845064e
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
