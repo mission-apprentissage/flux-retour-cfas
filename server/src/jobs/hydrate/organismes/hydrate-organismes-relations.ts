@@ -15,7 +15,7 @@ interface OrganismeInfos {
   _id?: ObjectId;
   enseigne?: string | null;
   raison_sociale?: string;
-  commune?: string;
+  commune?: string | null;
   region?: string;
   departement?: string;
   academie?: string;
