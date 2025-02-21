@@ -25,6 +25,7 @@ import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
+import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -102,6 +103,11 @@ export async function setupJobProcessor() {
             "Cleanup organismes": {
               cron_string: "0 3 * * *",
               handler: cleanupOrganismes,
+            },
+
+            "Import formations": {
+              cron_string: "0 3 * * *",
+              handler: hydrateFormationV2,
             },
 
             "Send reminder emails at 7h": {

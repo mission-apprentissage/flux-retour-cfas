@@ -1,4 +1,5 @@
 import type { IOrganisme as IOrganismeApi } from "api-alternance-sdk";
+import { generateOrganismeFixture as generateOrganismeApiFixture } from "api-alternance-sdk/fixtures";
 import { ObjectId } from "mongodb";
 import type { IOrganisme } from "shared/models";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
@@ -21,7 +22,7 @@ const lastYear = new Date("2023-01-29T00:00:00.000Z");
 describe("hydrateOrganismesFromReferentiel", () => {
   const organismesApi: IOrganismeApi[][] = [
     [
-      {
+      generateOrganismeApiFixture({
         contacts: [
           {
             email: "contact@mail.com",
@@ -65,6 +66,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           fermeture: null,
           ouvert: true,
           siret: "13002975400020",
+          geopoint: null,
         },
         renseignements_specifiques: {
           numero_activite: "32591104359",
@@ -80,8 +82,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
           raison_sociale: "UNIVERSITE DE LILLE",
           siren: "130029754",
         },
-      },
-      {
+      }),
+      generateOrganismeApiFixture({
         contacts: [],
         identifiant: {
           siret: "26220009000278",
@@ -114,6 +116,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           fermeture: null,
           ouvert: true,
           siret: "26220009000278",
+          geopoint: null,
         },
         renseignements_specifiques: {
           numero_activite: null,
@@ -129,8 +132,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
           raison_sociale: "CENTRE HOSPITALIER DE SAINT-BRIEUC, PAIMPOL ET TREGUIER",
           siren: "262200090",
         },
-      },
-      {
+      }),
+      generateOrganismeApiFixture({
         identifiant: {
           uai: null,
           siret: "19590065900028",
@@ -163,6 +166,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           },
           creation: new Date("1970-01-09T00:08:34.800Z"),
           fermeture: null,
+          geopoint: null,
         },
         renseignements_specifiques: {
           qualiopi: false,
@@ -178,10 +182,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
           creation: new Date("-178938000"),
           cessation: null,
         },
-      },
+      }),
     ],
     [
-      {
+      generateOrganismeApiFixture({
         identifiant: {
           uai: "0802230P",
           siret: "81171016900012",
@@ -193,6 +197,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           adresse: null,
           creation: new Date("1970-01-17T13:49:19.200Z"),
           fermeture: new Date("1970-01-19T09:48:50.400Z"),
+          geopoint: null,
         },
         renseignements_specifiques: {
           qualiopi: false,
@@ -209,7 +214,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           cessation: null,
         },
         contacts: [],
-      },
+      }),
     ],
   ];
 

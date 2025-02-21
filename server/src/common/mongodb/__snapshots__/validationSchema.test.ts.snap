@@ -8209,9 +8209,60 @@ exports[`validation-schema > should create validation schema for formationV2 > f
     "_id": {
       "bsonType": "objectId",
     },
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "cfd": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "rncp": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+      },
+      "required": [
+        "cfd",
+        "rncp",
+        "responsable_siret",
+        "responsable_uai",
+        "formateur_siret",
+        "formateur_uai",
+      ],
+    },
   },
   "required": [
     "_id",
+    "identifiant",
   ],
 }
 `;
