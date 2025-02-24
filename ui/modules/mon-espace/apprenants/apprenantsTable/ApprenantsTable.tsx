@@ -140,6 +140,7 @@ const ApprenantsTable = ({
         enableRowExpansion={true}
         onTableChange={onTableChange}
         isLoading={isFetching}
+        enableSorting={false}
         renderSubComponent={(row: Row<any>) => (
           <ApprenantsDetails row={row} updateSituationState={updateSituationState} />
         )}
