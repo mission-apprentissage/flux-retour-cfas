@@ -44,6 +44,41 @@ const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
+const buildDefaultSortFilter = () => {
+  return {
+    statusPriority: 1,
+    transmitted_at: -1,
+  };
+};
+
+const buildSortingPriorityOnStatus = () => {
+  return [
+    {
+      $addFields: {
+        statusPriority: {
+          $switch: {
+            branches: [
+              {
+                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] },
+                then: 1,
+              },
+              {
+                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] },
+                then: 2,
+              },
+              {
+                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] },
+                then: 3,
+              },
+            ],
+            default: 4,
+          },
+        },
+      },
+    },
+  ];
+};
+
 const buildARisqueFilter = (a_risque: boolean | null = false) => [
   {
     $addFields: {
@@ -83,6 +118,7 @@ const createDernierStatutFieldPipelineMl = (date: Date) => [
       },
     },
   },
+  ...buildSortingPriorityOnStatus(),
   {
     $addFields: {
       dernierStatutDureeInDay: {
@@ -224,7 +260,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
   effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
 ) => {
-  const { page = 1, limit = 20, sort = "nom", order = "asc", ...effectifFilters } = effectifsFiltersMissionLocale;
+  const { page = 1, limit = 20, ...effectifFilters } = effectifsFiltersMissionLocale;
 
   const effectifMissionLocaleLookupAggregation = [
     {
@@ -358,7 +394,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
       },
     },
     {
-      $sort: buildSortFilter(sort, order),
+      $sort: buildDefaultSortFilter(),
     },
     {
       $facet: {
