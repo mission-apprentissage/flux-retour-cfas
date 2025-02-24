@@ -2,11 +2,7 @@ import Boom from "boom";
 import express from "express";
 import { z } from "zod";
 
-import {
-  findOrganismeById,
-  getAllOrganismes,
-  getDetailedOrganismeById,
-} from "@/common/actions/organismes/organismes.actions";
+import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes/organismes.actions";
 import {
   getArchivableOrganismes,
   searchOrganismesSupportInfoBySiret,
@@ -62,22 +58,6 @@ export default () => {
   router.get("/archivables", async (_req, res) => {
     res.json(await getArchivableOrganismes());
   });
-
-  router.get(
-    "/:id",
-    validateRequestMiddleware({
-      params: objectIdSchema("id"),
-    }),
-    async ({ params }, res) => {
-      const { id } = params;
-      const organisme = await getDetailedOrganismeById(id);
-      if (!organisme) {
-        throw Boom.notFound(`Organisme with id ${id} not found`);
-      }
-
-      res.json(organisme);
-    }
-  );
 
   router.get(
     "/:id/parametrage-transmission",
