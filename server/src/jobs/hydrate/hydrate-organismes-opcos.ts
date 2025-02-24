@@ -1,7 +1,7 @@
 import { AnyBulkWriteOperation } from "mongodb";
 import { IOrganisme } from "shared/models";
 
-import { organismesDb } from "@/common/model/collections";
+import { formationV2Db, organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
@@ -41,9 +41,49 @@ export const hydrateOrganismesOPCOs = async () => {
   let ops: AnyBulkWriteOperation<IOrganisme>[] = [];
 
   for await (const organisme of cursor) {
-    const organismeRncps: Set<string> = new Set(
-      organisme.relatedFormations?.map((formation) => formation.rncp).filter((v) => v != null) ?? []
-    );
+    const [rncpAsResponsable, rncpAsFormateur] = await Promise.all([
+      formationV2Db()
+        .aggregate<{
+          _id: { siret: string; rncp: string };
+        }>([
+          {
+            $match: {
+              "identifiant.responsable_siret": organisme.siret,
+              "$identifiant.rncp": { $ne: null },
+            },
+          },
+          {
+            $group: {
+              siret: "$identifiant.responsable_siret",
+              rncp: "$identifiant.rncp",
+            },
+          },
+        ])
+        .toArray(),
+      formationV2Db()
+        .aggregate<{
+          _id: { siret: string; rncp: string };
+        }>([
+          {
+            $match: {
+              "identifiant.formateur_siret": organisme.siret,
+              "$identifiant.rncp": { $ne: null },
+            },
+          },
+          {
+            $group: {
+              siret: "$identifiant.formateur_siret",
+              rncp: "$identifiant.rncp",
+            },
+          },
+        ])
+        .toArray(),
+    ]);
+
+    const organismeRncps: Set<string> = new Set([
+      ...rncpAsResponsable.map(({ _id: { rncp } }) => rncp),
+      ...rncpAsFormateur.map(({ _id: { rncp } }) => rncp),
+    ]);
     const organismeOpcos: Set<string> = new Set();
 
     for (const rncp of organismeRncps) {

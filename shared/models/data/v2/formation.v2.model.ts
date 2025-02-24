@@ -14,6 +14,20 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
     { unique: true },
   ],
+  [
+    {
+      "identifiant.responsable_siret": 1,
+      "identifiant.rncp": 1,
+    },
+    {},
+  ],
+  [
+    {
+      "identifiant.formateur_siret": 1,
+      "identifiant.rncp": 1,
+    },
+    {},
+  ],
 ];
 
 const collectionName = "formationV2";

@@ -772,9 +772,7 @@ function getOrganismeListProjection(
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
-    formationsCount: {
-      $cond: { if: { $isArray: "$relatedFormations" }, then: { $size: "$relatedFormations" }, else: 0 },
-    },
+    formationsCount: "$formations_count",
     erps: {
       $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
     },
