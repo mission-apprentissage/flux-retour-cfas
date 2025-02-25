@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
-    "api-alternance-sdk": "^2.10.0",
+    "api-alternance-sdk": "^2.10.2",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "libphonenumber-js": "^1.11.19",

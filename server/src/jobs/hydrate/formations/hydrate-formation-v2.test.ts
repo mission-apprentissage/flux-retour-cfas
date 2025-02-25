@@ -153,7 +153,7 @@ describe("hydrateFormationV2", () => {
 
     expect(apiAlternanceClient.formation.recherche).toHaveBeenCalledWith({
       page_size: 1_000,
-      include_archived: true,
+      include_archived: "true",
     });
 
     const formations = await formationV2Db()
@@ -171,7 +171,7 @@ describe("hydrateFormationV2", () => {
 
     expect(apiAlternanceClient.formation.recherche).toHaveBeenCalledWith({
       page_size: 1_000,
-      include_archived: true,
+      include_archived: "true",
     });
 
     const formations = await formationV2Db().find({}, { sort }).toArray();

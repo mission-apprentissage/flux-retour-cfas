@@ -535,7 +535,7 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
   if (mlDb) {
     return mlDb;
   }
-  const allMl = await apiAlternanceClient.geographie.listMissionLocales();
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
   const ml: IMissionLocale | undefined = allMl.find((ml) => ml.id === id);
   if (!ml) {
     Boom.notFound(`Mission locale with id ${id} not found`);

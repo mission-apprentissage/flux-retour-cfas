@@ -7,7 +7,7 @@ import { formationV2Db } from "@/common/model/collections";
 export async function hydrateFormationV2() {
   const cursor = apiAlternanceClient.formation.recherche({
     page_size: 1_000,
-    include_archived: true,
+    include_archived: "true",
   });
 
   for await (const page of cursor) {
