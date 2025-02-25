@@ -5083,25 +5083,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-alternance-sdk@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "api-alternance-sdk@npm:2.7.0"
-  dependencies:
-    "@asteasolutions/zod-to-openapi": ^7.3.0
-    "@fastify/swagger": ^9.4.1
-    "@readme/openapi-parser": ^2.6.0
-    jsonwebtoken: ^9.0.2
-    lru-cache: ^11.0.2
-    luhn: ^2.4.1
-    luxon: ^3.5.0
-    microdiff: ^1.5.0
-    openapi3-ts: ^4.4.0
-    safe-stable-stringify: ^2.5.0
-    zod: ^3.24.1
-  checksum: 81ceaedb1457482e92b7ea898327ff1b6f169a6a56d59604835c42ce71cbe13ba51d4d305e215e8095e5c94017d32c521a0d9e6273e017d38014f4963a32ff9d
-  languageName: node
-  linkType: hard
-
 "append-field@npm:^1.0.0":
   version: 1.0.0
   resolution: "append-field@npm:1.0.0"
@@ -16466,7 +16447,7 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^7.3.0
     "@tsconfig/node22": ^22.0.0
     "@types/node": ^22.7.5
-    api-alternance-sdk: ^2.7.0
+    api-alternance-sdk: ^2.10.1
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1
