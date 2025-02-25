@@ -61,10 +61,12 @@ const createDernierStatutFieldPipeline = (date: Date) => [
 export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
-  extraAccumulator: Record<string, unknown> = {}
+  extraAccumulator: Record<string, unknown> = {},
+  extraStepAggregation: Array<Record<string, string>> = []
 ) {
   return [
     ...createDernierStatutFieldPipeline(currentDate),
+    ...extraStepAggregation,
     {
       $group: {
         _id: groupBy,

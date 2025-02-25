@@ -33,6 +33,9 @@ import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
 import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
 
+/**
+ * Filtre constant pour les missions locales
+ */
 const EFF_MISSION_LOCALE_FILTER = [
   {
     $match: {
@@ -44,13 +47,22 @@ const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
+/**
+ * Filtre par défaut pour les missions locales : sur les statuts, puis sur la date du dernier statut
+ *
+ * @returns Objet de filtre
+ */
 const buildDefaultSortFilter = () => {
   return {
     statusPriority: 1,
-    transmitted_at: -1,
+    "dernierStatut.date": -1,
   };
 };
 
+/**
+ * Ajout de l'ordre des priorités sur les status pour les filtres
+ * @returns Objet pour addFields
+ */
 const buildSortingPriorityOnStatus = () => {
   return [
     {
@@ -79,6 +91,77 @@ const buildSortingPriorityOnStatus = () => {
   ];
 };
 
+/**
+ * Ajout d'un booléen pour déterminer si la rupture a eu lieu dans les 3 premiers mois du contrat
+ * @returns Objet pour addFields
+ */
+const buildPremier3Mois = () => {
+  return [
+    {
+      $addFields: {
+        premier_3_mois: {
+          $cond: {
+            if: {
+              $and: [
+                { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] },
+                {
+                  $lte: [
+                    {
+                      $dateDiff: {
+                        startDate: "$formation.date_entree",
+                        endDate: "$dernierStatut.date",
+                        unit: "month",
+                      },
+                    },
+                    3,
+                  ],
+                },
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+  ];
+};
+/**
+ * Ajout d'un booléen pour déterminer si la transmission a eu lieu dans les 2 dernières semaines
+ * @returns Objet pour addFields
+ */
+const buildFraicheur2Semaines = () => {
+  return [
+    {
+      $addFields: {
+        fraicheur_2_semaines: {
+          $cond: {
+            if: {
+              $lte: [
+                {
+                  $dateDiff: {
+                    startDate: "$transmitted_at",
+                    endDate: new Date(),
+                    unit: "week",
+                  },
+                },
+                2,
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+  ];
+};
+
+/**
+ * Filtre sur les jeunes a risque
+ * @param a_risque Boolean Si l'on doit appliquer le filtre ou non
+ * @returns Objet pour addFields et match
+ */
 const buildARisqueFilter = (a_risque: boolean | null = false) => [
   {
     $addFields: {
@@ -110,6 +193,11 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
   ...(a_risque ? [{ $match: { a_risque: true } }] : []),
 ];
 
+/**
+ * Création des filtres par defaut sur les statuts et leur date
+ * @param date Date de calcul des filtres
+ * @returns Une liste de addFields
+ */
 const createDernierStatutFieldPipelineMl = (date: Date) => [
   {
     $addFields: {
@@ -126,23 +214,42 @@ const createDernierStatutFieldPipelineMl = (date: Date) => [
       },
     },
   },
+  ...buildPremier3Mois(),
+  ...buildFraicheur2Semaines(),
 ];
 
+/**
+ * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
+ * @param statut Liste des status a filtrer
+ * @param date Date de calcul du filtre
+ * @returns Une liste de addFields et de match
+ */
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length
-    ? [
-        ...createDernierStatutFieldPipelineMl(date),
-        {
-          $match: {
-            $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
-          },
-        },
-      ]
-    : [];
+  statut.length ? [...createDernierStatutFieldPipelineMl(date), matchDernierStatutPipelineMl(statut)] : [];
 
+/**
+ * Création du match sur les dernier statuts
+ * @param statut Liste de statuts à matcher
+ * @returns Un obet match
+ */
+const matchDernierStatutPipelineMl = (statut): any => {
+  return {
+    $match: {
+      $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+      premier_3_mois: true,
+      fraicheur_2_semaines: true,
+    },
+  };
+};
+
+/**
+ * Création des filtres dynamique
+ * @param effectifFilters Liste de filtre dynamique
+ * @returns Liste de matches
+ */
 const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionLocale) => {
   const {
-    statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
+    statut = [STATUT_APPRENANT.RUPTURANT],
     rqth,
     mineur,
     niveaux,
@@ -234,6 +341,11 @@ const buildFiltersForMissionLocale = (effectifFilters: IEffectifsFiltersMissionL
   return filter;
 };
 
+/**
+ * Création du filtre sur la mission locale concerné
+ * @param missionLocaleId Id de la mission locale
+ * @returns Objet match
+ */
 const generateMissionLocaleMatchStage = (missionLocaleId: number) => {
   return {
     $match: {
@@ -243,6 +355,11 @@ const generateMissionLocaleMatchStage = (missionLocaleId: number) => {
   };
 };
 
+/**
+ * Union des données avec DECA
+ * @param missionLocaleId Id de la mission locale
+ * @returns Objet unionWith
+ */
 const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
   return [
     generateMissionLocaleMatchStage(missionLocaleId),
@@ -255,6 +372,13 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
   ];
 };
 
+/**
+ * Aggregation pour récupérer les effectifs en fonction de la mission locale et de filtres
+ * @param missionLocaleId Id de la mission locale
+ * @param missionLocaleMongoId Id du tdb de la mission locale
+ * @param effectifsFiltersMissionLocale Liste de filtre pour les effectifs
+ * @returns Les données d'effectif paginées
+ */
 export const getPaginatedEffectifsByMissionLocaleId = async (
   missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
@@ -293,10 +417,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(
-      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
-      new Date()
-    ),
+    ...filterByDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT], new Date()),
     {
       $match: {
         "apprenant.adresse.code_insee": { $exists: true },
@@ -408,10 +529,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   const totalApprenantsAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(
-      [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT],
-      new Date()
-    ),
+    ...filterByDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT], new Date()),
     {
       $count: "totalApprenants",
     },
@@ -432,7 +550,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
     },
     effectifsDb().aggregate(totalApprenantsAggregation).next(),
   ]);
-
   const resultAdresse = await effectifsDb().aggregate(adresseFilterAggregation).toArray();
 
   const totalApprenants = totalApprenantsResult?.totalApprenants || 0;
@@ -456,7 +573,11 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
   const aggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...buildIndicateursEffectifsPipeline(null, filters.date),
+    ...buildIndicateursEffectifsPipeline(null, filters.date, {}, [
+      ...buildPremier3Mois(),
+      ...buildFraicheur2Semaines(),
+      matchDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT]),
+    ]),
     {
       $project: {
         _id: 0,
@@ -559,7 +680,7 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
   organismesFiltersMissionLocale: IPaginationFilters
 ) => {
   const { page = 0, limit = 20, sort = "nom", order = "asc" } = organismesFiltersMissionLocale;
-  const statut = [STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.INSCRIT];
+  const statut = [STATUT_APPRENANT.RUPTURANT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
