@@ -168,8 +168,6 @@ const matchDernierStatutPipelineMl = (statut): any => {
   return {
     $match: {
       $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
-      premier_3_mois: true,
-      fraicheur_2_semaines: true,
     },
   };
 };
