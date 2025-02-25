@@ -32,13 +32,14 @@ interface TableWithApiProps<T> extends SystemProps {
   onTableChange: (state: IPaginationFilters) => any;
   renderSubComponent?: (row: Row<T>) => React.ReactElement;
   renderDivider?: () => React.ReactElement;
+  enableSorting?: boolean;
 }
 
 function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: boolean }>) {
   const paginationState = props.paginationState;
   const page = paginationState.page ?? 0;
   const limit = paginationState.limit ?? 10;
-
+  const enableSorting = props.enableSorting === undefined ? true : props.enableSorting;
   const [expandedRows, setExpandedRows] = useState<Set<string>>(
     props.expandAllRows ? new Set(props.data.map((row) => row.id)) : new Set()
   );
@@ -80,6 +81,7 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
     },
     manualPagination: true,
     manualSorting: true,
+    enableSorting,
     onStateChange: (updater) => {
       const newState = functionalUpdate(updater, table.getState());
       const { pagination, sorting } = newState;

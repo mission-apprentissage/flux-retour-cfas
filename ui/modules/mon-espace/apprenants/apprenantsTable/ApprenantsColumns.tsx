@@ -17,32 +17,38 @@ const apprenantsTableColumnsDefs = (
         Nom{" "}
         <InfoTooltip
           popoverWidth="lg"
-          headerComponent={() => "Nom du jeune identifié “à risque”"}
+          headerComponent={() => "Nom du jeune"}
           contentComponent={() => (
             <Box>
-              <Text>
-                L’icône rouge permet d’identifier un jeune comme étant dans l’une de ces situations et nécessite
-                potentiellement un accompagnement urgent du CFA ou de la Mission Locale :{" "}
-              </Text>
+              <Text>Les jeunes sont affichés dans l’ordre de priorité suivant :</Text>
               <UnorderedList mt={4}>
                 <ListItem>
-                  il est en formation, sans contrat depuis plus de 2 mois et 1 semaine, et arrive à la fin du délai des
-                  3 mois{" "}
+                  <Text>
+                    D’abord par fraîcheur de données : les données reçues il y a plus d’une semaine sont à la fin.
+                  </Text>
                 </ListItem>
                 <ListItem>
-                  il a rompu son contrat d’apprentissage depuis plus de 5 mois, et arrive à la fin de la période des 6
-                  mois sans nouveau contrat
+                  <Text>
+                    Ensuite par statut des jeunes, dans l’ordre suivant :
+                    <UnorderedList mt={4}>
+                      <ListItem>
+                        En premier, ceux qui ont eue une rupture dans les 3 premiers mois de leur dernier contrat
+                        d’apprentissage
+                      </ListItem>
+                      <ListItem>Puis les autres rupturants</ListItem>
+                      <ListItem>Puis les jeunes qui cherchent leur premier contrat d’apprentissage</ListItem>
+                      <ListItem>Enfin, les jeunes ayant quitté leur formation.</ListItem>
+                    </UnorderedList>
+                  </Text>
                 </ListItem>
-                <ListItem>il a quitté la formation et son employeur (considéré comme en abandon).</ListItem>
               </UnorderedList>
             </Box>
           )}
         />
       </>
     ),
-    cell: ({ row, getValue }) => (
+    cell: ({ getValue }) => (
       <HStack>
-        {row.original.a_risque && <Box as="i" className="ri-alert-fill" color="warning" mt="0.5px" />}
         <Text>{getValue()}</Text>
       </HStack>
     ),

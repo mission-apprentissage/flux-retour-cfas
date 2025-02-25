@@ -20,7 +20,7 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const DEFAULT_PAGINATION: IPaginationFilters = {
   page: 0,
-  limit: 10,
+  limit: 50,
   sort: "statut",
   order: "desc",
 };

@@ -1,4 +1,4 @@
-import { Box, Button, HStack, ListItem, Stack, Switch, Text, UnorderedList } from "@chakra-ui/react";
+import { Button, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import {
   API_SITUATION_ENUM,
@@ -13,7 +13,6 @@ import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-loc
 import { FilterList } from "@/components/Filter/FilterList";
 import { FilterListSearchable } from "@/components/Filter/FilterListSearchable";
 import { FilterRadioList } from "@/components/Filter/FilterRadioList";
-import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 
 interface ApprenantsFilterPanelProps {
   filters: IEffectifsFiltersMissionLocale;
@@ -30,7 +29,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
   resetFilters,
 }) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
-  const [aRisque, setARisque] = useState<boolean>(Boolean(filters["a_risque"]));
+  // const [aRisque, setARisque] = useState<boolean>(Boolean(filters["a_risque"]));
 
   const handleCheckboxChange = (filterKey: keyof IEffectifsFiltersMissionLocale, selectedValues: string[]) => {
     onFilterChange({ ...filters, [filterKey]: selectedValues });
@@ -40,11 +39,11 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
     onFilterChange({ ...filters, [filterKey]: selectedValue ?? undefined });
   };
 
-  const handleRiskToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.checked;
-    setARisque(newValue);
-    onFilterChange({ ...filters, a_risque: newValue });
-  };
+  // const handleRiskToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newValue = e.target.checked;
+  //   setARisque(newValue);
+  //   onFilterChange({ ...filters, a_risque: newValue });
+  // };
 
   return (
     <Stack spacing="0.5">
@@ -187,7 +186,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
         </Button>
       </Stack>
 
-      <HStack mt={6} spacing={4} alignItems="center">
+      {/* <HStack mt={6} spacing={4} alignItems="center">
         <Text>
           Afficher les jeunes &quot;à risque&quot;{" "}
           <InfoTooltip
@@ -215,7 +214,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           />
         </Text>
         <Switch variant="icon" isChecked={aRisque} onChange={handleRiskToggle} />
-      </HStack>
+      </HStack> */}
     </Stack>
   );
 };
