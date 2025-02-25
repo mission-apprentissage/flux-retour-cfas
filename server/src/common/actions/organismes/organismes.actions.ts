@@ -398,28 +398,35 @@ export async function getOrganismeById(_id: ObjectId) {
  * Les permissions de l'utilisateur authentifié sont également retournées
  */
 export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
-  const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    {
-      projection: getOrganismeProjection(permissionsOrganisme),
+  try {
+    const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
+    const organisme = await organismesDb().findOne(
+      { _id: organismeId },
+      {
+        projection: getOrganismeProjection(permissionsOrganisme),
+      }
+    );
+
+    if (!organisme) {
+      throw Boom.notFound(`IOrganisme ${organismeId} not found`);
     }
-  );
-  if (!organisme) {
-    throw Boom.notFound(`IOrganisme ${organismeId} not found`);
+
+    const organismesWithAdditionalData = withOrganismeListSummary(organisme);
+
+    const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
+      longitude: organisme.geopoint?.coordinates[0],
+      latitude: organisme.geopoint?.coordinates[1],
+    });
+
+    return {
+      ...organismesWithAdditionalData,
+      permissions: permissionsOrganisme,
+      missionsLocales: missionsLocalesAPI,
+    } as OrganismeWithPermissions;
+  } catch (error) {
+    console.error("Error fetching organisme details:", error);
+    throw Boom.internal("An error occurred while fetching organisme details");
   }
-  const organismesWithAdditionalData = withOrganismeListSummary(organisme);
-
-  const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
-    longitude: organisme.geopoint?.coordinates[0],
-    latitude: organisme.geopoint?.coordinates[1],
-  });
-
-  return {
-    ...organismesWithAdditionalData,
-    permissions: permissionsOrganisme,
-    missionsLocales: missionsLocalesAPI,
-  } as OrganismeWithPermissions;
 }
 
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
