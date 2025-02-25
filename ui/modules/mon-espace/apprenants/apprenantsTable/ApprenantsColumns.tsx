@@ -1,9 +1,8 @@
-import { Box, HStack, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
+import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import { IMissionLocaleEffectif } from "shared";
 
 import { _post } from "@/common/httpClient";
-import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 
 import ApprenantsSituationSelect from "./ApprenantsSituationSelect";
 
@@ -12,41 +11,7 @@ const apprenantsTableColumnsDefs = (
 ) => [
   {
     accessorKey: "apprenant.nom",
-    header: () => (
-      <>
-        Nom{" "}
-        <InfoTooltip
-          popoverWidth="lg"
-          headerComponent={() => "Nom du jeune"}
-          contentComponent={() => (
-            <Box>
-              <Text>Les jeunes sont affichés dans l’ordre de priorité suivant :</Text>
-              <UnorderedList mt={4}>
-                <ListItem>
-                  <Text>
-                    D’abord par fraîcheur de données : les données reçues il y a plus d’une semaine sont à la fin.
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text>
-                    Ensuite par statut des jeunes, dans l’ordre suivant :
-                    <UnorderedList mt={4}>
-                      <ListItem>
-                        En premier, ceux qui ont eue une rupture dans les 3 premiers mois de leur dernier contrat
-                        d’apprentissage
-                      </ListItem>
-                      <ListItem>Puis les autres rupturants</ListItem>
-                      <ListItem>Puis les jeunes qui cherchent leur premier contrat d’apprentissage</ListItem>
-                      <ListItem>Enfin, les jeunes ayant quitté leur formation.</ListItem>
-                    </UnorderedList>
-                  </Text>
-                </ListItem>
-              </UnorderedList>
-            </Box>
-          )}
-        />
-      </>
-    ),
+    header: () => "Nom",
     cell: ({ getValue }) => (
       <HStack>
         <Text>{getValue()}</Text>

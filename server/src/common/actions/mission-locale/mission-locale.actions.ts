@@ -92,72 +92,6 @@ const buildSortingPriorityOnStatus = () => {
 };
 
 /**
- * Ajout d'un booléen pour déterminer si la rupture a eu lieu dans les 3 premiers mois du contrat
- * @returns Objet pour addFields
- */
-const buildPremier3Mois = () => {
-  return [
-    {
-      $addFields: {
-        premier_3_mois: {
-          $cond: {
-            if: {
-              $and: [
-                { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] },
-                {
-                  $lte: [
-                    {
-                      $dateDiff: {
-                        startDate: "$formation.date_entree",
-                        endDate: "$dernierStatut.date",
-                        unit: "month",
-                      },
-                    },
-                    3,
-                  ],
-                },
-              ],
-            },
-            then: true,
-            else: false,
-          },
-        },
-      },
-    },
-  ];
-};
-/**
- * Ajout d'un booléen pour déterminer si la transmission a eu lieu dans les 2 dernières semaines
- * @returns Objet pour addFields
- */
-const buildFraicheur2Semaines = () => {
-  return [
-    {
-      $addFields: {
-        fraicheur_2_semaines: {
-          $cond: {
-            if: {
-              $lte: [
-                {
-                  $dateDiff: {
-                    startDate: "$transmitted_at",
-                    endDate: new Date(),
-                    unit: "week",
-                  },
-                },
-                2,
-              ],
-            },
-            then: true,
-            else: false,
-          },
-        },
-      },
-    },
-  ];
-};
-
-/**
  * Filtre sur les jeunes a risque
  * @param a_risque Boolean Si l'on doit appliquer le filtre ou non
  * @returns Objet pour addFields et match
@@ -214,8 +148,6 @@ const createDernierStatutFieldPipelineMl = (date: Date) => [
       },
     },
   },
-  ...buildPremier3Mois(),
-  ...buildFraicheur2Semaines(),
 ];
 
 /**
@@ -574,8 +506,6 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...buildIndicateursEffectifsPipeline(null, filters.date, {}, [
-      ...buildPremier3Mois(),
-      ...buildFraicheur2Semaines(),
       matchDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT]),
     ]),
     {
