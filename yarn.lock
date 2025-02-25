@@ -5064,9 +5064,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"api-alternance-sdk@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "api-alternance-sdk@npm:2.7.0"
+"api-alternance-sdk@npm:^2.10.1":
+  version: 2.10.1
+  resolution: "api-alternance-sdk@npm:2.10.1"
   dependencies:
     "@asteasolutions/zod-to-openapi": ^7.3.0
     "@fastify/swagger": ^9.4.1
@@ -5079,7 +5079,7 @@ __metadata:
     openapi3-ts: ^4.4.0
     safe-stable-stringify: ^2.5.0
     zod: ^3.24.1
-  checksum: 81ceaedb1457482e92b7ea898327ff1b6f169a6a56d59604835c42ce71cbe13ba51d4d305e215e8095e5c94017d32c521a0d9e6273e017d38014f4963a32ff9d
+  checksum: 4450a690322a416d74389534d016228d96a5eb8d2f9a770fb3b071c90c5f41e89a6e2f0154e5990c89077337db3052efda29ada173547ed827e11225d248606c
   languageName: node
   linkType: hard
 
@@ -16320,7 +16320,7 @@ __metadata:
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
-    api-alternance-sdk: ^2.7.0
+    api-alternance-sdk: ^2.10.1
     axios: ^1.7.9
     axios-cache-interceptor: ^1.6.2
     axios-retry: ^4.5.0
@@ -16447,7 +16447,7 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^7.3.0
     "@tsconfig/node22": ^22.0.0
     "@types/node": ^22.7.5
-    api-alternance-sdk: ^2.7.0
+    api-alternance-sdk: ^2.10.1
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1

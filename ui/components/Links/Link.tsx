@@ -60,6 +60,7 @@ const Link = ({
         }
       }}
       isExternal={isExternal}
+      w="fit-content"
       {...rest}
     >
       {children}
