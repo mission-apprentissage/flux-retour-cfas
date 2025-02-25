@@ -1,3 +1,4 @@
+import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 import {
@@ -20,6 +21,8 @@ import { findOrganismeFormateursIds } from "./permissions";
 
 export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme } & {
   formationsCount?: number;
+} & {
+  missionsLocales?: IMissionLocale[];
 };
 export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {

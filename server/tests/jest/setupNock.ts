@@ -168,6 +168,11 @@ export const useNock = () => {
       .query({ code: "75001" })
       .reply(200, communes["75001"])
       .persist();
+    nock("https://api.apprentissage.beta.gouv.fr/api")
+      .get("/geographie/v1/mission-locale")
+      .query({ latitude: 2.320041, longitude: 48.8588897, radius: 30 })
+      .reply(200, [communes["75001"][0].mission_locale])
+      .persist();
   });
   afterEach(() => {
     nock.cleanAll();

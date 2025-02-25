@@ -22,6 +22,7 @@ import {
   findOrganismeResponsablesIds,
 } from "@/common/actions/helpers/permissions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import {
   organismesDb,
@@ -409,9 +410,15 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
   }
   const organismesWithAdditionalData = withOrganismeListSummary(organisme);
 
+  const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
+    longitude: organisme.geopoint?.coordinates[0],
+    latitude: organisme.geopoint?.coordinates[1],
+  });
+
   return {
     ...organismesWithAdditionalData,
     permissions: permissionsOrganisme,
+    missionsLocales: missionsLocalesAPI,
   } as OrganismeWithPermissions;
 }
 
@@ -843,6 +850,7 @@ export function getOrganismeProjection(
     raison_sociale: 1,
     reseaux: 1,
     adresse: 1,
+    geopoint: 1,
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,

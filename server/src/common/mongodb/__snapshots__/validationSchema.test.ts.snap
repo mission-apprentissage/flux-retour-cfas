@@ -10060,6 +10060,32 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date de la première transmission de données",
     },
+    "geopoint": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "coordinates": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "number",
+              },
+            },
+            "type": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "type",
+            "coordinates",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "has_transmission_errors": {
       "bsonType": "bool",
       "description": "Indique si cet organisme a une transmissions d'effectif en erreur",

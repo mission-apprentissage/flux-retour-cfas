@@ -553,4 +553,23 @@ export interface Organisme {
     effectifsNominatifs: boolean | TypeEffectifNominatif[];
     manageEffectifs: boolean;
   };
+  missionsLocales?: {
+    id: string;
+    nom: string;
+    siret: string;
+    localisation?: {
+      geopoint?: {
+        type: "Point";
+        coordinates: [number, number];
+      };
+      adresse?: string;
+      cp?: string;
+      ville?: string;
+    };
+    contact?: {
+      email?: string;
+      telephone?: string;
+      siteWeb?: string;
+    };
+  };
 }

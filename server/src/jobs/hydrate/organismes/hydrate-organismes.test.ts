@@ -60,6 +60,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
               nom: "Hauts-de-France",
             },
           },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
           creation: new Date("1970-01-19T23:49:51.600Z"),
           enseigne: "FACULTE SCIENCES SPORT ET EDUCATION PHYSIQUE",
           fermeture: null,
@@ -108,6 +112,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
               code_insee: "53",
               nom: "Bretagne",
             },
+          },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
           },
           creation: new Date("1970-01-20T17:21:03.600Z"),
           enseigne: "ECOLE D'AIDE SOIGNANTS",
@@ -161,6 +169,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
               nom: "Lille",
             },
           },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
           creation: new Date("1970-01-09T00:08:34.800Z"),
           fermeture: null,
         },
@@ -193,6 +205,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
           adresse: null,
           creation: new Date("1970-01-17T13:49:19.200Z"),
           fermeture: new Date("1970-01-19T09:48:50.400Z"),
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
         },
         renseignements_specifiques: {
           qualiopi: false,
@@ -224,6 +240,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         departement: "59",
         region: "32",
       },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
+      },
       contacts_from_referentiel: organismesApi[0][0].contacts,
       enseigne: "FACULTE SCIENCES SPORT ET EDUCATION PHYSIQUE",
       est_dans_le_referentiel: "present",
@@ -245,6 +265,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         complete: "TOUR SAINT MICHEL 22220 Tréguier",
         departement: "22",
         region: "53",
+      },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
       },
       contacts_from_referentiel: [],
       enseigne: "ECOLE D'AIDE SOIGNANTS",
@@ -344,6 +368,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         complete: "TOUR SAINT MICHEL 22220 Tréguier",
         departement: "22",
         region: "53",
+      },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
       },
       ferme: false,
       enseigne: null,

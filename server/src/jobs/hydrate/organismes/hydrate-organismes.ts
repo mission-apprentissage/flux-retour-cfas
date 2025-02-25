@@ -17,7 +17,9 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
 
   const cursor = apiAlternanceClient.organisme.export({ page_size: 100 });
   for await (const page of cursor) {
-    const operations = page.map((o) => generateBulkOperation(o, startTime)).filter((op) => op !== null);
+    const operations = page
+      .map((o) => generateBulkOperation(o, startTime))
+      .filter((op): op is AnyBulkWriteOperation<IOrganisme> => op !== null);
 
     if (operations.length > 0) {
       const result = await organismesDb().bulkWrite(operations);
@@ -82,6 +84,7 @@ const generateBulkOperation = (
     raison_sociale: organismeApi.unite_legale.raison_sociale,
     enseigne: organismeApi.etablissement.enseigne,
     adresse: adresseFormatted,
+    geopoint: organismeApi.etablissement.geopoint,
     ferme: !organismeApi.etablissement.ouvert,
     qualiopi: organismeApi.renseignements_specifiques.qualiopi,
     fiabilisation_statut:
