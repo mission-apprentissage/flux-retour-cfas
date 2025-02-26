@@ -54,7 +54,7 @@ export const buildNewHistoriqueStatutApprenant = (
   return newHistoriqueStatutApprenant;
 };
 
-export const getAndFormatCommuneFromCode = async (insee, postal) => {
+export const getAndFormatCommuneFromCode = async (insee, postal, commune?) => {
   if (!insee && !postal) {
     return {};
   }
@@ -62,6 +62,7 @@ export const getAndFormatCommuneFromCode = async (insee, postal) => {
     const communeInfo = await getCommune({
       codeInsee: insee,
       codePostal: postal,
+      nomCommune: commune,
     });
 
     return communeInfo
@@ -91,7 +92,8 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
     ...effectifDataWithAddress.apprenant.adresse,
     ...(await getAndFormatCommuneFromCode(
       effectifData.apprenant?.adresse?.code_insee,
-      effectifData.apprenant?.adresse?.code_postal
+      effectifData.apprenant?.adresse?.code_postal,
+      effectifData.apprenant?.adresse?.commune
     )),
   };
 
@@ -99,7 +101,8 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
     ...effectifDataWithAddress.apprenant.adresse_naissance,
     ...(await getAndFormatCommuneFromCode(
       effectifData.apprenant?.adresse_naissance?.code_insee,
-      effectifData.apprenant?.adresse_naissance?.code_postal
+      effectifData.apprenant?.adresse_naissance?.code_postal,
+      effectifData.apprenant?.adresse_naissance?.commune
     )),
   };
   return effectifDataWithAddress;
@@ -184,6 +187,7 @@ export const mapEffectifQueueToEffectif = (
         code_insee: dossierApprenant.code_commune_insee_apprenant,
         code_postal: "code_postal_apprenant" in dossierApprenant ? dossierApprenant.code_postal_apprenant : null,
         complete: "adresse_apprenant" in dossierApprenant ? dossierApprenant.adresse_apprenant : null,
+        commune: "nom_commune_apprenant" in dossierApprenant ? dossierApprenant.nom_commune_apprenant : undefined,
       },
       adresse_naissance: {
         code_insee:
@@ -194,6 +198,10 @@ export const mapEffectifQueueToEffectif = (
           "code_postal_de_naissance_apprenant" in dossierApprenant
             ? dossierApprenant.code_postal_de_naissance_apprenant
             : null,
+        commune:
+          "nom_commune_de_naissance_apprenant" in dossierApprenant
+            ? dossierApprenant.nom_commune_de_naissance_apprenant
+            : undefined,
       },
       sexe: "sexe_apprenant" in dossierApprenant ? dossierApprenant.sexe_apprenant : null,
       rqth: "rqth_apprenant" in dossierApprenant ? dossierApprenant.rqth_apprenant : null,

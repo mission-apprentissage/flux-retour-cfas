@@ -85,12 +85,13 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
 export const getCommune = async ({
   codePostal,
   codeInsee,
+  nomCommune,
 }: {
   codePostal?: string | null;
   codeInsee?: string | null;
+  nomCommune?: string | null;
 }): Promise<ICommune | null> => {
   const code = codePostal || codeInsee;
-
   if (!code) return null;
 
   const communeList = await apiAlternanceClient.geographie.rechercheCommune({ code }).catch((error) => {
@@ -112,9 +113,29 @@ export const getCommune = async ({
     return null;
   }
 
-  // Full match
+  // Full match postal/insee
   if (codePostal && codeInsee) {
     const commune = communeList.find(({ code }) => code.postaux.includes(codePostal) && code.insee === codeInsee);
+    if (commune) {
+      return commune;
+    }
+  }
+
+  // Full match postal/commune
+  if (codePostal && nomCommune) {
+    const commune = communeList.find(
+      ({ code, nom }) => code.postaux.includes(codePostal) && nom.toLowerCase() === nomCommune.toLowerCase()
+    );
+    if (commune) {
+      return commune;
+    }
+  }
+
+  // Full match insee/commune
+  if (codeInsee && nomCommune) {
+    const commune = communeList.find(
+      ({ code, nom }) => code.insee === codeInsee && nom.toLowerCase() === nomCommune.toLowerCase()
+    );
     if (commune) {
       return commune;
     }

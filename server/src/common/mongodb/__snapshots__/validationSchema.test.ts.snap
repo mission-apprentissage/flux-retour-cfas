@@ -637,9 +637,17 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Le code postal doit contenir 5 caractères",
                 },
                 "commune": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Commune",
-                  "maxLength": 80,
                 },
                 "complement": {
                   "bsonType": "string",
@@ -938,9 +946,17 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "description": "Le code postal doit contenir 5 caractères",
                 },
                 "commune": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Commune",
-                  "maxLength": 80,
                 },
                 "complement": {
                   "bsonType": "string",
@@ -1581,9 +1597,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Le code postal doit contenir 5 caractères",
                         },
                         "commune": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Commune",
+                              "maxLength": 80,
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Commune",
-                          "maxLength": 80,
                         },
                         "complement": {
                           "bsonType": "string",
@@ -2096,9 +2120,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Le code postal doit contenir 5 caractères",
                       },
                       "commune": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Commune",
+                            "maxLength": 80,
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Commune",
-                        "maxLength": 80,
                       },
                       "complement": {
                         "bsonType": "string",
@@ -3442,9 +3474,17 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Le code postal doit contenir 5 caractères",
                 },
                 "commune": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Commune",
-                  "maxLength": 80,
                 },
                 "complement": {
                   "bsonType": "string",
@@ -3743,9 +3783,17 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "description": "Le code postal doit contenir 5 caractères",
                 },
                 "commune": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Commune",
-                  "maxLength": 80,
                 },
                 "complement": {
                   "bsonType": "string",
@@ -4386,9 +4434,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Le code postal doit contenir 5 caractères",
                         },
                         "commune": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Commune",
+                              "maxLength": 80,
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Commune",
-                          "maxLength": 80,
                         },
                         "complement": {
                           "bsonType": "string",
@@ -4901,9 +4957,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Le code postal doit contenir 5 caractères",
                       },
                       "commune": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Commune",
+                            "maxLength": 80,
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Commune",
-                        "maxLength": 80,
                       },
                       "complement": {
                         "bsonType": "string",
@@ -6039,9 +6103,17 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                   "description": "Le code postal doit contenir 5 caractères",
                 },
                 "commune": {
-                  "bsonType": "string",
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
                   "description": "Commune",
-                  "maxLength": 80,
                 },
                 "complement": {
                   "bsonType": "string",
@@ -6671,9 +6743,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "description": "Le code postal doit contenir 5 caractères",
                         },
                         "commune": {
-                          "bsonType": "string",
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Commune",
+                              "maxLength": 80,
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
                           "description": "Commune",
-                          "maxLength": 80,
                         },
                         "complement": {
                           "bsonType": "string",
@@ -7160,9 +7240,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "description": "Le code postal doit contenir 5 caractères",
                       },
                       "commune": {
-                        "bsonType": "string",
+                        "anyOf": [
+                          {
+                            "bsonType": "string",
+                            "description": "Commune",
+                            "maxLength": 80,
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
                         "description": "Commune",
-                        "maxLength": 80,
                       },
                       "complement": {
                         "bsonType": "string",
@@ -9700,9 +9788,17 @@ exports[`validation-schema > should create validation schema for organismes > or
               "description": "Le code postal doit contenir 5 caractères",
             },
             "commune": {
-              "bsonType": "string",
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Commune",
+                  "maxLength": 80,
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
               "description": "Commune",
-              "maxLength": 80,
             },
             "complement": {
               "bsonType": "string",
@@ -10426,9 +10522,17 @@ exports[`validation-schema > should create validation schema for organismes > or
                       "description": "Le code postal doit contenir 5 caractères",
                     },
                     "commune": {
-                      "bsonType": "string",
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Commune",
+                          "maxLength": 80,
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                       "description": "Commune",
-                      "maxLength": 80,
                     },
                     "complement": {
                       "bsonType": "string",
