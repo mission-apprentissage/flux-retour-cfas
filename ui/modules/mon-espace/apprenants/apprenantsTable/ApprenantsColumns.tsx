@@ -17,13 +17,19 @@ const apprenantsTableColumnsDefs = (
         <Text>{getValue()}</Text>
       </HStack>
     ),
-    size: 160,
+    size: 130,
   },
   {
     accessorKey: "apprenant.prenom",
     header: () => "Prénom",
     cell: ({ getValue }) => <Text>{getValue()}</Text>,
-    size: 160,
+    size: 110,
+  },
+  {
+    accessorKey: "contrat.date_rupture",
+    header: () => "Date de rupture",
+    cell: ({ getValue }) => <Text>{new Date(getValue()).toLocaleDateString("fr-FR")}</Text>,
+    size: 120,
   },
   {
     accessorKey: "formation",
@@ -38,7 +44,7 @@ const apprenantsTableColumnsDefs = (
         </VStack>
       );
     },
-    size: 350,
+    size: 300,
   },
   {
     accessorKey: "apprenant.telephone",
@@ -49,13 +55,13 @@ const apprenantsTableColumnsDefs = (
       }
       return <ShowErrorInCell item={row.original} fieldName="apprenant.telephone" value={getValue()} />;
     },
-    size: 160,
+    size: 120,
   },
   {
     accessorKey: "apprenant.courriel",
     header: () => "Email",
     cell: ({ row }) => <EmailCell email={row.original.apprenant.courriel} />,
-    size: 160,
+    size: 150,
   },
   {
     accessorKey: "apprenant.situation",
