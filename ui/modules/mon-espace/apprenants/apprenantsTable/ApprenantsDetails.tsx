@@ -39,23 +39,17 @@ const getLastStatut = (statut: any) => {
   if (!statut || !statut.parcours || statut.parcours.length === 0) return { valeur: null, date: null };
 
   const lastStatut = statut.parcours.reduce((latest, current) => {
-    return new Date(current.date) > new Date(latest.date) ? current : latest;
+    return new Date(current.date) >= new Date(latest.date) ? current : latest;
   });
 
   return lastStatut;
 };
 
-const getRuptureText = (source: SourceApprenant, ruptureAt: Date) => {
+const getRuptureText = (ruptureAt: Date) => {
   const formattedDate = new Date(ruptureAt).toLocaleDateString("fr-FR");
-  const sourceLabel = source === SOURCE_APPRENANT.DECA ? "API DECA" : "CFA";
-  const prefix = source === SOURCE_APPRENANT.DECA ? "l’" : "le ";
   return (
     <Text color="plaininfo" my={4}>
-      Date de rupture du contrat déclarée par {prefix}
-      <Text as="span" fontWeight="bold">
-        {sourceLabel}{" "}
-      </Text>
-      le{" "}
+      Date de rupture du contrat : le{" "}
       <Text as="span" fontWeight="bold">
         {formattedDate}
       </Text>
@@ -379,7 +373,7 @@ const ApprenantsDetails = ({ row, updateSituationState }) => {
               <TableContainer p={3}>
                 <Table variant="list">
                   <Tbody>
-                    {contrat.date_rupture && <Tr>{getRuptureText(row.original.source, contrat.date_rupture)}</Tr>}
+                    {contrat.date_rupture && <Tr>{getRuptureText(contrat.date_rupture)}</Tr>}
                     <Tr>
                       <Td fontWeight="bold">Date d&apos;exéctuion du contrat </Td>
                       <Td>
