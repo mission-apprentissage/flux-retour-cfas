@@ -1,3 +1,4 @@
+import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
 import type { Request } from "express";
@@ -394,12 +395,18 @@ export async function getOrganismeById(_id: ObjectId) {
 }
 
 /**
- * Retourne les informations d'un organisme avec plus ou moins d'informations selon l'utilisateur authentifié.
- * Les permissions de l'utilisateur authentifié sont également retournées
+ * Retourne les informations d'un organisme avec plus ou moins d'informations
+ * selon l'utilisateur authentifié. Les permissions de l'utilisateur
+ * authentifié sont également retournées.
+ *
+ * @param ctx Le contexte d'authentification
+ * @param organismeId L'identifiant de l'organisme
+ * @returns Les détails d'un organisme, les permissions associées et la liste des missions locales à proximité
  */
 export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
   try {
     const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
+
     const organisme = await organismesDb().findOne(
       { _id: organismeId },
       {
@@ -408,15 +415,19 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
     );
 
     if (!organisme) {
-      throw Boom.notFound(`IOrganisme ${organismeId} not found`);
+      throw Boom.notFound(`Aucun organisme trouvé pour l'identifiant ${organismeId}`);
     }
 
     const organismesWithAdditionalData = withOrganismeListSummary(organisme);
 
-    const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
-      longitude: organisme.geopoint?.coordinates[0],
-      latitude: organisme.geopoint?.coordinates[1],
-    });
+    let missionsLocalesAPI: IMissionLocale[] = [];
+    const [longitude, latitude] = organisme.geopoint?.coordinates || [];
+    if (typeof longitude === "number" && typeof latitude === "number") {
+      missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
+        longitude,
+        latitude,
+      });
+    }
 
     return {
       ...organismesWithAdditionalData,
@@ -424,8 +435,8 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
       missionsLocales: missionsLocalesAPI,
     } as OrganismeWithPermissions;
   } catch (error) {
-    console.error("Error fetching organisme details:", error);
-    throw Boom.internal("An error occurred while fetching organisme details");
+    logger.error("Erreur lors de la récupération des détails de l'organisme :", error);
+    throw Boom.internal("Une erreur est survenue lors de la récupération des détails de l'organisme");
   }
 }
 
@@ -588,17 +599,6 @@ export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: 
       },
     }
   );
-
-  // if (organisme.siret !== verif.siret && organisme.uai !== verif.uai) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("Siret/UAI");
-  // } else if (organisme.siret !== verif.siret) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("Siret");
-  // } else if (organisme.uai !== verif.uai) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("UAI");
-  // }
 }
 
 export async function listContactsOrganisme(organismeId: ObjectId) {
