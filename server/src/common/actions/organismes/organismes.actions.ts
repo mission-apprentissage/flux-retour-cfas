@@ -39,6 +39,7 @@ import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
+import { listContactsMlOrganisme } from "../mission-locale/mission-locale.actions";
 
 /**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
@@ -401,7 +402,7 @@ export async function getOrganismeById(_id: ObjectId) {
  *
  * @param ctx Le contexte d'authentification
  * @param organismeId L'identifiant de l'organisme
- * @returns Les détails d'un organisme, les permissions associées et la liste des missions locales à proximité
+ * @returns Les détails d'un organisme, les permissions associées et sa mission locale la plus proche
  */
 export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
   try {
@@ -418,21 +419,32 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
       throw Boom.notFound(`Aucun organisme trouvé pour l'identifiant ${organismeId}`);
     }
 
-    const organismesWithAdditionalData = withOrganismeListSummary(organisme);
+    const organismeAvecDonneesSupplementaires = withOrganismeListSummary(organisme);
 
-    let missionsLocalesAPI: IMissionLocale[] = [];
+    let missionLocaleWithTDBContacts: (IMissionLocale & { contactsTDB: IUsersMigration[] }) | null = null;
     const [longitude, latitude] = organisme.geopoint?.coordinates || [];
+
     if (typeof longitude === "number" && typeof latitude === "number") {
-      missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
+      const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
         longitude,
         latitude,
       });
+      if (missionsLocalesAPI.length > 0) {
+        const firstMissionLocale = missionsLocalesAPI[0];
+        if (typeof firstMissionLocale.id === "number") {
+          const missionLocaleContacts = await listContactsMlOrganisme(firstMissionLocale.id);
+          missionLocaleWithTDBContacts = {
+            ...firstMissionLocale,
+            contactsTDB: missionLocaleContacts,
+          };
+        }
+      }
     }
 
     return {
-      ...organismesWithAdditionalData,
+      ...organismeAvecDonneesSupplementaires,
       permissions: permissionsOrganisme,
-      missionsLocales: missionsLocalesAPI,
+      missionLocale: missionLocaleWithTDBContacts,
     } as OrganismeWithPermissions;
   } catch (error) {
     logger.error("Erreur lors de la récupération des détails de l'organisme :", error);

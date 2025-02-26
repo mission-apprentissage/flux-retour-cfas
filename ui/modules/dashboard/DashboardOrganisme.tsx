@@ -25,6 +25,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useQueries } from "@tanstack/react-query";
+import { format } from "date-fns";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -300,8 +301,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
-
-  const missionLocale = organisme.missionsLocales ? organisme.missionsLocales[0] : undefined;
+  const missionLocale = organisme.missionLocale;
 
   return (
     <Box>
@@ -650,8 +650,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 {missionLocale && (
                   <HStack alignItems="flex-start">
                     <Text whiteSpace="nowrap">Mission Locale près de chez vous&nbsp;:</Text>
+
                     <Flex gap={2}>
-                      <Text fontWeight="bold">ML {missionLocale.nom} </Text>
+                      <Text fontWeight="bold">ML {missionLocale.nom}</Text>
+
                       <BasicModal
                         renderTrigger={(onOpen) => (
                           <Button
@@ -679,46 +681,72 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                             votre CFA.
                           </Text>
                         </Flex>
-                        <Flex direction="column" gap={4}>
-                          <Flex
-                            direction="column"
-                            flexGrow={1}
-                            borderLeft="4px solid"
-                            borderColor="bluefrance"
-                            pl={6}
-                            ml={6}
-                            my={3}
-                          >
-                            <Text fontSize="lg">
-                              {missionLocale.localisation.adresse}, {missionLocale.localisation.cp}{" "}
-                              {missionLocale.localisation.ville}
-                            </Text>
-                            <Text>{missionLocale.contact.telephone}</Text>
-                            <Text>{missionLocale.contact.email}</Text>
-                            <CustomLink href={missionLocale.contact.siteWeb} isExternal isUnderlined>
-                              {missionLocale.contact.siteWeb}
-                            </CustomLink>
-                          </Flex>
-                          <Text>
-                            Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :
-                          </Text>
 
-                          <UnorderedList spacing={3} my={3}>
-                            <ListItem key={1}>
-                              <Flex align="center" gap={2}>
-                                <Text fontWeight="bold">Alexandre Martin</Text>
-                                <Badge variant="purple" borderRadius="full" px={3} py={1} fontSize="sm">
-                                  <Flex align="center" gap={1}>
-                                    <Icon as={CheckCircleIcon} mr={1} />
-                                    Compte créé le 30/01/2025
-                                  </Flex>
-                                </Badge>
-                              </Flex>
-                              <Text>Conseiller entreprises</Text>
-                              <Text>alexandra.martin@ml-arcachon.fr</Text>
-                              <Text>05 57 42 98 12</Text>
-                            </ListItem>
-                          </UnorderedList>
+                        <Flex direction="column" gap={4}>
+                          {missionLocale.localisation && (
+                            <Flex
+                              direction="column"
+                              flexGrow={1}
+                              borderLeft="4px solid"
+                              borderColor="bluefrance"
+                              pl={6}
+                              ml={6}
+                              my={3}
+                            >
+                              <Text fontSize="lg">
+                                {missionLocale.localisation.adresse}, {missionLocale.localisation.cp}{" "}
+                                {missionLocale.localisation.ville}
+                              </Text>
+                              {missionLocale.contact?.telephone && <Text>{missionLocale.contact.telephone}</Text>}
+                              {missionLocale.contact?.email && (
+                                <CustomLink href={`mailto:${missionLocale.contact.email}`} isExternal isUnderlined>
+                                  {missionLocale.contact.email}
+                                </CustomLink>
+                              )}
+                              {missionLocale.contact?.siteWeb && (
+                                <CustomLink href={missionLocale.contact.siteWeb} isExternal isUnderlined>
+                                  {missionLocale.contact.siteWeb}
+                                </CustomLink>
+                              )}
+                            </Flex>
+                          )}
+
+                          {missionLocale.contactsTDB && missionLocale.contactsTDB.length > 0 && (
+                            <>
+                              <Text>
+                                Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :
+                              </Text>
+
+                              <UnorderedList spacing={3} my={3}>
+                                {missionLocale.contactsTDB.map((contactTDB) => (
+                                  <ListItem key={contactTDB._id}>
+                                    <Flex align="center" gap={2} mb={1}>
+                                      <Text fontWeight="bold">
+                                        {contactTDB.prenom} {contactTDB.nom}
+                                      </Text>
+
+                                      {contactTDB.created_at && (
+                                        <Badge variant="purple" borderRadius="full" px={3} py={1} fontSize="sm">
+                                          <Flex align="center" gap={1}>
+                                            <Icon as={CheckCircleIcon} mr={1} />
+                                            Compte créé le {format(new Date(contactTDB.created_at), "dd/MM/yyyy")}
+                                          </Flex>
+                                        </Badge>
+                                      )}
+                                    </Flex>
+                                    {contactTDB.fonction && <Text>{contactTDB.fonction}</Text>}
+                                    {contactTDB.email && (
+                                      <CustomLink href={`mailto:${contactTDB.email}`} isExternal isUnderlined>
+                                        {contactTDB.email}
+                                      </CustomLink>
+                                    )}
+                                    {contactTDB.telephone && <Text>{contactTDB.telephone}</Text>}
+                                  </ListItem>
+                                ))}
+                              </UnorderedList>
+                            </>
+                          )}
+
                           <CustomLink
                             href="https://www.unml.info/le-reseau/annuaire/?type=&nom=&region=&affichage=liste&hp_v=&hp_r=1"
                             isUnderlined
