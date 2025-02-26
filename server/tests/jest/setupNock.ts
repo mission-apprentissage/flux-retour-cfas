@@ -171,7 +171,7 @@ export const useNock = () => {
       .persist();
     nock("https://api.apprentissage.beta.gouv.fr/api")
       .get("/geographie/v1/mission-locale")
-      .query({ latitude: /^\d*\.?\d*$/, longitude: /^\d*\.?\d*$/ })
+      .query({ latitude: /^\d*\.?\d*$/, longitude: /^\d*\.?\d*$/, radius: /^\d*$/ })
       .reply(200, [communes["75001"][0].mission_locale])
       .persist();
   });
