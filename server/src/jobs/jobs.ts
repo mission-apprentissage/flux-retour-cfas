@@ -32,6 +32,7 @@ import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
+import { hydrateOrganismesMails } from "./hydrate/organismes/hydrate-organismes-mail";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
@@ -45,6 +46,9 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Remplissage des organismes depuis le référentiel
   await addJob({ name: "hydrate:organismes", queued });
+
+  // # Vérification des mails du référentiel sur les organismes
+  await addJob({ name: "hydrate:organismes-mails", queued });
 
   // # Mise à jour des relations
   await addJob({ name: "hydrate:organismes-relations", queued });
@@ -210,6 +214,11 @@ export async function setupJobProcessor() {
       "hydrate:organismes": {
         handler: async (job) => {
           return hydrateOrganismesFromApiAlternance(job.started_at ?? new Date());
+        },
+      },
+      "hydrate:organismes-mails": {
+        handler: async () => {
+          return hydrateOrganismesMails();
         },
       },
       "hydrate:organismes-effectifs-count": {
