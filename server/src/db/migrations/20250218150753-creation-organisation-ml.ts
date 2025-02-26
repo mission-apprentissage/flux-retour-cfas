@@ -4,7 +4,7 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organisationsDb } from "@/common/model/collections";
 
 export const up = async () => {
-  const allMl = await apiAlternanceClient.geographie.listMissionLocales();
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
   const currentDate = new Date();
   for (const ml of allMl) {
     await organisationsDb().findOneAndUpdate(
