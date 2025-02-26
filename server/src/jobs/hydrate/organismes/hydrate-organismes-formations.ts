@@ -77,6 +77,8 @@ type FormationOrganisme = ArrayElement<OrganismeFormation["organismes"]>;
 async function formatFormation(formationCatalogue: WithId<IFormationCatalogue>): Promise<OrganismeFormation> {
   return {
     formation_id: formationCatalogue._id,
+    cfd: formationCatalogue.cfd,
+    rncp: formationCatalogue.rncp_code,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
     annee_formation: parseInt(formationCatalogue.annee, 10) || -1, // parfois annee === "X"
     duree_formation_theorique: parseInt(formationCatalogue.duree, 10) || -1,
