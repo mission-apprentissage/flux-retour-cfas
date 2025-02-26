@@ -1,13 +1,6 @@
 import { Button, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import {
-  API_SITUATION_ENUM,
-  Commune,
-  SITUATION_ENUM,
-  SITUATION_LABEL_ENUM,
-  STATUT_APPRENANT,
-  STATUT_NAME,
-} from "shared";
+import { API_SITUATION_ENUM, Commune, SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 import { IEffectifsFiltersMissionLocale } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import { FilterList } from "@/components/Filter/FilterList";
@@ -51,7 +44,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
         FILTRER PAR
       </Text>
       <Stack direction="row" spacing={0} wrap="wrap">
-        <FilterList
+        {/* <FilterList
           key="statut"
           filterKey="statut"
           displayName="Statut"
@@ -65,7 +58,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           isOpen={openFilter === "statut"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "statut" : null)}
           sortOrder="desc"
-        />
+        /> */}
 
         <FilterRadioList
           key="rqth"
@@ -130,7 +123,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "code_adresse" : null)}
         />
 
-        <FilterRadioList
+        {/* <FilterRadioList
           key="last_update_value"
           filterKey="last_update_value"
           displayName="Fraîcheur de la donnée"
@@ -161,7 +154,7 @@ const ApprenantsFilterPanel: React.FC<ApprenantsFilterPanelProps> = ({
           }}
           isOpen={openFilter === "last_update_value"}
           setIsOpen={(isOpen) => setOpenFilter(isOpen ? "last_update_value" : null)}
-        />
+        /> */}
 
         <FilterList
           key="situation"
