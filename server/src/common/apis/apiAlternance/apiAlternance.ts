@@ -147,7 +147,7 @@ export const getCommune = async ({
 
 export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
   try {
-    const result = await apiAlternanceClient.geographie.listMissionLocales();
+    const result = await apiAlternanceClient.geographie.listMissionLocales({});
     return result;
   } catch (error: any) {
     captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));

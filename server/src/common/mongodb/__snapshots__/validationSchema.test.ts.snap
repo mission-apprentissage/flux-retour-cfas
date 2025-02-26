@@ -39,74 +39,12 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
   "additionalProperties": false,
   "bsonType": "object",
   "properties": {
-    "_computed": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "date_de_naissance": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "bsonType": "date",
-                    },
-                    {
-                      "bsonType": "string",
-                    },
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-            "nom": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-            "prenom": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
     "_id": {
       "bsonType": "objectId",
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "draft": {
-      "bsonType": "bool",
-    },
-    "formation_id": {
-      "bsonType": "objectId",
-    },
-    "person_id": {
-      "bsonType": "objectId",
-    },
-    "updated_at": {
-      "bsonType": "date",
     },
   },
   "required": [
     "_id",
-    "created_at",
-    "updated_at",
-    "draft",
-    "formation_id",
-    "person_id",
   ],
 }
 `;
@@ -8271,41 +8209,60 @@ exports[`validation-schema > should create validation schema for formationV2 > f
     "_id": {
       "bsonType": "objectId",
     },
-    "cfd": {
-      "bsonType": [
-        "string",
-        "null",
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "cfd": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "rncp": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+      },
+      "required": [
+        "cfd",
+        "rncp",
+        "responsable_siret",
+        "responsable_uai",
+        "formateur_siret",
+        "formateur_uai",
       ],
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "draft": {
-      "bsonType": "bool",
-    },
-    "organisme_formateur_id": {
-      "bsonType": "objectId",
-    },
-    "organisme_responsable_id": {
-      "bsonType": "objectId",
-    },
-    "rncp": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "updated_at": {
-      "bsonType": "date",
     },
   },
   "required": [
     "_id",
-    "draft",
-    "created_at",
-    "updated_at",
-    "organisme_responsable_id",
-    "organisme_formateur_id",
+    "identifiant",
   ],
 }
 `;
@@ -9608,44 +9565,9 @@ exports[`validation-schema > should create validation schema for organismeV2 > o
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "current_organisme_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Identifiant unique",
-    },
-    "draft": {
-      "bsonType": "bool",
-    },
-    "siret": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "uai": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "updated_at": {
-      "bsonType": "date",
-    },
   },
   "required": [
     "_id",
-    "draft",
-    "created_at",
-    "updated_at",
   ],
 }
 `;
@@ -10379,42 +10301,9 @@ exports[`validation-schema > should create validation schema for personV2 > pers
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "date_de_naissance": {
-      "anyOf": [
-        {
-          "anyOf": [
-            {
-              "bsonType": "date",
-            },
-            {
-              "bsonType": "string",
-            },
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "nom": {
-      "bsonType": "string",
-    },
-    "prenom": {
-      "bsonType": "string",
-    },
-    "updated_at": {
-      "bsonType": "date",
-    },
   },
   "required": [
     "_id",
-    "created_at",
-    "updated_at",
-    "nom",
-    "prenom",
   ],
 }
 `;
@@ -10619,28 +10508,9 @@ exports[`validation-schema > should create validation schema for transmissionV2 
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "formation_id": {
-      "bsonType": "objectId",
-    },
-    "organisme_transmetteur_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Identifiant unique",
-    },
   },
   "required": [
     "_id",
-    "created_at",
-    "formation_id",
   ],
 }
 `;

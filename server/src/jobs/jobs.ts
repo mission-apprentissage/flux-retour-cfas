@@ -25,6 +25,7 @@ import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
+import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -42,6 +43,8 @@ import { validationTerritoires } from "./territoire/validationTerritoire";
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
   await addJob({ name: "hydrate:formations-catalogue", queued });
+
+  await addJob({ name: "import:formation", queued });
 
   // # Remplissage des organismes depuis le référentiel
   await addJob({ name: "hydrate:organismes", queued });
@@ -104,6 +107,11 @@ export async function setupJobProcessor() {
               handler: cleanupOrganismes,
             },
 
+            "Import formations": {
+              cron_string: "0 3 * * *",
+              handler: hydrateFormationV2,
+            },
+
             "Send reminder emails at 7h": {
               cron_string: "0 7 * * *",
               handler: async () => {
@@ -143,6 +151,9 @@ export async function setupJobProcessor() {
     jobs: {
       "init:dev": {
         handler: async () => dailyJobs(false),
+      },
+      "import:formation": {
+        handler: hydrateFormationV2,
       },
       "hydrate:daily": {
         handler: async () => dailyJobs(true),

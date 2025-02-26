@@ -5,12 +5,14 @@ import { zObjectId } from "zod-mongodb-schema";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [
     {
-      cfd: 1,
-      rncp: 1,
-      organisme_formateur_id: 1,
-      organisme_responsable_id: 1,
+      "identifiant.cfd": 1,
+      "identifiant.rncp": 1,
+      "identifiant.responsable_siret": 1,
+      "identifiant.responsable_uai": 1,
+      "identifiant.formateur_siret": 1,
+      "identifiant.formateur_uai": 1,
     },
-    {},
+    { unique: true },
   ],
 ];
 
@@ -18,13 +20,14 @@ const collectionName = "formationV2";
 
 const zFormationV2 = z.object({
   _id: zObjectId,
-  draft: z.boolean(),
-  created_at: z.date(),
-  updated_at: z.date(),
-  organisme_responsable_id: zObjectId,
-  organisme_formateur_id: zObjectId,
-  rncp: z.string().nullish(),
-  cfd: z.string().nullish(),
+  identifiant: z.object({
+    cfd: z.string().nullable(),
+    rncp: z.string().nullable(),
+    responsable_siret: z.string().nullable(),
+    responsable_uai: z.string().nullable(),
+    formateur_siret: z.string().nullable(),
+    formateur_uai: z.string().nullable(),
+  }),
 });
 
 export type IFormationV2 = z.output<typeof zFormationV2>;
