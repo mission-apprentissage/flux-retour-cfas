@@ -8,6 +8,7 @@ import {
   PermissionScope,
   PermissionsOrganisme,
   assertUnreachable,
+  IUsersMigration,
 } from "shared";
 import { IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
@@ -22,7 +23,7 @@ import { findOrganismeFormateursIds } from "./permissions";
 export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme } & {
   formationsCount?: number;
 } & {
-  missionsLocales?: IMissionLocale[];
+  missionLocale?: IMissionLocale & { contactsTDB?: IUsersMigration[] };
 };
 export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {

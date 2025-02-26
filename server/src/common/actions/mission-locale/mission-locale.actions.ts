@@ -21,12 +21,14 @@ import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
+import logger from "@/common/logger";
 import {
   effectifsDb,
   effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogsDb,
   organisationsDb,
+  usersMigrationDb,
 } from "@/common/model/collections";
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
@@ -786,3 +788,47 @@ export const getPaginatedOrganismesByMissionLocaleId = async (
 
   return { pagination, data, totalFormations: totalFormations?.totalFormations || 0 };
 };
+
+/**
+ * Liste les contacts (utilisateurs) liés à une Mission Locale
+ * à partir de son identifiant `ml_id`.
+ *
+ * @param missionLocaleID Identifiant numérique de la Mission Locale (ml_id)
+ * @returns La liste des utilisateurs confirmés rattachés à cette organisation
+ */
+export async function listContactsMlOrganisme(missionLocaleID: number) {
+  const organisation = await organisationsDb().findOne({
+    ml_id: missionLocaleID,
+    type: "MISSION_LOCALE",
+  });
+
+  if (!organisation) {
+    logger.warn(
+      { module: "listContactsMlOrganisme", missionLocaleID },
+      `Aucune organisation de type MISSION_LOCALE trouvée pour ml_id=${missionLocaleID}.`
+    );
+    return [];
+  }
+
+  const contacts = await usersMigrationDb()
+    .find(
+      {
+        organisation_id: new ObjectId(organisation._id),
+        account_status: "CONFIRMED",
+      },
+      {
+        projection: {
+          _id: 1,
+          email: 1,
+          nom: 1,
+          prenom: 1,
+          fonction: 1,
+          telephone: 1,
+          created_at: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return contacts;
+}

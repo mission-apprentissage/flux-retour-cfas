@@ -553,7 +553,7 @@ export interface Organisme {
     effectifsNominatifs: boolean | TypeEffectifNominatif[];
     manageEffectifs: boolean;
   };
-  missionsLocales?: {
+  missionLocale?: {
     id: string;
     nom: string;
     siret: string;
@@ -571,5 +571,14 @@ export interface Organisme {
       telephone?: string;
       siteWeb?: string;
     };
+    contactsTDB?: {
+      _id: string;
+      email: string;
+      nom?: string;
+      prenom?: string;
+      fonction?: string;
+      telephone?: string;
+      created_at: string;
+    }[];
   };
 }
