@@ -428,6 +428,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
       const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
         longitude,
         latitude,
+        radius: 100,
       });
       if (missionsLocalesAPI.length > 0) {
         const firstMissionLocale = missionsLocalesAPI[0];
