@@ -30,7 +30,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-const createDernierStatutFieldPipeline = (date: Date) => [
+export const createDernierStatutFieldPipeline = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {
@@ -62,11 +62,11 @@ export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
   extraAccumulator: Record<string, unknown> = {},
-  extraStepAggregation: Array<Record<string, string>> = []
+  customMatchAggregation: Array<Record<string, string>> = []
 ) {
+  const firstStage = customMatchAggregation ?? [createDernierStatutFieldPipeline(currentDate)];
   return [
-    ...createDernierStatutFieldPipeline(currentDate),
-    ...extraStepAggregation,
+    ...firstStage,
     {
       $group: {
         _id: groupBy,
