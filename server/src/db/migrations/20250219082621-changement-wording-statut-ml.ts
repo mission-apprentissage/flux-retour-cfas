@@ -9,7 +9,7 @@ export const up = async () => {
     },
     {
       $set: {
-        situation: SITUATION_ENUM.CONTACTE,
+        situation: SITUATION_ENUM.SUIVI_DEMARRE,
       },
     }
   );
@@ -31,7 +31,7 @@ export const up = async () => {
     },
     {
       $set: {
-        "payload.situation": SITUATION_ENUM.CONTACTE,
+        "payload.situation": SITUATION_ENUM.SUIVI_DEMARRE,
       },
     }
   );
