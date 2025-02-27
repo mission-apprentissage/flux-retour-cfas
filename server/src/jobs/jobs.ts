@@ -85,7 +85,7 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "organisme:cleanup", queued });
 
   // # Mise à jour des effectifs DECA
-  await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
+  await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
   return 0;
 };
