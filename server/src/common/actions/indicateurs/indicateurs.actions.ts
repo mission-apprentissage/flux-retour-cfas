@@ -62,9 +62,9 @@ export function buildIndicateursEffectifsPipeline(
   groupBy: string | null | Record<string, string>,
   currentDate: Date,
   extraAccumulator: Record<string, unknown> = {},
-  customMatchAggregation: Array<Record<string, string>> = []
+  customMatchAggregation: Array<Record<string, string>> | null = null
 ) {
-  const firstStage = customMatchAggregation ?? [createDernierStatutFieldPipeline(currentDate)];
+  const firstStage = customMatchAggregation ?? createDernierStatutFieldPipeline(currentDate);
   return [
     ...firstStage,
     {
