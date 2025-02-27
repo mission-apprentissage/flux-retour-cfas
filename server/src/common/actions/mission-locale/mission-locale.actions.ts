@@ -33,7 +33,10 @@ import {
 
 import { buildEffectifForMissionLocale } from "../effectifs.actions";
 import { buildSortFilter, DateFilters } from "../helpers/filters";
-import { buildIndicateursEffectifsPipeline } from "../indicateurs/indicateurs.actions";
+import {
+  buildIndicateursEffectifsPipeline,
+  createDernierStatutFieldPipeline,
+} from "../indicateurs/indicateurs.actions";
 
 /**
  * Filtre constant pour les missions locales
@@ -56,41 +59,8 @@ const EFF_MISSION_LOCALE_FILTER = [
  */
 const buildDefaultSortFilter = () => {
   return {
-    statusPriority: 1,
     "dernierStatut.date": -1,
   };
-};
-
-/**
- * Ajout de l'ordre des priorités sur les status pour les filtres
- * @returns Objet pour addFields
- */
-const buildSortingPriorityOnStatus = () => {
-  return [
-    {
-      $addFields: {
-        statusPriority: {
-          $switch: {
-            branches: [
-              {
-                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] },
-                then: 1,
-              },
-              {
-                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] },
-                then: 2,
-              },
-              {
-                case: { $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] },
-                then: 3,
-              },
-            ],
-            default: 4,
-          },
-        },
-      },
-    },
-  ];
 };
 
 /**
@@ -130,36 +100,13 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
 ];
 
 /**
- * Création des filtres par defaut sur les statuts et leur date
- * @param date Date de calcul des filtres
- * @returns Une liste de addFields
- */
-const createDernierStatutFieldPipelineMl = (date: Date) => [
-  {
-    $addFields: {
-      dernierStatut: {
-        $arrayElemAt: ["$_computed.statut.parcours", -1],
-      },
-    },
-  },
-  ...buildSortingPriorityOnStatus(),
-  {
-    $addFields: {
-      dernierStatutDureeInDay: {
-        $dateDiff: { startDate: "$dernierStatut.date", endDate: date, unit: "day" },
-      },
-    },
-  },
-];
-
-/**
  * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
  * @param statut Liste des status a filtrer
  * @param date Date de calcul du filtre
  * @returns Une liste de addFields et de match
  */
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length ? [...createDernierStatutFieldPipelineMl(date), matchDernierStatutPipelineMl(statut)] : [];
+  statut.length ? [...createDernierStatutFieldPipeline(date), matchDernierStatutPipelineMl(statut)] : [];
 
 /**
  * Création du match sur les dernier statuts
@@ -505,9 +452,12 @@ export const getEffectifIndicateursForMissionLocaleId = async (filters: DateFilt
   const aggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...buildIndicateursEffectifsPipeline(null, filters.date, {}, [
-      matchDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT]),
-    ]),
+    ...buildIndicateursEffectifsPipeline(
+      null,
+      filters.date,
+      {},
+      filterByDernierStatutPipelineMl([STATUT_APPRENANT.RUPTURANT], new Date())
+    ),
     {
       $project: {
         _id: 0,
