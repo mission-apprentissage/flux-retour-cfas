@@ -75,6 +75,7 @@ const dailyJobs = async (queued: boolean) => {
     name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
     queued,
   });
+
   await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued });
 
   await addJob({ name: "hydrate:rncp", queued });
@@ -82,6 +83,9 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "computed:update", queued });
 
   await addJob({ name: "organisme:cleanup", queued });
+
+  // # Mise à jour des effectifs DECA
+  await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
 
   return 0;
 };
@@ -119,18 +123,10 @@ export async function setupJobProcessor() {
                 return 0;
               },
             },
-            "Mettre à jour les effectifs DECA tous les dimanches matin à 6h": {
-              cron_string: "0 6 * * 0",
-              handler: async () => {
-                await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
-                return 0;
-              },
-            },
             "Validation des constantes de territoires": {
               cron_string: "5 4 1 * *",
               handler: validationTerritoires,
             },
-
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
             //   cron_string: "45 12 1 * *",
