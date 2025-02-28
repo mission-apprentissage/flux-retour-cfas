@@ -112,7 +112,7 @@ function NavBarTransverse(): React.ReactElement {
 
   return (
     <>
-      <NavItem to="/" exactMatch>
+      <NavItem to="/home" exactMatch>
         Mon tableau de bord
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
@@ -141,7 +141,7 @@ function NavBarTransverse(): React.ReactElement {
 function NavBarMissionLocale(): React.ReactElement {
   return (
     <>
-      <NavItem to="/" exactMatch>
+      <NavItem to="/home" exactMatch>
         Mon tableau de bord
       </NavItem>
       <NavItem to="/mission-locale/apprenants" exactMatch>
@@ -159,7 +159,7 @@ function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
   return (
     <>
-      <NavItem to="/" exactMatch>
+      <NavItem to="/home" exactMatch>
         Mon tableau de bord
       </NavItem>
       {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
