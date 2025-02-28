@@ -1,5 +1,6 @@
 import Boom from "boom";
 import express from "express";
+import { zOrganismesMailReferentielStatut } from "shared/models/data/organismesMailReferentiel.model";
 import { z } from "zod";
 
 import {
@@ -11,6 +12,7 @@ import {
   getArchivableOrganismes,
   searchOrganismesSupportInfoBySiret,
 } from "@/common/actions/organismes/organismes.admin.actions";
+import { organismesMailReferentielDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
@@ -135,6 +137,38 @@ export default () => {
             }
           : {}),
       });
+    }
+  );
+
+  router.post(
+    "/validate-mail",
+    validateRequestMiddleware({
+      body: z.object({
+        data: z.array(
+          z.object({
+            email: z.string(),
+            bouncer: zOrganismesMailReferentielStatut,
+          })
+        ),
+      }),
+    }),
+    async ({ body }, res) => {
+      for (const { email, bouncer } of body.data) {
+        await organismesMailReferentielDb().findOneAndUpdate(
+          {
+            email,
+          },
+          {
+            $set: {
+              statut: bouncer,
+            },
+          },
+          {
+            upsert: true,
+          }
+        );
+      }
+      res.sendStatus(200);
     }
   );
 
