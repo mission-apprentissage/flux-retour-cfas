@@ -20,7 +20,6 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
-import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -29,56 +28,26 @@ import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
-import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
-import DashboardMissionLocale from "@/modules/dashboard/DashboardMissionLocale";
-import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
-import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
 import { useIndicateurNational } from "@/modules/dashboard/hooks/useIndicateursNational";
 import { TeamIcon } from "@/modules/dashboard/icons";
 import { TerritoireFilters } from "@/modules/models/effectifs-filters";
 import { LockFill } from "@/theme/components/icons";
 
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
-
-function DashboardOwnOrganisme() {
-  const { organisme } = useOrganisationOrganisme();
-  return <DashboardOrganisme organisme={organisme} modePublique={false} />;
-}
-
-function getDashboardComponent(organisationType: IOrganisationType) {
-  switch (organisationType) {
-    case "ORGANISME_FORMATION": {
-      return <DashboardOwnOrganisme />;
-    }
-
-    case "MISSION_LOCALE": {
-      return <DashboardMissionLocale />;
-    }
-
-    case "TETE_DE_RESEAU":
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
-    case "DRAFPIC":
-    case "DDETS":
-    case "ACADEMIE":
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "CARIF_OREF_NATIONAL":
-    case "ADMINISTRATEUR":
-      return <DashboardTransverse />;
+export const getServerSideProps = async (context) => {
+  const props = await getAuthServerSideProps(context, false);
+  if (props.auth) {
+    return {
+      redirect: {
+        destination: "/home",
+        permanent: false,
+      },
+    };
   }
-}
+  return { props };
+};
 
-function DashboardPage() {
-  const { organisationType } = useAuth();
-
-  return <SimplePage title="Tableau de bord de l’apprentissage">{getDashboardComponent(organisationType)}</SimplePage>;
-}
-
-function PublicLandingPage() {
+export default function PublicLandingPage() {
   return (
     <SimplePage title="Tableau de bord de l’apprentissage">
       <Box
@@ -605,9 +574,4 @@ function SectionApercuChiffresCles() {
       </HStack>
     </Container>
   );
-}
-
-export default function Home() {
-  const { auth } = useAuth();
-  return auth ? <DashboardPage /> : <PublicLandingPage />;
 }
