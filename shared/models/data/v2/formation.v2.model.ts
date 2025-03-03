@@ -28,6 +28,7 @@ const zFormationV2 = z.object({
     formateur_siret: z.string().nullable(),
     formateur_uai: z.string().nullable(),
   }),
+  draft: z.boolean(),
 });
 
 export type IFormationV2 = z.output<typeof zFormationV2>;

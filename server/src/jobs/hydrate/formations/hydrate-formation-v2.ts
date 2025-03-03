@@ -22,6 +22,9 @@ export async function hydrateFormationV2() {
           "identifiant.formateur_uai": formation.formateur.organisme?.identifiant.uai ?? null,
         },
         update: {
+          $set: {
+            draft: false,
+          },
           $setOnInsert: {
             _id: new ObjectId(),
           },

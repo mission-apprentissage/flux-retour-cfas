@@ -81,6 +81,7 @@ const expectedFormations: Omit<IFormationV2, "_id">[] = [
       formateur_siret: siret2,
       formateur_uai: uai2,
     },
+    draft: false,
   },
   {
     identifiant: {
@@ -91,6 +92,7 @@ const expectedFormations: Omit<IFormationV2, "_id">[] = [
       formateur_siret: siret2,
       formateur_uai: uai2,
     },
+    draft: false,
   },
   {
     identifiant: {
@@ -101,6 +103,7 @@ const expectedFormations: Omit<IFormationV2, "_id">[] = [
       formateur_siret: siret2,
       formateur_uai: uai2,
     },
+    draft: false,
   },
   {
     identifiant: {
@@ -111,6 +114,7 @@ const expectedFormations: Omit<IFormationV2, "_id">[] = [
       formateur_siret: siret1,
       formateur_uai: uai1,
     },
+    draft: false,
   },
   {
     identifiant: {
@@ -121,6 +125,7 @@ const expectedFormations: Omit<IFormationV2, "_id">[] = [
       formateur_siret: siret2,
       formateur_uai: uai2,
     },
+    draft: false,
   },
 ];
 
@@ -157,7 +162,7 @@ describe("hydrateFormationV2", () => {
     });
 
     const formations = await formationV2Db()
-      .find({}, { projection: { _id: 0, identifiant: 1 }, sort })
+      .find({}, { projection: { _id: 0 }, sort })
       .toArray();
 
     expect(formations).toEqual(expectedFormations);
