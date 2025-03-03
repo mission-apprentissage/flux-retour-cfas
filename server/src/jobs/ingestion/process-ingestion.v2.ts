@@ -5,13 +5,17 @@ import dossierApprenantSchemaV3 from "shared/models/parts/dossierApprenantSchema
 
 import parentLogger from "@/common/logger";
 
+import { ingestFormationV2 } from "./formationV2/formationV2.ingestion";
+
 const logger = parentLogger.child({
   module: "process-ingestion.v2",
 });
 
 export async function handleEffectifTransmission(effectifQueue: WithId<IEffectifQueue>): Promise<void> {
   try {
-    dossierApprenantSchemaV3.parse(effectifQueue);
+    const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
+
+    await ingestFormationV2(dossier);
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);

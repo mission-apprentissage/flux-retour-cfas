@@ -8209,6 +8209,9 @@ exports[`validation-schema > should create validation schema for formationV2 > f
     "_id": {
       "bsonType": "objectId",
     },
+    "draft": {
+      "bsonType": "bool",
+    },
     "identifiant": {
       "additionalProperties": false,
       "bsonType": "object",
@@ -8263,6 +8266,7 @@ exports[`validation-schema > should create validation schema for formationV2 > f
   "required": [
     "_id",
     "identifiant",
+    "draft",
   ],
 }
 `;
