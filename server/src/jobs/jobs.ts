@@ -46,6 +46,8 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "import:formation", queued });
 
+  await addJob({ name: "import:formation", queued });
+
   // # Remplissage des organismes depuis le référentiel
   await addJob({ name: "hydrate:organismes", queued });
 
