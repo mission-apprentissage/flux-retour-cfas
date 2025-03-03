@@ -19,7 +19,7 @@ import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-i
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
-import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
+import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import {
   hydrateEffectifsLieuDeFormation,
@@ -173,14 +173,14 @@ export async function setupJobProcessor() {
       },
       "hydrate:effectifs:update_all_computed_statut": {
         handler: async () => {
-          return hydrateEffectifsComputedTypes();
+          return hydrateEffectifsComputedTypesGenerique();
         },
       },
       "hydrate:effectifs:update_computed_statut": {
         handler: async (job, signal) => {
           const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
           const evaluationDate = new Date();
-          return hydrateEffectifsComputedTypes(
+          return hydrateEffectifsComputedTypesGenerique(
             {
               query: {
                 annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
