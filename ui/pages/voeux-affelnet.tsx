@@ -16,7 +16,7 @@ const PageVoeuxAffelnet = () => {
 
   useEffect(() => {
     if (isUnauthorized) {
-      router.push("/");
+      router.push("/home");
     }
   }, [isUnauthorized, router]);
 
