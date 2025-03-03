@@ -1,10 +1,17 @@
 import { captureException } from "@sentry/node";
 import { IEffectif } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 
+export type IEffectifGenerique = IEffectif | IEffectifDECA;
+
+export const hydrateEffectifsComputedTypesGenerique = async (options?, signal?) => {
+  await hydrateEffectifsComputedTypes(options, effectifsDb, signal);
+  await hydrateEffectifsComputedTypes(options, effectifsDECADb, signal);
+};
 /**
  * Met à jour le statut des effectifs en fonction d'une requête donnée.
  *
@@ -14,17 +21,18 @@ import { effectifsDb } from "@/common/model/collections";
  */
 export async function hydrateEffectifsComputedTypes(
   { query = {}, evaluationDate = new Date() } = {},
+  collection: typeof effectifsDb | typeof effectifsDECADb,
   signal?: AbortSignal
 ) {
   let nbEffectifsMisAJour = 0;
   let nbEffectifsNonMisAJour = 0;
 
   const BULK_SIZE = 100;
-  let bulkEffectifs: IEffectif[] = [];
+  let bulkEffectifs: Array<IEffectifGenerique> = [];
 
-  const processEffectif = async (eff: IEffectif) => {
+  const processEffectif = async (eff: IEffectifGenerique) => {
     if (eff) {
-      const isSuccess = await updateEffectifStatut(eff, evaluationDate);
+      const isSuccess = await updateEffectifStatut(eff, evaluationDate, collection());
       if (isSuccess) {
         nbEffectifsMisAJour++;
       } else {
@@ -34,10 +42,10 @@ export async function hydrateEffectifsComputedTypes(
   };
 
   try {
-    const cursor = effectifsDb().find(query);
+    const cursor = collection().find(query);
 
     while (await cursor.hasNext()) {
-      const effectif: IEffectif | null = await cursor.next();
+      const effectif: IEffectifGenerique | null = await cursor.next();
       if (effectif) {
         bulkEffectifs.push(effectif);
       }

@@ -6,7 +6,7 @@ import { addDaysUTC } from "shared/utils";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { hydrateEffectifsComputedTypes } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
+import { hydrateEffectifsComputedTypesGenerique } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
 import { createSampleEffectif, createRandomOrganisme, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
@@ -26,7 +26,7 @@ const sampleOrganisme: IOrganisme = {
   ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
 };
 
-describe("hydrateEffectifsComputedTypes", () => {
+describe("hydrateEffectifsComputedTypesGenerique", () => {
   useMongo();
 
   beforeEach(async () => {
@@ -47,7 +47,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: moinsDe90Jours });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: moinsDe90Jours });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -65,7 +65,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: plusDe90Jours });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: plusDe90Jours });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -87,7 +87,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes();
+      await hydrateEffectifsComputedTypesGenerique();
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -110,7 +110,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes();
+      await hydrateEffectifsComputedTypesGenerique();
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -137,7 +137,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: customEvalutationDate });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: customEvalutationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -163,7 +163,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -187,7 +187,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -220,7 +220,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
       const evaluationDateAfterDiploma = new Date(2026, 8, 1);
 
-      await hydrateEffectifsComputedTypes({ evaluationDate: evaluationDateAfterDiploma });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: evaluationDateAfterDiploma });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -249,7 +249,7 @@ describe("hydrateEffectifsComputedTypes", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
@@ -298,7 +298,7 @@ describe("hydrateEffectifsComputedTypes", () => {
         },
       });
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: new Date(2023, 6, 1) });
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
       expect(updatedEffectif?._computed?.statut).toEqual({
         en_cours: STATUT_APPRENANT.RUPTURANT,
@@ -326,7 +326,7 @@ describe("hydrateEffectifsComputedTypes", () => {
         },
       });
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: new Date(2023, 6, 1) });
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
@@ -357,7 +357,7 @@ describe("hydrateEffectifsComputedTypes", () => {
         },
       });
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate: new Date(2023, 6, 1) });
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
