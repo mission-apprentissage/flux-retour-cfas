@@ -1,6 +1,6 @@
 import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
-const REGIONS = [
+export const REGIONS = [
   {
     nom: "Guadeloupe",
     code: "01",
