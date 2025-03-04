@@ -5,7 +5,21 @@ import { useOrganisationOrganisme } from "@/hooks/organismes";
 
 import ListeTransmissionsPage from "../modules/transmissions/ListeTransmissionsPage";
 
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+export const getServerSideProps = async (context) => {
+  const authProps = await getAuthServerSideProps(context, false);
+  const organisme = authProps?.auth?.organisation?.organisme_id || null;
+
+  if (!organisme) {
+    return {
+      redirect: {
+        destination: "/home",
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: { ...authProps } };
+};
 
 const PageTransmissionsDeMonOrganismes = () => {
   const { organisme, isLoading, error } = useOrganisationOrganisme();
