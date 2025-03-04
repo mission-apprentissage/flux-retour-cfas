@@ -10795,6 +10795,29 @@ exports[`validation-schema > should create validation schema for personV2 > pers
 }
 `;
 
+exports[`validation-schema > should create validation schema for regions > regions 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "code": {
+      "bsonType": "string",
+    },
+    "nom": {
+      "bsonType": "string",
+    },
+  },
+  "required": [
+    "_id",
+    "nom",
+    "code",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for reseaux > reseaux 1`] = `
 {
   "additionalProperties": false,
