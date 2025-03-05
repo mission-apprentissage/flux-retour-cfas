@@ -26,6 +26,7 @@ const EffectifTableDetails = ({ row, modeSifa = false, canEdit = false, refetch 
       modeSifa={modeSifa}
       canEdit={canEdit}
       parcours={row?.original?.statut?.parcours || []}
+      transmissionDate={row?.original?.transmitted_at || null}
       refetch={refetch}
     />
   );
