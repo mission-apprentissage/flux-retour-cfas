@@ -98,7 +98,7 @@ export default () => {
         throw Boom.internal("Failed to update the organismes_ids array.");
       }
 
-      await organismesDb().updateOne({ _id: organismeObjectId }, { $addToSet: { reseaux: reseau.nom } });
+      await organismesDb().updateOne({ _id: organismeObjectId }, { $addToSet: { reseaux: reseau.key } });
 
       const updatedOrganisme = await organismesDb().findOne({ _id: organismeObjectId });
       if (updatedOrganisme) {
@@ -142,7 +142,7 @@ export default () => {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }
 
-        await organismesDb().updateOne({ _id: organismeId as ObjectId }, { $pull: { reseaux: reseau.nom } });
+        await organismesDb().updateOne({ _id: organismeId as ObjectId }, { $pull: { reseaux: reseau.key } });
 
         const updatedOrganisme = await organismesDb().findOne({ _id: organismeId as ObjectId });
         if (updatedOrganisme) {
