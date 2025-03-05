@@ -10305,9 +10305,30 @@ exports[`validation-schema > should create validation schema for personV2 > pers
     "_id": {
       "bsonType": "objectId",
     },
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "date_de_naissance": {
+          "bsonType": "date",
+        },
+        "nom": {
+          "bsonType": "string",
+        },
+        "prenom": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "nom",
+        "prenom",
+        "date_de_naissance",
+      ],
+    },
   },
   "required": [
     "_id",
+    "identifiant",
   ],
 }
 `;
