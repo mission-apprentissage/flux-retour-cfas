@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 class AppError extends Error {
   details: any;
 
@@ -27,3 +29,9 @@ export const formatError = (error: any) => {
 
   return error;
 };
+
+export function withCause<T extends Error>(error: T, cause: Error, level: "fatal" | "error" | "warning" = "error"): T {
+  error.cause = cause;
+  captureException(cause, { level });
+  return error;
+}
