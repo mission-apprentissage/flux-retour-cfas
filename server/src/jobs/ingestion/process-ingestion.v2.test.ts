@@ -283,6 +283,21 @@ describe("process-ingestion.v2", () => {
       },
       contrats: {},
       derniere_transmission: now,
+      _computed: {
+        statut: {
+          en_cours: "ABANDON",
+          parcours: [
+            {
+              date: new Date("2024-09-01T00:00:00.000Z"),
+              valeur: "INSCRIT",
+            },
+            {
+              date: new Date("2024-11-30T00:00:00.000Z"),
+              valeur: "ABANDON",
+            },
+          ],
+        },
+      },
     });
   });
 });
