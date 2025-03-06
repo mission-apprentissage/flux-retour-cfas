@@ -6,6 +6,7 @@ import dossierApprenantSchemaV3 from "shared/models/parts/dossierApprenantSchema
 import parentLogger from "@/common/logger";
 
 import { ingestFormationV2 } from "./formationV2/formationV2.ingestion";
+import { ingestPersonV2 } from "./person/person.ingestion";
 
 const logger = parentLogger.child({
   module: "process-ingestion.v2",
@@ -15,7 +16,7 @@ export async function handleEffectifTransmission(effectifQueue: WithId<IEffectif
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
 
-    await ingestFormationV2(dossier);
+    await Promise.all([ingestFormationV2(dossier), ingestPersonV2(dossier)]);
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);

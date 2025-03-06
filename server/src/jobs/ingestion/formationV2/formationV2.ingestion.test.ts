@@ -19,7 +19,7 @@ describe("ingestFormationV2", () => {
     etablissement_formateur_uai: uaiFixtures["0631408N"],
   } as const satisfies IIngestFormationV2Params;
 
-  it("should insert a new formation if it does not exist", async () => {
+  it("doit créer une nouvelle formation si celle-ci n'existe pas", async () => {
     const result = await ingestFormationV2(dossier);
 
     expect(result).toEqual({
@@ -38,7 +38,7 @@ describe("ingestFormationV2", () => {
     expect(await formationV2Db().find({}).toArray()).toEqual([result]);
   });
 
-  it("should return the existing formation if it exists", async () => {
+  it("doit retourner la formation existante si celle-ci existe", async () => {
     const existingFormation = {
       _id: new ObjectId(),
       identifiant: {
@@ -139,7 +139,7 @@ describe("ingestFormationV2", () => {
 
     await formationV2Db().insertMany(existingFormations);
 
-    await ingestFormationV2(dossier);
+    const result = await ingestFormationV2(dossier);
 
     expect({
       _id: expect.any(ObjectId),
@@ -152,7 +152,7 @@ describe("ingestFormationV2", () => {
         formateur_uai: dossier.etablissement_formateur_uai,
       },
       draft: true,
-    });
+    }).toEqual(result);
 
     expect(await formationV2Db().countDocuments()).toBe(existingFormations.length + 1);
   });
