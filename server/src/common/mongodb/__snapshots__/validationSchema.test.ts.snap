@@ -42,9 +42,249 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
     "_id": {
       "bsonType": "objectId",
     },
+    "adresse": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "code_academie": {
+              "bsonType": "string",
+            },
+            "code_commune_insee": {
+              "bsonType": "string",
+            },
+            "code_departement": {
+              "bsonType": "string",
+            },
+            "code_postal": {
+              "bsonType": "string",
+            },
+            "code_region": {
+              "bsonType": "string",
+            },
+            "commune": {
+              "bsonType": "string",
+            },
+            "label": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "mission_locale_id": {
+              "bsonType": [
+                "number",
+                "null",
+              ],
+            },
+          },
+          "required": [
+            "label",
+            "code_postal",
+            "code_commune_insee",
+            "commune",
+            "code_region",
+            "code_departement",
+            "code_academie",
+            "mission_locale_id",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "annee_scolaires": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "description": "Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")",
+        "pattern": "^[12][0-9]{3}-[12][0-9]{3}$",
+      },
+    },
+    "contrats": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "date_debut": {
+            "bsonType": "date",
+          },
+          "date_fin": {
+            "anyOf": [
+              {
+                "bsonType": "date",
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+          "employeur": {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "siret": {
+                "bsonType": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "required": [
+              "siret",
+            ],
+          },
+          "rupture": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "cause": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                  },
+                  "date_rupture": {
+                    "bsonType": "date",
+                  },
+                },
+                "required": [
+                  "cause",
+                  "date_rupture",
+                ],
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+        },
+        "required": [
+          "date_debut",
+          "date_fin",
+          "employeur",
+          "rupture",
+        ],
+      },
+      "bsonType": "object",
+    },
+    "date_inscription": {
+      "bsonType": "date",
+    },
+    "derniere_transmission": {
+      "bsonType": "date",
+    },
+    "diplome": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "obtention": {
+              "bsonType": "bool",
+            },
+          },
+          "required": [
+            "date",
+            "obtention",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "exclusion": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "cause": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "date": {
+              "bsonType": "date",
+            },
+          },
+          "required": [
+            "cause",
+            "date",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "id_erp": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+      },
+    },
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "formation_id": {
+          "bsonType": "objectId",
+        },
+        "person_id": {
+          "bsonType": "objectId",
+        },
+      },
+      "required": [
+        "person_id",
+        "formation_id",
+      ],
+    },
+    "session": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "debut": {
+          "bsonType": "date",
+        },
+        "fin": {
+          "bsonType": "date",
+        },
+      },
+      "required": [
+        "debut",
+        "fin",
+      ],
+    },
   },
   "required": [
     "_id",
+    "identifiant",
+    "annee_scolaires",
+    "id_erp",
+    "date_inscription",
+    "exclusion",
+    "diplome",
+    "session",
+    "adresse",
+    "contrats",
+    "derniere_transmission",
   ],
 }
 `;

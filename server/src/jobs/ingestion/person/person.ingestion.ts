@@ -5,10 +5,9 @@ import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierAppre
 
 import { personV2Db } from "@/common/model/collections";
 
-export type IIngestPersonV2Params = Pick<
-  IDossierApprenantSchemaV3,
-  "nom_apprenant" | "prenom_apprenant" | "date_de_naissance_apprenant"
->;
+export type IIngestPersonUsedFields = "nom_apprenant" | "prenom_apprenant" | "date_de_naissance_apprenant";
+
+export type IIngestPersonV2Params = Pick<IDossierApprenantSchemaV3, IIngestPersonUsedFields>;
 
 function normalisePersonIdentifiant(input: IPersonV2["identifiant"]): IPersonV2["identifiant"] {
   return {

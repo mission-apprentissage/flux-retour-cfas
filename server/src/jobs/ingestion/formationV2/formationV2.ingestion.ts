@@ -4,15 +4,15 @@ import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierAppre
 
 import { formationV2Db } from "@/common/model/collections";
 
-export type IIngestFormationV2Params = Pick<
-  IDossierApprenantSchemaV3,
+export type IIngestFormationUsedFields =
   | "formation_cfd"
   | "formation_rncp"
   | "etablissement_responsable_siret"
   | "etablissement_responsable_uai"
   | "etablissement_formateur_siret"
-  | "etablissement_formateur_uai"
->;
+  | "etablissement_formateur_uai";
+
+export type IIngestFormationV2Params = Pick<IDossierApprenantSchemaV3, IIngestFormationUsedFields>;
 
 export async function ingestFormationV2(dossier: IIngestFormationV2Params): Promise<IFormationV2> {
   const data: IFormationV2 = {
