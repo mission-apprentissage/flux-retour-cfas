@@ -11,10 +11,15 @@ import {
   IUsersMigration,
 } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  API_TRAITEMENT_TYPE,
+  IMissionLocaleEffectif,
+  SITUATION_ENUM,
+} from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
   IEffectifsFiltersMissionLocale,
+  IEffectifsParMoisFiltersMissionLocaleSchema,
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { IPaginationFilters, WithPagination } from "shared/models/routes/pagination";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -119,6 +124,16 @@ const matchDernierStatutPipelineMl = (statut): any => {
       $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
     },
   };
+};
+
+const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
+  return [
+    {
+      $match: {
+        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
+      },
+    },
+  ];
 };
 
 /**
@@ -251,21 +266,19 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
   ];
 };
 
-/**
- * Aggregation pour récupérer les effectifs en fonction de la mission locale et de filtres
- * @param missionLocaleId Id de la mission locale
- * @param missionLocaleMongoId Id du tdb de la mission locale
- * @param effectifsFiltersMissionLocale Liste de filtre pour les effectifs
- * @returns Les données d'effectif paginées
- */
-export const getPaginatedEffectifsByMissionLocaleId = async (
-  missionLocaleId: number,
-  missionLocaleMongoId: ObjectId,
-  effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
-) => {
-  const { page = 1, limit = 20, ...effectifFilters } = effectifsFiltersMissionLocale;
+const effectifMissionLocaleLookupAggregation = (missionLocaleMongoId: ObjectId) => {
+  const A_TRAITER_CONDIITON = {
+    $or: [
+      {
+        $ifNull: ["$ml_effectif.situation", false],
+      },
+      {
+        $in: ["$ml_effectif.situation", [SITUATION_ENUM.A_CONTACTER]],
+      },
+    ],
+  };
 
-  const effectifMissionLocaleLookupAggregation = [
+  return [
     {
       $lookup: {
         let: { missionLocaleMongoId: new ObjectId(missionLocaleMongoId), effectif_id: "$_id" },
@@ -291,7 +304,29 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    {
+      $addFields: {
+        a_traiter: {
+          $cond: [A_TRAITER_CONDIITON, true, false],
+        },
+      },
+    },
   ];
+};
+
+/**
+ * Aggregation pour récupérer les effectifs en fonction de la mission locale et de filtres
+ * @param missionLocaleId Id de la mission locale
+ * @param missionLocaleMongoId Id du tdb de la mission locale
+ * @param effectifsFiltersMissionLocale Liste de filtre pour les effectifs
+ * @returns Les données d'effectif paginées
+ */
+export const getPaginatedEffectifsByMissionLocaleId = async (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
+) => {
+  const { page = 1, limit = 20, ...effectifFilters } = effectifsFiltersMissionLocale;
 
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
@@ -356,7 +391,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
-    ...effectifMissionLocaleLookupAggregation,
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
     {
       $lookup: {
         from: "organismes",
@@ -782,3 +817,93 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 
   return contacts;
 }
+
+export const getEffectifsParMoisByMissionLocaleId = async (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
+  const { type } = effectifsParMoisFiltersMissionLocale;
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const organismeMissionLocaleAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    ...matchTraitementEffectifPipelineMl(type),
+    {
+      $addFields: {
+        firstDayOfMonth: {
+          $dateFromParts: {
+            year: { $year: "$dernierStatut.date" },
+            month: { $month: "$dernierStatut.date" },
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$firstDayOfMonth",
+        data: {
+          $push: {
+            id: "$$ROOT._id",
+            nom: "$$ROOT.apprenant.nom",
+            prenom: "$$ROOT.apprenant.prenom",
+            libelle_formation: "$$ROOT.formation.libelle_long",
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id",
+        data: 1,
+      },
+    },
+  ];
+
+  const effectifs = await effectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  return { type, data: effectifs };
+};
+
+export const getEffectifFromMissionLocaleId = async (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifId: string
+) => {
+  const aggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    {
+      $match: {
+        _id: new ObjectId(effectifId),
+      },
+    },
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    ...createDernierStatutFieldPipeline(new Date()),
+    {
+      $project: {
+        nom: "$apprenant.nom",
+        prenom: "$apprenant.prenom",
+        date_de_naissance: "$apprenant.date_de_naissance",
+        adresse: 1,
+        formation: 1,
+        courriel: "$apprenant.courriel",
+        telephone: "$apprenant.telephone",
+        responsable_mail: "$apprenant.responsable_apprenant_mail1",
+        rqth: "$apprenant.rqth",
+        form_effectif: "$ml_effectif",
+        a_traiter: "$a_traiter",
+        transmitted_at: "$transmitted_at",
+        dernier_statut: "$dernierStatut",
+      },
+    },
+  ];
+
+  const effectif = await effectifsDb().aggregate(aggregation).next();
+
+  if (!effectif) {
+    throw Boom.notFound();
+  }
+  return effectif;
+};

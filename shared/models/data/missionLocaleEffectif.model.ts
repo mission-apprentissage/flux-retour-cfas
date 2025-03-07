@@ -51,10 +51,17 @@ export enum INSCRIPTION_FRANCE_TRAVAIL {
   INCONNU = "INCONNU",
 }
 
+export enum API_TRAITEMENT_TYPE {
+  A_TRAITER = "A_TRAITER",
+  TRAITE = "TRAITE",
+}
+
 export const zSituationEnum = z.nativeEnum({ ...SITUATION_ENUM, ...OLD_SITUATION_ENUM });
 export const zApiSituationEnum = z
   .nativeEnum({ ...SITUATION_ENUM, ...API_SITUATION_ENUM })
   .transform((arg) => (arg === API_SITUATION_ENUM.NON_TRAITE ? null : arg));
+
+export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,

@@ -3,12 +3,17 @@ import { ObjectId } from "bson";
 import express from "express";
 import { IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { effectifsFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
+import {
+  effectifsFiltersMissionLocaleSchema,
+  effectifsParMoisFiltersMissionLocaleSchema,
+} from "shared/models/routes/mission-locale/missionLocale.api";
 import { withPaginationSchema } from "shared/models/routes/pagination";
 
 import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
+  getEffectifFromMissionLocaleId,
   getEffectifIndicateursForMissionLocaleId,
+  getEffectifsParMoisByMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
   getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
@@ -22,6 +27,8 @@ export default () => {
   const router = express.Router();
   router.get("/indicateurs", returnResult(getIndicateursMissionLocale));
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
+  router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
+  router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   router.get("/organismes", returnResult(getOrganismesMissionLocale));
   return router;
@@ -62,4 +69,17 @@ const getOrganismesMissionLocale = async (req, { locals }) => {
   const filters = await validateFullZodObjectSchema(req.query, withPaginationSchema({}));
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   return await getPaginatedOrganismesByMissionLocaleId(missionLocale.ml_id, filters);
+};
+
+const getEffectifsParMoisMissionLocale = async ({ query }, { locals }) => {
+  const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  return await getEffectifsParMoisByMissionLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+};
+
+const getEffectifMissionLocale = async ({ params }, { locals }) => {
+  const effectifId = params.id;
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+
+  return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
 };
