@@ -53,7 +53,8 @@
   },
   "dependencies": {
     "husky": "^8.0.3",
-    "libphonenumber-js": "^1.11.19"
+    "libphonenumber-js": "^1.11.19",
+    "node-xlsx": "^0.24.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
