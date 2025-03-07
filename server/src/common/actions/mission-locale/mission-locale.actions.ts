@@ -11,10 +11,15 @@ import {
   IUsersMigration,
 } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  API_TRAITEMENT_TYPE,
+  IMissionLocaleEffectif,
+  SITUATION_ENUM,
+} from "shared/models/data/missionLocaleEffectif.model";
 import {
   effectifsFiltersMissionLocaleSchema,
   IEffectifsFiltersMissionLocale,
+  IEffectifsParMoisFiltersMissionLocaleSchema,
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { IPaginationFilters, WithPagination } from "shared/models/routes/pagination";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -119,6 +124,49 @@ const matchDernierStatutPipelineMl = (statut): any => {
       $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
     },
   };
+};
+
+const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
+  switch (type) {
+    case API_TRAITEMENT_TYPE.A_TRAITER:
+      return [
+        {
+          $match: {
+            $or: [
+              {
+                ml_effectif: { $exists: false },
+              },
+              {
+                "ml_effectif.situation": { $in: [SITUATION_ENUM.A_CONTACTER] },
+              },
+            ],
+          },
+        },
+      ];
+    case API_TRAITEMENT_TYPE.TRAITE:
+      return [
+        {
+          $match: {
+            $and: [
+              {
+                ml_effectif: { $exists: true },
+              },
+              {
+                "ml_effectif.situation": {
+                  $in: [
+                    SITUATION_ENUM.CONTACTE,
+                    SITUATION_ENUM.SUIVI_DEMARRE,
+                    SITUATION_ENUM.CONTACT_SANS_SUIVI,
+                    SITUATION_ENUM.INJOIGNABLE,
+                    SITUATION_ENUM.DEJA_SUIVI,
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ];
+  }
 };
 
 /**
@@ -251,6 +299,34 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
   ];
 };
 
+const effectifMissionLocaleLookupAggregation = (missionLocaleMongoId: ObjectId) => [
+  {
+    $lookup: {
+      let: { missionLocaleMongoId: new ObjectId(missionLocaleMongoId), effectif_id: "$_id" },
+      from: "missionLocaleEffectif",
+      as: "ml_effectif",
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$mission_locale_id", "$$missionLocaleMongoId"] },
+                { $eq: ["$effectif_id", "$$effectif_id"] },
+              ],
+            },
+          },
+        },
+      ],
+    },
+  },
+  {
+    $unwind: {
+      path: "$ml_effectif",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+];
+
 /**
  * Aggregation pour récupérer les effectifs en fonction de la mission locale et de filtres
  * @param missionLocaleId Id de la mission locale
@@ -264,34 +340,6 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
   effectifsFiltersMissionLocale: WithPagination<typeof effectifsFiltersMissionLocaleSchema>
 ) => {
   const { page = 1, limit = 20, ...effectifFilters } = effectifsFiltersMissionLocale;
-
-  const effectifMissionLocaleLookupAggregation = [
-    {
-      $lookup: {
-        let: { missionLocaleMongoId: new ObjectId(missionLocaleMongoId), effectif_id: "$_id" },
-        from: "missionLocaleEffectif",
-        as: "ml_effectif",
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$mission_locale_id", "$$missionLocaleMongoId"] },
-                  { $eq: ["$effectif_id", "$$effectif_id"] },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      $unwind: {
-        path: "$ml_effectif",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-  ];
 
   const adresseFilterAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
@@ -356,7 +404,7 @@ export const getPaginatedEffectifsByMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
-    ...effectifMissionLocaleLookupAggregation,
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
     {
       $lookup: {
         from: "organismes",
@@ -782,3 +830,52 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 
   return contacts;
 }
+
+export const getEffectifsParMoisByMissionLocaleId = async (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
+  const { type } = effectifsParMoisFiltersMissionLocale;
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const organismeMissionLocaleAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    ...matchTraitementEffectifPipelineMl(type),
+    {
+      $addFields: {
+        firstDayOfMonth: {
+          $dateFromParts: {
+            year: { $year: "$dernierStatut.date" },
+            month: { $month: "$dernierStatut.date" },
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$firstDayOfMonth",
+        data: {
+          $push: {
+            id: "$$ROOT._id",
+            nom: "$$ROOT.apprenant.nom",
+            prenom: "$$ROOT.apprenant.prenom",
+            libelle_formation: "$$ROOT.formation.libelle_long",
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id",
+        data: 1,
+      },
+    },
+  ];
+
+  const effectifs = await effectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  return { type, data: effectifs };
+};

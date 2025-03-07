@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { STATUT_APPRENANT } from "../../../constants";
-import { zApiSituationEnum } from "../../data/missionLocaleEffectif.model";
+import { zApiSituationEnum, zApiTypeEnum } from "../../data/missionLocaleEffectif.model";
 import { zBooleanStringSchema } from "../../parts/zodPrimitives";
 
 export const effectifsFiltersMissionLocaleSchema = {
@@ -20,3 +20,11 @@ export const effectifsFiltersMissionLocaleSchema = {
 };
 
 export type IEffectifsFiltersMissionLocale = z.infer<z.ZodObject<typeof effectifsFiltersMissionLocaleSchema>>;
+
+export const effectifsParMoisFiltersMissionLocaleSchema = {
+  type: zApiTypeEnum,
+};
+
+export type IEffectifsParMoisFiltersMissionLocaleSchema = z.infer<
+  z.ZodObject<typeof effectifsParMoisFiltersMissionLocaleSchema>
+>;
