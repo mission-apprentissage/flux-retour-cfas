@@ -11,6 +11,7 @@ import { withPaginationSchema } from "shared/models/routes/pagination";
 
 import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
+  getEffectifFromMissionLocaleId,
   getEffectifIndicateursForMissionLocaleId,
   getEffectifsParMoisByMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
@@ -26,6 +27,7 @@ export default () => {
   const router = express.Router();
   router.get("/indicateurs", returnResult(getIndicateursMissionLocale));
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
+  router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   router.get("/organismes", returnResult(getOrganismesMissionLocale));
@@ -73,4 +75,11 @@ const getEffectifsParMoisMissionLocale = async ({ query }, { locals }) => {
   const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   return await getEffectifsParMoisByMissionLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+};
+
+const getEffectifMissionLocale = async ({ params }, { locals }) => {
+  const effectifId = params.id;
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+
+  return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
 };
