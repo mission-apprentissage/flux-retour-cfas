@@ -907,3 +907,22 @@ export const getEffectifFromMissionLocaleId = async (
   }
   return effectif;
 };
+
+export const getEffectifsListByMisisonLocaleId = (missionLocaleId: number, missionLocaleMongoId: ObjectId) => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const effectifsMissionLocaleAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    ...matchTraitementEffectifPipelineMl(API_TRAITEMENT_TYPE.A_TRAITER),
+    {
+      $project: {
+        nom: "$apprenant.nom",
+        prenom: "$apprenant.prenom",
+      },
+    },
+  ];
+
+  return effectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+};

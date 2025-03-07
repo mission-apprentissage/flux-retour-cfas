@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import xlsx from "node-xlsx";
 import { IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
@@ -13,14 +14,17 @@ import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifFromMissionLocaleId,
   getEffectifIndicateursForMissionLocaleId,
+  getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
   getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { formatJsonToXlsx } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -29,8 +33,9 @@ export default () => {
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
-  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
+  router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.get("/organismes", returnResult(getOrganismesMissionLocale));
+  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   return router;
 };
 
@@ -82,4 +87,26 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
+};
+
+const exportEffectifMissionLocale = async (req, res) => {
+  const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
+
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id);
+
+  const worksheet = xlsx.build([
+    { name: "Liste des jeunes à traiter", data: formatJsonToXlsx(effectifList, ["nom", "prenom"]), options: {} },
+  ]);
+  res.attachment(`rupturants_a_traiter-${new Date().toISOString().split("T")[0]}.xlsx`);
+  res.contentType("xlsx");
+  await createTelechargementListeNomLog(
+    "ml_a_traiter",
+    effectifList.map(({ _id }) => _id.toString()),
+    new Date(),
+    req.user?._id,
+    undefined,
+    missionLocale._id
+  );
+
+  return worksheet;
 };

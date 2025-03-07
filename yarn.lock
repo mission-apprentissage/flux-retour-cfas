@@ -13161,6 +13161,7 @@ __metadata:
     lint-staged: ^15.2.10
     next: ^13.5.7
     node-talisman: ^1.29.11
+    node-xlsx: ^0.24.0
     prettier: ^3.3.3
     semantic-release: ^21.1.2
     semantic-release-slack-bot: ^4.0.2
