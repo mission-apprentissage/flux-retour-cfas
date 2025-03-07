@@ -867,6 +867,13 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         },
       },
     },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id",
+        data: 1,
+      },
+    },
   ];
 
   const effectifs = await effectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
