@@ -908,14 +908,19 @@ export const getEffectifFromMissionLocaleId = async (
   return effectif;
 };
 
-export const getEffectifsListByMisisonLocaleId = (missionLocaleId: number, missionLocaleMongoId: ObjectId) => {
+export const getEffectifsListByMisisonLocaleId = (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
+  const { type } = effectifsParMoisFiltersMissionLocale;
   const effectifsMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
-    ...matchTraitementEffectifPipelineMl(API_TRAITEMENT_TYPE.A_TRAITER),
+    ...matchTraitementEffectifPipelineMl(type),
     {
       $project: {
         nom: "$apprenant.nom",

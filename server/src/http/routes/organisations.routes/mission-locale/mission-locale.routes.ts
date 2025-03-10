@@ -2,7 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import xlsx from "node-xlsx";
-import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -89,21 +89,41 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
 };
 
-const exportEffectifMissionLocale = async (req, res) => {
+const exportEffectifMissionLocale = async ({ query, user }, res) => {
+  const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
   const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id, filters);
 
-  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id);
+  const computeFileName = (
+    t: API_TRAITEMENT_TYPE
+  ): { worksheetName: string; fileName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+    switch (t) {
+      case API_TRAITEMENT_TYPE.A_TRAITER:
+        return {
+          worksheetName: "Liste des jeunes à traiter",
+          fileName: "rupturants_a_traiter",
+          logsTag: "ml_a_traiter",
+        };
+      case API_TRAITEMENT_TYPE.TRAITE:
+        return {
+          worksheetName: "Liste des jeunes déjà traité",
+          fileName: "rupturants_traite",
+          logsTag: "ml_traite",
+        };
+    }
+  };
 
+  const fileInfo = computeFileName(filters.type);
   const worksheet = xlsx.build([
-    { name: "Liste des jeunes à traiter", data: formatJsonToXlsx(effectifList, ["nom", "prenom"]), options: {} },
+    { name: fileInfo.worksheetName, data: formatJsonToXlsx(effectifList, ["nom", "prenom"]), options: {} },
   ]);
-  res.attachment(`rupturants_a_traiter-${new Date().toISOString().split("T")[0]}.xlsx`);
+  res.attachment(`${fileInfo.fileName}-${new Date().toISOString().split("T")[0]}.xlsx`);
   res.contentType("xlsx");
   await createTelechargementListeNomLog(
-    "ml_a_traiter",
+    fileInfo.logsTag,
     effectifList.map(({ _id }) => _id.toString()),
     new Date(),
-    req.user?._id,
+    user?._id,
     undefined,
     missionLocale._id
   );

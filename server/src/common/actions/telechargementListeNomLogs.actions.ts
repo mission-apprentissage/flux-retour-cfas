@@ -18,7 +18,8 @@ export const createTelechargementListeNomLog = async (
     | "organismes_siret_ferme"
     | "organismes_uai_non_determine"
     | "sifa"
-    | "ml_a_traiter",
+    | "ml_a_traiter"
+    | "ml_traite",
   elementList: string[],
   date: Date,
   userId: ObjectId,
