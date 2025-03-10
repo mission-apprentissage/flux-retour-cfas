@@ -5,7 +5,7 @@ export const up = async () => {
   const organismes = await organismesDb().find({}).toArray();
   const organismeLookup = new Map(organismes.map((o) => [o._id.toHexString(), o]));
 
-  const cursor = effectifsDb().find({}, { sort: { transmitted_at: 1, updated_at: 1 } });
+  const cursor = effectifsDb().find({}, { sort: { transmitted_at: 1, updated_at: 1 }, timeout: false });
 
   let counter = 0;
   for await (const effectif of cursor) {
