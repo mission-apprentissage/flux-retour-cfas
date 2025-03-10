@@ -1,7 +1,8 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import xlsx from "node-xlsx";
+import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -13,14 +14,17 @@ import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifFromMissionLocaleId,
   getEffectifIndicateursForMissionLocaleId,
+  getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
   getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { formatJsonToXlsx } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -29,8 +33,9 @@ export default () => {
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
-  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
+  router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.get("/organismes", returnResult(getOrganismesMissionLocale));
+  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   return router;
 };
 
@@ -82,4 +87,46 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
+};
+
+const exportEffectifMissionLocale = async ({ query, user }, res) => {
+  const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
+  const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+
+  const computeFileName = (
+    t: API_TRAITEMENT_TYPE
+  ): { worksheetName: string; fileName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+    switch (t) {
+      case API_TRAITEMENT_TYPE.A_TRAITER:
+        return {
+          worksheetName: "Liste des jeunes à traiter",
+          fileName: "rupturants_a_traiter",
+          logsTag: "ml_a_traiter",
+        };
+      case API_TRAITEMENT_TYPE.TRAITE:
+        return {
+          worksheetName: "Liste des jeunes déjà traité",
+          fileName: "rupturants_traite",
+          logsTag: "ml_traite",
+        };
+    }
+  };
+
+  const fileInfo = computeFileName(filters.type);
+  const worksheet = xlsx.build([
+    { name: fileInfo.worksheetName, data: formatJsonToXlsx(effectifList, ["nom", "prenom"]), options: {} },
+  ]);
+  res.attachment(`${fileInfo.fileName}-${new Date().toISOString().split("T")[0]}.xlsx`);
+  res.contentType("xlsx");
+  await createTelechargementListeNomLog(
+    fileInfo.logsTag,
+    effectifList.map(({ _id }) => _id.toString()),
+    new Date(),
+    user?._id,
+    undefined,
+    missionLocale._id
+  );
+
+  return worksheet;
 };
