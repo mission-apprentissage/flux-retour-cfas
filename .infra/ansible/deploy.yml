@@ -56,7 +56,7 @@
       when:
         - stack_status.stdout != ""
         - '"migrations-status=synced" not in migration_status_output.stdout_lines'
-      async: 18000
+      async: 43200
       poll: 10
 
     - name: Trigger de la création des indexes

@@ -38,6 +38,7 @@ import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
+import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
@@ -345,6 +346,9 @@ export async function setupJobProcessor() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
         },
+      },
+      "tmp:migrate:effectifs": {
+        handler: migrateEffectifs,
       },
     },
   });

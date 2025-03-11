@@ -39,6 +39,63 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
   "additionalProperties": false,
   "bsonType": "object",
   "properties": {
+    "_computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "statut": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "en_cours": {
+              "bsonType": "string",
+              "enum": [
+                "ABANDON",
+                "PRE_INSCRIT",
+                "INSCRIT",
+                "APPRENTI",
+                "RUPTURANT",
+                "FIN_DE_FORMATION",
+              ],
+            },
+            "parcours": {
+              "bsonType": "array",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "date": {
+                    "bsonType": "date",
+                  },
+                  "valeur": {
+                    "bsonType": "string",
+                    "enum": [
+                      "ABANDON",
+                      "PRE_INSCRIT",
+                      "INSCRIT",
+                      "APPRENTI",
+                      "RUPTURANT",
+                      "FIN_DE_FORMATION",
+                    ],
+                  },
+                },
+                "required": [
+                  "date",
+                  "valeur",
+                ],
+              },
+            },
+          },
+          "required": [
+            "en_cours",
+            "parcours",
+          ],
+        },
+      },
+      "required": [
+        "statut",
+      ],
+    },
     "_id": {
       "bsonType": "objectId",
     },
@@ -285,6 +342,7 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
     "adresse",
     "contrats",
     "derniere_transmission",
+    "_computed",
   ],
 }
 `;
