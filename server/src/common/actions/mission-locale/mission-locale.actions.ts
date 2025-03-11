@@ -269,9 +269,7 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
 const effectifMissionLocaleLookupAggregation = (missionLocaleMongoId: ObjectId) => {
   const A_TRAITER_CONDIITON = {
     $or: [
-      {
-        $ifNull: ["$ml_effectif.situation", false],
-      },
+      { $eq: ["$ml_effectif.situation", "$$REMOVE"] },
       {
         $in: ["$ml_effectif.situation", [SITUATION_ENUM.A_CONTACTER]],
       },
@@ -824,13 +822,16 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
+
+  const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
+
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
-    ...matchTraitementEffectifPipelineMl(type),
+    //...matchTraitementEffectifPipelineMl(type),
     {
       $addFields: {
         firstDayOfMonth: {
@@ -844,21 +845,52 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     {
       $group: {
         _id: "$firstDayOfMonth",
+        truc: {
+          $push: "$$ROOT"
+        },
         data: {
           $push: {
-            id: "$$ROOT._id",
-            nom: "$$ROOT.apprenant.nom",
-            prenom: "$$ROOT.apprenant.prenom",
-            libelle_formation: "$$ROOT.formation.libelle_long",
+            "$cond": [
+              {
+                $eq: ['$$ROOT.a_traiter', aTraiter]
+              },
+              {
+                id: "$$ROOT._id",
+                nom: "$$ROOT.apprenant.nom",
+                prenom: "$$ROOT.apprenant.prenom",
+                libelle_formation: "$$ROOT.formation.libelle_long",
+              },
+              null
+            ],
+            
           },
         },
+         ... (aTraiter ? {
+            treated_count: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ['$$ROOT.a_traiter', false]
+                },
+                1, 
+                0
+              ]
+            }
+          }
+        } : {}),
       },
     },
     {
       $project: {
         _id: 0,
         month: "$_id",
-        data: 1,
+        treated_count: 1,
+        data: {
+          $setDifference: [
+            "$data",
+            [null]
+          ]
+        },
       },
     },
   ];
