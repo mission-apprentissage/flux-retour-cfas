@@ -126,16 +126,6 @@ const matchDernierStatutPipelineMl = (statut): any => {
   };
 };
 
-const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
-  return [
-    {
-      $match: {
-        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
-      },
-    },
-  ];
-};
-
 /**
  * Création des filtres dynamique
  * @param effectifFilters Liste de filtre dynamique
@@ -831,7 +821,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
-    //...matchTraitementEffectifPipelineMl(type),
     {
       $addFields: {
         firstDayOfMonth: {
