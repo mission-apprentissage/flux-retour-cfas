@@ -903,6 +903,33 @@ export const getEffectifFromMissionLocaleId = async (
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
     ...createDernierStatutFieldPipeline(new Date()),
     {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $project: {
         nom: "$apprenant.nom",
         prenom: "$apprenant.prenom",
@@ -917,6 +944,8 @@ export const getEffectifFromMissionLocaleId = async (
         a_traiter: "$a_traiter",
         transmitted_at: "$transmitted_at",
         dernier_statut: "$dernierStatut",
+        organisme: "$organisme",
+        contrats: "$contrats",
       },
     },
   ];

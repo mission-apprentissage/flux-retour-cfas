@@ -18,7 +18,7 @@ const contentSecurityPolicy = `
       img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site https://stats.beta.gouv.fr data:;
       object-src 'none';
       script-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat ${
-        process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval'" : ""
+        process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval' 'unsafe-inline'" : ""
       };
       script-src-attr 'none';
       style-src 'self' https: *.plausible.io 'unsafe-inline';
@@ -33,7 +33,6 @@ const nextConfig = {
   transpilePackages: ["shared"],
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
-  swcMinify: true,
   experimental: {
     outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
     typedRoutes: true,
@@ -75,11 +74,11 @@ const nextConfig = {
         destination: "/reinscription",
         permanent: true,
       },
-      {
-        source: "/mission-locale",
-        destination: "/",
-        permanent: true,
-      },
+      // {
+      //   source: "/mission-locale",
+      //   destination: "/",
+      //   permanent: true,
+      // },
       {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
