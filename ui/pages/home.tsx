@@ -1,16 +1,12 @@
 import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import DashboardMissionLocale from "@/modules/dashboard/DashboardMissionLocale";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
-
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 function DashboardOwnOrganisme() {
   const { organisme } = useOrganisationOrganisme();
@@ -21,10 +17,6 @@ function getDashboardComponent(organisationType: IOrganisationType) {
   switch (organisationType) {
     case "ORGANISME_FORMATION": {
       return <DashboardOwnOrganisme />;
-    }
-
-    case "MISSION_LOCALE": {
-      return <DashboardMissionLocale />;
     }
 
     case "TETE_DE_RESEAU":

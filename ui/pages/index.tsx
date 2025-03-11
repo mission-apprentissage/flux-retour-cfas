@@ -22,7 +22,6 @@ import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 
 import { _get } from "@/common/httpClient";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
 import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
@@ -33,19 +32,6 @@ import { useIndicateurNational } from "@/modules/dashboard/hooks/useIndicateursN
 import { TeamIcon } from "@/modules/dashboard/icons";
 import { TerritoireFilters } from "@/modules/models/effectifs-filters";
 import { LockFill } from "@/theme/components/icons";
-
-export const getServerSideProps = async (context) => {
-  const props = await getAuthServerSideProps(context, false);
-  if (props.auth) {
-    return {
-      redirect: {
-        destination: "/home",
-        permanent: false,
-      },
-    };
-  }
-  return { props };
-};
 
 export default function PublicLandingPage() {
   return (
