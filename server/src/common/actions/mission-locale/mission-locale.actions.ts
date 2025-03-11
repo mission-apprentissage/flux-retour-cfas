@@ -835,13 +835,13 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       $group: {
         _id: "$firstDayOfMonth",
         truc: {
-          $push: "$$ROOT"
+          $push: "$$ROOT",
         },
         data: {
           $push: {
-            "$cond": [
+            $cond: [
               {
-                $eq: ['$$ROOT.a_traiter', aTraiter]
+                $eq: ["$$ROOT.a_traiter", aTraiter],
               },
               {
                 id: "$$ROOT._id",
@@ -849,24 +849,25 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 prenom: "$$ROOT.apprenant.prenom",
                 libelle_formation: "$$ROOT.formation.libelle_long",
               },
-              null
+              null,
             ],
-            
           },
         },
-         ... (aTraiter ? {
-            treated_count: {
-            $sum: {
-              $cond: [
-                {
-                  $eq: ['$$ROOT.a_traiter', false]
+        ...(aTraiter
+          ? {
+              treated_count: {
+                $sum: {
+                  $cond: [
+                    {
+                      $eq: ["$$ROOT.a_traiter", false],
+                    },
+                    1,
+                    0,
+                  ],
                 },
-                1, 
-                0
-              ]
+              },
             }
-          }
-        } : {}),
+          : {}),
       },
     },
     {
@@ -875,10 +876,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         month: "$_id",
         treated_count: 1,
         data: {
-          $setDifference: [
-            "$data",
-            [null]
-          ]
+          $setDifference: ["$data", [null]],
         },
       },
     },
