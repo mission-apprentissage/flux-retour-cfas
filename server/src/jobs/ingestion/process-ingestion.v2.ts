@@ -5,6 +5,7 @@ import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import parentLogger from "@/common/logger";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 import { buildAdresse, type IIngestAdresseUsedFields } from "./adresse/adresse.builder";
 import { ingestEffectifV2, type IIngestEffectifUsedFields } from "./effectif/effectif.ingestion";
@@ -52,10 +53,7 @@ function nullishToOptional<T>(v: T | null | undefined): T | undefined {
   return v ?? undefined;
 }
 
-export async function migrateEffectif(
-  effectif: IEffectif,
-  organismeLookup: Map<string | null | undefined, IOrganisme>
-) {
+async function migrateEffectif(effectif: IEffectif, organismeLookup: Map<string | null | undefined, IOrganisme>) {
   const reponsable = organismeLookup.get(effectif.organisme_responsable_id?.toHexString()) ?? null;
   const formateur = organismeLookup.get(effectif.organisme_id?.toHexString()) ?? null;
 
@@ -155,4 +153,20 @@ export async function migrateEffectif(
       : await buildAdresse(dossier);
 
   return ingestDossier(dossier, adresse, effectif.transmitted_at ?? effectif.updated_at!);
+}
+
+export async function migrateEffectifs() {
+  const organismes = await organismesDb().find({}).toArray();
+  const organismeLookup = new Map(organismes.map((o) => [o._id.toHexString(), o]));
+
+  const cursor = effectifsDb().find({}, { sort: { transmitted_at: 1, updated_at: 1 }, timeout: false });
+
+  let counter = 0;
+  for await (const effectif of cursor) {
+    await migrateEffectif(effectif, organismeLookup);
+    counter++;
+    if (counter % 1_000 === 0) {
+      console.log(`${new Date().toJSON()}: Migrated ${counter} effectifs`);
+    }
+  }
 }
