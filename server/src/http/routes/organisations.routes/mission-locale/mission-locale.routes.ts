@@ -89,8 +89,8 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
 };
 
-const exportEffectifMissionLocale = async ({ query, user }, res) => {
-  const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
+const exportEffectifMissionLocale = async (req, res) => {
+  const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleSchema);
   const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
   const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id, filters);
 
@@ -124,7 +124,7 @@ const exportEffectifMissionLocale = async ({ query, user }, res) => {
     { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => new Date(d) },
     { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
     { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
-    { name: "RQTH", id: "rqth" },
+    { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "") },
     { name: "Ville de résidence", id: "commune" },
     { name: "Code postal de résidence", id: "code_postal" },
     { name: "Téléphone", id: "telephone" },
@@ -153,7 +153,7 @@ const exportEffectifMissionLocale = async ({ query, user }, res) => {
     fileInfo.logsTag,
     effectifList.map(({ _id }) => _id.toString()),
     new Date(),
-    user?._id,
+    req.user?._id,
     undefined,
     missionLocale._id
   );

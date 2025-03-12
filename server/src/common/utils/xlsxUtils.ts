@@ -9,7 +9,7 @@ export const parseLocalXlsx = async (relativePath: string) => {
 export const addSheetToXlscFile = async (
   relativePath: string,
   name: string,
-  columns: Array<{ name: string; id: string; transform?: () => any }>,
+  columns: Array<{ name: string; id: string; transform?: (d: any) => any }>,
   data: Array<any>
 ) => {
   const formattedData = formatJsonToXlsx(data, columns);

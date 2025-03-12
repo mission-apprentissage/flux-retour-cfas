@@ -971,7 +971,7 @@ export const getEffectifsListByMisisonLocaleId = (
         commune: "$apprenant.adresse.commune",
         code_postal: "$apprenant.adresse.code_postal",
         telephone: "$apprenant.telephone",
-        mail: "$apprenant.courriel",
+        email: "$apprenant.courriel",
         email_responsable_1: "$apprenant.responsable_mail1",
         email_responsable_2: "$apprenant.responsable_mail2",
         libelle_formation: "$formation.libelle_long",
