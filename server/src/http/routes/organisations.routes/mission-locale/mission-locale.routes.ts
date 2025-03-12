@@ -1,7 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import xlsx from "node-xlsx";
 import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
@@ -23,8 +22,9 @@ import {
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
+import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { formatJsonToXlsx } from "@/common/utils/xlsxUtils";
+import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -96,28 +96,58 @@ const exportEffectifMissionLocale = async ({ query, user }, res) => {
 
   const computeFileName = (
     t: API_TRAITEMENT_TYPE
-  ): { worksheetName: string; fileName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+  ): { worksheetName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
     switch (t) {
       case API_TRAITEMENT_TYPE.A_TRAITER:
         return {
-          worksheetName: "Liste des jeunes à traiter",
-          fileName: "rupturants_a_traiter",
+          worksheetName: "à traiter (nouveaux)",
           logsTag: "ml_a_traiter",
         };
       case API_TRAITEMENT_TYPE.TRAITE:
         return {
-          worksheetName: "Liste des jeunes déjà traité",
-          fileName: "rupturants_traite",
+          worksheetName: "déjà traités",
           logsTag: "ml_traite",
         };
     }
   };
 
   const fileInfo = computeFileName(filters.type);
-  const worksheet = xlsx.build([
-    { name: fileInfo.worksheetName, data: formatJsonToXlsx(effectifList, ["nom", "prenom"]), options: {} },
-  ]);
-  res.attachment(`${fileInfo.fileName}-${new Date().toISOString().split("T")[0]}.xlsx`);
+  const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+  const columns = [
+    { name: "Date transmission données", id: "transmitted_at" },
+    { name: "Source données", id: "source" },
+    { name: "NOM", id: "nom" },
+    { name: "Prénom", id: "prenom" },
+    { name: "Date rupture contrat", id: "contrat_date_rupture", transform: (d) => new Date(d) },
+    { name: "Date début contrat", id: "contrat_date_debut", transform: (d) => new Date(d) },
+    { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => new Date(d) },
+    { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
+    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "RQTH", id: "rqth" },
+    { name: "Ville de résidence", id: "commune" },
+    { name: "Code postal de résidence", id: "code_postal" },
+    { name: "Téléphone", id: "telephone" },
+    { name: "Email", id: "email" },
+    { name: "Téléphone responsable légal 1", id: "telephone_responsable_1" },
+    { name: "Email responsable légal 1", id: "email_responsable_1" },
+    { name: "Téléphone responsable légal 2", id: "telephone_responsable_2" },
+    { name: "Email responsable légal 2", id: "email_responsable_2" },
+    { name: "Intitulé de la formation", id: "libelle_formation" },
+    { name: "Nom du CFA", id: "organisme_nom" },
+    { name: "Code postal du CFA", id: "organisme_code_postal" },
+    { name: "Téléphone du CFA", id: "organisme_telephone" },
+    { name: "Email du CFA", id: "organisme_email" },
+  ];
+
+  const templateFile = await addSheetToXlscFile(
+    "mission-locale/modele-rupturant-ml.xlsx",
+    fileInfo.worksheetName,
+    columns,
+    effectifList
+  );
+
+  res.attachment(fileName);
   res.contentType("xlsx");
   await createTelechargementListeNomLog(
     fileInfo.logsTag,
@@ -127,6 +157,5 @@ const exportEffectifMissionLocale = async ({ query, user }, res) => {
     undefined,
     missionLocale._id
   );
-
-  return worksheet;
+  return templateFile.xlsx.writeBuffer();
 };
