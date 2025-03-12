@@ -113,6 +113,15 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
   statut.length ? [...createDernierStatutFieldPipeline(date), matchDernierStatutPipelineMl(statut)] : [];
 
+const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
+  return [
+    {
+      $match: {
+        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
+      },
+    },
+  ];
+};
 /**
  * Création du match sur les dernier statuts
  * @param statut Liste de statuts à matcher
