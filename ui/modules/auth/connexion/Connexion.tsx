@@ -40,7 +40,7 @@ const Login = (props) => {
         setOriginConnexionUrl("");
         router.push(originConnexionUrl);
       } else {
-        router.push("/home");
+        router.push("/");
       }
     } catch (err) {
       const errorMessage = err?.json?.data?.message || err.message;

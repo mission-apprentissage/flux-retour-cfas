@@ -126,16 +126,6 @@ const matchDernierStatutPipelineMl = (statut): any => {
   };
 };
 
-const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
-  return [
-    {
-      $match: {
-        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
-      },
-    },
-  ];
-};
-
 /**
  * Création des filtres dynamique
  * @param effectifFilters Liste de filtre dynamique
@@ -269,9 +259,7 @@ const generateUnionWithEffectifDECA = (missionLocaleId: number) => {
 const effectifMissionLocaleLookupAggregation = (missionLocaleMongoId: ObjectId) => {
   const A_TRAITER_CONDIITON = {
     $or: [
-      {
-        $ifNull: ["$ml_effectif.situation", false],
-      },
+      { $eq: ["$ml_effectif.situation", "$$REMOVE"] },
       {
         $in: ["$ml_effectif.situation", [SITUATION_ENUM.A_CONTACTER]],
       },
@@ -824,13 +812,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
+
+  const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
+
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
-    ...matchTraitementEffectifPipelineMl(type),
     {
       $addFields: {
         firstDayOfMonth: {
@@ -844,21 +834,50 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     {
       $group: {
         _id: "$firstDayOfMonth",
+        truc: {
+          $push: "$$ROOT",
+        },
         data: {
           $push: {
-            id: "$$ROOT._id",
-            nom: "$$ROOT.apprenant.nom",
-            prenom: "$$ROOT.apprenant.prenom",
-            libelle_formation: "$$ROOT.formation.libelle_long",
+            $cond: [
+              {
+                $eq: ["$$ROOT.a_traiter", aTraiter],
+              },
+              {
+                id: "$$ROOT._id",
+                nom: "$$ROOT.apprenant.nom",
+                prenom: "$$ROOT.apprenant.prenom",
+                libelle_formation: "$$ROOT.formation.libelle_long",
+              },
+              null,
+            ],
           },
         },
+        ...(aTraiter
+          ? {
+              treated_count: {
+                $sum: {
+                  $cond: [
+                    {
+                      $eq: ["$$ROOT.a_traiter", false],
+                    },
+                    1,
+                    0,
+                  ],
+                },
+              },
+            }
+          : {}),
       },
     },
     {
       $project: {
         _id: 0,
         month: "$_id",
-        data: 1,
+        treated_count: 1,
+        data: {
+          $setDifference: ["$data", [null]],
+        },
       },
     },
   ];
@@ -882,6 +901,33 @@ export const getEffectifFromMissionLocaleId = async (
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
     ...createDernierStatutFieldPipeline(new Date()),
     {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $project: {
         nom: "$apprenant.nom",
         prenom: "$apprenant.prenom",
@@ -896,6 +942,8 @@ export const getEffectifFromMissionLocaleId = async (
         a_traiter: "$a_traiter",
         transmitted_at: "$transmitted_at",
         dernier_statut: "$dernierStatut",
+        organisme: "$organisme",
+        contrats: "$contrats",
       },
     },
   ];
