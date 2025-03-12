@@ -113,6 +113,15 @@ const buildARisqueFilter = (a_risque: boolean | null = false) => [
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
   statut.length ? [...createDernierStatutFieldPipeline(date), matchDernierStatutPipelineMl(statut)] : [];
 
+const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
+  return [
+    {
+      $match: {
+        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
+      },
+    },
+  ];
+};
 /**
  * Création du match sur les dernier statuts
  * @param statut Liste de statuts à matcher
@@ -982,4 +991,80 @@ export const getEffectifFromMissionLocaleId = async (
     throw Boom.notFound();
   }
   return effectif;
+};
+
+export const getEffectifsListByMisisonLocaleId = (
+  missionLocaleId: number,
+  missionLocaleMongoId: ObjectId,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const { type } = effectifsParMoisFiltersMissionLocale;
+  const effectifsMissionLocaleAggregation = [
+    ...generateUnionWithEffectifDECA(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    ...matchTraitementEffectifPipelineMl(type),
+    {
+      $lookup: {
+        from: "organismes",
+        localField: "organisme_id",
+        foreignField: "_id",
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        nom: "$apprenant.nom",
+        prenom: "$apprenant.prenom",
+        transmitted_at: "$transmitted_at",
+        source: "$source",
+        contrat_date_debut: {
+          $getField: {
+            field: "date_debut",
+            input: {
+              $last: "$contrats",
+            },
+          },
+        },
+        contrat_date_rupture: {
+          $getField: {
+            field: "date_rupture",
+            input: {
+              $last: "$contrats",
+            },
+          },
+        },
+        contrat_date_fin: {
+          $getField: {
+            field: "date_fin",
+            input: {
+              $last: "$contrats",
+            },
+          },
+        },
+        date_de_naissance: "$apprenant.date_de_naissance",
+        age: "$apprenant.age",
+        rqth: "$apprenant.rqth",
+        commune: "$apprenant.adresse.commune",
+        code_postal: "$apprenant.adresse.code_postal",
+        telephone: "$apprenant.telephone",
+        email: "$apprenant.courriel",
+        email_responsable_1: "$apprenant.responsable_mail1",
+        email_responsable_2: "$apprenant.responsable_mail2",
+        libelle_formation: "$formation.libelle_long",
+        organisme_nom: "$organisme.nom",
+        organisme_code_postal: "$organisme.adresse.code_postal",
+      },
+    },
+  ];
+
+  return effectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };

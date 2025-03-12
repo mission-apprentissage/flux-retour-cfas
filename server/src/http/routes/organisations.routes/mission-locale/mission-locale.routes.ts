@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   effectifsFiltersMissionLocaleSchema,
@@ -13,14 +13,18 @@ import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifFromMissionLocaleId,
   getEffectifIndicateursForMissionLocaleId,
+  getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
   getPaginatedEffectifsByMissionLocaleId,
   getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
+import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -29,8 +33,9 @@ export default () => {
   router.get("/effectifs", returnResult(getEffectifsMissionLocale));
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
-  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
+  router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.get("/organismes", returnResult(getOrganismesMissionLocale));
+  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   return router;
 };
 
@@ -82,4 +87,75 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
+};
+
+const exportEffectifMissionLocale = async (req, res) => {
+  const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleSchema);
+  const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+
+  const computeFileName = (
+    t: API_TRAITEMENT_TYPE
+  ): { worksheetName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+    switch (t) {
+      case API_TRAITEMENT_TYPE.A_TRAITER:
+        return {
+          worksheetName: "à traiter (nouveaux)",
+          logsTag: "ml_a_traiter",
+        };
+      case API_TRAITEMENT_TYPE.TRAITE:
+        return {
+          worksheetName: "déjà traités",
+          logsTag: "ml_traite",
+        };
+    }
+  };
+
+  const fileInfo = computeFileName(filters.type);
+  const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+  const columns = [
+    { name: "Date transmission données", id: "transmitted_at" },
+    { name: "Source données", id: "source" },
+    { name: "NOM", id: "nom" },
+    { name: "Prénom", id: "prenom" },
+    { name: "Date rupture contrat", id: "contrat_date_rupture", transform: (d) => new Date(d) },
+    { name: "Date début contrat", id: "contrat_date_debut", transform: (d) => new Date(d) },
+    { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => new Date(d) },
+    { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
+    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "") },
+    { name: "Ville de résidence", id: "commune" },
+    { name: "Code postal de résidence", id: "code_postal" },
+    { name: "Téléphone", id: "telephone" },
+    { name: "Email", id: "email" },
+    { name: "Téléphone responsable légal 1", id: "telephone_responsable_1" },
+    { name: "Email responsable légal 1", id: "email_responsable_1" },
+    { name: "Téléphone responsable légal 2", id: "telephone_responsable_2" },
+    { name: "Email responsable légal 2", id: "email_responsable_2" },
+    { name: "Intitulé de la formation", id: "libelle_formation" },
+    { name: "Nom du CFA", id: "organisme_nom" },
+    { name: "Code postal du CFA", id: "organisme_code_postal" },
+    { name: "Téléphone du CFA", id: "organisme_telephone" },
+    { name: "Email du CFA", id: "organisme_email" },
+  ];
+
+  const templateFile = await addSheetToXlscFile(
+    "mission-locale/modele-rupturant-ml.xlsx",
+    fileInfo.worksheetName,
+    columns,
+    effectifList
+  );
+
+  res.attachment(fileName);
+  res.contentType("xlsx");
+  await createTelechargementListeNomLog(
+    fileInfo.logsTag,
+    effectifList.map(({ _id }) => _id.toString()),
+    new Date(),
+    req.user?._id,
+    undefined,
+    missionLocale._id
+  );
+  return templateFile.xlsx.writeBuffer();
 };
