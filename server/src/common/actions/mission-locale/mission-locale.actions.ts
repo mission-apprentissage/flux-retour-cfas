@@ -815,12 +815,30 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
 
+  const getFirstDayOfPreviousSixMonths = () => {
+    const dates: string[] = [];
+    const today: Date = new Date();
+
+    for (let i = 0; i < 6; i++) {
+      const date: Date = new Date(Date.UTC(today.getFullYear(), today.getMonth() - i, 1));
+      const formatted: string = date.toISOString();
+      dates.push(formatted);
+    }
+
+    return dates;
+  };
+
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const organismeMissionLocaleAggregation = [
     ...generateUnionWithEffectifDECA(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...effectifMissionLocaleLookupAggregation(missionLocaleMongoId),
+    {
+      $match: {
+        "dernierStatut.date": { $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)) },
+      },
+    },
     {
       $addFields: {
         firstDayOfMonth: {
@@ -883,7 +901,17 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   ];
 
   const effectifs = await effectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
-  return { type, data: effectifs };
+  const formattedData = getFirstDayOfPreviousSixMonths().map((date) => {
+    const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
+    return (
+      found ?? {
+        month: date,
+        ...(aTraiter ? { treated_count: 0 } : {}),
+        data: [],
+      }
+    );
+  });
+  return { type, data: formattedData };
 };
 
 export const getEffectifFromMissionLocaleId = async (
