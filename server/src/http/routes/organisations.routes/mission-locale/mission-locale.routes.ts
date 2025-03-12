@@ -3,20 +3,12 @@ import { ObjectId } from "bson";
 import express from "express";
 import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import {
-  effectifsFiltersMissionLocaleSchema,
-  effectifsParMoisFiltersMissionLocaleSchema,
-} from "shared/models/routes/mission-locale/missionLocale.api";
-import { withPaginationSchema } from "shared/models/routes/pagination";
+import { effectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 
-import { dateFiltersSchema } from "@/common/actions/helpers/filters";
 import {
   getEffectifFromMissionLocaleId,
-  getEffectifIndicateursForMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
-  getPaginatedEffectifsByMissionLocaleId,
-  getPaginatedOrganismesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -29,26 +21,11 @@ import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
   const router = express.Router();
-  router.get("/indicateurs", returnResult(getIndicateursMissionLocale));
-  router.get("/effectifs", returnResult(getEffectifsMissionLocale));
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
-  router.get("/organismes", returnResult(getOrganismesMissionLocale));
   router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
   return router;
-};
-
-const getIndicateursMissionLocale = async (req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-  return await getEffectifIndicateursForMissionLocaleId(filters, missionLocale.ml_id);
-};
-
-const getEffectifsMissionLocale = async ({ query }, { locals }) => {
-  const filters = await validateFullZodObjectSchema(query, withPaginationSchema(effectifsFiltersMissionLocaleSchema));
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  return await getPaginatedEffectifsByMissionLocaleId(missionLocale.ml_id, missionLocale._id, filters);
 };
 
 const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
@@ -68,12 +45,6 @@ const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
     throw Boom.forbidden("Accès non autorisé");
   }
   return await setEffectifMissionLocaleData(missionLocale._id, data);
-};
-
-const getOrganismesMissionLocale = async (req, { locals }) => {
-  const filters = await validateFullZodObjectSchema(req.query, withPaginationSchema({}));
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  return await getPaginatedOrganismesByMissionLocaleId(missionLocale.ml_id, filters);
 };
 
 const getEffectifsParMoisMissionLocale = async ({ query }, { locals }) => {

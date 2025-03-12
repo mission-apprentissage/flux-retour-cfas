@@ -22,6 +22,7 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -432,9 +433,11 @@ const createOrUpdateEffectif = async (
           $set: mergedEffectif,
         }
       );
+      await createMissionLocaleSnapshot(effectifDb, effectifDb._id);
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
+      await createMissionLocaleSnapshot(effectifDb, insertedId);
       await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
     }
 

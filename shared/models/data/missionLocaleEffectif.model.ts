@@ -2,6 +2,9 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { zEffectif } from "./effectifs.model";
+import { zEffectifDECA } from "./effectifsDECA.model";
+
 const collectionName = "missionLocaleEffectif";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
@@ -74,6 +77,8 @@ const zMissionLocaleEffectif = z.object({
   statut_reel_text: z.string().max(150).optional(),
   inscrit_france_travail: z.nativeEnum(INSCRIPTION_FRANCE_TRAVAIL).optional(),
   commentaires: z.string().max(200).optional(),
+  effectif_snapshot: zEffectif.or(zEffectifDECA),
+  effectif_snapshot_date: z.date().optional(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
