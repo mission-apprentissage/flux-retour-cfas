@@ -109,7 +109,7 @@ async function upsertEffectifDeca(
     try {
       const id = new ObjectId();
       await effectifsDECADb().insertOne({ ...effectif, _id: id });
-      await createMissionLocaleSnapshot(effectif, id);
+      await createMissionLocaleSnapshot({ ...effectif, _id: id });
       count.created++;
     } catch (err) {
       // Le code d'erreur 11000 correspond à une duplication d'index unique
@@ -119,8 +119,9 @@ async function upsertEffectifDeca(
       }
     }
   } else {
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at: new Date() });
-    await createMissionLocaleSnapshot(effectif, effectifFound._id);
+    const transmitted_at = new Date();
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at });
+    await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
     count.updated++;
   }
 }

@@ -569,8 +569,9 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
 };
 
 export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
-  const ageFilter =
-    effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26));
+  const ageFilter = effectif?.apprenant?.date_de_naissance
+    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
+    : false;
   const rqthFilter = effectif.apprenant.rqth;
   const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
