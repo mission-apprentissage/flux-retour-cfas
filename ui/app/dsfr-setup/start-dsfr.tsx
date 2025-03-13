@@ -1,3 +1,5 @@
+"use client";
+
 import { startReactDsfr } from "@codegouvfr/react-dsfr/next-appdir";
 import Link from "next/link";
 

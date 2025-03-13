@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
@@ -11,6 +12,8 @@ import { Footer } from "./_components/Footer";
 import { Header } from "./_components/Header";
 import { defaultColorScheme } from "./dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./dsfr-setup/start-dsfr";
+
+import "./global.css";
 
 export default function RootLayout({ children }: { children: JSX.Element }) {
   return (
@@ -39,7 +42,18 @@ export default function RootLayout({ children }: { children: JSX.Element }) {
           <AppRouterCacheProvider>
             <DsfrProvider>
               <Header />
-              {children}
+              <div
+                style={{
+                  flex: 1,
+                  margin: "auto",
+                  maxWidth: 1232,
+                  ...fr.spacing("padding", {
+                    topBottom: "10v",
+                  }),
+                }}
+              >
+                {children}
+              </div>
               <Footer />
             </DsfrProvider>
           </AppRouterCacheProvider>
