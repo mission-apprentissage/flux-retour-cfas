@@ -128,7 +128,7 @@ export const lockEffectif = async (effectif: IEffectif) => {
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated.value as IEffectif;
 };
 
 export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({
