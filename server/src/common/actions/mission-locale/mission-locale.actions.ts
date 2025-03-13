@@ -1,7 +1,7 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { WithoutId } from "mongodb";
+import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IStatutApprenantEnum } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -21,6 +21,60 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 
+import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
+
+/**
+ *    EffectifsDb
+ */
+
+const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
+  {
+    $unionWith: {
+      coll: "effectifsDECA",
+      pipeline: [{ $match: { is_deca_compatible: true } }],
+    },
+  },
+  {
+    $match: {
+      $or: [
+        {
+          "apprenant.date_de_naissance": {
+            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
+          },
+        },
+        { "apprenant.rqth": true },
+      ],
+    },
+  },
+  {
+    $match: {
+      "apprenant.adresse.mission_locale_id": missionLocaleId,
+      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+    },
+  },
+];
+
+export const getAllEffectifForMissionLocaleCursor = (
+  mission_locale_id: number
+): AggregationCursor<IEffectif | IEffectifDECA> => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+
+  const effectifsMissionLocaleAggregation = [
+    ...unionWithDecaForMissionLocale(mission_locale_id),
+    ...createDernierStatutFieldPipeline(new Date()),
+    matchDernierStatutPipelineMl(statut),
+    {
+      $unset: ["dernierStatutDureeInDay", "dernierStatut"],
+    },
+  ];
+
+  return effectifsDb().aggregate(effectifsMissionLocaleAggregation);
+};
+
+/**
+ *    MissionLocaleEffectifDb
+ */
+
 /**
  * Filtre constant pour les missions locales
  */
@@ -39,7 +93,7 @@ const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
-const createDernierStatutFieldPipeline = (date: Date) => [
+const createDernierStatutFieldPipelineML = (date: Date) => [
   {
     $addFields: {
       dernierStatut: {
@@ -74,7 +128,7 @@ const createDernierStatutFieldPipeline = (date: Date) => [
  * @returns Une liste de addFields et de match
  */
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length ? [...createDernierStatutFieldPipeline(date), matchDernierStatutPipelineMl(statut)] : [];
+  statut.length ? [...createDernierStatutFieldPipelineML(date), matchDernierStatutPipelineMl(statut)] : [];
 
 const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
   return [
@@ -258,7 +312,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 $eq: ["$$ROOT.a_traiter", aTraiter],
               },
               {
-                id: "$$ROOT._id",
+                id: "$$ROOT.effectif_snapshot._id",
                 nom: "$$ROOT.effectif_snapshot.apprenant.nom",
                 prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
                 libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
@@ -324,7 +378,7 @@ export const getEffectifFromMissionLocaleId = async (
       },
     },
     ...addFieldTraitementStatus(),
-    ...createDernierStatutFieldPipeline(new Date()),
+    ...createDernierStatutFieldPipelineML(new Date()),
     {
       $lookup: {
         from: "organismes",
@@ -514,10 +568,7 @@ export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, da
   return updated;
 };
 
-export const createMissionLocaleSnapshot = async (
-  effectif: WithoutId<IEffectif> | WithoutId<IEffectifDECA>,
-  id: ObjectId
-) => {
+export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const ageFilter =
     effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26));
   const rqthFilter = effectif.apprenant.rqth;
@@ -529,15 +580,16 @@ export const createMissionLocaleSnapshot = async (
       type: "MISSION_LOCALE",
       ml_id: effectif.apprenant.adresse?.mission_locale_id,
     });
+
     if (mlData) {
-      missionLocaleEffectifsDb().findOneAndUpdate(
+      await missionLocaleEffectifsDb().findOneAndUpdate(
         {
           mission_locale_id: mlData?._id,
-          effectif_id: id,
+          effectif_id: effectif._id,
         },
         {
           $setOnInsert: {
-            effectif_snapshot: { ...effectif, _id: id },
+            effectif_snapshot: { ...effectif, _id: effectif._id },
             effectif_snapshot_date: new Date(),
           },
         },
