@@ -3,23 +3,16 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif, IStatutApprenantEnum } from "shared/models";
+import { IEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { API_TRAITEMENT_TYPE, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
 import logger from "@/common/logger";
-import {
-  effectifsDb,
-  effectifsDECADb,
-  missionLocaleEffectifsDb,
-  missionLocaleEffectifsLogsDb,
-  organisationsDb,
-  usersMigrationDb,
-} from "@/common/model/collections";
+import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 
@@ -167,14 +160,7 @@ const generateMissionLocaleMatchStage = (missionLocaleId: ObjectId) => {
 };
 
 const addFieldTraitementStatus = () => {
-  const A_TRAITER_CONDIITON = {
-    $or: [
-      { $eq: ["$situation", "$$REMOVE"] },
-      {
-        $in: ["$situation", [SITUATION_ENUM.A_CONTACTER]],
-      },
-    ],
-  };
+  const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
 
   return [
     {
@@ -418,11 +404,15 @@ export const getEffectifFromMissionLocaleId = async (
         responsable_mail: "$effectif_snapshot.apprenant.responsable_apprenant_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
         //form_effectif: "$effectif_snapshot.ml_effectif", TODO
-        a_traiter: "$effectif_snapshot.a_traiter",
+        a_traiter: "$a_traiter",
         transmitted_at: "$effectif_snapshot.transmitted_at",
         dernier_statut: "$dernierStatut",
         organisme: "$organisme",
         contrats: "$effectif_snapshot.contrats",
+        situation: "$situation",
+        situation_autre: "$situation_autre",
+        deja_connu: "$deja_connu",
+        commentaires: "$commentaires",
       },
     },
   ];
@@ -510,60 +500,33 @@ export const getEffectifsListByMisisonLocaleId = (
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
-export const setEffectifMissionLocaleData = async (missionLocaleId: ObjectId, data: IUpdateMissionLocaleEffectif) => {
-  const {
-    effectif_id,
-    situation,
-    statut_reel,
-    statut_reel_text,
-    inscrit_france_travail,
-    commentaires,
-    statut_correct,
-  } = data;
+export const setEffectifMissionLocaleData = async (
+  missionLocaleId: ObjectId,
+  effectifId: ObjectId,
+  data: IUpdateMissionLocaleEffectif
+) => {
+  const { situation, situation_autre, commentaires, deja_connu } = data;
 
   const setObject = {
-    ...(situation !== undefined ? { situation } : {}),
-    ...(statut_reel !== undefined ? { statut_reel } : {}),
-    ...(statut_reel_text !== undefined ? { statut_reel_text } : {}),
-    ...(inscrit_france_travail !== undefined ? { inscrit_france_travail } : {}),
+    situation,
+    deja_connu,
+    ...(situation_autre !== undefined ? { situation_autre } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
-    ...(statut_correct !== undefined && statut_correct !== null ? { statut_correct } : {}),
   };
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
-      effectif_id: new ObjectId(effectif_id),
+      effectif_id: new ObjectId(effectifId),
     },
     {
       $set: {
         ...setObject,
-        ...(situation !== undefined ? { situation_updated_at: new Date() } : {}),
+        updated_at: new Date(),
       },
     },
     { upsert: true, returnDocument: "after" }
   );
-
-  const toUpdateId = updated.lastErrorObject?.upserted || updated.value?._id;
-  let statut: IStatutApprenantEnum | null = null;
-  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(effectif_id) });
-  if (!effectif) {
-    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectif_id) });
-  }
-
-  if (effectif) {
-    statut = effectif._computed?.statut?.en_cours ?? null;
-  }
-
-  if (toUpdateId) {
-    await missionLocaleEffectifsLogsDb().insertOne({
-      created_at: new Date(),
-      _id: new ObjectId(),
-      mission_locale_effectif_id: toUpdateId,
-      payload: setObject,
-      statut,
-    });
-  }
 
   return updated;
 };
@@ -592,6 +555,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
           $setOnInsert: {
             effectif_snapshot: { ...effectif, _id: effectif._id },
             effectif_snapshot_date: new Date(),
+            created_at: new Date(),
           },
         },
         { upsert: true }

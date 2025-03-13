@@ -24,18 +24,19 @@ export default () => {
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
-  router.post("/effectif", returnResult(updateEffectifMissionLocaleData));
+  router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
   return router;
 };
 
-const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
+const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => {
+  const effectifId = params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
 
-  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(data.effectif_id) });
+  let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
 
   if (!effectif) {
-    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(data.effectif_id) });
+    effectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectifId) });
   }
 
   if (!effectif) {
@@ -44,7 +45,7 @@ const updateEffectifMissionLocaleData = async ({ body }, { locals }) => {
   if (effectif.apprenant.adresse?.mission_locale_id?.toString() !== missionLocale.ml_id.toString()) {
     throw Boom.forbidden("Accès non autorisé");
   }
-  return await setEffectifMissionLocaleData(missionLocale._id, data);
+  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
 };
 
 const getEffectifsParMoisMissionLocale = async ({ query }, { locals }) => {

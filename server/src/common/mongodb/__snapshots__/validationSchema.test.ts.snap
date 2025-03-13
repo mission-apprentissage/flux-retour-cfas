@@ -8883,7 +8883,15 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     },
     "commentaires": {
       "bsonType": "string",
-      "maxLength": 200,
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "deja_connu": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
     },
     "effectif_id": {
       "bsonType": "objectId",
@@ -13827,14 +13835,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_snapshot_date": {
       "bsonType": "date",
     },
-    "inscrit_france_travail": {
-      "bsonType": "string",
-      "enum": [
-        "OUI",
-        "NON",
-        "INCONNU",
-      ],
-    },
     "mission_locale_id": {
       "bsonType": "objectId",
     },
@@ -13843,38 +13843,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         {
           "bsonType": "string",
           "enum": [
-            "A_CONTACTER",
-            "CONTACTE",
-            "SUIVI_DEMARRE",
-            "CONTACT_SANS_SUIVI",
-            "INJOIGNABLE",
-            "DEJA_SUIVI",
-            "CONTACTE_AVEC_SUIVI",
-            "NON_CONTACTE",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "situation_updated_at": {
-      "bsonType": "date",
-    },
-    "statut_correct": {
-      "bsonType": "bool",
-    },
-    "statut_reel": {
-      "anyOf": [
-        {
-          "bsonType": "string",
-          "enum": [
-            "CONTRAT_SIGNE_NON_DEMARRE",
-            "CONTRAT_EN_COURS",
-            "RETOUR_EN_VOIE_SCOLAIRE",
-            "ABANDON",
-            "RUPTURE",
-            "DECROCHAGE",
+            "RDV_PRIS",
+            "PAS_BESOIN_SUIVI",
+            "CONTACTE_SANS_RETOUR",
+            "COORDONNEES_INCORRECT",
             "AUTRE",
           ],
         },
@@ -13883,122 +13855,19 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         },
       ],
     },
-    "statut_reel_text": {
+    "situation_autre": {
       "bsonType": "string",
-      "maxLength": 150,
+    },
+    "updated_at": {
+      "bsonType": "date",
     },
   },
   "required": [
     "_id",
     "mission_locale_id",
     "effectif_id",
-    "effectif_snapshot",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for missionLocaleEffectifLogs > missionLocaleEffectifLogs 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "mission_locale_effectif_id": {
-      "bsonType": "objectId",
-    },
-    "payload": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "commentaires": {
-          "bsonType": "string",
-          "maxLength": 200,
-        },
-        "inscrit_france_travail": {
-          "bsonType": "string",
-          "enum": [
-            "OUI",
-            "NON",
-            "INCONNU",
-          ],
-        },
-        "situation": {
-          "anyOf": [
-            {
-              "bsonType": "string",
-              "enum": [
-                "A_CONTACTER",
-                "CONTACTE",
-                "SUIVI_DEMARRE",
-                "CONTACT_SANS_SUIVI",
-                "INJOIGNABLE",
-                "DEJA_SUIVI",
-                "CONTACTE_AVEC_SUIVI",
-                "NON_CONTACTE",
-              ],
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
-        },
-        "statut_correct": {
-          "bsonType": "bool",
-        },
-        "statut_reel": {
-          "anyOf": [
-            {
-              "bsonType": "string",
-              "enum": [
-                "CONTRAT_SIGNE_NON_DEMARRE",
-                "CONTRAT_EN_COURS",
-                "RETOUR_EN_VOIE_SCOLAIRE",
-                "ABANDON",
-                "RUPTURE",
-                "DECROCHAGE",
-                "AUTRE",
-              ],
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
-        },
-        "statut_reel_text": {
-          "bsonType": "string",
-          "maxLength": 150,
-        },
-      },
-    },
-    "statut": {
-      "anyOf": [
-        {
-          "bsonType": "string",
-          "enum": [
-            "ABANDON",
-            "PRE_INSCRIT",
-            "INSCRIT",
-            "APPRENTI",
-            "RUPTURANT",
-            "FIN_DE_FORMATION",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-  },
-  "required": [
-    "_id",
     "created_at",
-    "mission_locale_effectif_id",
-    "payload",
+    "effectif_snapshot",
   ],
 }
 `;
