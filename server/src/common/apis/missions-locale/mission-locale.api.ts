@@ -2,13 +2,10 @@ import zMissionLocaleEffectif, { zSituationEnum } from "shared/models/data/missi
 import { z } from "zod";
 
 export const updateMissionLocaleEffectifApi = {
-  effectif_id: z.string().regex(/^[0-9a-f]{24}$/),
-  situation: zSituationEnum.nullish(),
-  statut_reel: zMissionLocaleEffectif.zod.shape.statut_reel.optional(),
-  statut_reel_text: zMissionLocaleEffectif.zod.shape.statut_reel_text.optional(),
-  inscrit_france_travail: zMissionLocaleEffectif.zod.shape.inscrit_france_travail.optional(),
+  situation: zSituationEnum,
+  situation_autre: zMissionLocaleEffectif.zod.shape.situation_autre.optional(),
   commentaires: zMissionLocaleEffectif.zod.shape.commentaires.optional(),
-  statut_correct: z.boolean().nullish(),
+  deja_connu: z.boolean(),
 };
 
 export type IUpdateMissionLocaleEffectif = z.output<z.ZodObject<typeof updateMissionLocaleEffectifApi>>;
