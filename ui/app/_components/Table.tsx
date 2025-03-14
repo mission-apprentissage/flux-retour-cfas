@@ -1,7 +1,8 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { useState, useEffect, ReactNode, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, ReactNode, useMemo, isValidElement } from "react";
 
 type CellContent = string | number | ReactNode | JSX.Element;
 
@@ -13,6 +14,18 @@ interface TableProps {
   searchTerm?: string;
   searchableColumns?: number[];
   columnWidths?: string[];
+  getRowLink?: (rowIndex: number) => string;
+  className?: string;
+  emptyMessage?: string;
+}
+
+function extractTextFromReactNode(node: ReactNode): string {
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) return node.map(extractTextFromReactNode).join(" ");
+  if (isValidElement(node) && node.props.children) {
+    return extractTextFromReactNode(node.props.children);
+  }
+  return "";
 }
 
 export function Table({
@@ -23,16 +36,18 @@ export function Table({
   searchTerm = "",
   searchableColumns,
   columnWidths,
+  getRowLink,
+  className,
+  emptyMessage = "Aucun élément à afficher",
 }: TableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
   const searchTokens = useMemo(() => {
     if (!searchTerm) return [];
-
     const tokens: string[] = [];
     let currentPhrase = "";
     let inQuotes = false;
-
     for (let i = 0; i < searchTerm.length; i++) {
       const char = searchTerm[i];
       if (char === '"') {
@@ -50,24 +65,20 @@ export function Table({
         currentPhrase += char;
       }
     }
-
     if (currentPhrase.trim()) {
       tokens.push(currentPhrase.trim().toLowerCase());
     }
-
     return tokens.filter((token) => token.length > 0);
   }, [searchTerm]);
 
-  const cellMatchesSearch = (cell: CellContent, tokens: string[]): boolean => {
-    if (typeof cell !== "string") return false;
-    const cellContent = cell.toLowerCase();
+  function cellMatchesSearch(cell: CellContent, tokens: string[]): boolean {
+    const content = extractTextFromReactNode(cell).toLowerCase();
     if (tokens.length === 0) return true;
-    return tokens.every((token) => cellContent.includes(token));
-  };
+    return tokens.every((token) => content.includes(token));
+  }
 
   const filteredData = useMemo(() => {
     if (searchTokens.length === 0) return data;
-
     return data.filter((row) => {
       if (searchableColumns && searchableColumns.length > 0) {
         return searchableColumns.some((colIndex) => {
@@ -103,12 +114,16 @@ export function Table({
     setCurrentPage(page);
   };
 
-  const noSearchResults = searchTokens.length > 0 && filteredData.length === 0;
+  const handleRowClick = (rowIndex: number) => {
+    if (!getRowLink) return;
+    const link = getRowLink(rowIndex);
+    router.push(link);
+  };
 
-  const renderTable = () => {
-    return (
-      <div className="fr-table fr-table--bordered fr-table--layout-fixed no-borders">
-        <table className="fr-table">
+  return (
+    <div className={className}>
+      <div className="fr-table fr-table--layout-fixed fr-table--bordered no-borders">
+        <table id="table-sm">
           <caption>{caption}</caption>
           {columnWidths && columnWidths.length > 0 && (
             <colgroup>
@@ -127,33 +142,42 @@ export function Table({
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, rowIndex) => (
-              <tr key={`row-${rowIndex}`}>
-                {row.map((cell, cellIndex) => (
-                  <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
-                ))}
+            {filteredData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={headers.length || columnWidths?.length || 1}
+                  style={{ textAlign: "left", fontStyle: "italic" }}
+                >
+                  {emptyMessage}
+                </td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((row, rowIndex) => (
+                <tr
+                  key={`row-${rowIndex}`}
+                  style={{ cursor: getRowLink ? "pointer" : "auto" }}
+                  onClick={() => {
+                    if (getRowLink) handleRowClick(rowIndex);
+                  }}
+                  onMouseEnter={(e) => {
+                    if (getRowLink) {
+                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#f5f5f5";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (getRowLink) {
+                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "";
+                    }
+                  }}
+                >
+                  {row.map((cell, cellIndex) => (
+                    <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-      </div>
-    );
-  };
-
-  return (
-    <div className="fr-table-container">
-      <div className="fr-mb-2w">
-        {filteredData.length > 0 ? (
-          renderTable()
-        ) : (
-          <div className="fr-alert fr-alert--info">
-            <p>
-              {noSearchResults
-                ? `Aucun résultat ne correspond à votre recherche "${searchTerm}".`
-                : "Aucune donnée disponible."}
-            </p>
-          </div>
-        )}
       </div>
 
       {filteredData.length > 0 && (

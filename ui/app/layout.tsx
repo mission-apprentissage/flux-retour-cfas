@@ -12,6 +12,7 @@ import { Footer } from "./_components/Footer";
 import { Header } from "./_components/Header";
 import { defaultColorScheme } from "./dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./dsfr-setup/start-dsfr";
+import { Providers } from "./providers";
 
 import "./global.css";
 
@@ -41,20 +42,22 @@ export default function RootLayout({ children }: { children: JSX.Element }) {
         {
           <AppRouterCacheProvider>
             <DsfrProvider>
-              <Header />
-              <div
-                style={{
-                  flex: 1,
-                  margin: "auto",
-                  maxWidth: 1232,
-                  ...fr.spacing("padding", {
-                    topBottom: "10v",
-                  }),
-                }}
-              >
-                {children}
-              </div>
-              <Footer />
+              <Providers>
+                <Header />
+                <div
+                  style={{
+                    flex: 1,
+                    margin: "auto",
+                    maxWidth: 1232,
+                    ...fr.spacing("padding", {
+                      topBottom: "10v",
+                    }),
+                  }}
+                >
+                  {children}
+                </div>
+                <Footer />
+              </Providers>
             </DsfrProvider>
           </AppRouterCacheProvider>
         }

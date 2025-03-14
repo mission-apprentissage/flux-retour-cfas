@@ -2,15 +2,104 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import { Tile } from "@codegouvfr/react-dsfr/Tile";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import format from "date-fns/format/index";
+import { fr } from "date-fns/locale";
+import { useState, useMemo, useEffect } from "react";
+
+import { _get } from "@/common/httpClient";
 
 import { Table } from "../_components/Table";
 
+function formatMonthAndYear(dateString: string) {
+  const date = new Date(dateString);
+  return format(date, "MMMM yyyy", { locale: fr });
+}
+
+function sortDataByMonthDescending(data: any[]) {
+  return [...data].sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime());
+}
+
+function anchorFromLabel(label: string) {
+  return label.replace(/\s/g, "-").toLowerCase();
+}
+
 export default function Page() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeAnchor, setActiveAnchor] = useState("");
+
+  const { data: monthsData } = useQuery(
+    ["effectifs-per-month"],
+    async () => {
+      return await _get(`/api/v1/organisation/mission-locale/effectifs-per-month`, {
+        params: {
+          type: "A_TRAITER",
+        },
+      });
+    },
+    { keepPreviousData: true }
+  );
+
+  const sortedData = useMemo(() => {
+    if (!monthsData?.data) return [];
+    return sortDataByMonthDescending(monthsData.data);
+  }, [monthsData]);
+
+  const totalToTreat = useMemo(() => {
+    if (!sortedData.length) return 0;
+    return sortedData.reduce((acc, item) => acc + item.data.length, 0);
+  }, [sortedData]);
+
+  useEffect(() => {
+    if (sortedData.length > 0 && activeAnchor === "") {
+      const label = formatMonthAndYear(sortedData[0].month);
+      const anchorId = anchorFromLabel(label);
+      setActiveAnchor(anchorId);
+    }
+  }, [sortedData, activeAnchor]);
+
+  const sideMenuItems = useMemo(() => {
+    if (!sortedData.length) return [];
+    return [
+      {
+        text: `A traiter (${totalToTreat})`,
+        expandedByDefault: true,
+        items: sortedData.map((monthItem) => {
+          const label = formatMonthAndYear(monthItem.month);
+          const anchorId = anchorFromLabel(label);
+          return {
+            linkProps: {
+              href: `#${anchorId}`,
+              onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.preventDefault();
+                setActiveAnchor(anchorId);
+                const element = document.getElementById(anchorId);
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              },
+            },
+            text: `${label.charAt(0).toUpperCase() + label.slice(1)} (${monthItem.data.length})`,
+            isActive: activeAnchor === anchorId,
+          };
+        }),
+      },
+      {
+        text: "Déjà traité",
+        linkProps: {
+          href: "#",
+          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            setActiveAnchor("deja-traite");
+          },
+        },
+        isActive: activeAnchor === "deja-traite",
+      },
+    ];
+  }, [sortedData, totalToTreat, activeAnchor]);
 
   return (
     <div className="fr-container">
@@ -25,68 +114,31 @@ export default function Page() {
         }}
       />
 
-      <div className="fr-grid-row fr-mb-2w">
+      <div className="fr-grid-row fr-grid-row--gutters fr-mb-1w fr-items-center">
         <div className="fr-col">
-          <h1 className="fr-h1 fr-text--blue-france">Liste des jeunes en ruptures de contrat</h1>
-          <p className="fr-text--sm fr-mb-3w">
+          <h1 className="fr-h1">Liste des jeunes en ruptures de contrat</h1>
+          <p className="fr-text--sm fr-text--bold fr-mb-1w">
             Nous affichons sur le TBA tous les jeunes ayant un statut de rupture, en les classant par date de rupture
             (du plus récent au plus ancien).
           </p>
+          <p className="fr-text--xs">
+            Sources : CFA et <a href="#">DECA</a>
+          </p>
+        </div>
+        <div
+          className="fr-col-auto fr-text-align--right"
+          style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
+        >
+          <Button iconId="ri-arrow-right-line" iconPosition="right" onClick={function noRefCheck() {}}>
+            Télécharger la liste
+          </Button>
         </div>
       </div>
+      <p className="fr-hr"></p>
 
       <div className="fr-grid-row fr-grid-row--gutters">
         <div className="fr-col-12 fr-col-md-4">
-          <SideMenu
-            align="left"
-            burgerMenuButtonText="Dans cette rubrique"
-            sticky
-            items={[
-              {
-                text: "A traiter (47)",
-                expandedByDefault: true,
-                isActive: true,
-                items: [
-                  {
-                    linkProps: {
-                      href: "#mars-2025",
-                    },
-                    text: "Mars 2025 (5)",
-                  },
-                  {
-                    linkProps: {
-                      href: "#fevrier-2025",
-                    },
-                    text: "Février 2025",
-                  },
-                  {
-                    linkProps: {
-                      href: "#janvier-2025",
-                    },
-                    text: "Janvier 2025",
-                  },
-                  {
-                    linkProps: {
-                      href: "#decembre-2024",
-                    },
-                    text: "Décembre 2024 (30)",
-                  },
-                  {
-                    linkProps: {
-                      href: "#novembre-2024",
-                    },
-                    text: "Novembre 2024",
-                  },
-                ],
-              },
-              {
-                text: "Déjà traité",
-                linkProps: {
-                  href: "#",
-                },
-              },
-            ]}
-          />
+          <SideMenu align="left" burgerMenuButtonText="Dans cette rubrique" sticky items={sideMenuItems} />
         </div>
 
         <div className="fr-col-12 fr-col-md-8">
@@ -94,7 +146,7 @@ export default function Page() {
 
           <div>
             <SearchBar
-              label="Rechercher par nom, prénom ou CFA"
+              label="Rechercher par nom, prénom ou formation"
               renderInput={({ id, className, placeholder }) => (
                 <input
                   id={id}
@@ -108,126 +160,45 @@ export default function Page() {
             />
           </div>
 
-          <div id="mars-2025" className="fr-mb-4w">
-            <Table
-              caption="Mars 2025"
-              data={[
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Lorem ipsum d",
-                  "Lorem ipsu",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Lorem ipsum dolor sit amet consectetur adipisicin",
-                  "Lorem ipsum dolor sit amet consectetur",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Lorem ipsum d",
-                  "Lorem ipsu",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Autre exemple de données",
-                  "Valeur de test",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Données supplémentaires",
-                  "Autre valeur",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Information importante",
-                  "Détail associé",
-                ],
-                [
-                  <Badge key={1} severity="new" small>
-                    Label new
-                  </Badge>,
-                  "Dernier élément",
-                  "Description finale",
-                ],
-              ]}
-              columnWidths={["20%", "40%", "40%"]}
-              searchTerm={searchTerm}
-              searchableColumns={[1, 2]}
-              itemsPerPage={5}
-            />
-          </div>
+          {sortedData.map((monthItem) => {
+            const label = formatMonthAndYear(monthItem.month);
+            const anchorId = anchorFromLabel(label);
+            const dataRows = monthItem.data.map((d: any) => [
+              <div
+                key={`badge-${d.id}`}
+                className="fr-text--bold"
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <Badge key={d.id} severity="new" small>
+                  à traiter
+                </Badge>
+                {`${d.nom} ${d.prenom}`}
+              </div>,
+              <span key={`formation-${d.id}`} className="line-clamp-1">
+                {d.libelle_formation}
+              </span>,
+              <i key={`icon-${d.id}`} className="ri-arrow-right-line"></i>,
+            ]);
 
-          <h4 id="fevrier-2025" className="fr-h4 fr-text--blue-france fr-mb-2w">
-            Février 2025
-          </h4>
-          <div className="fr-mb-4w">
-            <Tile
-              enlargeLinkOrButton
-              imageSvg
-              imageUrl="static/media/city-hall.27b3dc9b.svg"
-              linkProps={{ href: "#" }}
-              orientation="horizontal"
-              small
-              title="Intitulé de la tuile"
-              titleAs="h4"
-              classes={{
-                root: "fr-mb-2w",
-              }}
-            />
-          </div>
-
-          <h4 id="janvier-2025" className="fr-h4 fr-text--blue-france fr-mb-2w">
-            Janvier 2025
-          </h4>
-          <p className="fr-mb-2w">Pas de rupturant à afficher ce mois-ci</p>
-
-          <div id="decembre-2024" className="fr-mb-4w">
-            <Table
-              caption="Décembre 2024"
-              data={[
-                ["Lorem ipsum dolor sit amet consectetur adipisicin", "Lorem ipsum dolor sit amet consectetur"],
-                ["Lorem ipsum d", "Lorem ipsu"],
-                ["Lorem ipsum dolor sit amet consectetur adipisicin", "Lorem ipsum dolor sit amet consectetur"],
-                ["Lorem ipsum d", "Lorem ipsu"],
-                ["Autre exemple de données", "Valeur de test"],
-                ["Données supplémentaires", "Autre valeur"],
-                ["Information importante", "Détail associé"],
-                ["Dernier élément", "Description finale"],
-              ]}
-              searchTerm={searchTerm}
-              itemsPerPage={5}
-            />
-          </div>
-
-          <div id="novembre-2024" className="fr-mb-4w">
-            <Table
-              caption="Novembre 2024"
-              data={[
-                ["Lorem ipsum dolor sit amet consectetur adipisicin", "Lorem ipsum dolor sit amet consectetur"],
-                ["Lorem ipsum d", "Lorem ipsu"],
-                ["Lorem ipsum dolor sit amet consectetur adipisicin", "Lorem ipsum dolor sit amet consectetur"],
-                ["Lorem ipsum d", "Lorem ipsu"],
-                ["Autre exemple de données", "Valeur de test"],
-                ["Données supplémentaires", "Autre valeur"],
-                ["Information importante", "Détail associé"],
-                ["Dernier élément", "Description finale"],
-              ]}
-              searchTerm={searchTerm}
-              itemsPerPage={5}
-            />
-          </div>
+            return (
+              <div key={monthItem.month} id={anchorId} className="fr-mb-4w">
+                <Table
+                  caption={label.charAt(0).toUpperCase() + label.slice(1) + ` (${monthItem.data.length})`}
+                  data={dataRows}
+                  columnWidths={["46%", "46%", "8%"]}
+                  searchTerm={searchTerm}
+                  searchableColumns={[0, 1]}
+                  itemsPerPage={5}
+                  className="fr-pt-1w"
+                  getRowLink={(rowIndex) => {
+                    const item = monthItem.data[rowIndex];
+                    return `/mission-locale/${item.id}`;
+                  }}
+                  emptyMessage="Pas de rupturant à afficher ce mois-ci"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
