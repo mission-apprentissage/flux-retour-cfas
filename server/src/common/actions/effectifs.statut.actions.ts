@@ -144,7 +144,7 @@ const generateUnifiedParcours = (
 
 function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: Date }[]) {
   return parcours
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .sort(sortStatusDate)
     .filter((event, index, array) => index === 0 || event.valeur !== array[index - 1].valeur);
 }
 
@@ -159,9 +159,6 @@ function determineStatutsByContrats(
   const statuts: { valeur: StatutApprenant; date: Date }[] = [];
   const currentDate = evaluationDate || new Date();
   const dateEntree = effectif.formation.date_entree;
-
-  const dateFin = effectif.formation.date_fin ? new Date(effectif.formation.date_fin) : currentDate;
-  const effectiveDateFin = dateFin < currentDate ? dateFin : currentDate;
 
   let contracts =
     effectif.contrats
@@ -199,19 +196,39 @@ function determineStatutsByContrats(
     }
   });
 
-  if (latestRuptureDate && effectiveDateFin.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
+  if (latestRuptureDate && currentDate.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
     statuts.push({
       valeur: STATUT_APPRENANT.ABANDON,
       date: addDaysUTC(latestRuptureDate, 180),
     });
   }
 
-  if (statuts.length === 1 && dateEntree && effectiveDateFin.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
+  if (statuts.length === 1 && dateEntree && currentDate.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
     statuts.push({ valeur: STATUT_APPRENANT.ABANDON, date: addDaysUTC(dateEntree, 90) });
   }
 
   return statuts.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
+
+const sortStatusDate = (a: { valeur: StatutApprenant; date: Date }, b: { valeur: StatutApprenant; date: Date }) => {
+  const statusPriority = {
+    ABANDON: 0,
+    PRE_INSCRIT: 0,
+    INSCRIT: 0,
+    APPRENTI: 0,
+    FIN_DE_FORMATION: 1,
+    RUPTURANT: 2,
+  };
+
+  const aDate = a.date.getTime();
+  const bDate = b.date.getTime();
+
+  if (aDate === bDate) {
+    return statusPriority[a.valeur] - statusPriority[b.valeur];
+  }
+
+  return aDate - bDate;
+};
 
 function determineNewStatutFromHistorique(
   historiqueStatut: IEffectifApprenant["historique_statut"],
