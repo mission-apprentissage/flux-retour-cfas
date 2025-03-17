@@ -5,6 +5,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
+import Grid from "@mui/material/Grid2";
 import { useQuery } from "@tanstack/react-query";
 import format from "date-fns/format/index";
 import { fr } from "date-fns/locale";
@@ -45,6 +46,7 @@ export default function Page() {
     },
     { keepPreviousData: true }
   );
+  console.log("CONSOLE LOG ~ Page ~ monthsData:", monthsData);
 
   const sortedData = useMemo(() => {
     if (!monthsData?.data) return [];
@@ -150,12 +152,17 @@ export default function Page() {
       </div>
       <p className="fr-hr"></p>
 
-      <div className="fr-grid-row fr-grid-row--gutters">
-        <div className="fr-col-12 fr-col-md-4">
-          <SideMenu align="left" burgerMenuButtonText="Dans cette rubrique" sticky items={sideMenuItems} />
-        </div>
-
-        <div className="fr-col-12 fr-col-md-8">
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4} size={3}>
+          <SideMenu
+            align="left"
+            burgerMenuButtonText="Dans cette rubrique"
+            sticky
+            items={sideMenuItems}
+            style={{ paddingRight: 0 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={8} size={9} pl={4}>
           <h2 className="fr-h2 fr-text--blue-france fr-mb-2w">A traiter</h2>
 
           <div>
@@ -213,8 +220,8 @@ export default function Page() {
               </div>
             );
           })}
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
+// eslint-disable-next-line import/no-named-as-default
+import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
@@ -42,22 +44,24 @@ export default function RootLayout({ children }: { children: JSX.Element }) {
         {
           <AppRouterCacheProvider>
             <DsfrProvider>
-              <Providers>
-                <Header />
-                <div
-                  style={{
-                    flex: 1,
-                    margin: "auto",
-                    maxWidth: 1232,
-                    ...fr.spacing("padding", {
-                      topBottom: "10v",
-                    }),
-                  }}
-                >
-                  {children}
-                </div>
-                <Footer />
-              </Providers>
+              <MuiDsfrThemeProvider>
+                <Providers>
+                  <Header />
+                  <div
+                    style={{
+                      flex: 1,
+                      margin: "auto",
+                      maxWidth: 1232,
+                      ...fr.spacing("padding", {
+                        topBottom: "10v",
+                      }),
+                    }}
+                  >
+                    {children}
+                  </div>
+                  <Footer />
+                </Providers>
+              </MuiDsfrThemeProvider>
             </DsfrProvider>
           </AppRouterCacheProvider>
         }

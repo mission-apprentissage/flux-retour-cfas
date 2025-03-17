@@ -16936,9 +16936,9 @@ __metadata:
   linkType: hard
 
 "remixicon@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "remixicon@npm:4.3.0"
-  checksum: bdce2fadea276f0cc46640e62bbd55cbd0f73227debeaaa185223bf86be6815a4a3f78f3b8a889047ac9c03d1fae6a484a25b22ca0452441b7940895583df0c2
+  version: 4.6.0
+  resolution: "remixicon@npm:4.6.0"
+  checksum: 39bb3d4ca8cdffb54afe9cc15313359e356ee9ced7fbd2e2a61a8a1e6d88e2920ded23f427db45a0f24475b7b1a5c16426062c7c2221b96eedd64d162ffd5855
   languageName: node
   linkType: hard
 

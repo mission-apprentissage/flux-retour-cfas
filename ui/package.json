@@ -12,7 +12,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "yarn predev && next dev",
+    "dev": "rm -rf .next && yarn predev && next dev",
     "build": "yarn prebuild && next build --no-lint",
     "typecheck": "tsc --noEmit",
     "predev": "react-dsfr update-icons",
