@@ -36,7 +36,6 @@ export default function Page() {
     },
     { enabled: !!id, keepPreviousData: true }
   );
-  console.log("CONSOLE LOG ~ Page ~ data:", data);
 
   if (isLoading) {
     return <Typography>Chargement…</Typography>;

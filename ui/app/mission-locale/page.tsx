@@ -46,7 +46,6 @@ export default function Page() {
     },
     { keepPreviousData: true }
   );
-  console.log("CONSOLE LOG ~ Page ~ monthsData:", monthsData);
 
   const sortedData = useMemo(() => {
     if (!monthsData?.data) return [];
