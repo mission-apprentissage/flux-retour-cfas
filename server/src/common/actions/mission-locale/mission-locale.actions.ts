@@ -243,7 +243,6 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 }
 
 export const getEffectifsParMoisByMissionLocaleId = async (
-  missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
@@ -270,11 +269,21 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
-    {
-      $match: {
-        "dernierStatut.date": { $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)) },
-      },
-    },
+    ...(aTraiter
+      ? [
+          {
+            $match: {
+              "dernierStatut.date": { $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)) },
+            },
+          },
+        ]
+      : [
+          {
+            $match: {
+              a_traiter: aTraiter,
+            },
+          },
+        ]),
     {
       $addFields: {
         firstDayOfMonth: {
@@ -337,17 +346,19 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   ];
 
   const effectifs = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
-  const formattedData = getFirstDayOfPreviousSixMonths().map((date) => {
-    const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
-    return (
-      found ?? {
-        month: date,
-        ...(aTraiter ? { treated_count: 0 } : {}),
-        data: [],
-      }
-    );
-  });
-  return { type, data: formattedData };
+  const formattedData = aTraiter
+    ? getFirstDayOfPreviousSixMonths().map((date) => {
+        const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
+        return (
+          found ?? {
+            month: date,
+            ...(aTraiter ? { treated_count: 0 } : {}),
+            data: [],
+          }
+        );
+      })
+    : effectifs.sort((a, b) => b.month - a.month);
+  return formattedData;
 };
 
 export const getEffectifFromMissionLocaleId = async (

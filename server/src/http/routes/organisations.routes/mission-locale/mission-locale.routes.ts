@@ -48,10 +48,16 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
 };
 
-const getEffectifsParMoisMissionLocale = async ({ query }, { locals }) => {
-  const filters = await validateFullZodObjectSchema(query, effectifsParMoisFiltersMissionLocaleSchema);
+const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  return await getEffectifsParMoisByMissionLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+  const [a_traiter, traite] = await Promise.all([
+    getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.A_TRAITER }),
+    getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.TRAITE }),
+  ]);
+  return {
+    a_traiter,
+    traite,
+  };
 };
 
 const getEffectifMissionLocale = async ({ params }, { locals }) => {
