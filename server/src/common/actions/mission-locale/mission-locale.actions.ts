@@ -440,7 +440,7 @@ export const getEffectifsListByMisisonLocaleId = (
     {
       $lookup: {
         from: "organismes",
-        localField: "organisme_id",
+        localField: "effectif_snapshot.organisme_id",
         foreignField: "_id",
         as: "organisme",
       },
@@ -453,15 +453,15 @@ export const getEffectifsListByMisisonLocaleId = (
     },
     {
       $project: {
-        nom: "$apprenant.nom",
-        prenom: "$apprenant.prenom",
-        transmitted_at: "$transmitted_at",
-        source: "$source",
+        nom: "$effectif_snapshot.apprenant.nom",
+        prenom: "$effectif_snapshot.apprenant.prenom",
+        transmitted_at: "$effectif_snapshot.transmitted_at",
+        source: "$effectif_snapshot.source",
         contrat_date_debut: {
           $getField: {
             field: "date_debut",
             input: {
-              $last: "$contrats",
+              $last: "$effectif_snapshot.contrats",
             },
           },
         },
@@ -469,7 +469,7 @@ export const getEffectifsListByMisisonLocaleId = (
           $getField: {
             field: "date_rupture",
             input: {
-              $last: "$contrats",
+              $last: "$effectif_snapshot.contrats",
             },
           },
         },
@@ -477,20 +477,19 @@ export const getEffectifsListByMisisonLocaleId = (
           $getField: {
             field: "date_fin",
             input: {
-              $last: "$contrats",
+              $last: "$effectif_snapshot.contrats",
             },
           },
         },
-        date_de_naissance: "$apprenant.date_de_naissance",
-        age: "$apprenant.age",
-        rqth: "$apprenant.rqth",
-        commune: "$apprenant.adresse.commune",
-        code_postal: "$apprenant.adresse.code_postal",
-        telephone: "$apprenant.telephone",
-        email: "$apprenant.courriel",
-        email_responsable_1: "$apprenant.responsable_mail1",
-        email_responsable_2: "$apprenant.responsable_mail2",
-        libelle_formation: "$formation.libelle_long",
+        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+        rqth: "$effectif_snapshot.rqth",
+        commune: "$effectif_snapshot.apprenant.adresse.commune",
+        code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
+        telephone: "$effectif_snapshot.apprenant.telephone",
+        email: "$effectif_snapshot.apprenant.courriel",
+        email_responsable_1: "$effectif_snapshot.apprenant.responsable_mail1",
+        email_responsable_2: "$effectif_snapshot.apprenant.responsable_mail2",
+        libelle_formation: "$effectif_snapshot.formation.libelle_long",
         organisme_nom: "$organisme.nom",
         organisme_code_postal: "$organisme.adresse.code_postal",
       },

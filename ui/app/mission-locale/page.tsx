@@ -8,9 +8,12 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { useQuery } from "@tanstack/react-query";
 import format from "date-fns/format/index";
 import { fr } from "date-fns/locale";
+import mime from "mime";
 import { useState, useMemo, useEffect } from "react";
+import { API_TRAITEMENT_TYPE } from "shared";
 
-import { _get } from "@/common/httpClient";
+import { _get, _getBlob } from "@/common/httpClient";
+import { downloadObject } from "@/common/utils/browser";
 
 import { Table } from "../_components/Table";
 
@@ -101,6 +104,13 @@ export default function Page() {
     ];
   }, [sortedData, totalToTreat, activeAnchor]);
 
+  const onDownloadList = async (type: API_TRAITEMENT_TYPE) => {
+    const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs?type=${type}`);
+    downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
+  };
+
   return (
     <div className="fr-container">
       <Alert
@@ -129,7 +139,11 @@ export default function Page() {
           className="fr-col-auto fr-text-align--right"
           style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
         >
-          <Button iconId="ri-arrow-right-line" iconPosition="right" onClick={function noRefCheck() {}}>
+          <Button
+            iconId="ri-arrow-right-line"
+            iconPosition="right"
+            onClick={() => onDownloadList(API_TRAITEMENT_TYPE.A_TRAITER)}
+          >
             Télécharger la liste
           </Button>
         </div>
