@@ -296,8 +296,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   return index >= 0 && effectifs.length > 1
     ? {
         total: effectifs.length,
-        next: modulo(index + 1, effectifs.length),
-        previous: modulo(index - 1, effectifs.length),
+        next: effectifs[modulo(index + 1, effectifs.length)],
+        previous: effectifs[modulo(index - 1, effectifs.length)],
         currentIndex: index,
       }
     : {
