@@ -10,15 +10,17 @@ import PlausibleProvider from "next-plausible";
 
 import { publicConfig } from "@/config.public";
 
+import { UserContextProvider } from "./_components/context/UserContext";
 import { Footer } from "./_components/Footer";
 import { Header } from "./_components/Header";
+import { getSession } from "./_utils/session.utils";
 import { defaultColorScheme } from "./dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./dsfr-setup/start-dsfr";
 import { Providers } from "./providers";
-
 import "./global.css";
 
-export default function RootLayout({ children }: { children: JSX.Element }) {
+export default async function RootLayout({ children }: { children: JSX.Element }) {
+  const user = await getSession();
   return (
     <html {...getHtmlAttributes({ defaultColorScheme })}>
       <head>
@@ -46,20 +48,22 @@ export default function RootLayout({ children }: { children: JSX.Element }) {
             <DsfrProvider>
               <MuiDsfrThemeProvider>
                 <Providers>
-                  <Header />
-                  <div
-                    style={{
-                      flex: 1,
-                      margin: "auto",
-                      maxWidth: 1232,
-                      ...fr.spacing("padding", {
-                        topBottom: "10v",
-                      }),
-                    }}
-                  >
-                    {children}
-                  </div>
-                  <Footer />
+                  <UserContextProvider user={user}>
+                    <Header />
+                    <div
+                      style={{
+                        flex: 1,
+                        margin: "auto",
+                        maxWidth: 1232,
+                        ...fr.spacing("padding", {
+                          topBottom: "10v",
+                        }),
+                      }}
+                    >
+                      {children}
+                    </div>
+                    <Footer />
+                  </UserContextProvider>
                 </Providers>
               </MuiDsfrThemeProvider>
             </DsfrProvider>

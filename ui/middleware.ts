@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { AuthContext } from "@/common/internal/AuthContext";
+
 import { publicConfig } from "./config.public";
 
 export const config = {
   matcher: ["/:path*"],
 };
 
-async function fetchSession(request: NextRequest) {
+async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   try {
     const cookie = request.cookies.get("flux-retour-cfas-local-jwt");
     if (!cookie) return null;
@@ -23,7 +25,17 @@ async function fetchSession(request: NextRequest) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
+
   const session = await fetchSession(request);
+
+  requestHeaders.set("x-session", JSON.stringify(session));
+
+  const requestNextData = {
+    request: {
+      headers: requestHeaders,
+    },
+  };
 
   if (pathname === "/") {
     if (session) {
@@ -31,7 +43,7 @@ export async function middleware(request: NextRequest) {
         ? NextResponse.redirect(new URL("/mission-locale", request.url))
         : NextResponse.redirect(new URL("/home", request.url));
     }
-    return NextResponse.next();
+    return NextResponse.next(requestNextData);
   }
 
   if (pathname === "/mission-locale") {
@@ -41,8 +53,8 @@ export async function middleware(request: NextRequest) {
     if (session.organisation?.type !== "MISSION_LOCALE") {
       return NextResponse.redirect(new URL("/home", request.url));
     }
-    return NextResponse.next();
+    return NextResponse.next(requestNextData);
   }
 
-  return NextResponse.next();
+  return NextResponse.next(requestNextData);
 }
