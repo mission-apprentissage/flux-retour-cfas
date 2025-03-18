@@ -1,4 +1,7 @@
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
+import { CRISP_FAQ } from "shared";
+
+import { Impersonate } from "./Impersonate";
 
 export function Header() {
   return (
@@ -10,6 +13,7 @@ export function Header() {
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
+      quickAccessItems={[<Impersonate key="impersonate" />]}
       navigation={[
         {
           text: "Mon tableau de bord",
@@ -24,39 +28,12 @@ export function Header() {
           menuLinks: [
             {
               linkProps: {
-                href: "#",
+                href: CRISP_FAQ,
+                target: "_blank",
+                rel: "noopener noreferrer",
               },
-              text: "Lien de navigation",
-            },
-            {
-              linkProps: {
-                href: "#",
-              },
-              text: "Lien de navigation",
-            },
-            {
-              linkProps: {
-                href: "#",
-              },
-              text: "Lien de navigation",
-            },
-            {
-              linkProps: {
-                href: "#",
-              },
-              text: "Lien de navigation",
-            },
-            {
-              linkProps: {
-                href: "#",
-              },
-              text: "Lien de navigation",
-            },
-            {
-              linkProps: {
-                href: "#",
-              },
-              text: "Lien de navigation",
+
+              text: "Centre d’aide",
             },
           ],
         },
