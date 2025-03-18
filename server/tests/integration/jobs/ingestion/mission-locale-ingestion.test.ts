@@ -99,7 +99,6 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
       expect(effectif?.apprenant.adresse?.mission_locale_id).toStrictEqual(609);
 
       const effectifML = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-      console.log(await missionLocaleEffectifsDb().find().toArray());
       expect(effectifML?.effectif_snapshot).toEqual(effectif);
     }
   });
@@ -134,7 +133,6 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     expect(effectif?.apprenant.adresse?.mission_locale_id).toStrictEqual(609);
 
     const effectifML = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-    console.log(await missionLocaleEffectifsDb().find().toArray());
     expect(effectifML?.effectif_snapshot).toEqual(effectif);
 
     // Second ajout
