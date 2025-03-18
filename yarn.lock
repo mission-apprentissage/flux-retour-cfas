@@ -97,6 +97,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.23.8":
+  version: 7.26.10
+  resolution: "@babel/runtime@npm:7.26.10"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: 22d2e0abb86e90de489ab16bb578db6fe2b63a88696db431198b24963749820c723f1982298cdbbea187f7b2b80fb4d98a514faf114ddb2fdc14a4b96277b955
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.25.7":
   version: 7.25.7
   resolution: "@babel/template@npm:7.25.7"
@@ -12912,6 +12921,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"match-sorter@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "match-sorter@npm:8.0.0"
+  dependencies:
+    "@babel/runtime": ^7.23.8
+    remove-accents: 0.5.0
+  checksum: 282aca13d45ffd93f858e8a0f558a405855c4e6cb80eef7f95f3ddf9e67d2fa492278f96f5fa7bda7be5f95cc10dfebb9e04781b9f59de1c92cf94f9c57a68bb
+  languageName: node
+  linkType: hard
+
 "mdast-util-definitions@npm:^5.0.0":
   version: 5.1.2
   resolution: "mdast-util-definitions@npm:5.1.2"
@@ -19316,6 +19335,7 @@ __metadata:
     lodash.range: 3.2.0
     lodash.setwith: 4.3.2
     luxon: ^3.5.0
+    match-sorter: ^8.0.0
     mime: ^4.0.6
     next: ^15.2.1
     next-plausible: ^3.12.2

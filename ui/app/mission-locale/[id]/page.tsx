@@ -28,7 +28,11 @@ export default function Page() {
   const params = useParams();
   const id = params?.id;
 
-  const { data, isLoading, error } = useQuery(
+  const {
+    data: effectifPayload,
+    isLoading,
+    error,
+  } = useQuery(
     ["effectif", id],
     async () => {
       if (!id) return null;
@@ -38,39 +42,37 @@ export default function Page() {
   );
 
   if (isLoading) {
-    return <Typography>Chargement…</Typography>;
+    return null;
   }
-  if (error) {
-    return <Typography>Une erreur est survenue.</Typography>;
+  if (error || !effectifPayload) {
+    return <Typography>Une erreur est survenue ou aucune donnée à afficher.</Typography>;
   }
-  if (!data) {
+
+  const { effectif, total, next, previous, currentIndex } = effectifPayload;
+  if (!effectif) {
     return <Typography>Aucune donnée à afficher.</Typography>;
   }
 
-  const nom = data.nom ?? "";
-  const prenom = data.prenom ?? "";
-  const telephone = data.telephone ?? "";
-  const courriel = data.courriel ?? "";
-  const rqth = data.rqth ? "oui" : "non";
-  const naissance = formatDate(data.date_de_naissance);
-  const age = getAge(data.date_de_naissance);
-  const dateRupture = formatDate(data.contrats?.[0]?.date_rupture);
-  const transmittedAt = formatDate(data.transmitted_at);
-
-  const libelleFormation = data.formation?.libelle_long ?? "";
-  const commune = data.organisme?.adresse?.commune ?? "";
-  const codePostal = data.organisme?.adresse?.code_postal ?? "";
-  const departement = data.organisme?.adresse?.departement ?? "";
-
-  const responsableLegalNom = data.formation?.referent_handicap?.nom ?? "";
-  const responsableLegalPrenom = data.formation?.referent_handicap?.prenom ?? "";
-  const responsableLegalEmail = data.formation?.referent_handicap?.email ?? "";
-
-  const dernierStatutDate = data.dernier_statut?.date;
+  const nom = effectif.nom ?? "";
+  const prenom = effectif.prenom ?? "";
+  const telephone = effectif.telephone ?? "";
+  const courriel = effectif.courriel ?? "";
+  const rqth = effectif.rqth ? "oui" : "non";
+  const naissance = formatDate(effectif.date_de_naissance);
+  const age = getAge(effectif.date_de_naissance);
+  const dateRupture = formatDate(effectif.contrats?.[0]?.date_rupture);
+  const transmittedAt = formatDate(effectif.transmitted_at);
+  const libelleFormation = effectif.formation?.libelle_long ?? "";
+  const commune = effectif.organisme?.adresse?.commune ?? "";
+  const codePostal = effectif.organisme?.adresse?.code_postal ?? "";
+  const departement = effectif.organisme?.adresse?.departement ?? "";
+  const responsableLegalNom = effectif.formation?.referent_handicap?.nom ?? "";
+  const responsableLegalPrenom = effectif.formation?.referent_handicap?.prenom ?? "";
+  const responsableLegalEmail = effectif.formation?.referent_handicap?.email ?? "";
+  const dernierStatutDate = effectif.dernier_statut?.date;
   const displayedMonthYear = getMonthYearFromDate(dernierStatutDate);
-
-  const contrat = data.contrats;
-  const cfaContacts = data.organisme?.contacts_from_referentiel;
+  const contrats = effectif.contrats;
+  const cfaContacts = effectif.organisme?.contacts_from_referentiel;
 
   return (
     <Grid container spacing={2}>
@@ -79,7 +81,6 @@ export default function Page() {
           Retour à la liste
         </DsfrLink>
       </Grid>
-
       <Grid
         size={9}
         pl={4}
@@ -96,18 +97,28 @@ export default function Page() {
           p={2}
           sx={{ border: "1px solid var(--border-default-grey)" }}
         >
-          <DsfrLink href="/mission-locale" arrow="left">
-            Précédent
-          </DsfrLink>
+          {previous ? (
+            <DsfrLink href={`/mission-locale/${previous}`} arrow="left">
+              Précédent
+            </DsfrLink>
+          ) : (
+            <Box />
+          )}
           <Box display="flex" alignItems="center">
-            <Typography fontWeight="bold">Dossier n°12 sur les 13 encore à traiter</Typography>
+            <Typography fontWeight="bold">
+              Dossier n°{currentIndex} sur les {total} encore à traiter
+            </Typography>
             <Typography component="span" sx={{ marginLeft: 1 }}>
               (tous mois confondus)
             </Typography>
           </Box>
-          <DsfrLink href="/mission-locale" arrow="right">
-            Suivant
-          </DsfrLink>
+          {next ? (
+            <DsfrLink href={`/mission-locale/${next}`} arrow="right">
+              Suivant
+            </DsfrLink>
+          ) : (
+            <Box />
+          )}
         </Box>
 
         <Stack direction="column" spacing={2} py={6}>
@@ -132,6 +143,7 @@ export default function Page() {
               </Typography>
             </div>
           </Stack>
+
           <Grid container spacing={2} p={3} sx={{ backgroundColor: "var(--background-default-grey-active)" }}>
             <Grid size={8}>
               <Stack direction="column" spacing={1}>
@@ -160,8 +172,8 @@ export default function Page() {
                 <Box mt={1}>
                   <Stack direction="column" spacing={1}>
                     <Typography fontWeight="bold">Contrat d’apprentissage</Typography>
-                    {contrat?.map((c) => (
-                      <Stack key={c.id} direction="column" spacing={1}>
+                    {contrats?.map((c, idx) => (
+                      <Stack key={idx} direction="column" spacing={1}>
                         <Typography>Date de début : {formatDate(c.date_debut) || "non renseignée"}</Typography>
                         <Typography>Date de fin : {formatDate(c.date_fin) || "non renseignée"}</Typography>
                         <Typography>Cause de rupture : {c.cause_rupture || "non renseignée"}</Typography>
@@ -170,8 +182,8 @@ export default function Page() {
                     <Typography mt={1} fontWeight="bold">
                       Coordonnées du CFA
                     </Typography>
-                    {cfaContacts?.map((contact) => (
-                      <Stack key={contact.id} direction="column" spacing={1}>
+                    {cfaContacts?.map((contact, idx) => (
+                      <Stack key={idx} direction="column" spacing={1}>
                         <Typography>E-mail : {contact.email || "non renseigné"}</Typography>
                       </Stack>
                     ))}

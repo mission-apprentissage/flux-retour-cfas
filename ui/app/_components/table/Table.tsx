@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
+import { matchSorter } from "match-sorter";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, ReactNode, useMemo, isValidElement } from "react";
 
@@ -21,7 +22,9 @@ interface TableProps {
 
 function extractTextFromReactNode(node: ReactNode): string {
   if (typeof node === "string") return node;
-  if (Array.isArray(node)) return node.map(extractTextFromReactNode).join(" ");
+  if (Array.isArray(node)) {
+    return node.map(extractTextFromReactNode).join(" ");
+  }
   if (isValidElement(node) && node.props.children) {
     return extractTextFromReactNode(node.props.children);
   }
@@ -43,52 +46,31 @@ export function Table({
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const searchTokens = useMemo(() => {
-    if (!searchTerm) return [];
-    const tokens: string[] = [];
-    let currentPhrase = "";
-    let inQuotes = false;
-    for (let i = 0; i < searchTerm.length; i++) {
-      const char = searchTerm[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-        if (!inQuotes && currentPhrase.trim()) {
-          tokens.push(currentPhrase.trim().toLowerCase());
-          currentPhrase = "";
-        }
-      } else if (char === " " && !inQuotes) {
-        if (currentPhrase.trim()) {
-          tokens.push(currentPhrase.trim().toLowerCase());
-          currentPhrase = "";
-        }
-      } else {
-        currentPhrase += char;
-      }
-    }
-    if (currentPhrase.trim()) {
-      tokens.push(currentPhrase.trim().toLowerCase());
-    }
-    return tokens.filter((token) => token.length > 0);
-  }, [searchTerm]);
-
-  function cellMatchesSearch(cell: CellContent, tokens: string[]): boolean {
-    const content = extractTextFromReactNode(cell).toLowerCase();
-    if (tokens.length === 0) return true;
-    return tokens.every((token) => content.includes(token));
-  }
-
   const filteredData = useMemo(() => {
-    if (searchTokens.length === 0) return data;
-    return data.filter((row) => {
-      if (searchableColumns && searchableColumns.length > 0) {
-        return searchableColumns.some((colIndex) => {
-          if (colIndex < 0 || colIndex >= row.length) return false;
-          return cellMatchesSearch(row[colIndex], searchTokens);
-        });
-      }
-      return row.some((cell) => cellMatchesSearch(cell, searchTokens));
+    if (!searchTerm) return data;
+
+    const rowsAsObjects = data.map((row, index) => {
+      const columnsToSearch =
+        searchableColumns && searchableColumns.length > 0
+          ? searchableColumns.reduce((acc, colIndex) => {
+              if (colIndex >= 0 && colIndex < row.length) {
+                acc.push(extractTextFromReactNode(row[colIndex]));
+              }
+              return acc;
+            }, [] as string[])
+          : row.map((cell) => extractTextFromReactNode(cell));
+
+      const combinedText = columnsToSearch.join(" ");
+      return {
+        originalIndex: index,
+        row,
+        combinedText,
+      };
     });
-  }, [data, searchTokens, searchableColumns]);
+
+    const matched = matchSorter(rowsAsObjects, searchTerm, { keys: ["combinedText"] });
+    return matched.map((obj) => obj.row);
+  }, [data, searchTerm, searchableColumns]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
@@ -157,7 +139,7 @@ export function Table({
                   key={`row-${rowIndex}`}
                   style={{ cursor: getRowLink ? "pointer" : "auto" }}
                   onClick={() => {
-                    if (getRowLink) handleRowClick(rowIndex);
+                    if (getRowLink) handleRowClick(rowIndex + (currentPage - 1) * itemsPerPage);
                   }}
                   onMouseEnter={(e) => {
                     if (getRowLink) {
