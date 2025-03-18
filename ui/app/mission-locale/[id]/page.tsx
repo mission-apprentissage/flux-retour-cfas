@@ -75,7 +75,7 @@ export default function Page() {
   const cfaContacts = effectif.organisme?.contacts_from_referentiel;
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{ height: "80rem" }}>
       <Grid size={3}>
         <DsfrLink href="/mission-locale" arrow="left">
           Retour à la liste
@@ -98,7 +98,7 @@ export default function Page() {
           sx={{ border: "1px solid var(--border-default-grey)" }}
         >
           {previous ? (
-            <DsfrLink href={`/mission-locale/${previous}`} arrow="left">
+            <DsfrLink href={`/mission-locale/${previous.id}`} arrow="left">
               Précédent
             </DsfrLink>
           ) : (
@@ -106,14 +106,14 @@ export default function Page() {
           )}
           <Box display="flex" alignItems="center">
             <Typography fontWeight="bold">
-              Dossier n°{currentIndex} sur les {total} encore à traiter
+              Dossier n°{currentIndex + 1} sur les {total} encore à traiter
             </Typography>
             <Typography component="span" sx={{ marginLeft: 1 }}>
               (tous mois confondus)
             </Typography>
           </Box>
           {next ? (
-            <DsfrLink href={`/mission-locale/${next}`} arrow="right">
+            <DsfrLink href={`/mission-locale/${next.id}`} arrow="right">
               Suivant
             </DsfrLink>
           ) : (

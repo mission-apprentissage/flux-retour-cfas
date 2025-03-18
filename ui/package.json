@@ -12,10 +12,10 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "rm -rf .next && yarn predev && next dev",
+    "dev": "yarn predev && next dev",
     "build": "yarn prebuild && next build --no-lint",
     "typecheck": "tsc --noEmit",
-    "predev": "react-dsfr update-icons",
+    "predev": "rm -rf .next && react-dsfr update-icons",
     "prebuild": "react-dsfr update-icons"
   },
   "dependencies": {
