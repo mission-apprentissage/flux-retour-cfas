@@ -64,13 +64,13 @@ const getEffectifMissionLocale = async ({ params }, { locals }) => {
   const effectifId = params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale.ml_id, missionLocale._id, effectifId);
+  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
   const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleSchema);
   const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
-  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale.ml_id, missionLocale._id, filters);
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale._id, filters);
 
   const computeFileName = (
     t: API_TRAITEMENT_TYPE

@@ -242,10 +242,76 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
   return contacts;
 }
 
+const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
+  missionLocaleMongoId: ObjectId,
+  aTraiter: boolean,
+  effectifId: ObjectId
+) => {
+  const dateThreshold = new Date();
+  dateThreshold.setMonth(new Date().getMonth() - 5);
+  dateThreshold.setDate(1);
+
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const aggregation = [
+    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...addFieldTraitementStatus(),
+    {
+      $match: {
+        a_traiter: aTraiter,
+      },
+    },
+    ...(aTraiter
+      ? [
+          {
+            $match: {
+              "dernierStatut.date": { $gte: dateThreshold },
+            },
+          },
+        ]
+      : []),
+    {
+      $sort: {
+        "dernierStatut.date": -1,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: "$effectif_snapshot._id",
+        nom: "$effectif_snapshot.apprenant.nom",
+        prenom: "$effectif_snapshot.apprenant.prenom",
+      },
+    },
+  ];
+
+  const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
+  const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
+
+  // Si il n'y a qu'un seul element, pas de next
+
+  return index >= 0 && effectifs.length > 1
+    ? {
+        total: effectifs.length,
+        next: effectifs[(index + 1) % effectifs.length],
+        currentIndex: index,
+      }
+    : {
+        total: effectifs.length,
+        next: null,
+        currentIndex: null,
+      };
+};
+
 export const getEffectifsParMoisByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
+  const dateThreshold = new Date();
+  dateThreshold.setMonth(new Date().getMonth() - 5);
+  dateThreshold.setDate(1);
+
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
@@ -273,7 +339,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       ? [
           {
             $match: {
-              "dernierStatut.date": { $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)) },
+              "dernierStatut.date": { $gte: dateThreshold },
             },
           },
         ]
@@ -284,6 +350,11 @@ export const getEffectifsParMoisByMissionLocaleId = async (
             },
           },
         ]),
+    {
+      $sort: {
+        "dernierStatut.date": -1,
+      },
+    },
     {
       $addFields: {
         firstDayOfMonth: {
@@ -361,13 +432,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   return formattedData;
 };
 
-export const getEffectifFromMissionLocaleId = async (
-  missionLocaleId: number,
-  missionLocaleMongoId: ObjectId,
-  effectifId: string
-) => {
+export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: ObjectId, effectifId: string) => {
   const aggregation = [
-    // ...generateUnionWithEffectifDECA(missionLocaleId),
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     {
       $match: {
@@ -405,6 +471,7 @@ export const getEffectifFromMissionLocaleId = async (
     },
     {
       $project: {
+        _id: "$effectif_snapshot._id",
         nom: "$effectif_snapshot.apprenant.nom",
         prenom: "$effectif_snapshot.apprenant.prenom",
         date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
@@ -427,16 +494,22 @@ export const getEffectifFromMissionLocaleId = async (
       },
     },
   ];
+
   const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
 
   if (!effectif) {
     throw Boom.notFound();
   }
-  return effectif;
+
+  const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
+    missionLocaleMongoId,
+    effectif.a_traiter,
+    new ObjectId(effectifId)
+  );
+  return { effectif, ...next };
 };
 
 export const getEffectifsListByMisisonLocaleId = (
-  missionLocaleId: number,
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
