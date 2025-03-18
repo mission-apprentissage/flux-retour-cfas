@@ -1,7 +1,5 @@
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 
-import { PAGES } from "../_utils/routes.utils";
-
 export function Footer() {
   return (
     <DsfrFooter
@@ -12,100 +10,6 @@ export function Footer() {
         imgUrl: "/images/france_relance.svg",
         orientation: "vertical",
       }}
-      linkList={[
-        {
-          categoryName: "Liens utiles",
-          links: [
-            {
-              linkProps: {
-                href: PAGES.static.faq.getPath(),
-              },
-              text: "FAQ",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.blog.getPath(),
-              },
-              text: "Blog",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.ressources.getPath(),
-              },
-              text: "Ressources",
-            },
-          ],
-        },
-        {
-          categoryName: "Développement",
-          links: [
-            {
-              linkProps: {
-                href: PAGES.static.codeSources.getPath(),
-              },
-              text: "Code source",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.EspaceDeveloppeurs.getPath(),
-              },
-              text: "Espace développeurs",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.metiers.getPath(),
-              },
-              text: "Métiers",
-            },
-          ],
-        },
-        {
-          categoryName: "L'organisation",
-          links: [
-            {
-              linkProps: {
-                href: PAGES.static.aPropos.getPath(),
-              },
-              text: "A propos",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.statistiques.getPath(),
-              },
-              text: "Statistiques",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.contact.getPath(),
-              },
-              text: "Contact",
-            },
-          ],
-        },
-        {
-          categoryName: "Règlement générales des données",
-          links: [
-            {
-              linkProps: {
-                href: PAGES.static.mentionsLegales.getPath(),
-              },
-              text: "Mentions légales",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.politiqueConfidentialite.getPath(),
-              },
-              text: "Politique de confidentialité",
-            },
-            {
-              linkProps: {
-                href: PAGES.static.cgu.getPath(),
-              },
-              text: "Conditions générales d'utilisation",
-            },
-          ],
-        },
-      ]}
     />
   );
 }
