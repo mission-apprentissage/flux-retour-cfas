@@ -289,17 +289,21 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
-  // Si il n'y a qu'un seul element, pas de next
+  // modulo qui gère les valeurs négatives
+  const modulo = (a, b) => ((a % b) + b) % b;
 
+  // Si il n'y a qu'un seul element, pas de next
   return index >= 0 && effectifs.length > 1
     ? {
         total: effectifs.length,
-        next: effectifs[(index + 1) % effectifs.length],
+        next: modulo(index + 1, effectifs.length),
+        previous: modulo(index - 1, effectifs.length),
         currentIndex: index,
       }
     : {
         total: effectifs.length,
         next: null,
+        previous: null,
         currentIndex: null,
       };
 };
