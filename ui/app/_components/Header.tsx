@@ -2,6 +2,7 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { CRISP_FAQ } from "shared";
 
 import { Impersonate } from "./Impersonate";
+import { UserConnectedHeader } from "./UserConnectedHeader";
 
 export function Header() {
   return (
@@ -13,7 +14,7 @@ export function Header() {
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
-      quickAccessItems={[<Impersonate key="impersonate" />]}
+      quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
       navigation={[
         {
           text: "Mon tableau de bord",
