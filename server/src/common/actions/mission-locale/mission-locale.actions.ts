@@ -3,14 +3,13 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif } from "shared/models";
+import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { IUpdateMissionLocaleEffectif } from "@/common/apis/missions-locale/mission-locale.api";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
@@ -475,26 +474,27 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
     },
     {
       $project: {
-        _id: "$effectif_snapshot._id",
+        id: "$effectif_snapshot._id",
         nom: "$effectif_snapshot.apprenant.nom",
         prenom: "$effectif_snapshot.apprenant.prenom",
         date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        adresse: "$effectif_snapshot.adresse",
+        adresse: "$effectif_snapshot.apprenant.adresse",
         formation: "$effectif_snapshot.formation",
         courriel: "$effectif_snapshot.apprenant.courriel",
         telephone: "$effectif_snapshot.apprenant.telephone",
-        responsable_mail: "$effectif_snapshot.apprenant.responsable_apprenant_mail1",
+        responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
         //form_effectif: "$effectif_snapshot.ml_effectif", TODO
         a_traiter: "$a_traiter",
         transmitted_at: "$effectif_snapshot.transmitted_at",
+        source: "$effectif_snapshot.source",
         dernier_statut: "$dernierStatut",
         organisme: "$organisme",
         contrats: "$effectif_snapshot.contrats",
-        situation: "$situation",
-        situation_autre: "$situation_autre",
-        deja_connu: "$deja_connu",
-        commentaires: "$commentaires",
+        "situation.situation": "$situation",
+        "situation.situation_autre": "$situation_autre",
+        "situation.deja_connu": "$deja_connu",
+        "situation.commentaires": "$commentaires",
       },
     },
   ];

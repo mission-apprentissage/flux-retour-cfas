@@ -19,13 +19,14 @@ export const MonthTable = memo(function MonthTable({ monthItem, isTraite, search
   const anchorId = anchorFromLabel(label);
 
   const dataRows = monthItem.data.map((student) => TableRow({ student, isTraite }));
+  const columnWidths = isTraite ? ["30%", "50%", "15%", "5%"] : ["15%", "30%", "50%", "5%"];
 
   return (
     <div id={anchorId} className="fr-mb-4w">
       <Table
         caption={`${label} (${monthItem.data.length})`}
         data={dataRows}
-        columnWidths={["46%", "46%", "8%"]}
+        columnWidths={columnWidths}
         searchTerm={searchTerm}
         searchableColumns={[0, 1]}
         itemsPerPage={5}

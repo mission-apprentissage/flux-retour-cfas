@@ -1,7 +1,12 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { API_TRAITEMENT_TYPE, IEffectif, IOrganisationMissionLocale } from "shared/models";
+import {
+  API_TRAITEMENT_TYPE,
+  IEffectif,
+  IOrganisationMissionLocale,
+  updateMissionLocaleEffectifApi,
+} from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { effectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 
@@ -12,7 +17,6 @@ import {
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { updateMissionLocaleEffectifApi } from "@/common/apis/missions-locale/mission-locale.api";
 import { effectifsDb, effectifsDECADb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";

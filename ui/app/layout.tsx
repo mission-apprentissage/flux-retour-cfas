@@ -13,9 +13,9 @@ import { publicConfig } from "@/config.public";
 import { UserContextProvider } from "./_components/context/UserContext";
 import { Footer } from "./_components/Footer";
 import { Header } from "./_components/Header";
+import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
+import { StartDsfr } from "./_dsfr-setup/start-dsfr";
 import { getSession } from "./_utils/session.utils";
-import { defaultColorScheme } from "./dsfr-setup/default-color-scheme";
-import { StartDsfr } from "./dsfr-setup/start-dsfr";
 import { Providers } from "./providers";
 import "./global.css";
 

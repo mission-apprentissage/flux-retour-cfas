@@ -3,31 +3,38 @@
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import Grid from "@mui/material/Grid2";
 import { useQuery } from "@tanstack/react-query";
-import mime from "mime";
 import { useState, useMemo, useCallback } from "react";
-import { API_TRAITEMENT_TYPE } from "shared";
 
+import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _getBlob } from "@/common/httpClient";
-import { downloadObject } from "@/common/utils/browser";
 
 import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
 import { MonthsData, SelectedSection } from "./_components/types";
 import { anchorFromLabel, formatMonthAndYear, getTotalEffectifs, sortDataByMonthDescending } from "./_components/utils";
 
-export default function Page() {
+function EffectifsDataLoader({ children }: { children: (data: MonthsData) => React.ReactNode }) {
+  const { data } = useQuery<MonthsData>(
+    ["effectifs-per-month"],
+    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
+    {
+      keepPreviousData: true,
+      suspense: true,
+      useErrorBoundary: true,
+    }
+  );
+
+  return <>{children(data || { a_traiter: [], traite: [] })}</>;
+}
+
+function MissionLocaleContent({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
 
-  const { data: effectifsData, isLoading } = useQuery<MonthsData>(
-    ["effectifs-per-month"],
-    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
-    { keepPreviousData: true }
-  );
-
-  const aTraiter = effectifsData?.a_traiter || [];
-  const dejaTraite = effectifsData?.traite || [];
+  const aTraiter = data?.a_traiter || [];
+  const dejaTraite = data?.traite || [];
 
   const sortedDataATraiter = useMemo(() => sortDataByMonthDescending(aTraiter), [aTraiter]);
   const sortedDataTraite = useMemo(() => sortDataByMonthDescending(dejaTraite), [dejaTraite]);
@@ -47,7 +54,6 @@ export default function Page() {
     }
   }, [sortedDataATraiter, sortedDataTraite, selectedSection, activeAnchor]);
 
-  // Event Handlers
   const handleSectionChange = useCallback((newSection: SelectedSection) => {
     setSelectedSection(newSection);
     setActiveAnchor("");
@@ -60,14 +66,6 @@ export default function Page() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   }, []);
-
-  const handleDownload = useCallback(async () => {
-    const type = API_TRAITEMENT_TYPE.A_TRAITER;
-
-    const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
-    const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs?type=${type}`);
-    downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
-  }, [selectedSection]);
 
   const sideMenuItems = useMemo(() => {
     const getItems = (data: any[], section: SelectedSection) => {
@@ -129,27 +127,21 @@ export default function Page() {
     handleSectionChange,
   ]);
 
-  if (isLoading) {
-    return null;
-  }
-
   return (
-    <div className="fr-container">
-      <MLHeader onDownloadClick={handleDownload} />
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={4} size={3}>
+        <SideMenu
+          align="left"
+          burgerMenuButtonText="Dans cette rubrique"
+          sticky
+          items={sideMenuItems}
+          style={{ paddingRight: 0 }}
+        />
+      </Grid>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4} size={3}>
-          <SideMenu
-            align="left"
-            burgerMenuButtonText="Dans cette rubrique"
-            sticky
-            items={sideMenuItems}
-            style={{ paddingRight: 0 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={8} size={9} pl={4}>
-          {selectedSection === "a-traiter" && (
+      <Grid item xs={12} md={8} size={9} pl={4}>
+        {selectedSection === "a-traiter" && (
+          <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="A traiter"
               data={sortedDataATraiter}
@@ -157,9 +149,11 @@ export default function Page() {
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
             />
-          )}
+          </SuspenseWrapper>
+        )}
 
-          {selectedSection === "deja-traite" && (
+        {selectedSection === "deja-traite" && (
+          <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="Déjà traité"
               data={sortedDataTraite}
@@ -167,9 +161,28 @@ export default function Page() {
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
             />
-          )}
-        </Grid>
+          </SuspenseWrapper>
+        )}
       </Grid>
+    </Grid>
+  );
+}
+
+export default function Page() {
+  return (
+    <div className="fr-container">
+      <MLHeader />
+
+      <SuspenseWrapper
+        fallback={<PageWithSidebarSkeleton />}
+        errorFallback={
+          <div className="fr-alert fr-alert--error">
+            <p>Impossible de charger les données. Veuillez réessayer plus tard.</p>
+          </div>
+        }
+      >
+        <EffectifsDataLoader>{(data) => <MissionLocaleContent data={data} />}</EffectifsDataLoader>
+      </SuspenseWrapper>
     </div>
   );
 }
