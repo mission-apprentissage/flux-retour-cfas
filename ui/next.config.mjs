@@ -30,12 +30,13 @@ const contentSecurityPolicy = `
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
   transpilePackages: ["shared"],
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
   experimental: {
+    outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
     typedRoutes: true,
+    instrumentationHook: true,
   },
   output: "standalone",
   sentry: {
@@ -46,10 +47,6 @@ const nextConfig = {
       test: /\.woff2$/,
       type: "asset/resource",
     });
-    // Bson is using top-level await, which is not supported by default in Next.js in client side
-    // Probably related to https://github.com/vercel/next.js/issues/54282
-    config.resolve.alias.bson = path.join(path.dirname(fileURLToPath(import.meta.resolve("bson"))), "bson.cjs");
-
     config.resolve.extensionAlias = {
       ".js": [".ts", ".tsx", ".js", ".jsx"],
       ".mjs": [".mts", ".mjs"],
@@ -57,8 +54,6 @@ const nextConfig = {
     };
     return config;
   },
-
-  // Headers
   async headers() {
     return [
       {
@@ -72,8 +67,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // Redirects
   async redirects() {
     return [
       {
@@ -81,6 +74,11 @@ const nextConfig = {
         destination: "/reinscription",
         permanent: true,
       },
+      // {
+      //   source: "/mission-locale",
+      //   destination: "/",
+      //   permanent: true,
+      // },
       {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
