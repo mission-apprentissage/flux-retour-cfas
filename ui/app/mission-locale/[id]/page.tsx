@@ -173,17 +173,7 @@ export default function Page() {
           borderColor: "var(--border-default-grey)",
         }}
       >
-        <SuspenseWrapper
-          fallback={<RightColumnSkeleton />}
-          errorFallback={
-            <div className="fr-alert fr-alert--error">
-              <p>Une erreur est survenue lors du chargement des données. Veuillez réessayer ultérieurement.</p>
-              <DsfrLink href="/mission-locale" arrow="left">
-                Retour à la liste
-              </DsfrLink>
-            </div>
-          }
-        >
+        <SuspenseWrapper fallback={<RightColumnSkeleton />}>
           <EffectifDataLoader id={id}>
             {(effectifPayload) => (
               <>
