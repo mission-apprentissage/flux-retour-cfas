@@ -17,7 +17,7 @@ const contentSecurityPolicy = `
       frame-src 'self' https://plausible.io https://cfas.apprentissage.beta.gouv.fr https://cfas-recette.apprentissage.beta.gouv.fr https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr https://plugins.crisp.chat;
       img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site https://stats.beta.gouv.fr data:;
       object-src 'none';
-      script-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat ${
+      script-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat https://cfas.apprentissage.beta.gouv.fr https://cfas-recette.apprentissage.beta.gouv.fr https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr ${
         process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval' 'unsafe-inline'" : ""
       };
       script-src-attr 'none';
