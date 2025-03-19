@@ -49,7 +49,7 @@ const CerfaLink = (props: CerfaLinkProps) => {
   const buildUrlWithUtm = () => {
     const url = new URL(CERFA_URL);
     const utmSource = "tdb";
-    const utmCampaign = searchParams.get("utm_campaign");
+    const utmCampaign = searchParams?.get("utm_campaign");
     const utmContent = props.organisme._id;
 
     url.searchParams.set("utm_source", utmSource);
