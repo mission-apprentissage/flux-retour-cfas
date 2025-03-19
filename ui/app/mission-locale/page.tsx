@@ -2,12 +2,13 @@
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import Grid from "@mui/material/Grid2";
-import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useCallback } from "react";
 
 import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _getBlob } from "@/common/httpClient";
+
+import { useClientQuery } from "../_utils/hooks.utils";
 
 import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
@@ -15,7 +16,7 @@ import { MonthsData, SelectedSection } from "./_components/types";
 import { anchorFromLabel, formatMonthAndYear, getTotalEffectifs, sortDataByMonthDescending } from "./_components/utils";
 
 function EffectifsDataLoader({ children }: { children: (data: MonthsData) => React.ReactNode }) {
-  const { data } = useQuery<MonthsData>(
+  const { data } = useClientQuery<MonthsData>(
     ["effectifs-per-month"],
     () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
     {
