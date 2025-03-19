@@ -17,7 +17,7 @@ export const Impersonate = () => {
 
   return (
     <>
-      {user.impersonating && (
+      {user && user.impersonating && (
         <Button
           iconId="ri-logout-box-line"
           style={{ backgroundColor: "var(--background-flat-red-marianne)", color: "white" }}
