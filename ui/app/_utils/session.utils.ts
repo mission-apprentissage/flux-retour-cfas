@@ -2,17 +2,17 @@ import { headers } from "next/headers";
 
 import { AuthContext } from "@/common/internal/AuthContext";
 
-export async function getSession(): Promise<AuthContext | Record<string, never>> {
+export async function getSession(): Promise<AuthContext | null> {
   try {
     const headerStore = await headers();
     const sessionRaw = headerStore.get("x-session");
 
     if (!sessionRaw) {
-      return {};
+      return null;
     }
 
     return JSON.parse(sessionRaw) as AuthContext;
   } catch (error) {
-    return {};
+    return null;
   }
 }
