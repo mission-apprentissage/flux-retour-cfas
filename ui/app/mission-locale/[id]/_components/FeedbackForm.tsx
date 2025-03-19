@@ -147,37 +147,48 @@ export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSav
 function FormActions({ isFormValid, onSave, isSaving, hasSuccess }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
 
+  const handleClick = (type: "saveAndQuit" | "saveAndNext", saveNext: boolean) => {
+    setSelectedButton(type);
+    onSave(saveNext);
+  };
+
   return (
     <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
-      <Button
-        priority="secondary"
+      <SaveButton
+        type="saveAndQuit"
+        selectedButton={selectedButton}
+        isSaving={isSaving}
+        hasSuccess={hasSuccess}
         disabled={!isFormValid || isSaving || hasSuccess}
-        onClick={() => {
-          setSelectedButton("saveAndQuit");
-          onSave(false);
-        }}
+        onClick={() => handleClick("saveAndQuit", false)}
       >
-        {selectedButton === "saveAndQuit"
-          ? renderButtonContent(isSaving, hasSuccess, "Valider et quitter")
-          : "Valider et quitter"}
-      </Button>
-      <Button
-        priority="primary"
+        Valider et quitter
+      </SaveButton>
+      <SaveButton
+        type="saveAndNext"
+        selectedButton={selectedButton}
+        isSaving={isSaving}
+        hasSuccess={hasSuccess}
         disabled={!isFormValid || isSaving || hasSuccess}
-        onClick={() => {
-          setSelectedButton("saveAndNext");
-          onSave(true);
-        }}
+        onClick={() => handleClick("saveAndNext", true)}
       >
-        {selectedButton === "saveAndNext"
-          ? renderButtonContent(isSaving, hasSuccess, "Valider et passer au suivant")
-          : "Valider et passer au suivant"}
-      </Button>
+        Valider et passer au suivant
+      </SaveButton>
     </Stack>
   );
 }
 
-function renderButtonContent(isSaving, hasSuccess, defaultLabel) {
+function SaveButton({ type, selectedButton, isSaving, hasSuccess, disabled, onClick, children }) {
+  const showLoader = selectedButton === type && (isSaving || hasSuccess);
+
+  return (
+    <Button priority={type === "saveAndQuit" ? "secondary" : "primary"} disabled={disabled} onClick={onClick}>
+      {showLoader ? renderButtonContent({ isSaving, hasSuccess, defaultLabel: children }) : children}
+    </Button>
+  );
+}
+
+function renderButtonContent({ isSaving, hasSuccess, defaultLabel }) {
   if (isSaving) {
     return (
       <>

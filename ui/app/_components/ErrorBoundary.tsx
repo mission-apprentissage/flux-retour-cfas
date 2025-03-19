@@ -1,6 +1,4 @@
-"use client";
-
-import { Typography, Button, Box, CircularProgress, Alert } from "@mui/material";
+import { Typography, Button, Box, CircularProgress, Alert, AlertTitle } from "@mui/material";
 import { Component, ReactNode } from "react";
 
 interface ErrorBoundaryProps {
@@ -32,8 +30,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error("Error caught by boundary:", error, errorInfo);
-
-    // Add sentry
   }
 
   handleRetry = async (): Promise<void> => {
@@ -115,9 +111,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           }}
         >
           <Alert severity="error" sx={{ mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              {title}
-            </Typography>
+            <AlertTitle>{title}</AlertTitle>
             <Typography variant="body2">{description}</Typography>
           </Alert>
 
