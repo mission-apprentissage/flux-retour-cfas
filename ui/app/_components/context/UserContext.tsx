@@ -5,7 +5,7 @@ import { createContext, type PropsWithChildren } from "react";
 import { AuthContext } from "@/common/internal/AuthContext";
 
 export type IUserContext = {
-  user?: AuthContext | Record<string, null>;
+  user?: AuthContext | null;
 };
 
 export const UserContext = createContext<any>(null);
