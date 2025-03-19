@@ -10,11 +10,11 @@ export const config = {
 
 async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   try {
-    const cookie = request.cookies.get("flux-retour-cfas-local-jwt");
+    const cookie = request.cookies.get(`flux-retour-cfas-${publicConfig.env}-jwt`);
     if (!cookie) return null;
 
     const response = await fetch(`${publicConfig.baseUrl.replace(/\/$/, "")}/api/v1/session`, {
-      headers: { cookie: `flux-retour-cfas-local-jwt=${cookie.value}` },
+      headers: { cookie: `flux-retour-cfas-${publicConfig.env}-jwt=${cookie.value}` },
     });
     return response.ok ? await response.json() : null;
   } catch {
