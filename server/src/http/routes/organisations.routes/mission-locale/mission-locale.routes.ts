@@ -79,14 +79,14 @@ const exportEffectifMissionLocale = async (req, res) => {
     switch (t) {
       case API_TRAITEMENT_TYPE.A_TRAITER:
         return {
-          worksheetToKeepName: "à traiter",
-          worksheetToDeleteName: "déjà traités",
+          worksheetToKeepName: "À traiter",
+          worksheetToDeleteName: "Déjà traités",
           logsTag: "ml_a_traiter",
         };
       case API_TRAITEMENT_TYPE.TRAITE:
         return {
-          worksheetToKeepName: "déjà traités",
-          worksheetToDeleteName: "à traiter",
+          worksheetToKeepName: "Déjà traités",
+          worksheetToDeleteName: "À traiter",
           logsTag: "ml_traite",
         };
     }
