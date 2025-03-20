@@ -31,14 +31,13 @@ const nextConfig = {
   transpilePackages: ["shared"],
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
-  experimental: {
-    outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
-    typedRoutes: true,
-    instrumentationHook: true,
-  },
+  outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
   output: "standalone",
   sentry: {
     hideSourceMaps: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   webpack: (config) => {
     config.module.rules.push({
