@@ -2,13 +2,13 @@
 
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { useClientQuery } from "@/app/_utils/hooks.utils";
 import { _get, _post } from "@/common/httpClient";
 
 import { EffectifInfo } from "./_components/EffectifInfo";
@@ -17,7 +17,7 @@ import { PageHeader } from "./_components/PageHeader";
 import { RightColumnSkeleton } from "./_components/RightColumnSkeleton";
 
 function EffectifDataLoader({ id, children }: { id: string; children: (data: any) => React.ReactNode }) {
-  const { data } = useClientQuery(
+  const { data } = useQuery(
     ["effectif", id],
     async () => {
       if (!id) return null;
