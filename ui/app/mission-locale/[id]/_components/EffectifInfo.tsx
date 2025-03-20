@@ -58,7 +58,7 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
             Née le {formatDate(effectif.date_de_naissance)} ({getAge(effectif.date_de_naissance) || "?"} ans)
           </Typography>
           <Typography>
-            Réside à {effectif.organisme?.adresse?.commune} ({effectif.organisme?.adresse?.code_postal})
+            Réside à {effectif.adresse?.commune} ({effectif.adresse?.code_postal})
           </Typography>
           <Typography>{effectif.formation?.libelle_long}</Typography>
           <Typography>
