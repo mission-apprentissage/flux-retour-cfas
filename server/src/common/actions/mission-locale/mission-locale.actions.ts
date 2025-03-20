@@ -517,14 +517,29 @@ export const getEffectifsListByMisisonLocaleId = (
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
+  const dateThreshold = new Date();
+  dateThreshold.setMonth(new Date().getMonth() - 5);
+  dateThreshold.setDate(1);
+
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const { type } = effectifsParMoisFiltersMissionLocale;
+  const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
+
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(type),
+    ...(aTraiter
+      ? [
+          {
+            $match: {
+              "dernierStatut.date": { $gte: dateThreshold },
+            },
+          },
+        ]
+      : []),
     {
       $lookup: {
         from: "organismes",
