@@ -106,7 +106,7 @@ export function Table({
     <div className={className}>
       <div className="fr-table fr-table--layout-fixed fr-table--bordered no-borders">
         <table id="table-sm">
-          <caption>{caption}</caption>
+          <caption style={{ color: "var(--text-title-blue-france)" }}>{caption}</caption>
           {columnWidths && columnWidths.length > 0 && (
             <colgroup>
               {columnWidths.map((width, index) => (

@@ -12,7 +12,11 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
       sx={{ border: "1px solid var(--border-default-grey)" }}
     >
       {previous ? (
-        <DsfrLink href={`/mission-locale/${previous.id}`} arrow="left">
+        <DsfrLink
+          href={`/mission-locale/${previous.id}`}
+          arrow="none"
+          className="fr-link--icon-left fr-icon-arrow-left-s-line"
+        >
           Précédent
         </DsfrLink>
       ) : (
@@ -35,7 +39,11 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
       </Box>
 
       {next ? (
-        <DsfrLink href={`/mission-locale/${next.id}`} arrow="right">
+        <DsfrLink
+          href={`/mission-locale/${next.id}`}
+          arrow="none"
+          className="fr-link--icon-right fr-icon-arrow-right-s-line"
+        >
           Suivant
         </DsfrLink>
       ) : (

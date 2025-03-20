@@ -8,6 +8,7 @@ export type EffectifData = {
 export type MonthItem = {
   month: string;
   data: EffectifData[];
+  treated_count?: number;
 };
 
 export type SelectedSection = "a-traiter" | "deja-traite";

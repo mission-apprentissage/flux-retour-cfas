@@ -14,7 +14,7 @@ export function Feedback({ situation }: { situation: IUpdateMissionLocaleEffecti
       </Stack>
 
       <Typography fontWeight="bold" gutterBottom>
-        Ce jeune était déjà connu de votre Mission Locale ?
+        Ce jeune était-il déjà connu de votre Mission Locale ?
       </Typography>
       <Tag>{situation.deja_connu ? "Oui" : "Non"}</Tag>
 

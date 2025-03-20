@@ -12,6 +12,7 @@ type SearchableTableSectionProps = {
   isTraite: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
+  handleSectionChange?: (section: "a-traiter" | "deja-traite") => void;
 };
 
 export const SearchableTableSection = memo(function SearchableTableSection({
@@ -20,10 +21,13 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   isTraite,
   searchTerm,
   onSearchChange,
+  handleSectionChange,
 }: SearchableTableSectionProps) {
   return (
     <div>
-      <h2 className="fr-h2 fr-text--blue-france fr-mb-2w">{title}</h2>
+      <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+        {title}
+      </h2>
       <div>
         <SearchBar
           label="Rechercher par nom, prénom ou formation"
@@ -40,7 +44,13 @@ export const SearchableTableSection = memo(function SearchableTableSection({
         />
       </div>
       {data.map((monthItem) => (
-        <MonthTable key={monthItem.month} monthItem={monthItem} isTraite={isTraite} searchTerm={searchTerm} />
+        <MonthTable
+          key={monthItem.month}
+          monthItem={monthItem}
+          isTraite={isTraite}
+          searchTerm={searchTerm}
+          handleSectionChange={handleSectionChange}
+        />
       ))}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
+import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useCallback } from "react";
@@ -8,6 +9,8 @@ import { useState, useMemo, useCallback } from "react";
 import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _getBlob } from "@/common/httpClient";
+
+import { MlCard } from "../_components/card/MlCard";
 
 import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
@@ -140,6 +143,42 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
       </Grid>
 
       <Grid item xs={12} md={8} size={9} pl={4}>
+        {selectedSection === "a-traiter" && sortedDataATraiter.length === 0 && (
+          <MlCard
+            title="Il n’y pas de nouveaux jeunes à contacter pour le moment"
+            imageSrc="/images/mission-locale-not-treated.svg"
+            imageAlt="Personnes discutant et travaillant devant un tableau"
+            body={
+              <Typography>
+                <strong>Nous vous invitons à vous reconnecter dans 1 semaine</strong> pour prendre connaissance de
+                nouvelles situations.
+              </Typography>
+            }
+          />
+        )}
+
+        {selectedSection === "deja-traite" && sortedDataTraite.length === 0 && (
+          <MlCard
+            title="Vous n’avez traité aucun dossier pour le moment"
+            imageSrc="/images/mission-locale-treated.svg"
+            imageAlt="Personnes discutant et travaillant dans un bureau"
+            body={
+              <Typography>
+                <strong>Nous vous invitons à consulter</strong>{" "}
+                <a
+                  className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
+                  href="#"
+                  onClick={() => {
+                    handleSectionChange("a-traiter");
+                  }}
+                >
+                  les dossiers à traiter
+                </a>
+              </Typography>
+            }
+          />
+        )}
+
         {selectedSection === "a-traiter" && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
@@ -148,6 +187,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
               isTraite={false}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              handleSectionChange={handleSectionChange}
             />
           </SuspenseWrapper>
         )}

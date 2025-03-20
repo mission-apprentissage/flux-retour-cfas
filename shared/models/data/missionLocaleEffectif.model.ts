@@ -26,7 +26,7 @@ export enum API_SITUATION_ENUM {
 export enum SITUATION_LABEL_ENUM {
   RDV_PRIS = "Rendez-vous pris à la Mission Locale",
   PAS_BESOIN_SUIVI = "Pas besoin de suivi",
-  CONTACTE_SANS_RETOUR = "Contacté mais sans retour",
+  CONTACTE_SANS_RETOUR = "Contacté mais sans réponse",
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
   AUTRE = "Autre situation / retour",
 }

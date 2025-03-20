@@ -91,7 +91,7 @@ export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSav
           />
         )}
         <RadioButtons
-          legend="Ce jeune était déjà connu de votre Mission Locale ?"
+          legend="Ce jeune était-il déjà connu de votre Mission Locale ?"
           orientation="horizontal"
           options={[
             {
