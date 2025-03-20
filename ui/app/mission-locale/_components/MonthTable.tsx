@@ -57,7 +57,7 @@ export const MonthTable = memo(function MonthTable({
           data={dataRows}
           columnWidths={columnWidths}
           searchTerm={searchTerm}
-          searchableColumns={[0, 1]}
+          searchableColumns={[0, 1, 2]}
           itemsPerPage={5}
           className="fr-pt-1w"
           getRowLink={(rowIndex) => {

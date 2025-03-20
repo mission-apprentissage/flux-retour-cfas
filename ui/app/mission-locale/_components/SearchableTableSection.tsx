@@ -30,7 +30,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
       </h2>
       <div>
         <SearchBar
-          label="Rechercher par nom, prénom ou formation"
+          label="Rechercher par nom, prénom ou cfa"
           renderInput={({ id, className, placeholder }) => (
             <input
               id={id}
