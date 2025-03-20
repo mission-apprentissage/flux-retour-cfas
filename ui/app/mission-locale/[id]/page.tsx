@@ -117,7 +117,7 @@ function EffectifContent({
     setHasSuccess(true);
     setTimeout(() => {
       if (goNext && next) router.push(`/mission-locale/${next.id}`);
-      else router.push("/mission-locale");
+      else router.push("/mission-locale/validation");
     }, SUCCESS_DISPLAY_TIME);
   }
 

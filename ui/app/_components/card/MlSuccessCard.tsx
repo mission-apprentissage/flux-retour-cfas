@@ -19,7 +19,7 @@ export const MlSuccessCard = ({
     >
       <Box
         component="img"
-        src={"/images/mission-local-valid-tick.svg"}
+        src={"/images/mission-locale-valid-tick.svg"}
         alt={""}
         sx={{
           width: "50px",
