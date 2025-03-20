@@ -78,16 +78,18 @@ const exportEffectifMissionLocale = async (req, res) => {
 
   const computeFileName = (
     t: API_TRAITEMENT_TYPE
-  ): { worksheetName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+  ): { worksheetToKeepName: string; worksheetToDeleteName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
     switch (t) {
       case API_TRAITEMENT_TYPE.A_TRAITER:
         return {
-          worksheetName: "à traiter (nouveaux)",
+          worksheetToKeepName: "à traiter (nouveaux)",
+          worksheetToDeleteName: "déjà traités",
           logsTag: "ml_a_traiter",
         };
       case API_TRAITEMENT_TYPE.TRAITE:
         return {
-          worksheetName: "déjà traités",
+          worksheetToKeepName: "déjà traités",
+          worksheetToDeleteName: "à traiter (nouveaux)",
           logsTag: "ml_traite",
         };
     }
@@ -124,7 +126,8 @@ const exportEffectifMissionLocale = async (req, res) => {
 
   const templateFile = await addSheetToXlscFile(
     "mission-locale/modele-rupturant-ml.xlsx",
-    fileInfo.worksheetName,
+    fileInfo.worksheetToKeepName,
+    fileInfo.worksheetToDeleteName,
     columns,
     effectifList
   );
@@ -139,5 +142,5 @@ const exportEffectifMissionLocale = async (req, res) => {
     undefined,
     missionLocale._id
   );
-  return templateFile.xlsx.writeBuffer();
+  return templateFile?.xlsx.writeBuffer();
 };
