@@ -75,16 +75,18 @@ const exportEffectifMissionLocale = async (req, res) => {
 
   const computeFileName = (
     t: API_TRAITEMENT_TYPE
-  ): { worksheetName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
+  ): { worksheetToKeepName: string; worksheetToDeleteName: string; logsTag: "ml_a_traiter" | "ml_traite" } => {
     switch (t) {
       case API_TRAITEMENT_TYPE.A_TRAITER:
         return {
-          worksheetName: "à traiter (nouveaux)",
+          worksheetToKeepName: "à traiter",
+          worksheetToDeleteName: "déjà traités",
           logsTag: "ml_a_traiter",
         };
       case API_TRAITEMENT_TYPE.TRAITE:
         return {
-          worksheetName: "déjà traités",
+          worksheetToKeepName: "déjà traités",
+          worksheetToDeleteName: "à traiter",
           logsTag: "ml_traite",
         };
     }
@@ -103,7 +105,7 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => new Date(d) },
     { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
     { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
-    { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "") },
+    { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },
     { name: "Code postal de résidence", id: "code_postal" },
     { name: "Téléphone", id: "telephone" },
@@ -121,7 +123,8 @@ const exportEffectifMissionLocale = async (req, res) => {
 
   const templateFile = await addSheetToXlscFile(
     "mission-locale/modele-rupturant-ml.xlsx",
-    fileInfo.worksheetName,
+    fileInfo.worksheetToKeepName,
+    fileInfo.worksheetToDeleteName,
     columns,
     effectifList
   );
@@ -136,5 +139,5 @@ const exportEffectifMissionLocale = async (req, res) => {
     undefined,
     missionLocale._id
   );
-  return templateFile.xlsx.writeBuffer();
+  return templateFile?.xlsx.writeBuffer();
 };

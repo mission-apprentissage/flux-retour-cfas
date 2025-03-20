@@ -570,7 +570,7 @@ export const getEffectifsListByMisisonLocaleId = (
           },
         },
         date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        rqth: "$effectif_snapshot.rqth",
+        rqth: "$effectif_snapshot.apprenant.rqth",
         commune: "$effectif_snapshot.apprenant.adresse.commune",
         code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
         telephone: "$effectif_snapshot.apprenant.telephone",

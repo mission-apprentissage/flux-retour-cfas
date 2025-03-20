@@ -8,13 +8,18 @@ export const parseLocalXlsx = async (relativePath: string) => {
 
 export const addSheetToXlscFile = async (
   relativePath: string,
-  name: string,
+  worksheetToKeepName: string,
+  worksheetToDeleteName: string,
   columns: Array<{ name: string; id: string; transform?: (d: any) => any }>,
   data: Array<any>
 ) => {
   const formattedData = formatJsonToXlsx(data, columns);
   const workbook = await parseLocalXlsx(relativePath);
-  const ws = workbook.addWorksheet(name, { properties: { defaultColWidth: 20 } });
+  const ws = await workbook.getWorksheet(worksheetToKeepName);
+  workbook.removeWorksheet(worksheetToDeleteName);
+  if (!ws) {
+    return null;
+  }
   ws.addRows(formattedData);
   return workbook;
 };
