@@ -89,6 +89,7 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
               <Typography mt={1} fontWeight="bold">
                 Coordonnées du CFA
               </Typography>
+              {effectif.organisme?.nom && <Typography>{effectif.organisme?.nom}</Typography>}
               {effectif.organisme?.contacts_from_referentiel?.map((contact, idx) => (
                 <Stack key={idx} direction="column" spacing={1}>
                   <Typography>E-mail : {contact.email || "non renseigné"}</Typography>
@@ -107,15 +108,17 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
             <Typography>{effectif.courriel || ""}</Typography>
           </Stack>
         </Box>
-        <Box>
-          <Stack direction="column" spacing={1}>
-            <Typography fontWeight="bold">Responsable légal</Typography>
-            <Typography>
-              {effectif.formation?.referent_handicap?.prenom} {effectif.formation?.referent_handicap?.nom}
-            </Typography>
-            <Typography>{effectif.formation?.referent_handicap?.email}</Typography>
-          </Stack>
-        </Box>
+        {effectif.formation?.referent_handicap && (
+          <Box>
+            <Stack direction="column" spacing={1}>
+              <Typography fontWeight="bold">Responsable légal</Typography>
+              <Typography>
+                {effectif.formation?.referent_handicap?.prenom} {effectif.formation?.referent_handicap?.nom}
+              </Typography>
+              <Typography>{effectif.formation?.referent_handicap?.email}</Typography>
+            </Stack>
+          </Box>
+        )}
       </Grid>
     </Grid>
   );
