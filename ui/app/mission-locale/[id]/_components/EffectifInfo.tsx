@@ -11,6 +11,10 @@ import { Feedback } from "./Feedback";
 export function EffectifInfo({ effectif }) {
   const [infosOpen, setInfosOpen] = useState(false);
 
+  const computeTransmissionDate = (date) => {
+    return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
+  };
+
   return (
     <Stack direction="column" spacing={2} py={6}>
       <Stack direction="row" spacing={2}>
@@ -35,9 +39,9 @@ export function EffectifInfo({ effectif }) {
           </div>
           <Typography variant="caption" color="grey" gutterBottom sx={{ fontStyle: "italic" }}>
             {effectif.source === "API_DECA" ? (
-              <span>Données transmises par l&apos;API DECA le {formatDate(effectif.transmitted_at)}</span>
+              <span>Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}</span>
             ) : (
-              <span>Données transmises par le CFA le {formatDate(effectif.transmitted_at)}</span>
+              <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
             )}
           </Typography>
         </div>

@@ -96,7 +96,11 @@ const exportEffectifMissionLocale = async (req, res) => {
   const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
 
   const columns = [
-    { name: "Date transmission données", id: "transmitted_at" },
+    {
+      name: "Date transmission données",
+      id: "transmitted_at",
+      transform: (d) => (d ? new Date(d) : "Plus de 2 semaines"),
+    },
     { name: "Source données", id: "source" },
     { name: "NOM", id: "nom" },
     { name: "Prénom", id: "prenom" },

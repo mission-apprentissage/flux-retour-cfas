@@ -9,13 +9,13 @@ type CellContent = string | number | ReactNode | JSX.Element;
 
 interface TableProps {
   caption: string;
-  data?: CellContent[][];
+  data?: Array<{ rawData: any; element: CellContent[] }>;
   headers?: string[];
   itemsPerPage?: number;
   searchTerm?: string;
   searchableColumns?: number[];
   columnWidths?: string[];
-  getRowLink?: (rowIndex: number) => string;
+  getRowLink?: (rawData: any) => string;
   className?: string;
   emptyMessage?: string;
 }
@@ -49,27 +49,28 @@ export function Table({
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
 
-    const rowsAsObjects = data.map((row, index) => {
+    const rowsAsObjects = data.map(({ rawData, element }, index) => {
       const columnsToSearch =
         searchableColumns && searchableColumns.length > 0
           ? searchableColumns.reduce((acc, colIndex) => {
-              if (colIndex >= 0 && colIndex < row.length) {
-                acc.push(extractTextFromReactNode(row[colIndex]));
+              if (colIndex >= 0 && colIndex < element.length) {
+                acc.push(extractTextFromReactNode(element[colIndex]));
               }
               return acc;
             }, [] as string[])
-          : row.map((cell) => extractTextFromReactNode(cell));
+          : element.map((cell) => extractTextFromReactNode(cell));
 
       const combinedText = columnsToSearch.join(" ");
       return {
         originalIndex: index,
-        row,
+        element,
         combinedText,
+        rawData,
       };
     });
 
     const matched = matchSorter(rowsAsObjects, searchTerm, { keys: ["combinedText"] });
-    return matched.map((obj) => obj.row);
+    return matched.map(({ element, rawData }) => ({ element, rawData }));
   }, [data, searchTerm, searchableColumns]);
 
   const totalPages = useMemo(() => {
@@ -96,9 +97,9 @@ export function Table({
     setCurrentPage(page);
   };
 
-  const handleRowClick = (rowIndex: number) => {
+  const handleRowClick = (rawData) => {
     if (!getRowLink) return;
-    const link = getRowLink(rowIndex);
+    const link = getRowLink(rawData);
     router.push(link);
   };
 
@@ -134,12 +135,12 @@ export function Table({
                 </td>
               </tr>
             ) : (
-              paginatedData.map((row, rowIndex) => (
+              paginatedData.map(({ rawData, element }, rowIndex) => (
                 <tr
                   key={`row-${rowIndex}`}
                   style={{ cursor: getRowLink ? "pointer" : "auto" }}
                   onClick={() => {
-                    if (getRowLink) handleRowClick(rowIndex + (currentPage - 1) * itemsPerPage);
+                    if (getRowLink) handleRowClick(rawData);
                   }}
                   onMouseEnter={(e) => {
                     if (getRowLink) {
@@ -152,7 +153,7 @@ export function Table({
                     }
                   }}
                 >
-                  {row.map((cell, cellIndex) => (
+                  {element.map((cell, cellIndex) => (
                     <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
                   ))}
                 </tr>

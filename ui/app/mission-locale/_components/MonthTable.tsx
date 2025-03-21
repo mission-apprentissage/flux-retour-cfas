@@ -7,7 +7,7 @@ import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { Table } from "@/app/_components/table/Table";
 
 import { TableRow } from "./TableRow";
-import { MonthItem } from "./types";
+import { EffectifData, MonthItem } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
 
 type MonthTableProps = {
@@ -25,7 +25,7 @@ export const MonthTable = memo(function MonthTable({
 }: MonthTableProps) {
   const label = formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
-  const dataRows = monthItem.data.map((student) => TableRow({ student, isTraite }));
+  const dataRows = monthItem.data.map((student) => ({ rawData: student, element: TableRow({ student, isTraite }) }));
   const columnWidths = isTraite ? ["30%", "50%", "15%", "5%"] : ["15%", "30%", "50%", "5%"];
 
   return (
@@ -60,9 +60,8 @@ export const MonthTable = memo(function MonthTable({
           searchableColumns={[0, 1, 2]}
           itemsPerPage={5}
           className="fr-pt-1w"
-          getRowLink={(rowIndex) => {
-            const item = monthItem.data[rowIndex];
-            return `/mission-locale/${item.id}`;
+          getRowLink={(rowData: EffectifData) => {
+            return `/mission-locale/${rowData.id}`;
           }}
         />
       )}
