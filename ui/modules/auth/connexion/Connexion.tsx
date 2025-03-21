@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import NavLink from "next/link";
-import { useRouter } from "next/router";
 import React from "react";
 import { useLocalStorage } from "usehooks-ts";
 import * as Yup from "yup";
@@ -27,7 +26,6 @@ import { AlertRounded, ShowPassword } from "@/theme/components/icons";
 const Login = (props) => {
   const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
   const { refreshSession } = useAuth();
-  const router = useRouter();
 
   const [show, setShow] = React.useState(false);
   const onShowPassword = () => setShow(!show);
@@ -38,9 +36,9 @@ const Login = (props) => {
       await refreshSession();
       if (originConnexionUrl) {
         setOriginConnexionUrl("");
-        router.push(originConnexionUrl);
+        window.location.href = originConnexionUrl;
       } else {
-        router.push("/");
+        window.location.href = "/";
       }
     } catch (err) {
       const errorMessage = err?.json?.data?.message || err.message;
