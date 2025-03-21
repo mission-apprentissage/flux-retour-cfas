@@ -14,6 +14,7 @@ import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
@@ -106,7 +107,9 @@ async function upsertEffectifDeca(
 
   if (!effectifFound) {
     try {
-      await effectifsDECADb().insertOne({ ...effectif, _id: new ObjectId() });
+      const id = new ObjectId();
+      await effectifsDECADb().insertOne({ ...effectif, _id: id });
+      await createMissionLocaleSnapshot({ ...effectif, _id: id });
       count.created++;
     } catch (err) {
       // Le code d'erreur 11000 correspond à une duplication d'index unique
@@ -116,7 +119,9 @@ async function upsertEffectifDeca(
       }
     }
   } else {
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at: new Date() });
+    const transmitted_at = new Date();
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at });
+    await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
     count.updated++;
   }
 }
