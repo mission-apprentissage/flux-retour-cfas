@@ -15,7 +15,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import DashboardAdministrateur from "../admin/DashboardAdministrateur";
 
-import { RupturantsIcon, InscritsSansContratsIcon, AbandonsIcon } from "./icons";
+import { RupturantsIcon } from "./icons";
 
 const DashboardMissionLocale = () => {
   const { auth } = useAuth();
@@ -88,21 +88,6 @@ const DashboardMissionLocale = () => {
         <Grid templateColumns="repeat(3, 1fr)" gap={4} maxW="xl" mx="auto" minH={200}>
           <GridItem bg="galt">
             <IndicatorCard
-              label="jeunes sans contrat"
-              count={indicateurs.inscrits}
-              tooltipHeader="Jeune sans contrat"
-              tooltipLabel={
-                <>
-                  Un jeune sans contrat est un jeune inscrit qui débute sa formation sans contrat signé en entreprise.
-                  Le jeune dispose d’un délai de 3 mois pour trouver son entreprise et continuer sereinement sa
-                  formation.
-                </>
-              }
-              icon={<InscritsSansContratsIcon />}
-            />
-          </GridItem>
-          <GridItem bg="galt">
-            <IndicatorCard
               label="jeunes en rupture de contrat"
               count={indicateurs.rupturants}
               tooltipHeader="Rupturant"
@@ -115,24 +100,6 @@ const DashboardMissionLocale = () => {
                 </>
               }
               icon={<RupturantsIcon />}
-            />
-          </GridItem>
-          <GridItem bg="galt">
-            <IndicatorCard
-              label="sorties d’apprentissage"
-              count={indicateurs.abandons}
-              tooltipHeader="Sorties d’apprentissage (anciennement “abandons”)"
-              tooltipLabel={
-                <div>
-                  Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à
-                  la date affichée. Cette indication est basée sur un statut transmis par les organismes de formation.
-                  Ces situations peuvent être consécutives à une rupture de contrat d’apprentissage avec départ du
-                  centre de formation, à un départ du centre de formation sans que l’apprenant n’ait jamais eu de
-                  contrat, à un départ du centre de formation pour intégrer une entreprise en CDI ou CDD plus
-                  rémunérateur.
-                </div>
-              }
-              icon={<AbandonsIcon />}
             />
           </GridItem>
         </Grid>

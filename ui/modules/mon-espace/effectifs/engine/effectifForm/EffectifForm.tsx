@@ -20,6 +20,7 @@ import { useRecoilValue } from "recoil";
 import { EFF_EDITION_ELEMENT_LINK, MOTIF_SUPPRESSION, MOTIF_SUPPRESSION_LABEL, Statut, getStatut } from "shared";
 
 import { _post } from "@/common/httpClient";
+import { prettyPrintDate } from "@/common/utils/dateUtils";
 import AppButton from "@/components/buttons/Button";
 import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
@@ -202,10 +203,12 @@ export const EffectifForm = memo(
     modeSifa = false,
     parcours,
     refetch,
+    transmissionDate,
   }: {
     modeSifa: boolean;
     parcours: Statut["parcours"];
     refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
+    transmissionDate: Date | null;
   }) => {
     const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 
@@ -216,17 +219,22 @@ export const EffectifForm = memo(
     const sortedParcours = [...parcours].reverse();
     const currentStatus = sortedParcours[0];
     const historyStatus = sortedParcours.slice(1);
-
+    const computeTransmissionDate = (d: Date | null) => {
+      return d ? prettyPrintDate(d) : "plus de 2 semaines";
+    };
     return (
       <Box>
-        {!fromDECA && (
-          <SuppressionEffectifComponent
-            nom={values?.apprenant.nom}
-            prenom={values?.apprenant.prenom}
-            id={effectifId}
-            refetch={refetch}
-          />
-        )}
+        <HStack justifyContent="space-between">
+          <Text>Date de dernière mise à jour : {computeTransmissionDate(transmissionDate)}</Text>
+          {!fromDECA && (
+            <SuppressionEffectifComponent
+              nom={values?.apprenant.nom}
+              prenom={values?.apprenant.prenom}
+              id={effectifId}
+              refetch={refetch}
+            />
+          )}
+        </HStack>
         <Box borderWidth="2px" borderStyle="solid" borderColor="#E3E3FD" p={2} mt={3}>
           <Accordion
             allowMultiple

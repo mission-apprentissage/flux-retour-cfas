@@ -14,6 +14,7 @@ interface EffectifProps {
   canEdit: boolean;
   parcours: Statut["parcours"];
   refetch: any;
+  transmissionDate: Date | null;
 }
 
 const Effectif = React.memo(function EffectifMemo({
@@ -21,6 +22,7 @@ const Effectif = React.memo(function EffectifMemo({
   canEdit = false,
   parcours,
   refetch,
+  transmissionDate,
 }: EffectifProps) {
   const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
   const { isLoading } = useInitEffectifForm({
@@ -38,7 +40,7 @@ const Effectif = React.memo(function EffectifMemo({
     <>
       {/* @ts-expect-error */}
       <EffectifFormControllerContext.Provider value={effectifFormController}>
-        <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} />
+        <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} transmissionDate={transmissionDate} />
       </EffectifFormControllerContext.Provider>
     </>
   );

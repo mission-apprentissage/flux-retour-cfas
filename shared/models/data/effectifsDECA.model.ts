@@ -110,7 +110,7 @@ const zEffectifComputedStatut = z.object({
   ),
 });
 
-const zEffectifDECA = z.object({
+export const zEffectifDECA = z.object({
   _id: zObjectId.describe("Identifiant MongoDB de l'effectifDeca"),
   deca_raw_id: zObjectId.describe("Identifiant decaraw associé à cet effectif"),
   organisme_id: zObjectId.describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),

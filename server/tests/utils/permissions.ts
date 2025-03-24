@@ -205,6 +205,10 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof IOrganisme]: IOrgan
       academie: ofCible.academie, // rennes
       bassinEmploi: "5315", // rennes
     },
+    geopoint: {
+      type: "Point",
+      coordinates: [48.8588897, 2.320041],
+    },
     reseaux: [ofCible.reseaux.normal, ofCible.reseaux.responsable],
     erps: ["YMAG"],
     nature: "responsable_formateur",

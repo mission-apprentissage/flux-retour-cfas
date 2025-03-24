@@ -6,7 +6,7 @@ import { _post } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
-import { AbandonsIcon, InscritsSansContratsIcon, RupturantsIcon } from "@/modules/dashboard/icons";
+import { RupturantsIcon } from "@/modules/dashboard/icons";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
 const organismesTableColumnsDefs = [
@@ -103,33 +103,6 @@ const organismesTableColumnsDefs = [
     size: 150,
   },
   {
-    accessorKey: "inscrits",
-    sortingFn: (a, b) => {
-      const communeA = a.original.adresse?.commune || "";
-      const communeB = b.original.adresse?.commune || "";
-      return communeA.localeCompare(communeB);
-    },
-    header: () => (
-      <Flex gap={2}>
-        <InscritsSansContratsIcon w={4} h={4} /> JSC
-        <InfoTooltip
-          headerComponent={() => "Jeunes inscrits sans contrat d’apprentissage"}
-          contentComponent={() => (
-            <Box>
-              <Text as="p">
-                Un jeune sans contrat est un jeune inscrit qui débute sa formation sans contrat signé en entreprise. Le
-                jeune dispose d&apos;un délai de 3 mois pour trouver son entreprise et continuer sereinement sa
-                formation.
-              </Text>
-            </Box>
-          )}
-          aria-label="Jeunes inscrits sans contrat d’apprentissage"
-        />
-      </Flex>
-    ),
-    size: 150,
-  },
-  {
     accessorKey: "rupturants",
     sortingFn: (a, b) => {
       const communeA = a.original.adresse?.commune || "";
@@ -151,35 +124,6 @@ const organismesTableColumnsDefs = [
             </Box>
           )}
           aria-label="Jeunes en rupture de contrat"
-        />
-      </Flex>
-    ),
-    size: 150,
-  },
-  {
-    accessorKey: "abandons",
-    sortingFn: (a, b) => {
-      const communeA = a.original.adresse?.commune || "";
-      const communeB = b.original.adresse?.commune || "";
-      return communeA.localeCompare(communeB);
-    },
-    header: () => (
-      <Flex gap={2}>
-        <AbandonsIcon w={4} h={4} /> Sorties
-        <InfoTooltip
-          headerComponent={() => "Sorties d’apprentissage (anciennement “abandons”)"}
-          contentComponent={() => (
-            <Box>
-              <Text as="p">
-                Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à la
-                date affichée. Cette indication est basée sur un statut transmis par les organismes de formation. Ces
-                situations peuvent être consécutives à une rupture de contrat d’apprentissage avec départ du centre de
-                formation, à un départ du centre de formation sans que l’apprenant n’ait jamais eu de contrat, à un
-                départ du centre de formation pour intégrer une entreprise en CDI ou CDD plus rémunérateur.
-              </Text>
-            </Box>
-          )}
-          aria-label="Sorties d’apprentissage (anciennement “abandons”)"
         />
       </Flex>
     ),

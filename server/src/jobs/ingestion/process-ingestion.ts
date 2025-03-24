@@ -22,6 +22,7 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -443,9 +444,10 @@ const createOrUpdateEffectif = async (
     // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
     // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
     if (effectif.source !== SOURCE_APPRENANT.FICHIER) {
-      await lockEffectif(effectifDb);
+      effectifDb = await lockEffectif(effectifDb);
     }
 
+    await createMissionLocaleSnapshot(effectifDb);
     return { effectifId: effectifDb._id, itemProcessingInfos };
   } catch (err) {
     // Le code d'erreur 11000 correspond à une duplication d'index unique

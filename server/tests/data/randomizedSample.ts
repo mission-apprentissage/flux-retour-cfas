@@ -155,3 +155,17 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
     source_organisme_id: faker.database.mongodbObjectId(),
   };
 };
+
+export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {
+  const dossier = createRandomDossierApprenantApiInputV3(params);
+
+  const contrat_date_debut = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 9, 1));
+  const contrat_date_rupture = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 10, 1));
+  const contrat_date_fin = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 11, 1));
+  return {
+    ...dossier,
+    contrat_date_debut,
+    contrat_date_rupture,
+    contrat_date_fin,
+  };
+};

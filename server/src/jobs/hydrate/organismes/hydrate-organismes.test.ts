@@ -61,12 +61,15 @@ describe("hydrateOrganismesFromReferentiel", () => {
               nom: "Hauts-de-France",
             },
           },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
           creation: new Date("1970-01-19T23:49:51.600Z"),
           enseigne: "FACULTE SCIENCES SPORT ET EDUCATION PHYSIQUE",
           fermeture: null,
           ouvert: true,
           siret: "13002975400020",
-          geopoint: null,
         },
         renseignements_specifiques: {
           numero_activite: "32591104359",
@@ -111,12 +114,15 @@ describe("hydrateOrganismesFromReferentiel", () => {
               nom: "Bretagne",
             },
           },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
           creation: new Date("1970-01-20T17:21:03.600Z"),
           enseigne: "ECOLE D'AIDE SOIGNANTS",
           fermeture: null,
           ouvert: true,
           siret: "26220009000278",
-          geopoint: null,
         },
         renseignements_specifiques: {
           numero_activite: null,
@@ -164,9 +170,12 @@ describe("hydrateOrganismesFromReferentiel", () => {
               nom: "Lille",
             },
           },
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
           creation: new Date("1970-01-09T00:08:34.800Z"),
           fermeture: null,
-          geopoint: null,
         },
         renseignements_specifiques: {
           qualiopi: false,
@@ -197,7 +206,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
           adresse: null,
           creation: new Date("1970-01-17T13:49:19.200Z"),
           fermeture: new Date("1970-01-19T09:48:50.400Z"),
-          geopoint: null,
+          geopoint: {
+            type: "Point",
+            coordinates: [3.098, 50.611],
+          },
         },
         renseignements_specifiques: {
           qualiopi: false,
@@ -229,6 +241,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         departement: "59",
         region: "32",
       },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
+      },
       contacts_from_referentiel: organismesApi[0][0].contacts,
       formations_count: 0,
       enseigne: "FACULTE SCIENCES SPORT ET EDUCATION PHYSIQUE",
@@ -251,6 +267,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         complete: "TOUR SAINT MICHEL 22220 Tréguier",
         departement: "22",
         region: "53",
+      },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
       },
       contacts_from_referentiel: [],
       enseigne: "ECOLE D'AIDE SOIGNANTS",
@@ -351,6 +371,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
         complete: "TOUR SAINT MICHEL 22220 Tréguier",
         departement: "22",
         region: "53",
+      },
+      geopoint: {
+        type: "Point",
+        coordinates: [3.098, 50.611],
       },
       ferme: false,
       enseigne: null,
