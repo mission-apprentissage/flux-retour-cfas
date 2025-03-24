@@ -28,7 +28,10 @@ import {
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
-import { hydrateMissionLocaleSnapshot } from "./hydrate/mission-locale/hydrate-mission-locale";
+import {
+  hydrateMissionLocaleOrganisation,
+  hydrateMissionLocaleSnapshot,
+} from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
@@ -245,6 +248,11 @@ export async function setupJobProcessor() {
             ? parseInt(job.payload?.ml_id as string)
             : null;
           return hydrateMissionLocaleSnapshot(missionLocaleStructureId);
+        },
+      },
+      "hydrate:mission-locale-organisation": {
+        handler: async () => {
+          return hydrateMissionLocaleOrganisation();
         },
       },
       "populate:reseaux": {
