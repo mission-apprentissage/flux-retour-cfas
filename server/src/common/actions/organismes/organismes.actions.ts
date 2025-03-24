@@ -1,3 +1,4 @@
+import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
 import type { Request } from "express";
@@ -22,6 +23,7 @@ import {
   findOrganismeResponsablesIds,
 } from "@/common/actions/helpers/permissions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import {
   organismesDb,
@@ -37,6 +39,7 @@ import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
+import { listContactsMlOrganisme } from "../mission-locale/mission-locale.actions";
 
 /**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
@@ -277,26 +280,61 @@ export async function getOrganismeById(_id: ObjectId) {
 }
 
 /**
- * Retourne les informations d'un organisme avec plus ou moins d'informations selon l'utilisateur authentifié.
- * Les permissions de l'utilisateur authentifié sont également retournées
+ * Retourne les informations d'un organisme avec plus ou moins d'informations
+ * selon l'utilisateur authentifié. Les permissions de l'utilisateur
+ * authentifié sont également retournées.
+ *
+ * @param ctx Le contexte d'authentification
+ * @param organismeId L'identifiant de l'organisme
+ * @returns Les détails d'un organisme, les permissions associées et sa mission locale la plus proche
  */
 export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
-  const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    {
-      projection: getOrganismeProjection(permissionsOrganisme),
-    }
-  );
-  if (!organisme) {
-    throw Boom.notFound(`IOrganisme ${organismeId} not found`);
-  }
-  const organismesWithAdditionalData = withOrganismeListSummary(organisme);
+  try {
+    const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
 
-  return {
-    ...organismesWithAdditionalData,
-    permissions: permissionsOrganisme,
-  } as OrganismeWithPermissions;
+    const organisme = await organismesDb().findOne(
+      { _id: organismeId },
+      {
+        projection: getOrganismeProjection(permissionsOrganisme),
+      }
+    );
+
+    if (!organisme) {
+      throw Boom.notFound(`Aucun organisme trouvé pour l'identifiant ${organismeId}`);
+    }
+
+    const organismeAvecDonneesSupplementaires = withOrganismeListSummary(organisme);
+
+    let missionLocaleWithTDBContacts: (IMissionLocale & { contactsTDB: IUsersMigration[] }) | null = null;
+    const [longitude, latitude] = organisme.geopoint?.coordinates || [];
+
+    if (typeof longitude === "number" && typeof latitude === "number") {
+      const missionsLocalesAPI = await apiAlternanceClient.geographie.listMissionLocales({
+        longitude,
+        latitude,
+        radius: 100,
+      });
+      if (missionsLocalesAPI.length > 0) {
+        const firstMissionLocale = missionsLocalesAPI[0];
+        if (typeof firstMissionLocale.id === "number") {
+          const missionLocaleContacts = await listContactsMlOrganisme(firstMissionLocale.id);
+          missionLocaleWithTDBContacts = {
+            ...firstMissionLocale,
+            contactsTDB: missionLocaleContacts,
+          };
+        }
+      }
+    }
+
+    return {
+      ...organismeAvecDonneesSupplementaires,
+      permissions: permissionsOrganisme,
+      missionLocale: missionLocaleWithTDBContacts,
+    } as OrganismeWithPermissions;
+  } catch (error) {
+    logger.error("Erreur lors de la récupération des détails de l'organisme :", error);
+    throw Boom.internal("Une erreur est survenue lors de la récupération des détails de l'organisme");
+  }
 }
 
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
@@ -458,17 +496,6 @@ export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: 
       },
     }
   );
-
-  // if (organisme.siret !== verif.siret && organisme.uai !== verif.uai) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("Siret/UAI");
-  // } else if (organisme.siret !== verif.siret) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("Siret");
-  // } else if (organisme.uai !== verif.uai) {
-  //   // TODO WHAT DO WE DO
-  //   throw Boom.conflict("UAI");
-  // }
 }
 
 export async function listContactsOrganisme(organismeId: ObjectId) {
@@ -727,6 +754,7 @@ export function getOrganismeProjection(
     raison_sociale: 1,
     reseaux: 1,
     adresse: 1,
+    geopoint: 1,
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,

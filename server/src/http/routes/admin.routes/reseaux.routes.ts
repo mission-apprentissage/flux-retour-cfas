@@ -14,7 +14,16 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllReseaux));
-
+  router.post(
+    "/",
+    validateRequestMiddleware({
+      body: z.object({
+        nom: z.string(),
+        responsable: z.boolean(),
+      }),
+    }),
+    returnResult(createReseau)
+  );
   router.get(
     "/:id",
     validateRequestMiddleware({
@@ -89,7 +98,7 @@ export default () => {
         throw Boom.internal("Failed to update the organismes_ids array.");
       }
 
-      await organismesDb().updateOne({ _id: organismeObjectId }, { $addToSet: { reseaux: reseau.nom } });
+      await organismesDb().updateOne({ _id: organismeObjectId }, { $addToSet: { reseaux: reseau.key } });
 
       const updatedOrganisme = await organismesDb().findOne({ _id: organismeObjectId });
       if (updatedOrganisme) {
@@ -133,7 +142,7 @@ export default () => {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }
 
-        await organismesDb().updateOne({ _id: organismeId as ObjectId }, { $pull: { reseaux: reseau.nom } });
+        await organismesDb().updateOne({ _id: organismeId as ObjectId }, { $pull: { reseaux: reseau.key } });
 
         const updatedOrganisme = await organismesDb().findOne({ _id: organismeId as ObjectId });
         if (updatedOrganisme) {
@@ -170,4 +179,22 @@ export default () => {
 
 export const getAllReseaux = async () => {
   return reseauxDb().find().sort({ nom: 1 }).toArray();
+};
+
+export const createReseau = async ({ body }) => {
+  const nom: string = body.nom;
+  const responsable: boolean = body.responsable;
+  const key = nom.toUpperCase().replace(/ /g, "_");
+
+  const date = new Date();
+
+  return await reseauxDb().insertOne({
+    _id: new ObjectId(),
+    key,
+    nom,
+    responsable,
+    organismes_ids: [],
+    created_at: date,
+    updated_at: date,
+  });
 };

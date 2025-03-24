@@ -1,5 +1,13 @@
-import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
+  ArrowForwardIcon,
+  ViewIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  WarningTwoIcon,
+  CheckCircleIcon,
+} from "@chakra-ui/icons";
+import {
+  Badge,
   Box,
   Button,
   Container,
@@ -14,8 +22,10 @@ import {
   Wrap,
   Link,
   Collapse,
+  Icon,
 } from "@chakra-ui/react";
 import { useQueries } from "@tanstack/react-query";
+import { format } from "date-fns";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -44,6 +54,8 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplittedWithDefaultValue } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
+import CustomLink from "@/components/Links/Link";
+import { BasicModal } from "@/components/Modals/BasicModal";
 import NotificationTransmissionError from "@/components/Notifications/TransmissionErrors";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
@@ -52,7 +64,9 @@ import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
+import { InfoCircle } from "@/theme/components/icons";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
+import Eye from "@/theme/components/icons/Eye";
 
 import InfosTransmissionEtParametrageOFA from "../admin/InfosTransmissionEtParametrageOFA";
 import { ExternalLinks } from "../admin/OrganismeDetail";
@@ -287,6 +301,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
+  const missionLocale = organisme.missionLocale;
 
   return (
     <Box>
@@ -369,7 +384,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           siret: organisme.siret,
                           uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
                         });
-                        location.href = "/";
+                        location.href = "/home";
                       }}
                     >
                       Imposture
@@ -630,6 +645,121 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       </HStack>
                     )}
                   </>
+                )}
+
+                {missionLocale && (
+                  <HStack alignItems="flex-start">
+                    <Text whiteSpace="nowrap">Mission Locale près de chez vous&nbsp;:</Text>
+
+                    <Flex gap={2}>
+                      <Text fontWeight="bold">ML {missionLocale.nom}</Text>
+
+                      <BasicModal
+                        renderTrigger={(onOpen) => (
+                          <Button
+                            variant="link"
+                            fontSize="md"
+                            borderBottom="1px"
+                            borderRadius="0"
+                            p="0"
+                            width="fit-content"
+                            onClick={onOpen}
+                          >
+                            <Eye mr={1} />
+                            Voir le contact
+                          </Button>
+                        )}
+                        title={`Mission Locale ${missionLocale.nom}`}
+                        size="4xl"
+                      >
+                        <Flex gap={3}>
+                          <InfoCircle color="plaininfo" w={4} h={4} mt={1} />
+                          <Text color="plaininfo" size="zeta">
+                            Les Missions Locales peuvent avoir accès au Tableau de bord de l’apprentissage et aux
+                            données nominatives des jeunes sans contrat, en rupture de contrat ou en abandon. Dans le
+                            cadre de leur mission d’accompagnement des jeunes, elles peuvent être amenées à contacter
+                            votre CFA.
+                          </Text>
+                        </Flex>
+
+                        <Flex direction="column" gap={4}>
+                          {missionLocale.localisation && (
+                            <Flex
+                              direction="column"
+                              flexGrow={1}
+                              borderLeft="4px solid"
+                              borderColor="bluefrance"
+                              pl={6}
+                              ml={6}
+                              my={3}
+                            >
+                              <Text fontSize="lg">
+                                {missionLocale.localisation.adresse}, {missionLocale.localisation.cp}{" "}
+                                {missionLocale.localisation.ville}
+                              </Text>
+                              {missionLocale.contact?.telephone && <Text>{missionLocale.contact.telephone}</Text>}
+                              {missionLocale.contact?.email && (
+                                <CustomLink href={`mailto:${missionLocale.contact.email}`} isExternal isUnderlined>
+                                  {missionLocale.contact.email}
+                                </CustomLink>
+                              )}
+                              {missionLocale.contact?.siteWeb && (
+                                <CustomLink href={missionLocale.contact.siteWeb} isExternal isUnderlined>
+                                  {missionLocale.contact.siteWeb}
+                                </CustomLink>
+                              )}
+                            </Flex>
+                          )}
+
+                          {missionLocale.contactsTDB && missionLocale.contactsTDB.length > 0 && (
+                            <>
+                              <Text>
+                                Les contacts ci-dessous ont créé un compte sur le Tableau de bord de l’apprentissage :
+                              </Text>
+
+                              <UnorderedList spacing={3} my={3}>
+                                {missionLocale.contactsTDB.map((contactTDB) => (
+                                  <ListItem key={contactTDB._id}>
+                                    <Flex align="center" gap={2} mb={1}>
+                                      <Text fontWeight="bold">
+                                        {contactTDB.prenom} {contactTDB.nom}
+                                      </Text>
+
+                                      {contactTDB.created_at && (
+                                        <Badge variant="purple" borderRadius="full" px={3} py={1} fontSize="sm">
+                                          <Flex align="center" gap={1}>
+                                            <Icon as={CheckCircleIcon} mr={1} />
+                                            Compte créé le {format(new Date(contactTDB.created_at), "dd/MM/yyyy")}
+                                          </Flex>
+                                        </Badge>
+                                      )}
+                                    </Flex>
+                                    {contactTDB.fonction && <Text>{contactTDB.fonction}</Text>}
+                                    {contactTDB.email && (
+                                      <CustomLink href={`mailto:${contactTDB.email}`} isExternal isUnderlined>
+                                        {contactTDB.email}
+                                      </CustomLink>
+                                    )}
+                                    {contactTDB.telephone && <Text>{contactTDB.telephone}</Text>}
+                                  </ListItem>
+                                ))}
+                              </UnorderedList>
+                            </>
+                          )}
+
+                          <CustomLink
+                            href="https://www.unml.info/le-reseau/annuaire/?type=&nom=&region=&affichage=liste&hp_v=&hp_r=1"
+                            isUnderlined
+                            isExternal
+                            color="blueFrance"
+                            w="fit-content"
+                          >
+                            Annuaire complet des Missions Locales
+                          </CustomLink>
+                        </Flex>
+                      </BasicModal>
+                    </Flex>
+                  </HStack>
                 )}
 
                 {organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (

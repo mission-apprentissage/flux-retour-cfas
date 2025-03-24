@@ -463,9 +463,7 @@
                     "etablissement_responsable_uai",
                     "etablissement_responsable_siret",
                     "etablissement_formateur_uai",
-                    "etablissement_formateur_siret",
-                    "etablissement_lieu_de_formation_uai",
-                    "etablissement_lieu_de_formation_siret"
+                    "etablissement_formateur_siret"
                   ]
                 }
               }
@@ -962,8 +960,6 @@
                           "etablissement_responsable_siret",
                           "etablissement_formateur_uai",
                           "etablissement_formateur_siret",
-                          "etablissement_lieu_de_formation_uai",
-                          "etablissement_lieu_de_formation_siret",
                           "updated_at",
                           "created_at",
                           "source",

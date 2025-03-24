@@ -19,7 +19,7 @@ import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-i
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
 import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
-import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
+import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import {
   hydrateEffectifsLieuDeFormation,
@@ -29,6 +29,10 @@ import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
+import {
+  hydrateMissionLocaleOrganisation,
+  hydrateMissionLocaleSnapshot,
+} from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
@@ -81,6 +85,7 @@ const dailyJobs = async (queued: boolean) => {
     name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
     queued,
   });
+
   await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued });
 
   await addJob({ name: "hydrate:rncp", queued });
@@ -88,6 +93,9 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "computed:update", queued });
 
   await addJob({ name: "organisme:cleanup", queued });
+
+  // # Mise à jour des effectifs DECA
+  await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
   return 0;
 };
@@ -130,18 +138,10 @@ export async function setupJobProcessor() {
                 return 0;
               },
             },
-            "Mettre à jour les effectifs DECA tous les dimanches matin à 6h": {
-              cron_string: "0 6 * * 0",
-              handler: async () => {
-                await addJob({ name: "hydrate:contrats-deca-raw", queued: true });
-                return 0;
-              },
-            },
             "Validation des constantes de territoires": {
               cron_string: "5 4 1 * *",
               handler: validationTerritoires,
             },
-
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
             //   cron_string: "45 12 1 * *",
@@ -189,14 +189,14 @@ export async function setupJobProcessor() {
       },
       "hydrate:effectifs:update_all_computed_statut": {
         handler: async () => {
-          return hydrateEffectifsComputedTypes();
+          return hydrateEffectifsComputedTypesGenerique();
         },
       },
       "hydrate:effectifs:update_computed_statut": {
         handler: async (job, signal) => {
           const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
           const evaluationDate = new Date();
-          return hydrateEffectifsComputedTypes(
+          return hydrateEffectifsComputedTypesGenerique(
             {
               query: {
                 annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
@@ -252,6 +252,19 @@ export async function setupJobProcessor() {
       "hydrate:voeux-effectifs-relations": {
         handler: async () => {
           return hydrateVoeuxEffectifsRelations();
+        },
+      },
+      "hydrate:mission-locale-effectif-snapshot": {
+        handler: async (job) => {
+          const missionLocaleStructureId = (job.payload?.ml_id as string)
+            ? parseInt(job.payload?.ml_id as string)
+            : null;
+          return hydrateMissionLocaleSnapshot(missionLocaleStructureId);
+        },
+      },
+      "hydrate:mission-locale-organisation": {
+        handler: async () => {
+          return hydrateMissionLocaleOrganisation();
         },
       },
       "populate:reseaux": {

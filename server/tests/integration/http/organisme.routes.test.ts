@@ -11,6 +11,7 @@ import { createComputedStatutObject } from "@/common/actions/effectifs.statut.ac
 import { effectifsDb, organisationsDb, organismesDb, reseauxDb, usersMigrationDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { useNock } from "@tests/jest/setupNock";
 import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
@@ -231,6 +232,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
 };
 
 describe("Routes /organismes/:id", () => {
+  useNock();
   useMongo();
   beforeEach(async () => {
     app = await initTestApp();

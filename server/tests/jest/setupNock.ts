@@ -154,6 +154,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
 export const useNock = () => {
   beforeAll(() => {
     nock.disableNetConnect();
+    nock.enableNetConnect("127.0.0.1");
   });
   beforeEach(() => {
     nockExternalApis();
@@ -167,6 +168,11 @@ export const useNock = () => {
       .get("/geographie/v1/commune/search")
       .query({ code: "75001" })
       .reply(200, communes["75001"])
+      .persist();
+    nock("https://api.apprentissage.beta.gouv.fr/api")
+      .get("/geographie/v1/mission-locale")
+      .query({ latitude: /^\d*\.?\d*$/, longitude: /^\d*\.?\d*$/, radius: /^\d*$/ })
+      .reply(200, [communes["75001"][0].mission_locale])
       .persist();
   });
   afterEach(() => {

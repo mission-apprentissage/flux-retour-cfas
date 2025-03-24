@@ -257,6 +257,7 @@ export async function getOrganismeEffectifs(
     date_de_naissance: effectif.apprenant.date_de_naissance,
     historique_statut: effectif.apprenant.historique_statut,
     statut: effectif._computed?.statut,
+    transmitted_at: effectif.transmitted_at,
     ...(sifa
       ? {
           requiredSifa: compact(

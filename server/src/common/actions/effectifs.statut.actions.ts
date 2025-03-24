@@ -5,11 +5,12 @@ import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import type { IContrat } from "shared/models/data/effectifs/contrat.part";
 import type { IFormationEffectif } from "shared/models/data/effectifs/formation.part";
-import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
+import { IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 import { addDaysUTC } from "shared/utils";
 
+import { IEffectifGenerique } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
+
 import logger from "../logger";
-import { effectifsDb } from "../model/collections";
 
 const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
 const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
@@ -20,14 +21,18 @@ type ICreateComputedStatutObjectParams = Readonly<{
   contrats?: Pick<IContrat, "date_debut" | "date_rupture">[] | null | undefined;
 }>;
 
-export async function updateEffectifStatut(effectif: IEffectif, evaluationDate: Date): Promise<boolean> {
+export async function updateEffectifStatut(
+  effectif: IEffectifGenerique,
+  evaluationDate: Date,
+  collection
+): Promise<boolean> {
   if (!shouldUpdateStatut(effectif)) {
     return false;
   }
 
   try {
     const updateObj = createUpdateObject(effectif, evaluationDate);
-    const { modifiedCount } = await effectifsDb().updateOne({ _id: effectif._id }, updateObj);
+    const { modifiedCount } = await collection.updateOne({ _id: effectif._id }, updateObj);
     return modifiedCount > 0;
   } catch (err) {
     handleUpdateError(err, effectif);
@@ -35,7 +40,7 @@ export async function updateEffectifStatut(effectif: IEffectif, evaluationDate: 
   }
 }
 
-function shouldUpdateStatut(effectif: IEffectif): boolean {
+function shouldUpdateStatut(effectif: IEffectifGenerique): boolean {
   return !(
     !effectif.formation?.date_entree &&
     (!effectif.apprenant.historique_statut ||
@@ -78,7 +83,7 @@ export function createComputedStatutObject(
   }
 }
 
-function createUpdateObject(effectif: IEffectif, evaluationDate: Date): UpdateFilter<IEffectif> {
+function createUpdateObject(effectif: IEffectifGenerique, evaluationDate: Date): UpdateFilter<IEffectifGenerique> {
   return {
     $set: {
       updated_at: new Date(),
@@ -87,7 +92,7 @@ function createUpdateObject(effectif: IEffectif, evaluationDate: Date): UpdateFi
   };
 }
 
-function handleUpdateError(err: unknown, effectif: IEffectif) {
+function handleUpdateError(err: unknown, effectif: IEffectifGenerique) {
   console.error("Erreur lors de la mise à jour de l'effectif :", err);
   if (
     err instanceof MongoServerError &&

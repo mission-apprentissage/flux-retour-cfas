@@ -129,6 +129,12 @@ export const zOrganisme = z
     enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).nullish(),
     raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
     adresse: zAdresse.describe("Adresse de l'établissement").nullish(),
+    geopoint: z
+      .object({
+        type: z.literal("Point"),
+        coordinates: z.array(z.number()),
+      })
+      .nullish(),
     formations_count: z.number(),
     organismesFormateurs: z.array(relationOrganismeSchema).optional(),
     organismesResponsables: z.array(relationOrganismeSchema).optional(),

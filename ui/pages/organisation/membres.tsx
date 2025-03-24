@@ -81,7 +81,9 @@ const PageGestionDesMembres = () => {
             Vous êtes actuellement <strong>Gestionnaire</strong> pour votre organisation sur le tableau de bord.
           </Text>
           <InvitationForm onInvitation={() => refetchInvitations()} />
-          <InvitationFormAdmin onInvitation={() => refetchInvitations()} />
+          {auth.organisation.type === "ADMINISTRATEUR" && (
+            <InvitationFormAdmin onInvitation={() => refetchInvitations()} />
+          )}
           {statusMembres === "success" && statusInvitations === "success" && (
             <Box>
               {membresEnAttenteValidation.length > 0 && (

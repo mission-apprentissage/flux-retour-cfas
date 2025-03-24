@@ -48,10 +48,8 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowId)) {
-        newSet.delete(rowId);
-      } else {
+      const newSet = new Set<string>();
+      if (!prev.has(rowId)) {
         newSet.add(rowId);
       }
       return newSet;
