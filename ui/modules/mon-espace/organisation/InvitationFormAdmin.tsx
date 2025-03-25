@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { object, string } from "yup";
 
 import { _post } from "@/common/httpClient";
-import withAuth from "@/components/withAuth";
 import useToaster from "@/hooks/useToaster";
 import { MissionLocaleSelect } from "@/modules/auth/inscription/components/MissionLocaleSelect";
 
@@ -111,4 +110,4 @@ const InvitationFormAdmin = (props: InvitationFormProps) => {
   );
 };
 
-export default withAuth(InvitationFormAdmin, ["ADMINISTRATEUR"]);
+export default InvitationFormAdmin;
