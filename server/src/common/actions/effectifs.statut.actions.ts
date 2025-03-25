@@ -160,6 +160,9 @@ function determineStatutsByContrats(
   const currentDate = evaluationDate || new Date();
   const dateEntree = effectif.formation.date_entree;
 
+  const dateFin = effectif.formation.date_fin ? new Date(effectif.formation.date_fin) : currentDate;
+  const effectiveDateFin = dateFin < currentDate ? dateFin : currentDate;
+
   let contracts =
     effectif.contrats
       ?.map((contract) => ({
@@ -196,14 +199,14 @@ function determineStatutsByContrats(
     }
   });
 
-  if (latestRuptureDate && currentDate.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
+  if (latestRuptureDate && effectiveDateFin.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
     statuts.push({
       valeur: STATUT_APPRENANT.ABANDON,
       date: addDaysUTC(latestRuptureDate, 180),
     });
   }
 
-  if (statuts.length === 1 && dateEntree && currentDate.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
+  if (statuts.length === 1 && dateEntree && effectiveDateFin.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
     statuts.push({ valeur: STATUT_APPRENANT.ABANDON, date: addDaysUTC(dateEntree, 90) });
   }
 
