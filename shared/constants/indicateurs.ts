@@ -28,3 +28,5 @@ export const typesSIFA = ["sifa"];
 export type TypeOrganismesIndicateurs = (typeof typesOrganismesIndicateurs)[number];
 
 export const typesAffelnet = ["affelnet_concretise", "affelnet", "affelnet_non_concretise"];
+
+export const typesMissionLocale = ["ml_a_traiter", "ml_traite"];

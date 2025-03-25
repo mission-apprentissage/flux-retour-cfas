@@ -1,0 +1,13 @@
+.no-borders.fr-table table tbody::after {
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

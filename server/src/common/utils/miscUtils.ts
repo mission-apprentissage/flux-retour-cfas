@@ -47,3 +47,19 @@ export function addPrefixToProperties<
 export type AddPrefix<Prefix extends string, T> = {
   [K in keyof T as `${Prefix}${string & K}`]: T[K];
 };
+
+export const getAgeFromDate = (date_de_naissance: Date) => {
+  const today = new Date();
+  const birthDate = new Date(date_de_naissance);
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  // Adjust age if birthday hasn't occurred yet this year
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+
+  return age;
+};

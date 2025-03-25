@@ -11,9 +11,6 @@ import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
-import missionLocaleEffectifLogsDescriptor, {
-  IMissionLocaleEffectifLogs,
-} from "shared/models/data/missionLocaleEffectifLogs.model";
 import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
@@ -59,7 +56,6 @@ export const modelDescriptors = [
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
-  missionLocaleEffectifLogsDescriptor,
   regionsModelDescriptor,
 ];
 
@@ -89,8 +85,6 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
-export const missionLocaleEffectifsLogsDb = () =>
-  getDbCollection<IMissionLocaleEffectifLogs>(missionLocaleEffectifLogsDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);
 // v2
 
