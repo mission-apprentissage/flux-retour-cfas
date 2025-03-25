@@ -4982,6 +4982,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.17.16":
+  version: 4.17.16
+  resolution: "@types/lodash@npm:4.17.16"
+  checksum: 915618c5735b10007e0ed7d06fdce6b344f88fc721d492b189a69064bfd046d2382e1ba61d683eeb61cad60ca0286cd110e6fe0fa4ab2e99066a40478376831d
+  languageName: node
+  linkType: hard
+
 "@types/mdast@npm:^3.0.0":
   version: 3.0.10
   resolution: "@types/mdast@npm:3.0.10"
@@ -14217,6 +14224,7 @@ __metadata:
     "@commitlint/config-conventional": ^17.8.1
     "@semantic-release/changelog": ^6.0.3
     "@semantic-release/exec": ^6.0.3
+    "@types/lodash": ^4.17.16
     "@types/node": ^22.7.5
     "@typescript-eslint/eslint-plugin": ^6.21.0
     "@typescript-eslint/parser": ^6.21.0
@@ -19310,6 +19318,7 @@ __metadata:
     "@tanstack/react-table": ^8.20.5
     "@tsconfig/next": ^2.0.3
     "@types/jsonwebtoken": ^9.0.7
+    "@types/lodash": ^4.17.16
     "@types/node": ^22.7.5
     "@types/react": ^18.3.11
     "@types/react-dom": ^18.3.1
