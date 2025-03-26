@@ -172,7 +172,7 @@ const addFieldTraitementStatus = () => {
   ];
 };
 
-const lookUpOrganisme = () => {
+const lookUpOrganisme = (withContacts: boolean = false) => {
   return [
     {
       $lookup: {
@@ -182,7 +182,7 @@ const lookUpOrganisme = () => {
           { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
           {
             $project: {
-              _id: 0,
+              _id: withContacts ? 1 : 0,
               contacts_from_referentiel: 1,
               nom: 1,
               raison_sociale: 1,
@@ -201,6 +201,49 @@ const lookUpOrganisme = () => {
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...(withContacts
+      ? [
+          {
+            $lookup: {
+              from: "organisations",
+              let: { id: { $toString: "$organisme._id" } },
+              pipeline: [
+                { $match: { type: "ORGANISME_FORMATION" } },
+                { $match: { $expr: { $eq: ["$organisme_id", "$$id"] } } },
+                {
+                  $project: {
+                    _id: 1,
+                  },
+                },
+              ],
+              as: "organisation",
+            },
+          },
+          {
+            $unwind: {
+              path: "$organisation",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "usersMigration",
+              let: { id: "$organisation._id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$organisation_id", "$$id"] } } },
+                {
+                  $project: {
+                    _id: 0,
+                    email: 1,
+                    telephone: 1,
+                  },
+                },
+              ],
+              as: "tdb_users",
+            },
+          },
+        ]
+      : []),
   ];
 };
 
@@ -458,7 +501,7 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
     },
     ...addFieldTraitementStatus(),
     ...createDernierStatutFieldPipelineML(new Date()),
-    ...lookUpOrganisme(),
+    ...lookUpOrganisme(true),
     {
       $project: {
         id: "$effectif_snapshot._id",
@@ -471,7 +514,6 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
         telephone: "$effectif_snapshot.apprenant.telephone",
         responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
-        //form_effectif: "$effectif_snapshot.ml_effectif", TODO
         a_traiter: "$a_traiter",
         transmitted_at: "$effectif_snapshot.transmitted_at",
         source: "$effectif_snapshot.source",
@@ -482,6 +524,7 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
         "situation.situation_autre": "$situation_autre",
         "situation.deja_connu": "$deja_connu",
         "situation.commentaires": "$commentaires",
+        contacts_tdb: "$tdb_users",
       },
     },
   ];
@@ -513,20 +556,7 @@ export const getEffectifsListByMisisonLocaleId = (
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(type),
-    {
-      $lookup: {
-        from: "organismes",
-        localField: "effectif_snapshot.organisme_id",
-        foreignField: "_id",
-        as: "organisme",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisme",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
+    ...lookUpOrganisme(true),
     {
       $project: {
         nom: "$effectif_snapshot.apprenant.nom",
@@ -568,6 +598,8 @@ export const getEffectifsListByMisisonLocaleId = (
         libelle_formation: "$effectif_snapshot.formation.libelle_long",
         organisme_nom: "$organisme.nom",
         organisme_code_postal: "$organisme.adresse.code_postal",
+        organisme_contacts: "$organisme.contacts_from_referentiel",
+        tdb_organisme_contacts: "$tdb_users",
       },
     },
   ];
