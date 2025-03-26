@@ -10,7 +10,7 @@ export const addSheetToXlscFile = async (
   relativePath: string,
   worksheetToKeepName: string,
   worksheetToDeleteName: string,
-  columns: Array<{ name: string; id: string; array: string; transform?: (d: any) => any }>,
+  columns: Array<{ name: string; id: string; array?: string; transform?: (d: any) => any }>,
   data: Array<any>
 ) => {
   const formattedData = formatJsonToXlsx(data, columns);
@@ -26,7 +26,7 @@ export const addSheetToXlscFile = async (
 
 export const formatJsonToXlsx = (
   data: Array<any>,
-  format: Array<{ name: string; id: string; array: string; transform?: (data: any) => any }>
+  format: Array<{ name: string; id: string; array?: string; transform?: (data: any) => any }>
 ) => {
   /**
    * Création de n column numéroté de 1 à n
@@ -35,9 +35,14 @@ export const formatJsonToXlsx = (
    */
   const generateNColumnForAttribute = (name, array) => {
     const maxElement = getMaxElementForAttribute(array);
-    return Array(maxElement)
-      .fill(null)
-      .map((_, index) => `${name} - n°${index + 1}`);
+    if (maxElement > 1) {
+      return Array(maxElement)
+        .fill(null)
+        .map((_, index) => `${name} - n°${index + 0}`);
+    } else if (maxElement === 1) {
+      return [name];
+    }
+    return [];
   };
 
   /**
@@ -46,7 +51,6 @@ export const formatJsonToXlsx = (
    * @returns La valeur max
    */
   const getMaxElementForAttribute = (arrName) => {
-    console.log(data, arrName);
     return data.reduce((maxElement, data) => {
       return data[arrName].length > maxElement ? data[arrName].length : maxElement;
     }, 0);

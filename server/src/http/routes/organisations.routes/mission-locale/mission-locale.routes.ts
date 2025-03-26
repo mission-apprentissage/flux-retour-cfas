@@ -121,8 +121,6 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Intitulé de la formation", id: "libelle_formation" },
     { name: "Nom du CFA", id: "organisme_nom" },
     { name: "Code postal du CFA", id: "organisme_code_postal" },
-    { name: "Téléphone du CFA", id: "organisme_telephone" },
-    { name: "Email du CFA", id: "organisme_email" },
     { name: "Téléphone du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "telephone" },
     { name: "Email du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "email" },
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
