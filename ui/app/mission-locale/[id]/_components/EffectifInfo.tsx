@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Box, Collapse, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
@@ -16,27 +18,36 @@ export function EffectifInfo({ effectif }) {
   };
 
   return (
-    <Stack direction="column" spacing={2} py={6}>
-      <Stack direction="row" spacing={2}>
+    <Stack
+      spacing={2}
+      sx={{
+        py: { xs: 2, md: 6 },
+      }}
+    >
+      <Stack direction="row" spacing={1}>
         {effectif.a_traiter ? <Badge severity="new">à traiter</Badge> : <Badge severity="success">traité</Badge>}
         <Badge>{getMonthYearFromDate(effectif.dernier_statut?.date)}</Badge>
       </Stack>
 
-      <Stack direction="column" spacing={1}>
-        <h3 className="fr-h3 fr-text--blue-france">
+      <Stack spacing={1}>
+        <Typography
+          variant="h3"
+          className="fr-text--blue-france"
+          sx={{ fontSize: { xs: "1.25rem", md: "1.75rem" }, margin: 0 }}
+        >
           {effectif.nom} {effectif.prenom}
-        </h3>
-        <div className="fr-notice fr-notice--info" style={{ backgroundColor: "white", padding: "0" }}>
-          <div className="fr-notice__body">
-            <p>
+        </Typography>
+        <Box className="fr-notice fr-notice--info" sx={{ backgroundColor: "white", p: 0 }}>
+          <Box className="fr-notice__body">
+            <Typography component="p">
               <span className="fr-notice__title">Date de la rupture du contrat d&apos;apprentissage :</span>
               <span className="fr-notice__desc">
                 {formatDate(effectif.contrats?.[0]?.date_rupture)
                   ? `le ${formatDate(effectif.contrats?.[0]?.date_rupture)}`
                   : "non renseignée"}
               </span>
-            </p>
-          </div>
+            </Typography>
+          </Box>
           <Typography variant="caption" color="grey" gutterBottom sx={{ fontStyle: "italic" }}>
             {effectif.source === "API_DECA" ? (
               <span>Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}</span>
@@ -44,7 +55,7 @@ export function EffectifInfo({ effectif }) {
               <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
             )}
           </Typography>
-        </div>
+        </Box>
       </Stack>
 
       {effectif.situation && Object.keys(effectif.situation).length > 0 && <Feedback situation={effectif.situation} />}
@@ -55,9 +66,17 @@ export function EffectifInfo({ effectif }) {
 
 function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
   return (
-    <Grid container spacing={2} p={3} sx={{ backgroundColor: "var(--background-default-grey-active)" }}>
-      <Grid size={8}>
-        <Stack direction="column" spacing={1}>
+    <Grid
+      container
+      spacing={2}
+      sx={{
+        backgroundColor: "var(--background-default-grey-active)",
+        px: { xs: 2, sm: 3 },
+        py: { xs: 2, sm: 3 },
+      }}
+    >
+      <Grid size={{ xs: 12, md: 8 }}>
+        <Stack spacing={1}>
           <Typography>
             Née le {formatDate(effectif.date_de_naissance)} ({getAge(effectif.date_de_naissance) || "?"} ans)
           </Typography>
@@ -81,10 +100,10 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
 
         <Collapse in={infosOpen}>
           <Box mt={1}>
-            <Stack direction="column" spacing={1}>
+            <Stack spacing={1}>
               <Typography fontWeight="bold">Contrat d&apos;apprentissage</Typography>
               {effectif.contrats?.map((c, idx) => (
-                <Stack key={idx} direction="column" spacing={1}>
+                <Stack key={idx} spacing={1}>
                   <Typography>Date de début : {formatDate(c.date_debut) || "non renseignée"}</Typography>
                   <Typography>Date de fin : {formatDate(c.date_fin) || "non renseignée"}</Typography>
                   <Typography>Cause de rupture : {c.cause_rupture || "non renseignée"}</Typography>
@@ -95,7 +114,7 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
               </Typography>
               {effectif.organisme?.nom && <Typography>{effectif.organisme?.nom}</Typography>}
               {effectif.organisme?.contacts_from_referentiel?.map((contact, idx) => (
-                <Stack key={idx} direction="column" spacing={1}>
+                <Stack key={idx} spacing={1}>
                   <Typography>E-mail : {contact.email || "non renseigné"}</Typography>
                 </Stack>
               ))}
@@ -104,9 +123,9 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
         </Collapse>
       </Grid>
 
-      <Grid size={4}>
+      <Grid size={{ xs: 12, md: 4 }}>
         <Box mb={2}>
-          <Stack direction="column" spacing={1}>
+          <Stack spacing={1}>
             <Typography fontWeight="bold">Coordonnées</Typography>
             <Typography>{effectif.telephone || ""}</Typography>
             <Typography>{effectif.courriel || ""}</Typography>
@@ -114,7 +133,7 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
         </Box>
         {effectif.formation?.referent_handicap && (
           <Box>
-            <Stack direction="column" spacing={1}>
+            <Stack spacing={1}>
               <Typography fontWeight="bold">Responsable légal</Typography>
               <Typography>
                 {effectif.formation?.referent_handicap?.prenom} {effectif.formation?.referent_handicap?.nom}

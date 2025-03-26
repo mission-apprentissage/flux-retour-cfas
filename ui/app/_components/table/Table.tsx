@@ -1,44 +1,40 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
+import { Table as MuiTable, TableBody, TableCell, TableContainer, TableRow, Paper, Typography } from "@mui/material";
 import { matchSorter } from "match-sorter";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, ReactNode, useMemo, isValidElement } from "react";
+import { useState, useEffect, useMemo } from "react";
 
-type CellContent = string | number | ReactNode | JSX.Element;
+interface ColumnData {
+  label: string;
+  dataKey: string;
+  width?: number | string;
+  numeric?: boolean;
+  searchable?: boolean;
+}
+
+interface TableRowData {
+  [key: string]: any;
+}
 
 interface TableProps {
   caption: string;
-  data?: Array<{ rawData: any; element: CellContent[] }>;
-  headers?: string[];
+  data: TableRowData[];
+  columns: ColumnData[];
   itemsPerPage?: number;
   searchTerm?: string;
-  searchableColumns?: number[];
-  columnWidths?: string[];
-  getRowLink?: (rawData: any) => string;
+  getRowLink?: (rowData: TableRowData) => string;
   className?: string;
   emptyMessage?: string;
 }
 
-function extractTextFromReactNode(node: ReactNode): string {
-  if (typeof node === "string") return node;
-  if (Array.isArray(node)) {
-    return node.map(extractTextFromReactNode).join(" ");
-  }
-  if (isValidElement(node) && node.props.children) {
-    return extractTextFromReactNode(node.props.children);
-  }
-  return "";
-}
-
 export function Table({
   caption,
-  data = [],
-  headers = [],
-  itemsPerPage = 1,
+  data,
+  columns,
+  itemsPerPage = 10,
   searchTerm = "",
-  searchableColumns,
-  columnWidths,
   getRowLink,
   className,
   emptyMessage = "Aucun élément à afficher",
@@ -48,30 +44,12 @@ export function Table({
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
-
-    const rowsAsObjects = data.map(({ rawData, element }, index) => {
-      const columnsToSearch =
-        searchableColumns && searchableColumns.length > 0
-          ? searchableColumns.reduce((acc, colIndex) => {
-              if (colIndex >= 0 && colIndex < element.length) {
-                acc.push(extractTextFromReactNode(element[colIndex]));
-              }
-              return acc;
-            }, [] as string[])
-          : element.map((cell) => extractTextFromReactNode(cell));
-
-      const combinedText = columnsToSearch.join(" ");
-      return {
-        originalIndex: index,
-        element,
-        combinedText,
-        rawData,
-      };
+    const searchableColumns = columns.filter((col) => col.searchable);
+    if (searchableColumns.length === 0) return data;
+    return matchSorter(data, searchTerm, {
+      keys: searchableColumns.map((col) => col.dataKey),
     });
-
-    const matched = matchSorter(rowsAsObjects, searchTerm, { keys: ["combinedText"] });
-    return matched.map(({ element, rawData }) => ({ element, rawData }));
-  }, [data, searchTerm, searchableColumns]);
+  }, [data, columns, searchTerm]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
@@ -88,83 +66,64 @@ export function Table({
   }, [searchTerm, data, itemsPerPage]);
 
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
+    if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  const handleRowClick = (rawData) => {
+  const handleRowClick = (rowData: TableRowData) => {
     if (!getRowLink) return;
-    const link = getRowLink(rawData);
+    const link = getRowLink(rowData);
     router.push(link);
   };
 
+  const isEmpty = filteredData.length === 0;
+
   return (
     <div className={className}>
-      <div className="fr-table fr-table--layout-fixed fr-table--bordered no-borders">
-        <table id="table-sm">
-          <caption style={{ color: "var(--text-title-blue-france)" }}>{caption}</caption>
-          {columnWidths && columnWidths.length > 0 && (
-            <colgroup>
-              {columnWidths.map((width, index) => (
-                <col key={`col-${index}`} style={{ width }} />
-              ))}
-            </colgroup>
-          )}
-          <thead>
-            <tr>
-              {headers.map((header, index) => (
-                <th key={`header-${index}`} scope="col">
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={headers.length || columnWidths?.length || 1}
-                  style={{ textAlign: "left", fontStyle: "italic" }}
+      <Typography
+        variant="h4"
+        sx={{
+          mt: 3,
+          mb: 2,
+          color: "var(--text-title-blue-france)",
+          textAlign: "left",
+        }}
+      >
+        {caption}
+      </Typography>
+      {isEmpty ? (
+        <div style={{ fontStyle: "italic" }}>{emptyMessage}</div>
+      ) : (
+        <TableContainer component={Paper} elevation={0} sx={{ boxShadow: "none", overflowX: "auto" }}>
+          <MuiTable sx={{ width: "100%", minWidth: 600 }}>
+            <TableBody>
+              {paginatedData.map((row, rowIndex) => (
+                <TableRow
+                  key={rowIndex}
+                  hover={!!getRowLink}
+                  sx={{ cursor: getRowLink ? "pointer" : "auto" }}
+                  onClick={() => handleRowClick(row)}
                 >
-                  {emptyMessage}
-                </td>
-              </tr>
-            ) : (
-              paginatedData.map(({ rawData, element }, rowIndex) => (
-                <tr
-                  key={`row-${rowIndex}`}
-                  style={{ cursor: getRowLink ? "pointer" : "auto" }}
-                  onClick={() => {
-                    if (getRowLink) handleRowClick(rawData);
-                  }}
-                  onMouseEnter={(e) => {
-                    if (getRowLink) {
-                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#f5f5f5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (getRowLink) {
-                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "";
-                    }
-                  }}
-                >
-                  {element.map((cell, cellIndex) => (
-                    <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.dataKey}
+                      align={col.numeric ? "right" : "left"}
+                      sx={{ width: col.width, borderBottom: "1px solid var(--border-default-grey)" }}
+                    >
+                      {row[col.dataKey]}
+                    </TableCell>
                   ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {filteredData.length > 0 && (
-        <div className="fr-pagination-container">
+                </TableRow>
+              ))}
+            </TableBody>
+          </MuiTable>
+        </TableContainer>
+      )}
+      {!isEmpty && totalPages > 1 && (
+        <div className="fr-pagination-container" style={{ marginTop: "1rem" }}>
           <Pagination
             count={totalPages}
             defaultPage={currentPage}
@@ -176,7 +135,6 @@ export function Table({
               },
             })}
             showFirstLast
-            className="fr-mt-2w"
           />
         </div>
       )}
