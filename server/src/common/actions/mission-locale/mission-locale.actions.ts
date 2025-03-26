@@ -321,10 +321,6 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   aTraiter: boolean,
   effectifId: ObjectId
 ) => {
-  const dateThreshold = new Date();
-  dateThreshold.setMonth(new Date().getMonth() - 5);
-  dateThreshold.setDate(1);
-
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
@@ -336,15 +332,6 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
         a_traiter: aTraiter,
       },
     },
-    ...(aTraiter
-      ? [
-          {
-            $match: {
-              "dernierStatut.date": { $gte: dateThreshold },
-            },
-          },
-        ]
-      : []),
     {
       $sort: {
         "dernierStatut.date": -1,
@@ -386,10 +373,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
-  const dateThreshold = new Date();
-  dateThreshold.setMonth(new Date().getMonth() - 5);
-  dateThreshold.setDate(1);
-
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
@@ -413,14 +396,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
-    ...(aTraiter
-      ? [
-          {
-            $match: {
-              "dernierStatut.date": { $gte: dateThreshold },
-            },
-          },
-        ]
+    ...(aTraiter // Si a traiter = true, alors pas de match sur le statut de traiement afin de pouvoir grouper par traitement ( treated_count )
+      ? []
       : [
           {
             $match: {
@@ -570,13 +547,8 @@ export const getEffectifsListByMisisonLocaleId = (
   missionLocaleMongoId: ObjectId,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
-  const dateThreshold = new Date();
-  dateThreshold.setMonth(new Date().getMonth() - 5);
-  dateThreshold.setDate(1);
-
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const { type } = effectifsParMoisFiltersMissionLocale;
-  const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
 
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
@@ -584,15 +556,6 @@ export const getEffectifsListByMisisonLocaleId = (
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(type),
-    ...(aTraiter
-      ? [
-          {
-            $match: {
-              "dernierStatut.date": { $gte: dateThreshold },
-            },
-          },
-        ]
-      : []),
     ...lookUpOrganisme(true),
     {
       $project: {
