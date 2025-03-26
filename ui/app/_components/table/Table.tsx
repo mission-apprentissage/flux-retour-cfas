@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
+import { get } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, ReactNode, useMemo, isValidElement } from "react";
@@ -13,7 +14,7 @@ interface TableProps {
   headers?: string[];
   itemsPerPage?: number;
   searchTerm?: string;
-  searchableColumns?: number[];
+  searchableColumns?: string[];
   columnWidths?: string[];
   getRowLink?: (rawData: any) => string;
   className?: string;
@@ -52,10 +53,8 @@ export function Table({
     const rowsAsObjects = data.map(({ rawData, element }, index) => {
       const columnsToSearch =
         searchableColumns && searchableColumns.length > 0
-          ? searchableColumns.reduce((acc, colIndex) => {
-              if (colIndex >= 0 && colIndex < element.length) {
-                acc.push(extractTextFromReactNode(element[colIndex]));
-              }
+          ? searchableColumns.reduce((acc, rawDataPath: string) => {
+              acc.push(extractTextFromReactNode(get(rawData, rawDataPath)));
               return acc;
             }, [] as string[])
           : element.map((cell) => extractTextFromReactNode(cell));
