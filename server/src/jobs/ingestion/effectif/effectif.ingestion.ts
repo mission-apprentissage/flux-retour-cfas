@@ -38,7 +38,8 @@ export type IIngestEffectifUsedFields =
   | "contrat_date_fin_4"
   | "contrat_date_rupture_4"
   | "cause_rupture_contrat_4"
-  | "siret_employeur_4";
+  | "siret_employeur_4"
+  | "rqth_apprenant";
 
 export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
@@ -164,6 +165,10 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     adresse: input.adresse,
 
     derniere_transmission: input.date_transmission,
+
+    informations_personnelles: {
+      rqth: input.dossier.rqth_apprenant ?? false,
+    },
   };
 
   const contrats = getContrats(input);

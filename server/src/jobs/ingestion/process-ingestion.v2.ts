@@ -86,7 +86,7 @@ async function migrateEffectif(effectif: IEffectif, organismeLookup: Map<string 
     IDossierApprenantSchemaV3,
     IIngestFormationUsedFields | IIngestEffectifUsedFields | IIngestPersonUsedFields | IIngestAdresseUsedFields
   > = {
-    formation_cfd: effectif._raw?.formation?.cfd ?? effectif.formation?.cfd,
+    formation_cfd: effectif._raw?.formation?.cfd ?? effectif.formation?.cfd ?? null,
     formation_rncp: nullishToOptional(effectif._raw?.formation?.rncp ?? effectif.formation?.rncp),
     etablissement_responsable_siret: reponsable.siret ?? null,
     etablissement_responsable_uai: reponsable.uai!,
@@ -122,6 +122,7 @@ async function migrateEffectif(effectif: IEffectif, organismeLookup: Map<string 
     contrat_date_rupture_4: nullishToOptional(effectif.contrats?.[3]?.date_rupture),
     cause_rupture_contrat_4: nullishToOptional(effectif.contrats?.[3]?.cause_rupture),
     siret_employeur_4: nullishToOptional(effectif.contrats?.[3]?.siret),
+    rqth_apprenant: effectif.apprenant.rqth ?? false,
 
     nom_apprenant: effectif.apprenant.nom,
     prenom_apprenant: effectif.apprenant.prenom,

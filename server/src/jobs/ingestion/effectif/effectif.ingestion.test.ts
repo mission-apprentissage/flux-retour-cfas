@@ -83,6 +83,7 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: now,
       _computed: {
         statut: {
@@ -122,6 +123,7 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: lastWeek,
       _computed: {
         statut: {
@@ -143,6 +145,7 @@ describe("ingestEffectifV2", () => {
         date_entree_formation: sept24,
         date_inscription_formation: juil24,
         date_fin_formation: aout26,
+        rqth_apprenant: true,
       },
       person_id: existingEffectif.identifiant.person_id,
       formation_id: existingEffectif.identifiant.formation_id,
@@ -153,6 +156,7 @@ describe("ingestEffectifV2", () => {
     const expectedResult = {
       ...existingEffectif,
       derniere_transmission: now,
+      informations_personnelles: { rqth: true },
     };
     expect(result).toEqual(expectedResult);
 
@@ -185,6 +189,7 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
         _computed: {
           statut: {
@@ -214,6 +219,7 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
         _computed: {
           statut: {
@@ -243,6 +249,7 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
         _computed: {
           statut: {
@@ -272,6 +279,7 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
         _computed: {
           statut: {
@@ -400,6 +408,7 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: lastWeek,
       _computed: {
         statut: {
@@ -460,6 +469,7 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: now,
       _computed: {
         statut: {
