@@ -131,12 +131,12 @@ export function Table({
         <TableContainer component={Paper} elevation={0} sx={{ boxShadow: "none", overflowX: "auto" }}>
           <MuiTable sx={{ width: "100%", minWidth: 600 }}>
             <TableBody>
-              {paginatedData.map((row, rowIndex) => (
+              {paginatedData.map(({ rawData, element }, rowIndex) => (
                 <TableRow
                   key={rowIndex}
                   hover={!!getRowLink}
                   sx={{ cursor: getRowLink ? "pointer" : "auto" }}
-                  onClick={() => handleRowClick(row)}
+                  onClick={() => handleRowClick(rawData)}
                 >
                   {columns.map((col) => (
                     <TableCell
@@ -144,7 +144,7 @@ export function Table({
                       align={col.numeric ? "right" : "left"}
                       sx={{ width: col.width, borderBottom: "1px solid var(--border-default-grey)" }}
                     >
-                      {row[col.dataKey]}
+                      {element[col.dataKey]}
                     </TableCell>
                   ))}
                 </TableRow>

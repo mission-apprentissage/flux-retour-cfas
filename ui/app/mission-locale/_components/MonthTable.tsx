@@ -23,10 +23,10 @@ type ColumnData = {
   width?: number | string;
 };
 
-function buildRowData(student: EffectifData, isTraite: boolean) {
+function buildRowData(effectif: EffectifData, isTraite: boolean) {
   if (!isTraite) {
     return {
-      id: student.id,
+      id: effectif.id,
       badge: (
         <Badge severity="new" small>
           à traiter
@@ -34,15 +34,15 @@ function buildRowData(student: EffectifData, isTraite: boolean) {
       ),
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {`${student.nom} ${student.prenom}`}
+          {`${effectif.nom} ${effectif.prenom}`}
         </div>
       ),
-      formation: <span className="line-clamp-1">{student.libelle_formation}</span>,
+      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
       icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
     };
   }
   return {
-    id: student.id,
+    id: effectif.id,
     badge: (
       <Badge severity="success" small>
         traité
@@ -50,10 +50,10 @@ function buildRowData(student: EffectifData, isTraite: boolean) {
     ),
     name: (
       <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {`${student.nom} ${student.prenom}`}
+        {`${effectif.nom} ${effectif.prenom}`}
       </div>
     ),
-    formation: <span className="line-clamp-1">{student.libelle_formation}</span>,
+    formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
     icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
   };
 }
@@ -81,7 +81,10 @@ export const MonthTable = memo(function MonthTable({
         { label: "", dataKey: "icon", width: 10 },
       ];
 
-  const dataRows = monthItem.data.map((student) => buildRowData(student, isTraite));
+  const dataRows = monthItem.data.map((effectif) => ({
+    rawData: effectif,
+    element: buildRowData(effectif, isTraite),
+  }));
 
   return (
     <div id={anchorId} className="fr-mb-4w fr-mt-4w">
