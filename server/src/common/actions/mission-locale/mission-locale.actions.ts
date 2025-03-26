@@ -172,6 +172,38 @@ const addFieldTraitementStatus = () => {
   ];
 };
 
+const lookUpOrganisme = () => {
+  return [
+    {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$effectif_snapshot.organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ];
+};
+
 export const getOrCreateMissionLocaleById = async (id: number) => {
   const mlDb = await organisationsDb().findOne({ ml_id: id });
 
@@ -358,6 +390,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         "dernierStatut.date": -1,
       },
     },
+    ...lookUpOrganisme(),
     {
       $addFields: {
         firstDayOfMonth: {
@@ -385,6 +418,9 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 nom: "$$ROOT.effectif_snapshot.apprenant.nom",
                 prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
                 libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
+                organisme_nom: "$$ROOT.organisme.nom",
+                organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
+                organisme_enseigne: "$$ROOT.organisme.enseigne",
               },
               null,
             ],
@@ -445,33 +481,7 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
     },
     ...addFieldTraitementStatus(),
     ...createDernierStatutFieldPipelineML(new Date()),
-    {
-      $lookup: {
-        from: "organismes",
-        let: { id: "$effectif_snapshot.organisme_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 0,
-              contacts_from_referentiel: 1,
-              nom: 1,
-              raison_sociale: 1,
-              adresse: 1,
-              siret: 1,
-              enseigne: 1,
-            },
-          },
-        ],
-        as: "organisme",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisme",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
+    ...lookUpOrganisme(),
     {
       $project: {
         id: "$effectif_snapshot._id",

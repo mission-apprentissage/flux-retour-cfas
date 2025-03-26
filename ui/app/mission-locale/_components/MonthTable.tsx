@@ -57,7 +57,14 @@ export const MonthTable = memo(function MonthTable({
           data={dataRows}
           columnWidths={columnWidths}
           searchTerm={searchTerm}
-          searchableColumns={[0, 1, 2]}
+          searchableColumns={[
+            "nom",
+            "prenom",
+            "libelle_formation",
+            "organisme_nom",
+            "organisme_raison_sociale",
+            "organisme_enseigne",
+          ]}
           itemsPerPage={5}
           className="fr-pt-1w"
           getRowLink={(rowData: EffectifData) => {
