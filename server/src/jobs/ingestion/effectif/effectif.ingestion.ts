@@ -1,9 +1,13 @@
+import Boom from "boom";
 import { formatISO } from "date-fns";
+import { isEqual } from "lodash-es";
 import { ObjectId } from "mongodb";
 import type { IEffectifV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { effectifV2Db } from "@/common/model/collections";
+
+import { buildEffectifStatus } from "../status/effectif_status.builder";
 
 export type IIngestEffectifUsedFields =
   | "annee_scolaire"
@@ -34,7 +38,8 @@ export type IIngestEffectifUsedFields =
   | "contrat_date_fin_4"
   | "contrat_date_rupture_4"
   | "cause_rupture_contrat_4"
-  | "siret_employeur_4";
+  | "siret_employeur_4"
+  | "rqth_apprenant";
 
 export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
@@ -120,9 +125,11 @@ function getContrats(input: IIngestEffectifV2Params): IEffectifV2["contrats"][st
 }
 
 type InvariantFields = "_id" | "identifiant";
-type SpecialFields = "annee_scolaires" | "id_erp" | "contrats";
+type SpecialFields = "annee_scolaires" | "id_erp" | "contrats" | "_computed";
 
 export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<IEffectifV2> {
+  const now = new Date();
+
   const invariantFields: Pick<IEffectifV2, InvariantFields> = {
     _id: new ObjectId(),
     identifiant: {
@@ -158,9 +165,26 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     adresse: input.adresse,
 
     derniere_transmission: input.date_transmission,
+
+    informations_personnelles: {
+      rqth: input.dossier.rqth_apprenant ?? false,
+    },
   };
 
   const contrats = getContrats(input);
+
+  const computed: IEffectifV2["_computed"] = {
+    statut: buildEffectifStatus(
+      {
+        session: updateFields.session,
+        contrats: contrats.reduce((acc, contrat) => {
+          acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
+          return acc;
+        }, {}),
+      },
+      new Date()
+    ),
+  };
 
   const result = await effectifV2Db().findOneAndUpdate(
     {
@@ -178,6 +202,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
           acc[`contrats.${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
           return acc;
         }, {}),
+        _computed: computed,
       },
       $addToSet: {
         annee_scolaires: input.dossier.annee_scolaire,
@@ -191,5 +216,35 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     }
   );
 
+  await updateComputedStatut(result!, now);
+
   return result!;
+}
+
+function getComputedStatutUpdateOp(effectif: IEffectifV2, now: Date) {
+  const computedStatut = buildEffectifStatus(effectif, now);
+
+  return isEqual(effectif._computed.statut, computedStatut) ? null : { $set: { "_computed.statut": computedStatut } };
+}
+
+export async function updateComputedStatut(effectif: IEffectifV2, now: Date) {
+  let op = getComputedStatutUpdateOp(effectif, now);
+  let counter = 0;
+  while (op !== null && counter < 3) {
+    const lastEffectif = await effectifV2Db().findOneAndUpdate({ _id: effectif._id }, op, {
+      returnDocument: "after",
+      includeResultMetadata: false,
+    });
+    if (!lastEffectif) {
+      // The effectif has been deleted
+      return;
+    }
+
+    op = getComputedStatutUpdateOp(lastEffectif, now);
+    counter++;
+  }
+
+  if (op !== null) {
+    throw Boom.internal("ensureStatutIsUpToDate: too many iterations", { effectifId: effectif._id });
+  }
 }

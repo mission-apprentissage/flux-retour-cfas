@@ -1,7 +1,7 @@
 import { siretFixtures } from "api-alternance-sdk/fixtures";
 import { ObjectId } from "mongodb";
 import type { IEffectifV2 } from "shared/models";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { effectifV2Db } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -13,7 +13,7 @@ useMongo();
 const juil24 = new Date("2024-07-21");
 const aout24 = new Date("2024-08-31");
 const sept24 = new Date("2024-09-01");
-const nov24 = new Date("2024-11-01");
+const nov24 = new Date("2024-11-30");
 const aout25 = new Date("2025-08-31");
 const aout26 = new Date("2026-08-31");
 const now = new Date("2024-12-28");
@@ -42,6 +42,15 @@ const marseille = {
 };
 
 describe("ingestEffectifV2", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    return () => {
+      vi.useRealTimers();
+    };
+  });
+
   it("doit créer l'effectif si celle-ci n'existe pas", async () => {
     const result = await ingestEffectifV2({
       dossier: {
@@ -74,7 +83,17 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: now,
+      _computed: {
+        statut: {
+          en_cours: "ABANDON",
+          parcours: [
+            { date: sept24, valeur: "INSCRIT" },
+            { date: nov24, valeur: "ABANDON" },
+          ],
+        },
+      },
     };
 
     expect(result).toEqual({
@@ -86,7 +105,7 @@ describe("ingestEffectifV2", () => {
   });
 
   it("doit mettre à jour l'effectif si celui-ci existe", async () => {
-    const existingEffectif = {
+    const existingEffectif: IEffectifV2 = {
       _id: new ObjectId(),
       identifiant: {
         person_id: new ObjectId(),
@@ -104,7 +123,17 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: lastWeek,
+      _computed: {
+        statut: {
+          en_cours: "ABANDON",
+          parcours: [
+            { date: sept24, valeur: "INSCRIT" },
+            { date: nov24, valeur: "ABANDON" },
+          ],
+        },
+      },
     };
 
     await effectifV2Db().insertOne(existingEffectif);
@@ -116,6 +145,7 @@ describe("ingestEffectifV2", () => {
         date_entree_formation: sept24,
         date_inscription_formation: juil24,
         date_fin_formation: aout26,
+        rqth_apprenant: true,
       },
       person_id: existingEffectif.identifiant.person_id,
       formation_id: existingEffectif.identifiant.formation_id,
@@ -126,6 +156,7 @@ describe("ingestEffectifV2", () => {
     const expectedResult = {
       ...existingEffectif,
       derniere_transmission: now,
+      informations_personnelles: { rqth: true },
     };
     expect(result).toEqual(expectedResult);
 
@@ -139,7 +170,7 @@ describe("ingestEffectifV2", () => {
     const formation1 = new ObjectId();
     const formation2 = new ObjectId();
 
-    const existingEffectifs = [
+    const existingEffectifs: IEffectifV2[] = [
       {
         _id: new ObjectId(),
         identifiant: {
@@ -158,7 +189,17 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
+        _computed: {
+          statut: {
+            en_cours: "ABANDON",
+            parcours: [
+              { date: sept24, valeur: "INSCRIT" },
+              { date: nov24, valeur: "ABANDON" },
+            ],
+          },
+        },
       },
       {
         _id: new ObjectId(),
@@ -178,7 +219,17 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
+        _computed: {
+          statut: {
+            en_cours: "ABANDON",
+            parcours: [
+              { date: sept24, valeur: "INSCRIT" },
+              { date: nov24, valeur: "ABANDON" },
+            ],
+          },
+        },
       },
       {
         _id: new ObjectId(),
@@ -198,7 +249,17 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
+        _computed: {
+          statut: {
+            en_cours: "ABANDON",
+            parcours: [
+              { date: sept24, valeur: "INSCRIT" },
+              { date: nov24, valeur: "ABANDON" },
+            ],
+          },
+        },
       },
       {
         _id: new ObjectId(),
@@ -218,7 +279,17 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
+        informations_personnelles: { rqth: false },
         derniere_transmission: lastWeek,
+        _computed: {
+          statut: {
+            en_cours: "ABANDON",
+            parcours: [
+              { date: sept24, valeur: "INSCRIT" },
+              { date: nov24, valeur: "ABANDON" },
+            ],
+          },
+        },
       },
     ];
 
@@ -259,6 +330,15 @@ describe("ingestEffectifV2", () => {
       {
         date_inscription: aout24,
         session: { debut: aout24, fin: aout25 },
+        _computed: {
+          statut: {
+            en_cours: "ABANDON",
+            parcours: [
+              { date: aout24, valeur: "INSCRIT" },
+              { date: new Date("2024-11-29"), valeur: "ABANDON" },
+            ],
+          },
+        },
       },
     ],
     [
@@ -310,7 +390,7 @@ describe("ingestEffectifV2", () => {
     [{ annee_scolaire: "2025-2025" }, { annee_scolaires: ["2024-2025", "2025-2025"] }],
     [{ id_erp_apprenant: "#2" }, { id_erp: ["#1", "#2"] }],
   ])("doit mettre à jour l'effectif avec le dossier '%s'", async (updatedDossier, expectedUpdates) => {
-    const existingEffectif = {
+    const existingEffectif: IEffectifV2 = {
       _id: new ObjectId(),
       identifiant: {
         person_id: new ObjectId(),
@@ -328,7 +408,17 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: lastWeek,
+      _computed: {
+        statut: {
+          en_cours: "ABANDON",
+          parcours: [
+            { date: sept24, valeur: "INSCRIT" },
+            { date: nov24, valeur: "ABANDON" },
+          ],
+        },
+      },
     };
 
     await effectifV2Db().insertOne(existingEffectif);
@@ -379,7 +469,17 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
+      informations_personnelles: { rqth: false },
       derniere_transmission: now,
+      _computed: {
+        statut: {
+          en_cours: "ABANDON",
+          parcours: [
+            { date: sept24, valeur: "INSCRIT" },
+            { date: nov24, valeur: "ABANDON" },
+          ],
+        },
+      },
     };
 
     const commonParams: IIngestEffectifV2Params = {
@@ -475,13 +575,22 @@ describe("ingestEffectifV2", () => {
               date_rupture: aout24,
             },
           },
-          "2024-11-01": {
+          "2024-11-30": {
             date_debut: nov24,
             date_fin: aout25,
             employeur: {
               siret: null,
             },
             rupture: null,
+          },
+        },
+        _computed: {
+          statut: {
+            en_cours: "APPRENTI",
+            parcours: [
+              { date: sept24, valeur: "INSCRIT" },
+              { date: nov24, valeur: "APPRENTI" },
+            ],
           },
         },
       });

@@ -2,10 +2,11 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { zEffectifAnneeScolaire } from "../effectifs.model";
+import { zEffectifAnneeScolaire, zEffectifComputedStatut } from "../effectifs.model";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "identifiant.formation_id": 1, "identifiant.person_id": 1 }, { unique: true }],
+  [{ annee_scolaires: 1, "adresse.mission_locale_id": 1 }, {}],
 ];
 
 const collectionName = "effectifV2";
@@ -79,6 +80,14 @@ const zEffectifV2 = z.object({
   contrats: z.record(zContrat),
 
   derniere_transmission: z.date(),
+
+  informations_personnelles: z.object({
+    rqth: z.boolean(),
+  }),
+
+  _computed: z.object({
+    statut: zEffectifComputedStatut,
+  }),
 });
 
 export type IEffectifV2 = z.output<typeof zEffectifV2>;

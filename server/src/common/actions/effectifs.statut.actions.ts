@@ -1,10 +1,11 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { cloneDeep } from "lodash-es";
-import { MongoServerError, UpdateFilter, type WithoutId } from "mongodb";
+import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
-import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IContrat } from "shared/models/data/effectifs/contrat.part";
+import type { IFormationEffectif } from "shared/models/data/effectifs/formation.part";
+import { IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 import { addDaysUTC } from "shared/utils";
 
 import { IEffectifGenerique } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -13,6 +14,12 @@ import logger from "../logger";
 
 const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
 const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
+
+type ICreateComputedStatutObjectParams = Readonly<{
+  apprenant: Readonly<Pick<IEffectifApprenant, "historique_statut">>;
+  formation?: Readonly<Pick<IFormationEffectif, "date_entree" | "periode" | "date_fin">> | null | undefined;
+  contrats?: Pick<IContrat, "date_debut" | "date_rupture">[] | null | undefined;
+}>;
 
 export async function updateEffectifStatut(
   effectif: IEffectifGenerique,
@@ -50,7 +57,7 @@ function shouldUpdateStatut(effectif: IEffectifGenerique): boolean {
  * @returns {IEffectifComputedStatut} L'objet de statut calculé pour l'effectif.
  */
 export function createComputedStatutObject(
-  effectif: WithoutId<IEffectif | IEffectifDECA>,
+  effectif: ICreateComputedStatutObjectParams,
   evaluationDate: Date
 ): IEffectifComputedStatut | null {
   try {
@@ -107,7 +114,7 @@ function handleUpdateError(err: unknown, effectif: IEffectifGenerique) {
 }
 
 const generateUnifiedParcours = (
-  effectif: WithoutId<IEffectif | IEffectifDECA>,
+  effectif: ICreateComputedStatutObjectParams,
   evaluationDate: Date
 ): { valeur: StatutApprenant; date: Date }[] => {
   let parcours: { valeur: StatutApprenant; date: Date }[] = [];
@@ -149,7 +156,7 @@ function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: D
 }
 
 function determineStatutsByContrats(
-  effectif: WithoutId<IEffectif | IEffectifDECA>,
+  effectif: ICreateComputedStatutObjectParams,
   evaluationDate?: Date
 ): { valeur: StatutApprenant; date: Date }[] {
   if (!effectif.formation?.date_entree && !effectif.formation?.date_fin) {
@@ -166,7 +173,7 @@ function determineStatutsByContrats(
   let contracts =
     effectif.contrats
       ?.map((contract) => ({
-        dateDebut: new Date(contract.date_debut),
+        dateDebut: new Date(contract.date_debut ?? 0),
         dateRupture: contract.date_rupture ? new Date(contract.date_rupture) : null,
       }))
       .sort((a, b) => a.dateDebut.getTime() - b.dateDebut.getTime()) || [];
