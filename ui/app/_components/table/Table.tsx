@@ -2,9 +2,10 @@
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Table as MuiTable, TableBody, TableCell, TableContainer, TableRow, Paper, Typography } from "@mui/material";
+import { get } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, ReactNode, useMemo, isValidElement } from "react";
 
 interface ColumnData {
   label: string;
@@ -24,9 +25,22 @@ interface TableProps {
   columns: ColumnData[];
   itemsPerPage?: number;
   searchTerm?: string;
-  getRowLink?: (rowData: TableRowData) => string;
+  searchableColumns?: string[];
+  columnWidths?: string[];
+  getRowLink?: (rawData: any) => string;
   className?: string;
   emptyMessage?: string;
+}
+
+function extractTextFromReactNode(node: ReactNode): string {
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) {
+    return node.map(extractTextFromReactNode).join(" ");
+  }
+  if (isValidElement(node) && node.props.children) {
+    return extractTextFromReactNode(node.props.children);
+  }
+  return "";
 }
 
 export function Table({
@@ -35,6 +49,7 @@ export function Table({
   columns,
   itemsPerPage = 10,
   searchTerm = "",
+  searchableColumns,
   getRowLink,
   className,
   emptyMessage = "Aucun élément à afficher",
@@ -44,12 +59,28 @@ export function Table({
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
-    const searchableColumns = columns.filter((col) => col.searchable);
-    if (searchableColumns.length === 0) return data;
-    return matchSorter(data, searchTerm, {
-      keys: searchableColumns.map((col) => col.dataKey),
+
+    const rowsAsObjects = data.map(({ rawData, element }, index) => {
+      const columnsToSearch =
+        searchableColumns && searchableColumns.length > 0
+          ? searchableColumns.reduce((acc, rawDataPath: string) => {
+              acc.push(extractTextFromReactNode(get(rawData, rawDataPath)));
+              return acc;
+            }, [] as string[])
+          : element.map((cell) => extractTextFromReactNode(cell));
+
+      const combinedText = columnsToSearch.join(" ");
+      return {
+        originalIndex: index,
+        element,
+        combinedText,
+        rawData,
+      };
     });
-  }, [data, columns, searchTerm]);
+
+    const matched = matchSorter(rowsAsObjects, searchTerm, { keys: ["combinedText"] });
+    return matched.map(({ element, rawData }) => ({ element, rawData }));
+  }, [data, searchTerm, searchableColumns]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(filteredData.length / itemsPerPage));

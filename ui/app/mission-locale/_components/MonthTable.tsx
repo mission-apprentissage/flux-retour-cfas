@@ -115,6 +115,14 @@ export const MonthTable = memo(function MonthTable({
           data={dataRows}
           columns={columns}
           searchTerm={searchTerm}
+          searchableColumns={[
+            "nom",
+            "prenom",
+            "libelle_formation",
+            "organisme_nom",
+            "organisme_raison_sociale",
+            "organisme_enseigne",
+          ]}
           itemsPerPage={5}
           getRowLink={(rowData) => `/mission-locale/${rowData.id}`}
           emptyMessage="Aucun élément à afficher"
