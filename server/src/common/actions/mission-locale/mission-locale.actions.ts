@@ -673,3 +673,51 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
     }
   }
 };
+
+export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
+  const aggregation = [
+    {
+      $match: {
+        "brevo.token": token 
+      } 
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        let: { id: { $toString: "$mission_locale_id" } },
+        pipeline: [
+          { $match: { type: "MISSION_LOCALE" } },
+          { $match: { $expr: { $eq: ["$id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1
+            },
+          },
+        ],
+        as: "organisation",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisation",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        "missionLocale.nom": "$organisation.nom",
+        telephone: "$effectif_snapshot.apprenant.telephone"
+      }
+    }
+  ]
+
+  const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
+
+  if (!effectif) {
+    throw Boom.notFound();
+  }
+
+  return effectif;
+
+}
