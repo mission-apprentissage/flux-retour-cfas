@@ -8881,6 +8881,60 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "_id": {
       "bsonType": "objectId",
     },
+    "brevo": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "history": {
+          "anyOf": [
+            {
+              "bsonType": "array",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "token": {
+                    "bsonType": "string",
+                  },
+                  "token_created_at": {
+                    "bsonType": "date",
+                  },
+                  "token_expired_at": {
+                    "bsonType": "date",
+                  },
+                },
+                "required": [
+                  "token",
+                ],
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "token": {
+          "anyOf": [
+            {
+              "bsonType": "string",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "token_created_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
     "commentaires": {
       "bsonType": "string",
     },
@@ -13868,6 +13922,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_id",
     "created_at",
     "effectif_snapshot",
+    "brevo",
   ],
 }
 `;
