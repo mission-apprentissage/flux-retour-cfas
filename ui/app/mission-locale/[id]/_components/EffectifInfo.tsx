@@ -54,19 +54,42 @@ export function EffectifInfo({ effectif }) {
 }
 
 function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
+  const withDefaultFallback = (data, defaultText, value?) => {
+    const defaultValue = value ?? "";
+    return data ? defaultValue : <span style={{ color: "#666666", fontStyle: "italic" }}>{defaultText}</span>;
+  };
+
   return (
     <Grid container spacing={2} p={3} sx={{ backgroundColor: "var(--background-default-grey-active)" }}>
       <Grid size={8}>
         <Stack direction="column" spacing={1}>
-          <Typography>
-            Née le {formatDate(effectif.date_de_naissance)} ({getAge(effectif.date_de_naissance) || "?"} ans)
+          <Typography display="inline">
+            Née le{" "}
+            {withDefaultFallback(
+              effectif.date_de_naissance,
+              "date de naissance non renseignée",
+              `${formatDate(effectif.date_de_naissance)} (${getAge(effectif.date_de_naissance) || "?"} ans)`
+            )}
           </Typography>
-          <Typography>
-            Réside à {effectif.adresse?.commune} ({effectif.adresse?.code_postal})
+          <Typography display="inline">
+            Réside à{" "}
+            {withDefaultFallback(effectif.adresse?.commune, "commune non renseignée", effectif.adresse?.commune)}{" "}
+            {withDefaultFallback(effectif.adresse?.code_postal, null, `(${effectif.adresse?.code_postal})`)}
           </Typography>
-          <Typography>{effectif.formation?.libelle_long}</Typography>
-          <Typography>
-            {effectif.organisme?.adresse?.commune} ({effectif.organisme?.adresse?.departement})
+          <Typography display="inline">
+            {withDefaultFallback(effectif.formation?.libelle_long, "Intitulé de la formation non renseigné")}
+          </Typography>
+          <Typography display="inline">
+            {withDefaultFallback(
+              effectif.organisme?.nom,
+              "Organisme de formation non renseigné",
+              effectif.organisme?.nom
+            )}{" "}
+            {withDefaultFallback(
+              effectif.organisme?.adresse?.departement,
+              null,
+              `(${effectif.organisme?.adresse?.departement})`
+            )}
           </Typography>
           <Typography>RQTH : {effectif.rqth ? "oui" : "non"}</Typography>
           <DsfrLink
@@ -93,10 +116,18 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
               <Typography mt={1} fontWeight="bold">
                 Coordonnées du CFA
               </Typography>
-              {effectif.organisme?.nom && <Typography>{effectif.organisme?.nom}</Typography>}
               {effectif.organisme?.contacts_from_referentiel?.map((contact, idx) => (
                 <Stack key={idx} direction="column" spacing={1}>
                   <Typography>E-mail : {contact.email || "non renseigné"}</Typography>
+                </Stack>
+              ))}
+              {effectif.contacts_tdb?.map(({ email, telephone, nom, prenom, fonction }, idx) => (
+                <Stack key={idx} direction="column" spacing={1}>
+                  <Typography>
+                    {nom} {prenom} {fonction ? `(${fonction})` : ""}
+                  </Typography>
+                  <Typography>E-mail : {email || "non renseigné"}</Typography>
+                  <Typography>Téléphone : {telephone || "non renseigné"}</Typography>
                 </Stack>
               ))}
             </Stack>

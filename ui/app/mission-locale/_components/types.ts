@@ -3,6 +3,9 @@ export type EffectifData = {
   nom: string;
   prenom: string;
   libelle_formation: string;
+  organisme_nom: string;
+  organisme_raison_sociale: string;
+  organisme_enseigne: string;
 };
 
 export type MonthItem = {
