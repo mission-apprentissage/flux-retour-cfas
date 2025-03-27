@@ -28,6 +28,17 @@ export const formatJsonToXlsx = (
   data: Array<any>,
   format: Array<{ name: string; id: string; array?: string; transform?: (data: any) => any }>
 ) => {
+  const attributeSizeMap = {};
+  /**
+   * Extenstion du tableau à la taille en entrée (padding)
+   * @param arr Le tableau à étendre
+   * @param size La taille visé
+   * @returns Le nouveau tableau étendu
+   */
+  const extendArrayWithSize = (arr: Array<any>, size: number) => {
+    const l = arr.length;
+    return arr.concat(Array(size - l).fill(null));
+  };
   /**
    * Création de n column numéroté de 1 à n
    * @param name Le nom de la colonne
@@ -35,6 +46,8 @@ export const formatJsonToXlsx = (
    */
   const generateNColumnForAttribute = (name, array) => {
     const maxElement = getMaxElementForAttribute(array);
+    attributeSizeMap[array] = maxElement;
+
     if (maxElement > 1) {
       return Array(maxElement)
         .fill(null)
@@ -67,7 +80,12 @@ export const formatJsonToXlsx = (
       return format.reduce((acc, { id, transform, array }) => {
         const computeSingleData = (d) => (transform ? transform(d) : d);
         const handleData = () =>
-          array ? r[array].map((arrAttribute) => computeSingleData(arrAttribute[id])) : [computeSingleData(r[id])];
+          array
+            ? extendArrayWithSize(
+                r[array].map((arrAttribute) => computeSingleData(arrAttribute[id])),
+                attributeSizeMap[array]
+              )
+            : [computeSingleData(r[id])];
         return [...acc, ...handleData()];
       }, [] as Array<any>);
     }),
