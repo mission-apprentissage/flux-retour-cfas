@@ -132,7 +132,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} md={4} size={3}>
+      <Grid size={{ xs: 12, md: 3 }}>
         <SideMenu
           align="left"
           burgerMenuButtonText="Dans cette rubrique"
@@ -141,8 +141,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
           style={{ paddingRight: 0 }}
         />
       </Grid>
-
-      <Grid item xs={12} md={8} size={9} pl={4}>
+      <Grid size={{ xs: 12, md: 9 }} pl={{ sx: 0, md: 4 }}>
         {selectedSection === "a-traiter" && sortedDataATraiter.length === 0 && (
           <MlCard
             title="Il n’y pas de nouveaux jeunes à contacter pour le moment"

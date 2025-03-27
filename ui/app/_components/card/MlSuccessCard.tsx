@@ -12,7 +12,7 @@ export const MlSuccessCard = ({
       spacing={2}
       alignItems="center"
       p={3}
-      style={{
+      sx={{
         border: "1px solid var(--border-default-grey)",
         width: "100%",
       }}
