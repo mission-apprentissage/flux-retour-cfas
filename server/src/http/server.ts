@@ -978,6 +978,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/campagne", campagneRouter());
+  app.use("/api/v1/campagne", campagneRouter());
   app.use(authRouter);
 }

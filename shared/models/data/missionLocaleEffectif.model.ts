@@ -52,15 +52,17 @@ const zMissionLocaleEffectif = z.object({
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
   brevo: z.object({
-    token: z.string().uuid(),
-    token_created_at: z.date().optional(),
-    history: z.array(
-      z.object({
-        token: z.string().uuid(),
-        token_created_at: z.date().optional(),
-        token_expired_at: z.date().optional(),
-      })
-    ),
+    token: z.string().uuid().nullish(),
+    token_created_at: z.date().nullish(),
+    history: z
+      .array(
+        z.object({
+          token: z.string().uuid(),
+          token_created_at: z.date().optional(),
+          token_expired_at: z.date().optional(),
+        })
+      )
+      .nullish(),
   }),
 });
 
