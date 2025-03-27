@@ -24,10 +24,6 @@ function TextCellComponent({ value }) {
   );
 }
 
-function getRelatedFormationToOrganisme(organisme: IOrganismeJson, toOrganismeId: unknown) {
-  return organisme.relatedFormations?.filter((f) => f.organismes?.some((o) => o.organisme_id === toOrganismeId)) ?? [];
-}
-
 type RelatedOrganismeFormationListProps = {
   organisme: IOrganismeJson;
   relatedFormations: Array<OffreFormation | (Partial<OffreFormation> & { cle_ministere_educatif: string })>;
@@ -111,6 +107,14 @@ type RelatedOrganismeProps = {
   relatedOrganisme: IRelatedOrganismeJson;
 };
 
+function isFormateur(org: Pick<IOrganismeJson, "uai" | "siret">, formation: OffreFormation) {
+  return org.siret === formation.formateur.siret && org.uai === formation.formateur.uai;
+}
+
+function isGestionaire(org: Pick<IOrganismeJson, "uai" | "siret">, formation: OffreFormation) {
+  return org.siret === formation.gestionnaire.siret && org.uai === formation.gestionnaire.uai;
+}
+
 function RelatedOrganisme({ organisme, relatedOrganisme, formations }: RelatedOrganismeProps) {
   const formationByCleMe: Map<unknown, OffreFormation> = useMemo(() => {
     const byCle = new Map();
@@ -121,17 +125,9 @@ function RelatedOrganisme({ organisme, relatedOrganisme, formations }: RelatedOr
   }, [formations]);
 
   const relatedFormations = useMemo(() => {
-    const result: RelatedOrganismeFormationListProps["relatedFormations"] = [];
-
-    for (const relatedFormation of getRelatedFormationToOrganisme(organisme, relatedOrganisme._id)) {
-      if (relatedFormation.cle_ministere_educatif != null) {
-        const formation = formationByCleMe.get(relatedFormation.cle_ministere_educatif) ?? {
-          cle_ministere_educatif: relatedFormation.cle_ministere_educatif,
-        };
-
-        result.push(formation);
-      }
-    }
+    const result: RelatedOrganismeFormationListProps["relatedFormations"] = formations.filter((f) => {
+      return isFormateur(relatedOrganisme, f) || isGestionaire(relatedOrganisme, f);
+    });
 
     const intl = new Intl.Collator("fr");
 

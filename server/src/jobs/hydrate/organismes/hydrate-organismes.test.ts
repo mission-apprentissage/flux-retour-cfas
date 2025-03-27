@@ -1,4 +1,5 @@
 import type { IOrganisme as IOrganismeApi } from "api-alternance-sdk";
+import { generateOrganismeFixture as generateOrganismeApiFixture } from "api-alternance-sdk/fixtures";
 import { ObjectId } from "mongodb";
 import type { IOrganisme } from "shared/models";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
@@ -21,7 +22,7 @@ const lastYear = new Date("2023-01-29T00:00:00.000Z");
 describe("hydrateOrganismesFromReferentiel", () => {
   const organismesApi: IOrganismeApi[][] = [
     [
-      {
+      generateOrganismeApiFixture({
         contacts: [
           {
             email: "contact@mail.com",
@@ -84,8 +85,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
           raison_sociale: "UNIVERSITE DE LILLE",
           siren: "130029754",
         },
-      },
-      {
+      }),
+      generateOrganismeApiFixture({
         contacts: [],
         identifiant: {
           siret: "26220009000278",
@@ -137,8 +138,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
           raison_sociale: "CENTRE HOSPITALIER DE SAINT-BRIEUC, PAIMPOL ET TREGUIER",
           siren: "262200090",
         },
-      },
-      {
+      }),
+      generateOrganismeApiFixture({
         identifiant: {
           uai: null,
           siret: "19590065900028",
@@ -190,10 +191,10 @@ describe("hydrateOrganismesFromReferentiel", () => {
           creation: new Date("-178938000"),
           cessation: null,
         },
-      },
+      }),
     ],
     [
-      {
+      generateOrganismeApiFixture({
         identifiant: {
           uai: "0802230P",
           siret: "81171016900012",
@@ -225,7 +226,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
           cessation: null,
         },
         contacts: [],
-      },
+      }),
     ],
   ];
 
@@ -245,6 +246,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
         coordinates: [3.098, 50.611],
       },
       contacts_from_referentiel: organismesApi[0][0].contacts,
+      formations_count: 0,
       enseigne: "FACULTE SCIENCES SPORT ET EDUCATION PHYSIQUE",
       est_dans_le_referentiel: "present",
       ferme: false,
@@ -273,6 +275,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       contacts_from_referentiel: [],
       enseigne: "ECOLE D'AIDE SOIGNANTS",
       est_dans_le_referentiel: "present",
+      formations_count: 0,
       ferme: false,
       fiabilisation_statut: "FIABLE",
       nature: "inconnue",

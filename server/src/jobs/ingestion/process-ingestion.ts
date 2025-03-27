@@ -162,7 +162,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   const start = Date.now();
   try {
     //Process du nouveau schéma de données
-    handleEffectifTransmission(effectifQueue);
+    await handleEffectifTransmission(effectifQueue, new Date());
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger

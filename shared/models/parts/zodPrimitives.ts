@@ -1,6 +1,6 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
-import parsePhoneNumber from "libphonenumber-js";
+import parsePhoneNumberFromString from "libphonenumber-js";
 import { capitalize } from "lodash-es";
 import { z } from "zod";
 
@@ -46,7 +46,7 @@ export const extensions = {
           if (v === null || v === undefined) {
             return true;
           }
-          const parsed = parsePhoneNumber(v, "FR"); // Default indicator if none provided
+          const parsed = parsePhoneNumberFromString(v, "FR"); // Default indicator if none provided
           return parsed?.isValid();
         },
         {

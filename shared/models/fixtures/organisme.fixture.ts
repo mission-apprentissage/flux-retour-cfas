@@ -9,6 +9,7 @@ export function generateOrganismeFixture(data?: Partial<IOrganisme>): IOrganisme
     created_at: new Date("2020-01-01T00:00:00.000Z"),
     updated_at: new Date("2021-09-01T00:00:00.000Z"),
     contacts_from_referentiel: [],
+    formations_count: 0,
     ...data,
   };
 }

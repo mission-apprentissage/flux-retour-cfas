@@ -25,6 +25,7 @@ import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
+import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -35,17 +36,22 @@ import {
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromApiAlternance } from "./hydrate/organismes/hydrate-organismes";
-import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
+import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
+import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
   await addJob({ name: "hydrate:formations-catalogue", queued });
+
+  await addJob({ name: "import:formation", queued });
+
+  await addJob({ name: "import:formation", queued });
 
   // # Remplissage des organismes depuis le référentiel
   await addJob({ name: "hydrate:organismes", queued });
@@ -53,8 +59,8 @@ const dailyJobs = async (queued: boolean) => {
   // # Mise à jour des relations
   await addJob({ name: "hydrate:organismes-relations", queued });
 
-  // # Remplissage des formations des organismes
-  await addJob({ name: "hydrate:organismes-formations", queued });
+  // # Mise à jour du compteur de formations par organisme
+  await addJob({ name: "hydrate:organismes-formations-count", queued });
 
   // # Remplissage des OPCOs
   await addJob({ name: "hydrate:opcos", queued });
@@ -112,6 +118,11 @@ export async function setupJobProcessor() {
               handler: cleanupOrganismes,
             },
 
+            "Import formations": {
+              cron_string: "0 3 * * *",
+              handler: hydrateFormationV2,
+            },
+
             "Send reminder emails at 7h": {
               cron_string: "0 7 * * *",
               handler: async () => {
@@ -144,6 +155,9 @@ export async function setupJobProcessor() {
       "init:dev": {
         handler: async () => dailyJobs(false),
       },
+      "import:formation": {
+        handler: hydrateFormationV2,
+      },
       "hydrate:daily": {
         handler: async () => dailyJobs(true),
       },
@@ -157,10 +171,8 @@ export async function setupJobProcessor() {
           return hydrateRNCP();
         },
       },
-      "hydrate:organismes-formations": {
-        handler: async () => {
-          return hydrateOrganismesFormations();
-        },
+      "hydrate:organismes-formations-count": {
+        handler: hydrateOrganismesFormationsCount,
       },
       "hydrate:organismes-relations": {
         handler: async () => {
@@ -347,6 +359,9 @@ export async function setupJobProcessor() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return createMigration(job.payload as any);
         },
+      },
+      "tmp:migrate:effectifs": {
+        handler: migrateEffectifs,
       },
     },
   });
