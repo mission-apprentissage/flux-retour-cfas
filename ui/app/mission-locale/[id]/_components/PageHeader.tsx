@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Skeleton, Typography } from "@mui/material";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
@@ -26,15 +28,23 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
       <Box display="flex" alignItems="center">
         {!isLoading && total !== undefined ? (
           <>
-            <Typography fontWeight="bold">
-              Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
-            </Typography>
-            <Typography component="span" sx={{ marginLeft: 1 }}>
-              (tous mois confondus)
-            </Typography>
+            <Box display={{ xs: "none", sm: "flex" }} alignItems="center">
+              <Typography fontWeight="bold">
+                Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
+              </Typography>
+              <Typography component="span" sx={{ marginLeft: 1 }}>
+                (tous mois confondus)
+              </Typography>
+            </Box>
+
+            <Box display={{ xs: "flex", sm: "none" }} alignItems="center">
+              <Typography fontWeight="bold">
+                {currentIndex + 1}/{total}
+              </Typography>
+            </Box>
           </>
         ) : (
-          <Skeleton animation="wave" variant="text" width={480} />
+          <Skeleton animation="wave" variant="text" width={180} />
         )}
       </Box>
 
