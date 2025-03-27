@@ -51,6 +51,17 @@ const zMissionLocaleEffectif = z.object({
   commentaires: z.string().optional(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
+  brevo: z.object({
+    token: z.string().uuid(),
+    token_created_at: z.date().optional(),
+    history: z.array(
+      z.object({
+        token: z.string().uuid(),
+        token_created_at: z.date().optional(),
+        token_expired_at: z.date().optional(),
+      })
+    ),
+  }),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

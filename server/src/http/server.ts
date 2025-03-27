@@ -144,6 +144,7 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
+import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
@@ -977,5 +978,6 @@ function setupRoutes(app: Application) {
       )
   );
 
+  app.use("/campagne", campagneRouter());
   app.use(authRouter);
 }
