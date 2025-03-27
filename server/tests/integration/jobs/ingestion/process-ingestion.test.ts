@@ -298,12 +298,12 @@ describe("Processus d'ingestion", () => {
               opcos: [],
             },
             statut: {
-              en_cours: "FIN_DE_FORMATION",
+              en_cours: "RUPTURANT",
               parcours: [
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "INSCRIT" },
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "APPRENTI" },
-                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "RUPTURANT" },
                 { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "FIN_DE_FORMATION" },
+                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "RUPTURANT" },
               ],
             },
           },

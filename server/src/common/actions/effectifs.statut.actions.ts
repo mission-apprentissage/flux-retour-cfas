@@ -144,7 +144,7 @@ const generateUnifiedParcours = (
 
 function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: Date }[]) {
   return parcours
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .sort(sortStatusDate)
     .filter((event, index, array) => index === 0 || event.valeur !== array[index - 1].valeur);
 }
 
@@ -212,6 +212,26 @@ function determineStatutsByContrats(
 
   return statuts.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
+
+const sortStatusDate = (a: { valeur: StatutApprenant; date: Date }, b: { valeur: StatutApprenant; date: Date }) => {
+  const statusPriority = {
+    ABANDON: 0,
+    PRE_INSCRIT: 0,
+    INSCRIT: 0,
+    APPRENTI: 0,
+    FIN_DE_FORMATION: 1,
+    RUPTURANT: 2,
+  };
+
+  const aDate = a.date.getTime();
+  const bDate = b.date.getTime();
+
+  if (aDate === bDate) {
+    return statusPriority[a.valeur] - statusPriority[b.valeur];
+  }
+
+  return aDate - bDate;
+};
 
 function determineNewStatutFromHistorique(
   historiqueStatut: IEffectifApprenant["historique_statut"],
