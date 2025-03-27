@@ -1,3 +1,5 @@
+"use client";
+
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -9,7 +11,7 @@ import { SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSaving, hasSuccess, hasError }) {
   return (
     <>
-      <Box p={2} sx={{ border: "1px solid var(--border-default-blue-france)" }}>
+      <Box p={3} sx={{ border: "1px solid var(--border-default-blue-france)" }}>
         <RadioButtons
           legend="Quel est votre retour sur la prise de contact ?"
           orientation="vertical"
@@ -180,9 +182,13 @@ function FormActions({ isFormValid, onSave, isSaving, hasSuccess }) {
 
 function SaveButton({ type, selectedButton, isSaving, hasSuccess, disabled, onClick, children }) {
   const showLoader = selectedButton === type && (isSaving || hasSuccess);
+  const priority = type === "saveAndQuit" ? "secondary" : "primary";
+
+  const buttonStyle =
+    hasSuccess && selectedButton === type ? { background: "var(--background-flat-success)", color: "#fff" } : undefined;
 
   return (
-    <Button priority={type === "saveAndQuit" ? "secondary" : "primary"} disabled={disabled} onClick={onClick}>
+    <Button priority={priority} disabled={disabled} onClick={onClick} style={buttonStyle}>
       {showLoader ? renderButtonContent({ isSaving, hasSuccess, defaultLabel: children }) : children}
     </Button>
   );

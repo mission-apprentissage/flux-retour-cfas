@@ -159,18 +159,26 @@ export default function Page() {
 
   return (
     <Grid container>
-      <Grid size={{ xs: 12, md: 3 }}>
+      <Grid
+        size={{ xs: 12, md: 3 }}
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: { xs: 2, md: 2 },
+        }}
+      >
         <DsfrLink href="/mission-locale" arrow="left">
           Retour à la liste
         </DsfrLink>
       </Grid>
+
       <Grid
         size={{ xs: 12, md: 9 }}
-        pl={4}
         sx={{
-          "--Grid-borderWidth": "1px",
-          borderLeft: "var(--Grid-borderWidth) solid",
+          borderLeft: "1px solid",
           borderColor: "var(--border-default-grey)",
+          pl: { xs: 2, md: 6 },
+          pr: { xs: 2, md: 2 },
+          py: { xs: 2, md: 2 },
         }}
       >
         <SuspenseWrapper fallback={<RightColumnSkeleton />}>
