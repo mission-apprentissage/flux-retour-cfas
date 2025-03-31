@@ -313,6 +313,18 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
         "formation_id",
       ],
     },
+    "informations_personnelles": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "rqth": {
+          "bsonType": "bool",
+        },
+      },
+      "required": [
+        "rqth",
+      ],
+    },
     "session": {
       "additionalProperties": false,
       "bsonType": "object",
@@ -342,6 +354,7 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
     "adresse",
     "contrats",
     "derniere_transmission",
+    "informations_personnelles",
     "_computed",
   ],
 }

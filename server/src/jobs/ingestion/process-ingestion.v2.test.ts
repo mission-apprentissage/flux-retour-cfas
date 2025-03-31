@@ -283,6 +283,9 @@ describe("process-ingestion.v2", () => {
       },
       contrats: {},
       derniere_transmission: now,
+      informations_personnelles: {
+        rqth: false,
+      },
       _computed: {
         statut: {
           en_cours: "ABANDON",
