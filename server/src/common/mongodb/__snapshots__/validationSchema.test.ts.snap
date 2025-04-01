@@ -40,73 +40,322 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
   "bsonType": "object",
   "properties": {
     "_computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "statut": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "en_cours": {
+              "bsonType": "string",
+              "enum": [
+                "ABANDON",
+                "PRE_INSCRIT",
+                "INSCRIT",
+                "APPRENTI",
+                "RUPTURANT",
+                "FIN_DE_FORMATION",
+              ],
+            },
+            "parcours": {
+              "bsonType": "array",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "date": {
+                    "bsonType": "date",
+                  },
+                  "valeur": {
+                    "bsonType": "string",
+                    "enum": [
+                      "ABANDON",
+                      "PRE_INSCRIT",
+                      "INSCRIT",
+                      "APPRENTI",
+                      "RUPTURANT",
+                      "FIN_DE_FORMATION",
+                    ],
+                  },
+                },
+                "required": [
+                  "date",
+                  "valeur",
+                ],
+              },
+            },
+          },
+          "required": [
+            "en_cours",
+            "parcours",
+          ],
+        },
+      },
+      "required": [
+        "statut",
+      ],
+    },
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "adresse": {
       "anyOf": [
         {
           "additionalProperties": false,
           "bsonType": "object",
           "properties": {
-            "date_de_naissance": {
-              "anyOf": [
-                {
-                  "anyOf": [
-                    {
-                      "bsonType": "date",
-                    },
-                    {
-                      "bsonType": "string",
-                    },
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
+            "code_academie": {
+              "bsonType": "string",
             },
-            "nom": {
+            "code_commune_insee": {
+              "bsonType": "string",
+            },
+            "code_departement": {
+              "bsonType": "string",
+            },
+            "code_postal": {
+              "bsonType": "string",
+            },
+            "code_region": {
+              "bsonType": "string",
+            },
+            "commune": {
+              "bsonType": "string",
+            },
+            "label": {
               "bsonType": [
                 "string",
                 "null",
               ],
             },
-            "prenom": {
+            "mission_locale_id": {
               "bsonType": [
-                "string",
+                "number",
                 "null",
               ],
             },
           },
+          "required": [
+            "label",
+            "code_postal",
+            "code_commune_insee",
+            "commune",
+            "code_region",
+            "code_departement",
+            "code_academie",
+            "mission_locale_id",
+          ],
         },
         {
           "bsonType": "null",
         },
       ],
     },
-    "_id": {
-      "bsonType": "objectId",
+    "annee_scolaires": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "description": "Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")",
+        "pattern": "^[12][0-9]{3}-[12][0-9]{3}$",
+      },
     },
-    "created_at": {
+    "contrats": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "date_debut": {
+            "bsonType": "date",
+          },
+          "date_fin": {
+            "anyOf": [
+              {
+                "bsonType": "date",
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+          "employeur": {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "siret": {
+                "bsonType": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "required": [
+              "siret",
+            ],
+          },
+          "rupture": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "cause": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                  },
+                  "date_rupture": {
+                    "bsonType": "date",
+                  },
+                },
+                "required": [
+                  "cause",
+                  "date_rupture",
+                ],
+              },
+              {
+                "bsonType": "null",
+              },
+            ],
+          },
+        },
+        "required": [
+          "date_debut",
+          "date_fin",
+          "employeur",
+          "rupture",
+        ],
+      },
+      "bsonType": "object",
+    },
+    "date_inscription": {
       "bsonType": "date",
     },
-    "draft": {
-      "bsonType": "bool",
-    },
-    "formation_id": {
-      "bsonType": "objectId",
-    },
-    "person_id": {
-      "bsonType": "objectId",
-    },
-    "updated_at": {
+    "derniere_transmission": {
       "bsonType": "date",
+    },
+    "diplome": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "obtention": {
+              "bsonType": "bool",
+            },
+          },
+          "required": [
+            "date",
+            "obtention",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "exclusion": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "cause": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "date": {
+              "bsonType": "date",
+            },
+          },
+          "required": [
+            "cause",
+            "date",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "id_erp": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+      },
+    },
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "formation_id": {
+          "bsonType": "objectId",
+        },
+        "person_id": {
+          "bsonType": "objectId",
+        },
+      },
+      "required": [
+        "person_id",
+        "formation_id",
+      ],
+    },
+    "informations_personnelles": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "rqth": {
+          "bsonType": "bool",
+        },
+      },
+      "required": [
+        "rqth",
+      ],
+    },
+    "session": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "debut": {
+          "bsonType": "date",
+        },
+        "fin": {
+          "bsonType": "date",
+        },
+      },
+      "required": [
+        "debut",
+        "fin",
+      ],
     },
   },
   "required": [
     "_id",
-    "created_at",
-    "updated_at",
-    "draft",
-    "formation_id",
-    "person_id",
+    "identifiant",
+    "annee_scolaires",
+    "id_erp",
+    "date_inscription",
+    "exclusion",
+    "diplome",
+    "session",
+    "adresse",
+    "contrats",
+    "derniere_transmission",
+    "informations_personnelles",
+    "_computed",
   ],
 }
 `;
@@ -8271,41 +8520,64 @@ exports[`validation-schema > should create validation schema for formationV2 > f
     "_id": {
       "bsonType": "objectId",
     },
-    "cfd": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
     "draft": {
       "bsonType": "bool",
     },
-    "organisme_formateur_id": {
-      "bsonType": "objectId",
-    },
-    "organisme_responsable_id": {
-      "bsonType": "objectId",
-    },
-    "rncp": {
-      "bsonType": [
-        "string",
-        "null",
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "cfd": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "formateur_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_siret": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "responsable_uai": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+        "rncp": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+      },
+      "required": [
+        "cfd",
+        "rncp",
+        "responsable_siret",
+        "responsable_uai",
+        "formateur_siret",
+        "formateur_uai",
       ],
-    },
-    "updated_at": {
-      "bsonType": "date",
     },
   },
   "required": [
     "_id",
+    "identifiant",
     "draft",
-    "created_at",
-    "updated_at",
-    "organisme_responsable_id",
-    "organisme_formateur_id",
   ],
 }
 `;
@@ -14417,44 +14689,9 @@ exports[`validation-schema > should create validation schema for organismeV2 > o
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "current_organisme_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Identifiant unique",
-    },
-    "draft": {
-      "bsonType": "bool",
-    },
-    "siret": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "uai": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "updated_at": {
-      "bsonType": "date",
-    },
   },
   "required": [
     "_id",
-    "draft",
-    "created_at",
-    "updated_at",
   ],
 }
 `;
@@ -14869,6 +15106,9 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date de la première transmission de données",
     },
+    "formations_count": {
+      "bsonType": "number",
+    },
     "geopoint": {
       "anyOf": [
         {
@@ -15158,360 +15398,6 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "string",
       "description": "Raison sociale de l'organisme de formation",
     },
-    "relatedFormations": {
-      "bsonType": "array",
-      "description": "Formations de cet organisme",
-      "items": {
-        "additionalProperties": false,
-        "bsonType": "object",
-        "properties": {
-          "annee_formation": {
-            "bsonType": "int",
-            "description": "Année millésime de la formation pour cet organisme",
-          },
-          "cle_ministere_educatif": {
-            "bsonType": "string",
-            "description": "Clé unique de la formation",
-          },
-          "duree_formation_theorique": {
-            "anyOf": [
-              {
-                "bsonType": "int",
-                "description": "Durée théorique de la formation en mois pour cet organisme",
-              },
-              {
-                "bsonType": "null",
-              },
-            ],
-            "description": "Durée théorique de la formation en mois pour cet organisme",
-          },
-          "formation_id": {
-            "bsonType": "objectId",
-            "description": "Identifiant unique",
-          },
-          "organismes": {
-            "bsonType": "array",
-            "items": {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "adresse": {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "description": "Adresse du lieu de formation (optionnel)",
-                  "properties": {
-                    "academie": {
-                      "bsonType": "string",
-                      "pattern": "^[0-9]{2}$",
-                    },
-                    "bassinEmploi": {
-                      "bsonType": "string",
-                      "description": "Code Bassin d'emploi",
-                    },
-                    "code_insee": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Le code insee doit contenir 5 caractères",
-                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Le code insee doit contenir 5 caractères",
-                    },
-                    "code_postal": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Le code postal doit contenir 5 caractères",
-                          "pattern": "^[0-9]{5}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Le code postal doit contenir 5 caractères",
-                    },
-                    "commune": {
-                      "bsonType": "string",
-                      "description": "Commune",
-                      "maxLength": 80,
-                    },
-                    "complement": {
-                      "bsonType": "string",
-                      "description": "Complément d'adresse",
-                    },
-                    "complete": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Adresse complète",
-                    },
-                    "departement": {
-                      "bsonType": "string",
-                      "pattern": "^(2A|2B|[0-9]{2,3})$",
-                    },
-                    "numero": {
-                      "bsonType": "int",
-                      "description": "N° de la voie",
-                    },
-                    "pays": {
-                      "bsonType": "string",
-                      "description": "Pays",
-                      "enum": [
-                        "AF",
-                        "ZA",
-                        "AL",
-                        "DZ",
-                        "DE",
-                        "AD",
-                        "AO",
-                        "AG",
-                        "SA",
-                        "AR",
-                        "AM",
-                        "AU",
-                        "AT",
-                        "AZ",
-                        "BS",
-                        "BH",
-                        "BD",
-                        "BB",
-                        "BE",
-                        "BZ",
-                        "BJ",
-                        "BT",
-                        "BY",
-                        "MM",
-                        "BO",
-                        "BQ",
-                        "BA",
-                        "BW",
-                        "BR",
-                        "BN",
-                        "BG",
-                        "BF",
-                        "BI",
-                        "KH",
-                        "CM",
-                        "CA",
-                        "CV",
-                        "CF",
-                        "CL",
-                        "CN",
-                        "CY",
-                        "CO",
-                        "KM",
-                        "CG",
-                        "CD",
-                        "KR",
-                        "KP",
-                        "CR",
-                        "CI",
-                        "HR",
-                        "CU",
-                        "CW",
-                        "DK",
-                        "DJ",
-                        "DO",
-                        "DM",
-                        "EG",
-                        "SV",
-                        "AE",
-                        "EC",
-                        "ER",
-                        "ES",
-                        "EE",
-                        "SZ",
-                        "US",
-                        "ET",
-                        "MK",
-                        "FJ",
-                        "FI",
-                        "FR",
-                        "GA",
-                        "GM",
-                        "GE",
-                        "GH",
-                        "GR",
-                        "GD",
-                        "GT",
-                        "GN",
-                        "GQ",
-                        "GW",
-                        "GY",
-                        "HT",
-                        "HN",
-                        "HU",
-                        "IN",
-                        "ID",
-                        "IR",
-                        "IQ",
-                        "IE",
-                        "IS",
-                        "IL",
-                        "IT",
-                        "JM",
-                        "JP",
-                        "JO",
-                        "KZ",
-                        "KE",
-                        "KG",
-                        "KI",
-                        "XK",
-                        "KW",
-                        "LA",
-                        "LS",
-                        "LV",
-                        "LB",
-                        "LR",
-                        "LY",
-                        "LI",
-                        "LT",
-                        "LU",
-                        "MG",
-                        "MY",
-                        "MW",
-                        "MV",
-                        "ML",
-                        "MT",
-                        "MA",
-                        "MH",
-                        "MU",
-                        "MR",
-                        "MX",
-                        "FM",
-                        "MD",
-                        "MC",
-                        "MN",
-                        "ME",
-                        "MZ",
-                        "NA",
-                        "NR",
-                        "NP",
-                        "NI",
-                        "NE",
-                        "NG",
-                        "NO",
-                        "NZ",
-                        "OM",
-                        "UG",
-                        "UZ",
-                        "PK",
-                        "PW",
-                        "PS",
-                        "PA",
-                        "PG",
-                        "PY",
-                        "NL",
-                        "PE",
-                        "PH",
-                        "PL",
-                        "PT",
-                        "QA",
-                        "RO",
-                        "GB",
-                        "RU",
-                        "RW",
-                        "KN",
-                        "SM",
-                        "SX",
-                        "VC",
-                        "LC",
-                        "SB",
-                        "WS",
-                        "ST",
-                        "SN",
-                        "RS",
-                        "SC",
-                        "SL",
-                        "SG",
-                        "SK",
-                        "SI",
-                        "SO",
-                        "SD",
-                        "SS",
-                        "LK",
-                        "SE",
-                        "CH",
-                        "SR",
-                        "SY",
-                        "TJ",
-                        "TZ",
-                        "TD",
-                        "CZ",
-                        "TH",
-                        "TL",
-                        "TG",
-                        "TO",
-                        "TT",
-                        "TN",
-                        "TM",
-                        "TR",
-                        "TV",
-                        "UA",
-                        "UY",
-                        "VU",
-                        "VA",
-                        "VE",
-                        "VN",
-                        "YE",
-                        "ZM",
-                        "ZW",
-                      ],
-                    },
-                    "region": {
-                      "bsonType": "string",
-                      "pattern": "^[0-9]{2,3}$",
-                    },
-                    "repetition_voie": {
-                      "bsonType": "string",
-                      "description": "Indice de répétition du numéro de voie",
-                      "enum": [
-                        "B",
-                        "T",
-                        "Q",
-                        "C",
-                      ],
-                    },
-                    "voie": {
-                      "bsonType": "string",
-                      "description": "Nom de voie",
-                    },
-                  },
-                },
-                "nature": {
-                  "bsonType": "string",
-                  "enum": [
-                    "responsable",
-                    "formateur",
-                    "responsable_formateur",
-                    "lieu_formation",
-                    "inconnue",
-                  ],
-                },
-                "organisme_id": {
-                  "bsonType": "objectId",
-                  "description": "Identifiant unique",
-                },
-                "siret": {
-                  "bsonType": "string",
-                  "description": "Siret du lieu de formation (optionnel)",
-                },
-                "uai": {
-                  "bsonType": "string",
-                  "description": "Code UAI du lieu de formation (optionnel)",
-                  "pattern": "^[0-9]{7}[a-zA-Z]$",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
     "reseaux": {
       "bsonType": "array",
       "description": "Réseaux du CFA, s'ils existent",
@@ -15549,6 +15435,7 @@ exports[`validation-schema > should create validation schema for organismes > or
   "required": [
     "_id",
     "siret",
+    "formations_count",
     "contacts_from_referentiel",
     "updated_at",
     "created_at",
@@ -15564,42 +15451,30 @@ exports[`validation-schema > should create validation schema for personV2 > pers
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "date_de_naissance": {
-      "anyOf": [
-        {
-          "anyOf": [
-            {
-              "bsonType": "date",
-            },
-            {
-              "bsonType": "string",
-            },
-          ],
+    "identifiant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "date_de_naissance": {
+          "bsonType": "date",
         },
-        {
-          "bsonType": "null",
+        "nom": {
+          "bsonType": "string",
         },
+        "prenom": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "nom",
+        "prenom",
+        "date_de_naissance",
       ],
-    },
-    "nom": {
-      "bsonType": "string",
-    },
-    "prenom": {
-      "bsonType": "string",
-    },
-    "updated_at": {
-      "bsonType": "date",
     },
   },
   "required": [
     "_id",
-    "created_at",
-    "updated_at",
-    "nom",
-    "prenom",
+    "identifiant",
   ],
 }
 `;
@@ -15829,28 +15704,9 @@ exports[`validation-schema > should create validation schema for transmissionV2 
     "_id": {
       "bsonType": "objectId",
     },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "formation_id": {
-      "bsonType": "objectId",
-    },
-    "organisme_transmetteur_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Identifiant unique",
-    },
   },
   "required": [
     "_id",
-    "created_at",
-    "formation_id",
   ],
 }
 `;

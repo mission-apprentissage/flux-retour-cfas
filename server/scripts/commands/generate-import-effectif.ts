@@ -134,15 +134,17 @@ export default function registerCommand(program: Command, getClient: () => Mongo
         throw new Error("OF not found");
       }
 
-      if (formateur.relatedFormations == null) {
-        throw new Error("Not related formation");
-      }
-
-      const formationCles = formateur.relatedFormations.map((f) => f.cle_ministere_educatif);
       const formations: IFormationCatalogue[] = (await client
         .db("flux-retour-cfas")
         .collection("formationsCatalogue")
-        .find({ cle_ministere_educatif: { $in: formationCles } })
+        .find({
+          $and: [
+            { published: true },
+            {
+              $or: [{ etablissement_formateur_siret: siret }, { etablissement_gestionnaire_siret: siret }],
+            },
+          ],
+        })
         .toArray()) as any;
 
       if (formations.length === 0) {
