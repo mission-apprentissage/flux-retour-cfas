@@ -37,7 +37,7 @@ function PhoneForm({
 }
 
 export default function Page() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("xxx");
   const [newPhone, setNewPhone] = useState("");
   const [changePhoneOpen, setChangePhoneOpen] = useState(false);
 

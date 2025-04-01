@@ -3,21 +3,42 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Box, Stack, Typography } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { _get } from "@/common/httpClient";
+
 export default function Page() {
   const router = useRouter();
-  const params = useParams<{ token: string }>();
-  const token = params?.token;
+  const { token } = useParams() as { token: string };
 
   const [formData, setFormData] = useState<{ isInterested: boolean | null }>({
     isInterested: null,
   });
 
+  const { data, isLoading, isError } = useQuery(
+    ["effectifs-per-month", token],
+    () => _get(`/api/v1/campagne/mission-locale/${token}`),
+    {
+      enabled: !!token,
+      keepPreviousData: true,
+      useErrorBoundary: true,
+    }
+  );
+  console.log("CONSOLE LOG ~ Page ~ data:", data);
+
   const handleValider = () => {
     router.push(`/campagnes/mission-locale/${token}/validation`);
   };
+
+  if (isLoading) {
+    return <Typography>Chargement...</Typography>;
+  }
+
+  if (isError) {
+    return <Typography color="error">Une erreur est survenue.</Typography>;
+  }
 
   return (
     <>
