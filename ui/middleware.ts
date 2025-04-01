@@ -29,7 +29,12 @@ export async function middleware(request: NextRequest) {
 
   const session = await fetchSession(request);
 
-  requestHeaders.set("x-session", JSON.stringify(session));
+  if (session) {
+    const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
+    requestHeaders.set("x-session", encodedSession);
+  } else {
+    requestHeaders.delete("x-session");
+  }
 
   const requestNextData = {
     request: {
