@@ -8,6 +8,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
+import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
@@ -655,6 +656,8 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
       ml_id: effectif.apprenant.adresse?.mission_locale_id,
     });
 
+    const date = new Date();
+
     if (mlData) {
       await missionLocaleEffectifsDb().findOneAndUpdate(
         {
@@ -664,12 +667,64 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
         {
           $setOnInsert: {
             effectif_snapshot: { ...effectif, _id: effectif._id },
-            effectif_snapshot_date: new Date(),
-            created_at: new Date(),
+            effectif_snapshot_date: date,
+            created_at: date,
+            brevo: {
+              token: uuidv4(),
+              token_created_at: date,
+            },
           },
         },
         { upsert: true }
       );
     }
   }
+};
+
+export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
+  const aggregation = [
+    {
+      $match: {
+        "brevo.token": token,
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        let: { id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { type: "MISSION_LOCALE" } },
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+            },
+          },
+        ],
+        as: "organisation",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisation",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        "missionLocale.nom": "$organisation.nom",
+        telephone: "$effectif_snapshot.apprenant.telephone",
+        formation: "$effectif_snapshot.formation",
+      },
+    },
+  ];
+
+  const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
+
+  if (!effectif) {
+    throw Boom.notFound();
+  }
+
+  return effectif;
 };
