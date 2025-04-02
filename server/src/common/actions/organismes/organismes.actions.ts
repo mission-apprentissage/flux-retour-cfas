@@ -154,122 +154,6 @@ export const getAllOrganismes = async (
 };
 
 /**
- * Méthode de récupération d'un organisme et de ses détails depuis son id
- */
-export const getDetailedOrganismeById = async (_id: any) => {
-  const organisme = await organismesDb()
-    .aggregate([
-      { $match: { _id: new ObjectId(_id) } },
-      // lookup formations
-      {
-        $lookup: {
-          from: "formations",
-          localField: "relatedFormations.formation_id",
-          foreignField: "_id",
-          as: "_tmp_related_formations",
-          // lookup are not ordered by default, so we need to sort them manually
-          let: { formationIds: "$relatedFormations.formation_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $in: ["$_id", "$$formationIds"] },
-              },
-            },
-            {
-              $addFields: {
-                sort: {
-                  $indexOfArray: ["$$formationIds", "$_id"],
-                },
-              },
-            },
-            { $sort: { sort: 1 } },
-            { $addFields: { sort: "$$REMOVE" } },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          relatedFormations: {
-            $map: {
-              input: "$relatedFormations",
-              as: "formation",
-              in: {
-                $mergeObjects: [
-                  "$$formation",
-                  {
-                    formation: {
-                      $arrayElemAt: [
-                        "$_tmp_related_formations",
-                        { $indexOfArray: ["$relatedFormations", "$$formation"] },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-      { $unset: ["_tmp_related_formations"] },
-      // lookup organismesReferentiel
-      {
-        $lookup: {
-          from: "organismesReferentiel",
-          as: "organismesReferentiel",
-          let: {
-            siret: "$siret",
-            uai: "$uai",
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $or: [
-                    { $and: [{ $gt: ["$siret", null] }, { $eq: ["$siret", "$$siret"] }] },
-                    { $and: [{ $gt: ["$uai", null] }, { $eq: ["$uai", "$$uai"] }] },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      },
-      // lookup for doublons
-      {
-        $lookup: {
-          from: "organismes",
-          as: "organismesDoublon",
-          let: {
-            id: "$_id",
-            siret: "$siret",
-            uai: "$uai",
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $not: { $eq: ["$_id", "$$id"] } },
-                    {
-                      $or: [
-                        { $and: [{ $gt: ["$siret", null] }, { $eq: ["$siret", "$$siret"] }] },
-                        { $and: [{ $gt: ["$uai", null] }, { $eq: ["$uai", "$$uai"] }] },
-                      ],
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      },
-    ])
-    .next();
-
-  return organisme;
-};
-
-/**
  * Met à jour le nombre d'effectifs d'un organisme
  */
 export const updateEffectifsCount = async (organisme_id: ObjectId) => {
@@ -916,9 +800,7 @@ function getOrganismeListProjection(
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
-    formationsCount: {
-      $cond: { if: { $isArray: "$relatedFormations" }, then: { $size: "$relatedFormations" }, else: 0 },
-    },
+    formationsCount: "$formations_count",
     erps: {
       $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
     },

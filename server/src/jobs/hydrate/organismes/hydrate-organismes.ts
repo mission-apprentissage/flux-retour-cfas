@@ -44,7 +44,7 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   };
 };
 
-type DefaultField = "created_at" | "_id" | "nature";
+type DefaultField = "created_at" | "_id" | "nature" | "formations_count";
 
 const generateBulkOperation = (
   organismeApi: IApiOrganisme,
@@ -75,6 +75,7 @@ const generateBulkOperation = (
     _id: new ObjectId(),
     created_at: startTime,
     nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
+    formations_count: 0,
   };
 
   const update: Omit<IOrganisme, DefaultField> = {
