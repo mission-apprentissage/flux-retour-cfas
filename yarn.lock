@@ -7438,12 +7438,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron-parser@npm:^4.9.0":
-  version: 4.9.0
-  resolution: "cron-parser@npm:4.9.0"
+"cron-parser@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "cron-parser@npm:5.1.0"
   dependencies:
-    luxon: ^3.2.1
-  checksum: 3cf248fc5cae6c19ec7124962b1cd84b76f02b9bc4f58976b3bd07624db3ef10aaf1548efcc2d2dcdab0dad4f12029d640a55ecce05ea5e1596af9db585502cf
+    luxon: ^3.5.0
+  checksum: de25fc73927a8565d4c279f1a8974fe18379485c006f5802eb8a4b61a8bc0b586a4f7ef65e5f0148c243691508b7e8504d10c63544c1fc11daf0bf852f98e016
   languageName: node
   linkType: hard
 
@@ -7732,6 +7732,13 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.21.0
   checksum: f7be01523282e9bb06c0cd2693d34f245247a29098527d4420628966a2d9aad154bd0e90a6b1cf66d37adcb769cd108cf8a7bd49d76db0fb119af5cdd13644f4
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: fb681b242cccabed45494468f64282a7d375ea970e0adbcc5dcc92dcb7aba49b2081c2c9739d41bf71ce89ed68dd73bebfe06ca35129490704775d091895710b
   languageName: node
   linkType: hard
 
@@ -11608,20 +11615,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"job-processor@npm:^1.10.2":
-  version: 1.10.2
-  resolution: "job-processor@npm:1.10.2"
+"job-processor@npm:^1.10.3":
+  version: 1.10.3
+  resolution: "job-processor@npm:1.10.3"
   dependencies:
-    cron-parser: ^4.9.0
-    date-fns: ^2.30.0
-    type-fest: ^4.18.2
+    cron-parser: ^5.1.0
+    date-fns: ^4.1.0
+    type-fest: ^4.39.0
   peerDependencies:
     "@codegouvfr/react-dsfr": ^1.9.11
     "@mui/material": ^5.15.18
     "@mui/x-data-grid": ^7.5.0
     "@sentry/node": ^7.51.1 || ^8.0.0
     mongodb: "*"
-    react: ^18.0.0
+    react: ^18.0.0 || ^19.0.0
     zod: ^3.0.0
     zod-mongodb-schema: ^1.0.0
   peerDependenciesMeta:
@@ -11633,7 +11640,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: e771d08cdbe92b1019648556301ae8e952f77daa353f08c8af652827a9337908d25611f845d91f171cf838d8df9657d633ae15d9388d170bd8937809173bea11
+  checksum: 1ec02b3fc8b159755cb7ae8c9119d9daff1e76912cb0e6d27286aee6bb036fc03ff3c82678c4e61061c8e095defd27cbeb134abe307e9016ab30bb04dc978d0b
   languageName: node
   linkType: hard
 
@@ -12786,7 +12793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.2.1, luxon@npm:^3.5.0":
+"luxon@npm:^3.5.0":
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
   checksum: f290fe5788c8e51e748744f05092160d4be12150dca70f9fadc0d233e53d60ce86acd82e7d909a114730a136a77e56f0d3ebac6141bbb82fd310969a4704825b
@@ -17600,7 +17607,7 @@ __metadata:
     express: ^4.21.1
     express-async-errors: 3.1.1
     fast-xml-parser: ^4.5.0
-    job-processor: ^1.10.2
+    job-processor: ^1.10.3
     joi: ^17.13.3
     joi-password: ^4.2.0
     json2csv: 5.0.7
@@ -19184,10 +19191,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.18.2, type-fest@npm:^4.2.0, type-fest@npm:^4.26.1":
-  version: 4.26.1
-  resolution: "type-fest@npm:4.26.1"
-  checksum: 7188db3bca82afa62c69a8043fb7c5eb74e63c45e7e28efb986da1629d844286f7181bc5a8185f38989fffff0d6c96be66fd13529b01932d1b6ebe725181d31a
+"type-fest@npm:^4.2.0, type-fest@npm:^4.26.1, type-fest@npm:^4.39.0":
+  version: 4.39.0
+  resolution: "type-fest@npm:4.39.0"
+  checksum: 430acd3311a156ed041e93d6de7bf58fa17a9e5c0156e4831e15fb40de676fcc0b09382ee3f609b2919988a1ed97cf3ed3af688634e0fb92990cb0380ca95eb0
   languageName: node
   linkType: hard
 
