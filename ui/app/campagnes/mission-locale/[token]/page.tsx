@@ -26,13 +26,12 @@ export default function Page() {
       useErrorBoundary: true,
     }
   );
-  console.log("CONSOLE LOG ~ Page ~ data:", data);
 
   const handleValider = () => {
     router.push(`/campagnes/mission-locale/${token}/validation`);
   };
 
-  if (isLoading) {
+  if (!data && isLoading) {
     return <Typography>Chargement...</Typography>;
   }
 
@@ -41,16 +40,17 @@ export default function Page() {
   }
 
   return (
-    <>
+    <Stack spacing={3} sx={{ width: "100%" }}>
       <Box
         component="img"
         src="/images/landing-missions-jeunes.svg"
         alt="Accompagner les apprentis"
         sx={{
-          maxWidth: "350px",
-          height: "auto",
+          maxWidth: "auto",
+          height: "180px",
           userSelect: "none",
           marginBottom: "16px",
+          marginLeft: "auto",
         }}
       />
       <Typography variant="h2" sx={{ color: "var(--text-title-blue-france)" }}>
@@ -62,7 +62,7 @@ export default function Page() {
         proximité et profiter d’un réseau de partenaires !
       </Typography>
 
-      <Stack p={2} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
+      <Stack p={{ sm: 2, md: 4 }} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
         <RadioButtons
           legend="Intéressé(e) ?"
           orientation="vertical"
@@ -96,6 +96,6 @@ export default function Page() {
 
         <Button onClick={handleValider}>Valider ma réponse</Button>
       </Stack>
-    </>
+    </Stack>
   );
 }

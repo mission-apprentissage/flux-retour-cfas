@@ -37,7 +37,7 @@ function PhoneForm({
 }
 
 export default function Page() {
-  const [phone, setPhone] = useState("xxx");
+  const [phone, setPhone] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [changePhoneOpen, setChangePhoneOpen] = useState(false);
 
@@ -50,15 +50,14 @@ export default function Page() {
   };
 
   return (
-    <>
+    <Stack spacing={3}>
       <Box
         component="img"
         src="/images/support_solid.svg"
         alt="Accompagner les apprentis"
         sx={{
-          display: "block",
-          maxWidth: "350px",
-          height: "auto",
+          maxWidth: "auto",
+          height: "180px",
           userSelect: "none",
           marginBottom: "16px",
           marginLeft: "auto",
@@ -68,7 +67,7 @@ export default function Page() {
         C’est noté !
       </Typography>
 
-      <Stack p={2} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
+      <Stack p={{ sm: 2, md: 4 }} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
         {!phone ? (
           <Stack spacing={2}>
             <Typography fontWeight="bold">
@@ -108,6 +107,6 @@ export default function Page() {
           </Stack>
         )}
       </Stack>
-    </>
+    </Stack>
   );
 }
