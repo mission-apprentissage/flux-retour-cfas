@@ -173,7 +173,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
       // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
-        createOrUpdateEffectif(effectif, 0, organismeTarget.uai),
+        createOrUpdateEffectif(effectif, 0, organismeTarget),
         updateOrganismeTransmission(
           organisme,
           effectif.source,
@@ -414,7 +414,7 @@ export function mergeEffectif(effectifDb: IEffectif, effectif: WithoutId<IEffect
 const createOrUpdateEffectif = async (
   effectif: WithoutId<IEffectif>,
   retryCount = 0,
-  uai: string | undefined | null
+  organisme: IOrganisme
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
   const itemProcessingInfos: ItemProcessingInfos = {};
   let effectifDb = await checkIfEffectifExists<IEffectif>(effectif, effectifsDb());
@@ -436,7 +436,7 @@ const createOrUpdateEffectif = async (
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
-      await updateVoeuxAffelnetEffectif(insertedId, effectifDb, uai);
+      await updateVoeuxAffelnetEffectif(insertedId, effectifDb, organisme.uai);
     }
 
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
@@ -447,14 +447,14 @@ const createOrUpdateEffectif = async (
       effectifDb = await lockEffectif(effectifDb);
     }
 
-    await createMissionLocaleSnapshot(effectifDb);
+    await createMissionLocaleSnapshot(effectifDb, organisme.raison_sociale);
     return { effectifId: effectifDb._id, itemProcessingInfos };
   } catch (err) {
     // Le code d'erreur 11000 correspond à une duplication d'index unique
     // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
     if (typeof err === "object" && err !== null && "code" in err && err.code === 11000) {
       // On ré-essaie une fois maximum
-      if (retryCount === 0) return createOrUpdateEffectif(effectif, retryCount + 1, uai);
+      if (retryCount === 0) return createOrUpdateEffectif(effectif, retryCount + 1, organisme);
     }
 
     throw err;
