@@ -11608,9 +11608,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"job-processor@npm:^1.10.1":
-  version: 1.10.1
-  resolution: "job-processor@npm:1.10.1"
+"job-processor@npm:^1.10.2":
+  version: 1.10.2
+  resolution: "job-processor@npm:1.10.2"
   dependencies:
     cron-parser: ^4.9.0
     date-fns: ^2.30.0
@@ -11633,7 +11633,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 45f4f44b1dddf6a4a9bedafd7e1f7175bc75bede0e864d03904914110b17206b6ff9973d97a68f1e9c93ba732b472dcdd04b4b361a5d740c796939842a715f59
+  checksum: e771d08cdbe92b1019648556301ae8e952f77daa353f08c8af652827a9337908d25611f845d91f171cf838d8df9657d633ae15d9388d170bd8937809173bea11
   languageName: node
   linkType: hard
 
@@ -17600,7 +17600,7 @@ __metadata:
     express: ^4.21.1
     express-async-errors: 3.1.1
     fast-xml-parser: ^4.5.0
-    job-processor: ^1.10.1
+    job-processor: ^1.10.2
     joi: ^17.13.3
     joi-password: ^4.2.0
     json2csv: 5.0.7
