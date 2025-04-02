@@ -1,4 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
 // eslint-disable-next-line import/no-named-as-default
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
@@ -10,17 +9,11 @@ import PlausibleProvider from "next-plausible";
 
 import { publicConfig } from "@/config.public";
 
-import { UserContextProvider } from "./_components/context/UserContext";
-import { Footer } from "./_components/Footer";
-import { Header } from "./_components/Header";
 import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./_dsfr-setup/start-dsfr";
-import { getSession } from "./_utils/session.utils";
-import { Providers } from "./providers";
 import "./global.css";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
-  const user = await getSession();
   return (
     <html {...getHtmlAttributes({ defaultColorScheme })}>
       <head>
@@ -46,26 +39,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         {
           <AppRouterCacheProvider>
             <DsfrProvider>
-              <MuiDsfrThemeProvider>
-                <Providers>
-                  <UserContextProvider user={user}>
-                    <Header />
-                    <div
-                      style={{
-                        flex: 1,
-                        margin: "auto",
-                        maxWidth: 1232,
-                        ...fr.spacing("padding", {
-                          topBottom: "10v",
-                        }),
-                      }}
-                    >
-                      {children}
-                    </div>
-                    <Footer />
-                  </UserContextProvider>
-                </Providers>
-              </MuiDsfrThemeProvider>
+              <MuiDsfrThemeProvider>{children}</MuiDsfrThemeProvider>
             </DsfrProvider>
           </AppRouterCacheProvider>
         }
