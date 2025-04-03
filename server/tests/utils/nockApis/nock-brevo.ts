@@ -1,6 +1,10 @@
 import nock from "nock";
 
+import logger from "@/common/logger";
+
 export const nockBrevo = () => {
+  logger.info("Nocking Brevo");
+
   nock("https://api.brevo.com")
     .persist() // Keep the interceptor active for all tests
     .defaultReplyHeaders({ "Content-Type": "application/json" })
