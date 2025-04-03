@@ -10,8 +10,8 @@ export async function getSession(): Promise<AuthContext | null> {
     if (!sessionRaw) {
       return null;
     }
-
-    return JSON.parse(sessionRaw) as AuthContext;
+    const decoded = atob(sessionRaw);
+    return JSON.parse(decoded) as AuthContext;
   } catch (error) {
     return null;
   }

@@ -1,7 +1,7 @@
-import { PromisePool } from "@supercharge/promise-pool";
+import { AnyBulkWriteOperation } from "mongodb";
+import { IOrganisme } from "shared/models";
 
-import parentLogger from "@/common/logger";
-import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
+import { formationV2Db, organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
@@ -10,109 +10,103 @@ import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 // dans le dossier server/static/opcos
 const OPCOS = ["2i", "ep", "akto", "atlas", "mobilite", "uniformation", "ocapiat", "afdas"];
 
-const jobLogger = parentLogger.child({
-  module: "job:hydrate:opcos",
-});
+function getOpcoParRncpCodeMap(): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+
+  for (const opco of OPCOS) {
+    const codes_rncp = (
+      readJsonFromCsvFile(getStaticFilePath(`opcos/${opco}.csv`), ";") as { code_rncp: string }[]
+    ).map((row) => row.code_rncp);
+
+    for (const code_rncp of codes_rncp) {
+      if (!map.has(code_rncp)) {
+        map.set(code_rncp, []);
+      }
+      map.get(code_rncp)?.push(opco);
+    }
+  }
+
+  return map;
+}
 
 /**
  * Remplit le champ organismes.opcos.
  * Pour l'instant, uniquement 2i, ep, akto et atlas.
  */
 export const hydrateOrganismesOPCOs = async () => {
-  for (const opco of OPCOS) {
-    const logger = jobLogger.child({ opco });
+  const opcoParRncpCodeMap = getOpcoParRncpCodeMap();
 
-    const organismes = await organismesDb()
-      .find(
-        { opcos: opco },
-        {
-          projection: {
-            uai: 1,
-            siret: 1,
-            opcos: 1,
-          },
-        }
-      )
-      .toArray();
-    logger.info({ count: organismes.length }, "organismes existants");
+  const cursor = organismesDb().find();
 
-    const codes_rncp = (
-      readJsonFromCsvFile(getStaticFilePath(`opcos/${opco}.csv`), ";") as { code_rncp: string }[]
-    ).map((row) => row.code_rncp);
-    logger.info({ count: codes_rncp.length }, "rncp chargés");
+  let ops: AnyBulkWriteOperation<IOrganisme>[] = [];
 
-    const formationsRNCP = await formationsCatalogueDb()
-      .find(
-        {
-          rncp_code: {
-            $in: codes_rncp,
-          },
-        },
-        {
-          projection: {
-            etablissement_gestionnaire_siret: 1,
-            etablissement_gestionnaire_uai: 1,
-            etablissement_formateur_siret: 1,
-            etablissement_formateur_uai: 1,
-          },
-        }
-      )
-      .toArray();
-    logger.info({ count: formationsRNCP.length }, "formations correspondantes"); // ~6k
-
-    const organismesRNCPMap = formationsRNCP.reduce((acc, formation) => {
-      acc.set(`${formation.etablissement_gestionnaire_siret}-${formation.etablissement_gestionnaire_uai ?? null}`, {
-        siret: formation.etablissement_gestionnaire_siret,
-        uai: formation.etablissement_gestionnaire_uai ?? null,
-      });
-      acc.set(`${formation.etablissement_formateur_siret}-${formation.etablissement_formateur_uai ?? null}`, {
-        siret: formation.etablissement_formateur_siret,
-        uai: formation.etablissement_formateur_uai ?? null,
-      });
-      return acc;
-    }, new Map<string, { siret: string; uai: string | null }>());
-
-    logger.info({ count: organismesRNCPMap.size }, "organismes correspondants"); // ~1.6k
-
-    await PromisePool.for([...organismesRNCPMap.values()])
-      .handleError((err) => {
-        throw err;
-      })
-      .process(async (organisme) => {
-        await organismesDb().updateOne(
+  for await (const organisme of cursor) {
+    const [rncpAsResponsable, rncpAsFormateur] = await Promise.all([
+      formationV2Db()
+        .aggregate<{
+          _id: { siret: string; rncp: string };
+        }>([
           {
-            siret: organisme.siret,
-            uai: organisme.uai as any,
-          },
-          {
-            $addToSet: {
-              opcos: opco,
+            $match: {
+              "identifiant.responsable_siret": organisme.siret,
+              "identifiant.rncp": { $ne: null },
             },
-          }
-        );
-      });
-
-    const ancienOrganismes = organismes.filter(
-      (organisme) => !organismesRNCPMap.has(`${organisme.siret}-${organisme.uai ?? null}`)
-    );
-    logger.info({ count: ancienOrganismes.length }, "nettoyage anciens organismes");
-
-    await PromisePool.for(ancienOrganismes)
-      .handleError((err) => {
-        throw err;
-      })
-      .process(async (organisme) => {
-        await organismesDb().updateOne(
-          {
-            siret: organisme.siret,
-            uai: organisme.uai as any,
           },
           {
-            $pull: {
-              opcos: opco,
+            $group: {
+              siret: "$identifiant.responsable_siret",
+              rncp: "$identifiant.rncp",
             },
-          }
-        );
-      });
+          },
+        ])
+        .toArray(),
+      formationV2Db()
+        .aggregate<{
+          _id: { siret: string; rncp: string };
+        }>([
+          {
+            $match: {
+              "identifiant.formateur_siret": organisme.siret,
+              "identifiant.rncp": { $ne: null },
+            },
+          },
+          {
+            $group: {
+              siret: "$identifiant.formateur_siret",
+              rncp: "$identifiant.rncp",
+            },
+          },
+        ])
+        .toArray(),
+    ]);
+
+    const organismeRncps: Set<string> = new Set([
+      ...rncpAsResponsable.map(({ _id: { rncp } }) => rncp),
+      ...rncpAsFormateur.map(({ _id: { rncp } }) => rncp),
+    ]);
+    const organismeOpcos: Set<string> = new Set();
+
+    for (const rncp of organismeRncps) {
+      const opcos = opcoParRncpCodeMap.get(rncp) ?? [];
+      for (const opco of opcos) {
+        organismeOpcos.add(opco);
+      }
+    }
+
+    ops.push({
+      updateOne: {
+        filter: { _id: organisme._id },
+        update: { $set: { opcos: Array.from(organismeOpcos) } },
+      },
+    });
+
+    if (ops.length >= 1000) {
+      await organismesDb().bulkWrite(ops);
+      ops = [];
+    }
+  }
+
+  if (ops.length > 0) {
+    await organismesDb().bulkWrite(ops);
   }
 };
