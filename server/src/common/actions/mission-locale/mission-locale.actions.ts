@@ -120,8 +120,16 @@ const createDernierStatutFieldPipelineML = (date: Date) => [
  * @param date Date de calcul du filtre
  * @returns Une liste de addFields et de match
  */
-const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) =>
-  statut.length ? [...createDernierStatutFieldPipelineML(date), matchDernierStatutPipelineMl(statut)] : [];
+const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date, mlActivationDate?: Date) => {
+  let thresholdDate;
+
+  if (mlActivationDate) {
+    const thresholdDate = new Date(mlActivationDate);
+    thresholdDate.setDate(thresholdDate.getDate() - 180);
+  }
+
+  return [...createDernierStatutFieldPipelineML(date), matchDernierStatutPipelineMl(statut, thresholdDate)];
+};
 
 const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
   return [
@@ -137,10 +145,11 @@ const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
  * @param statut Liste de statuts à matcher
  * @returns Un obet match
  */
-const matchDernierStatutPipelineMl = (statut): any => {
+const matchDernierStatutPipelineMl = (statut, thresholdDate?: Date): any => {
   return {
     $match: {
       $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
+      ...(thresholdDate ? { "dernierStatut.date": { gte: thresholdDate } } : {}),
     },
   };
 };
@@ -323,13 +332,14 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
   aTraiter: boolean,
-  effectifId: ObjectId
+  effectifId: ObjectId,
+  missionLocaleActivationDate?: Date
 ) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date(), missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
     {
       $match: {
@@ -375,7 +385,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 
 export const getEffectifsParMoisByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
-  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
+  missionLocaleActivationDate?: Date
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
 
@@ -407,7 +418,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const organismeMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date(), missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
     ...(aTraiter // Si a traiter = true, alors pas de match sur le statut de traiement afin de pouvoir grouper par traitement ( treated_count )
       ? []
@@ -511,7 +522,11 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   return formattedData;
 };
 
-export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: ObjectId, effectifId: string) => {
+export const getEffectifFromMissionLocaleId = async (
+  missionLocaleMongoId: ObjectId,
+  effectifId: string,
+  missionLocaleActivationDate?: Date
+) => {
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     {
@@ -558,14 +573,16 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
     missionLocaleMongoId,
     effectif.a_traiter,
-    new ObjectId(effectifId)
+    new ObjectId(effectifId),
+    missionLocaleActivationDate
   );
   return { effectif, ...next };
 };
 
 export const getEffectifsListByMisisonLocaleId = (
   missionLocaleMongoId: ObjectId,
-  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
+  missionLocaleActivationDate?: Date
 ) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const { type } = effectifsParMoisFiltersMissionLocale;
@@ -573,7 +590,7 @@ export const getEffectifsListByMisisonLocaleId = (
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(statut as any, new Date(), missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),

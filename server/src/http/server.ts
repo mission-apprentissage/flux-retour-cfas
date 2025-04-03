@@ -918,6 +918,7 @@ function setupRoutes(app: Application) {
       .use("/affelnet", affelnetRoutesAdmin())
       .use("/opcos", opcosRoutesAdmin())
       .use("/erps", erpsRoutesAdmin())
+      .use("/mission-locale", missionLocaleRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {

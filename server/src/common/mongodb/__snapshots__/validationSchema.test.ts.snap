@@ -14130,6 +14130,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "situation_autre": {
       "bsonType": "string",
     },
+    "soft_deleted": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+    },
     "updated_at": {
       "bsonType": "date",
     },
