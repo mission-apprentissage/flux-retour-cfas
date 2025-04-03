@@ -688,6 +688,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
           effectif.apprenant.prenom,
           effectif.apprenant.nom,
           token,
+          `${config.publicUrl}/${token}`,
           effectif.apprenant.telephone,
           organismeNom
         );

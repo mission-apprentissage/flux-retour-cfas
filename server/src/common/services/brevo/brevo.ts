@@ -16,6 +16,7 @@ export const createContact = (
   prenom?: string | null,
   nom?: string | null,
   token?: string | null,
+  url?: string | null,
   telephone?: string | null,
   nomOrganisme?: string | null
 ) => {
@@ -30,12 +31,10 @@ export const createContact = (
     PRENOM: prenom,
     NOM: nom,
     TOKEN: token,
+    URL_TBA_ML: url,
     TELEPHONE: telephone,
     NOM_ORGANISME: nomOrganisme,
   };
   contact.listIds = [listeId];
   return ContactInstance.createContact(contact);
 };
-
-//2703 - RECETTE Rupturant - Contact ML
-//
