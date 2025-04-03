@@ -88,6 +88,7 @@ const config = {
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
   brevo: {
     api_key: env.get("MNA_TDB_BREVO_API_KEY").required().asString(),
+    listeRupturantId: env.get("MNA_TDB_BREVO_RUPTURANT_LISTE_ID").required().asInt(),
   },
 };
 

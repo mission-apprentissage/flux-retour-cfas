@@ -13,9 +13,10 @@ import { v4 as uuidv4 } from "uuid";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { createContact } from "@/common/services/brevo/brevo";
+import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
-
 /**
  *    EffectifsDb
  */
@@ -658,7 +659,7 @@ export const setEffectifMissionLocaleData = async (
   return updated;
 };
 
-export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA, organismeNom?: string) => {
   const ageFilter = effectif?.apprenant?.date_de_naissance
     ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
     : false;
@@ -673,9 +674,10 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
     });
 
     const date = new Date();
+    const token = uuidv4();
 
     if (mlData) {
-      await missionLocaleEffectifsDb().findOneAndUpdate(
+      const result = await missionLocaleEffectifsDb().findOneAndUpdate(
         {
           mission_locale_id: mlData?._id,
           effectif_id: effectif._id,
@@ -686,13 +688,27 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
             effectif_snapshot_date: date,
             created_at: date,
             brevo: {
-              token: uuidv4(),
+              token,
               token_created_at: date,
             },
           },
         },
         { upsert: true }
       );
+
+      // Comme returnDocument = false par defaut, si c'est vide, c'est que c'est un insert
+      if (!result.value) {
+        await createContact(
+          config.brevo.listeRupturantId,
+          effectif.apprenant.courriel,
+          effectif.apprenant.prenom,
+          effectif.apprenant.nom,
+          token,
+          `${config.publicUrl}/campagnes/mission-locale/${token}`,
+          effectif.apprenant.telephone,
+          organismeNom
+        );
+      }
     }
   }
 };

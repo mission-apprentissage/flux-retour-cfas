@@ -4,6 +4,7 @@ import { modelDescriptors } from "@/common/model/collections";
 import { startCLI } from "./commands";
 import { connectToMongodb, configureDbSchemaValidation, getMongodbUri } from "./common/mongodb";
 import { setupJobProcessor } from "./jobs/jobs";
+import { setupLocalNock } from "./nock";
 import createGlobalServices from "./services";
 
 process.on("unhandledRejection", (err) => logger.error(err, "unhandledRejection"));
@@ -16,7 +17,7 @@ try {
 
   // We need to setup even for server to be able to call addJob
   await setupJobProcessor();
-
+  setupLocalNock();
   createGlobalServices();
   await startCLI();
 } catch (err) {
