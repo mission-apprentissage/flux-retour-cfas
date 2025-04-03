@@ -81,6 +81,7 @@ const EFF_MISSION_LOCALE_FILTER = [
         },
         { "effectif_snapshot.apprenant.rqth": true },
       ],
+      soft_deleted: { $ne: true },
     },
   },
 ];
@@ -687,5 +688,24 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
         { upsert: true }
       );
     }
+  }
+};
+
+export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif) => {
+  const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
+  const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
+
+  if (eff) {
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: effectif._id },
+      {
+        $set: {
+          ...(rupturantFilter ? {} : { soft_deleted: true }),
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: new Date(),
+          updated_at: new Date(),
+        },
+      }
+    );
   }
 };

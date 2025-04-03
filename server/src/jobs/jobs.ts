@@ -32,6 +32,7 @@ import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
@@ -265,6 +266,11 @@ export async function setupJobProcessor() {
       "hydrate:mission-locale-organisation": {
         handler: async () => {
           return hydrateMissionLocaleOrganisation();
+        },
+      },
+      "tmp:mission-locale-snapshot-update": {
+        handler: async () => {
+          return updateMissionLocaleSnapshotFromLastStatus();
         },
       },
       "populate:reseaux": {
