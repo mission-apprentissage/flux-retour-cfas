@@ -83,6 +83,9 @@ const EFF_MISSION_LOCALE_FILTER = [
         { "effectif_snapshot.apprenant.rqth": true },
       ],
       soft_deleted: { $ne: true },
+      "effectif_snapshot.apprenant.date_de_naissance": {
+        $lte: new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+      },
     },
   },
 ];
