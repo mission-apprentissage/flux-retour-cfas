@@ -11,7 +11,7 @@ export default () => {
   router.post(
     "/activate",
     validateRequestMiddleware({
-      body: z.object({ date: z.date(), missionLocaleId: z.string() }),
+      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string() }),
     }),
     returnResult(activateMLAtDate)
   );

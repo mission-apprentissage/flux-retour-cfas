@@ -47,14 +47,15 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
 ];
 
 export const getAllEffectifForMissionLocaleCursor = (
-  mission_locale_id: number
+  mission_locale_id: number,
+  missionLocaleActivationDate?: Date | null
 ): AggregationCursor<IEffectif | IEffectifDECA> => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
   const effectifsMissionLocaleAggregation = [
     ...unionWithDecaForMissionLocale(mission_locale_id),
     ...createDernierStatutFieldPipeline(new Date()),
-    matchDernierStatutPipelineMl(statut),
+    matchDernierStatutPipelineMl(statut, missionLocaleActivationDate),
     {
       $unset: ["dernierStatutDureeInDay", "dernierStatut"],
     },
@@ -121,13 +122,12 @@ const createDernierStatutFieldPipelineML = (date: Date) => [
  * @returns Une liste de addFields et de match
  */
 const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date, mlActivationDate?: Date) => {
-  let thresholdDate;
+  let thresholdDate: Date | null = null;
 
   if (mlActivationDate) {
-    const thresholdDate = new Date(mlActivationDate);
+    thresholdDate = new Date(mlActivationDate);
     thresholdDate.setDate(thresholdDate.getDate() - 180);
   }
-
   return [...createDernierStatutFieldPipelineML(date), matchDernierStatutPipelineMl(statut, thresholdDate)];
 };
 
@@ -145,13 +145,15 @@ const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
  * @param statut Liste de statuts à matcher
  * @returns Un obet match
  */
-const matchDernierStatutPipelineMl = (statut, thresholdDate?: Date): any => {
-  return {
+const matchDernierStatutPipelineMl = (statut, thresholdDate?: Date | null): any => {
+  const match = {
     $match: {
       $or: statut.map((s) => ({ "dernierStatut.valeur": s })),
-      ...(thresholdDate ? { "dernierStatut.date": { gte: thresholdDate } } : {}),
+      ...(thresholdDate ? { "dernierStatut.date": { $gte: thresholdDate } } : {}),
     },
   };
+  console.log(match);
+  return match;
 };
 
 /**
@@ -391,7 +393,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
-
+  console.log(missionLocaleActivationDate);
   const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
     if (!firstDate) {
       return [];
