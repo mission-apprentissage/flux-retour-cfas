@@ -1,14 +1,23 @@
 import brevo, { ContactsApiApiKeys } from "@getbrevo/brevo";
+import { captureException } from "@sentry/node";
 
 import config from "@/config";
 
 const initContactApi = () => {
   let apiInstance = new brevo.ContactsApi();
+
+  const apiKey = config.brevo.api_key;
+
+  if (!apiKey) {
+    captureException(new Error(`Init Brevo: no api key provided`));
+    return null;
+  }
+
   apiInstance.setApiKey(ContactsApiApiKeys.apiKey, config.brevo.api_key);
   return apiInstance;
 };
 
-const ContactInstance: brevo.ContactsApi = initContactApi();
+const ContactInstance: brevo.ContactsApi | null = initContactApi();
 
 export const createContact = (
   listeId: number,
@@ -20,9 +29,17 @@ export const createContact = (
   telephone?: string | null,
   nomOrganisme?: string | null
 ) => {
+  if (!ContactInstance) {
+    captureException(new Error(`Create contact Brevo: no instance initialized`));
+    return;
+  }
+
   const contact = new brevo.CreateContact();
 
   if (!email) {
+    captureException(
+      new Error(`Create contact Brevo: no email provided initialized`, { cause: { prenom, nom, telephone } })
+    );
     return;
   }
 
