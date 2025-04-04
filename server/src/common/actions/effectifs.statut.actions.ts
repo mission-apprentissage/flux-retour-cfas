@@ -17,7 +17,10 @@ const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecond
 
 type ICreateComputedStatutObjectParams = Readonly<{
   apprenant: Readonly<Pick<IEffectifApprenant, "historique_statut">>;
-  formation?: Readonly<Pick<IFormationEffectif, "date_entree" | "periode" | "date_fin">> | null | undefined;
+  formation?:
+    | Readonly<Pick<IFormationEffectif, "date_entree" | "periode" | "date_fin" | "date_exclusion">>
+    | null
+    | undefined;
   contrats?: Pick<IContrat, "date_debut" | "date_rupture">[] | null | undefined;
 }>;
 
@@ -166,6 +169,7 @@ function determineStatutsByContrats(
   const statuts: { valeur: StatutApprenant; date: Date }[] = [];
   const currentDate = evaluationDate || new Date();
   const dateEntree = effectif.formation.date_entree;
+  const dateAbandon = effectif.formation.date_exclusion;
 
   const dateFin = effectif.formation.date_fin ? new Date(effectif.formation.date_fin) : currentDate;
   const effectiveDateFin = dateFin < currentDate ? dateFin : currentDate;
@@ -206,11 +210,15 @@ function determineStatutsByContrats(
     }
   });
 
-  if (latestRuptureDate && effectiveDateFin.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
-    statuts.push({
-      valeur: STATUT_APPRENANT.ABANDON,
-      date: addDaysUTC(latestRuptureDate, 180),
-    });
+  if (dateEntree && dateAbandon && dateAbandon <= effectiveDateFin && dateAbandon >= dateEntree) {
+    statuts.push({ valeur: STATUT_APPRENANT.ABANDON, date: dateAbandon });
+  } else {
+    if (latestRuptureDate && effectiveDateFin.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
+      statuts.push({
+        valeur: STATUT_APPRENANT.ABANDON,
+        date: addDaysUTC(latestRuptureDate, 180),
+      });
+    }
   }
 
   if (statuts.length === 1 && dateEntree && effectiveDateFin.getTime() - dateEntree.getTime() > ninetyDaysInMs) {

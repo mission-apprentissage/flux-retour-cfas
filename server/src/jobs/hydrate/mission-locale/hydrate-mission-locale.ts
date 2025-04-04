@@ -1,12 +1,15 @@
 import { ObjectId } from "mongodb";
-import { IOrganisationMissionLocale } from "shared/models";
+import { CODES_STATUT_APPRENANT } from "shared/constants";
+import { IEffectif, IOrganisationMissionLocale } from "shared/models";
 
+import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import {
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
+  updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { organisationsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -43,6 +46,56 @@ export const hydrateMissionLocaleOrganisation = async () => {
       });
 
       await hydrateMissionLocaleSnapshot(ml.id);
+    }
+  }
+};
+
+export const updateMissionLocaleSnapshotFromLastStatus = async () => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+  });
+
+  while (await cursor.hasNext()) {
+    const orga = (await cursor.next()) as IOrganisationMissionLocale;
+    const cursor2 = missionLocaleEffectifsDb().find({ mission_locale_id: orga._id, situation: { $exists: false } });
+    while (await cursor2.hasNext()) {
+      const eff = await cursor2.next();
+
+      if (eff) {
+        const lastEffectifQueue = await effectifsQueueDb()
+          .find({
+            effectif_id: eff.effectif_id,
+          })
+          .sort({ created_at: -1 })
+          .limit(1)
+          .toArray();
+
+        if (
+          lastEffectifQueue &&
+          lastEffectifQueue.length > 0 &&
+          lastEffectifQueue[0].statut_apprenant === CODES_STATUT_APPRENANT.abandon &&
+          lastEffectifQueue[0].date_metier_mise_a_jour_statut
+        ) {
+          {
+            const date: string = lastEffectifQueue[0].date_metier_mise_a_jour_statut as string;
+
+            await effectifsDb().updateOne(
+              { _id: eff.effectif_id },
+              {
+                $set: {
+                  "formation.date_exclusion": new Date(date),
+                },
+              }
+            );
+            const effToCompute = await effectifsDb().findOne({ _id: eff.effectif_id });
+            await updateEffectifStatut(effToCompute as IEffectif, new Date(), effectifsDb());
+            const effToSnap = await effectifsDb().findOne({ _id: eff.effectif_id });
+            if (effToSnap) {
+              updateOrDeleteMissionLocaleSnapshot(effToSnap);
+            }
+          }
+        }
+      }
     }
   }
 };

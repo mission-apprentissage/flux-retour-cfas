@@ -1,5 +1,5 @@
 import { usePlausible } from "next-plausible";
-import { PlausibleGoalType, getOrganisationLabel } from "shared";
+import { IOrganisationCreate, PlausibleGoalType, getOrganisationLabel } from "shared";
 
 import useAuth from "./useAuth";
 
@@ -16,7 +16,9 @@ export function usePlausibleTracking() {
       const eventProps: Record<string, string | number | boolean | undefined> = {
         userId: auth?._id,
         organisationType: auth?.organisation?.type,
-        organisationNom: auth?.organisation ? getOrganisationLabel(auth.organisation) : undefined,
+        organisationNom: auth?.organisation
+          ? getOrganisationLabel(auth.organisation as IOrganisationCreate)
+          : undefined,
         ...(currentPath ? { currentPath: currentPath } : {}),
         ...props,
       };

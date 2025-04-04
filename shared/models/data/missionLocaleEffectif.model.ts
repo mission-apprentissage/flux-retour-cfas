@@ -51,6 +51,7 @@ const zMissionLocaleEffectif = z.object({
   commentaires: z.string().optional(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
+  soft_deleted: z.boolean().nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
