@@ -4,21 +4,21 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Box, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { _get } from "@/common/httpClient";
+import { publicConfig } from "@/config.public";
+
+import { MissionLocaleFaq } from "../_components/faq";
+import { MissionLocaleQuestion } from "../_components/question";
 
 export default function Page() {
-  const router = useRouter();
   const { token } = useParams() as { token: string };
-
-  const [formData, setFormData] = useState<{ isInterested: boolean | null }>({
-    isInterested: null,
-  });
+  const [formData, setFormData] = useState<{ isInterested: boolean | null }>({ isInterested: null });
 
   const { data, isLoading, isError } = useQuery(
-    ["effectifs-per-month", token],
+    ["ml-effectif", token],
     () => _get(`/api/v1/campagne/mission-locale/${token}`),
     {
       enabled: !!token,
@@ -28,11 +28,14 @@ export default function Page() {
   );
 
   const handleValider = () => {
-    router.push(`/campagnes/mission-locale/${token}/validation`);
+    if (formData.isInterested === null) return;
+    window.location.href = `${publicConfig.baseUrl}/api/v1/campagne/mission-locale/${token}/confirmation/${
+      formData.isInterested ? "true" : "false"
+    }`;
   };
 
-  if (!data && isLoading) {
-    return <Typography>Chargement...</Typography>;
+  if (isLoading) {
+    return null;
   }
 
   if (isError) {
@@ -41,28 +44,31 @@ export default function Page() {
 
   return (
     <Stack spacing={3} sx={{ width: "100%" }}>
-      <Box
-        component="img"
-        src="/images/landing-missions-jeunes.svg"
-        alt="Accompagner les apprentis"
-        sx={{
-          maxWidth: "auto",
-          height: "180px",
-          userSelect: "none",
-          marginBottom: "16px",
-          marginLeft: "auto",
-        }}
-      />
+      <Stack justifyContent="end" alignItems="center">
+        <Box
+          component="img"
+          src="/images/landing-missions-jeunes.svg"
+          alt="Accompagner les apprentis"
+          sx={{
+            maxWidth: "auto",
+            height: "180px",
+            userSelect: "none",
+            marginBottom: "16px",
+            marginLeft: "auto",
+          }}
+        />
+      </Stack>
+
       <Typography variant="h2" sx={{ color: "var(--text-title-blue-france)" }}>
-        Pour trouverez une entreprise, laissez-vous guider !
+        Pour trouver une entreprise, laissez-vous guider&nbsp;!
       </Typography>
 
       <Typography>
-        Etre accompagné par la Mission Locale de Marseille, c’est bénéficier d’un accompagnement personnalisé, de
-        proximité et profiter d’un réseau de partenaires !
+        Être accompagné par la Mission Locale de {data?.missionLocale?.nom}, c’est bénéficier d’un accompagnement
+        personnalisé, de proximité et profiter d’un réseau de partenaires !
       </Typography>
 
-      <Stack p={{ sm: 2, md: 4 }} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
+      <Stack p={{ xs: 2, md: 4 }} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
         <RadioButtons
           legend="Intéressé(e) ?"
           orientation="vertical"
@@ -72,11 +78,7 @@ export default function Page() {
               nativeInputProps: {
                 value: "oui",
                 checked: formData.isInterested === true,
-                onChange: () =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isInterested: true,
-                  })),
+                onChange: () => setFormData({ isInterested: true }),
               },
             },
             {
@@ -84,18 +86,16 @@ export default function Page() {
               nativeInputProps: {
                 value: "non",
                 checked: formData.isInterested === false,
-                onChange: () =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isInterested: false,
-                  })),
+                onChange: () => setFormData({ isInterested: false }),
               },
             },
           ]}
         />
-
         <Button onClick={handleValider}>Valider ma réponse</Button>
       </Stack>
+
+      <MissionLocaleQuestion />
+      <MissionLocaleFaq missionLocalNom={data?.missionLocale?.nom} />
     </Stack>
   );
 }
