@@ -10,6 +10,7 @@ import {
 import { effectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import {
+  getEffectifARisqueByMissionLocaleId,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
@@ -51,13 +52,15 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
 
 const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const [a_traiter, traite] = await Promise.all([
+  const [a_traiter, traite, prioritaire] = await Promise.all([
     getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.A_TRAITER }),
     getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.TRAITE }),
+    getEffectifARisqueByMissionLocaleId(missionLocale._id),
   ]);
   return {
     a_traiter,
     traite,
+    prioritaire,
   };
 };
 

@@ -160,12 +160,36 @@ const generateMissionLocaleMatchStage = (missionLocaleId: ObjectId) => {
 
 const addFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
+  const A_RISQUE_CONDITION = {
+    $or: [
+      { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
+      {
+        $and: [
+          {
+            $gte: [
+              "$effectif_snapshot.apprenant.date_de_naissance",
+              new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+            ],
+          },
+          {
+            $lte: [
+              "$effectif_snapshot.apprenant.date_de_naissance",
+              new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+            ],
+          },
+        ],
+      },
+    ],
+  };
 
   return [
     {
       $addFields: {
         a_traiter: {
           $cond: [A_TRAITER_CONDIITON, true, false],
+        },
+        a_risque: {
+          $cond: [A_RISQUE_CONDITION, true, false],
         },
       },
     },
@@ -453,6 +477,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 organisme_nom: "$$ROOT.organisme.nom",
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
+                prioritaire: "$a_risque",
               },
               null,
             ],
@@ -624,6 +649,42 @@ export const getEffectifsListByMisisonLocaleId = (
   ];
 
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+};
+
+export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const organismeMissionLocaleAggregation = [
+    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...addFieldTraitementStatus(),
+    {
+      $match: {
+        a_traiter: true,
+        a_risque: true,
+      },
+    },
+    {
+      $sort: {
+        "dernierStatut.date": -1,
+      },
+    },
+    ...lookUpOrganisme(),
+    {
+      $project: {
+        id: "$$ROOT.effectif_snapshot._id",
+        nom: "$$ROOT.effectif_snapshot.apprenant.nom",
+        prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
+        libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
+        organisme_nom: "$$ROOT.organisme.nom",
+        organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
+        organisme_enseigne: "$$ROOT.organisme.enseigne",
+        prioritaire: "$a_risque",
+      },
+    },
+  ];
+
+  return await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
 };
 
 export const setEffectifMissionLocaleData = async (
