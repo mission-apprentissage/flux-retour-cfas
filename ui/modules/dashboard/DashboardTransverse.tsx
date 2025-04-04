@@ -6,6 +6,7 @@ import {
   ACADEMIES_BY_CODE,
   DEPARTEMENTS_BY_CODE,
   getOrganisationLabel,
+  IOrganisationCreate,
   IOrganisationJson,
   REGIONS_BY_CODE,
 } from "shared";
@@ -115,7 +116,7 @@ const DashboardTransverse = () => {
             Bienvenue sur votre tableau de bord, {formatCivility(auth.civility)} {auth.prenom} {auth.nom}
           </Heading>
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
-            {getOrganisationLabel(auth.organisation)}
+            {getOrganisationLabel(auth.organisation as IOrganisationCreate)}
           </Text>
         </Container>
       </Box>
