@@ -704,6 +704,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
         organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
         organisme_enseigne: "$$ROOT.organisme.enseigne",
         prioritaire: "$a_risque",
+        dernier_statut: "$dernierStatut",
       },
     },
   ];
