@@ -8933,6 +8933,16 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             },
           ],
         },
+        "token_expired_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
       },
     },
     "commentaires": {
@@ -8946,6 +8956,44 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         "bool",
         "null",
       ],
+    },
+    "effectif_choice": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "confirmation": {
+          "bsonType": [
+            "bool",
+            "null",
+          ],
+        },
+        "confirmation_created_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "confirmation_expired_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "telephone": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
+      },
     },
     "effectif_id": {
       "bsonType": "objectId",
@@ -13922,6 +13970,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_id",
     "created_at",
     "effectif_snapshot",
+    "effectif_choice",
     "brevo",
   ],
 }
