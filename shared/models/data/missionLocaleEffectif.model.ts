@@ -36,8 +36,13 @@ export enum API_TRAITEMENT_TYPE {
   TRAITE = "TRAITE",
 }
 
+export enum API_EFFECTIF_LISTE {
+  PRIORITAIRE = "prioritaire",
+}
+
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
+export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,

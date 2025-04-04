@@ -5,7 +5,7 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
+import { API_EFFECTIF_LISTE, API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
@@ -346,14 +346,31 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   missionLocaleMongoId: ObjectId,
   aTraiter: boolean,
-  effectifId: ObjectId
+  effectifId: ObjectId,
+  nom_liste?: API_EFFECTIF_LISTE
 ) => {
+  const listMatchStage = () => {
+    switch (nom_liste) {
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+        return [
+          {
+            $match: {
+              a_risque: true,
+            },
+          },
+        ];
+      default:
+        return [];
+    }
+  };
+
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
+    ...listMatchStage(),
     {
       $match: {
         a_traiter: aTraiter,
@@ -387,6 +404,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
         next: effectifs[modulo(index + 1, effectifs.length)],
         previous: effectifs[modulo(index - 1, effectifs.length)],
         currentIndex: index,
+        nomListe: nom_liste,
       }
     : {
         total: effectifs.length,
@@ -535,7 +553,11 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   return formattedData;
 };
 
-export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: ObjectId, effectifId: string) => {
+export const getEffectifFromMissionLocaleId = async (
+  missionLocaleMongoId: ObjectId,
+  effectifId: string,
+  nom_liste?: API_EFFECTIF_LISTE
+) => {
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     {
@@ -582,7 +604,8 @@ export const getEffectifFromMissionLocaleId = async (missionLocaleMongoId: Objec
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
     missionLocaleMongoId,
     effectif.a_traiter,
-    new ObjectId(effectifId)
+    new ObjectId(effectifId),
+    nom_liste
   );
   return { effectif, ...next };
 };
@@ -672,6 +695,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
     ...lookUpOrganisme(),
     {
       $project: {
+        _id: 0,
         id: "$$ROOT.effectif_snapshot._id",
         nom: "$$ROOT.effectif_snapshot.apprenant.nom",
         prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
@@ -680,6 +704,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
         organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
         organisme_enseigne: "$$ROOT.organisme.enseigne",
         prioritaire: "$a_risque",
+        dernier_statut: "$dernierStatut",
       },
     },
   ];
