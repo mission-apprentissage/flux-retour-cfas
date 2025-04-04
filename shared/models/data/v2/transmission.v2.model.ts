@@ -8,9 +8,6 @@ const collectionName = "transmissionV2";
 
 const zTransmissionV2 = z.object({
   _id: zObjectId,
-  created_at: z.date(),
-  organisme_transmetteur_id: zObjectId.nullish(),
-  formation_id: zObjectId,
 });
 
 export type ITransmissionV2 = z.output<typeof zTransmissionV2>;

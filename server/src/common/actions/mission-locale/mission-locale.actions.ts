@@ -381,14 +381,23 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
 
-  const getFirstDayOfPreviousSixMonths = () => {
+  const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
+    if (!firstDate) {
+      return [];
+    }
+
     const dates: string[] = [];
     const today: Date = new Date();
+    const targetDate = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
+    let done = false;
+    let i = 0;
 
-    for (let i = 0; i < 6; i++) {
+    while (!done) {
       const date: Date = new Date(Date.UTC(today.getFullYear(), today.getMonth() - i, 1));
       const formatted: string = date.toISOString();
+      done = date <= targetDate;
       dates.push(formatted);
+      i++;
     }
 
     return dates;
@@ -477,11 +486,18 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         },
       },
     },
+    {
+      $sort: {
+        month: -1,
+      },
+    },
   ];
 
   const effectifs = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+
+  const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
   const formattedData = aTraiter
-    ? getFirstDayOfPreviousSixMonths().map((date) => {
+    ? getFirstDayOfMonthListFromDate(oldestMonth).map((date) => {
         const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
         return (
           found ?? {
