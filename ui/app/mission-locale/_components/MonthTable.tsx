@@ -28,9 +28,17 @@ function buildRowData(effectif: EffectifData, isTraite: boolean) {
     return {
       id: effectif.id,
       badge: (
-        <Badge severity="new" small>
-          à traiter
-        </Badge>
+        <>
+          {effectif.prioritaire ? (
+            <Badge noIcon severity="warning" small style={{ gap: "0.3rem" }}>
+              <i className="fr-icon-fire-fill fr-icon--xs" /> à traiter en priorité
+            </Badge>
+          ) : (
+            <Badge severity="new" small>
+              à traiter
+            </Badge>
+          )}
+        </>
       ),
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -69,14 +77,14 @@ export const MonthTable = memo(function MonthTable({
 
   const columns: ColumnData[] = isTraite
     ? [
-        { label: "Apprenant", dataKey: "name", width: 300 },
+        { label: "Apprenant", dataKey: "name", width: 200 },
         { label: "Formation", dataKey: "formation", width: 350 },
-        { label: "Statut", dataKey: "badge", width: 150 },
-        { label: "", dataKey: "icon", width: "5%" },
+        { label: "Statut", dataKey: "badge", width: 200 },
+        { label: "", dataKey: "icon", width: 10 },
       ]
     : [
-        { label: "Statut", dataKey: "badge", width: 150 },
-        { label: "Apprenant", dataKey: "name", width: 300 },
+        { label: "Statut", dataKey: "badge", width: 200 },
+        { label: "Apprenant", dataKey: "name", width: 200 },
         { label: "Formation", dataKey: "formation", width: 350 },
         { label: "", dataKey: "icon", width: 10 },
       ];
