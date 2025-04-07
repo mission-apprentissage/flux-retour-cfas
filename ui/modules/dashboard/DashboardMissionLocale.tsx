@@ -2,7 +2,7 @@ import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Center, Container, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { getOrganisationLabel } from "shared";
+import { getOrganisationLabel, IOrganisationCreate } from "shared";
 
 import { _get, _post } from "@/common/httpClient";
 import { formatCivility } from "@/common/utils/stringUtils";
@@ -51,7 +51,7 @@ const DashboardMissionLocale = () => {
             Bienvenue sur votre tableau de bord, {formatCivility(auth.civility)} {auth.prenom} {auth.nom}
           </Heading>
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
-            {getOrganisationLabel(auth.organisation)}
+            {getOrganisationLabel(auth.organisation as IOrganisationCreate)}
           </Text>
         </Container>
       </Box>

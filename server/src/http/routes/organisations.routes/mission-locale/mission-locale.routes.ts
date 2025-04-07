@@ -55,9 +55,18 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
 
 const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+
   const [a_traiter, traite, prioritaire] = await Promise.all([
-    getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.A_TRAITER }),
-    getEffectifsParMoisByMissionLocaleId(missionLocale._id, { type: API_TRAITEMENT_TYPE.TRAITE }),
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocale._id,
+      { type: API_TRAITEMENT_TYPE.A_TRAITER },
+      missionLocale.activated_at
+    ),
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocale._id,
+      { type: API_TRAITEMENT_TYPE.TRAITE },
+      missionLocale.activated_at
+    ),
     getEffectifARisqueByMissionLocaleId(missionLocale._id),
   ]);
   return {
@@ -72,13 +81,13 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste);
+  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
   const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleSchema);
   const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
-  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale._id, filters);
+  const effectifList = await getEffectifsListByMisisonLocaleId(missionLocale._id, filters, missionLocale.activated_at);
 
   const computeFileName = (
     t: API_TRAITEMENT_TYPE

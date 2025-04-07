@@ -30,6 +30,7 @@ const zOrganisationMissionLocaleCreate = z.object({
   nom: z.string({ description: "Nom de la mission locale" }),
   siret: z.string({ description: "N° SIRET" }).optional(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
+  activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
 });
 
 const zOrganisationOrganismeCreate = z.object({
