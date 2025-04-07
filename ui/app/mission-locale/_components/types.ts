@@ -6,6 +6,14 @@ export type EffectifData = {
   organisme_nom: string;
   organisme_raison_sociale: string;
   organisme_enseigne: string;
+  prioritaire: boolean;
+};
+
+export type EffectifPriorityData = EffectifData & {
+  dernier_statut: {
+    date: string;
+    statut: string;
+  };
 };
 
 export type MonthItem = {
@@ -18,5 +26,6 @@ export type SelectedSection = "a-traiter" | "deja-traite";
 
 export type MonthsData = {
   a_traiter: MonthItem[];
+  prioritaire: EffectifData[];
   traite: MonthItem[];
 };

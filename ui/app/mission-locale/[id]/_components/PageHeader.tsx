@@ -4,7 +4,25 @@ import { Box, Skeleton, Typography } from "@mui/material";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 
-export function PageHeader({ previous, next, total, currentIndex, isLoading, isATraiter }) {
+export function PageHeader({
+  previous,
+  next,
+  total,
+  currentIndex,
+  isLoading,
+  isATraiter,
+  nomListe,
+}: {
+  previous?: { id: string };
+  next?: { id: string };
+  total?: number;
+  currentIndex: number;
+  isLoading?: boolean;
+  isATraiter?: boolean;
+  nomListe?: string;
+}) {
+  const getHref = (id: string) => `/mission-locale/${id}${nomListe ? `?nomListe=${nomListe}` : ""}`;
+
   return (
     <Box
       display="flex"
@@ -14,11 +32,7 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
       sx={{ border: "1px solid var(--border-default-grey)" }}
     >
       {previous ? (
-        <DsfrLink
-          href={`/mission-locale/${previous.id}`}
-          arrow="none"
-          className="fr-link--icon-left fr-icon-arrow-left-s-line"
-        >
+        <DsfrLink href={getHref(previous.id)} arrow="none" className="fr-link--icon-left fr-icon-arrow-left-s-line">
           Précédent
         </DsfrLink>
       ) : (
@@ -29,9 +43,17 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
         {!isLoading && total !== undefined ? (
           <>
             <Box display={{ xs: "none", sm: "flex" }} alignItems="center">
-              <Typography fontWeight="bold">
-                Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
-              </Typography>
+              {nomListe === "prioritaire" ? (
+                <Typography fontWeight="bold">
+                  Dossier n°{currentIndex + 1} sur {total} à traiter en priorité
+                </Typography>
+              ) : (
+                <>
+                  <Typography fontWeight="bold">
+                    Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
+                  </Typography>
+                </>
+              )}
               <Typography component="span" sx={{ marginLeft: 1 }}>
                 (tous mois confondus)
               </Typography>
@@ -49,11 +71,7 @@ export function PageHeader({ previous, next, total, currentIndex, isLoading, isA
       </Box>
 
       {next ? (
-        <DsfrLink
-          href={`/mission-locale/${next.id}`}
-          arrow="none"
-          className="fr-link--icon-right fr-icon-arrow-right-s-line"
-        >
+        <DsfrLink href={getHref(next.id)} arrow="none" className="fr-link--icon-right fr-icon-arrow-right-s-line">
           Suivant
         </DsfrLink>
       ) : (

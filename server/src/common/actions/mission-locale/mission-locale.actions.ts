@@ -643,6 +643,7 @@ export const getEffectifFromMissionLocaleId = async (
         "situation.deja_connu": "$deja_connu",
         "situation.commentaires": "$commentaires",
         contacts_tdb: "$tdb_users",
+        prioritaire: "$a_risque",
       },
     },
   ];

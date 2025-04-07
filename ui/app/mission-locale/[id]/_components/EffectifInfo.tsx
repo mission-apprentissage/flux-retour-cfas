@@ -24,8 +24,16 @@ export function EffectifInfo({ effectif }) {
         py: { xs: 2, md: 6 },
       }}
     >
-      <Stack direction="row" spacing={1}>
-        {effectif.a_traiter ? <Badge severity="new">à traiter</Badge> : <Badge severity="success">traité</Badge>}
+      <Stack direction="row" spacing={1} alignItems="center">
+        {effectif.a_traiter && effectif.prioritaire ? (
+          <Badge noIcon severity="warning" style={{ gap: "0.5rem" }}>
+            <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
+          </Badge>
+        ) : effectif.a_traiter ? (
+          <Badge severity="new">à traiter</Badge>
+        ) : (
+          <Badge severity="success">traité</Badge>
+        )}
         <Badge>{getMonthYearFromDate(effectif.dernier_statut?.date)}</Badge>
       </Stack>
 

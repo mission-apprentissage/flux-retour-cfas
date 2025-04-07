@@ -4,11 +4,13 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
 
 import { MonthTable } from "./MonthTable";
-import { MonthItem } from "./types";
+import { PriorityTable } from "./PriorityTable";
+import { EffectifPriorityData, MonthItem } from "./types";
 
 type SearchableTableSectionProps = {
   title: string;
   data: MonthItem[];
+  priorityData?: EffectifPriorityData[];
   isTraite: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
@@ -18,6 +20,7 @@ type SearchableTableSectionProps = {
 export const SearchableTableSection = memo(function SearchableTableSection({
   title,
   data,
+  priorityData,
   isTraite,
   searchTerm,
   onSearchChange,
@@ -43,6 +46,9 @@ export const SearchableTableSection = memo(function SearchableTableSection({
           )}
         />
       </div>
+
+      {!isTraite && priorityData && priorityData.length > 0 && <PriorityTable priorityData={priorityData} />}
+
       {data.map((monthItem) => (
         <MonthTable
           key={monthItem.month}
