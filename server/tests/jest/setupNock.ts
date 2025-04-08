@@ -45,6 +45,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
       },
       mission_locale: {
         id: 211,
+        code: "54321",
         nom: "JEUNES HAUTES-ALPES",
         siret: "18053700300048",
         localisation: {

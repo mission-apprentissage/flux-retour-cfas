@@ -147,6 +147,7 @@ describe("buildAdresse", () => {
     },
     mission_locale: {
       id: 609,
+      code: "12345",
       nom: "DE PARIS",
       siret: "53132862300149",
       localisation: {
