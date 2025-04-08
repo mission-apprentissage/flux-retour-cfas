@@ -96,7 +96,8 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "organisme:cleanup", queued });
 
   // # Mise à jour des effectifs DECA
-  await addJob({ name: "hydrate:contrats-deca-raw", queued });
+  // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
+  // await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
   return 0;
 };
