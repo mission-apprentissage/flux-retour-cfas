@@ -32,6 +32,5 @@ export async function buildAdresse(dossier: IBuildAdresseParams): Promise<IEffec
     code_departement: communeInfo.departement.codeInsee,
     code_region: communeInfo.region.codeInsee,
     mission_locale_id: communeInfo.mission_locale?.id ?? null,
-    mission_locale_code: communeInfo.mission_locale?.code ?? null,
   };
 }
