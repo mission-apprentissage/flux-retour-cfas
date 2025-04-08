@@ -905,6 +905,13 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
+                "mission_locale_code": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code de la mission locale",
+                },
                 "mission_locale_id": {
                   "bsonType": [
                     "number",
@@ -1205,6 +1212,13 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                 "departement": {
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
+                },
+                "mission_locale_code": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code de la mission locale",
                 },
                 "mission_locale_id": {
                   "bsonType": [
@@ -3710,6 +3724,13 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
                 },
+                "mission_locale_code": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code de la mission locale",
+                },
                 "mission_locale_id": {
                   "bsonType": [
                     "number",
@@ -4010,6 +4031,13 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                 "departement": {
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
+                },
+                "mission_locale_code": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code de la mission locale",
                 },
                 "mission_locale_id": {
                   "bsonType": [
@@ -6306,6 +6334,13 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                 "departement": {
                   "bsonType": "string",
                   "pattern": "^(2A|2B|[0-9]{2,3})$",
+                },
+                "mission_locale_code": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code de la mission locale",
                 },
                 "mission_locale_id": {
                   "bsonType": [
@@ -9714,6 +9749,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                           "bsonType": "string",
                           "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
+                        "mission_locale_code": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Code de la mission locale",
+                        },
                         "mission_locale_id": {
                           "bsonType": [
                             "number",
@@ -10014,6 +10056,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                         "departement": {
                           "bsonType": "string",
                           "pattern": "^(2A|2B|[0-9]{2,3})$",
+                        },
+                        "mission_locale_code": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Code de la mission locale",
                         },
                         "mission_locale_id": {
                           "bsonType": [
@@ -12259,6 +12308,13 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "bsonType": "string",
                           "pattern": "^(2A|2B|[0-9]{2,3})$",
                         },
+                        "mission_locale_code": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Code de la mission locale",
+                        },
                         "mission_locale_id": {
                           "bsonType": [
                             "number",
@@ -14241,12 +14297,19 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date d'activation de la mission locale",
         },
+        "code": {
+          "bsonType": "string",
+          "description": "Code de la mission locale",
+        },
         "created_at": {
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
         "ml_id": {
-          "bsonType": "number",
+          "bsonType": [
+            "number",
+            "null",
+          ],
           "description": "Identifiant de la mission locale",
         },
         "nom": {
@@ -14266,7 +14329,6 @@ exports[`validation-schema > should create validation schema for organisations >
         "created_at",
         "type",
         "nom",
-        "ml_id",
       ],
     },
     {

@@ -41,6 +41,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
       nom: "MA MISSION LOCALE",
       created_at: new Date(),
       ml_id: 609,
+      code: "12345",
     });
     await effectifsQueueDb().deleteMany({});
     await effectifsDb().deleteMany({});
@@ -96,7 +97,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     expect(effectifId).toBeDefined();
     if (effectifId) {
       const effectif = await effectifsDb().findOne({ _id: effectifId });
-      expect(effectif?.apprenant.adresse?.mission_locale_id).toStrictEqual(609);
+      expect(effectif?.apprenant.adresse?.mission_locale_code).toStrictEqual("12345");
 
       const effectifML = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
       expect(effectifML?.effectif_snapshot).toEqual(effectif);
@@ -130,7 +131,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     }
 
     const effectif = await effectifsDb().findOne({ _id: effectifId });
-    expect(effectif?.apprenant.adresse?.mission_locale_id).toStrictEqual(609);
+    expect(effectif?.apprenant.adresse?.mission_locale_code).toStrictEqual("12345");
 
     const effectifML = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
     expect(effectifML?.effectif_snapshot).toEqual(effectif);

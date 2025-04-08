@@ -721,7 +721,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
     : false;
   const rqthFilter = effectif.apprenant.rqth;
   const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
-  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
+  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_code;
 
   if (mlFilter && rupturantFilter && (ageFilter || rqthFilter)) {
     const mlData = await organisationsDb().findOne({

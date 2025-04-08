@@ -191,6 +191,7 @@ describe("Processus d'ingestion", () => {
               academie: "01",
               region: "11",
               mission_locale_id: 609,
+              mission_locale_code: "12345",
             },
             adresse_naissance: {
               code_postal: "75001",
@@ -200,6 +201,7 @@ describe("Processus d'ingestion", () => {
               mission_locale_id: 609,
               academie: "01",
               region: "11",
+              mission_locale_code: "12345",
             },
             sexe: "F",
             rqth: true,

@@ -128,6 +128,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
       },
       mission_locale: {
         id: 609,
+        code: "12345",
         nom: "DE PARIS",
         siret: "53132862300149",
         localisation: {
