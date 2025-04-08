@@ -73,6 +73,7 @@ const zEffectifV2 = z.object({
       code_departement: z.string(),
       code_academie: z.string(),
       mission_locale_id: z.number().nullable(),
+      mission_locale_code: z.string().nullable(),
     })
     .nullable(),
 

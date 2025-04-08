@@ -19,7 +19,7 @@ import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.act
  *    EffectifsDb
  */
 
-const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
+const unionWithDecaForMissionLocale = (code?: string) => [
   {
     $unionWith: {
       coll: "effectifsDECA",
@@ -40,19 +40,17 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
   },
   {
     $match: {
-      "apprenant.adresse.mission_locale_id": missionLocaleId,
+      "apprenant.adresse.mission_locale_code": code,
       annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
     },
   },
 ];
 
-export const getAllEffectifForMissionLocaleCursor = (
-  mission_locale_id: number
-): AggregationCursor<IEffectif | IEffectifDECA> => {
+export const getAllEffectifForMissionLocaleCursor = (code?: string): AggregationCursor<IEffectif | IEffectifDECA> => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
   const effectifsMissionLocaleAggregation = [
-    ...unionWithDecaForMissionLocale(mission_locale_id),
+    ...unionWithDecaForMissionLocale(code),
     ...createDernierStatutFieldPipeline(new Date()),
     matchDernierStatutPipelineMl(statut),
     {
@@ -296,16 +294,16 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
   ];
 };
 
-export const getOrCreateMissionLocaleById = async (id: number) => {
-  const mlDb = await organisationsDb().findOne({ ml_id: id });
+export const getOrCreateMissionLocaleById = async (code: string) => {
+  const mlDb = await organisationsDb().findOne({ code: code });
 
   if (mlDb) {
     return mlDb;
   }
   const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
-  const ml: IMissionLocale | undefined = allMl.find((ml) => ml.id === id);
+  const ml: IMissionLocale | undefined = allMl.find((ml) => ml.code === code);
   if (!ml) {
-    Boom.notFound(`Mission locale with id ${id} not found`);
+    Boom.notFound(`Mission locale with cpde ${code} not found`);
     return;
   }
 
@@ -316,6 +314,7 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
     ml_id: ml.id,
     nom: ml.nom,
     siret: ml.siret,
+    code: ml.code,
   });
 
   return organisationsDb().findOne({ _id: orga.insertedId });
@@ -328,16 +327,16 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
  * @param missionLocaleID Identifiant numérique de la Mission Locale (ml_id)
  * @returns La liste des utilisateurs confirmés rattachés à cette organisation
  */
-export async function listContactsMlOrganisme(missionLocaleID: number) {
+export async function listContactsMlOrganisme(code: string) {
   const organisation = await organisationsDb().findOne({
-    ml_id: missionLocaleID,
+    code: code,
     type: "MISSION_LOCALE",
   });
 
   if (!organisation) {
     logger.warn(
-      { module: "listContactsMlOrganisme", missionLocaleID },
-      `Aucune organisation de type MISSION_LOCALE trouvée pour ml_id=${missionLocaleID}.`
+      { module: "listContactsMlOrganisme", code },
+      `Aucune organisation de type MISSION_LOCALE trouvée pour code=${code}.`
     );
     return [];
   }
@@ -727,7 +726,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   if (mlFilter && rupturantFilter && (ageFilter || rqthFilter)) {
     const mlData = await organisationsDb().findOne({
       type: "MISSION_LOCALE",
-      ml_id: effectif.apprenant.adresse?.mission_locale_id,
+      code: effectif.apprenant.adresse?.mission_locale_code,
     });
 
     if (mlData) {

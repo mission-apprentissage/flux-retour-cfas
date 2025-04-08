@@ -32,6 +32,7 @@ import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  updateMissionLocaleOrganisationFromMlIdToCode,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
@@ -257,10 +258,8 @@ export async function setupJobProcessor() {
       },
       "hydrate:mission-locale-effectif-snapshot": {
         handler: async (job) => {
-          const missionLocaleStructureId = (job.payload?.ml_id as string)
-            ? parseInt(job.payload?.ml_id as string)
-            : null;
-          return hydrateMissionLocaleSnapshot(missionLocaleStructureId);
+          const mlCode = job.payload?.mlCode as string;
+          return hydrateMissionLocaleSnapshot(mlCode);
         },
       },
       "hydrate:mission-locale-organisation": {
@@ -271,6 +270,11 @@ export async function setupJobProcessor() {
       "tmp:mission-locale-snapshot-update": {
         handler: async () => {
           return updateMissionLocaleSnapshotFromLastStatus();
+        },
+      },
+      "tmp:mission-locale-id-code-update": {
+        handler: async () => {
+          return updateMissionLocaleOrganisationFromMlIdToCode();
         },
       },
       "populate:reseaux": {

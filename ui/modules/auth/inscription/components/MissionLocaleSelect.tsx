@@ -41,6 +41,7 @@ export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProp
       nom: ml.nom,
       siret: ml.siret,
       ml_id: ml.id,
+      code: ml.code,
     });
   };
 

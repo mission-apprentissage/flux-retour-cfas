@@ -7,10 +7,10 @@ import { _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
 import { MissionLocaleSelect } from "@/modules/auth/inscription/components/MissionLocaleSelect";
 
-async function inviteUserToOrganisation(email: string, mission_locale_id: number) {
+async function inviteUserToOrganisation(email: string, mission_locale_code: number) {
   await _post("/api/v1/admin/users/mission-locale/membre", {
     email,
-    mission_locale_id,
+    mission_locale_code,
   });
 }
 
@@ -20,7 +20,7 @@ interface InvitationFormProps {
 
 const InvitationFormAdmin = (props: InvitationFormProps) => {
   const { toastSuccess, toastError } = useToaster();
-  const [organisation, setOrganisation] = useState<{ ml_id: number } | null>(null);
+  const [organisation, setOrganisation] = useState<{ code: number } | null>(null);
   const { values, handleChange, handleSubmit, errors, touched, resetForm } = useFormik({
     initialValues: {
       userEmail: "",
@@ -34,7 +34,7 @@ const InvitationFormAdmin = (props: InvitationFormProps) => {
         if (!organisation) {
           return;
         }
-        await inviteUserToOrganisation(form.userEmail, organisation.ml_id);
+        await inviteUserToOrganisation(form.userEmail, organisation.code);
         resetForm();
         toastSuccess("Un email d'invitation a été envoyé au destinataire.");
         props.onInvitation?.();
