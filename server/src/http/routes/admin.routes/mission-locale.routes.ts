@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import express from "express";
 import { z } from "zod";
 
@@ -21,5 +22,5 @@ export default () => {
 
 const activateMLAtDate = ({ body }) => {
   const { date, missionLocaleId } = body;
-  return activateMissionLocale(missionLocaleId, date);
+  return activateMissionLocale(new ObjectId(missionLocaleId), date);
 };

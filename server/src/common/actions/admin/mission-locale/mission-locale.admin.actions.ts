@@ -2,15 +2,19 @@ import { ObjectId } from "bson";
 
 import { organisationsDb } from "@/common/model/collections";
 
-export const activateMissionLocale = async (missionLocaleId: string, date: Date) => {
-  const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: new ObjectId(missionLocaleId) });
+export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date, createOnly: boolean = false) => {
+  const ml = await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    _id: missionLocaleId,
+    ...(createOnly ? { activated_at: { $exists: false } } : {}),
+  });
 
   if (!ml) {
-    throw new Error(`Mission locale with id ${missionLocaleId} not found`);
+    return;
   }
 
   await organisationsDb().updateOne(
-    { _id: new ObjectId(missionLocaleId) },
+    { _id: missionLocaleId },
     {
       $set: {
         activated_at: date,
