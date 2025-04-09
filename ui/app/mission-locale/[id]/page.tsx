@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -72,6 +72,7 @@ function EffectifContent({
   setHasError,
   hasSuccess,
   setHasSuccess,
+  isListPrioritaire,
 }: {
   effectifPayload: IEffecifMissionLocale;
   formData: IUpdateMissionLocaleEffectif;
@@ -82,6 +83,7 @@ function EffectifContent({
   setHasError: (val: boolean) => void;
   hasSuccess: boolean;
   setHasSuccess: (val: boolean) => void;
+  isListPrioritaire: boolean;
 }) {
   const MIN_LOADING_TIME = 1500;
   const SUCCESS_DISPLAY_TIME = 600;
@@ -124,15 +126,20 @@ function EffectifContent({
   }
 
   function handleResult(success: boolean, goNext: boolean) {
-    if (!success) {
-      setIsSaving(false);
-      return;
-    }
     setIsSaving(false);
+
+    if (!success) return;
+
     setHasSuccess(true);
+
     setTimeout(() => {
-      if (goNext && next) router.push(`/mission-locale/${next.id}`);
-      else router.push(next ? "/mission-locale/" : "/mission-locale/validation");
+      if (goNext && next) {
+        const nextUrl = `/mission-locale/${next.id}${isListPrioritaire ? `?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}` : ""}`;
+        router.push(nextUrl);
+      } else {
+        const fallbackUrl = isListPrioritaire ? "/mission-locale/validation/prioritaire" : "/mission-locale/validation";
+        router.push(fallbackUrl);
+      }
     }, SUCCESS_DISPLAY_TIME);
   }
 
@@ -214,6 +221,7 @@ export default function Page() {
                   setHasError={setHasError}
                   hasSuccess={hasSuccess}
                   setHasSuccess={setHasSuccess}
+                  isListPrioritaire={nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE}
                 />
               </>
             )}

@@ -178,7 +178,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
           />
         )}
 
-        {selectedSection === "a-traiter" && (
+        {selectedSection === "a-traiter" && sortedDataATraiter.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="A traiter"
@@ -192,7 +192,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
           </SuspenseWrapper>
         )}
 
-        {selectedSection === "deja-traite" && (
+        {selectedSection === "deja-traite" && sortedDataTraite.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="Déjà traité"
