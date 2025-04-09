@@ -543,7 +543,9 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     },
   ];
 
-  const effectifs = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const oldestRealDataIndex = result.findLastIndex(({ treated_count, data }) => treated_count > 0 || data.length > 0);
+  const effectifs = oldestRealDataIndex >= 0 ? result.slice(0, oldestRealDataIndex + 1) : [...result];
 
   const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
   const formattedData = aTraiter
