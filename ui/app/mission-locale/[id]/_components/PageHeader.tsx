@@ -21,7 +21,7 @@ export function PageHeader({
   isATraiter?: boolean;
   nomListe?: string;
 }) {
-  const getHref = (id: string) => `/mission-locale/${id}${nomListe ? `?nomListe=${nomListe}` : ""}`;
+  const getHref = (id: string) => `/mission-locale/${id}${nomListe ? `?nom_liste=${nomListe}` : ""}`;
 
   return (
     <Box

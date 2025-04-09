@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Box, Stack, Typography } from "@mui/material";
 import { format } from "date-fns/index";
 import { fr } from "date-fns/locale";
@@ -12,6 +11,7 @@ import { EffectifPriorityData } from "./types";
 
 type PriorityTableProps = {
   priorityData: EffectifPriorityData[];
+  searchTerm: string;
 };
 
 function formatMonthAndYear(dateStr: string | undefined): string {
@@ -24,14 +24,14 @@ function formatMonthAndYear(dateStr: string | undefined): string {
 function PriorityBadge({ priorityData }: { priorityData: EffectifPriorityData[] }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-      <Badge noIcon severity="warning" style={{ gap: "0.5rem" }}>
+      <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
         <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ ({priorityData.length})
-      </Badge>
+      </p>
     </div>
   );
 }
 
-export function PriorityTable({ priorityData }: PriorityTableProps) {
+export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) {
   const columns = useMemo(() => {
     return [
       { label: "", dataKey: "monthBadge", width: 150 },
@@ -48,11 +48,7 @@ export function PriorityTable({ priorityData }: PriorityTableProps) {
         rawData: effectif,
         element: {
           id: effectif.id,
-          monthBadge: (
-            <Badge noIcon severity="warning" small>
-              {labelMonth}
-            </Badge>
-          ),
+          monthBadge: <p className="fr-badge fr-badge--beige-gris-galet fr-badge--sm">{labelMonth}</p>,
           name: <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>,
           formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
           arrow: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -93,9 +89,17 @@ export function PriorityTable({ priorityData }: PriorityTableProps) {
             caption=""
             data={tableData}
             columns={columns}
-            itemsPerPage={6}
+            itemsPerPage={7}
             emptyMessage="Aucun élément prioritaire"
-            searchableColumns={["nom", "prenom", "libelle_formation"]}
+            searchTerm={searchTerm}
+            searchableColumns={[
+              "nom",
+              "prenom",
+              "libelle_formation",
+              "organisme_nom",
+              "organisme_raison_sociale",
+              "organisme_enseigne",
+            ]}
             getRowLink={(row) => `/mission-locale/${row.id}?nom_liste=prioritaire`}
           />
         </>
