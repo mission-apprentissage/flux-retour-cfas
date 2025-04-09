@@ -45,6 +45,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
       },
       mission_locale: {
         id: 211,
+        code: "54321",
         nom: "JEUNES HAUTES-ALPES",
         siret: "18053700300048",
         localisation: {
@@ -128,6 +129,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
       },
       mission_locale: {
         id: 609,
+        code: "12345",
         nom: "DE PARIS",
         siret: "53132862300149",
         localisation: {

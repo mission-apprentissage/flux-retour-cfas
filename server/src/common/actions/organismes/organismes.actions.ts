@@ -316,8 +316,8 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
       });
       if (missionsLocalesAPI.length > 0) {
         const firstMissionLocale = missionsLocalesAPI[0];
-        if (typeof firstMissionLocale.id === "number") {
-          const missionLocaleContacts = await listContactsMlOrganisme(firstMissionLocale.id);
+        if (typeof firstMissionLocale.code === "string") {
+          const missionLocaleContacts = await listContactsMlOrganisme(firstMissionLocale.code);
           missionLocaleWithTDBContacts = {
             ...firstMissionLocale,
             contactsTDB: missionLocaleContacts,

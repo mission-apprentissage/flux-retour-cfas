@@ -126,8 +126,8 @@ export default () => {
     "/mission-locale/membre",
     returnResult(async (req) => {
       const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToMissionLocale);
-      const { email, mission_locale_id } = body;
-      const organisation = await getOrCreateMissionLocaleById(mission_locale_id);
+      const { email, mission_locale_code } = body;
+      const organisation = await getOrCreateMissionLocaleById(mission_locale_code);
       if (!organisation) {
         throw Boom.notFound("Mission locale not found");
       }

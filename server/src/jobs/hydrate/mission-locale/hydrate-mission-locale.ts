@@ -11,15 +11,15 @@ import {
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
-export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
+export const hydrateMissionLocaleSnapshot = async (mlCode: string | null) => {
   const cursor = organisationsDb().find({
     type: "MISSION_LOCALE",
-    ...(missionLocaleStructureId ? { ml_id: missionLocaleStructureId } : {}),
+    ...(mlCode ? { code: mlCode } : {}),
   });
 
   while (await cursor.hasNext()) {
     const orga = (await cursor.next()) as IOrganisationMissionLocale;
-    const cursor2 = getAllEffectifForMissionLocaleCursor(orga.ml_id);
+    const cursor2 = getAllEffectifForMissionLocaleCursor(orga.code);
     while (await cursor2.hasNext()) {
       const eff = await cursor2.next();
       if (eff) {
@@ -33,7 +33,7 @@ export const hydrateMissionLocaleOrganisation = async () => {
   const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
   const currentDate = new Date();
   for (const ml of allMl) {
-    const missionLocale = await organisationsDb().findOne({ ml_id: ml.id });
+    const missionLocale = await organisationsDb().findOne({ code: ml.code });
 
     if (!missionLocale) {
       await organisationsDb().insertOne({
@@ -43,9 +43,43 @@ export const hydrateMissionLocaleOrganisation = async () => {
         ml_id: ml.id,
         nom: ml.nom,
         siret: ml.siret,
+        code: ml.code,
       });
 
-      await hydrateMissionLocaleSnapshot(ml.id);
+      await hydrateMissionLocaleSnapshot(ml.code);
+    }
+  }
+};
+
+export const updateMissionLocaleOrganisationFromMlIdToCode = async () => {
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
+  const currentDate = new Date();
+  for (const ml of allMl) {
+    const missionLocale = await organisationsDb().findOne({ ml_id: ml.id });
+
+    const result = await organisationsDb().findOneAndUpdate(
+      {
+        _id: missionLocale?._id ?? new ObjectId(),
+      },
+      {
+        $set: {
+          code: ml.code,
+        },
+        $setOnInsert: {
+          type: "MISSION_LOCALE",
+          created_at: currentDate,
+          ml_id: ml.id,
+          nom: ml.nom,
+          siret: ml.siret,
+        },
+      },
+      { upsert: true, returnDocument: "before" }
+    );
+
+    // Si le document est créé
+
+    if (!result) {
+      await hydrateMissionLocaleSnapshot(ml.code);
     }
   }
 };

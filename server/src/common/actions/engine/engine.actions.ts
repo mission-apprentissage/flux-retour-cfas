@@ -77,6 +77,7 @@ export const getAndFormatCommuneFromCode = async (
           academie: communeInfo.academie.code,
           region: communeInfo.region.codeInsee,
           mission_locale_id: communeInfo.mission_locale?.id,
+          mission_locale_code: communeInfo.mission_locale?.code,
         }
       : {};
   } catch (e) {

@@ -77,6 +77,7 @@ export const zAdresse = zodOpenApi.object({
 
 export const zAdresseWithMissionLocale = zAdresse.extend({
   mission_locale_id: zodOpenApi.number({ description: "Id de mission locale" }).nullish(),
+  mission_locale_code: zodOpenApi.string({ description: "Code de la mission locale" }).nullish(),
 });
 
 const zCommune = zAdresse.pick({
