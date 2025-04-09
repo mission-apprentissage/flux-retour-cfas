@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -134,7 +134,7 @@ function EffectifContent({
 
     setTimeout(() => {
       if (goNext && next) {
-        const nextUrl = `/mission-locale/${next.id}${isListPrioritaire ? "?nom_liste=prioritaire" : ""}`;
+        const nextUrl = `/mission-locale/${next.id}${isListPrioritaire ? `?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}` : ""}`;
         router.push(nextUrl);
       } else {
         const fallbackUrl = isListPrioritaire ? "/mission-locale/validation/prioritaire" : "/mission-locale/validation";
@@ -221,7 +221,7 @@ export default function Page() {
                   setHasError={setHasError}
                   hasSuccess={hasSuccess}
                   setHasSuccess={setHasSuccess}
-                  isListPrioritaire={nomListeParam === "prioritaire"}
+                  isListPrioritaire={nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE}
                 />
               </>
             )}

@@ -4,6 +4,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { format } from "date-fns/index";
 import { fr } from "date-fns/locale";
 import React, { useMemo } from "react";
+import { API_EFFECTIF_LISTE } from "shared";
 
 import { Table } from "@/app/_components/table/Table";
 
@@ -100,7 +101,7 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
               "organisme_raison_sociale",
               "organisme_enseigne",
             ]}
-            getRowLink={(row) => `/mission-locale/${row.id}?nom_liste=prioritaire`}
+            getRowLink={(row) => `/mission-locale/${row.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`}
           />
         </>
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Skeleton, Typography } from "@mui/material";
+import { API_EFFECTIF_LISTE } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 
@@ -43,7 +44,7 @@ export function PageHeader({
         {!isLoading && total !== undefined ? (
           <>
             <Box display={{ xs: "none", sm: "flex" }} alignItems="center">
-              {nomListe === "prioritaire" ? (
+              {nomListe === API_EFFECTIF_LISTE.PRIORITAIRE ? (
                 <Typography fontWeight="bold">
                   Dossier n°{currentIndex + 1} sur {total} à traiter en priorité
                 </Typography>
