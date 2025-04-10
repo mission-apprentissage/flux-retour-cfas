@@ -8,13 +8,18 @@ import { API_TRAITEMENT_TYPE } from "shared";
 
 import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
+import { usePlausibleTracking } from "@/hooks/plausible";
 
 type MLHeaderProps = {
   onDownloadClick?: () => void;
 };
 
 export const MLHeader = ({ onDownloadClick }: MLHeaderProps) => {
+  const { trackPlausibleEvent } = usePlausibleTracking();
+
   const handleDownload = async () => {
+    trackPlausibleEvent("telechargement_mission_locale_liste");
+
     if (onDownloadClick) {
       onDownloadClick();
       return;
