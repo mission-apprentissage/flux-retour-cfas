@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axiosist";
+import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { it, expect, describe, beforeEach } from "vitest";
 
@@ -142,8 +143,8 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
               annee_scolaire: ANNEE_SCOLAIRE,
               contrats: [
                 {
-                  date_debut: new Date(date),
-                  date_fin: new Date(date),
+                  date_debut: addDays(new Date(date), -100),
+                  date_fin: addDays(new Date(date), 50),
                   date_rupture: new Date(date),
                 },
               ],

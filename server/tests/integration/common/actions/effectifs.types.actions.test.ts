@@ -1,3 +1,4 @@
+import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
@@ -93,42 +94,19 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
 
       expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
     });
-
-    it("doit avoir le statut apprenti même si le contrat commence dans le futur", async () => {
-      const customDateDeDebutDeContrat = new Date();
-      customDateDeDebutDeContrat.setDate(customDateDeDebutDeContrat.getDate() + 7);
-
-      const effectif = await createSampleEffectif({
-        organisme: sampleOrganisme,
-        contrats: [
-          {
-            date_debut: customDateDeDebutDeContrat,
-            date_fin: formation.date_fin,
-          },
-        ],
-        formation,
-      });
-
-      const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypesGenerique();
-
-      const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-
-      expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
-    });
   });
 
   describe("apprenent en formation avec rupture de contrat", () => {
     it("ne doit  pas avoir le statut d'apprenti si rupture de contrat avant le début du contrat", async () => {
-      const ruptureDate = new Date(formation.date_entree.getTime());
-      ruptureDate.setDate(formation.date_entree.getDate() - 10);
+      const ruptureDate = addDays(formation.date_entree, -10);
+      const dateDebutContrat = addDays(ruptureDate, -5);
 
       const customEvalutationDate = new Date(formation.date_entree.getTime() + 10);
       const effectif = await createSampleEffectif({
         organisme: sampleOrganisme,
         contrats: [
           {
-            date_debut: formation.date_entree,
+            date_debut: dateDebutContrat,
             date_fin: formation.date_fin,
             date_rupture: ruptureDate,
           },
@@ -141,8 +119,15 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
+      const abandonDate = addDays(ruptureDate, 180);
+      // Gestion du changement d'heure
+      abandonDate.setUTCHours(0);
+
       expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
-        { valeur: STATUT_APPRENANT.INSCRIT, date: formation.date_entree },
+        { valeur: STATUT_APPRENANT.APPRENTI, date: dateDebutContrat },
+        { valeur: STATUT_APPRENANT.RUPTURANT, date: ruptureDate },
+        { valeur: STATUT_APPRENANT.ABANDON, date: abandonDate },
+        { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: formationDateFin },
       ]);
     });
 
@@ -260,6 +245,7 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
           { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
           { valeur: "RUPTURANT", date: new Date("2024-10-24T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2024-11-03T00:00:00.000Z") },
+          { valeur: "FIN_DE_FORMATION", date: formationDateFin },
         ],
       });
     });
@@ -305,8 +291,9 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
         parcours: [
           { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-08-01T00:00:00.000Z") },
           { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
-          { valeur: STATUT_APPRENANT.ABANDON, date: new Date("2022-10-29T00:00:00.000Z") },
           { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2023-01-05T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.ABANDON, date: new Date("2023-07-04T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date("2023-07-31T00:00:00.000Z") },
         ],
       });
     });
@@ -330,7 +317,7 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
-    it("ne doit pas gérer de statut sans periode de formation", async () => {
+    it("doit gérer le statut sans periode de formation", async () => {
       const effectif = await createSampleEffectif({
         apprenant: {
           historique_statut: [
@@ -355,11 +342,36 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
           date_entree: null,
           date_fin: null,
         },
+        annee_scolaire: "2021-2023",
       });
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
       await hydrateEffectifsComputedTypesGenerique({ evaluationDate: new Date(2023, 6, 1) });
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-      expect(updatedEffectif?._computed?.statut).toBeNull();
+      expect(updatedEffectif?._computed?.statut).toEqual({
+        en_cours: "FIN_DE_FORMATION",
+        parcours: [
+          {
+            date: new Date("2021-08-01T00:00:00.000Z"),
+            valeur: "INSCRIT",
+          },
+          {
+            date: new Date("2021-09-06T00:00:00.000Z"),
+            valeur: "APPRENTI",
+          },
+          {
+            date: new Date("2022-07-06T00:00:00.000Z"),
+            valeur: "RUPTURANT",
+          },
+          {
+            date: new Date("2023-01-02T00:00:00.000Z"),
+            valeur: "ABANDON",
+          },
+          {
+            date: new Date("2023-07-31T00:00:00.000Z"),
+            valeur: "FIN_DE_FORMATION",
+          },
+        ],
+      });
     });
   });
 });

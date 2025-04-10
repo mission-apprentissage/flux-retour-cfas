@@ -4,12 +4,278 @@ import { describe, expect, it } from "vitest";
 import { buildEffectifStatus } from "./effectif_status.builder";
 
 describe("buildEffectifStatus", () => {
-  // Cas réels issus de la base de données, meme si certains statuts sont clairement faux
-  const testCases: [Pick<IEffectifV2, "session" | "contrats">, IEffectifComputedStatut | null][] = [
+  const now = new Date("2025-03-06");
+
+  const testCases: [Pick<IEffectifV2, "session" | "contrats" | "exclusion">, IEffectifComputedStatut | null][] = [
+    [
+      // Cas d'acceptation #1
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-10-01": {
+            date_debut: new Date("2024-10-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: null,
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "APPRENTI",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-10-01"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #2
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {},
+        exclusion: null,
+      },
+      {
+        en_cours: "ABANDON",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "ABANDON",
+            date: new Date("2024-11-30"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #3
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-07-01": {
+            date_debut: new Date("2024-07-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: null,
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "APPRENTI",
+        parcours: [
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-07-01"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #4
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-10-01": {
+            date_debut: new Date("2024-10-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-09-01T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "ABANDON",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "ABANDON",
+            date: new Date("2024-11-30"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #5
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-10-01": {
+            date_debut: new Date("2024-10-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-12-01T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "RUPTURANT",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-10-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-12-01"),
+          },
+          {
+            valeur: "ABANDON",
+            date: new Date("2025-05-30"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #6
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-10-01": {
+            date_debut: new Date("2024-10-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-12-01T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+          "2025-04-01": {
+            date_debut: new Date("2025-04-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: null,
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "RUPTURANT",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-10-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-12-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2025-04-01"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
+    [
+      // Cas d'acceptation #7
+      {
+        session: { debut: new Date("2024-09-01"), fin: new Date("2025-08-31") },
+        contrats: {
+          "2024-10-01": {
+            date_debut: new Date("2024-10-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-12-01T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+          "2025-04-01": {
+            date_debut: new Date("2025-04-01T00:00:00.000Z"),
+            date_fin: new Date("2025-08-31T00:00:00.000Z"),
+            rupture: null,
+            employeur: { siret: null },
+          },
+        },
+        exclusion: {
+          date: new Date("2025-03-01T00:00:00.000Z"),
+          cause: null,
+        },
+      },
+      {
+        en_cours: "ABANDON",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-09-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-10-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-12-01"),
+          },
+          {
+            valeur: "ABANDON",
+            date: new Date("2025-03-01"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-08-31"),
+          },
+        ],
+      },
+    ],
     [
       {
         session: { debut: new Date("2025-01-06"), fin: new Date("2025-12-23") },
         contrats: {},
+        exclusion: null,
       },
       {
         en_cours: "INSCRIT",
@@ -17,6 +283,14 @@ describe("buildEffectifStatus", () => {
           {
             valeur: "INSCRIT",
             date: new Date("2025-01-06"),
+          },
+          {
+            valeur: "ABANDON",
+            date: new Date("2025-04-06"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-12-23"),
           },
         ],
       },
@@ -35,17 +309,18 @@ describe("buildEffectifStatus", () => {
           debut: new Date("2024-09-06T00:00:00.000Z"),
           fin: new Date("2025-09-02T00:00:00.000Z"),
         },
+        exclusion: null,
       },
       {
         en_cours: "APPRENTI",
         parcours: [
           {
-            valeur: "INSCRIT",
+            valeur: "APPRENTI",
             date: new Date("2023-09-25T00:00:00.000Z"),
           },
           {
-            valeur: "APPRENTI",
-            date: new Date("2023-09-25T00:00:00.000Z"),
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-09-02T00:00:00.000Z"),
           },
         ],
       },
@@ -55,7 +330,7 @@ describe("buildEffectifStatus", () => {
         contrats: {
           "2022-12-05": {
             date_debut: new Date("2022-12-05T00:00:00.000Z"),
-            date_fin: new Date("2025-09-15T00:00:00.000Z"),
+            date_fin: new Date("2023-05-29T00:00:00.000Z"),
             rupture: null,
             employeur: { siret: "44391877603721" },
           },
@@ -92,6 +367,7 @@ describe("buildEffectifStatus", () => {
           fin: new Date("2025-07-11T00:00:00.000Z"),
           debut: new Date("2022-10-25T00:00:00.000Z"),
         },
+        exclusion: null,
       },
       {
         en_cours: "APPRENTI",
@@ -119,6 +395,10 @@ describe("buildEffectifStatus", () => {
           {
             valeur: "APPRENTI",
             date: new Date("2024-10-01T00:00:00.000Z"),
+          },
+          {
+            valeur: "FIN_DE_FORMATION",
+            date: new Date("2025-07-11T00:00:00.000Z"),
           },
         ],
       },
@@ -153,14 +433,11 @@ describe("buildEffectifStatus", () => {
           debut: new Date("2022-09-13T00:00:00.000Z"),
           fin: new Date("2024-07-10T00:00:00.000Z"),
         },
+        exclusion: null,
       },
       {
-        en_cours: "RUPTURANT",
+        en_cours: "FIN_DE_FORMATION",
         parcours: [
-          {
-            valeur: "INSCRIT",
-            date: new Date("2022-09-05T00:00:00.000Z"),
-          },
           {
             valeur: "APPRENTI",
             date: new Date("2022-09-05T00:00:00.000Z"),
@@ -177,19 +454,15 @@ describe("buildEffectifStatus", () => {
             valeur: "FIN_DE_FORMATION",
             date: new Date("2024-07-10T00:00:00.000Z"),
           },
-          {
-            valeur: "RUPTURANT",
-            date: new Date("2024-07-12T00:00:00.000Z"),
-          },
         ],
       },
     ],
   ];
 
-  it.each<[Pick<IEffectifV2, "session" | "contrats">, IEffectifComputedStatut | null]>(testCases)(
+  it.each<[Pick<IEffectifV2, "session" | "contrats" | "exclusion">, IEffectifComputedStatut | null]>(testCases)(
     "doit calculer correctement le statut de l'effectif %s",
     (data, expected) => {
-      const result = buildEffectifStatus(data, new Date("2025-03-06"));
+      const result = buildEffectifStatus(data, now);
 
       expect(result).toEqual(expected);
     }
