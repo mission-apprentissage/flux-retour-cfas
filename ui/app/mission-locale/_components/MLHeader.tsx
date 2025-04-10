@@ -6,16 +6,16 @@ import { Stack, Box } from "@mui/material";
 import mime from "mime";
 import { API_TRAITEMENT_TYPE } from "shared";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
-import { usePlausibleTracking } from "@/hooks/plausible";
 
 type MLHeaderProps = {
   onDownloadClick?: () => void;
 };
 
 export const MLHeader = ({ onDownloadClick }: MLHeaderProps) => {
-  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const handleDownload = async () => {
     trackPlausibleEvent("telechargement_mission_locale_liste");

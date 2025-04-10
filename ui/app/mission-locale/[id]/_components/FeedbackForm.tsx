@@ -8,7 +8,7 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 
-import { usePlausibleTracking } from "@/hooks/plausible";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSaving, hasSuccess, hasError }) {
   return (
@@ -150,7 +150,7 @@ export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSav
 
 function FormActions({ isFormValid, onSave, isSaving, hasSuccess }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
-  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const handleClick = (type: "saveAndQuit" | "saveAndNext", saveNext: boolean) => {
     setSelectedButton(type);
