@@ -1,0 +1,29 @@
+/**
+*
+* MARIANNE (titres)
+*
+*/
+@font-face {
+  font-family: "Marianne-Bold";
+  src:
+    url("./Marianne-Bold.woff") format("woff"),
+    url("./Marianne-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marianne";
+  src:
+    url("./Marianne-Medium.woff") format("woff"),
+    url("./Marianne-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marianne";
+  src:
+    url("./Marianne-Regular.woff") format("woff"),
+    url("./Marianne-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}

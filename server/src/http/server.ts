@@ -139,6 +139,7 @@ import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
+import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
@@ -919,6 +920,7 @@ function setupRoutes(app: Application) {
       .use("/affelnet", affelnetRoutesAdmin())
       .use("/opcos", opcosRoutesAdmin())
       .use("/erps", erpsRoutesAdmin())
+      .use("/mission-locale", missionLocaleRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {

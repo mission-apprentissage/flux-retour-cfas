@@ -1,6 +1,7 @@
 import { isEqual } from "date-fns";
 import { cloneDeep } from "lodash-es";
 import { Collection } from "mongodb";
+import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
@@ -119,6 +120,16 @@ export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>
   });
 };
 
+const getAbandonDate = (statut_apprenant, date_metier_mise_a_jour_statut, date_exclusion_formation) => {
+  if (date_exclusion_formation) {
+    return date_exclusion_formation;
+  }
+  return statut_apprenant !== null &&
+    date_metier_mise_a_jour_statut &&
+    statut_apprenant === CODES_STATUT_APPRENANT.abandon
+    ? date_metier_mise_a_jour_statut
+    : null;
+};
 /**
  * Création d'un objet effectif depuis les données d'un dossierApprenant.
  * Fonctionne pour l'API v2 et v3.
@@ -127,7 +138,11 @@ export const mapEffectifQueueToEffectif = (
   dossierApprenant: IDossierApprenantSchemaV3
 ): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   // Ne pas remplir l'historique statut en cas de v3
-  const { statut_apprenant, date_metier_mise_a_jour_statut } = dossierApprenant;
+  const { statut_apprenant, date_metier_mise_a_jour_statut, date_exclusion_formation } = dossierApprenant;
+
+  // Temporary fix
+  const dateAbandon = getAbandonDate(statut_apprenant, date_metier_mise_a_jour_statut, date_exclusion_formation);
+
   const historiqueStatut: IEffectif["apprenant"]["historique_statut"] =
     statut_apprenant && date_metier_mise_a_jour_statut
       ? [
@@ -225,7 +240,7 @@ export const mapEffectifQueueToEffectif = (
         "date_obtention_diplome_formation" in dossierApprenant
           ? dossierApprenant.date_obtention_diplome_formation
           : null,
-      date_exclusion: "date_exclusion_formation" in dossierApprenant ? dossierApprenant.date_exclusion_formation : null,
+      date_exclusion: dateAbandon,
       cause_exclusion:
         "cause_exclusion_formation" in dossierApprenant ? dossierApprenant.cause_exclusion_formation : null,
       referent_handicap:

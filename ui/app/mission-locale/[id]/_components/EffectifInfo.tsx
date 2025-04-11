@@ -91,7 +91,11 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
             {withDefaultFallback(effectif.adresse?.code_postal, null, `(${effectif.adresse?.code_postal})`)}
           </Typography>
           <Typography display="inline">
-            {withDefaultFallback(effectif.formation?.libelle_long, "Intitulé de la formation non renseigné")}
+            {withDefaultFallback(
+              effectif.formation?.libelle_long,
+              "Intitulé de la formation non renseigné",
+              effectif.formation?.libelle_long
+            )}
           </Typography>
           <Typography display="inline">
             {withDefaultFallback(

@@ -54,7 +54,7 @@
     "express": "^4.21.1",
     "express-async-errors": "3.1.1",
     "fast-xml-parser": "^4.5.0",
-    "job-processor": "^1.10.1",
+    "job-processor": "^1.10.3",
     "joi": "^17.13.3",
     "joi-password": "^4.2.0",
     "json2csv": "5.0.7",
