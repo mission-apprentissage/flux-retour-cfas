@@ -140,7 +140,7 @@ export default function Page() {
         )}
       </Stack>
       <MissionLocaleQuestion />
-      <MissionLocaleFaq missionLocalNom={data?.missionLocale?.nom} />
+      <MissionLocaleFaq missionLocalNom={data?.missionLocale?.nom} organismeNom={data?.organismeNom} />
     </Stack>
   );
 }

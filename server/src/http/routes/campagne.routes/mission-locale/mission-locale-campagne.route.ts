@@ -34,6 +34,7 @@ async function getMissionLocaleEffectifInfoByToken(req, res, next) {
 
     res.json({
       missionLocale: effectif.missionLocale,
+      organismeNom: effectif.organismeFormateur.nom,
       telephone: maskedTelephone,
       lbaUrl,
     });

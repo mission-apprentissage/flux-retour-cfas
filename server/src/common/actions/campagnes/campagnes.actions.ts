@@ -33,10 +33,39 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
       },
     },
     {
+      $lookup: {
+        from: "organismes",
+        let: { organismeFormateurId: "$effectif_snapshot.organisme_formateur_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$organismeFormateurId"],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+            },
+          },
+        ],
+        as: "organismeFormateur",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organismeFormateur",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $project: {
         "missionLocale.nom": "$organisation.nom",
         telephone: "$effectif_snapshot.apprenant.telephone",
         formation: "$effectif_snapshot.formation",
+        "organismeFormateur.nom": "$organismeFormateur.nom",
       },
     },
   ];

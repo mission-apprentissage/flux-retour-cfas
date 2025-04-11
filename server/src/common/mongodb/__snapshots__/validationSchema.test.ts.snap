@@ -9230,42 +9230,49 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       ],
     },
     "effectif_choice": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "confirmation": {
-          "bsonType": [
-            "bool",
-            "null",
-          ],
-        },
-        "confirmation_created_at": {
-          "anyOf": [
-            {
-              "bsonType": "date",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "confirmation": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
             },
-            {
-              "bsonType": "null",
+            "confirmation_created_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
             },
-          ],
-        },
-        "confirmation_expired_at": {
-          "anyOf": [
-            {
-              "bsonType": "date",
+            "confirmation_expired_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
             },
-            {
-              "bsonType": "null",
+            "telephone": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
             },
-          ],
+          },
         },
-        "telephone": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
+        {
+          "bsonType": "null",
         },
-      },
+      ],
     },
     "effectif_id": {
       "bsonType": "objectId",
@@ -14242,7 +14249,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_id",
     "created_at",
     "effectif_snapshot",
-    "effectif_choice",
     "brevo",
   ],
 }

@@ -2,16 +2,24 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import { Stack, Typography } from "@mui/material";
 
-export const MissionLocaleFaq = ({ missionLocalNom }: { missionLocalNom: string }) => {
+import { capitalizeWords } from "@/common/utils/stringUtils";
+
+export const MissionLocaleFaq = ({
+  missionLocalNom,
+  organismeNom,
+}: {
+  missionLocalNom: string;
+  organismeNom: string;
+}) => {
   return (
     <>
       <Typography fontWeight="bold">Encore des questions ?</Typography>
       <div className={fr.cx("fr-accordions-group")}>
-        <Accordion label={`La Mission Locale de ${missionLocalNom} ?`}>
+        <Accordion label={`La Mission Locale de ${capitalizeWords(missionLocalNom)} ?`}>
           <Stack spacing={3} px={1}>
             <Typography>
-              <strong>La Mission Locale de {missionLocalNom}</strong> accueille les jeunes de 16 à 25 ans et jusqu’à 29
-              ans pour les personnes en situation de handicap.
+              <strong>La Mission Locale de {capitalizeWords(missionLocalNom)}</strong> accueille les jeunes de 16 à 25
+              ans et jusqu’à 29 ans pour les personnes en situation de handicap.
             </Typography>
             <Typography>
               Consulter le site pour en savoir plus et trouver l’antenne proche de chez vous en cliquant ici&nbsp;!
@@ -46,17 +54,20 @@ export const MissionLocaleFaq = ({ missionLocalNom }: { missionLocalNom: string 
         <Accordion label="Comment avez-vous eu connaissance de ma situation et de mes coordonnées ?">
           <Stack spacing={3} px={1}>
             <Typography>
-              C’est votre établissement <strong>[nom de l’organisme]</strong> qui nous a informé de votre situation et
-              qui nous a communiqué vos coordonnées afin que nous puissions vous proposer un accompagnement.
+              C’est votre établissement <strong>{capitalizeWords(organismeNom)}</strong> qui nous a informé de votre
+              situation et qui nous a communiqué vos coordonnées afin que nous puissions vous proposer un
+              accompagnement.
             </Typography>
             <Typography>
               Nous ne faisons aucune utilisation commerciale de vos coordonnées et adresses e-mail.
             </Typography>
             <Typography>
-              Vous bénéficiez d’un droit d’opposition que vous pouvez utiliser à tout moment via l’adresse
-              tableaudebord@apprentissage.beta.gouv.fr. Votre adresse e-mail sera dès lors supprimée de notre base de
-              données et vous ne serez plus contacté. Si vous pensez que vos droits ne sont pas respectés, vous pouvez à
-              tout moment{" "}
+              Vous bénéficiez d’un droit d’opposition que vous pouvez utiliser à tout moment via l’adresse{" "}
+              <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" className="fr-link">
+                tableaudebord@apprentissage.beta.gouv.fr
+              </a>
+              . Votre adresse e-mail sera dès lors supprimée de notre base de données et vous ne serez plus contacté. Si
+              vous pensez que vos droits ne sont pas respectés, vous pouvez à tout moment{" "}
               <a
                 href="https://www.cnil.fr/fr/adresser-une-plainte"
                 target="_blank"
