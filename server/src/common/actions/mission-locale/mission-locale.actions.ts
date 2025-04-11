@@ -5,7 +5,7 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
+import { API_TRAITEMENT_TYPE, IEmailStatusEnum } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
-import { createContact } from "@/common/services/brevo/brevo";
+import { importContacts } from "@/common/services/brevo/brevo";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
@@ -659,7 +659,7 @@ export const setEffectifMissionLocaleData = async (
   return updated;
 };
 
-export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA, organismeNom?: string) => {
+export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const ageFilter = effectif?.apprenant?.date_de_naissance
     ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
     : false;
@@ -677,7 +677,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
     const token = uuidv4();
 
     if (mlData) {
-      const result = await missionLocaleEffectifsDb().findOneAndUpdate(
+      await missionLocaleEffectifsDb().findOneAndUpdate(
         {
           mission_locale_id: mlData?._id,
           effectif_id: effectif._id,
@@ -695,20 +695,6 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
         },
         { upsert: true }
       );
-
-      // Comme returnDocument = false par defaut, si c'est vide, c'est que c'est un insert
-      if (!result.value) {
-        await createContact(
-          config.brevo.listeRupturantId,
-          effectif.apprenant.courriel,
-          effectif.apprenant.prenom,
-          effectif.apprenant.nom,
-          token,
-          `${config.publicUrl}/campagnes/mission-locale/${token}`,
-          effectif.apprenant.telephone,
-          organismeNom
-        );
-      }
     }
   }
 };
@@ -759,4 +745,80 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
   }
 
   return effectif;
+};
+
+export const getMissionLocaleRupturantToCheckMail = async () => {
+  const data: Array<any> = await missionLocaleEffectifsDb()
+    .find({ email_status: { $exists: false } }, { projection: { email: "$effectif_snapshot.apprenant.courriel" } })
+    .toArray();
+  return data.map(({ email }) => email);
+};
+
+export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+  const bulkOps = rupturants.map(({ email, status }) => ({
+    updateOne: {
+      filter: { "effectif_snapshot.apprenant.courriel": email },
+      update: { $set: { email_status: status } },
+    },
+  }));
+
+  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
+  const contactsList = (await missionLocaleEffectifsDb()
+    .aggregate([
+      {
+        $match: {
+          "effectif_snapshot.apprenant.courriel": { $in: rupturants.map(({ email }) => email) },
+          email_status: "valid",
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          let: { id: "$effectif_snapshot.organisme_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+            {
+              $project: {
+                _id: 1,
+                nom: 1,
+              },
+            },
+          ],
+          as: "organisme",
+        },
+      },
+      {
+        $unwind: {
+          path: "$organisme",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          email: "$effectif_snapshot.apprenant.courriel",
+          nom: "$effectif_snapshot.apprenant.nom",
+          prenom: "$effectif_snapshot.apprenant.prenom",
+          token: "$brevo.token", //`${config.publicUrl}/campagnes/mission-locale/${token}`
+          url: {
+            $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
+          },
+          telephone: "$effectif_snapshot.apprenant.telephone",
+          nomOrganisme: "$organisme.nom",
+        },
+      },
+    ])
+    .toArray()) as Array<{
+    email: string;
+    nom?: string | null;
+    prenom?: string | null;
+    token?: string | null;
+    url?: string | null;
+    telephone?: string | null;
+    nomOrganisme?: string | null;
+  }>;
+
+  importContacts(config.brevo.listeRupturantId, contactsList);
+  console.log("contactsList", contactsList);
+  return result;
 };

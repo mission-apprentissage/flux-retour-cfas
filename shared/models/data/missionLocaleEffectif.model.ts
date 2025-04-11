@@ -39,6 +39,10 @@ export enum API_TRAITEMENT_TYPE {
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
 
+export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
+
+export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
+
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
@@ -51,6 +55,7 @@ const zMissionLocaleEffectif = z.object({
   commentaires: z.string().optional(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
+  email_status: zEmailStatusEnum.nullish(),
   brevo: z.object({
     token: z.string().uuid().nullish(),
     token_created_at: z.date().nullish(),
