@@ -133,6 +133,7 @@ import {
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
+import requireXApiKeyAuthentication from "./middlewares/requireXApiKeyAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -151,6 +152,7 @@ import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.route
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
+import balRouter from "./routes/specific.routes/bal.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
@@ -392,6 +394,14 @@ function setupRoutes(app: Application) {
       }
     },
     dossierApprenantRouter()
+  );
+
+  app.use(
+    "/api/v1/bal",
+    requireXApiKeyAuthentication({
+      apiKeyValue: config.bal.api_key,
+    }),
+    balRouter()
   );
 
   /*********************************************************

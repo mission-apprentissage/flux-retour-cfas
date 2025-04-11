@@ -55,3 +55,40 @@ export const createContact = (
   contact.listIds = [listeId];
   return ContactInstance.createContact(contact);
 };
+
+export const importContacts = (
+  listeId: number,
+  contacts: Array<{
+    email: string;
+    prenom?: string | null;
+    nom?: string | null;
+    token?: string | null;
+    url?: string | null;
+    telephone?: string | null;
+    nomOrganisme?: string | null;
+  }>
+) => {
+  if (!ContactInstance) {
+    captureException(new Error(`Create contact Brevo: no instance initialized`));
+    return;
+  }
+  const contactImport = new brevo.RequestContactImport();
+  contactImport.listIds = [listeId];
+
+  const contactList = contacts.map((contact) => {
+    const contactData = new brevo.RequestContactImportJsonBodyInner();
+    contactData.email = contact.email;
+    contactData.attributes = {
+      PRENOM: contact.prenom,
+      NOM: contact.nom,
+      TOKEN: contact.token,
+      URL_TBA_ML: contact.url,
+      TELEPHONE: contact.telephone,
+      NOM_ORGANISME: contact.nomOrganisme,
+    };
+    return contactData;
+  });
+  contactImport.jsonBody = contactList;
+
+  return ContactInstance.importContacts(contactImport);
+};

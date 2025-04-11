@@ -90,6 +90,9 @@ const config = {
     api_key: env.get("MNA_TDB_BREVO_API_KEY").required().asString(),
     listeRupturantId: env.get("MNA_TDB_BREVO_RUPTURANT_LISTE_ID").required().asInt(),
   },
+  bal: {
+    api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
+  },
 };
 
 export default config;
