@@ -878,8 +878,7 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
     telephone?: string | null;
     nomOrganisme?: string | null;
   }>;
-
-  importContacts(config.brevo.listeRupturantId, contactsList);
+  await importContacts(config.brevo.listeRupturantId, contactsList);
   return result;
 };
 

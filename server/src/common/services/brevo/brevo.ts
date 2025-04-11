@@ -56,7 +56,7 @@ export const createContact = (
   return ContactInstance.createContact(contact);
 };
 
-export const importContacts = (
+export const importContacts = async (
   listeId: number,
   contacts: Array<{
     email: string;
@@ -89,6 +89,10 @@ export const importContacts = (
     return contactData;
   });
   contactImport.jsonBody = contactList;
-
-  return ContactInstance.importContacts(contactImport);
+  try {
+    return await ContactInstance.importContacts(contactImport);
+  } catch (e) {
+    captureException(new Error(`Brevo importContacts error: ${e}`));
+    return;
+  }
 };
