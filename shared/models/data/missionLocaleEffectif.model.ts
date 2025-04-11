@@ -78,6 +78,7 @@ const zMissionLocaleEffectif = z.object({
       )
       .nullish(),
   }),
+  soft_deleted: z.boolean().nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

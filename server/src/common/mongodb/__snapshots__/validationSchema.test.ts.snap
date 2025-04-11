@@ -14239,6 +14239,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "situation_autre": {
       "bsonType": "string",
     },
+    "soft_deleted": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+    },
     "updated_at": {
       "bsonType": "date",
     },
@@ -14340,6 +14346,10 @@ exports[`validation-schema > should create validation schema for organisations >
       "properties": {
         "_id": {
           "bsonType": "objectId",
+        },
+        "activated_at": {
+          "bsonType": "date",
+          "description": "Date d'activation de la mission locale",
         },
         "created_at": {
           "bsonType": "date",
