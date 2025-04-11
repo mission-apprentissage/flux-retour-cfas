@@ -9205,6 +9205,16 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             },
           ],
         },
+        "token_expired_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
       },
     },
     "commentaires": {
@@ -9217,6 +9227,51 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "bsonType": [
         "bool",
         "null",
+      ],
+    },
+    "effectif_choice": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "confirmation": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+            },
+            "confirmation_created_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "confirmation_expired_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "telephone": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "effectif_id": {
