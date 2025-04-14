@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
-import { importContacts } from "@/common/services/brevo/brevo";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
@@ -809,27 +808,11 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
 };
 
 export const getMissionLocaleRupturantToCheckMail = async () => {
-  const data: Array<any> = await missionLocaleEffectifsDb()
-    .find({ email_status: { $exists: false } }, { projection: { email: "$effectif_snapshot.apprenant.courriel" } })
-    .toArray();
-  return data.map(({ email }) => email);
-};
-
-export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
-  const bulkOps = rupturants.map(({ email, status }) => ({
-    updateOne: {
-      filter: { "effectif_snapshot.apprenant.courriel": email },
-      update: { $set: { email_status: status } },
-    },
-  }));
-
-  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
-  const contactsList = (await missionLocaleEffectifsDb()
+  return await missionLocaleEffectifsDb()
     .aggregate([
       {
         $match: {
-          "effectif_snapshot.apprenant.courriel": { $in: rupturants.map(({ email }) => email) },
-          email_status: "valid",
+          email_status: { $exists: false },
         },
       },
       {
@@ -860,7 +843,6 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
           email: "$effectif_snapshot.apprenant.courriel",
           nom: "$effectif_snapshot.apprenant.nom",
           prenom: "$effectif_snapshot.apprenant.prenom",
-          token: "$brevo.token", //`${config.publicUrl}/campagnes/mission-locale/${token}`
           url: {
             $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
           },
@@ -869,16 +851,18 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
         },
       },
     ])
-    .toArray()) as Array<{
-    email: string;
-    nom?: string | null;
-    prenom?: string | null;
-    token?: string | null;
-    url?: string | null;
-    telephone?: string | null;
-    nomOrganisme?: string | null;
-  }>;
-  await importContacts(config.brevo.listeRupturantId, contactsList);
+    .toArray();
+};
+
+export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+  const bulkOps = rupturants.map(({ email, status }) => ({
+    updateOne: {
+      filter: { "effectif_snapshot.apprenant.courriel": email },
+      update: { $set: { email_status: status } },
+    },
+  }));
+
+  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
   return result;
 };
 
