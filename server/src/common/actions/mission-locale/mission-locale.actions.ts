@@ -843,8 +843,14 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
           email: "$effectif_snapshot.apprenant.courriel",
           nom: "$effectif_snapshot.apprenant.nom",
           prenom: "$effectif_snapshot.apprenant.prenom",
-          url: {
+          "urls.TDB_AB_TEST_A": {
             $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
+          },
+          "urls.TDB_AB_TEST_B_TRUE": {
+            $concat: [config.publicUrl, "api/v1/campagnes/mission-locale/", "$brevo.token", "/true"],
+          },
+          "urls.TDB_AB_TEST_B_FALSE": {
+            $concat: [config.publicUrl, "api/v1/campagnes/mission-locale/", "$brevo.token", "/false"],
           },
           telephone: "$effectif_snapshot.apprenant.telephone",
           nomOrganisme: "$organisme.nom",
