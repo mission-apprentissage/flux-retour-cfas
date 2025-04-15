@@ -118,6 +118,8 @@ async function upsertEffectifDeca(
       // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
       if (retry && err instanceof MongoError && err.code === 11000) {
         return upsertEffectifDeca(effectif, count, false);
+      } else {
+        throw err;
       }
     }
   } else {
@@ -195,18 +197,24 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
 
   if (startYear === endYear) {
     const anneeScolaire = `${startYear}-${startYear}`;
-    effectifs.push(await createEffectif(document, anneeScolaire));
+    const effectif = await createEffectif(document, anneeScolaire);
+    if (effectif) {
+      effectifs.push(effectif);
+    }
   } else {
     for (let year = startYear; year < endYear; year++) {
       const anneeScolaire = `${year}-${year + 1}`;
-      effectifs.push(await createEffectif(document, anneeScolaire));
+      const effectif = await createEffectif(document, anneeScolaire);
+      if (effectif) {
+        effectifs.push(effectif);
+      }
     }
   }
 
   return effectifs;
 }
 
-async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA>> {
+async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA> | null> {
   const {
     alternant,
     formation,
@@ -235,10 +243,10 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
-  const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
 
   if (!organisme) {
-    throw new Error("L'organisme n'a pas été trouvé dans la base de données.");
+    return null;
   }
 
   const currentTimestamp = new Date();

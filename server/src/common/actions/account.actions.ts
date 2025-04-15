@@ -29,7 +29,7 @@ export async function register(registration: RegistrationSchema): Promise<{
     const { uai, siret } = registration.organisation;
     const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
     if (!organisme) {
-      throw Boom.badRequest("L'organisme de formation n'existe pas.");
+      throw Boom.badRequest("Aucun organisme trouvé");
     }
   }
   const organisation = await organisationsDb().findOne(registration.organisation);
