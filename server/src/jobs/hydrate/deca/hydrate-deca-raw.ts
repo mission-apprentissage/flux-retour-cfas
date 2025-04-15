@@ -122,7 +122,7 @@ async function upsertEffectifDeca(
     }
   } else {
     const transmitted_at = new Date();
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at });
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: { ...effectif, transmitted_at } });
 
     // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
     //await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
