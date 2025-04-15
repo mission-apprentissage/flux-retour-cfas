@@ -30,11 +30,11 @@ function buildRowData(effectif: EffectifData, isTraite: boolean) {
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {effectif.prioritaire ? (
-            <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.3rem" }}>
+            <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.3rem", whiteSpace: "nowrap" }}>
               <i className="fr-icon-fire-fill fr-icon--xs" /> à traiter en priorité
             </p>
           ) : (
-            <Badge severity="new" small>
+            <Badge severity="new" small style={{ whiteSpace: "nowrap" }}>
               à traiter
             </Badge>
           )}
