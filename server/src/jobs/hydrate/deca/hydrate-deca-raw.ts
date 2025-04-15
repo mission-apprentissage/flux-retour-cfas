@@ -272,6 +272,13 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
+  if (adresseAlternant.code_postal.length !== 5) {
+    logger.warn(
+      `Le code postal de l'alternant est invalide. Document ID: ${document._id}, code postal: ${adresseAlternant.code_postal}`
+    );
+    return null;
+  }
+
   const commune = await getAndFormatCommuneFromCode(null, adresseAlternant.code_postal);
 
   const effectif: WithoutId<IEffectifDECA> = {
