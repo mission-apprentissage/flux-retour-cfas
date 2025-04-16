@@ -1,4 +1,5 @@
 import express from "express";
+import { z } from "zod";
 
 import {
   confirmEffectifChoiceByTokenDbUpdate,
@@ -8,12 +9,17 @@ import {
 } from "@/common/actions/campagnes/campagnes.actions";
 import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
 import { maskTelephone } from "@/common/utils/phoneUtils";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
   const router = express.Router();
 
   router.get("/", getMissionLocaleEffectifInfoByToken);
-  router.get("/confirmation/:confirmation", confirmEffectifChoiceAndRedirect);
+  router.get(
+    "/confirmation/:confirmation",
+    validateRequestMiddleware({ params: z.object({ confirmation: z.enum(["true", "false"]) }) }),
+    confirmEffectifChoiceAndRedirect
+  );
   router.post("/telephone", updateEffectifPhoneNumberByToken);
 
   return router;
