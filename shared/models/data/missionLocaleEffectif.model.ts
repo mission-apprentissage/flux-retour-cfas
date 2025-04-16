@@ -39,7 +39,7 @@ export enum API_TRAITEMENT_TYPE {
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
 
-export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
+export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "hardbounced"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 
