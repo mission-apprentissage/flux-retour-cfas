@@ -4884,18 +4884,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-serve-static-core@npm:^5.0.0":
-  version: 5.0.6
-  resolution: "@types/express-serve-static-core@npm:5.0.6"
-  dependencies:
-    "@types/node": "*"
-    "@types/qs": "*"
-    "@types/range-parser": "*"
-    "@types/send": "*"
-  checksum: bc3ea44923da7d1ffaa29eff7cc41a2b05f7340e8879fe9ee40717859937d73bcd635fcc0f8232f66af942624cc48bff42971e9e2c4075db6afe478534245855
-  languageName: node
-  linkType: hard
-
 "@types/express@npm:*, @types/express@npm:^4.17.21":
   version: 4.17.21
   resolution: "@types/express@npm:4.17.21"
@@ -4905,17 +4893,6 @@ __metadata:
     "@types/qs": "*"
     "@types/serve-static": "*"
   checksum: fb238298630370a7392c7abdc80f495ae6c716723e114705d7e3fb67e3850b3859bbfd29391463a3fb8c0b32051847935933d99e719c0478710f8098ee7091c5
-  languageName: node
-  linkType: hard
-
-"@types/express@npm:latest":
-  version: 5.0.1
-  resolution: "@types/express@npm:5.0.1"
-  dependencies:
-    "@types/body-parser": "*"
-    "@types/express-serve-static-core": ^5.0.0
-    "@types/serve-static": "*"
-  checksum: 189dd078679c5f748644c9dccf6b9666755d2fd37741ae5b7494129531b14d0366746a79191e1064060c2547daf7d342a02c48923730f20c8980c9ca7dfce1d2
   languageName: node
   linkType: hard
 
@@ -5096,15 +5073,6 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: fd6bce2b674b6efc3db4c7c3d336bd70c90838e8439de639b909ce22f3720d21344f52427f1d9e57b265fcb7f6c018699b99e5e0c208a1a4823014269a6bf35b
-  languageName: node
-  linkType: hard
-
-"@types/passport@npm:latest":
-  version: 1.0.17
-  resolution: "@types/passport@npm:1.0.17"
-  dependencies:
-    "@types/express": "*"
-  checksum: b131d5963576e759f972f038bb7461dcaaa1dc484a488eb093eac6a9f8d4f51c9b7adcd432ae84e3ecb68839dfba16f6d569f36664330b6af59d36ff3c4c64e2
   languageName: node
   linkType: hard
 
@@ -14274,10 +14242,8 @@ __metadata:
     "@commitlint/config-conventional": ^17.8.1
     "@semantic-release/changelog": ^6.0.3
     "@semantic-release/exec": ^6.0.3
-    "@types/express": latest
     "@types/lodash": ^4.17.16
     "@types/node": ^22.7.5
-    "@types/passport": latest
     "@typescript-eslint/eslint-plugin": ^6.21.0
     "@typescript-eslint/parser": ^6.21.0
     eslint: ^8.57.1
@@ -14293,7 +14259,6 @@ __metadata:
     lint-staged: ^15.2.10
     next: ^13.5.7
     node-talisman: ^1.29.11
-    passport-headerapikey: latest
     prettier: ^3.3.3
     semantic-release: ^21.1.2
     semantic-release-slack-bot: ^4.0.2
@@ -15690,16 +15655,6 @@ __metadata:
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3"
   checksum: 407cee8e0a3a4c5cd472559bca8b6a45b82c124e9a4703302326e9ab60fc1081442ada4e02628efef1eb16197ddc7f8822f5a91fd7d7c86b51f530aedb17dfa2
-  languageName: node
-  linkType: hard
-
-"passport-headerapikey@npm:latest":
-  version: 1.2.2
-  resolution: "passport-headerapikey@npm:1.2.2"
-  dependencies:
-    lodash: ^4.17.15
-    passport-strategy: ^1.0.0
-  checksum: 509b0d72225845fcb4d6a95acd76f98042bdee256bf11731ece2c8be8341235013f2150207148d7e8ed939e28857dea18503969842ad40bba7a9724396b94481
   languageName: node
   linkType: hard
 
