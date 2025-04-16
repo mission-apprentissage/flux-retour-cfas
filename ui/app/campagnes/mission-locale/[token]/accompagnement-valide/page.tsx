@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { _get, _post } from "@/common/httpClient";
+import { capitalizeWords } from "@/common/utils/stringUtils";
 
 import { MissionLocaleFaq } from "../../_components/faq";
 import { MissionLocaleQuestion } from "../../_components/question";
@@ -128,7 +129,7 @@ export default function Page() {
         ) : (
           <Stack spacing={2}>
             <Typography fontWeight="bold">
-              La Mission Locale de Marseille va vous contacter au numéro suivant :
+              La Mission Locale de {capitalizeWords(data.missionLocale.nom)} va vous contacter au numéro suivant :
             </Typography>
             <Badge noIcon severity="error">
               {state.phone}
