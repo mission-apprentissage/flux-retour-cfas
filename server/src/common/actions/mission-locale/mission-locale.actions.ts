@@ -847,10 +847,10 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
             $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
           },
           "urls.TDB_AB_TEST_B_TRUE": {
-            $concat: [config.publicUrl, "api/v1/campagnes/mission-locale/", "$brevo.token", "/true"],
+            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
           },
           "urls.TDB_AB_TEST_B_FALSE": {
-            $concat: [config.publicUrl, "api/v1/campagnes/mission-locale/", "$brevo.token", "/false"],
+            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
           },
           telephone: "$effectif_snapshot.apprenant.telephone",
           nomOrganisme: "$organisme.nom",
