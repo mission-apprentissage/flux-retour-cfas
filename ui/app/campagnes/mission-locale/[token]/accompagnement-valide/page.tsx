@@ -7,7 +7,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Box, Stack, Typography } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { _get, _post } from "@/common/httpClient";
@@ -44,9 +44,12 @@ function PhoneForm({
 
 export default function Page() {
   const { token } = useParams() as { token: string };
-  const [phone, setPhone] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [changePhoneOpen, setChangePhoneOpen] = useState(false);
+  const [state, setState] = useState({
+    phone: "",
+    newPhone: "",
+    changePhoneOpen: false,
+    hasPhoneChanged: false,
+  });
 
   const { data, isLoading, isError } = useQuery(
     ["ml-effectif", token],
@@ -58,17 +61,27 @@ export default function Page() {
     }
   );
 
+  useEffect(() => {
+    if (data?.telephone) {
+      setState((prev) => ({ ...prev, phone: data.telephone }));
+    }
+  }, [data]);
+
   const updatePhoneMutation = useMutation((telephone: string) =>
     _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone })
   );
 
   const handleSavePhone = () => {
-    if (!newPhone.trim()) return;
-    updatePhoneMutation.mutate(newPhone.trim(), {
+    if (!state.newPhone.trim()) return;
+    updatePhoneMutation.mutate(state.newPhone.trim(), {
       onSuccess: () => {
-        setPhone(newPhone.trim());
-        setNewPhone("");
-        setChangePhoneOpen(false);
+        setState((prev) => ({
+          ...prev,
+          phone: state.newPhone.replace(/(.{2})/g, "$1 ").trim(),
+          newPhone: "",
+          changePhoneOpen: false,
+          hasPhoneChanged: true,
+        }));
       },
     });
   };
@@ -100,15 +113,15 @@ export default function Page() {
         C’est noté !
       </Typography>
       <Stack p={{ xs: 2, md: 4 }} spacing={2} sx={{ background: "var(--background-alt-blue-france)" }}>
-        {!phone ? (
+        {!state.phone ? (
           <Stack spacing={2}>
             <Typography fontWeight="bold">
               Malheureusement, votre organisme de formation ne nous a pas communiqué de numéro où vous joindre.
             </Typography>
             <PhoneForm
               label="Merci de renseigner votre nouveau numéro"
-              phoneValue={newPhone}
-              setPhoneValue={setNewPhone}
+              phoneValue={state.newPhone}
+              setPhoneValue={(val) => setState((prev) => ({ ...prev, newPhone: val }))}
               onSave={handleSavePhone}
             />
           </Stack>
@@ -118,21 +131,23 @@ export default function Page() {
               La Mission Locale de Marseille va vous contacter au numéro suivant :
             </Typography>
             <Badge noIcon severity="error">
-              {phone}
+              {state.phone}
             </Badge>
-            <DsfrLink
-              href="#"
-              arrow="none"
-              onClick={() => setChangePhoneOpen((open) => !open)}
-              className={`fr-link--icon-right ${changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
-            >
-              Ce n’est pas mon numéro
-            </DsfrLink>
-            {changePhoneOpen && (
+            {!state.hasPhoneChanged && (
+              <DsfrLink
+                href="#"
+                arrow="none"
+                onClick={() => setState((prev) => ({ ...prev, changePhoneOpen: !prev.changePhoneOpen }))}
+                className={`fr-link--icon-right ${state.changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
+              >
+                Ce n’est pas mon numéro
+              </DsfrLink>
+            )}
+            {state.changePhoneOpen && (
               <PhoneForm
                 label="Merci de renseigner votre nouveau numéro"
-                phoneValue={newPhone}
-                setPhoneValue={setNewPhone}
+                phoneValue={state.newPhone}
+                setPhoneValue={(val) => setState((prev) => ({ ...prev, newPhone: val }))}
                 onSave={handleSavePhone}
               />
             )}
