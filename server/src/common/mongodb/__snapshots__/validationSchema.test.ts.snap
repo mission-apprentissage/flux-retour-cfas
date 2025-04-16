@@ -2160,20 +2160,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "anyOf": [
                     {
                       "bsonType": "string",
-                      "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
-                      "pattern": "^([+])?(\\d{7,12})$",
                     },
                     {
                       "bsonType": "null",
                     },
                   ],
-                  "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
                 },
               },
             },
@@ -2248,14 +2239,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "anyOf": [
             {
               "bsonType": "string",
-              "description": "Téléphone de l'apprenant",
-              "pattern": "^([+])?(\\d{7,12})$",
             },
             {
               "bsonType": "null",
             },
           ],
-          "description": "Téléphone de l'apprenant",
         },
         "type_cfa": {
           "anyOf": [
@@ -4965,20 +4953,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "anyOf": [
                     {
                       "bsonType": "string",
-                      "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
-                      "pattern": "^([+])?(\\d{7,12})$",
                     },
                     {
                       "bsonType": "null",
                     },
                   ],
-                  "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
                 },
               },
             },
@@ -5053,14 +5032,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "anyOf": [
             {
               "bsonType": "string",
-              "description": "Téléphone de l'apprenant",
-              "pattern": "^([+])?(\\d{7,12})$",
             },
             {
               "bsonType": "null",
             },
           ],
-          "description": "Téléphone de l'apprenant",
         },
         "type_cfa": {
           "anyOf": [
@@ -7250,20 +7226,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "anyOf": [
                     {
                       "bsonType": "string",
-                      "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
-                      "pattern": "^([+])?(\\d{7,12})$",
                     },
                     {
                       "bsonType": "null",
                     },
                   ],
-                  "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
                 },
               },
             },
@@ -8439,9 +8406,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "statut_apprenant": {
       "description": "0,2,3",
     },
-    "tel_apprenant": {
-      "description": "Téléphone de l'apprenant",
-    },
+    "tel_apprenant": {},
     "type_cfa": {
       "description": "Type de CFA (nomenclature SIFA)",
     },
@@ -10969,20 +10934,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "anyOf": [
                             {
                               "bsonType": "string",
-                              "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
-                              "pattern": "^([+])?(\\d{7,12})$",
                             },
                             {
                               "bsonType": "null",
                             },
                           ],
-                          "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
                         },
                       },
                     },
@@ -11057,14 +11013,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "anyOf": [
                     {
                       "bsonType": "string",
-                      "description": "Téléphone de l'apprenant",
-                      "pattern": "^([+])?(\\d{7,12})$",
                     },
                     {
                       "bsonType": "null",
                     },
                   ],
-                  "description": "Téléphone de l'apprenant",
                 },
                 "type_cfa": {
                   "anyOf": [
@@ -13202,20 +13155,11 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                           "anyOf": [
                             {
                               "bsonType": "string",
-                              "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
-                              "pattern": "^([+])?(\\d{7,12})$",
                             },
                             {
                               "bsonType": "null",
                             },
                           ],
-                          "description": "Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.",
                         },
                       },
                     },
