@@ -7,9 +7,13 @@ import {
   IOrganisationMissionLocale,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
-import { effectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
+import {
+  effectifMissionLocaleListe,
+  effectifsParMoisFiltersMissionLocaleSchema,
+} from "shared/models/routes/mission-locale/missionLocale.api";
 
 import {
+  getEffectifARisqueByMissionLocaleId,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
@@ -51,7 +55,8 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
 
 const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const [a_traiter, traite] = await Promise.all([
+
+  const [a_traiter, traite, prioritaire] = await Promise.all([
     getEffectifsParMoisByMissionLocaleId(
       missionLocale._id,
       { type: API_TRAITEMENT_TYPE.A_TRAITER },
@@ -62,18 +67,21 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
       { type: API_TRAITEMENT_TYPE.TRAITE },
       missionLocale.activated_at
     ),
+    getEffectifARisqueByMissionLocaleId(missionLocale._id),
   ]);
   return {
     a_traiter,
     traite,
+    prioritaire,
   };
 };
 
-const getEffectifMissionLocale = async ({ params }, { locals }) => {
-  const effectifId = params.id;
+const getEffectifMissionLocale = async (req, { locals }) => {
+  const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {

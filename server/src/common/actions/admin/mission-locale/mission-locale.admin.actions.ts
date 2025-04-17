@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { IOrganisationMissionLocale } from "shared/models";
 
 import { organisationsDb } from "@/common/model/collections";
 
@@ -21,4 +22,14 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
       },
     }
   );
+};
+
+export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
+  const mls = await organisationsDb()
+    .find({
+      type: "MISSION_LOCALE",
+    })
+    .toArray();
+
+  return mls as Array<IOrganisationMissionLocale>;
 };

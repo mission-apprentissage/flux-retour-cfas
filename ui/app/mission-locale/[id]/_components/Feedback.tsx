@@ -1,3 +1,5 @@
+"use client";
+
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Stack, Typography } from "@mui/material";
 import { IUpdateMissionLocaleEffectif, SITUATION_LABEL_ENUM } from "shared";

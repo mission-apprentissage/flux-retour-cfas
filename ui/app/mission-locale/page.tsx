@@ -14,7 +14,7 @@ import { MlCard } from "../_components/card/MlCard";
 
 import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
-import { MonthsData, SelectedSection } from "./_components/types";
+import { EffectifPriorityData, MonthsData, SelectedSection } from "./_components/types";
 import { anchorFromLabel, formatMonthAndYear, getTotalEffectifs, sortDataByMonthDescending } from "./_components/utils";
 
 function EffectifsDataLoader({ children }: { children: (data: MonthsData) => React.ReactNode }) {
@@ -28,7 +28,7 @@ function EffectifsDataLoader({ children }: { children: (data: MonthsData) => Rea
     }
   );
 
-  return <>{children(data || { a_traiter: [], traite: [] })}</>;
+  return <>{children(data || { prioritaire: [], a_traiter: [], traite: [] })}</>;
 }
 
 function MissionLocaleContent({ data }: { data: MonthsData }) {
@@ -178,11 +178,12 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
           />
         )}
 
-        {selectedSection === "a-traiter" && (
+        {selectedSection === "a-traiter" && sortedDataATraiter.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="A traiter"
               data={sortedDataATraiter}
+              priorityData={data.prioritaire as EffectifPriorityData[]}
               isTraite={false}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -191,7 +192,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
           </SuspenseWrapper>
         )}
 
-        {selectedSection === "deja-traite" && (
+        {selectedSection === "deja-traite" && sortedDataTraite.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
               title="Déjà traité"
