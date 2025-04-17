@@ -133,7 +133,7 @@ export default () => {
         throw Boom.notFound("Mission locale not found");
       }
       await inviteUserToOrganisation(req.user, email, organisation._id);
-      await activateMissionLocale(organisation._id, new Date(), true);
+      await activateMissionLocale(organisation._id, new Date());
     })
   );
 

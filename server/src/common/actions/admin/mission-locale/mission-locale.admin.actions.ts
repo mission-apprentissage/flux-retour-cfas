@@ -2,13 +2,34 @@ import { ObjectId } from "bson";
 import { IOrganisationMissionLocale } from "shared/models";
 
 import { organisationsDb } from "@/common/model/collections";
+import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
-export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date, createOnly: boolean = false) => {
-  const ml = await organisationsDb().findOne({
-    type: "MISSION_LOCALE",
-    _id: missionLocaleId,
-    ...(createOnly ? { activated_at: { $exists: false } } : {}),
-  });
+export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date) => {
+  const ml = await organisationsDb()
+    .aggregate([
+      {
+        $match: {
+          type: "MISSION_LOCALE",
+          _id: missionLocaleId,
+        },
+      },
+      {
+        $lookup: {
+          from: "usersMigration",
+          localField: "_id",
+          foreignField: "organisation_id",
+          as: "users",
+        },
+      },
+      {
+        $match: {
+          "users.0": {
+            $exists: false,
+          },
+        },
+      },
+    ])
+    .next();
 
   if (!ml) {
     return;
@@ -22,6 +43,8 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
       },
     }
   );
+
+  await updateEffectifMissionLocaleSnapshotAtActivation(missionLocaleId);
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
