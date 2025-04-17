@@ -4,7 +4,6 @@ import { captureException } from "@sentry/node";
 import * as Sentry from "@sentry/node";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
-import { IOrganisme } from "shared/models";
 import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
