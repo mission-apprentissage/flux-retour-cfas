@@ -24,7 +24,13 @@ export function EffectifInfo({ effectif }) {
         py: { xs: 2, md: 4 },
       }}
     >
-      <Stack p={{ xs: 2, md: 3 }} mt={4} sx={{ background: "var(--background-alt-blue-france)" }}>
+      <Stack
+        p={{ xs: 2, md: 3 }}
+        mt={4}
+        sx={{
+          background: effectif.prioritaire ? "var(--background-alt-blue-france)" : "#ffffff",
+        }}
+      >
         <Stack direction="row" spacing={1} mb={2} alignItems="center">
           {effectif.a_traiter && effectif.prioritaire ? (
             <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>

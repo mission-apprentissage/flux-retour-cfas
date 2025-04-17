@@ -46,11 +46,9 @@ export const SearchableTableSection = memo(function SearchableTableSection({
           )}
         />
       </div>
-
       {!isTraite && priorityData && priorityData.length > 0 && (
         <PriorityTable priorityData={priorityData} searchTerm={searchTerm} />
       )}
-
       {data.map((monthItem) => (
         <MonthTable
           key={monthItem.month}
