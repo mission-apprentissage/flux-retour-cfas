@@ -402,15 +402,11 @@ export async function findOrganismesByUAI(uai: string): Promise<IOrganisme[]> {
   return organismes;
 }
 
-export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<IOrganisme>> {
-  const organisme = await organismesDb().findOne({
+export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<IOrganisme> | null> {
+  return await organismesDb().findOne({
     uai: uai as any,
     siret: siret,
   });
-  if (!organisme) {
-    throw Boom.badRequest("Aucun organisme trouvé");
-  }
-  return organisme;
 }
 
 export async function configureOrganismeERP(
