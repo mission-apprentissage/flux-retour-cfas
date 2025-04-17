@@ -835,7 +835,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   }
 };
 
-export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif) => {
+export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
   const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
 
