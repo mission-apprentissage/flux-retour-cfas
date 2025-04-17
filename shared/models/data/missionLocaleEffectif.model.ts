@@ -56,6 +56,28 @@ const zMissionLocaleEffectif = z.object({
   commentaires: z.string().optional(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
+  effectif_choice: z
+    .object({
+      confirmation: z.boolean().nullish(),
+      confirmation_created_at: z.date().nullish(),
+      confirmation_expired_at: z.date().nullish(),
+      telephone: z.string().nullish(),
+    })
+    .nullish(),
+  brevo: z.object({
+    token: z.string().uuid().nullish(),
+    token_created_at: z.date().nullish(),
+    token_expired_at: z.date().nullish(),
+    history: z
+      .array(
+        z.object({
+          token: z.string().uuid(),
+          token_created_at: z.date().optional(),
+          token_expired_at: z.date().optional(),
+        })
+      )
+      .nullish(),
+  }),
   soft_deleted: z.boolean().nullish(),
 });
 

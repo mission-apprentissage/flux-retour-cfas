@@ -86,6 +86,9 @@ const config = {
     password: env.get("MNA_TDB_API_DECA_PASSWORD").asString(),
   },
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
+  brevo: {
+    api_key: env.get("MNA_TDB_BREVO_API_KEY").required().asString(),
+  },
 };
 
 export default config;
