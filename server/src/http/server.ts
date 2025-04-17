@@ -257,7 +257,11 @@ function setupRoutes(app: Application) {
           uai: z.string().nullable(),
           siret: z.string(),
         });
-        return await getOrganismeByUAIAndSIRET(uai, siret);
+        const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
+        if (!organisme) {
+          throw Boom.badRequest("Aucun organisme trouvé");
+        }
+        return organisme;
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
