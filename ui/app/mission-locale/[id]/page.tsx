@@ -3,9 +3,9 @@
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -16,12 +16,25 @@ import { FeedbackForm } from "./_components/FeedbackForm";
 import { PageHeader } from "./_components/PageHeader";
 import { RightColumnSkeleton } from "./_components/RightColumnSkeleton";
 
-function EffectifDataLoader({ id, children }: { id: string; children: (data: any) => React.ReactNode }) {
+function EffectifDataLoader({
+  id,
+  nomListe,
+  children,
+}: {
+  id: string;
+  nomListe: string;
+  children: (data: any) => React.ReactNode;
+}) {
   const { data } = useQuery(
-    ["effectif", id],
+    ["effectif", id, nomListe],
     async () => {
       if (!id) return null;
-      return await _get<IEffecifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`);
+
+      return await _get<IEffecifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
+        params: {
+          nom_liste: nomListe || undefined,
+        },
+      });
     },
     {
       enabled: !!id,
@@ -29,20 +42,22 @@ function EffectifDataLoader({ id, children }: { id: string; children: (data: any
       useErrorBoundary: true,
     }
   );
+
   return <>{children(data)}</>;
 }
 
-function EffectifHeader({ effectifPayload }: { effectifPayload: IEffecifMissionLocale }) {
+function EffectifHeader({ effectifPayload, nomListe }: { effectifPayload: IEffecifMissionLocale; nomListe: string }) {
   const { effectif, total, next, previous, currentIndex } = effectifPayload;
   const { a_traiter } = effectif || {};
   return (
     <PageHeader
-      previous={previous}
-      next={next}
+      previous={previous || undefined}
+      next={next || undefined}
       total={total}
       currentIndex={currentIndex}
       isLoading={!effectifPayload}
       isATraiter={a_traiter}
+      nomListe={nomListe}
     />
   );
 }
@@ -57,6 +72,7 @@ function EffectifContent({
   setHasError,
   hasSuccess,
   setHasSuccess,
+  isListPrioritaire,
 }: {
   effectifPayload: IEffecifMissionLocale;
   formData: IUpdateMissionLocaleEffectif;
@@ -67,6 +83,7 @@ function EffectifContent({
   setHasError: (val: boolean) => void;
   hasSuccess: boolean;
   setHasSuccess: (val: boolean) => void;
+  isListPrioritaire: boolean;
 }) {
   const MIN_LOADING_TIME = 1500;
   const SUCCESS_DISPLAY_TIME = 600;
@@ -109,15 +126,20 @@ function EffectifContent({
   }
 
   function handleResult(success: boolean, goNext: boolean) {
-    if (!success) {
-      setIsSaving(false);
-      return;
-    }
     setIsSaving(false);
+
+    if (!success) return;
+
     setHasSuccess(true);
+
     setTimeout(() => {
-      if (goNext && next) router.push(`/mission-locale/${next.id}`);
-      else router.push(next ? "/mission-locale/" : "/mission-locale/validation");
+      if (goNext && next) {
+        const nextUrl = `/mission-locale/${next.id}${isListPrioritaire ? `?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}` : ""}`;
+        router.push(nextUrl);
+      } else {
+        const fallbackUrl = isListPrioritaire ? "/mission-locale/validation/prioritaire" : "/mission-locale/validation";
+        router.push(fallbackUrl);
+      }
     }, SUCCESS_DISPLAY_TIME);
   }
 
@@ -145,6 +167,9 @@ function EffectifContent({
 }
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const nomListeParam = searchParams?.get("nom_liste");
+
   const [formData, setFormData] = useState<IUpdateMissionLocaleEffectif>({
     situation: "" as unknown as SITUATION_ENUM,
     situation_autre: "",
@@ -182,10 +207,10 @@ export default function Page() {
         }}
       >
         <SuspenseWrapper fallback={<RightColumnSkeleton />}>
-          <EffectifDataLoader id={id}>
+          <EffectifDataLoader id={id} nomListe={nomListeParam || ""}>
             {(effectifPayload) => (
               <>
-                <EffectifHeader effectifPayload={effectifPayload} />
+                <EffectifHeader effectifPayload={effectifPayload} nomListe={nomListeParam || ""} />
                 <EffectifContent
                   effectifPayload={effectifPayload}
                   formData={formData}
@@ -196,6 +221,7 @@ export default function Page() {
                   setHasError={setHasError}
                   hasSuccess={hasSuccess}
                   setHasSuccess={setHasSuccess}
+                  isListPrioritaire={nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE}
                 />
               </>
             )}

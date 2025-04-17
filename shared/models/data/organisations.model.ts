@@ -18,7 +18,10 @@ import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 
 const collectionName = "organisations";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1 }, {}]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ organisme_id: 1 }, {}],
+  [{ ml_id: 1 }, { unique: true }],
+];
 
 const zOrganisationBase = z.object({
   _id: zObjectId,

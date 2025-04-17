@@ -7,6 +7,7 @@ import {
 } from "../../../constants";
 import { zodLiteralUnion } from "../../../utils/zodHelper";
 import { zAdresse, zAdresseWithMissionLocale } from "../../parts/adresseSchema";
+import { extensions } from "../../parts/zodPrimitives";
 import { zodOpenApi } from "../../zodOpenApi";
 
 export const zApprenant = zodOpenApi.object({
@@ -73,13 +74,7 @@ export const zApprenant = zodOpenApi.object({
     })
     .nullish(),
   courriel: zodOpenApi.string({ description: "Adresse mail de contact de l'apprenant" }).nullish(),
-  telephone: zodOpenApi
-    .string({
-      description: "Téléphone de l'apprenant", // Dans le cas d'un numéro français, il n'est pas nécessaire de saisir le "0" car l'indicateur pays est pré-renseigné. Il doit contenir 9 chiffres après l'indicatif.,
-    })
-    .openapi({ example: "+33908070605" })
-    .regex(/^([+])?(\d{7,12})$/)
-    .nullish(),
+  telephone: extensions.phone().nullish(),
 
   adresse: zAdresseWithMissionLocale.nullish(),
   adresse_naissance: zAdresseWithMissionLocale.nullish(),
@@ -142,16 +137,7 @@ export const zApprenant = zodOpenApi.object({
         .nullish(),
       adresse: zAdresse.nullish(),
       courriel: zodOpenApi.string({ description: "Adresse mail de contact du representant légal" }).nullish(),
-      telephone: zodOpenApi
-        .string({
-          description: `Dans le cas d'un numéro français, il n'est pas
-    nécessaire de saisir le "0" car l'indicateur pays est
-    pré-renseigné.
-    Il doit contenir 9 chiffres après l'indicatif.`,
-        })
-        .openapi({ example: "+33908070605" })
-        .regex(/^([+])?(\d{7,12})$/)
-        .nullish(),
+      telephone: extensions.phone().nullish(),
       pcs: zodLiteralUnion(
         [
           10, 21, 22, 23, 31, 33, 34, 37, 38, 42, 43, 44, 45, 46, 47, 48, 52, 53, 54, 55, 56, 61, 66, 69, 71, 72, 73,
