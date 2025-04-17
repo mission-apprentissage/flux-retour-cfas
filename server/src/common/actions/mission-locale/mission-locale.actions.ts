@@ -854,7 +854,7 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
           },
           telephone: "$effectif_snapshot.apprenant.telephone",
           nom_organisme: "$organisme.nom",
-          mission_locale_id: "$effectif_snapshot.adresse.mission_locale_id",
+          mission_locale_id: "$effectif_snapshot.apprenant.adresse.mission_locale_id",
         },
       },
     ])
