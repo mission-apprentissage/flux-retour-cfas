@@ -853,7 +853,8 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
             $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
           },
           telephone: "$effectif_snapshot.apprenant.telephone",
-          nomOrganisme: "$organisme.nom",
+          nom_organisme: "$organisme.nom",
+          mission_locale_id: "$effectif_snapshot.adresse.mission_locale_id",
         },
       },
     ])
