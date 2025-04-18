@@ -14160,6 +14160,23 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_snapshot_date": {
       "bsonType": "date",
     },
+    "email_status": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "not_supported",
+            "error",
+            "hardbounced",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "mission_locale_id": {
       "bsonType": "objectId",
     },
