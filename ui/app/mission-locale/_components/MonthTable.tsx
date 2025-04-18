@@ -35,7 +35,7 @@ function buildRowData(effectif: EffectifData, isTraite: boolean) {
               Prioritaire
             </p>
           ) : (
-            <Badge severity="new" small>
+            <Badge severity="new" small style={{ whiteSpace: "nowrap" }}>
               à traiter
             </Badge>
           )}
