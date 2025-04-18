@@ -16,7 +16,6 @@ try {
 
   // We need to setup even for server to be able to call addJob
   await setupJobProcessor();
-
   createGlobalServices();
   await startCLI();
 } catch (err) {
