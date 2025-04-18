@@ -23,7 +23,7 @@ export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: num
     while (await cursor2.hasNext()) {
       const eff = await cursor2.next();
       if (eff) {
-        await createMissionLocaleSnapshot(eff, "TEST A CHANGER");
+        await createMissionLocaleSnapshot(eff);
       }
     }
   }
