@@ -847,54 +847,6 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   }
 };
 
-export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
-  const aggregation = [
-    {
-      $match: {
-        "brevo.token": token,
-      },
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        let: { id: "$mission_locale_id" },
-        pipeline: [
-          { $match: { type: "MISSION_LOCALE" } },
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-            },
-          },
-        ],
-        as: "organisation",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisation",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        "missionLocale.nom": "$organisation.nom",
-        telephone: "$effectif_snapshot.apprenant.telephone",
-        formation: "$effectif_snapshot.formation",
-      },
-    },
-  ];
-
-  const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
-
-  if (!effectif) {
-    throw Boom.notFound();
-  }
-
-  return effectif;
-};
-
 export const getMissionLocaleRupturantToCheckMail = async () => {
   return await missionLocaleEffectifsDb()
     .aggregate([
