@@ -9,6 +9,7 @@ import {
 } from "@/common/actions/campagnes/campagnes.actions";
 import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
 import { maskTelephone } from "@/common/utils/phoneUtils";
+import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
@@ -62,7 +63,7 @@ async function confirmEffectifChoiceAndRedirect(req, res, next) {
     }
 
     const page = isConfirmed ? "accompagnement-valide" : "accompagnement-refuse";
-    res.redirect(302, `http://localhost:3000/campagnes/mission-locale/${token}/${page}`);
+    res.redirect(302, `${config.publicUrl}/campagnes/mission-locale/${token}/${page}`);
   } catch (error) {
     next(error);
   }
