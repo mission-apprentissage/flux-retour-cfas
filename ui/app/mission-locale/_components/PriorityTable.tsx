@@ -84,7 +84,9 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
           <PriorityBadge priorityData={priorityData} />
           <Typography variant="body2">
             Nous affichons dans cette liste <strong>les jeunes âgés de 16 à 18 ans</strong> (obligation de formation)
-            ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong>.
+            ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong> et les{" "}
+            <strong>jeunes qui ont indiqué avoir besoin d’être accompagnés par vos services</strong> (campagne
+            mailing)..
           </Typography>
           <Table
             caption=""
