@@ -333,6 +333,19 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
       if (effectif.formation?.date_fin && effectif.formation?.date_entree) {
+        if (effectif.formation.date_fin < effectif.formation.date_entree) {
+          ctx.addIssue(
+            createCustomEffectifIssue(
+              "La date de fin de formation doit être supérieure à la date d'entrée en formation",
+              ["date_fin_formation"],
+              {
+                date_entree_formation: effectif.formation.date_entree.toISOString(),
+                date_fin_formation: effectif.formation.date_fin.toISOString(),
+              }
+            )
+          );
+        }
+
         effectif.formation.duree_formation_relle = Math.round(
           (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) / 1000 / 60 / 60 / 24 / 30
         );

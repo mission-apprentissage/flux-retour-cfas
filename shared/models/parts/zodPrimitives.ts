@@ -1,23 +1,21 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
-import parsePhoneNumberFromString from "libphonenumber-js";
+import parsePhoneNumberFromString from "libphonenumber-js/max";
 import { capitalize } from "lodash-es";
 import { z } from "zod";
 
 import {
   CFD_REGEX,
   CODE_NAF_REGEX,
+  CODE_POSTAL_REGEX,
+  CODES_STATUT_APPRENANT_ENUM,
+  DERNIER_ORGANISME_UAI_REGEX,
   RNCP_REGEX,
   SIRET_REGEX,
   UAI_REGEX,
-  CODE_POSTAL_REGEX,
-  DERNIER_ORGANISME_UAI_REGEX,
   zCodeStatutApprenant,
-  CODES_STATUT_APPRENANT_ENUM,
   zEffectifDernierSituation,
-} from "shared";
-
-import { telephoneConverter } from "../../utils/frenchTelephoneNumber";
+} from "../../constants";
 
 extendZodWithOpenApi(z);
 
@@ -40,19 +38,42 @@ export const extensions = {
   phone: () =>
     z.coerce
       .string()
-      .transform((v: string) => (v ? telephoneConverter(v) : null))
-      .refine(
-        (v: string | null | undefined) => {
-          if (v === null || v === undefined) {
-            return true;
-          }
-          const parsed = parsePhoneNumberFromString(v, "FR"); // Default indicator if none provided
-          return parsed?.isValid();
-        },
-        {
-          message: "Format invalide",
+      .transform((v: string, ctx) => {
+        if (!v) {
+          return null;
         }
-      )
+
+        const normalized = v
+          .toString()
+          .trim()
+          .replace(/[-.()\s]/g, "");
+        const parsed = parsePhoneNumberFromString(normalized, { defaultCountry: "FR", extract: false }); // Default indicator if none provided
+
+        if (!parsed?.isPossible()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Format invalide",
+          });
+        } else if (!parsed?.isValid()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Numéro de téléphone invalide",
+          });
+        }
+
+        if (!parsed) {
+          return z.NEVER;
+        }
+
+        if (["PREMIUM_RATE", "PAGER", "VOICEMAIL", "SHARED_COST"].includes(parsed.getType()!)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Numéro de téléphone est un numéro spécial",
+          });
+        }
+
+        return parsed.country === "FR" ? `0${parsed.nationalNumber}` : parsed.number;
+      })
       .openapi({
         example: "0628000000",
       }),
