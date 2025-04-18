@@ -822,7 +822,6 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
     });
 
     const date = new Date();
-    const token = uuidv4();
 
     if (mlData) {
       await missionLocaleEffectifsDb().findOneAndUpdate(
@@ -836,7 +835,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
             effectif_snapshot_date: date,
             created_at: date,
             brevo: {
-              token,
+              token: uuidv4(),
               token_created_at: date,
             },
           },
