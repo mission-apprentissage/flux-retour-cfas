@@ -5,16 +5,21 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { API_EFFECTIF_LISTE, API_TRAITEMENT_TYPE } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  IEmailStatusEnum,
+  API_EFFECTIF_LISTE,
+  API_TRAITEMENT_TYPE,
+} from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
+import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
-
 /**
  *    EffectifsDb
  */
@@ -209,6 +214,7 @@ const addFieldTraitementStatus = () => {
   const A_RISQUE_CONDITION = {
     $or: [
       { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
+      { $eq: ["$effectif_choice.confirmation", true] },
       {
         $and: [
           {
@@ -632,6 +638,7 @@ export const getEffectifFromMissionLocaleId = async (
         formation: "$effectif_snapshot.formation",
         courriel: "$effectif_snapshot.apprenant.courriel",
         telephone: "$effectif_snapshot.apprenant.telephone",
+        telephone_corrected: "$effectif_choice.telephone",
         responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
         a_traiter: "$a_traiter",
@@ -816,6 +823,8 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
       ml_id: effectif.apprenant.adresse?.mission_locale_id,
     });
 
+    const date = new Date();
+
     if (mlData) {
       await missionLocaleEffectifsDb().findOneAndUpdate(
         {
@@ -825,14 +834,84 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
         {
           $setOnInsert: {
             effectif_snapshot: { ...effectif, _id: effectif._id },
-            effectif_snapshot_date: new Date(),
-            created_at: new Date(),
+            effectif_snapshot_date: date,
+            created_at: date,
+            brevo: {
+              token: uuidv4(),
+              token_created_at: date,
+            },
           },
         },
         { upsert: true }
       );
     }
   }
+};
+
+export const getMissionLocaleRupturantToCheckMail = async () => {
+  return await missionLocaleEffectifsDb()
+    .aggregate([
+      {
+        $match: {
+          email_status: { $exists: false },
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          let: { id: "$effectif_snapshot.organisme_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+            {
+              $project: {
+                _id: 1,
+                nom: 1,
+              },
+            },
+          ],
+          as: "organisme",
+        },
+      },
+      {
+        $unwind: {
+          path: "$organisme",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          email: "$effectif_snapshot.apprenant.courriel",
+          nom: "$effectif_snapshot.apprenant.nom",
+          prenom: "$effectif_snapshot.apprenant.prenom",
+          "urls.TDB_AB_TEST_A": {
+            $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
+          },
+          "urls.TDB_AB_TEST_B_TRUE": {
+            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
+          },
+          "urls.TDB_AB_TEST_B_FALSE": {
+            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
+          },
+          telephone: "$effectif_snapshot.apprenant.telephone",
+          nom_organisme: "$organisme.nom",
+          mission_locale_id: "$effectif_snapshot.apprenant.adresse.mission_locale_id",
+        },
+      },
+    ])
+    .toArray();
+};
+
+export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+  const bulkOps = rupturants.map(({ email, status }) => ({
+    updateOne: {
+      filter: { "effectif_snapshot.apprenant.courriel": email },
+      update: { $set: { email_status: status } },
+    },
+  }));
+
+  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
+  return result;
 };
 
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif) => {

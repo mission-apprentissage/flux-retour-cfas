@@ -9118,6 +9118,70 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "_id": {
       "bsonType": "objectId",
     },
+    "brevo": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "history": {
+          "anyOf": [
+            {
+              "bsonType": "array",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "token": {
+                    "bsonType": "string",
+                  },
+                  "token_created_at": {
+                    "bsonType": "date",
+                  },
+                  "token_expired_at": {
+                    "bsonType": "date",
+                  },
+                },
+                "required": [
+                  "token",
+                ],
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "token": {
+          "anyOf": [
+            {
+              "bsonType": "string",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "token_created_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "token_expired_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
     "commentaires": {
       "bsonType": "string",
     },
@@ -9128,6 +9192,51 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "bsonType": [
         "bool",
         "null",
+      ],
+    },
+    "effectif_choice": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "confirmation": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+            },
+            "confirmation_created_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "confirmation_expired_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "telephone": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "effectif_id": {
@@ -14051,6 +14160,23 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_snapshot_date": {
       "bsonType": "date",
     },
+    "email_status": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "not_supported",
+            "error",
+            "hardbounced",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "mission_locale_id": {
       "bsonType": "objectId",
     },
@@ -14090,6 +14216,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_id",
     "created_at",
     "effectif_snapshot",
+    "brevo",
   ],
 }
 `;
