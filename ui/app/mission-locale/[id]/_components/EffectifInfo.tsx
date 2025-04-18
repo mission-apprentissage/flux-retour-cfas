@@ -176,7 +176,7 @@ function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
         <Box mb={2}>
           <Stack spacing={1}>
             <Typography fontWeight="bold">Coordonnées</Typography>
-            <Typography>{effectif.telephone || ""}</Typography>
+            <Typography>{effectif.telephone_corrected || effectif.telephone || ""}</Typography>
             <Typography>{effectif.courriel || ""}</Typography>
           </Stack>
         </Box>

@@ -210,6 +210,7 @@ const addFieldTraitementStatus = () => {
   const A_RISQUE_CONDITION = {
     $or: [
       { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
+      { $eq: ["$effectif_choice.confirmation", true] },
       {
         $and: [
           {
@@ -633,6 +634,7 @@ export const getEffectifFromMissionLocaleId = async (
         formation: "$effectif_snapshot.formation",
         courriel: "$effectif_snapshot.apprenant.courriel",
         telephone: "$effectif_snapshot.apprenant.telephone",
+        telephone_corrected: "$effectif_choice.telephone",
         responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
         a_traiter: "$a_traiter",
