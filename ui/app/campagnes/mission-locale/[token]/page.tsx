@@ -2,12 +2,12 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { _get } from "@/common/httpClient";
+import { AuthError, _get } from "@/common/httpClient";
 import { publicConfig } from "@/config.public";
 
 import { MissionLocaleFaq } from "../_components/faq";
@@ -18,23 +18,31 @@ export default function Page() {
   const { token } = useParams() as { token: string };
   const [formData, setFormData] = useState<{ isInterested: boolean | null }>({ isInterested: null });
 
-  const { data, isLoading, isError, error } = useQuery(
+  const { data, error, isLoading, isError } = useQuery(
     ["ml-effectif", token],
     () => _get(`/api/v1/campagne/mission-locale/${token}`),
     {
       enabled: !!token,
       keepPreviousData: true,
+      retry: false,
+      onError(err) {
+        if (err instanceof AuthError) {
+          router.push("/campagnes/mission-locale/lien-invalide");
+        }
+      },
     }
   );
 
-  useEffect(() => {
-    if (isError) {
-      router.push("/campagnes/mission-locale/lien-invalide");
-    }
-  }, [isError, error, router]);
+  if (isLoading || (isError && error instanceof AuthError)) {
+    return (
+      <Stack justifyContent="center" alignItems="center" sx={{ height: "100vh" }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
 
-  if (isError || isLoading) {
-    return null;
+  if (isError && !(error instanceof AuthError)) {
+    return <Typography color="error">Une erreur est survenue.</Typography>;
   }
 
   const handleValider = () => {
@@ -99,7 +107,9 @@ export default function Page() {
       </Stack>
 
       <MissionLocaleQuestion />
-      <MissionLocaleFaq missionLocalNom={data?.missionLocale?.nom} organismeNom={data?.organismeNom} />
+      {data && data.missionLocale && (
+        <MissionLocaleFaq missionLocalNom={data.missionLocale.nom} organismeNom={data.organismeNom} />
+      )}
     </Stack>
   );
 }

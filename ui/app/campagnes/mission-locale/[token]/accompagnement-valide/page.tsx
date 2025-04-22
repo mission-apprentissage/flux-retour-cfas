@@ -4,14 +4,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { _get, _post } from "@/common/httpClient";
+import { AuthError, _get, _post } from "@/common/httpClient";
 import { capitalizeWords } from "@/common/utils/stringUtils";
 
 import { MissionLocaleFaq } from "../../_components/faq";
@@ -64,23 +64,26 @@ export default function Page() {
     phoneError: "",
   });
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, error, isLoading, isError } = useQuery(
     ["ml-effectif", token],
     () => _get(`/api/v1/campagne/mission-locale/${token}`),
     {
       enabled: !!token,
       keepPreviousData: true,
+      retry: false,
+      onError(err) {
+        if (err instanceof AuthError) {
+          router.push("/campagnes/mission-locale/lien-invalide");
+        }
+      },
     }
   );
 
   useEffect(() => {
-    if (isError) {
-      router.push("/campagnes/mission-locale/lien-invalide");
-    }
     if (data?.telephone) {
       setState((prev) => ({ ...prev, phone: data.telephone }));
     }
-  }, [isError, router]);
+  }, [router]);
 
   const updatePhoneMutation = useMutation((telephone: string) =>
     _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone })
@@ -106,11 +109,15 @@ export default function Page() {
     });
   };
 
-  if (isLoading) {
-    return <></>;
+  if (isLoading || (isError && error instanceof AuthError)) {
+    return (
+      <Stack justifyContent="center" alignItems="center" sx={{ height: "100vh" }}>
+        <CircularProgress />
+      </Stack>
+    );
   }
 
-  if (isError) {
+  if (isError && !(error instanceof AuthError)) {
     return <Typography color="error">Une erreur est survenue.</Typography>;
   }
 
