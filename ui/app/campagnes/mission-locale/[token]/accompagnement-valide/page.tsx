@@ -4,28 +4,36 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { _get, _post } from "@/common/httpClient";
+import { AuthError, _get, _post } from "@/common/httpClient";
 import { capitalizeWords } from "@/common/utils/stringUtils";
 
 import { MissionLocaleFaq } from "../../_components/faq";
 import { MissionLocaleQuestion } from "../../_components/question";
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[.\-\s]?\d{2}){4}$/, "Numéro de téléphone invalide");
 
 function PhoneForm({
   label,
   phoneValue,
   setPhoneValue,
   onSave,
+  phoneError,
 }: {
   label: string;
   phoneValue: string;
   setPhoneValue: (val: string) => void;
   onSave: () => void;
+  phoneError: string;
 }) {
   return (
     <Stack spacing={2}>
@@ -37,6 +45,8 @@ function PhoneForm({
           onChange: (e) => setPhoneValue(e.target.value),
         }}
         style={{ marginBottom: fr.spacing("2w") }}
+        state={phoneError ? "error" : undefined}
+        stateRelatedMessage={phoneError}
       />
       <Button onClick={onSave}>Enregistrer</Button>
     </Stack>
@@ -44,21 +54,28 @@ function PhoneForm({
 }
 
 export default function Page() {
+  const router = useRouter();
   const { token } = useParams() as { token: string };
   const [state, setState] = useState({
     phone: "",
     newPhone: "",
     changePhoneOpen: false,
     hasPhoneChanged: false,
+    phoneError: "",
   });
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, error, isLoading, isError } = useQuery(
     ["ml-effectif", token],
     () => _get(`/api/v1/campagne/mission-locale/${token}`),
     {
       enabled: !!token,
       keepPreviousData: true,
-      useErrorBoundary: true,
+      retry: false,
+      onError(err) {
+        if (err instanceof AuthError) {
+          router.push("/campagnes/mission-locale/lien-invalide");
+        }
+      },
     }
   );
 
@@ -66,14 +83,18 @@ export default function Page() {
     if (data?.telephone) {
       setState((prev) => ({ ...prev, phone: data.telephone }));
     }
-  }, [data]);
+  }, [router]);
 
   const updatePhoneMutation = useMutation((telephone: string) =>
     _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone })
   );
 
   const handleSavePhone = () => {
-    if (!state.newPhone.trim()) return;
+    const result = phoneSchema.safeParse(state.newPhone);
+    if (!result.success) {
+      setState((prev) => ({ ...prev, phoneError: result.error.errors[0].message }));
+      return;
+    }
     updatePhoneMutation.mutate(state.newPhone.trim(), {
       onSuccess: () => {
         setState((prev) => ({
@@ -82,16 +103,21 @@ export default function Page() {
           newPhone: "",
           changePhoneOpen: false,
           hasPhoneChanged: true,
+          phoneError: "",
         }));
       },
     });
   };
 
-  if (isLoading) {
-    return <></>;
+  if (isLoading || (isError && error instanceof AuthError)) {
+    return (
+      <Stack justifyContent="center" alignItems="center" sx={{ height: "100vh" }}>
+        <CircularProgress />
+      </Stack>
+    );
   }
 
-  if (isError) {
+  if (isError && !(error instanceof AuthError)) {
     return <Typography color="error">Une erreur est survenue.</Typography>;
   }
 
@@ -124,6 +150,7 @@ export default function Page() {
               phoneValue={state.newPhone}
               setPhoneValue={(val) => setState((prev) => ({ ...prev, newPhone: val }))}
               onSave={handleSavePhone}
+              phoneError={state.phoneError}
             />
           </Stack>
         ) : (
@@ -139,7 +166,9 @@ export default function Page() {
                 href="#"
                 arrow="none"
                 onClick={() => setState((prev) => ({ ...prev, changePhoneOpen: !prev.changePhoneOpen }))}
-                className={`fr-link--icon-right ${state.changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
+                className={`fr-link--icon-right ${
+                  state.changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"
+                }`}
               >
                 Ce n’est pas mon numéro
               </DsfrLink>
@@ -150,6 +179,7 @@ export default function Page() {
                 phoneValue={state.newPhone}
                 setPhoneValue={(val) => setState((prev) => ({ ...prev, newPhone: val }))}
                 onSave={handleSavePhone}
+                phoneError={state.phoneError}
               />
             )}
           </Stack>

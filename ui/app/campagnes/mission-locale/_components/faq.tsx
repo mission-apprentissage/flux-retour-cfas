@@ -30,7 +30,7 @@ export const MissionLocaleFaq = ({
           <Stack spacing={3} px={1}>
             <Typography>
               <strong>La bonne alternance est le site pour trouver une alternance.</strong> Il centralise toutes les
-              formations en apprentissa ge, ainsi que de nombreuses opportunités d’emplois en alternance. Vous pouvez
+              formations en apprentissage, ainsi que de nombreuses opportunités d’emplois en alternance. Vous pouvez
               contacter les écoles pour vous renseigner sur leurs formations, et postuler auprès de nombreuses
               entreprises.
             </Typography>
