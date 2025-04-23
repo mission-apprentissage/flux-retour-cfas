@@ -855,6 +855,8 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
       {
         $match: {
           email_status: { $exists: false },
+          soft_deleted: { $ne: true },
+          "brevo.token": { $exists: true },
         },
       },
       {
@@ -896,7 +898,7 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
           },
           telephone: "$effectif_snapshot.apprenant.telephone",
           nom_organisme: "$organisme.nom",
-          mission_locale_id: "$effectif_snapshot.apprenant.adresse.mission_locale_id",
+          mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
         },
       },
     ])
@@ -904,6 +906,10 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
 };
 
 export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+  if (!rupturants || rupturants.length === 0) {
+    return;
+  }
+
   const bulkOps = rupturants.map(({ email, status }) => ({
     updateOne: {
       filter: { "effectif_snapshot.apprenant.courriel": email },
