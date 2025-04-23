@@ -856,7 +856,7 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
         $match: {
           email_status: { $exists: false },
           soft_deleted: { $ne: true },
-          "brevo.token": { $exists: true },
+          "brevo.token": { $ne: null },
         },
       },
       {
