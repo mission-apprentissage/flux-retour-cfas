@@ -639,6 +639,7 @@ export const getEffectifFromMissionLocaleId = async (
         courriel: "$effectif_snapshot.apprenant.courriel",
         telephone: "$effectif_snapshot.apprenant.telephone",
         telephone_corrected: "$effectif_choice.telephone",
+        autorisation_contact: "$effectif_choice.confirmation",
         responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
         rqth: "$effectif_snapshot.apprenant.rqth",
         a_traiter: "$a_traiter",

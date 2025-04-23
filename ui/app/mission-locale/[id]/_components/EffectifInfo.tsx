@@ -75,6 +75,14 @@ export function EffectifInfo({ effectif }) {
             </Typography>
           </Box>
         </Stack>
+        {effectif.autorisation_contact === false && (
+          <Box className="fr-highlight" mt={2}>
+            <Typography component="p" className="fr-text--sm">
+              {effectif.nom} {effectif.prenom} a indiqué ne pas avoir besoin d&apos;être accompagné par vos services
+              (campagne emailing).
+            </Typography>
+          </Box>
+        )}
       </Stack>
 
       {effectif.situation && Object.keys(effectif.situation).length > 0 && <Feedback situation={effectif.situation} />}

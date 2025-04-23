@@ -83,7 +83,7 @@ export default function Page() {
     if (data?.telephone) {
       setState((prev) => ({ ...prev, phone: data.telephone }));
     }
-  }, [router]);
+  }, [data]);
 
   const updatePhoneMutation = useMutation((telephone: string) =>
     _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone })
