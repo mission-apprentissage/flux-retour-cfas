@@ -62,8 +62,11 @@ async function confirmEffectifChoiceAndRedirect(req, res, next) {
       await deactivateEffectifToken(token);
     }
 
-    const page = isConfirmed ? "accompagnement-valide" : "accompagnement-refuse";
-    res.redirect(302, `${config.publicUrl}/campagnes/mission-locale/${token}/${page}`);
+    const redirectUrl = isConfirmed
+      ? `${config.publicUrl}/campagnes/mission-locale/${token}/accompagnement-valide`
+      : `${config.publicUrl}/campagnes/mission-locale/accompagnement-refuse`;
+
+    res.redirect(302, redirectUrl);
   } catch (error) {
     next(error);
   }
