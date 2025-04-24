@@ -75,10 +75,13 @@ export function EffectifInfo({ effectif }) {
             </Typography>
           </Box>
         </Stack>
-        {effectif.autorisation_contact === false && (
+        {typeof effectif?.autorisation_contact === "boolean" && (
           <Box className="fr-highlight" mt={2}>
             <Typography component="p" className="fr-text--sm">
-              {effectif.nom} {effectif.prenom} a indiqué ne pas avoir besoin d&apos;être accompagné par vos services
+              {effectif.nom} {effectif.prenom}
+              {effectif.autorisation_contact
+                ? " a indiqué avoir besoin d'être accompagné par vos services "
+                : " a indiqué ne pas avoir besoin d'être accompagné par vos services "}
               (campagne emailing).
             </Typography>
           </Box>
