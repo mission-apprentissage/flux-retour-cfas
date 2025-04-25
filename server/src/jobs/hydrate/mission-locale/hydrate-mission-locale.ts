@@ -105,7 +105,7 @@ export const hydrateMissionLocaleAdresse = async () => {
   const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
 
   for (const ml of allMl) {
-    const missionLocale = await organisationsDb().findOne({ ml_id: ml.id });
+    const missionLocale = await organisationsDb().findOne({ ml_id: ml.id, type: "MISSION_LOCALE" });
     const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, ml.localisation.cp);
 
     if (missionLocale) {
