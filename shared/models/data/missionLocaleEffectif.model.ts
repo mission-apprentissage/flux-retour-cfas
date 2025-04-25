@@ -38,6 +38,9 @@ export enum API_TRAITEMENT_TYPE {
 
 export enum API_EFFECTIF_LISTE {
   PRIORITAIRE = "prioritaire",
+  INJOIGNABLE = "injoignable",
+  TRAITE = "traite",
+  A_TRAITER = "a_traiter",
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
