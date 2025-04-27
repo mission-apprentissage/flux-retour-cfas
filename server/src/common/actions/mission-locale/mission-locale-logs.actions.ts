@@ -1,12 +1,8 @@
 import { ObjectId } from "bson";
-import { IUpdateMissionLocaleEffectif } from "shared/models";
 
 import { missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
-export const createEffectifMissionLocaleLog = (
-  missionLocaleEffectifId: ObjectId,
-  data: IUpdateMissionLocaleEffectif
-) => {
+export const createEffectifMissionLocaleLog = (missionLocaleEffectifId: ObjectId, data) => {
   return missionLocaleEffectifsLogDb().insertOne({
     _id: new ObjectId(),
     mission_locale_effectif_id: missionLocaleEffectifId,

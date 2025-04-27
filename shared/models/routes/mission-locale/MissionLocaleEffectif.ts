@@ -21,7 +21,7 @@ const zApprenantPick = zApprenant.pick({
 });
 
 export const updateMissionLocaleEffectifApi = {
-  situation: zSituationEnum.nullish(),
+  situation: zSituationEnum,
   situation_autre: zMissionLocaleEffectif.zod.shape.situation_autre.optional(),
   commentaires: zMissionLocaleEffectif.zod.shape.commentaires.optional(),
   deja_connu: z.boolean().nullish(),
