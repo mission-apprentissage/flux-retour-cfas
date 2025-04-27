@@ -1,7 +1,10 @@
+import Boom from "boom";
 import { ObjectId } from "bson";
-import { IOrganisationMissionLocale } from "shared/models";
+import { IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
-import { organisationsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+
+import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 
 export const activateMissionLocale = async (missionLocaleId: string, date: Date) => {
   const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: new ObjectId(missionLocaleId) });
@@ -28,4 +31,73 @@ export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMi
     .toArray();
 
   return mls as Array<IOrganisationMissionLocale>;
+};
+
+export const setEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId, data: IUpdateMissionLocaleEffectif) => {
+  const { situation, situation_autre, commentaires, deja_connu } = data;
+
+  const mlEff = await missionLocaleEffectifsDb().findOne({ effectif_id: new ObjectId(effectifId) });
+  if (!mlEff) {
+    throw Boom.notFound();
+  }
+
+  const setObject = {
+    situation,
+    deja_connu,
+    ...(situation_autre !== undefined ? { situation_autre } : {}),
+    ...(commentaires !== undefined ? { commentaires } : {}),
+  };
+
+  await createEffectifMissionLocaleLog(mlEff?._id, {
+    situation,
+    situation_autre,
+    commentaires,
+    deja_connu,
+  });
+
+  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+    {
+      effectif_id: new ObjectId(effectifId),
+    },
+    {
+      $set: {
+        ...setObject,
+        updated_at: new Date(),
+      },
+    },
+    { upsert: true, returnDocument: "after" }
+  );
+
+  return updated;
+};
+
+export const resetEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId) => {
+  const mlEff = await missionLocaleEffectifsDb().findOne({ effectif_id: new ObjectId(effectifId) });
+  if (!mlEff) {
+    throw Boom.notFound();
+  }
+
+  await createEffectifMissionLocaleLog(mlEff?._id, {
+    situation: undefined,
+    situation_autre: undefined,
+    commentaires: undefined,
+    deja_connu: undefined,
+  });
+
+  await missionLocaleEffectifsDb().updateOne(
+    {
+      effectif_id: new ObjectId(effectifId),
+    },
+    {
+      $set: {
+        updated_at: new Date(),
+      },
+      $unset: {
+        situation: 1,
+        situation_autre: 1,
+        deja_connu: 1,
+        commentaires: 1,
+      },
+    }
+  );
 };

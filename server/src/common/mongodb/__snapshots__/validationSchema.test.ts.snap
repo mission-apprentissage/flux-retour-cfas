@@ -14197,7 +14197,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       ],
     },
     "situation_autre": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
     },
     "soft_deleted": {
       "bsonType": [
@@ -14216,6 +14219,64 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "created_at",
     "effectif_snapshot",
     "brevo",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for missionLocaleEffectifLog > missionLocaleEffectifLog 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "commentaires": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "deja_connu": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+    },
+    "mission_locale_effectif_id": {
+      "bsonType": "objectId",
+    },
+    "situation": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "RDV_PRIS",
+            "PAS_BESOIN_SUIVI",
+            "CONTACTE_SANS_RETOUR",
+            "COORDONNEES_INCORRECT",
+            "AUTRE",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "situation_autre": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+  },
+  "required": [
+    "_id",
+    "mission_locale_effectif_id",
+    "created_at",
   ],
 }
 `;
