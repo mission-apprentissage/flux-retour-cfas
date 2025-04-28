@@ -34,6 +34,7 @@ export enum SITUATION_LABEL_ENUM {
 export enum API_TRAITEMENT_TYPE {
   A_TRAITER = "A_TRAITER",
   TRAITE = "TRAITE",
+  INJOIGNABLE = "INJOIGNABLE",
 }
 
 export enum API_EFFECTIF_LISTE {
@@ -90,4 +91,5 @@ const zMissionLocaleEffectif = z.object({
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
+export type IMissionLocaleEffectifList = z.infer<typeof zApiEffectifListeEnum>;
 export default { zod: zMissionLocaleEffectif, indexes, collectionName };

@@ -15,7 +15,6 @@ import {
 import {
   getEffectifARisqueByMissionLocaleId,
   getEffectifFromMissionLocaleId,
-  getEffectifInjoignableByMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   getEffectifsParMoisByMissionLocaleId,
   setEffectifMissionLocaleData,
@@ -69,7 +68,11 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
       missionLocale.activated_at
     ),
     getEffectifARisqueByMissionLocaleId(missionLocale._id),
-    getEffectifInjoignableByMissionLocaleId(missionLocale._id),
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocale._id,
+      { type: API_TRAITEMENT_TYPE.INJOIGNABLE },
+      missionLocale.activated_at
+    ),
   ]);
   return {
     a_traiter,
@@ -108,6 +111,8 @@ const exportEffectifMissionLocale = async (req, res) => {
           worksheetToDeleteName: "À traiter",
           logsTag: "ml_traite",
         };
+      default:
+        throw new Error(`Unhandled API_TRAITEMENT_TYPE: ${t}`);
     }
   };
 

@@ -503,12 +503,13 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
+  const traite = type === API_TRAITEMENT_TYPE.TRAITE;
+  const injoignable = type === API_TRAITEMENT_TYPE.INJOIGNABLE;
 
   const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
     if (!firstDate) {
       return [];
     }
-
     const dates: string[] = [];
     const today: Date = new Date();
     const targetDate = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
@@ -522,27 +523,41 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       dates.push(formatted);
       i++;
     }
-
     return dates;
   };
 
   const statut = [STATUT_APPRENANT.RUPTURANT];
-  const organismeMissionLocaleAggregation = [
+
+  const organismeMissionLocaleAggregation: any[] = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
-    ...(aTraiter // Si a traiter = true, alors pas de match sur le statut de traiement afin de pouvoir grouper par traitement ( treated_count )
-      ? []
-      : [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: false,
-            },
-          },
-        ]),
+  ];
+
+  if (aTraiter) {
+    organismeMissionLocaleAggregation.push({
+      $match: {
+        a_traiter: true,
+      },
+    });
+  } else if (traite) {
+    organismeMissionLocaleAggregation.push({
+      $match: {
+        a_traiter: false,
+        injoignable: false,
+      },
+    });
+  } else if (injoignable) {
+    organismeMissionLocaleAggregation.push({
+      $match: {
+        injoignable: true,
+      },
+    });
+  }
+
+  organismeMissionLocaleAggregation.push(
     {
       $sort: {
         "dernierStatut.date": -1,
@@ -589,13 +604,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
           ? {
               treated_count: {
                 $sum: {
-                  $cond: [
-                    {
-                      $eq: ["$$ROOT.a_traiter", false],
-                    },
-                    1,
-                    0,
-                  ],
+                  $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
                 },
               },
             }
@@ -616,11 +625,14 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       $sort: {
         month: -1,
       },
-    },
-  ];
+    }
+  );
 
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
-  const oldestRealDataIndex = result.findLastIndex(({ treated_count, data }) => treated_count > 0 || data.length > 0);
+
+  const oldestRealDataIndex = result.findLastIndex(
+    ({ treated_count, data }) => (treated_count ?? 0) > 0 || data.length > 0
+  );
   const effectifs = oldestRealDataIndex >= 0 ? result.slice(0, oldestRealDataIndex + 1) : [...result];
 
   const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
@@ -636,6 +648,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         );
       })
     : effectifs.sort((a, b) => b.month - a.month);
+
   return formattedData;
 };
 
@@ -779,43 +792,6 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
       $match: {
         a_traiter: true,
         a_risque: true,
-      },
-    },
-    {
-      $sort: {
-        "dernierStatut.date": -1,
-      },
-    },
-    ...lookUpOrganisme(),
-    {
-      $project: {
-        _id: 0,
-        id: "$$ROOT.effectif_snapshot._id",
-        nom: "$$ROOT.effectif_snapshot.apprenant.nom",
-        prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
-        libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
-        organisme_nom: "$$ROOT.organisme.nom",
-        organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
-        organisme_enseigne: "$$ROOT.organisme.enseigne",
-        prioritaire: "$a_risque",
-        dernier_statut: "$dernierStatut",
-      },
-    },
-  ];
-
-  return await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
-};
-
-export const getEffectifInjoignableByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-  const organismeMissionLocaleAggregation = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
-    ...addFieldTraitementStatus(),
-    {
-      $match: {
-        injoignable: true,
       },
     },
     {
