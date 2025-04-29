@@ -3,16 +3,13 @@ import Boom from "boom";
 
 import config from "@/config";
 
-function shouldLogError(boomError, req) {
+function shouldLogError(boomError: Boom, req: Request): boolean {
   if (boomError.isServer) {
     return true;
   }
 
   // We want to track client errors from ERP and other API actors
-  // So we ignore errors from UI, as they will appear in tdb-ui Sentry project
-  const isFromUi = req.header("referer")?.includes(config.publicUrl) || req.header("sec-fetch-mode")?.includes("cors");
-
-  return !isFromUi;
+  return req.url.startsWith("/api/v3/dossiers-apprenants");
 }
 
 export default () => {

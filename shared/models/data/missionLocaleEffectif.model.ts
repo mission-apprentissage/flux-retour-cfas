@@ -36,8 +36,17 @@ export enum API_TRAITEMENT_TYPE {
   TRAITE = "TRAITE",
 }
 
+export enum API_EFFECTIF_LISTE {
+  PRIORITAIRE = "prioritaire",
+}
+
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
+export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
+
+export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
+
+export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
@@ -51,6 +60,29 @@ const zMissionLocaleEffectif = z.object({
   commentaires: z.string().optional(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
+  email_status: zEmailStatusEnum.nullish(),
+  effectif_choice: z
+    .object({
+      confirmation: z.boolean().nullish(),
+      confirmation_created_at: z.date().nullish(),
+      confirmation_expired_at: z.date().nullish(),
+      telephone: z.string().nullish(),
+    })
+    .nullish(),
+  brevo: z.object({
+    token: z.string().uuid().nullish(),
+    token_created_at: z.date().nullish(),
+    token_expired_at: z.date().nullish(),
+    history: z
+      .array(
+        z.object({
+          token: z.string().uuid(),
+          token_created_at: z.date().optional(),
+          token_expired_at: z.date().optional(),
+        })
+      )
+      .nullish(),
+  }),
   soft_deleted: z.boolean().nullish(),
 });
 

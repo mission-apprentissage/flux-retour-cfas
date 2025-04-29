@@ -27,13 +27,18 @@ function buildRowData(effectif: EffectifData, isTraite: boolean) {
   if (!isTraite) {
     return {
       id: effectif.id,
-      badge: (
-        <Badge severity="new" small>
-          à traiter
-        </Badge>
-      ),
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {effectif.prioritaire ? (
+            <p className="fr-badge fr-badge--orange-terre-battue fr-badge--sm" style={{ gap: "0.2rem" }}>
+              <i className="fr-icon-fire-fill fr-icon--xs" />
+              Prioritaire
+            </p>
+          ) : (
+            <Badge severity="new" small style={{ whiteSpace: "nowrap" }}>
+              à traiter
+            </Badge>
+          )}
           {`${effectif.nom} ${effectif.prenom}`}
         </div>
       ),
@@ -64,19 +69,18 @@ export const MonthTable = memo(function MonthTable({
   searchTerm,
   handleSectionChange,
 }: MonthTableProps) {
-  const label = formatMonthAndYear(monthItem.month);
+  const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
   const columns: ColumnData[] = isTraite
     ? [
-        { label: "Apprenant", dataKey: "name", width: 300 },
+        { label: "Apprenant", dataKey: "name", width: 200 },
         { label: "Formation", dataKey: "formation", width: 350 },
-        { label: "Statut", dataKey: "badge", width: 150 },
-        { label: "", dataKey: "icon", width: "5%" },
+        { label: "Statut", dataKey: "badge", width: 200 },
+        { label: "", dataKey: "icon", width: 10 },
       ]
     : [
-        { label: "Statut", dataKey: "badge", width: 150 },
-        { label: "Apprenant", dataKey: "name", width: 300 },
+        { label: "Apprenant", dataKey: "name", width: 400 },
         { label: "Formation", dataKey: "formation", width: 350 },
         { label: "", dataKey: "icon", width: 10 },
       ];
@@ -126,7 +130,7 @@ export const MonthTable = memo(function MonthTable({
             "organisme_raison_sociale",
             "organisme_enseigne",
           ]}
-          itemsPerPage={5}
+          itemsPerPage={7}
           getRowLink={(rowData) => `/mission-locale/${rowData.id}`}
           emptyMessage="Aucun élément à afficher"
         />

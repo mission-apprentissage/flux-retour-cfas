@@ -2,6 +2,7 @@ import { Box, Input, List, ListItem, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import type { IMissionLocale } from "api-alternance-sdk";
 import { useState, useRef, useEffect } from "react";
+import { IOrganisationMissionLocale } from "shared";
 
 import { _get } from "@/common/httpClient";
 
@@ -12,9 +13,9 @@ interface MissionLocaleSelectProps {
 }
 
 export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProps) => {
-  const { data: missionLocales, isLoading } = useQuery<IMissionLocale[]>(["mission-locale"], async () =>
-    _get("/api/v1/mission-locale")
-  );
+  const { data: missionLocales, isLoading } = useQuery<
+    { organisation: IOrganisationMissionLocale; externalML: IMissionLocale }[]
+  >(["mission-locale"], async () => _get("/api/v1/admin/mission-locale"));
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -22,26 +23,27 @@ export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProp
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-
   const filteredLocales = missionLocales
     ? missionLocales
         .filter((ml) =>
-          `${ml.nom} ${ml.localisation.ville} ${ml.localisation.cp}`.toLowerCase().includes(searchTerm.toLowerCase())
+          `${ml.externalML.nom} ${ml.externalML.localisation.ville} ${ml.externalML.localisation.cp}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
         )
-        .sort((a, b) => a.localisation.ville.localeCompare(b.localisation.ville))
+        .sort((a, b) => a.externalML.localisation.ville.localeCompare(b.externalML.localisation.ville))
     : [];
-
-  const handleSelect = (ml: IMissionLocale) => {
-    setSelectedValue(`${ml.nom} (${ml.localisation.ville} - ${ml.localisation.cp})`);
+  const handleSelect = ({
+    organisation,
+    externalML,
+  }: {
+    organisation: IOrganisationMissionLocale;
+    externalML: IMissionLocale;
+  }) => {
+    setSelectedValue(`${externalML.nom} (${externalML.localisation.ville} - ${externalML.localisation.cp})`);
     setSearchTerm("");
     setIsOpen(false);
-
-    setOrganisation({
-      type: "MISSION_LOCALE",
-      nom: ml.nom,
-      siret: ml.siret,
-      ml_id: ml.id,
-    });
+    const { adresse, ...restOrga } = organisation;
+    setOrganisation(restOrga);
   };
 
   // Handle keyboard navigation
@@ -98,14 +100,14 @@ export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProp
         >
           {filteredLocales.map((ml, index) => (
             <ListItem
-              key={ml.id}
+              key={ml.organisation._id.toString()}
               p={2}
               cursor="pointer"
               bg={highlightIndex === index ? "gray.100" : "white"}
               _hover={{ bg: "gray.200" }}
               onClick={() => handleSelect(ml)}
             >
-              {ml.nom} ({ml.localisation.ville} - {ml.localisation.cp})
+              {ml.externalML.nom} ({ml.externalML.localisation.ville} - {ml.externalML.localisation.cp})
             </ListItem>
           ))}
         </List>

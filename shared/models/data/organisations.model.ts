@@ -15,10 +15,14 @@ import {
   UAI_REGEX,
 } from "../../constants";
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { zAdresse } from "../parts/adresseSchema";
 
 const collectionName = "organisations";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1 }, {}]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ organisme_id: 1 }, {}],
+  [{ ml_id: 1 }, { unique: true }],
+];
 
 const zOrganisationBase = z.object({
   _id: zObjectId,
@@ -31,6 +35,7 @@ const zOrganisationMissionLocaleCreate = z.object({
   siret: z.string({ description: "N° SIRET" }).optional(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
+  adresse: zAdresse.optional(),
 });
 
 const zOrganisationOrganismeCreate = z.object({
