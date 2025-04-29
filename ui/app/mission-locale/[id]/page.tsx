@@ -148,7 +148,7 @@ function EffectifContent({
 
   return (
     <>
-      <EffectifInfo effectif={effectif} />
+      <EffectifInfo effectif={effectif} nomListe={nomListeParam} />
       {a_traiter && (
         <FeedbackForm
           formData={formData}

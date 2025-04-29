@@ -4,18 +4,27 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Box, Collapse, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useState } from "react";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate, getAge, getMonthYearFromDate } from "@/app/_utils/date.utils";
 
 import { Feedback } from "./Feedback";
 
-export function EffectifInfo({ effectif }) {
+export function EffectifInfo({
+  effectif,
+  nomListe,
+}: {
+  effectif: IEffecifMissionLocale["effectif"];
+  nomListe: IMissionLocaleEffectifList;
+}) {
   const [infosOpen, setInfosOpen] = useState(false);
 
   const computeTransmissionDate = (date) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
+
+  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
   return (
     <Stack
@@ -28,7 +37,7 @@ export function EffectifInfo({ effectif }) {
         p={{ xs: 2, md: 3 }}
         mt={4}
         sx={{
-          background: effectif.prioritaire ? "var(--background-alt-blue-france)" : "#ffffff",
+          background: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
         }}
       >
         <Stack direction="row" spacing={1} mb={2} alignItems="center">
@@ -54,7 +63,7 @@ export function EffectifInfo({ effectif }) {
           </Typography>
           <Box
             className="fr-notice fr-notice--info"
-            sx={{ backgroundColor: "var(--background-alt-blue-france)", p: 0 }}
+            sx={{ backgroundColor: isListePrioritaire ? "var(--background-alt-blue-france)" : "white", p: 0 }}
           >
             <Box className="fr-notice__body">
               <Typography component="p">

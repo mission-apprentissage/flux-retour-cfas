@@ -31,11 +31,13 @@ const zEffectifMissionLocale = z
   .object({
     id: zObjectId,
     formation: zFormationEffectif,
-    contrat: z.array(zContrat).nullish(),
+    contrats: z.array(zContrat).nullish(),
     organisme: zEffectifComputedOrganisme,
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
     transmitted_at: z.date().nullish(),
+    prioritaire: z.boolean().nullish(),
+    autorisation_contact: z.boolean().nullish(),
     dernier_statut: z
       .object({
         date: z.date(),

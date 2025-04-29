@@ -165,9 +165,9 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
       {
         text:
           totalInjoignable > 0 ? (
-            <strong>{`Injoignable (${totalInjoignable})`}</strong>
+            <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
           ) : (
-            `Injoignable (${totalInjoignable})`
+            `Contactés sans réponse (${totalInjoignable})`
           ),
         linkProps: {
           href: "#",
@@ -208,7 +208,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
   ]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container>
       <Grid size={{ xs: 12, md: 3 }}>
         <SideMenu
           align="left"
@@ -255,15 +255,9 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
         )}
         {selectedSection === "injoignable" && groupedInjoignable.length === 0 && (
           <MlCard
-            title="Aucun jeune injoignable pour le moment"
+            title="Il n'y a pas de nouveaux jeunes à contacter pour le moment"
             imageSrc="/images/mission-locale-not-treated.svg"
             imageAlt="Personnes parlant au téléphone"
-            body={
-              <Typography>
-                <strong>Nous vous invitons à vérifier régulièrement.</strong> Des situations peuvent devenir
-                injoignables au fil du temps.
-              </Typography>
-            }
           />
         )}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
@@ -295,7 +289,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
         {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
-              title="Injoignable"
+              title="Contactés sans réponse"
               data={groupedInjoignable}
               isTraite={false}
               searchTerm={searchTerm}

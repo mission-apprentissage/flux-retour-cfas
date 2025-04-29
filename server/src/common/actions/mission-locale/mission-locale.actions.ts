@@ -536,13 +536,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...addFieldTraitementStatus(),
   ];
 
-  if (aTraiter) {
-    organismeMissionLocaleAggregation.push({
-      $match: {
-        a_traiter: true,
-      },
-    });
-  } else if (traite) {
+  if (traite) {
     organismeMissionLocaleAggregation.push({
       $match: {
         a_traiter: false,
@@ -577,9 +571,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     {
       $group: {
         _id: "$firstDayOfMonth",
-        truc: {
-          $push: "$$ROOT",
-        },
         data: {
           $push: {
             $cond: [
