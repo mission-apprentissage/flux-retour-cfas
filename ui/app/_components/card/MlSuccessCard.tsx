@@ -1,10 +1,12 @@
 import { Box, Typography, Link, Stack } from "@mui/material";
 import React from "react";
 
+import { SelectedSection } from "@/app/mission-locale/_components/types";
+
 export const MlSuccessCard = ({
   handleSectionChange,
 }: {
-  handleSectionChange?: (section: "a-traiter" | "deja-traite") => void;
+  handleSectionChange?: (section: SelectedSection) => void;
 }) => {
   return (
     <Stack

@@ -3,18 +3,19 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Typography, Stack } from "@mui/material";
 import { memo } from "react";
+import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { Table } from "@/app/_components/table/Table";
 
-import { EffectifData, MonthItem } from "./types";
+import { EffectifData, MonthItem, SelectedSection } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
 
 type MonthTableProps = {
   monthItem: MonthItem;
-  isTraite: boolean;
   searchTerm: string;
-  handleSectionChange?: (section: "a-traiter" | "deja-traite") => void;
+  handleSectionChange?: (section: SelectedSection) => void;
+  listType: IMissionLocaleEffectifList;
 };
 
 type ColumnData = {
@@ -23,8 +24,8 @@ type ColumnData = {
   width?: number | string;
 };
 
-function buildRowData(effectif: EffectifData, isTraite: boolean) {
-  if (!isTraite) {
+function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifList) {
+  if (listType === API_EFFECTIF_LISTE.A_TRAITER) {
     return {
       id: effectif.id,
       name: (
@@ -46,48 +47,96 @@ function buildRowData(effectif: EffectifData, isTraite: boolean) {
       icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
     };
   }
+
+  if (listType === API_EFFECTIF_LISTE.TRAITE) {
+    return {
+      id: effectif.id,
+      badge: (
+        <Badge severity="success" small>
+          traité
+        </Badge>
+      ),
+      name: (
+        <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {`${effectif.nom} ${effectif.prenom}`}
+        </div>
+      ),
+      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
+      icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+    };
+  }
+
+  if (listType === API_EFFECTIF_LISTE.INJOIGNABLE) {
+    return {
+      id: effectif.id,
+      badge: (
+        <Badge severity="info" small>
+          sans réponse
+        </Badge>
+      ),
+      name: (
+        <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {`${effectif.nom} ${effectif.prenom}`}
+        </div>
+      ),
+      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
+      icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+    };
+  }
+
+  // Fallback (in case listType is an unexpected value)
   return {
     id: effectif.id,
-    badge: (
-      <Badge severity="success" small>
-        traité
-      </Badge>
-    ),
-    name: (
-      <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {`${effectif.nom} ${effectif.prenom}`}
-      </div>
-    ),
-    formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-    icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+    name: `${effectif.nom} ${effectif.prenom}`,
+    formation: effectif.libelle_formation,
+    icon: null,
   };
 }
 
 export const MonthTable = memo(function MonthTable({
   monthItem,
-  isTraite,
   searchTerm,
   handleSectionChange,
+  listType,
 }: MonthTableProps) {
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
-  const columns: ColumnData[] = isTraite
-    ? [
-        { label: "Apprenant", dataKey: "name", width: 200 },
-        { label: "Formation", dataKey: "formation", width: 350 },
-        { label: "Statut", dataKey: "badge", width: 200 },
-        { label: "", dataKey: "icon", width: 10 },
-      ]
-    : [
-        { label: "Apprenant", dataKey: "name", width: 400 },
-        { label: "Formation", dataKey: "formation", width: 350 },
-        { label: "", dataKey: "icon", width: 10 },
-      ];
+  function getColumns(listType: API_EFFECTIF_LISTE): ColumnData[] {
+    switch (listType) {
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return [
+          { label: "Apprenant", dataKey: "name", width: 400 },
+          { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "", dataKey: "icon", width: 10 },
+        ];
+
+      case API_EFFECTIF_LISTE.TRAITE:
+        return [
+          { label: "Apprenant", dataKey: "name", width: 200 },
+          { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "", dataKey: "icon", width: 10 },
+        ];
+
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return [
+          { label: "Apprenant", dataKey: "name", width: 200 },
+          { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "", dataKey: "icon", width: 10 },
+        ];
+
+      default:
+        return [];
+    }
+  }
+
+  const columns: ColumnData[] = getColumns(listType);
 
   const dataRows = monthItem.data.map((effectif) => ({
     rawData: effectif,
-    element: buildRowData(effectif, isTraite),
+    element: buildRowData(effectif, listType),
   }));
 
   return (
@@ -131,7 +180,7 @@ export const MonthTable = memo(function MonthTable({
             "organisme_enseigne",
           ]}
           itemsPerPage={7}
-          getRowLink={(rowData) => `/mission-locale/${rowData.id}`}
+          getRowLink={(rowData) => `/mission-locale/${rowData.id}?nom_liste=${listType}`}
           emptyMessage="Aucun élément à afficher"
         />
       )}
