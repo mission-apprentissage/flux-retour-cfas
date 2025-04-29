@@ -6,31 +6,11 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useState } from "react";
-import { IUpdateMissionLocaleEffectif, SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
+import { SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
-export function FeedbackForm({
-  formData,
-  setFormData,
-  isFormValid,
-  onSave,
-  isSaving,
-  isInjoignable,
-  hasSuccess,
-  hasError,
-}: {
-  formData: IUpdateMissionLocaleEffectif;
-  setFormData: (data: IUpdateMissionLocaleEffectif) => void;
-  isFormValid: boolean;
-  onSave: (saveNext: boolean) => void;
-  isSaving: boolean;
-  isInjoignable: boolean;
-  hasSuccess: boolean;
-  hasError: boolean;
-}) {
-  const [didChangeSituation, setDidChangeSituation] = useState(false);
-
+export function FeedbackForm({ formData, setFormData, isFormValid, onSave, isSaving, hasSuccess, hasError }) {
   return (
     <>
       <Box p={3} sx={{ border: "1px solid var(--border-default-blue-france)" }}>
@@ -43,13 +23,11 @@ export function FeedbackForm({
               nativeInputProps: {
                 value: SITUATION_ENUM.RDV_PRIS,
                 checked: formData.situation === SITUATION_ENUM.RDV_PRIS,
-                onChange: () => {
-                  setFormData({
-                    ...formData,
+                onChange: () =>
+                  setFormData((prev) => ({
+                    ...prev,
                     situation: SITUATION_ENUM.RDV_PRIS,
-                  });
-                  setDidChangeSituation(true);
-                },
+                  })),
               },
             },
             {
@@ -57,45 +35,35 @@ export function FeedbackForm({
               nativeInputProps: {
                 value: SITUATION_ENUM.PAS_BESOIN_SUIVI,
                 checked: formData.situation === SITUATION_ENUM.PAS_BESOIN_SUIVI,
-                onChange: () => {
-                  setFormData({
-                    ...formData,
+                onChange: () =>
+                  setFormData((prev) => ({
+                    ...prev,
                     situation: SITUATION_ENUM.PAS_BESOIN_SUIVI,
-                  });
-                  setDidChangeSituation(true);
-                },
+                  })),
               },
             },
-            ...(isInjoignable
-              ? []
-              : [
-                  {
-                    label: SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
-                    nativeInputProps: {
-                      value: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-                      checked: formData.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-                      onChange: () => {
-                        setFormData({
-                          ...formData,
-                          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-                        });
-                        setDidChangeSituation(true);
-                      },
-                    },
-                  },
-                ]),
+            {
+              label: SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
+              nativeInputProps: {
+                value: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+                checked: formData.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+                onChange: () =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+                  })),
+              },
+            },
             {
               label: SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT,
               nativeInputProps: {
                 value: SITUATION_ENUM.COORDONNEES_INCORRECT,
                 checked: formData.situation === SITUATION_ENUM.COORDONNEES_INCORRECT,
-                onChange: () => {
-                  setFormData({
-                    ...formData,
+                onChange: () =>
+                  setFormData((prev) => ({
+                    ...prev,
                     situation: SITUATION_ENUM.COORDONNEES_INCORRECT,
-                  });
-                  setDidChangeSituation(true);
-                },
+                  })),
               },
             },
             {
@@ -103,13 +71,11 @@ export function FeedbackForm({
               nativeInputProps: {
                 value: SITUATION_ENUM.AUTRE,
                 checked: formData.situation === SITUATION_ENUM.AUTRE,
-                onChange: () => {
-                  setFormData({
-                    ...formData,
+                onChange: () =>
+                  setFormData((prev) => ({
+                    ...prev,
                     situation: SITUATION_ENUM.AUTRE,
-                  });
-                  setDidChangeSituation(true);
-                },
+                  })),
               },
             },
           ]}
@@ -120,10 +86,10 @@ export function FeedbackForm({
             nativeInputProps={{
               value: formData.situation_autre,
               onChange: (e) =>
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   situation_autre: e.target.value,
-                }),
+                })),
             }}
             style={{ marginBottom: fr.spacing("4w") }}
           />
@@ -138,10 +104,10 @@ export function FeedbackForm({
                 value: "oui",
                 checked: formData.deja_connu === true,
                 onChange: () =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     deja_connu: true,
-                  }),
+                  })),
               },
             },
             {
@@ -150,10 +116,10 @@ export function FeedbackForm({
                 value: "non",
                 checked: formData.deja_connu === false,
                 onChange: () =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     deja_connu: false,
-                  }),
+                  })),
               },
             },
           ]}
@@ -165,12 +131,11 @@ export function FeedbackForm({
             rows: 3,
             value: formData.commentaires,
             onChange: (e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 commentaires: e.target.value,
-              }),
+              })),
           }}
-          style={{ fontWeight: "bold" }}
         />
       </Box>
       {hasError && (
@@ -178,33 +143,12 @@ export function FeedbackForm({
           Une erreur est survenue. Veuillez réessayer.
         </Typography>
       )}
-      <FormActions
-        isFormValid={isFormValid}
-        onSave={onSave}
-        isSaving={isSaving}
-        hasSuccess={hasSuccess}
-        didChangeSituation={didChangeSituation}
-        isInjoignable={isInjoignable}
-      />
+      <FormActions isFormValid={isFormValid} onSave={onSave} isSaving={isSaving} hasSuccess={hasSuccess} />
     </>
   );
 }
 
-function FormActions({
-  isFormValid,
-  onSave,
-  isSaving,
-  hasSuccess,
-  didChangeSituation,
-  isInjoignable,
-}: {
-  isFormValid: boolean;
-  onSave: (saveNext: boolean) => void;
-  isSaving: boolean;
-  hasSuccess: boolean;
-  didChangeSituation: boolean;
-  isInjoignable: boolean;
-}) {
+function FormActions({ isFormValid, onSave, isSaving, hasSuccess }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
@@ -214,8 +158,6 @@ function FormActions({
     onSave(saveNext);
   };
 
-  const disabled = !isFormValid || isSaving || hasSuccess || (isInjoignable && !didChangeSituation);
-
   return (
     <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
       <SaveButton
@@ -223,7 +165,7 @@ function FormActions({
         selectedButton={selectedButton}
         isSaving={isSaving}
         hasSuccess={hasSuccess}
-        disabled={disabled}
+        disabled={!isFormValid || isSaving || hasSuccess}
         onClick={() => handleClick("saveAndQuit", false)}
       >
         Valider et quitter
@@ -233,7 +175,7 @@ function FormActions({
         selectedButton={selectedButton}
         isSaving={isSaving}
         hasSuccess={hasSuccess}
-        disabled={disabled}
+        disabled={!isFormValid || isSaving || hasSuccess}
         onClick={() => handleClick("saveAndNext", true)}
       >
         Valider et passer au suivant
@@ -242,25 +184,10 @@ function FormActions({
   );
 }
 
-function SaveButton({
-  type,
-  selectedButton,
-  isSaving,
-  hasSuccess,
-  disabled,
-  onClick,
-  children,
-}: {
-  type: "saveAndQuit" | "saveAndNext";
-  selectedButton: "saveAndQuit" | "saveAndNext" | null;
-  isSaving: boolean;
-  hasSuccess: boolean;
-  disabled: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+function SaveButton({ type, selectedButton, isSaving, hasSuccess, disabled, onClick, children }) {
   const showLoader = selectedButton === type && (isSaving || hasSuccess);
   const priority = type === "saveAndQuit" ? "secondary" : "primary";
+
   const buttonStyle =
     hasSuccess && selectedButton === type ? { background: "var(--background-flat-success)", color: "#fff" } : undefined;
 
@@ -271,15 +198,7 @@ function SaveButton({
   );
 }
 
-function renderButtonContent({
-  isSaving,
-  hasSuccess,
-  defaultLabel,
-}: {
-  isSaving: boolean;
-  hasSuccess: boolean;
-  defaultLabel: React.ReactNode;
-}) {
+function renderButtonContent({ isSaving, hasSuccess, defaultLabel }) {
   if (isSaving) {
     return (
       <>
