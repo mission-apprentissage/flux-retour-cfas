@@ -16,7 +16,7 @@ export function FeedbackForm({
   isFormValid,
   onSave,
   isSaving,
-  isNotJoignable,
+  isInjoignable,
   hasSuccess,
   hasError,
 }: {
@@ -25,7 +25,7 @@ export function FeedbackForm({
   isFormValid: boolean;
   onSave: (saveNext: boolean) => void;
   isSaving: boolean;
-  isNotJoignable: boolean;
+  isInjoignable: boolean;
   hasSuccess: boolean;
   hasError: boolean;
 }) {
@@ -66,7 +66,7 @@ export function FeedbackForm({
                 },
               },
             },
-            ...(isNotJoignable
+            ...(isInjoignable
               ? []
               : [
                   {
@@ -184,7 +184,7 @@ export function FeedbackForm({
         isSaving={isSaving}
         hasSuccess={hasSuccess}
         didChangeSituation={didChangeSituation}
-        isNotJoignable={isNotJoignable}
+        isInjoignable={isInjoignable}
       />
     </>
   );
@@ -196,14 +196,14 @@ function FormActions({
   isSaving,
   hasSuccess,
   didChangeSituation,
-  isNotJoignable,
+  isInjoignable,
 }: {
   isFormValid: boolean;
   onSave: (saveNext: boolean) => void;
   isSaving: boolean;
   hasSuccess: boolean;
   didChangeSituation: boolean;
-  isNotJoignable: boolean;
+  isInjoignable: boolean;
 }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -214,7 +214,7 @@ function FormActions({
     onSave(saveNext);
   };
 
-  const disabled = !isFormValid || isSaving || hasSuccess || (isNotJoignable && !didChangeSituation);
+  const disabled = !isFormValid || isSaving || hasSuccess || (isInjoignable && !didChangeSituation);
 
   return (
     <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
