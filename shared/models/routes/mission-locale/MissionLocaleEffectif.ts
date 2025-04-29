@@ -37,6 +37,7 @@ const zEffectifMissionLocale = z
     a_traiter: z.boolean(),
     transmitted_at: z.date().nullish(),
     prioritaire: z.boolean().nullish(),
+    injoignable: z.boolean().nullish(),
     autorisation_contact: z.boolean().nullish(),
     dernier_statut: z
       .object({

@@ -19,12 +19,11 @@ export function EffectifInfo({
   nomListe: IMissionLocaleEffectifList;
 }) {
   const [infosOpen, setInfosOpen] = useState(false);
+  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
   const computeTransmissionDate = (date) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
-
-  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
   return (
     <Stack
@@ -41,7 +40,9 @@ export function EffectifInfo({
         }}
       >
         <Stack direction="row" spacing={1} mb={2} alignItems="center">
-          {effectif.a_traiter && effectif.prioritaire ? (
+          {effectif.injoignable ? (
+            <Badge severity="info">Injoignable</Badge>
+          ) : effectif.a_traiter && effectif.prioritaire ? (
             <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
               <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
             </p>
@@ -50,6 +51,7 @@ export function EffectifInfo({
           ) : (
             <Badge severity="success">traité</Badge>
           )}
+
           <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.dernier_statut?.date)}</p>
         </Stack>
 

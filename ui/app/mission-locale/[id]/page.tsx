@@ -87,7 +87,18 @@ function EffectifContent({
   const SUCCESS_DISPLAY_TIME = 600;
   const router = useRouter();
   const { effectif, next } = effectifPayload || {};
-  const { a_traiter } = effectif || {};
+  const { a_traiter, injoignable } = effectif || {};
+
+  useEffect(() => {
+    if (effectif) {
+      setFormData({
+        situation: effectif.situation?.situation || ("" as unknown as SITUATION_ENUM),
+        situation_autre: effectif.situation?.situation_autre || "",
+        deja_connu: typeof effectif.situation?.deja_connu === "boolean" ? effectif.situation.deja_connu : null,
+        commentaires: effectif.situation?.commentaires || "",
+      });
+    }
+  }, [effectif, setFormData]);
 
   if (!effectif) {
     return <Typography sx={{ marginTop: 2 }}>Aucune donnée à afficher.</Typography>;
@@ -149,7 +160,7 @@ function EffectifContent({
   return (
     <>
       <EffectifInfo effectif={effectif} nomListe={nomListeParam} />
-      {a_traiter && (
+      {(a_traiter || injoignable) && (
         <FeedbackForm
           formData={formData}
           setFormData={setFormData}
