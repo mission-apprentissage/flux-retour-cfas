@@ -41,14 +41,12 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
-    "effectif_snapshot._id": new ObjectId(effectifId),
+    effectif_id: new ObjectId(effectifId),
+    mission_locale_id: new ObjectId(missionLocale._id),
   });
 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
-  }
-  if (effectif.mission_locale_id.toString() !== missionLocale._id.toString()) {
-    throw Boom.forbidden("Accès non autorisé");
   }
   return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
 };
