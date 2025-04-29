@@ -41,7 +41,7 @@ export function EffectifInfo({
       >
         <Stack direction="row" spacing={1} mb={2} alignItems="center">
           {effectif.injoignable ? (
-            <Badge severity="info">Injoignable</Badge>
+            <Badge severity="info">Contacté sans réponse</Badge>
           ) : effectif.a_traiter && effectif.prioritaire ? (
             <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
               <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
@@ -99,7 +99,7 @@ export function EffectifInfo({
         )}
       </Stack>
 
-      {effectif.situation && Object.keys(effectif.situation).length > 0 && <Feedback situation={effectif.situation} />}
+      {!effectif.a_traiter && !effectif.injoignable && <Feedback situation={effectif.situation || {}} />}
       <PersonalInfoSection effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
     </Stack>
   );

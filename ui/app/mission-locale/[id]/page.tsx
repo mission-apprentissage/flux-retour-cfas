@@ -167,6 +167,7 @@ function EffectifContent({
           isFormValid={isFormValid}
           onSave={handleSave}
           isSaving={isSaving}
+          isNotJoignable={nomListeParam === API_EFFECTIF_LISTE.INJOIGNABLE}
           hasSuccess={hasSuccess}
           hasError={hasError}
         />
