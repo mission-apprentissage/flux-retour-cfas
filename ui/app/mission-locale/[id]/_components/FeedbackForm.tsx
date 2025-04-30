@@ -53,14 +53,30 @@ export function FeedbackForm({
               },
             },
             {
-              label: SITUATION_LABEL_ENUM.PAS_BESOIN_SUIVI,
+              label: SITUATION_LABEL_ENUM.NOUVEAU_PROJET,
+              hintText: "Ex : en contrat d’apprentissage, CDD, CDI, en formation initiale",
               nativeInputProps: {
-                value: SITUATION_ENUM.PAS_BESOIN_SUIVI,
-                checked: formData.situation === SITUATION_ENUM.PAS_BESOIN_SUIVI,
+                value: SITUATION_ENUM.NOUVEAU_PROJET,
+                checked: formData.situation === SITUATION_ENUM.NOUVEAU_PROJET,
                 onChange: () => {
                   setFormData({
                     ...formData,
-                    situation: SITUATION_ENUM.PAS_BESOIN_SUIVI,
+                    situation: SITUATION_ENUM.NOUVEAU_PROJET,
+                  });
+                  setDidChangeSituation(true);
+                },
+              },
+            },
+            {
+              label: SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE,
+              hintText: "Ex : Contrat d’engagement jeune (CEJ)",
+              nativeInputProps: {
+                value: SITUATION_ENUM.DEJA_ACCOMPAGNE,
+                checked: formData.situation === SITUATION_ENUM.DEJA_ACCOMPAGNE,
+                onChange: () => {
+                  setFormData({
+                    ...formData,
+                    situation: SITUATION_ENUM.DEJA_ACCOMPAGNE,
                   });
                   setDidChangeSituation(true);
                 },
