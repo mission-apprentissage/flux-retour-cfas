@@ -82,20 +82,6 @@ export function FeedbackForm({
                 },
               },
             },
-            // {
-            //   label: SITUATION_LABEL_ENUM.PAS_BESOIN_SUIVI,
-            //   nativeInputProps: {
-            //     value: SITUATION_ENUM.PAS_BESOIN_SUIVI,
-            //     checked: formData.situation === SITUATION_ENUM.PAS_BESOIN_SUIVI,
-            //     onChange: () => {
-            //       setFormData({
-            //         ...formData,
-            //         situation: SITUATION_ENUM.PAS_BESOIN_SUIVI,
-            //       });
-            //       setDidChangeSituation(true);
-            //     },
-            //   },
-            // },
             ...(isInjoignable
               ? []
               : [
