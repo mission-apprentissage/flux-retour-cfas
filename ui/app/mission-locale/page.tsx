@@ -5,6 +5,7 @@ import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useCallback } from "react";
+import { API_EFFECTIF_LISTE } from "shared";
 
 import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -16,19 +17,6 @@ import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
 import { EffectifPriorityData, MonthItem, MonthsData, SelectedSection } from "./_components/types";
 import { anchorFromLabel, formatMonthAndYear, getTotalEffectifs, sortDataByMonthDescending } from "./_components/utils";
-
-function EffectifsDataLoader({ children }: { children: (data: MonthsData) => React.ReactNode }) {
-  const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month"],
-    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
-    {
-      keepPreviousData: true,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
-  return <>{children(data || { prioritaire: [], a_traiter: [], traite: [] })}</>;
-}
 
 function groupMonthsOlderThanSixMonths(items: MonthItem[]): MonthItem[] {
   const now = new Date();
@@ -56,19 +44,53 @@ function groupMonthsOlderThanSixMonths(items: MonthItem[]): MonthItem[] {
   return result;
 }
 
+function EffectifsDataLoader({ children }: { children: (data: MonthsData) => React.ReactNode }) {
+  const { data } = useQuery<MonthsData>(
+    ["effectifs-per-month"],
+    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
+    {
+      keepPreviousData: true,
+      suspense: true,
+      useErrorBoundary: true,
+    }
+  );
+  return <>{children(data || { a_traiter: [], traite: [], prioritaire: [], injoignable: [] })}</>;
+}
+
+export default function Page() {
+  return (
+    <div className="fr-container">
+      <MLHeader />
+      <SuspenseWrapper
+        fallback={<PageWithSidebarSkeleton />}
+        errorFallback={
+          <div className="fr-alert fr-alert--error">
+            <p>Impossible de charger les données. Veuillez réessayer plus tard.</p>
+          </div>
+        }
+      >
+        <EffectifsDataLoader>{(data) => <MissionLocaleContent data={data} />}</EffectifsDataLoader>
+      </SuspenseWrapper>
+    </div>
+  );
+}
+
 function MissionLocaleContent({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
 
   const aTraiter = data?.a_traiter || [];
+  const injoignableList = data?.injoignable || [];
   const dejaTraite = data?.traite || [];
 
   const groupedDataATraiter = useMemo(() => groupMonthsOlderThanSixMonths(aTraiter), [aTraiter]);
+  const groupedInjoignable = useMemo(() => sortDataByMonthDescending(injoignableList), [injoignableList]);
   const sortedDataTraite = useMemo(() => sortDataByMonthDescending(dejaTraite), [dejaTraite]);
 
   const totalToTreat = useMemo(() => getTotalEffectifs(groupedDataATraiter), [groupedDataATraiter]);
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
+  const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
 
   useMemo(() => {
     if (!activeAnchor) {
@@ -81,9 +103,15 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
       } else if (selectedSection === "deja-traite" && sortedDataTraite.length > 0) {
         const label = formatMonthAndYear(sortedDataTraite[0].month);
         setActiveAnchor(anchorFromLabel(label));
+      } else if (selectedSection === "injoignable" && groupedInjoignable.length > 0) {
+        const label =
+          groupedInjoignable[0].month === "plus-de-6-mois"
+            ? "+ de 6 mois"
+            : formatMonthAndYear(groupedInjoignable[0].month);
+        setActiveAnchor(anchorFromLabel(label));
       }
     }
-  }, [groupedDataATraiter, sortedDataTraite, selectedSection, activeAnchor]);
+  }, [groupedDataATraiter, sortedDataTraite, groupedInjoignable, selectedSection, activeAnchor]);
 
   const handleSectionChange = useCallback((newSection: SelectedSection) => {
     setSelectedSection(newSection);
@@ -119,6 +147,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
         };
       });
     };
+
     return [
       {
         text: totalToTreat > 0 ? <strong>{`A traiter (${totalToTreat})`}</strong> : `A traiter (${totalToTreat})`,
@@ -132,6 +161,24 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
         isActive: selectedSection === "a-traiter",
         expandedByDefault: selectedSection === "a-traiter",
         items: getItems(groupedDataATraiter, "a-traiter"),
+      },
+      {
+        text:
+          totalInjoignable > 0 ? (
+            <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
+          ) : (
+            `Contactés sans réponse (${totalInjoignable})`
+          ),
+        linkProps: {
+          href: "#",
+          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            handleSectionChange("injoignable");
+          },
+        },
+        isActive: selectedSection === "injoignable",
+        expandedByDefault: selectedSection === "injoignable",
+        items: getItems(groupedInjoignable, "injoignable"),
       },
       {
         text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
@@ -150,8 +197,10 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
   }, [
     groupedDataATraiter,
     sortedDataTraite,
+    groupedInjoignable,
     totalToTreat,
     totalTraite,
+    totalInjoignable,
     activeAnchor,
     selectedSection,
     handleAnchorClick,
@@ -159,7 +208,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
   ]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container>
       <Grid size={{ xs: 12, md: 3 }}>
         <SideMenu
           align="left"
@@ -204,6 +253,13 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
             }
           />
         )}
+        {selectedSection === "injoignable" && groupedInjoignable.length === 0 && (
+          <MlCard
+            title="Il n'y a pas de nouveaux jeunes à contacter pour le moment"
+            imageSrc="/images/mission-locale-not-treated.svg"
+            imageAlt="Personnes parlant au téléphone"
+          />
+        )}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
@@ -214,6 +270,7 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
               handleSectionChange={handleSectionChange}
+              listType={API_EFFECTIF_LISTE.A_TRAITER}
             />
           </SuspenseWrapper>
         )}
@@ -225,28 +282,23 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
               isTraite={true}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              listType={API_EFFECTIF_LISTE.TRAITE}
+            />
+          </SuspenseWrapper>
+        )}
+        {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
+          <SuspenseWrapper fallback={<TableSkeleton />}>
+            <SearchableTableSection
+              title="Contactés sans réponse"
+              data={groupedInjoignable}
+              isTraite={false}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              listType={API_EFFECTIF_LISTE.INJOIGNABLE}
             />
           </SuspenseWrapper>
         )}
       </Grid>
     </Grid>
-  );
-}
-
-export default function Page() {
-  return (
-    <div className="fr-container">
-      <MLHeader />
-      <SuspenseWrapper
-        fallback={<PageWithSidebarSkeleton />}
-        errorFallback={
-          <div className="fr-alert fr-alert--error">
-            <p>Impossible de charger les données. Veuillez réessayer plus tard.</p>
-          </div>
-        }
-      >
-        <EffectifsDataLoader>{(data) => <MissionLocaleContent data={data} />}</EffectifsDataLoader>
-      </SuspenseWrapper>
-    </div>
   );
 }

@@ -48,6 +48,10 @@ export function PageHeader({
                 <Typography fontWeight="bold">
                   Dossier n°{currentIndex + 1} sur {total} à traiter en priorité
                 </Typography>
+              ) : nomListe === API_EFFECTIF_LISTE.INJOIGNABLE ? (
+                <Typography fontWeight="bold">
+                  Dossier n°{currentIndex + 1} sur {total} injoignable
+                </Typography>
               ) : (
                 <>
                   <Typography fontWeight="bold">

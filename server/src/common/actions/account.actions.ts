@@ -23,20 +23,27 @@ export async function register(registration: RegistrationSchema): Promise<{
     throw Boom.conflict("Cet email est déjà utilisé.");
   }
 
+  const orga = registration.organisation;
+
+  if (orga.type === "MISSION_LOCALE") {
+    delete orga.adresse; // Dirty fix, suppression de l'adresse autrement le findOne ne fonctionne pas. A corriger.
+  }
+
   // on s'assure que l'organisme existe pour un OF
-  const type = registration.organisation.type;
+  const type = orga.type;
   if (type === "ORGANISME_FORMATION") {
-    const { uai, siret } = registration.organisation;
+    const { uai, siret } = orga;
     const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
     if (!organisme) {
       throw Boom.badRequest("Aucun organisme trouvé");
     }
   }
-  const organisation = await organisationsDb().findOne(registration.organisation);
+
+  const organisation = await organisationsDb().findOne(orga);
   const organisationId = organisation
     ? organisation._id
     : await createOrganisation({
-        ...registration.organisation,
+        ...orga,
         ...registrationExtraData,
       });
 

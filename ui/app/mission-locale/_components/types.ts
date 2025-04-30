@@ -22,10 +22,11 @@ export type MonthItem = {
   treated_count?: number;
 };
 
-export type SelectedSection = "a-traiter" | "deja-traite";
+export type SelectedSection = "a-traiter" | "deja-traite" | "injoignable";
 
 export type MonthsData = {
   a_traiter: MonthItem[];
   prioritaire: EffectifData[];
   traite: MonthItem[];
+  injoignable: MonthItem[];
 };

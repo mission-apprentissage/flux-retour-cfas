@@ -4,8 +4,15 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { useEffect, useState } from "react";
+import {
+  API_EFFECTIF_LISTE,
+  IEffecifMissionLocale,
+  IMissionLocaleEffectifList,
+  IUpdateMissionLocaleEffectif,
+  SITUATION_ENUM,
+  zApiEffectifListeEnum,
+} from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -29,10 +36,9 @@ function EffectifDataLoader({
     ["effectif", id, nomListe],
     async () => {
       if (!id) return null;
-
       return await _get<IEffecifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
         params: {
-          nom_liste: nomListe || undefined,
+          nom_liste: nomListe || API_EFFECTIF_LISTE.A_TRAITER,
         },
       });
     },
@@ -66,41 +72,41 @@ function EffectifContent({
   effectifPayload,
   formData,
   setFormData,
-  isSaving,
-  setIsSaving,
-  hasError,
-  setHasError,
-  hasSuccess,
-  setHasSuccess,
-  isListPrioritaire,
+  saveStatus,
+  setSaveStatus,
+  nomListeParam,
 }: {
   effectifPayload: IEffecifMissionLocale;
   formData: IUpdateMissionLocaleEffectif;
   setFormData: (data: IUpdateMissionLocaleEffectif) => void;
-  isSaving: boolean;
-  setIsSaving: (val: boolean) => void;
-  hasError: boolean;
-  setHasError: (val: boolean) => void;
-  hasSuccess: boolean;
-  setHasSuccess: (val: boolean) => void;
-  isListPrioritaire: boolean;
+  saveStatus: "idle" | "loading" | "success" | "error";
+  setSaveStatus: (val: "idle" | "loading" | "success" | "error") => void;
+  nomListeParam: IMissionLocaleEffectifList;
 }) {
   const MIN_LOADING_TIME = 1500;
   const SUCCESS_DISPLAY_TIME = 600;
   const router = useRouter();
   const { effectif, next } = effectifPayload || {};
-  const { a_traiter } = effectif || {};
+  const { a_traiter, injoignable } = effectif || {};
+
+  useEffect(() => {
+    if (effectif) {
+      setFormData({
+        situation: effectif.situation?.situation || ("" as unknown as SITUATION_ENUM),
+        situation_autre: effectif.situation?.situation_autre || "",
+        deja_connu: typeof effectif.situation?.deja_connu === "boolean" ? effectif.situation.deja_connu : null,
+        commentaires: effectif.situation?.commentaires || "",
+      });
+    }
+  }, [effectif, setFormData]);
 
   if (!effectif) {
     return <Typography sx={{ marginTop: 2 }}>Aucune donnée à afficher.</Typography>;
   }
 
   async function handleSave(goNext: boolean) {
-    setIsSaving(true);
-    setHasError(false);
-    setHasSuccess(false);
+    setSaveStatus("loading");
     const startTime = Date.now();
-
     let success = false;
     try {
       await _post(`/api/v1/organisation/mission-locale/effectif/${effectif.id}`, {
@@ -111,12 +117,10 @@ function EffectifContent({
       });
       success = true;
     } catch (e) {
-      console.error("Error while saving data:", e);
-      setHasError(true);
+      success = false;
     } finally {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = MIN_LOADING_TIME - elapsedTime;
-
       if (remainingTime > 0) {
         setTimeout(() => handleResult(success, goNext), remainingTime);
       } else {
@@ -126,18 +130,19 @@ function EffectifContent({
   }
 
   function handleResult(success: boolean, goNext: boolean) {
-    setIsSaving(false);
-
-    if (!success) return;
-
-    setHasSuccess(true);
-
+    if (!success) {
+      setSaveStatus("error");
+      return;
+    }
+    setSaveStatus("success");
     setTimeout(() => {
       if (goNext && next) {
-        const nextUrl = `/mission-locale/${next.id}${isListPrioritaire ? `?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}` : ""}`;
-        router.push(nextUrl);
+        router.push(`/mission-locale/${next.id}?nom_liste=${nomListeParam}`);
       } else {
-        const fallbackUrl = isListPrioritaire ? "/mission-locale/validation/prioritaire" : "/mission-locale/validation";
+        const fallbackUrl =
+          nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE
+            ? "/mission-locale/validation/prioritaire"
+            : "/mission-locale/validation";
         router.push(fallbackUrl);
       }
     }, SUCCESS_DISPLAY_TIME);
@@ -148,16 +153,21 @@ function EffectifContent({
     (formData.situation !== SITUATION_ENUM.AUTRE || (formData.situation_autre?.trim() || "") !== "") &&
     formData.deja_connu !== null;
 
+  const isSaving = saveStatus === "loading";
+  const hasError = saveStatus === "error";
+  const hasSuccess = saveStatus === "success";
+
   return (
     <>
-      <EffectifInfo effectif={effectif} />
-      {a_traiter && (
+      <EffectifInfo effectif={effectif} nomListe={nomListeParam} />
+      {(a_traiter || injoignable) && (
         <FeedbackForm
           formData={formData}
           setFormData={setFormData}
           isFormValid={isFormValid}
           onSave={handleSave}
           isSaving={isSaving}
+          isInjoignable={nomListeParam === API_EFFECTIF_LISTE.INJOIGNABLE}
           hasSuccess={hasSuccess}
           hasError={hasError}
         />
@@ -167,8 +177,10 @@ function EffectifContent({
 }
 
 export default function Page() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const nomListeParam = searchParams?.get("nom_liste");
+  const nomListeParam = searchParams?.get("nom_liste") ?? "";
+  const parsed = zApiEffectifListeEnum.safeParse(nomListeParam);
 
   const [formData, setFormData] = useState<IUpdateMissionLocaleEffectif>({
     situation: "" as unknown as SITUATION_ENUM,
@@ -176,11 +188,21 @@ export default function Page() {
     commentaires: "",
     deja_connu: null,
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [hasSuccess, setHasSuccess] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const params = useParams();
   const id = params?.id as string;
+
+  useEffect(() => {
+    if (!parsed.success) {
+      router.push("/mission-locale");
+    }
+  }, [parsed, router]);
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  const validatedNomListe: IMissionLocaleEffectifList = parsed.data;
 
   return (
     <Grid container>
@@ -207,21 +229,17 @@ export default function Page() {
         }}
       >
         <SuspenseWrapper fallback={<RightColumnSkeleton />}>
-          <EffectifDataLoader id={id} nomListe={nomListeParam || ""}>
+          <EffectifDataLoader id={id} nomListe={validatedNomListe}>
             {(effectifPayload) => (
               <>
-                <EffectifHeader effectifPayload={effectifPayload} nomListe={nomListeParam || ""} />
+                <EffectifHeader effectifPayload={effectifPayload} nomListe={validatedNomListe} />
                 <EffectifContent
                   effectifPayload={effectifPayload}
                   formData={formData}
                   setFormData={setFormData}
-                  isSaving={isSaving}
-                  setIsSaving={setIsSaving}
-                  hasError={hasError}
-                  setHasError={setHasError}
-                  hasSuccess={hasSuccess}
-                  setHasSuccess={setHasSuccess}
-                  isListPrioritaire={nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE}
+                  saveStatus={saveStatus}
+                  setSaveStatus={setSaveStatus}
+                  nomListeParam={validatedNomListe}
                 />
               </>
             )}
