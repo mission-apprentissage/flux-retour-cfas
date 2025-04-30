@@ -14240,6 +14240,17 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "created_at": {
       "bsonType": "date",
     },
+    "created_by": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
+    },
     "deja_connu": {
       "bsonType": [
         "bool",

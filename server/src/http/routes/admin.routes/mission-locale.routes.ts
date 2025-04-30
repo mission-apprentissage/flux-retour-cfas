@@ -1,7 +1,8 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { IMissionLocaleEffectif, updateMissionLocaleEffectifApi } from "shared/models";
+import { IUpdateMissionLocaleEffectif, updateMissionLocaleEffectifApi } from "shared/models";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 
 import {
@@ -11,7 +12,6 @@ import {
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -29,14 +29,27 @@ export default () => {
   );
 
   router.put(
-    "/:id",
+    "/effectif",
     validateRequestMiddleware({
-      body: z.object(updateMissionLocaleEffectifApi),
+      body: z.object({
+        ...updateMissionLocaleEffectifApi,
+        mission_locale_id: extensions.objectIdString(),
+        effectif_id: extensions.objectIdString(),
+      }),
     }),
     returnResult(updateMissionLocaleEffectif)
   );
 
-  router.post("/:id/reset", returnResult(resetMissionLocaleEffectif));
+  router.post(
+    "/effectif/reset",
+    validateRequestMiddleware({
+      body: z.object({
+        mission_locale_id: extensions.objectIdString(),
+        effectif_id: extensions.objectIdString(),
+      }),
+    }),
+    returnResult(resetMissionLocaleEffectif)
+  );
   return router;
 };
 
@@ -57,30 +70,18 @@ const getAllMls = async () => {
     .filter((ml) => ml.externalML);
 };
 
-const updateMissionLocaleEffectif = async ({ params, body }) => {
-  const effectifId = params.id;
-
-  const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
-    "effectif_snapshot._id": new ObjectId(effectifId),
-  });
-
-  if (!effectif) {
-    throw Boom.notFound("Effectif introuvable");
-  }
-
-  return await setEffectifMissionLocaleDataAdmin(effectifId, body);
+const updateMissionLocaleEffectif = async (req) => {
+  const { mission_locale_id, effectif_id, ...rest } = req.body;
+  return await setEffectifMissionLocaleDataAdmin(
+    new ObjectId(mission_locale_id),
+    new ObjectId(effectif_id),
+    rest as IUpdateMissionLocaleEffectif,
+    req.user
+  );
 };
 
-const resetMissionLocaleEffectif = async ({ params }) => {
-  const effectifId = params.id;
+const resetMissionLocaleEffectif = async (req) => {
+  const { mission_locale_id, effectif_id } = req.body;
 
-  const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
-    "effectif_snapshot._id": new ObjectId(effectifId),
-  });
-
-  if (!effectif) {
-    throw Boom.notFound("Effectif introuvable");
-  }
-
-  resetEffectifMissionLocaleDataAdmin(effectifId);
+  return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
 };

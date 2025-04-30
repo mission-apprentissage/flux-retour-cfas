@@ -3,6 +3,7 @@ import { ObjectId } from "bson";
 import { IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 
@@ -33,12 +34,21 @@ export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMi
   return mls as Array<IOrganisationMissionLocale>;
 };
 
-export const setEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId, data: IUpdateMissionLocaleEffectif) => {
+export const setEffectifMissionLocaleDataAdmin = async (
+  missionLocaleId: ObjectId,
+  effectifId: ObjectId,
+  data: IUpdateMissionLocaleEffectif,
+  user: AuthContext
+) => {
   const { situation, situation_autre, commentaires, deja_connu } = data;
 
-  const mlEff = await missionLocaleEffectifsDb().findOne({ effectif_id: new ObjectId(effectifId) });
+  const mlEff = await missionLocaleEffectifsDb().findOne({
+    effectif_id: new ObjectId(effectifId),
+    mission_locale_id: new ObjectId(missionLocaleId),
+  });
+
   if (!mlEff) {
-    throw Boom.notFound();
+    throw Boom.notFound("Effectif introuvable");
   }
 
   const setObject = {
@@ -48,16 +58,12 @@ export const setEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId, da
     ...(commentaires !== undefined ? { commentaires } : {}),
   };
 
-  await createEffectifMissionLocaleLog(mlEff?._id, {
-    situation,
-    situation_autre,
-    commentaires,
-    deja_connu,
-  });
+  await createEffectifMissionLocaleLog(mlEff?._id, setObject, user);
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       effectif_id: new ObjectId(effectifId),
+      mission_locale_id: new ObjectId(missionLocaleId),
     },
     {
       $set: {
@@ -71,22 +77,35 @@ export const setEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId, da
   return updated;
 };
 
-export const resetEffectifMissionLocaleDataAdmin = async (effectifId: ObjectId) => {
-  const mlEff = await missionLocaleEffectifsDb().findOne({ effectif_id: new ObjectId(effectifId) });
+export const resetEffectifMissionLocaleDataAdmin = async (
+  missionLocaleId: ObjectId,
+  effectifId: ObjectId,
+  user: AuthContext
+) => {
+  const mlEff = await missionLocaleEffectifsDb().findOne({
+    effectif_id: new ObjectId(effectifId),
+    mission_locale_id: new ObjectId(missionLocaleId),
+  });
+
   if (!mlEff) {
-    throw Boom.notFound();
+    throw Boom.notFound("Effectif introuvable");
   }
 
-  await createEffectifMissionLocaleLog(mlEff?._id, {
-    situation: undefined,
-    situation_autre: undefined,
-    commentaires: undefined,
-    deja_connu: undefined,
-  });
+  await createEffectifMissionLocaleLog(
+    mlEff?._id,
+    {
+      situation: undefined,
+      situation_autre: undefined,
+      commentaires: undefined,
+      deja_connu: undefined,
+    },
+    user
+  );
 
   await missionLocaleEffectifsDb().updateOne(
     {
       effectif_id: new ObjectId(effectifId),
+      mission_locale_id: new ObjectId(missionLocaleId),
     },
     {
       $set: {

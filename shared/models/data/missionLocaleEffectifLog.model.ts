@@ -15,6 +15,7 @@ const zMissionLocaleEffectifLog = z.object({
   deja_connu: z.boolean().nullish(),
   commentaires: z.string().nullish(),
   created_at: z.date(),
+  created_by: zObjectId.nullish(),
 });
 
 export type IMissionLocaleEffectifLog = z.output<typeof zMissionLocaleEffectifLog>;
