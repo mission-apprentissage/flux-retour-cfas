@@ -7,7 +7,7 @@ export const effectifsParMoisFiltersMissionLocaleSchema = {
 };
 
 export const effectifMissionLocaleListe = {
-  nom_liste: zApiEffectifListeEnum.optional(),
+  nom_liste: zApiEffectifListeEnum,
 };
 
 export type IEffectifsParMoisFiltersMissionLocaleSchema = z.infer<
