@@ -13,8 +13,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 export enum SITUATION_ENUM {
   RDV_PRIS = "RDV_PRIS",
-  NOUVEAU_PROJET = "NOUVEAU_PROJET",
-  DEJA_ACCOMPAGNE = "DEJA_ACCOMPAGNE",
+  PAS_BESOIN_SUIVI = "PAS_BESOIN_SUIVI",
   CONTACTE_SANS_RETOUR = "CONTACTE_SANS_RETOUR",
   COORDONNEES_INCORRECT = "COORDONNEES_INCORRECT",
   AUTRE = "AUTRE",
@@ -26,8 +25,7 @@ export enum API_SITUATION_ENUM {
 
 export enum SITUATION_LABEL_ENUM {
   RDV_PRIS = "Rendez-vous pris à la Mission Locale",
-  NOUVEAU_PROJET = "Nouveau projet en cours",
-  DEJA_ACCOMPAGNE = "Déjà accompagné par la Mission Locale et/ou un partenaire",
+  PAS_BESOIN_SUIVI = "Pas besoin de suivi",
   CONTACTE_SANS_RETOUR = "Contacté mais sans réponse",
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
   AUTRE = "Autre situation / retour",

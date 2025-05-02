@@ -14185,8 +14185,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "bsonType": "string",
           "enum": [
             "RDV_PRIS",
-            "NOUVEAU_PROJET",
-            "DEJA_ACCOMPAGNE",
+            "PAS_BESOIN_SUIVI",
             "CONTACTE_SANS_RETOUR",
             "COORDONNEES_INCORRECT",
             "AUTRE",
