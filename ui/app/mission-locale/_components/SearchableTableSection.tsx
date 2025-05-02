@@ -2,11 +2,10 @@
 
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
-import { IMissionLocaleEffectifList } from "shared";
 
 import { MonthTable } from "./MonthTable";
 import { PriorityTable } from "./PriorityTable";
-import { EffectifPriorityData, MonthItem, SelectedSection } from "./types";
+import { EffectifPriorityData, MonthItem } from "./types";
 
 type SearchableTableSectionProps = {
   title: string;
@@ -15,8 +14,7 @@ type SearchableTableSectionProps = {
   isTraite: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  handleSectionChange?: (section: SelectedSection) => void;
-  listType: IMissionLocaleEffectifList;
+  handleSectionChange?: (section: "a-traiter" | "deja-traite") => void;
 };
 
 export const SearchableTableSection = memo(function SearchableTableSection({
@@ -27,7 +25,6 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   searchTerm,
   onSearchChange,
   handleSectionChange,
-  listType,
 }: SearchableTableSectionProps) {
   return (
     <div>
@@ -56,9 +53,9 @@ export const SearchableTableSection = memo(function SearchableTableSection({
         <MonthTable
           key={monthItem.month}
           monthItem={monthItem}
+          isTraite={isTraite}
           searchTerm={searchTerm}
           handleSectionChange={handleSectionChange}
-          listType={listType}
         />
       ))}
     </div>
