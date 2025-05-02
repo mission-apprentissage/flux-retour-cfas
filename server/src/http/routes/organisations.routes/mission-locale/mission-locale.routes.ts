@@ -54,7 +54,7 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
 const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+  const [a_traiter, traite, prioritaire] = await Promise.all([
     getEffectifsParMoisByMissionLocaleId(
       missionLocale._id,
       { type: API_TRAITEMENT_TYPE.A_TRAITER },
@@ -66,17 +66,11 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
       missionLocale.activated_at
     ),
     getEffectifARisqueByMissionLocaleId(missionLocale._id),
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocale._id,
-      { type: API_TRAITEMENT_TYPE.INJOIGNABLE },
-      missionLocale.activated_at
-    ),
   ]);
   return {
     a_traiter,
     traite,
     prioritaire,
-    injoignable,
   };
 };
 
@@ -109,8 +103,6 @@ const exportEffectifMissionLocale = async (req, res) => {
           worksheetToDeleteName: "À traiter",
           logsTag: "ml_traite",
         };
-      default:
-        throw new Error(`Unhandled API_TRAITEMENT_TYPE: ${t}`);
     }
   };
 

@@ -11,7 +11,7 @@ export function Feedback({ situation }: { situation: IUpdateMissionLocaleEffecti
         Quel est votre retour sur la prise de contact ?
       </Typography>
       <Stack direction="row" spacing={1} alignItems="center">
-        <Tag>{situation.situation ? SITUATION_LABEL_ENUM[situation.situation] : "Situation inconnue"}</Tag>
+        <Tag>{SITUATION_LABEL_ENUM[situation.situation]}</Tag>
         {situation.situation === "AUTRE" && <Typography variant="body2">({situation.situation_autre})</Typography>}
       </Stack>
 
