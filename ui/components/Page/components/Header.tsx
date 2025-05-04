@@ -6,7 +6,6 @@ import {
   Flex,
   HStack,
   Heading,
-  Image,
   Menu,
   MenuButton,
   MenuDivider,
@@ -14,7 +13,9 @@ import {
   MenuList,
   Tag,
   Text,
+  AspectRatio,
 } from "@chakra-ui/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
@@ -180,9 +181,12 @@ const Header = () => {
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
         <Flex flexDirection={["column", "column", "column", "row"]} alignItems="center" color="grey.800">
-          <Link href="/" p={[4, 0]}>
-            <Image src="/images/marianne.svg" alt="Logo République française" userSelect="none" />
-          </Link>
+          <AspectRatio ratio={162 / 78} w={{ base: "162px" }}>
+            <Link href="/" p={[4, 0]}>
+              <Image src="/images/marianne.svg" alt="Logo République française" fill priority />
+            </Link>
+          </AspectRatio>
+
           <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               {PRODUCT_NAME_TITLE}{" "}

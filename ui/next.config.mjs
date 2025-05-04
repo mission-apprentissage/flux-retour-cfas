@@ -28,6 +28,9 @@ const contentSecurityPolicy = `
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    optimizePackageImports: ["@chakra-ui/react"],
+  },
   transpilePackages: ["shared"],
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
@@ -56,6 +59,15 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*\\.(js|css|png|jpg|jpeg|gif|webp|svg|woff2?)$",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/:path*",
         headers: [
