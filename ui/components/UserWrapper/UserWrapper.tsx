@@ -1,4 +1,4 @@
-import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, createContext, useRef } from "react";
 
@@ -67,57 +67,64 @@ export const AuthenticationContext = createContext<IAuthenticationContext>({} as
 const UserWrapper = ({ children, ssrAuth }) => {
   const [auth, setAuth] = useState(ssrAuth);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(!ssrAuth);
+  // const [isLoading, setIsLoading] = useState(!ssrAuth);
   const { messageMaintenance } = useMaintenanceMessages();
 
   useEffect(() => {
-    (async () => {
-      if (
-        messageMaintenance?.enabled &&
-        router.asPath !== "/en-maintenance" &&
-        router.asPath !== "/auth/connexion" &&
-        auth.organisation.type === "ADMINISTRATEUR"
-      ) {
-        router.push("/en-maintenance");
-      }
-    })();
+    // 1) Si pas de message de maintenance, on arrête tout de suite
+    if (!messageMaintenance?.enabled) return;
+
+    // 2) On ne redirige pas si on est déjà sur la page maintenance ou connexion
+    const skipPaths = ["/en-maintenance", "/auth/connexion"];
+    if (skipPaths.includes(router.asPath)) return;
+
+    // 3) Seuls les admins sont concernés
+    if (auth && auth.organisation.type !== "ADMINISTRATEUR") return;
+
+    // 4) On redirige
+    router.push("/en-maintenance");
   }, [auth, messageMaintenance?.enabled, router]);
 
   useEffect(() => {
-    async function getUser() {
+    // Si on a déjà la session en SSR, on l’applique tout de suite
+    if (ssrAuth) {
+      setAuth(ssrAuth);
+      // setIsLoading(false);
+      return;
+    }
+
+    // Sinon, on la récupère côté client
+    const fetchUser = async () => {
       try {
-        const user = ssrAuth ?? (await _get("/api/v1/session"));
+        const user = await _get("/api/v1/session");
         setAuth(user);
-      } catch (error) {
+      } catch {
         setAuth(null);
+      } finally {
+        // setIsLoading(false);
       }
-      setIsLoading(false);
-    }
-    if (!ssrAuth) {
-      getUser();
-    }
+    };
+
+    fetchUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const onAPIResponseError = (response) => {
-      if (response.status === 401) {
-        //Auto logout user when token is invalid
-        setAuth(null);
-      }
-    };
-    emitter.on("http:error", onAPIResponseError);
-    return () => {
-      emitter.off("http:error", onAPIResponseError);
-    };
-  }, []);
+    const handleHttpError = ({ status }: { status: number }) => status === 401 && setAuth(null);
 
-  if (isLoading) {
-    return (
-      <Flex height="100vh" alignItems="center" justifyContent="center">
-        <Spinner />
-      </Flex>
-    );
-  }
+    emitter.on("http:error", handleHttpError);
+
+    return () => {
+      emitter.off("http:error", handleHttpError);
+    };
+  }, [setAuth]);
+
+  // if (isLoading) {
+  //   return (
+  //     <Flex height="100vh" alignItems="center" justifyContent="center">
+  //       <Spinner />
+  //     </Flex>
+  //   );
+  // }
 
   return (
     <AuthenticationContext.Provider value={{ auth, setAuth }}>
