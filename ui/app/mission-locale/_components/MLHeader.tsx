@@ -4,7 +4,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Stack, Box } from "@mui/material";
 import mime from "mime";
-import { API_TRAITEMENT_TYPE } from "shared";
+import { API_EFFECTIF_LISTE } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
@@ -26,9 +26,12 @@ export const MLHeader = ({ onDownloadClick }: MLHeaderProps) => {
     }
 
     const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
-    const { data } = await _getBlob(
-      `/api/v1/organisation/mission-locale/export/effectifs?type=${API_TRAITEMENT_TYPE.A_TRAITER}`
-    );
+    const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
+      params: { type: [API_EFFECTIF_LISTE.A_TRAITER /*, API_EFFECTIF_LISTE.INJOIGNABLE, API_EFFECTIF_LISTE.TRAITE*/] },
+      paramsSerializer: {
+        indexes: null,
+      },
+    });
     downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
   };
 
