@@ -8,6 +8,7 @@ import { Providers } from "../providers";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
+
   return (
     <Providers>
       <UserContextProvider user={user}>

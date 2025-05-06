@@ -1,5 +1,3 @@
-"use client";
-
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { CRISP_FAQ } from "shared";
 

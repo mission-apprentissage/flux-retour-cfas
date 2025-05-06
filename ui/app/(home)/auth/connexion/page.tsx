@@ -1,41 +1,33 @@
 "use client";
 
-import {
-  Flex,
-  Box,
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  HStack,
-  InputGroup,
-  Input,
-  InputRightElement,
-  Link,
-  Text,
-  Heading,
-} from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
-import NavLink from "next/link";
+import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Input } from "@codegouvfr/react-dsfr/Input";
+import { Container, Stack, Link, Typography, IconButton } from "@mui/material";
+import { Formik, Form, Field, FormikErrors } from "formik";
+import NextLink from "next/link";
 import React from "react";
 import { useLocalStorage } from "usehooks-ts";
-import * as Yup from "yup";
+import { z, ZodError } from "zod";
 
 import { _post } from "@/common/httpClient";
-import useAuth from "@/hooks/useAuth";
 import { AlertRounded, ShowPassword } from "@/theme/components/icons";
 
-const Login = (props) => {
+const authConnexionSchema = z.object({
+  email: z.string().email({ message: "Format d'email invalide" }),
+  password: z.string().nonempty({ message: "Requis" }),
+});
+type AuthConnexionType = z.infer<typeof authConnexionSchema>;
+
+export default function Login() {
   const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
-  const { refreshSession } = useAuth();
-
   const [show, setShow] = React.useState(false);
-  const onShowPassword = () => setShow(!show);
 
-  const login = async (values, { setStatus }) => {
+  const handleTogglePassword = () => setShow((s) => !s);
+
+  const login = async (values: AuthConnexionType, { setStatus }) => {
     try {
       await _post("/api/v1/auth/login", values);
-      await refreshSession();
       if (originConnexionUrl) {
         setOriginConnexionUrl("");
         window.location.href = originConnexionUrl;
@@ -49,78 +41,117 @@ const Login = (props) => {
   };
 
   return (
-    <Flex flexDirection="column" p={12} {...props}>
-      <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
+    <Container
+      maxWidth="sm"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        border: "1px solid",
+        borderColor: fr.colors.decisions.border.default.grey.default,
+        py: { xs: fr.spacing("6w") },
+        px: { xs: fr.spacing("6w") },
+        mx: "auto",
+        my: { xs: fr.spacing("2w"), md: fr.spacing("4w") },
+      }}
+    >
+      <Typography component="h1" variant="h3" sx={{ mb: fr.spacing("3w") }}>
         Connectez-vous
-      </Heading>
-      <Formik
+      </Typography>
+
+      <Formik<AuthConnexionType>
         initialValues={{ email: "", password: "" }}
-        validationSchema={Yup.object().shape({
-          email: Yup.string().email("Format d'email invalide").required("Requis"),
-          password: Yup.string().required("Requis"),
-        })}
+        validate={(values) => {
+          try {
+            authConnexionSchema.parse(values);
+            return {};
+          } catch (err) {
+            const errors: FormikErrors<AuthConnexionType> = {};
+            if (err instanceof ZodError) {
+              err.errors.forEach((issue) => {
+                const key = issue.path[0] as keyof AuthConnexionType;
+                if (key) {
+                  errors[key] = issue.message;
+                }
+              });
+            }
+            return errors;
+          }
+        }}
         onSubmit={login}
       >
-        {({ status = {} }) => {
-          return (
-            <Form>
-              <Box>
-                <Field name="email">
-                  {({ field, meta }) => (
-                    <FormControl isRequired isInvalid={meta.error && meta.touched} mb={5}>
-                      <FormLabel>Email (votre identifiant)</FormLabel>
-                      <Input {...field} id={field.name} placeholder="prenom.nom@courriel.fr" />
-                      <FormErrorMessage>{meta.error}</FormErrorMessage>
-                    </FormControl>
-                  )}
-                </Field>
-                <Field name="password">
-                  {({ field, meta }) => {
-                    return (
-                      <FormControl isRequired isInvalid={meta.error && meta.touched} mb={5}>
-                        <FormLabel>Mot de passe</FormLabel>
-                        <InputGroup size="md">
-                          <Input
-                            {...field}
-                            id={field.name}
-                            type={show ? "text" : "password"}
-                            placeholder="************************"
-                          />
-                          <InputRightElement width="2.5rem">
-                            <ShowPassword boxSize={5} onClick={onShowPassword} cursor="pointer" />
-                          </InputRightElement>
-                        </InputGroup>
-                        <FormErrorMessage>{meta.error}</FormErrorMessage>
-                      </FormControl>
-                    );
-                  }}
-                </Field>
-              </Box>
-              <HStack spacing="4w" mt={8}>
-                <Button variant="primary" type="submit">
-                  Connexion
-                </Button>
-                <Link href="/auth/mot-de-passe-oublie" as={NavLink} color="grey.600">
+        {({ status = {} }) => (
+          <Form noValidate>
+            <Stack>
+              <Field name="email">
+                {({ field, meta }: any) => (
+                  <Input
+                    label="Email (votre identifiant)"
+                    state={meta.touched && meta.error ? "error" : "default"}
+                    stateRelatedMessage={meta.touched ? (meta.error ?? "\u00a0") : "\u00a0"}
+                    nativeInputProps={{
+                      id: field.name,
+                      name: field.name,
+                      type: "email",
+                      placeholder: "prenom.nom@courriel.fr",
+                      value: field.value,
+                      onChange: field.onChange,
+                      onBlur: field.onBlur,
+                    }}
+                  />
+                )}
+              </Field>
+
+              <Field name="password">
+                {({ field, meta }: any) => (
+                  <Input
+                    label="Mot de passe"
+                    state={meta.touched && meta.error ? "error" : "default"}
+                    stateRelatedMessage={meta.touched ? (meta.error ?? "\u00a0") : "\u00a0"}
+                    nativeInputProps={{
+                      id: field.name,
+                      name: field.name,
+                      type: show ? "text" : "password",
+                      placeholder: "************************",
+                      value: field.value,
+                      onChange: field.onChange,
+                      onBlur: field.onBlur,
+                    }}
+                    action={
+                      <IconButton
+                        type="button"
+                        onClick={handleTogglePassword}
+                        aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                      >
+                        <ShowPassword />
+                      </IconButton>
+                    }
+                  />
+                )}
+              </Field>
+
+              <Stack direction="row" spacing={fr.spacing("4w")} alignItems="center" sx={{ mt: fr.spacing("2w") }}>
+                <Button type="submit">Connexion</Button>
+                <Link component={NextLink} href="/auth/mot-de-passe-oublie">
                   Mot de passe oublié
                 </Link>
-              </HStack>
+              </Stack>
+
               {status.error && (
-                <Text color="error" mt={8}>
-                  <AlertRounded mb="0.5" /> {status.error}
-                </Text>
+                <Typography color="error" sx={{ display: "flex", alignItems: "center", mt: fr.spacing("4w") }}>
+                  <AlertRounded sx={{ mr: fr.spacing("1w") }} /> {status.error}
+                </Typography>
               )}
-            </Form>
-          );
-        }}
+            </Stack>
+          </Form>
+        )}
       </Formik>
-      <HStack fontSize={14} mt="4w">
-        <Text>Vous n’avez pas encore de compte ? </Text>
-        <Link color="bluefrance" as={NavLink} href="/auth/inscription">
+
+      <Stack direction="row" spacing={fr.spacing("1w")} justifyContent="center" sx={{ mt: fr.spacing("8w") }}>
+        <Typography>Vous n’avez pas encore de compte ?</Typography>
+        <Link component={NextLink} href="/auth/inscription">
           Créer un compte
         </Link>
-      </HStack>
-    </Flex>
+      </Stack>
+    </Container>
   );
-};
-
-export default Login;
+}
