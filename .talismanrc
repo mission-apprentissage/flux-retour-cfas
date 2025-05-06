@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/app/(home)/auth/mot-de-passe-oublie/page.tsx
+  checksum: 23ff4a58fb50094a694a0dae033082419d075621318db10e30dcf40c088eb74d
 - filename: ui/app/(home)/auth/connexion/page.tsx
   checksum: 1f345425569479bb2a8c98cd087577c592b393d5f190514f5d9fe69b85c6e115
 - filename: ui/app/(home)/auth/connexion/page.tsx
