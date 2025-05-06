@@ -1,7 +1,7 @@
 import { Box, Typography, Link, Stack } from "@mui/material";
 import React from "react";
 
-import { SelectedSection } from "@/app/mission-locale/_components/types";
+import { SelectedSection } from "@/app/(mission-locale)/mission-locale/_components/types";
 
 export const MlSuccessCard = ({
   handleSectionChange,
