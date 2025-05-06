@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/app/(home)/auth/connexion/page.tsx
+  checksum: 07beb04984dd65e98897e3f23a4841a60e5251076cb54d08c0eab65f1aeac228
 - filename: ui/components/Televersement/DocumentsActionButtons.tsx
   checksum: 766028bfe6d530cbd170ff5af22d644b0e524e8dbac78cfed637a8115694bb9d
 - filename: yarn.lock

@@ -1,15 +1,17 @@
+"use client";
+
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { CRISP_FAQ } from "shared";
 
 import { Impersonate } from "./Impersonate";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
-export function Header() {
+export function ConnectedHeader() {
   return (
     <DsfrHeader
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
-        href: "/mission-locale",
+        href: "/",
         title: "Accueil - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)",
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
