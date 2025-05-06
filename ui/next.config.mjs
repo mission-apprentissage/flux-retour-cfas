@@ -65,6 +65,11 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Home page is different based on the user and it's not really static
+        source: "/",
+        headers: [{ key: "Vary", value: "Cookie" }],
+      },
     ];
   },
   async redirects() {
