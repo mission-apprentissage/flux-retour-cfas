@@ -141,9 +141,11 @@ export default function Page() {
               Vous êtes une{" "}
               <Box
                 className="fr-badge"
+                component="span"
                 sx={{
                   fontSize: { xs: "0.85rem", md: "1rem" },
                   backgroundColor: fr.colors.decisions.background.contrast.purpleGlycine.default,
+                  display: "inline-block",
                 }}
               >
                 mission locale
@@ -151,9 +153,11 @@ export default function Page() {
               ou un{" "}
               <Box
                 className="fr-badge"
+                component="span"
                 sx={{
                   fontSize: { xs: "0.85rem", md: "1rem" },
                   backgroundColor: fr.colors.decisions.background.contrast.purpleGlycine.default,
+                  display: "inline-block",
                 }}
               >
                 organisme de formation
