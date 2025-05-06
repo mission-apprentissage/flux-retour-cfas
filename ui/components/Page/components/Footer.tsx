@@ -1,24 +1,79 @@
-import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, Container, Flex, Grid, GridItem, List, ListItem, Text } from "@chakra-ui/react";
+import Image from "next/image";
 import { CRISP_FAQ } from "shared";
 
 import Link from "@/components/Links/Link";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
+const GOVERNMENT_LINKS = [
+  { href: "https://www.legifrance.gouv.fr/", label: "legifrance.gouv.fr", isExternal: true },
+  { href: "https://www.gouvernement.fr/", label: "gouvernement.fr", isExternal: true },
+  { href: "https://www.service-public.fr/", label: "service-public.fr", isExternal: true },
+  { href: "https://www.data.gouv.fr/fr/", label: "data.gouv.fr", isExternal: true },
+] as const;
+
+const FOOTER_LINKS = [
+  { href: "/sitemap.xml", label: "Plan du site" },
+  { href: "/accessibilite", label: "Accessibilité : non conforme" },
+  { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/cgu", label: "Conditions générales d’utilisation" },
+  { href: "/stats", label: "Statistiques" },
+  { href: CRISP_FAQ, label: "Centre d’aide" },
+  { href: "/politique-de-confidentialite", label: "Politique de confidentialité" },
+  { href: "https://beta.gouv.fr/startups/tdb-apprentissage.html", label: "À propos", isExternal: true },
+  {
+    href: "https://www.notion.so/mission-apprentissage/Journal-des-volutions-5c9bec4ae3c3451da671f3f684ee994f",
+    label: "Journal des évolutions",
+    isExternal: true,
+  },
+  { href: "https://github.com/mission-apprentissage/flux-retour-cfas", label: "Code source", isExternal: true },
+] as const;
+
+type LinkItem = {
+  href: string;
+  label: string;
+  isExternal?: boolean;
+};
+
+interface RenderOptions {
+  /** Add a trailing margin‑right to every item except the last */
+  marginRight?: number | string;
+  /** Insert a vertical bar separator between items */
+  withSeparator?: boolean;
+}
+
+const renderLinks = (links: readonly LinkItem[], options: RenderOptions = {}) =>
+  links.map((link, index) => {
+    const isLast = index === links.length - 1;
+
+    // Separator ("|") only when explicitly requested and not the last item
+    const separatorProps =
+      options.withSeparator && !isLast ? { content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" } : undefined;
+
+    // Trailing margin‑right for inline spacing (government links)
+    const linkProps = !isLast && options.marginRight ? { mr: options.marginRight } : {};
+
+    return (
+      <ListItem key={link.href} _after={separatorProps}>
+        <Link href={link.href} isExternal={link.isExternal} {...linkProps} display="inline-flex" alignItems="center">
+          {link.label}
+        </Link>
+      </ListItem>
+    );
+  });
+
 const Footer = () => {
   return (
     <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
       <Container maxW="xl" pt={["0", "0", "0", "2.5rem"]} pb={["4w", "4w", "2w", "2w"]}>
-        <Grid templateColumns={{ base: "1fr", lg: "repeat(4, 1fr)" }}>
-          <GridItem colSpan={{ base: 1, lg: 1 }}>
-            <Image
-              src="/images/marianne.svg#svgView(viewBox(12 0 152 78))"
-              alt="Logo République française"
-              width="290"
-              height="130"
-              userSelect="none"
-            />
+        <Grid gap={{ base: 6, lg: 8 }} templateColumns={{ base: "1fr", lg: "repeat(4, 1fr)" }}>
+          <GridItem colSpan={{ base: 1, lg: 1 }} mt={{ base: 4, lg: 0 }} display="flex" alignItems="center">
+            <AspectRatio ratio={270 / 130} w={270}>
+              <Image src="/images/marianne.svg" alt="Logo République française" fill priority objectFit="contain" />
+            </AspectRatio>
           </GridItem>
+
           <GridItem
             colSpan={{ base: 1, lg: 1 }}
             pl={{ base: 0, lg: 4 }}
@@ -26,103 +81,40 @@ const Footer = () => {
             display="flex"
             alignItems="center"
           >
-            <Image src="/images/france_relance.svg" alt="France relance" width="81" height="81" userSelect="none" />
+            <AspectRatio ratio={1 / 1} w={81}>
+              <Image src="/images/france_relance.svg" alt="France relance" fill priority />
+            </AspectRatio>
           </GridItem>
-          <GridItem colSpan={{ base: 1, lg: 2 }} mt={{ base: 8, lg: 0 }}>
+
+          <GridItem colSpan={{ base: 1, lg: 2 }}>
             <Box alignSelf="center" flex="1">
               <Text>
                 Mandatée par plusieurs ministères, la{" "}
-                <Link href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"} isExternal isUnderlined>
+                <Link
+                  href="https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"
+                  isExternal
+                  isUnderlined
+                  display="inline-flex"
+                  alignItems="center"
+                >
                   Mission interministérielle pour l’apprentissage
                 </Link>{" "}
                 développe plusieurs services destinés à faciliter les entrées en apprentissage.
               </Text>
               <br />
-              <List
-                textStyle="sm"
-                fontWeight="700"
-                flexDirection={"row"}
-                flexWrap={"wrap"}
-                mb={[3, 3, 0]}
-                display="flex"
-              >
-                <ListItem>
-                  <Link href="https://www.legifrance.gouv.fr/" mr={4} isExternal>
-                    legifrance.gouv.fr
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  <Link href="https://www.gouvernement.fr/" mr={4} isExternal>
-                    gouvernement.fr
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  <Link href="https://www.service-public.fr/" mr={4} isExternal>
-                    service-public.fr
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  <Link href="https://www.data.gouv.fr/fr/" isExternal>
-                    data.gouv.fr
-                  </Link>
-                </ListItem>
+              <List textStyle="sm" fontWeight="700" flexDirection="row" flexWrap="wrap" mb={[3, 3, 0]} display="flex">
+                {renderLinks(GOVERNMENT_LINKS, { marginRight: 4 })}
               </List>
             </Box>
           </GridItem>
         </Grid>
       </Container>
+
       <Box borderTop="1px solid" borderColor="#CECECE" color="#6A6A6A">
         <Container maxW="xl" py={[3, 3, 5]}>
           <Flex flexDirection={["column", "column", "row"]}>
-            <List
-              textStyle="xs"
-              flexDirection={"row"}
-              flexWrap={"wrap"}
-              display="flex"
-              flex="1"
-              // css={{ "li:not(:last-child):after": { content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" } }}
-            >
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/sitemap.xml"}>Plan du site</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/accessibilite"}>Accessibilité : non conforme</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/mentions-legales"}>Mentions légales</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/cgu"}>Conditions générales d’utilisation</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="/stats">Statistiques</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link target="_blank" rel="noopener noreferrer" href={CRISP_FAQ}>
-                  Centre d’aide
-                </Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/politique-de-confidentialite"}>Politique de confidentialité</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>
-                  À propos
-                </Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link
-                  href="https://www.notion.so/mission-apprentissage/Journal-des-volutions-5c9bec4ae3c3451da671f3f684ee994f"
-                  isExternal
-                >
-                  Journal des évolutions
-                </Link>
-              </ListItem>
-              <ListItem _after={{ content: "''", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="https://github.com/mission-apprentissage/flux-retour-cfas" isExternal>
-                  Code source
-                </Link>
-              </ListItem>
+            <List gap={1} textStyle="xs" flexDirection="row" flexWrap="wrap" display="flex" flex="1">
+              {renderLinks(FOOTER_LINKS, { withSeparator: true })}
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
               {APP_VERSION && `v.${APP_VERSION} `}© République française {new Date().getFullYear()}

@@ -1,12 +1,12 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import {
+  AspectRatio,
   Box,
   Container,
   Divider,
   Flex,
   HStack,
   Heading,
-  Image,
   ListItem,
   SimpleGrid,
   SystemProps,
@@ -14,6 +14,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
+import Image from "next/image";
 import { useState } from "react";
 import { CRISP_FAQ, SUPPORT_PAGE_ACCUEIL } from "shared";
 
@@ -28,7 +29,14 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const OperateursPublicsPage = () => {
   return (
     <SimplePage title="Opérateurs publics - Tableau de bord de l’apprentissage">
-      <Container maxW="xl" py="16" display="flex" alignItems="center" gap="16">
+      <Container
+        maxW="xl"
+        py="16"
+        display="flex"
+        alignItems="center"
+        gap="16"
+        flexDirection={{ base: "column-reverse", md: "row" }}
+      >
         <Box flex="3">
           <Heading as="h1" fontSize="xl">
             Opérateurs publics
@@ -51,22 +59,31 @@ const OperateursPublicsPage = () => {
             </Link>
           </HStack>
         </Box>
-
-        <Image
-          src="/images/landing-operateurs-publics.svg"
-          alt="Graphique tableau de bord"
-          flex="1"
-          userSelect="none"
-        />
+        <AspectRatio ratio={386 / 174} w={{ base: "100%", md: "386px" }}>
+          <Image
+            src="/images/landing-operateurs-publics.svg"
+            alt="Graphique tableau de bord"
+            sizes="(max-width: 768px) 100vw, 386px"
+            fill
+            priority
+          />
+        </AspectRatio>
       </Container>
 
       <Box bg="#F5F5FE">
-        <Container maxW="xl" py="24" display="flex" alignItems="center" gap="16">
+        <Container
+          maxW="xl"
+          py="24"
+          display="flex"
+          alignItems="center"
+          gap="16"
+          flexDirection={{ base: "column-reverse", md: "row" }}
+        >
           <Carousel
             images={[
-              "/images/landing-operateurs-publics-slide1.jpg",
-              "/images/landing-operateurs-publics-slide2.jpg",
-              "/images/landing-operateurs-publics-slide3.jpg",
+              "/images/landing-operateurs-publics-slide1.webp",
+              "/images/landing-operateurs-publics-slide2.webp",
+              "/images/landing-operateurs-publics-slide3.webp",
             ]}
             flex="2"
           />
@@ -105,13 +122,9 @@ const OperateursPublicsPage = () => {
           Le tableau de bord restitue les <strong>indicateurs liés aux étapes-clés</strong> du parcours d’un apprenant,
           de l’expression des vœux jusqu’à sa sortie d’apprentissage.
         </Text>
-        <Image
-          src="/images/landing-operateurs-publics-parcours.svg"
-          alt="Parcours apprenant"
-          userSelect="none"
-          w="100%"
-          mt={8}
-        />
+        <AspectRatio ratio={78 / 35} w="100%" mt={8}>
+          <Image src="/images/landing-operateurs-publics-parcours.svg" alt="Parcours apprenant" fill />
+        </AspectRatio>
 
         <Divider size="md" my={16} borderBottomWidth="2px" opacity="1" />
 
@@ -286,7 +299,17 @@ const OperateursPublicsPage = () => {
         </Container>
       </Box>
 
-      <Container maxW="1024px" bg="#F5F5FE" px="14" py="10" my="20" display="flex" alignItems="center" gap="16">
+      <Container
+        maxW="1024px"
+        bg="#F5F5FE"
+        px="14"
+        py="10"
+        my="20"
+        display="flex"
+        alignItems="center"
+        gap="16"
+        flexDirection={{ base: "column-reverse", md: "row" }}
+      >
         <Box flex="3">
           <Heading as="h3" fontSize="2xl" color="blue_cumulus_main">
             Faisons bien plus ensemble !
@@ -304,12 +327,15 @@ const OperateursPublicsPage = () => {
           </Link>
         </Box>
 
-        <Image
-          src="/images/landing-operateurs-publics-beta-testeurs.svg"
-          alt="Beta-testeurs du tableau de bord"
-          flex="1"
-          userSelect="none"
-        />
+        <AspectRatio ratio={227 / 114} w={{ base: "100%", md: "227px" }}>
+          <Image
+            src="/images/landing-operateurs-publics-beta-testeurs.svg"
+            alt="Beta-testeurs du tableau de bord"
+            sizes="(max-width: 768px) 100vw, 227px"
+            fill
+            priority
+          />
+        </AspectRatio>
       </Container>
     </SimplePage>
   );
@@ -327,18 +353,25 @@ function Carousel({ images, ...props }: CarouselProps) {
       <Box overflow="hidden" w="450px">
         <Flex transform={`translateX(${-activePageIndex * 100}%)`} transition=".3s transform">
           {images.map((image, index) => (
-            <Image
+            <AspectRatio
               key={index}
-              src={image}
-              alt="Capture d'écran du tableau de bord"
-              userSelect="none"
-              objectFit="contain"
+              ratio={450 / 300}
+              w={{ base: "100%", md: "450px" }}
+              flexShrink={0}
               onClick={() => setActivePageIndex((index + 1) % images.length)}
               cursor="pointer"
-            />
+            >
+              <Image
+                src={image}
+                alt={`Capture d'écran du tableau de bord ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 450px"
+              />
+            </AspectRatio>
           ))}
         </Flex>
       </Box>
+
       <HStack>
         {images.map((_, index) => (
           <Box

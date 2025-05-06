@@ -1,5 +1,5 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Flex, Link } from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Flex, Button } from "@chakra-ui/react";
 import { useState } from "react";
 
 interface BaseAccordionGroupProps {
@@ -36,9 +36,18 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, textColor = "#3A3
 
   return (
     <Flex flexDirection="column" marginTop="2w">
-      <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
+      <Button
+        variant="link"
+        textAlign="end"
+        color="bluefrance"
+        fontSize="omega"
+        px={0}
+        py={0}
+        justifyContent="left"
+        onClick={() => (!isUnfold ? unfoldAll() : foldAll())}
+      >
         {!isUnfold ? "Tout déplier" : "Tout replier"}
-      </Link>
+      </Button>
       <Accordion variant="withBorder" marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
           <AccordionItem key={index}>

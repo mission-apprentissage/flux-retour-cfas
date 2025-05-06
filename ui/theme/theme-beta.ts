@@ -338,11 +338,6 @@ const textStyles = {
   },
 };
 
-const fonts = {
-  body: "Marianne, Arial",
-  heading: "Marianne, Arial",
-};
-
 const space = {
   0: "0",
   "1v": `${4 / rootFontSizePx}rem`,
@@ -360,4 +355,4 @@ const space = {
   "15w": `${120 / rootFontSizePx}rem`,
 };
 
-export { fonts, colors, fontSizes, space, rootFontSizePx, textStyles };
+export { colors, fontSizes, space, rootFontSizePx, textStyles };

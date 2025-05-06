@@ -35,6 +35,7 @@ function Page({ children, childrenContainer, ...rest }: PageProps) {
         right="40px"
         bg="bluefrance"
         borderRadius="200px"
+        aria-label="Accéder à la FAQ"
       >
         <Interrogation color="white" pr="0.1em" pb="0.2em" />
       </Link>
