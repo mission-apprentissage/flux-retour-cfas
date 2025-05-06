@@ -136,13 +136,15 @@ function EffectifContent({
     }
     setSaveStatus("success");
     setTimeout(() => {
+      // Si on va voir le suivant et qu'il existe
       if (goNext && next) {
         router.push(`/mission-locale/${next.id}?nom_liste=${nomListeParam}`);
       } else {
-        const fallbackUrl =
-          nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE
+        const fallbackUrl = goNext
+          ? nomListeParam === API_EFFECTIF_LISTE.PRIORITAIRE
             ? "/mission-locale/validation/prioritaire"
-            : "/mission-locale/validation";
+            : "/mission-locale/validation"
+          : "/mission-locale";
         router.push(fallbackUrl);
       }
     }, SUCCESS_DISPLAY_TIME);
