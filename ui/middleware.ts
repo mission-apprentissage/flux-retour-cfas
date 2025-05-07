@@ -54,6 +54,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (session && pathname === "/auth/connexion") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   if (pathname === "/mission-locale") {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
