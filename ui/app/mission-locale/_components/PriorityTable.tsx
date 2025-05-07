@@ -95,14 +95,7 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
             itemsPerPage={7}
             emptyMessage="Aucun élément prioritaire"
             searchTerm={searchTerm}
-            searchableColumns={[
-              "nom",
-              "prenom",
-              "libelle_formation",
-              "organisme_nom",
-              "organisme_raison_sociale",
-              "organisme_enseigne",
-            ]}
+            searchableColumns={["nom", "prenom"]}
             getRowLink={(row) => `/mission-locale/${row.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`}
           />
         </>
