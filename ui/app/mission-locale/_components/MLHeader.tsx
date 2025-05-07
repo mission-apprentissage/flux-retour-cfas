@@ -1,40 +1,12 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Stack, Box } from "@mui/material";
-import mime from "mime";
-import { API_EFFECTIF_LISTE } from "shared";
 
-import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { ModalRupturantExcel } from "@/app/mission-locale/_components/modal/ModalRupturantExcel";
 import { _getBlob } from "@/common/httpClient";
-import { downloadObject } from "@/common/utils/browser";
 
-type MLHeaderProps = {
-  onDownloadClick?: () => void;
-};
-
-export const MLHeader = ({ onDownloadClick }: MLHeaderProps) => {
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
-
-  const handleDownload = async () => {
-    trackPlausibleEvent("telechargement_mission_locale_liste");
-
-    if (onDownloadClick) {
-      onDownloadClick();
-      return;
-    }
-
-    const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
-    const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
-      params: { type: [API_EFFECTIF_LISTE.A_TRAITER /*, API_EFFECTIF_LISTE.INJOIGNABLE, API_EFFECTIF_LISTE.TRAITE*/] },
-      paramsSerializer: {
-        indexes: null,
-      },
-    });
-    downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
-  };
-
+export const MLHeader = () => {
   return (
     <>
       <Alert
@@ -68,9 +40,7 @@ export const MLHeader = ({ onDownloadClick }: MLHeaderProps) => {
             </p>
           </Box>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="flex-end" alignItems="center">
-            <Button iconId="ri-arrow-right-line" iconPosition="right" onClick={handleDownload}>
-              Télécharger la liste
-            </Button>
+            <ModalRupturantExcel />
           </Stack>
         </Stack>
 

@@ -13,7 +13,7 @@ export const addSheetToXlscFile = async (
 ) => {
   const workbook = await parseLocalXlsx(relativePath);
   const wsList = workbook.worksheets.map(({ name }) => name);
-  const toDelete = worksheetList.map(({ worksheetName }) => worksheetName).filter((x) => !wsList.includes(x));
+  const toDelete = wsList.filter((x) => !worksheetList.map(({ worksheetName }) => worksheetName).includes(x));
 
   toDelete.forEach((element) => workbook.removeWorksheet(element));
 
