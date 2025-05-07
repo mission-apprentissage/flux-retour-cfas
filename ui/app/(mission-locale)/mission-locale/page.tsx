@@ -11,7 +11,7 @@ import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspen
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
 
-import { MlCard } from "../_components/card/MlCard";
+import { MlCard } from "../../_components/card/MlCard";
 
 import { MLHeader } from "./_components/MLHeader";
 import { SearchableTableSection } from "./_components/SearchableTableSection";
