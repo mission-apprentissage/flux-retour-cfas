@@ -1,10 +1,15 @@
 import Boom from "boom";
+import { ObjectId } from "bson";
 import express from "express";
+import { IUpdateMissionLocaleEffectif, updateMissionLocaleEffectifApi } from "shared/models";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 
 import {
   activateMissionLocale,
   getAllMlFromOrganisations,
+  resetEffectifMissionLocaleDataAdmin,
+  setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -23,6 +28,28 @@ export default () => {
     returnResult(activateMLAtDate)
   );
 
+  router.put(
+    "/effectif",
+    validateRequestMiddleware({
+      body: z.object({
+        ...updateMissionLocaleEffectifApi,
+        mission_locale_id: extensions.objectIdString(),
+        effectif_id: extensions.objectIdString(),
+      }),
+    }),
+    returnResult(updateMissionLocaleEffectif)
+  );
+
+  router.post(
+    "/effectif/reset",
+    validateRequestMiddleware({
+      body: z.object({
+        mission_locale_id: extensions.objectIdString(),
+        effectif_id: extensions.objectIdString(),
+      }),
+    }),
+    returnResult(resetMissionLocaleEffectif)
+  );
   return router;
 };
 
@@ -41,4 +68,20 @@ const getAllMls = async () => {
   return organisationMl
     .map((orga) => ({ organisation: orga, externalML: externalML.find((ml) => ml.id === orga.ml_id) }))
     .filter((ml) => ml.externalML);
+};
+
+const updateMissionLocaleEffectif = async (req) => {
+  const { mission_locale_id, effectif_id, ...rest } = req.body;
+  return await setEffectifMissionLocaleDataAdmin(
+    new ObjectId(mission_locale_id),
+    new ObjectId(effectif_id),
+    rest as IUpdateMissionLocaleEffectif,
+    req.user
+  );
+};
+
+const resetMissionLocaleEffectif = async (req) => {
+  const { mission_locale_id, effectif_id } = req.body;
+
+  return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
 };

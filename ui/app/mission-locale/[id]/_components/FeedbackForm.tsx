@@ -134,7 +134,7 @@ export function FeedbackForm({
           <Input
             label="Merci de préciser"
             nativeInputProps={{
-              value: formData.situation_autre,
+              value: formData.situation_autre ?? undefined,
               onChange: (e) =>
                 setFormData({
                   ...formData,
