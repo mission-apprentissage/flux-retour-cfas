@@ -8,19 +8,26 @@ export const parseLocalXlsx = async (relativePath: string) => {
 
 export const addSheetToXlscFile = async (
   relativePath: string,
-  worksheetToKeepName: string,
-  worksheetToDeleteName: string,
-  columns: Array<{ name: string; id: string; array?: string; transform?: (d: any) => any }>,
-  data: Array<any>
+  worksheetList: Array<{ worksheetName: string; logsTag: string; data: Array<any> }>,
+  columns: Array<{ name: string; id: string; array?: string; transform?: (d: any) => any }>
 ) => {
-  const formattedData = formatJsonToXlsx(data, columns);
   const workbook = await parseLocalXlsx(relativePath);
-  const ws = await workbook.getWorksheet(worksheetToKeepName);
-  workbook.removeWorksheet(worksheetToDeleteName);
-  if (!ws) {
-    return null;
+  const wsList = workbook.worksheets.map(({ name }) => name);
+  const toDelete = wsList.filter((x) => !worksheetList.map(({ worksheetName }) => worksheetName).includes(x));
+
+  toDelete.forEach((element) => workbook.removeWorksheet(element));
+
+  for (const { worksheetName, data } of worksheetList) {
+    const ws = workbook.getWorksheet(worksheetName);
+    const formattedData = formatJsonToXlsx(data, columns);
+
+    if (!ws) {
+      return null;
+    }
+
+    ws.addRows(formattedData);
   }
-  ws.addRows(formattedData);
+
   return workbook;
 };
 

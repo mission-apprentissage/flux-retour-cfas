@@ -5,12 +5,7 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import {
-  IEmailStatusEnum,
-  API_EFFECTIF_LISTE,
-  API_TRAITEMENT_TYPE,
-  SITUATION_ENUM,
-} from "shared/models/data/missionLocaleEffectif.model";
+import { IEmailStatusEnum, API_EFFECTIF_LISTE, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -95,6 +90,46 @@ const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
+const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return [
+        {
+          $match: {
+            a_traiter: true,
+            a_risque: true,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+      return [
+        {
+          $match: {
+            a_traiter: false,
+            injoignable: true,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.A_TRAITER:
+      return [
+        {
+          $match: {
+            a_traiter: true,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE:
+      return [
+        {
+          $match: {
+            a_traiter: false,
+            injoignable: false,
+          },
+        },
+      ];
+  }
+};
+
 const createDernierStatutFieldPipelineML = (date: Date) => [
   {
     $addFields: {
@@ -143,15 +178,6 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-const matchTraitementEffectifPipelineMl = (type: API_TRAITEMENT_TYPE) => {
-  return [
-    {
-      $match: {
-        a_traiter: type === API_TRAITEMENT_TYPE.A_TRAITER,
-      },
-    },
-  ];
-};
 /**
  * Création du match sur les dernier statuts
  * @param statut Liste de statuts à matcher
@@ -408,46 +434,6 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   nom_liste: API_EFFECTIF_LISTE,
   missionLocaleActivationDate?: Date
 ) => {
-  const listMatchStage = () => {
-    switch (nom_liste) {
-      case API_EFFECTIF_LISTE.PRIORITAIRE:
-        return [
-          {
-            $match: {
-              a_traiter: true,
-              a_risque: true,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.INJOIGNABLE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: true,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.A_TRAITER:
-        return [
-          {
-            $match: {
-              a_traiter: true,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.TRAITE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: false,
-            },
-          },
-        ];
-    }
-  };
-
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
@@ -456,7 +442,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
-    ...listMatchStage(),
+    ...matchTraitementEffectifPipelineMl(nom_liste),
     {
       $sort: {
         "dernierStatut.date": -1,
@@ -502,9 +488,9 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
 
-  const aTraiter = type === API_TRAITEMENT_TYPE.A_TRAITER;
-  const traite = type === API_TRAITEMENT_TYPE.TRAITE;
-  const injoignable = type === API_TRAITEMENT_TYPE.INJOIGNABLE;
+  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
+  const traite = type === API_EFFECTIF_LISTE.TRAITE;
+  const injoignable = type === API_EFFECTIF_LISTE.INJOIGNABLE;
 
   const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
     if (!firstDate) {

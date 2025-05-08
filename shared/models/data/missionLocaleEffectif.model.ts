@@ -33,12 +33,6 @@ export enum SITUATION_LABEL_ENUM {
   AUTRE = "Autre situation / retour",
 }
 
-export enum API_TRAITEMENT_TYPE {
-  A_TRAITER = "A_TRAITER",
-  TRAITE = "TRAITE",
-  INJOIGNABLE = "INJOIGNABLE",
-}
-
 export enum API_EFFECTIF_LISTE {
   PRIORITAIRE = "prioritaire",
   INJOIGNABLE = "injoignable",
@@ -47,7 +41,6 @@ export enum API_EFFECTIF_LISTE {
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
-export const zApiTypeEnum = z.nativeEnum(API_TRAITEMENT_TYPE);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
 export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
