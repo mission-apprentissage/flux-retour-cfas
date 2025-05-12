@@ -4,10 +4,9 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { CircularProgress } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
 import mime from "mime";
 import qs from "qs";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -21,34 +20,26 @@ const modal = createModal({
 
 export function ModalRupturantExcel() {
   const [selectedType, setSelectedType] = useState<Array<string>>([]);
+  const [isFetching, setIsFetching] = useState(false);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
-
-  const { data, refetch, isFetching } = useQuery(
-    ["excel-rupturant-telechargement"],
-    () => {
-      return _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
-        params: { type: selectedType },
-        paramsSerializer: (params) => {
-          return qs.stringify(params, { arrayFormat: "brackets" });
-        },
-      });
-    },
-    { enabled: false }
-  );
-
-  useEffect(() => {
-    const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
-    trackPlausibleEvent("telechargement_mission_locale_liste");
-    downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
-    setSelectedType([]);
-  }, [data]);
 
   const onRadioSelected = ({ value, checked }: { value: string; checked: boolean }) => {
     setSelectedType(checked ? [...selectedType, value] : selectedType.filter((x) => x !== value));
   };
 
   const onDownload = async () => {
-    refetch();
+    setIsFetching(true);
+    const data = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
+      params: { type: selectedType },
+      paramsSerializer: (params) => {
+        return qs.stringify(params, { arrayFormat: "brackets" });
+      },
+    });
+    const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
+    trackPlausibleEvent("telechargement_mission_locale_liste");
+    downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
+    setIsFetching(false);
+    setSelectedType([]);
   };
 
   return (
