@@ -29,7 +29,7 @@ export function ModalRupturantExcel() {
 
   const onDownload = async () => {
     setIsFetching(true);
-    const data = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
+    const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
       params: { type: selectedType },
       paramsSerializer: (params) => {
         return qs.stringify(params, { arrayFormat: "brackets" });
