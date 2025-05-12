@@ -1,10 +1,13 @@
 import { Box, Stack, Typography } from "@mui/material";
 
+import { StartDsfrOnHydration } from "@/app/_dsfr-setup/dsfrProvider";
+
 import { MissionLocaleQuestion } from "../_components/question";
 
 export default function InvalidLinkPage() {
   return (
     <Stack spacing={3} sx={{ width: "100%" }}>
+      <StartDsfrOnHydration />
       <Stack justifyContent="end" alignItems="center">
         <Typography variant="h2" sx={{ color: "var(--text-title-blue-france)" }} mb={3}>
           Ce lien n&apos;est plus valide. Si vous avez déjà répondu à l&apos;enquête, un mail de confirmation vous a été

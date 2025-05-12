@@ -2,6 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 
+import { StartDsfrOnHydration } from "@/app/_dsfr-setup/dsfrProvider";
 import { _get, _post } from "@/common/httpClient";
 
 import { MissionLocaleQuestion } from "../_components/question";
@@ -9,6 +10,7 @@ import { MissionLocaleQuestion } from "../_components/question";
 export default function Page() {
   return (
     <Stack spacing={3}>
+      <StartDsfrOnHydration />
       <Stack justifyContent="end" alignItems="center">
         <Box
           component="img"
