@@ -3,7 +3,7 @@ import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 export function Footer() {
   return (
     <DsfrFooter
-      accessibility="fully compliant"
+      accessibility="non compliant"
       contentDescription={
         <>
           Mandatée par plusieurs ministères, la{" "}

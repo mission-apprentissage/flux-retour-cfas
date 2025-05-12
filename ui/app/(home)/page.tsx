@@ -34,9 +34,7 @@ const STEPS = [
     title: "Les organismes enrichissent les dossiers de manière collaborative",
     description: (
       <>
-        <strong>
-          Ils précisent les raisons de la rupture et partagent les freins éventuels rencontrés par les jeunes
-        </strong>{" "}
+        <strong>Ils précisent les raisons de la rupture et partagent les freins rencontrés par les jeunes</strong>{" "}
         (mobilité, logement, etc.).
       </>
     ),
@@ -170,7 +168,7 @@ export default function Page() {
                 mt: fr.spacing("1w"),
               }}
             >
-              👉 Collaborez pour accompagner les apprentis vers un nouveau projet !
+              👉 Engageons une collaboration durable pour soutenir l’insertion des apprentis !
             </Typography>
             <Stack direction="row" spacing={2} sx={{ mt: fr.spacing("5w") }}>
               <Button onClick={() => router.push("/auth/inscription")}>Je m’inscris</Button>
