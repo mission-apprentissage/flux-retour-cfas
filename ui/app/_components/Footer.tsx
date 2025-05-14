@@ -6,7 +6,7 @@ export function Footer() {
     <DsfrFooter
       accessibility="non compliant"
       contentDescription={
-        <>Cette plateforme est proposée par le ministère du travail, de la santé, des solidarités et des familles.</>
+        <>Cette plateforme est proposée par le Ministère du Travail, de la Santé, des Solidarités et des Familles.</>
       }
       operatorLogo={{
         alt: "France relance",

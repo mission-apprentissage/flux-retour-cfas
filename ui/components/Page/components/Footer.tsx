@@ -31,7 +31,7 @@ const Footer = () => {
           <GridItem colSpan={{ base: 1, lg: 2 }} mt={{ base: 8, lg: 0 }}>
             <Box alignSelf="center" flex="1">
               <Text>
-                Cette plateforme est proposée par le ministère du travail, de la santé, des solidarités et des familles.
+                Cette plateforme est proposée par le Ministère du Travail, de la Santé, des Solidarités et des Familles.
               </Text>
               <br />
               <List
