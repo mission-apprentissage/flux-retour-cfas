@@ -31,11 +31,7 @@ const Footer = () => {
           <GridItem colSpan={{ base: 1, lg: 2 }} mt={{ base: 8, lg: 0 }}>
             <Box alignSelf="center" flex="1">
               <Text>
-                Mandatée par plusieurs ministères, la{" "}
-                <Link href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"} isExternal isUnderlined>
-                  Mission interministérielle pour l’apprentissage
-                </Link>{" "}
-                développe plusieurs services destinés à faciliter les entrées en apprentissage.
+                Cette plateforme est proposée par le ministère du travail, de la santé, des solidarités et des familles.
               </Text>
               <br />
               <List

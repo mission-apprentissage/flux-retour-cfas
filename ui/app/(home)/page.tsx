@@ -22,8 +22,7 @@ const STEPS = [
     title: "Les jeunes en rupture de contrats sont détectés en temps réel",
     description: (
       <>
-        <strong>Détection automatique grâce à une connexion sécurisée</strong> avec les systèmes d’information des
-        Organismes de formation.
+        <strong>Détection automatique grâce à une connexion sécurisée</strong> avec les systèmes d’information des CFA.
       </>
     ),
     imageSrc: "/images/landing-work-1.svg",
@@ -31,7 +30,7 @@ const STEPS = [
   },
   {
     stepNumber: "2",
-    title: "Les organismes enrichissent les dossiers de manière collaborative",
+    title: "Les CFA enrichissent les dossiers de manière collaborative",
     description: (
       <>
         <strong>Ils précisent les raisons de la rupture et partagent les freins rencontrés par les jeunes</strong>{" "}
@@ -136,7 +135,19 @@ export default function Page() {
                 mt: fr.spacing("3w"),
               }}
             >
-              Vous êtes une{" "}
+              Vous êtes un{" "}
+              <Box
+                className="fr-badge"
+                component="span"
+                sx={{
+                  fontSize: { xs: "0.85rem", md: "1rem" },
+                  backgroundColor: fr.colors.decisions.background.contrast.purpleGlycine.default,
+                  display: "inline-block",
+                }}
+              >
+                CFA
+              </Box>
+              ou une{" "}
               <Box
                 className="fr-badge"
                 component="span"
@@ -148,18 +159,6 @@ export default function Page() {
               >
                 mission locale
               </Box>{" "}
-              ou un{" "}
-              <Box
-                className="fr-badge"
-                component="span"
-                sx={{
-                  fontSize: { xs: "0.85rem", md: "1rem" },
-                  backgroundColor: fr.colors.decisions.background.contrast.purpleGlycine.default,
-                  display: "inline-block",
-                }}
-              >
-                organisme de formation
-              </Box>
             </Typography>
             <Typography
               sx={{

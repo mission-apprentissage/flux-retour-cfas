@@ -38,7 +38,7 @@ const SLIDES = [
         <strong>Les jeunes âgés de 16 à 18 ans</strong> (soumis à l&apos;obligation de formation).
       </>,
       <>
-        <strong>Les jeunes en situation de handicap (RQTH)</strong>.
+        <strong>Les jeunes en situation de handicap</strong>.
       </>,
       <>
         <strong>Les jeunes ayant explicitement signalé un besoin d&apos;accompagnement</strong>.
@@ -56,7 +56,7 @@ const SLIDES = [
         <strong>Ses coordonnées :</strong> téléphone, email.
       </>,
       <>
-        <strong>Les coordonnées de son OFA :</strong> pour faciliter la prise de contact.
+        <strong>Les coordonnées de son CFA :</strong> pour faciliter la prise de contact.
       </>,
       <>
         <strong>Les détails du contrat :</strong> date de début, date de rupture, formation suivie.
