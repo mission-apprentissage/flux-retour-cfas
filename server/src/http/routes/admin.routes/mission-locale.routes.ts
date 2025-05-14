@@ -14,21 +14,14 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
-
   router.post(
     "/activate",
     validateRequestMiddleware({
-      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string() }),
+      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string().regex(/^[0-9a-f]{24}$/) }),
     }),
     returnResult(activateMLAtDate)
   );
-
   return router;
-};
-
-const activateMLAtDate = ({ body }) => {
-  const { date, missionLocaleId } = body;
-  return activateMissionLocale(missionLocaleId, date);
 };
 
 const getAllMls = async () => {
@@ -41,4 +34,9 @@ const getAllMls = async () => {
   return organisationMl
     .map((orga) => ({ organisation: orga, externalML: externalML.find((ml) => ml.id === orga.ml_id) }))
     .filter((ml) => ml.externalML);
+};
+
+const activateMLAtDate = ({ body }) => {
+  const { date, missionLocaleId } = body;
+  return activateMissionLocale(missionLocaleId, date);
 };
