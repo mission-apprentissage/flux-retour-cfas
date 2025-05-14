@@ -40,7 +40,7 @@ export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: Ob
 
 export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date) => {
   await organisationsDb().updateOne(
-    { _id: missionLocaleId },
+    { _id: new ObjectId(missionLocaleId) },
     {
       $set: {
         activated_at: date,
