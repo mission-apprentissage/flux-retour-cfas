@@ -8,6 +8,8 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { Table } from "@/app/_components/table/Table";
 
+import { useAuth } from "../../_context/UserContext";
+
 import { EffectifData, MonthItem, SelectedSection } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
 
@@ -99,6 +101,8 @@ export const MonthTable = memo(function MonthTable({
   handleSectionChange,
   listType,
 }: MonthTableProps) {
+  const { user } = useAuth();
+  console.log("CONSOLE LOG ~ user:", user);
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
@@ -180,7 +184,12 @@ export const MonthTable = memo(function MonthTable({
             "organisme_enseigne",
           ]}
           itemsPerPage={7}
-          getRowLink={(rowData) => `/mission-locale/${rowData.id}?nom_liste=${listType}`}
+          getRowLink={(rowData) => {
+            console.log("CONSOLE LOG ~ rowData:", rowData);
+            return user.organisation.type === "ADMINISTRATEUR"
+              ? `/admin/mission-locale/${rowData.id}/${rowData.id}/?nom_liste=${listType}`
+              : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
+          }}
           emptyMessage="Aucun élément à afficher"
         />
       )}

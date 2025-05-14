@@ -1,7 +1,11 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { IUpdateMissionLocaleEffectif, updateMissionLocaleEffectifApi } from "shared/models";
+import {
+  IOrganisationMissionLocale,
+  IUpdateMissionLocaleEffectif,
+  updateMissionLocaleEffectifApi,
+} from "shared/models";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 
@@ -11,7 +15,9 @@ import {
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getAllEffectifsParMois } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
+import { organisationsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -19,6 +25,7 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
+  router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
 
   router.post(
     "/activate",
@@ -68,6 +75,20 @@ const getAllMls = async () => {
   return organisationMl
     .map((orga) => ({ organisation: orga, externalML: externalML.find((ml) => ml.id === orga.ml_id) }))
     .filter((ml) => ml.externalML);
+};
+
+export const getEffectifsParMoisMissionLocale = async (req) => {
+  const id = req.params.id;
+  if (!id) {
+    throw Boom.badRequest("Missing id");
+  }
+
+  const missionLocale = (await organisationsDb().findOne({ _id: new ObjectId(id) })) as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
+  }
+
+  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
 };
 
 const updateMissionLocaleEffectif = async (req) => {

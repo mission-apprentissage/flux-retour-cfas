@@ -13,10 +13,9 @@ import {
 } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import {
-  getEffectifARisqueByMissionLocaleId,
+  getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
-  getEffectifsParMoisByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -51,33 +50,13 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
 };
 
-const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
 
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocale._id,
-      { type: API_TRAITEMENT_TYPE.A_TRAITER },
-      missionLocale.activated_at
-    ),
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocale._id,
-      { type: API_TRAITEMENT_TYPE.TRAITE },
-      missionLocale.activated_at
-    ),
-    getEffectifARisqueByMissionLocaleId(missionLocale._id),
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocale._id,
-      { type: API_TRAITEMENT_TYPE.INJOIGNABLE },
-      missionLocale.activated_at
-    ),
-  ]);
-  return {
-    a_traiter,
-    traite,
-    prioritaire,
-    injoignable,
-  };
+  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
