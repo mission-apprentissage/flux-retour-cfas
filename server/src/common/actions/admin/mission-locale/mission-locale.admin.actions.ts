@@ -4,7 +4,7 @@ import { IOrganisationMissionLocale } from "shared/models";
 import { organisationsDb } from "@/common/model/collections";
 import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
-export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date) => {
+export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
   const ml = await organisationsDb()
     .aggregate([
       {
@@ -35,6 +35,10 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
     return;
   }
 
+  await activateMissionLocale(missionLocaleId, date);
+};
+
+export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date) => {
   await organisationsDb().updateOne(
     { _id: missionLocaleId },
     {
