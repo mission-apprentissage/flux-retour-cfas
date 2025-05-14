@@ -15,6 +15,7 @@ import {
   UAI_REGEX,
 } from "../../constants";
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { zAdresse } from "../parts/adresseSchema";
 
 const collectionName = "organisations";
 
@@ -34,6 +35,7 @@ const zOrganisationMissionLocaleCreate = z.object({
   siret: z.string({ description: "N° SIRET" }).optional(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
+  adresse: zAdresse.optional(),
 });
 
 const zOrganisationOrganismeCreate = z.object({

@@ -4,6 +4,7 @@ import { IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
+import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import {
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
@@ -131,5 +132,29 @@ export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLoc
       continue;
     }
     updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
+  }
+};
+
+export const hydrateMissionLocaleAdresse = async () => {
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
+
+  for (const ml of allMl) {
+    const missionLocale = await organisationsDb().findOne({ ml_id: ml.id, type: "MISSION_LOCALE" });
+    const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, ml.localisation.cp);
+
+    if (missionLocale) {
+      await organisationsDb().updateOne(
+        {
+          _id: missionLocale._id,
+        },
+        {
+          $set: {
+            adresse: {
+              ...rest,
+            },
+          },
+        }
+      );
+    }
   }
 };

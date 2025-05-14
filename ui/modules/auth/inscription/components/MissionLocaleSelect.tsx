@@ -42,8 +42,8 @@ export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProp
     setSelectedValue(`${externalML.nom} (${externalML.localisation.ville} - ${externalML.localisation.cp})`);
     setSearchTerm("");
     setIsOpen(false);
-
-    setOrganisation(organisation);
+    const { adresse, ...restOrga } = organisation;
+    setOrganisation(restOrga);
   };
 
   // Handle keyboard navigation

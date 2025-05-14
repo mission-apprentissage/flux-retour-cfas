@@ -1,14 +1,22 @@
 import { z } from "zod";
 
-import { zApiTypeEnum, zApiEffectifListeEnum } from "../../data/missionLocaleEffectif.model";
+import { zApiEffectifListeEnum } from "../../data/missionLocaleEffectif.model";
+
+export const effectifsParMoisFiltersMissionLocaleAPISchema = {
+  type: z.array(zApiEffectifListeEnum),
+};
 
 export const effectifsParMoisFiltersMissionLocaleSchema = {
-  type: zApiTypeEnum,
+  type: zApiEffectifListeEnum,
 };
 
 export const effectifMissionLocaleListe = {
-  nom_liste: zApiEffectifListeEnum.optional(),
+  nom_liste: zApiEffectifListeEnum,
 };
+
+export type IEffectifsParMoisFiltersMissionLocaleAPISchema = z.infer<
+  z.ZodObject<typeof effectifsParMoisFiltersMissionLocaleAPISchema>
+>;
 
 export type IEffectifsParMoisFiltersMissionLocaleSchema = z.infer<
   z.ZodObject<typeof effectifsParMoisFiltersMissionLocaleSchema>
