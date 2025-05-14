@@ -104,7 +104,7 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
 
 export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLocaleId: ObjectId) => {
   const cursor = missionLocaleEffectifsDb().find({
-    mission_locale_id: missionLocaleId,
+    mission_locale_id: new ObjectId(missionLocaleId),
   });
 
   while (await cursor.hasNext()) {
