@@ -9,6 +9,7 @@ import { API_EFFECTIF_LISTE } from "shared";
 
 import { PageWithSidebarSkeleton, TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { StartDsfrOnHydration } from "@/app/_dsfr-setup/dsfrProvider";
 import { _get } from "@/common/httpClient";
 
 import { MlCard } from "../../_components/card/MlCard";
@@ -60,6 +61,7 @@ function EffectifsDataLoader({ children }: { children: (data: MonthsData) => Rea
 export default function Page() {
   return (
     <div className="fr-container">
+      <StartDsfrOnHydration />
       <MLHeader />
       <SuspenseWrapper
         fallback={<PageWithSidebarSkeleton />}

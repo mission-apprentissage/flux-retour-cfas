@@ -15,6 +15,7 @@ import React from "react";
 import { _get } from "@/common/httpClient";
 
 import { HomeCarousel } from "../_components/carousel/HomeCarousel";
+import { StartDsfrOnHydration } from "../_dsfr-setup/dsfrProvider";
 
 const STEPS = [
   {
@@ -102,6 +103,7 @@ export default function Page() {
 
   return (
     <>
+      <StartDsfrOnHydration />
       <Box
         component="section"
         sx={{

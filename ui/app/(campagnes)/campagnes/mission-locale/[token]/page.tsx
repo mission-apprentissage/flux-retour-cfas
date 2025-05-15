@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
+import { StartDsfrOnHydration } from "@/app/_dsfr-setup/dsfrProvider";
 import { AuthError, _get } from "@/common/httpClient";
 import { publicConfig } from "@/config.public";
 
@@ -54,6 +55,7 @@ export default function Page() {
 
   return (
     <Stack spacing={3} sx={{ width: "100%" }}>
+      <StartDsfrOnHydration />
       <Stack justifyContent="end" alignItems="center">
         <Box
           component="img"
