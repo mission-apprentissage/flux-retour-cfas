@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import MissionLocaleDisplay from "@/app/mission-locale/_components/MissionLocaleDisplay";
 import { _get } from "@/common/httpClient";
 
-import MissionLocaleDisplay from "./_components/MissionLocaleDisplay";
 import { MonthsData } from "./_components/types";
 
 export default function Page() {

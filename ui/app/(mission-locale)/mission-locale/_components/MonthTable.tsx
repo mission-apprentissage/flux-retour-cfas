@@ -7,8 +7,7 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { Table } from "@/app/_components/table/Table";
-
-import { useAuth } from "../../_context/UserContext";
+import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifData, MonthItem, SelectedSection } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
@@ -102,7 +101,6 @@ export const MonthTable = memo(function MonthTable({
   listType,
 }: MonthTableProps) {
   const { user } = useAuth();
-  console.log("CONSOLE LOG ~ user:", user);
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
@@ -175,14 +173,7 @@ export const MonthTable = memo(function MonthTable({
           data={dataRows}
           columns={columns}
           searchTerm={searchTerm}
-          searchableColumns={[
-            "nom",
-            "prenom",
-            "libelle_formation",
-            "organisme_nom",
-            "organisme_raison_sociale",
-            "organisme_enseigne",
-          ]}
+          searchableColumns={["nom", "prenom"]}
           itemsPerPage={7}
           getRowLink={(rowData) => {
             console.log("CONSOLE LOG ~ rowData:", rowData);

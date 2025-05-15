@@ -4,16 +4,45 @@ import { IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 
-export const activateMissionLocale = async (missionLocaleId: string, date: Date) => {
-  const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: new ObjectId(missionLocaleId) });
+export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
+  const ml = await organisationsDb()
+    .aggregate([
+      {
+        $match: {
+          type: "MISSION_LOCALE",
+          _id: missionLocaleId,
+        },
+      },
+      {
+        $lookup: {
+          from: "usersMigration",
+          localField: "_id",
+          foreignField: "organisation_id",
+          as: "users",
+        },
+      },
+      {
+        $match: {
+          "users.0": {
+            $exists: false,
+          },
+        },
+      },
+    ])
+    .next();
 
   if (!ml) {
-    throw new Error(`Mission locale with id ${missionLocaleId} not found`);
+    return;
   }
 
+  await activateMissionLocale(missionLocaleId, date);
+};
+
+export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Date) => {
   await organisationsDb().updateOne(
     { _id: new ObjectId(missionLocaleId) },
     {
@@ -22,6 +51,8 @@ export const activateMissionLocale = async (missionLocaleId: string, date: Date)
       },
     }
   );
+
+  await updateEffectifMissionLocaleSnapshotAtActivation(missionLocaleId);
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {

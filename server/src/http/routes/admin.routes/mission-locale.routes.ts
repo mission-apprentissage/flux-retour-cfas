@@ -30,7 +30,7 @@ export default () => {
   router.post(
     "/activate",
     validateRequestMiddleware({
-      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string() }),
+      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string().regex(/^[0-9a-f]{24}$/) }),
     }),
     returnResult(activateMLAtDate)
   );
@@ -58,11 +58,6 @@ export default () => {
     returnResult(resetMissionLocaleEffectif)
   );
   return router;
-};
-
-const activateMLAtDate = ({ body }) => {
-  const { date, missionLocaleId } = body;
-  return activateMissionLocale(missionLocaleId, date);
 };
 
 const getAllMls = async () => {
@@ -105,4 +100,9 @@ const resetMissionLocaleEffectif = async (req) => {
   const { mission_locale_id, effectif_id } = req.body;
 
   return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
+};
+
+const activateMLAtDate = ({ body }) => {
+  const { date, missionLocaleId } = body;
+  return activateMissionLocale(missionLocaleId, date);
 };

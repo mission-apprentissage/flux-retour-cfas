@@ -16122,6 +16122,7 @@ exports[`validation-schema > should create validation schema for telechargementL
         "sifa",
         "ml_a_traiter",
         "ml_traite",
+        "ml_injoignable",
       ],
     },
     "user_id": {

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
@@ -98,6 +99,39 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
         }
       }
     }
+  }
+};
+
+export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLocaleId: ObjectId) => {
+  const cursor = missionLocaleEffectifsDb().find({
+    mission_locale_id: new ObjectId(missionLocaleId),
+  });
+
+  while (await cursor.hasNext()) {
+    const effML = await cursor.next();
+    if (!effML) {
+      continue;
+    }
+    const upToDateEffectif = (await effectifsDb()
+      .aggregate([
+        {
+          $unionWith: {
+            coll: "effectifsDECA",
+            pipeline: [{ $match: { _id: effML.effectif_id } }],
+          },
+        },
+        {
+          $match: {
+            _id: effML.effectif_id,
+          },
+        },
+      ])
+      .toArray()) as Array<IEffectif | IEffectifDECA>;
+
+    if (!upToDateEffectif || upToDateEffectif.length === 0) {
+      continue;
+    }
+    updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
   }
 };
 
