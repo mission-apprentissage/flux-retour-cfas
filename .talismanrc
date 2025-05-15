@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/app/_components/Footer.tsx
+  checksum: 0a8e317856f681ac679d216fe2b1539c4f09d23160651ef5bc1b84ba7c1cd111
 - filename: ui/app/(home)/auth/mot-de-passe-oublie/page.tsx
   checksum: 23ff4a58fb50094a694a0dae033082419d075621318db10e30dcf40c088eb74d
 - filename: ui/app/(home)/auth/connexion/page.tsx
