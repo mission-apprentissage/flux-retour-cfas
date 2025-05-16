@@ -11,7 +11,7 @@ import {
   getMissionLocaleEffectifInfoFromToken,
   updateEffectifPhoneNumberByTokenDbUpdate,
 } from "@/common/actions/campagnes/campagnes.actions";
-import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
+import { getLbaTrainingLinks, LBA_URL } from "@/common/apis/lba/lba.api";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { maskTelephone } from "@/common/utils/phoneUtils";
 import config from "@/config";
@@ -21,6 +21,13 @@ export default () => {
   const router = express.Router();
 
   router.get("/", getMissionLocaleEffectifInfoByToken);
+  router.get(
+    "/lba",
+    validateRequestMiddleware({
+      query: z.object({ utm_source: z.string(), utm_medium: z.string(), utm_campaign: z.string() }),
+    }),
+    getLbaLink
+  );
   router.get(
     "/confirmation/:confirmation",
     validateRequestMiddleware({ params: z.object({ confirmation: z.enum(["true", "false"]) }) }),
@@ -100,6 +107,30 @@ async function updateEffectifPhoneNumberByToken(req, res, next) {
     await updateEffectifPhoneNumberByTokenDbUpdate(token, telephone);
     await deactivateEffectifToken(token);
     res.json({ message: "Numéro de téléphone mis à jour." });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getLbaLink(req, res, next) {
+  try {
+    const { utm_campaign, utm_medium, utm_source } = req.query;
+    const token = res.locals.token;
+    const effectif = await getMissionLocaleEffectifInfoFromToken(token);
+    const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
+
+    let lbaUrl: string = `${LBA_URL}/recherche-emploi`;
+    if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
+      lbaUrl = lbaResponse.data[0].lien_lba as string;
+    }
+
+    const url = new URL(lbaUrl);
+    url.searchParams.set("utm_source", utm_source);
+    url.searchParams.set("utm_medium", utm_medium);
+    url.searchParams.set("utm_campaign", utm_campaign);
+    lbaUrl = url.toString();
+
+    res.redirect(302, lbaUrl);
   } catch (error) {
     next(error);
   }

@@ -158,10 +158,10 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
 
 export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {
   const dossier = createRandomDossierApprenantApiInputV3(params);
-
-  const contrat_date_debut = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 9, 1));
-  const contrat_date_rupture = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 10, 1));
-  const contrat_date_fin = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 11, 1));
+  const now = new Date();
+  const contrat_date_debut = new Date(new Date().setMonth(now.getMonth() - 3));
+  const contrat_date_rupture = new Date(new Date().setMonth(now.getMonth() - 2));
+  const contrat_date_fin = new Date(new Date().setMonth(now.getMonth() - 1));
   return {
     ...dossier,
     contrat_date_debut,
