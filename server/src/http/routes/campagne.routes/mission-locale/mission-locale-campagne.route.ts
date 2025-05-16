@@ -112,26 +112,28 @@ async function updateEffectifPhoneNumberByToken(req, res, next) {
   }
 }
 
-async function getLbaLink(req, res, next) {
-  try {
-    const { utm_campaign, utm_medium, utm_source } = req.query;
-    const token = res.locals.token;
-    const effectif = await getMissionLocaleEffectifInfoFromToken(token);
-    const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
+// Add here rncp and cfd to the quesry params ?
 
-    let lbaUrl: string = `${LBA_URL}/recherche-emploi`;
-    if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
-      lbaUrl = lbaResponse.data[0].lien_lba as string;
-    }
+// async function getLbaLink(req, res, next) {
+//   try {
+//     const { utm_campaign, utm_medium, utm_source } = req.query;
+//     const token = res.locals.token;
+//     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
+//     const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
 
-    const url = new URL(lbaUrl);
-    url.searchParams.set("utm_source", utm_source);
-    url.searchParams.set("utm_medium", utm_medium);
-    url.searchParams.set("utm_campaign", utm_campaign);
-    lbaUrl = url.toString();
+//     let lbaUrl: string = `${LBA_URL}/recherche-emploi`;
+//     if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
+//       lbaUrl = lbaResponse.data[0].lien_lba as string;
+//     }
 
-    res.redirect(302, lbaUrl);
-  } catch (error) {
-    next(error);
-  }
-}
+//     const url = new URL(lbaUrl);
+//     url.searchParams.set("utm_source", utm_source);
+//     url.searchParams.set("utm_medium", utm_medium);
+//     url.searchParams.set("utm_campaign", utm_campaign);
+//     lbaUrl = url.toString();
+
+//     res.redirect(302, lbaUrl);
+//   } catch (error) {
+//     next(error);
+//   }
+// }

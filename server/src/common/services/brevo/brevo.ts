@@ -62,3 +62,45 @@ export const getContactDetails = async (email: string) => {
     return;
   }
 };
+
+export const importContacts = async (
+   listeId: number,
+  contacts: Array<{
+    email: string;
+    prenom: string;
+    nom: string;
+    urls?: Record<string, string> | null;
+    telephone?: string | null;
+    nom_organisme?: string | null;
+    mission_locale_id: string;
+  }>
+) => {
+  if (!ContactInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const contactImport = new brevo.RequestContactImport();
+  contactImport.listIds = [listeId];
+
+  const contactList = contacts.map((contact) => {
+    const contactData = new brevo.RequestContactImportJsonBodyInner();
+    contactData.email = contact.email;
+    contactData.attributes = {
+      PRENOM: contact.prenom,
+      NOM: contact.nom,
+      ...contact.urls,
+      TELEPHONE: contact.telephone,
+      NOM_ORGANISME: contact.nom_organisme,
+      MISSION_LOCALE_ID: contact.mission_locale_id,
+    };
+    return contactData;
+  });
+  contactImport.jsonBody = contactList;
+
+  try {
+    return await ContactInstance.importContacts(contactImport);
+  } catch (e) {
+    captureException(new Error(`Brevo importContacts error: ${e}`));
+    return;
+  }
+}
