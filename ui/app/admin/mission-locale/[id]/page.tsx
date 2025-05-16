@@ -12,10 +12,18 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
 
 export default function Page() {
-  const params = useParams();
-  const id = params?.id as string | undefined;
+  const { id } = useParams() as { id?: string };
 
-  const { data } = useQuery<MonthsData>(
+  const { data: missionLocaleData } = useQuery(
+    ["mission-locale", id],
+    () => _get(`/api/v1/admin/mission-locale/${id}`),
+    {
+      suspense: true,
+      useErrorBoundary: true,
+    }
+  );
+
+  const { data: effectifsData } = useQuery<MonthsData>(
     ["effectifs-per-month-user", id],
     () => _get(`/api/v1/admin/mission-locale/${id}/effectifs-per-month`),
     {
@@ -24,32 +32,31 @@ export default function Page() {
     }
   );
 
-  const { data: missionLocale } = useQuery(["mission-locale", id], () => _get(`/api/v1/admin/mission-locale/${id}`), {
-    suspense: true,
-    useErrorBoundary: true,
-  });
-
-  console.log("CONSOLE LOG ~ const{data:missionLocale}=useQuery ~ missionLocale:", missionLocale);
-
   return (
-    <div className="fr-container">
-      <Stack spacing={3}>
-        <DsfrLink href={`/admin/mission-locale`} arrow="left">
-          Retour à la liste des missions locales
-        </DsfrLink>
-        <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems="end">
-          <Box flex="1">
-            <h1 className="fr-h1 fr-text--blue-france fr-mb-1w">Liste des jeunes en ruptures de contrat</h1>
-          </Box>
+    <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
+      <div className="fr-container">
+        <Stack spacing={3}>
+          <DsfrLink href="/admin/mission-locale" arrow="left">
+            Retour à la liste des missions locales
+          </DsfrLink>
+
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems="end">
+            <Box flex="1">
+              <h1 className="fr-h1 fr-text--blue-france fr-mb-1w">Liste des jeunes en ruptures de contrat</h1>
+            </Box>
+          </Stack>
         </Stack>
-      </Stack>
-      <Box flex="1">
-        <h6 className="">Mission locale {missionLocale.nom}</h6>
-      </Box>
-      <Box component="hr" className="fr-hr" />
-      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <MissionLocaleDisplay data={data} />}
-      </SuspenseWrapper>
-    </div>
+
+        {missionLocaleData && (
+          <Box flex="1">
+            <h6>Mission locale {missionLocaleData.nom}</h6>
+          </Box>
+        )}
+
+        <Box component="hr" className="fr-hr" />
+
+        {effectifsData && <MissionLocaleDisplay data={effectifsData} />}
+      </div>
+    </SuspenseWrapper>
   );
 }

@@ -42,7 +42,6 @@ export default function Page() {
       useErrorBoundary: true,
     }
   );
-  console.log("CONSOLE LOG ~ Page ~ data:", data);
 
   function handleResult(success: boolean, goNext: boolean, nextId?: string) {
     if (!success) {
