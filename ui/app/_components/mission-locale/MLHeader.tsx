@@ -3,8 +3,9 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Stack, Box } from "@mui/material";
 
-import { ModalRupturantExcel } from "@/app/mission-locale/_components/modal/ModalRupturantExcel";
 import { _getBlob } from "@/common/httpClient";
+
+import { ModalRupturantExcel } from "./modal/ModalRupturantExcel";
 
 export const MLHeader = () => {
   return (

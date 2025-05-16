@@ -114,6 +114,9 @@ const UserMenu = () => {
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
                     Gestion des utilisateurs
                   </MenuItem>
+                  <MenuItem href="/admin/mission-locale" icon={<Parametre boxSize={4} />}>
+                    Gestion des missions locales
+                  </MenuItem>
                   <MenuItem href="/admin/reseaux" icon={<Parametre boxSize={4} />}>
                     Gestion des réseaux
                   </MenuItem>

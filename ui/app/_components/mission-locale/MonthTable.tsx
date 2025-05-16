@@ -2,11 +2,13 @@
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Typography, Stack } from "@mui/material";
+import { useParams } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { Table } from "@/app/_components/table/Table";
+import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifData, MonthItem, SelectedSection } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
@@ -99,6 +101,9 @@ export const MonthTable = memo(function MonthTable({
   handleSectionChange,
   listType,
 }: MonthTableProps) {
+  const { user } = useAuth();
+  const params = useParams();
+  const mlId = params?.id as string | undefined;
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
@@ -173,7 +178,11 @@ export const MonthTable = memo(function MonthTable({
           searchTerm={searchTerm}
           searchableColumns={["nom", "prenom"]}
           itemsPerPage={7}
-          getRowLink={(rowData) => `/mission-locale/${rowData.id}?nom_liste=${listType}`}
+          getRowLink={(rowData) => {
+            return user.organisation.type === "ADMINISTRATEUR" && mlId
+              ? `/admin/mission-locale/${mlId}/${rowData.id}/?nom_liste=${listType}`
+              : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
+          }}
           emptyMessage="Aucun élément à afficher"
         />
       )}

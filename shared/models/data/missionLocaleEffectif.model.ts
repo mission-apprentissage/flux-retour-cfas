@@ -52,7 +52,7 @@ const zMissionLocaleEffectif = z.object({
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
   situation: zSituationEnum.nullish(),
-  situation_autre: z.string().optional(),
+  situation_autre: z.string().nullish(),
   created_at: z.date(),
   updated_at: z.date().optional(),
   deja_connu: z.boolean().nullish(),

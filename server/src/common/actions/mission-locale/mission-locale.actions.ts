@@ -959,3 +959,21 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
     );
   }
 };
+
+export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
+  const fetchByType = (type: API_EFFECTIF_LISTE) =>
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocaleId,
+      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
+      activationDate
+    );
+
+  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+    fetchByType(API_EFFECTIF_LISTE.TRAITE),
+    getEffectifARisqueByMissionLocaleId(missionLocaleId),
+    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+  ]);
+
+  return { a_traiter, traite, prioritaire, injoignable };
+}

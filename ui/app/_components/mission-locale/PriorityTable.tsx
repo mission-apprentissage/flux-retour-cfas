@@ -3,10 +3,12 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { format } from "date-fns/index";
 import { fr } from "date-fns/locale";
+import { useParams } from "next/navigation";
 import React, { useMemo } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
 import { Table } from "@/app/_components/table/Table";
+import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifPriorityData } from "./types";
 
@@ -33,6 +35,10 @@ function PriorityBadge({ priorityData }: { priorityData: EffectifPriorityData[] 
 }
 
 export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) {
+  const { user } = useAuth();
+  const params = useParams();
+  const mlId = params?.id as string | undefined;
+
   const columns = useMemo(() => {
     return [
       { label: "", dataKey: "monthBadge", width: 150 },
@@ -96,7 +102,11 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
             emptyMessage="Aucun élément prioritaire"
             searchTerm={searchTerm}
             searchableColumns={["nom", "prenom"]}
-            getRowLink={(row) => `/mission-locale/${row.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`}
+            getRowLink={(rowData) => {
+              return user.organisation.type === "ADMINISTRATEUR" && mlId
+                ? `/admin/mission-locale/${mlId}/${rowData.id}/?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`
+                : `/mission-locale/${rowData.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`;
+            }}
           />
         </>
       )}

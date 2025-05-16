@@ -19,6 +19,7 @@ export function FeedbackForm({
   isInjoignable,
   hasSuccess,
   hasError,
+  isAdmin,
 }: {
   formData: IUpdateMissionLocaleEffectif;
   setFormData: (data: IUpdateMissionLocaleEffectif) => void;
@@ -28,6 +29,7 @@ export function FeedbackForm({
   isInjoignable: boolean;
   hasSuccess: boolean;
   hasError: boolean;
+  isAdmin?: boolean;
 }) {
   const [didChangeSituation, setDidChangeSituation] = useState(false);
 
@@ -134,7 +136,7 @@ export function FeedbackForm({
           <Input
             label="Merci de préciser"
             nativeInputProps={{
-              value: formData.situation_autre,
+              value: formData.situation_autre ?? undefined,
               onChange: (e) =>
                 setFormData({
                   ...formData,
@@ -201,6 +203,7 @@ export function FeedbackForm({
         hasSuccess={hasSuccess}
         didChangeSituation={didChangeSituation}
         isInjoignable={isInjoignable}
+        isAdmin={isAdmin}
       />
     </>
   );
@@ -213,6 +216,7 @@ function FormActions({
   hasSuccess,
   didChangeSituation,
   isInjoignable,
+  isAdmin,
 }: {
   isFormValid: boolean;
   onSave: (saveNext: boolean) => void;
@@ -220,6 +224,7 @@ function FormActions({
   hasSuccess: boolean;
   didChangeSituation: boolean;
   isInjoignable: boolean;
+  isAdmin?: boolean;
 }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -244,16 +249,18 @@ function FormActions({
       >
         Valider et quitter
       </SaveButton>
-      <SaveButton
-        type="saveAndNext"
-        selectedButton={selectedButton}
-        isSaving={isSaving}
-        hasSuccess={hasSuccess}
-        disabled={disabled}
-        onClick={() => handleClick("saveAndNext", true)}
-      >
-        Valider et passer au suivant
-      </SaveButton>
+      {!isAdmin && (
+        <SaveButton
+          type="saveAndNext"
+          selectedButton={selectedButton}
+          isSaving={isSaving}
+          hasSuccess={hasSuccess}
+          disabled={disabled}
+          onClick={() => handleClick("saveAndNext", true)}
+        >
+          Valider et passer au suivant
+        </SaveButton>
+      )}
     </Stack>
   );
 }
