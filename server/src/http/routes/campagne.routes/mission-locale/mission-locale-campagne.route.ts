@@ -93,7 +93,7 @@ async function updateEffectifPhoneNumberByToken(req, res, next) {
 
 async function getLbaLink(req, res, next) {
   try {
-    const { utm_campaign, utm_medium, utm_source } = req.params;
+    const { utm_campaign, utm_medium, utm_source } = req.query;
     const token = res.locals.token;
     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
     const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
