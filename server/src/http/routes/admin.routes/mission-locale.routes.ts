@@ -7,17 +7,23 @@ import {
   updateMissionLocaleEffectifApi,
 } from "shared/models";
 import { extensions } from "shared/models/parts/zodPrimitives";
+import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
 
 import {
   activateMissionLocale,
   getAllMlFromOrganisations,
+  getMlFromOrganisations,
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
-import { getAllEffectifsParMois } from "@/common/actions/mission-locale/mission-locale.actions";
+import {
+  getAllEffectifsParMois,
+  getEffectifFromMissionLocaleId,
+} from "@/common/actions/mission-locale/mission-locale.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
 import { organisationsDb } from "@/common/model/collections";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -25,7 +31,9 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
+  router.get("/:id", returnResult(getMl));
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
+  router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
 
   router.post(
     "/activate",
@@ -72,6 +80,15 @@ const getAllMls = async () => {
     .filter((ml) => ml.externalML);
 };
 
+const getMl = async (req) => {
+  const id = req.params.id;
+  const organisationMl = await getMlFromOrganisations(id);
+  if (!organisationMl) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
+  }
+  return organisationMl;
+};
+
 export const getEffectifsParMoisMissionLocale = async (req) => {
   const id = req.params.id;
   if (!id) {
@@ -84,6 +101,19 @@ export const getEffectifsParMoisMissionLocale = async (req) => {
   }
 
   return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+};
+
+const getEffectifMissionLocale = async (req) => {
+  const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const mlId = req.params.id;
+  const effectifId = req.params.effectiId;
+
+  const missionLocale = (await organisationsDb().findOne({ _id: new ObjectId(mlId) })) as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.notFound(`No Mission Locale found for id: ${mlId}`);
+  }
+
+  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const updateMissionLocaleEffectif = async (req) => {

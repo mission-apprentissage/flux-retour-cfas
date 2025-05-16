@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { MissionLocaleDisplay } from "@/app/_components/mission-locale/MissionLocaleDisplay";
+import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
+import { MonthsData } from "@/app/_components/mission-locale/types";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import MissionLocaleDisplay from "@/app/mission-locale/_components/MissionLocaleDisplay";
 import { _get } from "@/common/httpClient";
-
-import { MonthsData } from "./_components/types";
 
 export default function Page() {
   const { data } = useQuery<MonthsData>(
@@ -20,8 +20,11 @@ export default function Page() {
   );
 
   return (
-    <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-      {data && <MissionLocaleDisplay data={data} />}
-    </SuspenseWrapper>
+    <div className="fr-container">
+      <MLHeader />
+      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
+        {data && <MissionLocaleDisplay data={data} />}
+      </SuspenseWrapper>
+    </div>
   );
 }

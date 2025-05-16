@@ -65,6 +65,15 @@ export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMi
   return mls as Array<IOrganisationMissionLocale>;
 };
 
+export const getMlFromOrganisations = async (id: string): Promise<IOrganisationMissionLocale | null> => {
+  const ml = await organisationsDb().findOne({
+    _id: new ObjectId(id),
+    type: "MISSION_LOCALE",
+  });
+
+  return ml as IOrganisationMissionLocale | null;
+};
+
 export const setEffectifMissionLocaleDataAdmin = async (
   missionLocaleId: ObjectId,
   effectifId: ObjectId,

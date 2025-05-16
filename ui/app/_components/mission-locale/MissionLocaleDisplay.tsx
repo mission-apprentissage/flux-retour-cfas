@@ -10,7 +10,6 @@ import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 
-import { MLHeader } from "./MLHeader";
 import { SearchableTableSection } from "./SearchableTableSection";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "./types";
 import {
@@ -21,16 +20,7 @@ import {
   anchorFromLabel,
 } from "./utils";
 
-export default function MissionLocaleDisplay({ data }: { data: MonthsData }) {
-  return (
-    <div className="fr-container">
-      <MLHeader />
-      <MissionLocaleContent data={data} />
-    </div>
-  );
-}
-
-function MissionLocaleContent({ data }: { data: MonthsData }) {
+export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
@@ -48,7 +38,6 @@ function MissionLocaleContent({ data }: { data: MonthsData }) {
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
 
   useEffect(() => {
-    // Auto-set the active anchor the first time
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
         const firstLabel =

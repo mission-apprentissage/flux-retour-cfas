@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Skeleton, Typography } from "@mui/material";
+import { useParams, useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
@@ -12,7 +13,6 @@ export function PageHeader({
   currentIndex,
   isLoading,
   isATraiter,
-  nomListe,
 }: {
   previous?: { id: string };
   next?: { id: string };
@@ -20,9 +20,18 @@ export function PageHeader({
   currentIndex: number;
   isLoading?: boolean;
   isATraiter?: boolean;
-  nomListe?: string;
 }) {
-  const getHref = (id: string) => `/mission-locale/${id}${nomListe ? `?nom_liste=${nomListe}` : ""}`;
+  const params = useParams();
+  const mlId = params?.id;
+  const effectifId = params && "effectifId" in params ? params.effectifId : undefined;
+  const searchParams = useSearchParams();
+  const rawList = searchParams ? (searchParams.get("nom_liste") as API_EFFECTIF_LISTE | null) : null;
+  const nomListe = rawList || API_EFFECTIF_LISTE.A_TRAITER;
+  const listQuery = `?nom_liste=${nomListe}`;
+
+  const basePath = effectifId ? `/admin/mission-locale/${mlId}` : `/mission-locale`;
+
+  const getHref = (id: string) => `${basePath}/${id}${listQuery}`;
 
   return (
     <Box
@@ -53,13 +62,11 @@ export function PageHeader({
                   Dossier n°{currentIndex + 1} sur {total} injoignable
                 </Typography>
               ) : (
-                <>
-                  <Typography fontWeight="bold">
-                    Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
-                  </Typography>
-                </>
+                <Typography fontWeight="bold">
+                  Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
+                </Typography>
               )}
-              <Typography component="span" sx={{ marginLeft: 1 }}>
+              <Typography component="span" sx={{ ml: 1 }}>
                 (tous mois confondus)
               </Typography>
             </Box>

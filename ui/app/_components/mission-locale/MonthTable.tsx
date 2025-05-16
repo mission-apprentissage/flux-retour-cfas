@@ -2,6 +2,7 @@
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Typography, Stack } from "@mui/material";
+import { useParams } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
@@ -101,6 +102,8 @@ export const MonthTable = memo(function MonthTable({
   listType,
 }: MonthTableProps) {
   const { user } = useAuth();
+  const params = useParams();
+  const mlId = params?.id as string | undefined;
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
@@ -176,9 +179,8 @@ export const MonthTable = memo(function MonthTable({
           searchableColumns={["nom", "prenom"]}
           itemsPerPage={7}
           getRowLink={(rowData) => {
-            console.log("CONSOLE LOG ~ rowData:", rowData);
-            return user.organisation.type === "ADMINISTRATEUR"
-              ? `/admin/mission-locale/${rowData.id}/${rowData.id}/?nom_liste=${listType}`
+            return user.organisation.type === "ADMINISTRATEUR" && mlId
+              ? `/admin/mission-locale/${mlId}/${rowData.id}/?nom_liste=${listType}`
               : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
           }}
           emptyMessage="Aucun élément à afficher"

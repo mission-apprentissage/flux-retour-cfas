@@ -958,7 +958,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
-  const fetchByType = (type: API_TRAITEMENT_TYPE) =>
+  const fetchByType = (type: API_EFFECTIF_LISTE) =>
     getEffectifsParMoisByMissionLocaleId(
       missionLocaleId,
       { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
@@ -966,10 +966,10 @@ export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activati
     );
 
   const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
-    fetchByType(API_TRAITEMENT_TYPE.A_TRAITER),
-    fetchByType(API_TRAITEMENT_TYPE.TRAITE),
+    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+    fetchByType(API_EFFECTIF_LISTE.TRAITE),
     getEffectifARisqueByMissionLocaleId(missionLocaleId),
-    fetchByType(API_TRAITEMENT_TYPE.INJOIGNABLE),
+    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
   ]);
 
   return { a_traiter, traite, prioritaire, injoignable };

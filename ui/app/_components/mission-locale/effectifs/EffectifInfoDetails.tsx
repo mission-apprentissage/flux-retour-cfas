@@ -1,111 +1,12 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Box, Collapse, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { formatDate, getAge, getMonthYearFromDate } from "@/app/_utils/date.utils";
+import { formatDate, getAge } from "@/app/_utils/date.utils";
 
-import { Feedback } from "./Feedback";
-
-export function EffectifInfo({
-  effectif,
-  nomListe,
-}: {
-  effectif: IEffecifMissionLocale["effectif"];
-  nomListe: IMissionLocaleEffectifList;
-}) {
-  const [infosOpen, setInfosOpen] = useState(false);
-  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
-
-  const computeTransmissionDate = (date) => {
-    return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
-  };
-
-  return (
-    <Stack
-      spacing={2}
-      sx={{
-        py: { xs: 2, md: 4 },
-      }}
-    >
-      <Stack
-        p={{ xs: 2, md: 3 }}
-        mt={4}
-        sx={{
-          background: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
-        }}
-      >
-        <Stack direction="row" spacing={1} mb={2} alignItems="center">
-          {effectif.injoignable ? (
-            <Badge severity="info">Contacté sans réponse</Badge>
-          ) : effectif.a_traiter && effectif.prioritaire ? (
-            <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
-              <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
-            </p>
-          ) : effectif.a_traiter ? (
-            <Badge severity="new">à traiter</Badge>
-          ) : (
-            <Badge severity="success">traité</Badge>
-          )}
-
-          <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.dernier_statut?.date)}</p>
-        </Stack>
-
-        <Stack spacing={1}>
-          <Typography
-            variant="h3"
-            className="fr-text--blue-france"
-            sx={{ fontSize: { xs: "1.25rem", md: "1.75rem" }, margin: 0 }}
-          >
-            {effectif.nom} {effectif.prenom}
-          </Typography>
-          <Box
-            className="fr-notice fr-notice--info"
-            sx={{ backgroundColor: isListePrioritaire ? "var(--background-alt-blue-france)" : "white", p: 0 }}
-          >
-            <Box className="fr-notice__body">
-              <Typography component="p">
-                <span className="fr-notice__title">Date de la rupture du contrat d&apos;apprentissage :</span>
-                <span className="fr-notice__desc">
-                  {formatDate(effectif.contrats?.[0]?.date_rupture)
-                    ? `le ${formatDate(effectif.contrats?.[0]?.date_rupture)}`
-                    : "non renseignée"}
-                </span>
-              </Typography>
-            </Box>
-            <Typography variant="caption" color="grey" gutterBottom sx={{ fontStyle: "italic" }}>
-              {effectif.source === "API_DECA" ? (
-                <span>Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}</span>
-              ) : (
-                <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
-              )}
-            </Typography>
-          </Box>
-        </Stack>
-        {typeof effectif?.autorisation_contact === "boolean" && (
-          <Box className="fr-highlight" mt={2}>
-            <Typography component="p" className="fr-text--sm">
-              {effectif.nom} {effectif.prenom}
-              {effectif.autorisation_contact
-                ? " a indiqué avoir besoin d'être accompagné par vos services "
-                : " a indiqué ne pas avoir besoin d'être accompagné par vos services "}
-              (campagne emailing).
-            </Typography>
-          </Box>
-        )}
-      </Stack>
-
-      {!effectif.a_traiter && !effectif.injoignable && <Feedback situation={effectif.situation || {}} />}
-      <PersonalInfoSection effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
-    </Stack>
-  );
-}
-
-function PersonalInfoSection({ effectif, infosOpen, setInfosOpen }) {
+export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }) {
   const withDefaultFallback = (data, defaultText, value?) => {
     const defaultValue = value ?? "";
     return data ? defaultValue : <span style={{ color: "#666666", fontStyle: "italic" }}>{defaultText}</span>;
