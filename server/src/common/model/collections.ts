@@ -1,4 +1,7 @@
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
+import brevoMissionLocaleTemplateModelDescriptor, {
+  IBrevoMissionLocaleTemplate,
+} from "shared/models/data/brevoMissionLocaleTemplate.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -57,6 +60,7 @@ export const modelDescriptors = [
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   regionsModelDescriptor,
+  brevoMissionLocaleTemplateModelDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -86,6 +90,8 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);
+export const brevoMissionLocaleTemplateDb = () =>
+  getDbCollection<IBrevoMissionLocaleTemplate>(brevoMissionLocaleTemplateModelDescriptor.collectionName);
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
