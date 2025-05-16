@@ -19,7 +19,7 @@ import { HomeCarousel } from "../_components/carousel/HomeCarousel";
 const STEPS = [
   {
     stepNumber: "1",
-    title: "Les jeunes en rupture de contrats sont détectés en temps réel",
+    title: "Les jeunes en rupture de contrat sont détectés en temps réel",
     description: (
       <>
         <strong>Détection automatique grâce à une connexion sécurisée</strong> avec les systèmes d’information des CFA.
@@ -42,7 +42,7 @@ const STEPS = [
   },
   {
     stepNumber: "3",
-    title: "Les missions locales engagent une démarche d’« aller vers »",
+    title: "Les Missions Locales engagent une démarche d’« aller vers »",
     description: (
       <>
         <strong>Elles prennent contact avec les jeunes, lèvent les freins périphériques</strong> (mobilité, logement) et{" "}
@@ -65,7 +65,7 @@ const QUOTES = [
   },
   {
     text: "Je souhaite vivement pouvoir utiliser cet outil. Nos ML ont un rôle essentiel à jouer sur le thème de l'apprentissage (promotion de cette voie de formation et accompagnement des jeunes dans la durée) ",
-    author: "Conseillère à la Mission locale Technowest (Bordeaux)",
+    author: "Conseillère à la Mission Locale Technowest (Bordeaux)",
   },
 ];
 
@@ -157,7 +157,7 @@ export default function Page() {
                   display: "inline-block",
                 }}
               >
-                mission locale
+                Mission Locale
               </Box>{" "}
             </Typography>
             <Typography
