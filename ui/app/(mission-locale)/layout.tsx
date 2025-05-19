@@ -30,3 +30,4 @@ export default async function RootLayout({ children }: { children: JSX.Element }
     </Providers>
   );
 }
+export const dynamic = "force-dynamic";

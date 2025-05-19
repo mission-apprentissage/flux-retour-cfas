@@ -7,6 +7,7 @@ import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
 import { MonthsData } from "@/app/_components/mission-locale/types";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { StartDsfrOnHydration } from "@/app/_dsfr-setup/dsfrProvider";
 import { _get } from "@/common/httpClient";
 
 export default function Page() {
@@ -21,6 +22,7 @@ export default function Page() {
 
   return (
     <div className="fr-container">
+      <StartDsfrOnHydration />
       <MLHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
         {data && <MissionLocaleDisplay data={data} />}
