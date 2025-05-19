@@ -42,7 +42,6 @@ export const sendTransactionalEmail = async (recipientEmail: string, templateId:
   sendSmtpEmail.templateId = templateId;
   sendSmtpEmail.to = [{ email: recipientEmail }];
   sendSmtpEmail.params = brevoAttributes;
-
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
   } catch (e) {
@@ -64,7 +63,7 @@ export const getContactDetails = async (email: string) => {
 };
 
 export const importContacts = async (
-   listeId: number,
+  listeId: number,
   contacts: Array<{
     email: string;
     prenom: string;
@@ -103,4 +102,41 @@ export const importContacts = async (
     captureException(new Error(`Brevo importContacts error: ${e}`));
     return;
   }
-}
+};
+
+export const removeAllContactFromList = async (listeId: number) => {
+  if (!ContactInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const contactList = new brevo.RemoveContactFromList();
+  contactList.all = true;
+
+  try {
+    return await ContactInstance.removeContactFromList(listeId, contactList);
+  } catch (e) {
+    captureException(new Error(`Brevo cleanContact error: ${e}`));
+    return;
+  }
+};
+
+export const createContactList = async (missionLocaleName: string) => {
+  if (!ContactInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
+  const ddmm = day + month;
+
+  const contactList = new brevo.CreateList();
+  contactList.name = `${ddmm} -  ${config.env} Rupturant - ${missionLocaleName}`;
+  contactList.folderId = 169; // Folder TBA
+  try {
+    return await ContactInstance.createList(contactList);
+  } catch (e) {
+    captureException(new Error(`Brevo createContactList error: ${e}`));
+    return;
+  }
+};

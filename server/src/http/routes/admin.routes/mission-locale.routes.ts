@@ -6,6 +6,7 @@ import {
   IUpdateMissionLocaleEffectif,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
+import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -17,6 +18,7 @@ import {
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -24,13 +26,11 @@ import {
   getEffectifMissionLocaleEligibleToBrevoCount,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
-import { brevoMissionLocaleListDb, organisationsDb } from "@/common/model/collections";
+import { organisationsDb } from "@/common/model/collections";
+import { importContacts, removeAllContactFromList } from "@/common/services/brevo/brevo";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
-import { BREVO_TEMPLATE_TYPE } from "shared/models/data/brevoMissionLocaleTemplate.model";
-import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
-import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 
 export default () => {
   const router = express.Router();
@@ -40,7 +40,7 @@ export default () => {
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
   router.get("/:id/brevo/sync", returnResult(getSyncBrevoContactInfo));
-  router.post("/:id/brevo/sync", returnResult(syncBrevoContactList));
+  router.post("/:id/brevo/sync", returnResult(syncBrevoContactMissionLocale));
   router.post(
     "/activate",
     validateRequestMiddleware({
@@ -151,7 +151,7 @@ const getSyncBrevoContactInfo = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
   return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl?._id, organisationMl?.activated_at);
-}
+};
 
 const syncBrevoContactMissionLocale = async (req) => {
   const id = req.params.id;
@@ -160,12 +160,16 @@ const syncBrevoContactMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
 
-  const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(organisationMl?._id, organisationMl?.activated_at)
-  const listId = await getOrCreateBrevoList(organisationMl.ml_id, BREVO_LISTE_TYPE.MISSION_LOCALE)
+  const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(
+    organisationMl?._id,
+    organisationMl?.activated_at
+  );
+  const listId = await getOrCreateBrevoList(organisationMl.ml_id, organisationMl?.nom, BREVO_LISTE_TYPE.MISSION_LOCALE);
 
-  // Import contact from effectif and listId
-  // cleanContact()
-  // importContacts()
+  if (!listId) {
+    throw Boom.notFound(`Error while creating Brevo list for id: ${id}`);
+  }
 
-
-}
+  await removeAllContactFromList(listId);
+  await importContacts(listId, getMissionLocaleEffectif);
+};
