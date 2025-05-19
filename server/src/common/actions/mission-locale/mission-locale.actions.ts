@@ -384,6 +384,9 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
     ml_id: ml.id,
     nom: ml.nom,
     siret: ml.siret,
+    email: (ml.contact.email ?? "").toLowerCase(),
+    telephone: ml.contact.telephone ?? "",
+    site_web: (ml.contact.siteWeb ?? "").toLowerCase(),
   });
 
   return organisationsDb().findOne({ _id: orga.insertedId });
