@@ -2,7 +2,6 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { number, z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-
 export enum BREVO_LISTE_TYPE {
   MISSION_LOCALE = "MISSION_LOCALE_RUPTURANT",
 }
