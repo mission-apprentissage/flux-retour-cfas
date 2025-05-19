@@ -34,6 +34,83 @@ exports[`validation-schema > should create validation schema for auditLogs > aud
 }
 `;
 
+exports[`validation-schema > should create validation schema for brevoMissionLocaleList > brevoMissionLocaleList 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "listId": {
+      "bsonType": "number",
+    },
+    "ml_id": {
+      "bsonType": "number",
+    },
+    "type": {
+      "bsonType": "string",
+      "enum": [
+        "MISSION_LOCALE_RUPTURANT",
+      ],
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+  },
+  "required": [
+    "_id",
+    "listId",
+    "type",
+    "ml_id",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for brevoMissionLocaleTemplate > brevoMissionLocaleTemplate 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "ml_id": {
+      "bsonType": "number",
+    },
+    "name": {
+      "bsonType": "string",
+      "enum": [
+        "CONFIRMATION",
+        "REFUS",
+      ],
+    },
+    "templateId": {
+      "bsonType": "number",
+    },
+    "type": {
+      "bsonType": "string",
+      "enum": [
+        "MISSION_LOCALE",
+      ],
+    },
+  },
+  "required": [
+    "_id",
+    "templateId",
+    "name",
+    "type",
+    "ml_id",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for effectifV2 > effectifV2 1`] = `
 {
   "additionalProperties": false,

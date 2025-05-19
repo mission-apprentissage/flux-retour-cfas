@@ -1,4 +1,10 @@
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
+import brevoMissionLocaleListModelDescriptor, {
+  IBrevoMissionLocaleList,
+} from "shared/models/data/brevoMissionLocaleList.model";
+import brevoMissionLocaleTemplateModelDescriptor, {
+  IBrevoMissionLocaleTemplate,
+} from "shared/models/data/brevoMissionLocaleTemplate.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -60,7 +66,9 @@ export const modelDescriptors = [
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   regionsModelDescriptor,
+  brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
+  brevoMissionLocaleListModelDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -92,6 +100,10 @@ export const missionLocaleEffectifsDb = () =>
 export const missionLocaleEffectifsLogDb = () =>
   getDbCollection<IMissionLocaleEffectifLog>(missionLocaleEffectifLogDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);
+export const brevoMissionLocaleTemplateDb = () =>
+  getDbCollection<IBrevoMissionLocaleTemplate>(brevoMissionLocaleTemplateModelDescriptor.collectionName);
+export const brevoMissionLocaleListDb = () =>
+  getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);

@@ -5,7 +5,12 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { IEmailStatusEnum, API_EFFECTIF_LISTE, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  IEmailStatusEnum,
+  API_EFFECTIF_LISTE,
+  SITUATION_ENUM,
+  zEmailStatusEnum,
+} from "shared/models/data/missionLocaleEffectif.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -869,6 +874,126 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   }
 };
 
+const getEffectifMissionLocaleEligibleToBrevoAggregation = (
+  missionLocaleMongoId: ObjectId,
+  statut,
+  missionLocaleActivationDate?: Date
+) => [
+  generateMissionLocaleMatchStage(missionLocaleMongoId),
+  ...EFF_MISSION_LOCALE_FILTER,
+  ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+  ...addFieldFromActivationDate(missionLocaleActivationDate),
+  ...filterByActivationDatePipelineMl(),
+];
+
+export const getEffectifMissionLocaleEligibleToBrevoCount = async (
+  missionLocaleMongoId: ObjectId,
+  missionLocaleActivationDate?: Date
+) => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+
+  const effectifsMissionLocaleAggregation = [
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    {
+      $facet: {
+        total: [{ $count: "total" }],
+        eligible: [
+          { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
+          { $count: "total" },
+        ],
+      },
+    },
+    {
+      $project: {
+        total: { $arrayElemAt: ["$total.total", 0] },
+        eligible: { $arrayElemAt: ["$eligible.total", 0] },
+      },
+    },
+  ];
+  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
+  return { total: data?.total ?? 0, eligible: data?.eligible ?? 0 };
+};
+
+export const getEffectifMissionLocaleEligibleToBrevo = async (
+  missionLocaleMongoId: ObjectId,
+  missionLocaleActivationDate?: Date
+) => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+  const effectifsMissionLocaleAggregation = [
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
+    {
+      $match: {
+        email_status: "valid",
+        soft_deleted: { $ne: true },
+        "brevo.token": { $ne: null },
+      },
+    },
+    {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$effectif_snapshot.organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        email: "$effectif_snapshot.apprenant.courriel",
+        nom: "$effectif_snapshot.apprenant.nom",
+        prenom: "$effectif_snapshot.apprenant.prenom",
+        "urls.TDB_AB_TEST_A": {
+          $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
+        },
+        "urls.TDB_AB_TEST_B_TRUE": {
+          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
+        },
+        "urls.TDB_AB_TEST_B_FALSE": {
+          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
+        },
+        "urls.TDB_LBA_LINK": {
+          $concat: [
+            config.publicUrl,
+            "/api/v1/mission-locale/lba?",
+            "rncp=",
+            "$effectif_snapshot.formation.rncp",
+            "&cfd=",
+            "$effectif_snapshot.formation.cfd",
+          ],
+        },
+        telephone: "$effectif_snapshot.apprenant.telephone",
+        nom_organisme: "$organisme.nom",
+        mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
+      },
+    },
+  ];
+  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+  return data as Array<{
+    email: string;
+    prenom: string;
+    nom: string;
+    urls?: Record<string, string> | null;
+    telephone?: string | null;
+    nom_organisme?: string | null;
+    mission_locale_id: string;
+  }>;
+};
+
 export const getMissionLocaleRupturantToCheckMail = async () => {
   return await missionLocaleEffectifsDb()
     .aggregate([
@@ -880,48 +1005,9 @@ export const getMissionLocaleRupturantToCheckMail = async () => {
         },
       },
       {
-        $lookup: {
-          from: "organismes",
-          let: { id: "$effectif_snapshot.organisme_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-            {
-              $project: {
-                _id: 1,
-                nom: 1,
-              },
-            },
-          ],
-          as: "organisme",
-        },
-      },
-      {
-        $unwind: {
-          path: "$organisme",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 0,
           email: "$effectif_snapshot.apprenant.courriel",
-          nom: "$effectif_snapshot.apprenant.nom",
-          prenom: "$effectif_snapshot.apprenant.prenom",
-          "urls.TDB_AB_TEST_A": {
-            $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
-          },
-          "urls.TDB_AB_TEST_B_TRUE": {
-            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
-          },
-          "urls.TDB_AB_TEST_B_FALSE": {
-            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
-          },
-          "urls.TDB_LBA_LINK": {
-            $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/lba"],
-          },
-          telephone: "$effectif_snapshot.apprenant.telephone",
-          nom_organisme: "$organisme.nom",
-          mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
         },
       },
     ])

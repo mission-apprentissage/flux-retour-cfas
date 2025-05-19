@@ -1,6 +1,7 @@
 import Boom from "boom";
+import { BREVO_TEMPLATE_NAME, BREVO_TEMPLATE_TYPE } from "shared/models/data/brevoMissionLocaleTemplate.model";
 
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { brevoMissionLocaleTemplateDb, missionLocaleEffectifsDb } from "@/common/model/collections";
 
 export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
   const aggregation = [
@@ -142,4 +143,25 @@ export const deactivateEffectifToken = async (token: string) => {
   );
 
   return result;
+};
+
+export const getEffectifMailFromToken = async (token: string) => {
+  const data = await missionLocaleEffectifsDb().findOne(
+    { "brevo.token": token },
+    {
+      projection: {
+        "effectif_snapshot.apprenant.courriel": 1,
+        "effectif_snapshot.apprenant.adresse.mission_locale_id": 1,
+      },
+    }
+  );
+  return {
+    courriel: data?.effectif_snapshot.apprenant.courriel,
+    ml_id: data?.effectif_snapshot.apprenant.adresse.mission_locale_id,
+  };
+};
+
+export const getBrevoTemplateId = async (name: BREVO_TEMPLATE_NAME, type: BREVO_TEMPLATE_TYPE, ml_id: number) => {
+  const data = await brevoMissionLocaleTemplateDb().findOne({ name, type, ml_id });
+  return data?.templateId;
 };
