@@ -900,9 +900,15 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
         ],
       },
     },
+    {
+      $project: {
+        total: { $arrayElemAt: ["$total.total", 0] },
+        eligible: { $arrayElemAt: ["$eligible.total", 0] },
+      },
+    },
   ];
   const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return data;
+  return { total: data?.total ?? 0, eligible: data?.eligible ?? 0 };
 };
 
 export const getEffectifMissionLocaleEligibleToBrevo = async (

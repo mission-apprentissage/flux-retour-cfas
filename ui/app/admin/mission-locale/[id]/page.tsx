@@ -6,14 +6,14 @@ import { useParams } from "next/navigation";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { MissionLocaleDisplay } from "@/app/_components/mission-locale/MissionLocaleDisplay";
+import { ModalAdminSyncBrevo } from "@/app/_components/mission-locale/modal/ModalAdminSyncBrevo";
 import { MonthsData } from "@/app/_components/mission-locale/types";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
 
 export default function Page() {
-  const { id } = useParams() as { id?: string };
-
+  const { id } = useParams() as { id: string };
   const { data: missionLocaleData } = useQuery(
     ["mission-locale", id],
     () => _get(`/api/v1/admin/mission-locale/${id}`),
@@ -44,6 +44,9 @@ export default function Page() {
             <Box flex="1">
               <h1 className="fr-h1 fr-text--blue-france fr-mb-1w">Liste des jeunes en ruptures de contrat</h1>
             </Box>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="flex-end" alignItems="center">
+              <ModalAdminSyncBrevo id={id} />
+            </Stack>
           </Stack>
         </Stack>
 
