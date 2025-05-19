@@ -156,7 +156,7 @@ export default function Page() {
         ) : (
           <Stack spacing={2}>
             <Typography fontWeight="bold">
-              La Mission Locale de {capitalizeWords(data.missionLocale.nom)} va vous contacter au numéro suivant :
+              La Mission Locale {capitalizeWords(data.missionLocale.nom)} va vous contacter au numéro suivant :
             </Typography>
             <Badge noIcon severity="error">
               {state.phone}
@@ -166,9 +166,7 @@ export default function Page() {
                 href="#"
                 arrow="none"
                 onClick={() => setState((prev) => ({ ...prev, changePhoneOpen: !prev.changePhoneOpen }))}
-                className={`fr-link--icon-right ${
-                  state.changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"
-                }`}
+                className={`fr-link--icon-right ${state.changePhoneOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
               >
                 Ce n’est pas mon numéro
               </DsfrLink>
