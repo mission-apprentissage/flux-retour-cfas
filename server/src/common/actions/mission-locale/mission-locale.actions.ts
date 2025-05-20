@@ -931,6 +931,23 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     },
     {
       $lookup: {
+        from: "organisations",
+        let: { id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+              site_web: 1,
+            },
+          },
+        ],
+        as: "mission_locale",
+      },
+    },
+    {
+      $lookup: {
         from: "organismes",
         let: { id: "$effectif_snapshot.organisme_id" },
         pipeline: [
@@ -948,6 +965,12 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     {
       $unwind: {
         path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$mission_locale",
         preserveNullAndEmptyArrays: true,
       },
     },
@@ -976,8 +999,10 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
             "$effectif_snapshot.formation.cfd",
           ],
         },
+        "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
         telephone: "$effectif_snapshot.apprenant.telephone",
         nom_organisme: "$organisme.nom",
+        nom_mission_locale: "$mission_locale.nom",
         mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
       },
     },
@@ -991,6 +1016,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     telephone?: string | null;
     nom_organisme?: string | null;
     mission_locale_id: string;
+    nom_mission_locale: string;
   }>;
 };
 
