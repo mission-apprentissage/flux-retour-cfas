@@ -21,6 +21,7 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
             $project: {
               _id: 1,
               nom: 1,
+              site_web: 1,
             },
           },
         ],
@@ -64,6 +65,7 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
     {
       $project: {
         "missionLocale.nom": "$organisation.nom",
+        "missionLocale.url": "$organisation.site_web",
         telephone: "$effectif_snapshot.apprenant.telephone",
         formation: "$effectif_snapshot.formation",
         "organismeFormateur.nom": "$organismeFormateur.nom",
