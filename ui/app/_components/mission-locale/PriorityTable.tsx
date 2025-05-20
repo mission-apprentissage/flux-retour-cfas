@@ -66,12 +66,12 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
 
   return (
     <Stack p={{ xs: 2, md: 3 }} mt={4} sx={{ background: "var(--background-alt-blue-france)" }}>
-      {priorityData.length === 0 ? (
+      {priorityData.length === 0 && (
         <Stack direction="row" justifyContent="space-between">
           <Stack>
             <PriorityBadge priorityData={priorityData} />
             <Typography variant="body2" fontWeight="bold">
-              À traiter en priorité ({priorityData.length})
+              Tous les jeunes de cette liste ont été contactés !
             </Typography>
           </Stack>
           <Box
@@ -85,7 +85,9 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
             }}
           />
         </Stack>
-      ) : (
+      )}
+
+      {priorityData.length > 0 && (
         <>
           <PriorityBadge priorityData={priorityData} />
           <Typography variant="body2">

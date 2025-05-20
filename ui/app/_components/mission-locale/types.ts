@@ -29,4 +29,5 @@ export type MonthsData = {
   prioritaire: EffectifData[];
   traite: MonthItem[];
   injoignable: MonthItem[];
+  hadEffectifsPrioritaires: boolean;
 };

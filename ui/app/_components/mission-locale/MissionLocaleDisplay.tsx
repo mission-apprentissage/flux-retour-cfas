@@ -213,6 +213,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
               title="A traiter"
               data={groupedDataATraiter}
               priorityData={data.prioritaire as EffectifPriorityData[]}
+              hadEffectifsPrioritaires={data.hadEffectifsPrioritaires}
               isTraite={false}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}

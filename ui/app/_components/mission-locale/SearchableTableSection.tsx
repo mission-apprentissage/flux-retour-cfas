@@ -12,6 +12,7 @@ type SearchableTableSectionProps = {
   title: string;
   data: MonthItem[];
   priorityData?: EffectifPriorityData[];
+  hadEffectifsPrioritaires?: boolean;
   isTraite: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
@@ -23,6 +24,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   title,
   data,
   priorityData,
+  hadEffectifsPrioritaires,
   isTraite,
   searchTerm,
   onSearchChange,
@@ -49,7 +51,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
           )}
         />
       </div>
-      {!isTraite && priorityData && priorityData.length > 0 && (
+      {!isTraite && priorityData && hadEffectifsPrioritaires && (
         <PriorityTable priorityData={priorityData} searchTerm={searchTerm} />
       )}
       {data.map((monthItem) => (

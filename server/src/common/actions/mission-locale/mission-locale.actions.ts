@@ -768,7 +768,23 @@ export const getEffectifsListByMisisonLocaleId = (
 
 export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
-  const organismeMissionLocaleAggregation = [
+
+  const checkHadEffectifsPipeline = [
+    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...addFieldTraitementStatus(),
+    {
+      $match: {
+        a_traiter: false,
+        a_risque: true,
+      },
+    },
+  ];
+
+  const hadEffectifs = await missionLocaleEffectifsDb().aggregate(checkHadEffectifsPipeline).next();
+
+  const pipeline = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
@@ -801,7 +817,12 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
     },
   ];
 
-  return await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const effectifs = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+
+  return {
+    hadEffectifsPrioritaires: !!hadEffectifs,
+    prioritaire: effectifs,
+  };
 };
 
 export const setEffectifMissionLocaleData = async (
@@ -1057,12 +1078,12 @@ export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activati
       activationDate
     );
 
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+  const [a_traiter, traite, { prioritaire, hadEffectifsPrioritaires }, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
     fetchByType(API_EFFECTIF_LISTE.TRAITE),
     getEffectifARisqueByMissionLocaleId(missionLocaleId),
     fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
   ]);
 
-  return { a_traiter, traite, prioritaire, injoignable };
+  return { a_traiter, traite, prioritaire, injoignable, hadEffectifsPrioritaires };
 }
