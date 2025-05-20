@@ -1,13 +1,18 @@
+import { captureException } from "@sentry/node";
 import express from "express";
+import { BREVO_TEMPLATE_NAME, BREVO_TEMPLATE_TYPE } from "shared/models/data/brevoMissionLocaleTemplate.model";
 import { z } from "zod";
 
 import {
   confirmEffectifChoiceByTokenDbUpdate,
   deactivateEffectifToken,
+  getBrevoTemplateId,
+  getEffectifMailFromToken,
   getMissionLocaleEffectifInfoFromToken,
   updateEffectifPhoneNumberByTokenDbUpdate,
 } from "@/common/actions/campagnes/campagnes.actions";
 import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { maskTelephone } from "@/common/utils/phoneUtils";
 import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -57,6 +62,22 @@ async function confirmEffectifChoiceAndRedirect(req, res, next) {
     const isConfirmed = confirmation === "true";
 
     await confirmEffectifChoiceByTokenDbUpdate(token, confirmation);
+    const { courriel, ml_id } = await getEffectifMailFromToken(token);
+
+    if (!courriel || !ml_id) {
+      captureException(new Error(`Email or mission locale ID not found for token: ${token}`));
+    } else {
+      const templateId = await getBrevoTemplateId(
+        isConfirmed ? BREVO_TEMPLATE_NAME.CONFIRMATION : BREVO_TEMPLATE_NAME.REFUS,
+        BREVO_TEMPLATE_TYPE.MISSION_LOCALE,
+        ml_id
+      );
+      if (!templateId) {
+        captureException(new Error(`Template ID not found for ${isConfirmed ? "confirmation" : "refus"} email`));
+      } else {
+        await sendTransactionalEmail(courriel, templateId);
+      }
+    }
 
     if (!isConfirmed) {
       await deactivateEffectifToken(token);

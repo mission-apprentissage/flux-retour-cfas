@@ -12,7 +12,6 @@ import {
   MenuDivider,
   MenuGroup,
   MenuList,
-  Tag,
   Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
@@ -115,6 +114,9 @@ const UserMenu = () => {
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
                     Gestion des utilisateurs
                   </MenuItem>
+                  <MenuItem href="/admin/mission-locale" icon={<Parametre boxSize={4} />}>
+                    Gestion des missions locales
+                  </MenuItem>
                   <MenuItem href="/admin/reseaux" icon={<Parametre boxSize={4} />}>
                     Gestion des réseaux
                   </MenuItem>
@@ -178,17 +180,14 @@ const Header = () => {
 
   return (
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
-      <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
+      <Container maxW="xl" py={[0, 3]} px={[0, 6]}>
         <Flex flexDirection={["column", "column", "column", "row"]} alignItems="center" color="grey.800">
           <Link href="/" p={[4, 0]}>
             <Image src="/images/marianne.svg" alt="Logo République française" userSelect="none" />
           </Link>
-          <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
+          <Box mt={["2w", "2w", "0"]} marginLeft="4w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               {PRODUCT_NAME_TITLE}{" "}
-              <Tag backgroundColor="#FEE7FC" color="#6E445A" fontWeight="bold" ml={1}>
-                BETA
-              </Tag>
             </Heading>
           </Box>
 

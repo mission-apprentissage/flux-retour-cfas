@@ -44,6 +44,9 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
       nom: "MA MISSION LOCALE",
       created_at: new Date(),
       ml_id: 609,
+      email: "",
+      telephone: "",
+      site_web: "",
     });
     await effectifsQueueDb().deleteMany({});
     await effectifsDb().deleteMany({});

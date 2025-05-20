@@ -89,6 +89,9 @@ const config = {
   bal: {
     api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
   },
+  brevo: {
+    apiKey: env.get("MNA_TDB_BREVO_API_KEY").required().asString(),
+  },
 };
 
 export default config;

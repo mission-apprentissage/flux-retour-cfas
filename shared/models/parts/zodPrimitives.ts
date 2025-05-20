@@ -117,6 +117,7 @@ export const extensions = {
       }),
   codeCommuneInsee: () =>
     z.preprocess((v: any) => (v ? String(v) : v), z.string().regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/, "Format invalide")),
+  objectIdString: () => z.string().regex(/^[0-9a-f]{24}$/),
 };
 
 export const primitivesV1 = {

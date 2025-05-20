@@ -98,8 +98,6 @@ const NavBarPublic = () => {
       <NavItem to="/" exactMatch>
         Accueil
       </NavItem>
-      <NavItem to="/operateurs-publics">Opérateurs publics</NavItem>
-      <NavItem to="/organismes-formation">Organismes de formation</NavItem>
       <MenuQuestions />
     </>
   );
