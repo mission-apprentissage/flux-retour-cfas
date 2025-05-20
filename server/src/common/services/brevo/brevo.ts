@@ -72,6 +72,7 @@ export const importContacts = async (
     telephone?: string | null;
     nom_organisme?: string | null;
     mission_locale_id: string;
+    nom_mission_locale: string;
   }>
 ) => {
   if (!ContactInstance) {
@@ -91,6 +92,7 @@ export const importContacts = async (
       TELEPHONE: contact.telephone,
       NOM_ORGANISME: contact.nom_organisme,
       MISSION_LOCALE_ID: contact.mission_locale_id,
+      MISSION_LOCALE: contact.nom_mission_locale,
     };
     return contactData;
   });
