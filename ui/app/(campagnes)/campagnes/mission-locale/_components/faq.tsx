@@ -15,11 +15,11 @@ export const MissionLocaleFaq = ({
     <>
       <Typography fontWeight="bold">Encore des questions ?</Typography>
       <div className={fr.cx("fr-accordions-group")}>
-        <Accordion label={`La Mission Locale de ${capitalizeWords(missionLocalNom)} ?`}>
+        <Accordion label={`La Mission Locale ${capitalizeWords(missionLocalNom)} ?`}>
           <Stack spacing={3} px={1}>
             <Typography>
-              <strong>La Mission Locale de {capitalizeWords(missionLocalNom)}</strong> accueille les jeunes de 16 à 25
-              ans et jusqu’à 29 ans pour les personnes en situation de handicap.
+              <strong>La Mission Locale {capitalizeWords(missionLocalNom)}</strong> accueille les jeunes de 16 à 25 ans
+              et jusqu’à 29 ans pour les personnes en situation de handicap.
             </Typography>
             <Typography>
               <a

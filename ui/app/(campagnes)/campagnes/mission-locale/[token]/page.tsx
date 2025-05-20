@@ -47,9 +47,7 @@ export default function Page() {
 
   const handleValider = () => {
     if (formData.isInterested === null) return;
-    window.location.href = `${publicConfig.baseUrl}/api/v1/campagne/mission-locale/${token}/confirmation/${
-      formData.isInterested ? "true" : "false"
-    }`;
+    window.location.href = `${publicConfig.baseUrl}/api/v1/campagne/mission-locale/${token}/confirmation/${formData.isInterested ? "true" : "false"}`;
   };
 
   return (
@@ -74,7 +72,7 @@ export default function Page() {
       </Typography>
 
       <Typography>
-        Être accompagné par la Mission Locale de {data?.missionLocale?.nom}, c’est bénéficier d’un accompagnement
+        Être accompagné par la Mission Locale {data?.missionLocale?.nom}, c’est bénéficier d’un accompagnement
         personnalisé, de proximité et profiter d’un réseau de partenaires !
       </Typography>
 
