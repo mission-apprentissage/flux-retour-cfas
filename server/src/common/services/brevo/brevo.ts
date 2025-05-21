@@ -8,7 +8,8 @@ const initEmailApi = () => {
   const apiEmailInstance = new brevo.TransactionalEmailsApi();
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
-    throw Boom.internal("Brevo API key not set");
+    captureException(new Error("Brevo API key not set"));
+    return null;
   }
   apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
   return apiEmailInstance;
@@ -18,7 +19,8 @@ const initContactApi = () => {
   const apiContactInstance = new brevo.ContactsApi();
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
-    throw Boom.internal("Brevo API key not set");
+    captureException(new Error("Brevo API key not set"));
+    return null;
   }
   apiContactInstance.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
   return apiContactInstance;
