@@ -759,6 +759,10 @@ export const getEffectifsListByMisisonLocaleId = (
         organisme_code_postal: "$organisme.adresse.code_postal",
         organisme_contacts: "$organisme.contacts_from_referentiel",
         tdb_organisme_contacts: "$tdb_users",
+        ml_situation: "$situation",
+        ml_deja_connu: "$deja_connu",
+        ml_commentaires: "$commentaires",
+        ml_situation_autre: "$situation_autre",
       },
     },
   ];
