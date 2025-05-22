@@ -184,7 +184,12 @@ export default function Page() {
         )}
       </Stack>
       <MissionLocaleQuestion />
-      <MissionLocaleFaq missionLocalNom={data?.missionLocale?.nom} organismeNom={data?.organismeNom} />
+      <MissionLocaleFaq
+        missionLocalNom={data?.missionLocale?.nom}
+        organismeNom={data?.organismeNom}
+        missionLocaleUrl={data?.missionLocale?.url}
+        lbaUrl={data?.lbaUrl}
+      />
     </Stack>
   );
 }
