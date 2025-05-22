@@ -38,12 +38,12 @@ export default function Page() {
     },
     {
       enabled: !!mlId,
-      suspense: true,
+      suspense: false,
       useErrorBoundary: true,
     }
   );
 
-  function handleResult(success: boolean, goNext: boolean, nextId?: string) {
+  function handleResult(success: boolean) {
     if (!success) {
       setSaveStatus("error");
       return;
@@ -51,19 +51,11 @@ export default function Page() {
     setSaveStatus("success");
 
     setTimeout(() => {
-      if (goNext && nextId) {
-        router.push(`/mission-locale/${nextId}?nom_liste=${nomListe}`);
-      } else {
-        const fallbackUrl =
-          nomListe === API_EFFECTIF_LISTE.PRIORITAIRE
-            ? `/mission-locale/validation/prioritaire`
-            : `/mission-locale/validation`;
-        router.push(fallbackUrl);
-      }
+      router.push(`/admin/mission-locale/${mlId}`);
     }, SUCCESS_DISPLAY_TIME);
   }
 
-  async function handleSave(goNext: boolean, formData: any, effectifId: string, nextId?: string) {
+  async function handleSave(formData: any, effectifId: string) {
     setSaveStatus("loading");
     const startTime = Date.now();
     let success = false;
@@ -84,9 +76,9 @@ export default function Page() {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = MIN_LOADING_TIME - elapsedTime;
       if (remainingTime > 0) {
-        setTimeout(() => handleResult(success, goNext, nextId), remainingTime);
+        setTimeout(() => handleResult(success), remainingTime);
       } else {
-        handleResult(success, goNext, nextId);
+        handleResult(success);
       }
     }
   }
@@ -121,7 +113,7 @@ export default function Page() {
               effectifPayload={data}
               nomListe={nomListe}
               saveStatus={saveStatus}
-              onSave={(goNext, formData) => handleSave(goNext, formData, data.effectif.id.toString(), data.next?.id)}
+              onSave={(formData) => handleSave(formData, data.effectif.id.toString())}
               isAdmin
             />
           )}
