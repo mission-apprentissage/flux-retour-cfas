@@ -5,6 +5,7 @@ import {
   API_EFFECTIF_LISTE,
   IMissionLocaleEffectif,
   IOrganisationMissionLocale,
+  SITUATION_LABEL_ENUM,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
 import {
@@ -152,6 +153,56 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Téléphone du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "telephone" },
     { name: "Email du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "email" },
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
+    {
+      name: "Quel est votre retour sur la prise de contact ?",
+      id: "ml_situation",
+      transform: (val) => {
+        if (!val) {
+          return "Aucun retour";
+        }
+
+        switch (val) {
+          case "RDV_PRIS":
+            return SITUATION_LABEL_ENUM.RDV_PRIS;
+          case "NOUVEAU_PROJET":
+            return SITUATION_LABEL_ENUM.NOUVEAU_PROJET;
+          case "DEJA_ACCOMPAGNE":
+            return SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE;
+          case "CONTACTE_SANS_RETOUR":
+            return SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR;
+          case "COORDONNEES_INCORRECT":
+            return SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT;
+          case "AUTRE": {
+            return SITUATION_LABEL_ENUM.AUTRE;
+          }
+          default:
+            return val;
+        }
+      },
+      listValues: [
+        "Aucun retour",
+        SITUATION_LABEL_ENUM.RDV_PRIS,
+        SITUATION_LABEL_ENUM.NOUVEAU_PROJET,
+        SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE,
+        SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
+        SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT,
+        SITUATION_LABEL_ENUM.AUTRE,
+      ],
+    },
+    {
+      name: "Commentaire sur la situation",
+      id: "ml_situation_autre",
+    },
+    {
+      name: "Ce jeune était-il déjà connu de votre Mission Locale ?",
+      id: "ml_deja_connu",
+      transform: (val) => (val ? "OUI" : "NON"),
+      listValues: ["OUI", "NON"],
+    },
+    {
+      name: "Avez-vous des commentaires ? (optionnel)",
+      id: "ml_commentaires",
+    },
   ];
 
   const templateFile = await addSheetToXlscFile("mission-locale/modele-rupturant-ml.xlsx", worksheetsInfo, columns);
