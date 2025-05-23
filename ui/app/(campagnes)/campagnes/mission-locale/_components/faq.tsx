@@ -7,9 +7,13 @@ import { capitalizeWords } from "@/common/utils/stringUtils";
 export const MissionLocaleFaq = ({
   missionLocalNom,
   organismeNom,
+  missionLocaleUrl,
+  lbaUrl,
 }: {
   missionLocalNom: string;
   organismeNom: string;
+  missionLocaleUrl: string;
+  lbaUrl: string;
 }) => {
   return (
     <>
@@ -22,12 +26,7 @@ export const MissionLocaleFaq = ({
               et jusqu’à 29 ans pour les personnes en situation de handicap.
             </Typography>
             <Typography>
-              <a
-                href="https://missionlocalemarseille.fr/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fr-link"
-              >
+              <a href={missionLocaleUrl} target="_blank" rel="noopener noreferrer" className="fr-link">
                 Consulter le site pour en savoir plus et trouver l’antenne proche de chez vous en cliquant ici&nbsp;!
               </a>
             </Typography>
@@ -42,12 +41,7 @@ export const MissionLocaleFaq = ({
               entreprises.
             </Typography>
             <Typography>
-              <a
-                href="https://labonnealternance.apprentissage.beta.gouv.fr/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fr-link"
-              >
+              <a href={lbaUrl} target="_blank" rel="noopener noreferrer" className="fr-link">
                 Consultez les opportunités d’emplois en lien avec votre formation en cliquant ici&nbsp;!
               </a>
             </Typography>
