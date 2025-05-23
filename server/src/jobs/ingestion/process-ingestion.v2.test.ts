@@ -298,6 +298,7 @@ describe("process-ingestion.v2", () => {
               date: new Date("2024-11-30T00:00:00.000Z"),
               valeur: "ABANDON",
             },
+            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
