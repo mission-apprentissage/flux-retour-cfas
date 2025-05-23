@@ -26,8 +26,7 @@ export type SelectedSection = "a-traiter" | "deja-traite" | "injoignable";
 
 export type MonthsData = {
   a_traiter: MonthItem[];
-  prioritaire: EffectifData[];
+  prioritaire: { hadEffectifsPrioritaires: boolean; effectifs: EffectifData[] };
   traite: MonthItem[];
   injoignable: MonthItem[];
-  hadEffectifsPrioritaires: boolean;
 };

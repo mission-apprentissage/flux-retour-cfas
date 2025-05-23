@@ -773,60 +773,63 @@ export const getEffectifsListByMisisonLocaleId = (
 export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
-  const checkHadEffectifsPipeline = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
-    ...addFieldTraitementStatus(),
-    {
-      $match: {
-        a_traiter: false,
-        a_risque: true,
-      },
-    },
-  ];
-
-  const hadEffectifs = await missionLocaleEffectifsDb().aggregate(checkHadEffectifsPipeline).next();
-
   const pipeline = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldTraitementStatus(),
     {
-      $match: {
-        a_traiter: true,
-        a_risque: true,
+      $facet: {
+        hadEffectifs: [
+          {
+            $match: {
+              a_traiter: false,
+              a_risque: true,
+            },
+          },
+          { $limit: 1 },
+        ],
+        prioritaire: [
+          {
+            $match: {
+              a_traiter: true,
+              a_risque: true,
+            },
+          },
+          {
+            $sort: {
+              "dernierStatut.date": -1,
+            },
+          },
+          ...lookUpOrganisme(),
+          {
+            $project: {
+              _id: 0,
+              id: "$effectif_snapshot._id",
+              nom: "$effectif_snapshot.apprenant.nom",
+              prenom: "$effectif_snapshot.apprenant.prenom",
+              libelle_formation: "$effectif_snapshot.formation.libelle_long",
+              organisme_nom: "$organisme.nom",
+              organisme_raison_sociale: "$organisme.raison_sociale",
+              organisme_enseigne: "$organisme.enseigne",
+              prioritaire: "$a_risque",
+              dernier_statut: "$dernierStatut",
+            },
+          },
+        ],
       },
     },
-    {
-      $sort: {
-        "dernierStatut.date": -1,
-      },
-    },
-    ...lookUpOrganisme(),
     {
       $project: {
-        _id: 0,
-        id: "$$ROOT.effectif_snapshot._id",
-        nom: "$$ROOT.effectif_snapshot.apprenant.nom",
-        prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
-        libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
-        organisme_nom: "$$ROOT.organisme.nom",
-        organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
-        organisme_enseigne: "$$ROOT.organisme.enseigne",
-        prioritaire: "$a_risque",
-        dernier_statut: "$dernierStatut",
+        hadEffectifsPrioritaires: { $gt: [{ $size: "$hadEffectifs" }, 0] },
+        effectifs: "$prioritaire",
       },
     },
   ];
 
-  const effectifs = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
 
-  return {
-    hadEffectifsPrioritaires: !!hadEffectifs,
-    prioritaire: effectifs,
-  };
+  return result;
 };
 
 export const setEffectifMissionLocaleData = async (
@@ -1108,12 +1111,12 @@ export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activati
       activationDate
     );
 
-  const [a_traiter, traite, { prioritaire, hadEffectifsPrioritaires }, injoignable] = await Promise.all([
+  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
     fetchByType(API_EFFECTIF_LISTE.TRAITE),
     getEffectifARisqueByMissionLocaleId(missionLocaleId),
     fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
   ]);
 
-  return { a_traiter, traite, prioritaire, injoignable, hadEffectifsPrioritaires };
+  return { a_traiter, traite, prioritaire, injoignable };
 }
