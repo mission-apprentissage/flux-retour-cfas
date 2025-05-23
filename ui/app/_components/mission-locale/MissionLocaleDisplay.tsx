@@ -212,7 +212,8 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
             <SearchableTableSection
               title="A traiter"
               data={groupedDataATraiter}
-              priorityData={data.prioritaire as EffectifPriorityData[]}
+              priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
+              hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
               isTraite={false}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
