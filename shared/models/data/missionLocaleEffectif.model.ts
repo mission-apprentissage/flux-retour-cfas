@@ -43,7 +43,7 @@ export enum API_EFFECTIF_LISTE {
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
-export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
+export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 

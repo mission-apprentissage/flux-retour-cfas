@@ -3,7 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, List, ListItemText } from "@mui/material";
 import { captureException } from "@sentry/nextjs";
 import React, { useState } from "react";
 
@@ -17,7 +17,11 @@ const modal = createModal({
 export function ModalAdminSyncBrevo(params: { id: string }) {
   const [isFetching, setIsFetching] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncData, setSyncData] = useState<{ total: number; eligible: number } | null>(null);
+  const [syncData, setSyncData] = useState<{
+    total: number;
+    eligible: number;
+    details: Array<{ _id: string; count: number }>;
+  } | null>(null);
   const onSync = async () => {
     setIsFetching(true);
     try {
@@ -67,9 +71,19 @@ export function ModalAdminSyncBrevo(params: { id: string }) {
       >
         {isSyncing && <CircularProgress size="1em" sx={{ mr: 1 }} />}
         {!isSyncing && syncData && (
-          <Box>
-            Sur les {syncData?.total} rupturants, seulement {syncData?.eligible} seront ajoutés dans la liste Brevo
-          </Box>
+          <>
+            <Box>
+              Sur les {syncData?.total} rupturants, seulement {syncData?.eligible} seront ajoutés dans la liste Brevo
+            </Box>
+            <Box>Les données se répartissent comme suit :</Box>
+            <List sx={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
+              {syncData.details.map((item) => (
+                <ListItemText key={item._id} sx={{ display: "list-item" }}>
+                  {item._id} : {item.count}
+                </ListItemText>
+              ))}
+            </List>
+          </>
         )}
       </modal.Component>
     </>

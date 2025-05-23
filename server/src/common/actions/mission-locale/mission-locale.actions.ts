@@ -922,6 +922,7 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
 
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+
     {
       $facet: {
         total: [{ $count: "total" }],
@@ -929,18 +930,47 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
           { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
           { $count: "total" },
         ],
+        details: [
+          {
+            $group: {
+              _id: { $ifNull: ["$email_status", "not_processed"] },
+              count: { $sum: 1 },
+            },
+          },
+        ],
       },
     },
     {
       $project: {
         total: { $arrayElemAt: ["$total.total", 0] },
         eligible: { $arrayElemAt: ["$eligible.total", 0] },
+        details: 1,
       },
     },
   ];
   const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return { total: data?.total ?? 0, eligible: data?.eligible ?? 0 };
+  return data;
 };
+
+export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
+  const fetchByType = (type: API_EFFECTIF_LISTE) =>
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocaleId,
+      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
+      activationDate
+    );
+
+  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+    fetchByType(API_EFFECTIF_LISTE.TRAITE),
+    getEffectifARisqueByMissionLocaleId(missionLocaleId),
+    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+  ]);
+
+  return { a_traiter, traite, prioritaire, injoignable };
+}
+
+// BAL
 
 export const getEffectifMissionLocaleEligibleToBrevo = async (
   missionLocaleMongoId: ObjectId,
@@ -1048,24 +1078,24 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   }>;
 };
 
-export const getMissionLocaleRupturantToCheckMail = async () => {
-  return await missionLocaleEffectifsDb()
-    .aggregate([
-      {
-        $match: {
-          email_status: { $exists: false },
-          soft_deleted: { $ne: true },
-          "brevo.token": { $ne: null },
+export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
+  return (
+    await missionLocaleEffectifsDb()
+      .aggregate([
+        {
+          $match: {
+            email_status: { $exists: false },
+          },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          email: "$effectif_snapshot.apprenant.courriel",
+        {
+          $project: {
+            _id: 0,
+            email: "$effectif_snapshot.apprenant.courriel",
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray()
+  ).map(({ email }) => email) as Array<string>;
 };
 
 export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
@@ -1102,21 +1132,3 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
     );
   }
 };
-
-export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
-  const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocaleId,
-      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
-      activationDate
-    );
-
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
-    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-    fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(missionLocaleId),
-    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
-  ]);
-
-  return { a_traiter, traite, prioritaire, injoignable };
-}
