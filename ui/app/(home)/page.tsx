@@ -256,6 +256,15 @@ export default function Page() {
           >
             Ils parlent de nous !
           </Typography>
+          <figure role="group" className="fr-content-media">
+            <iframe
+              title="Titre de l'iframe"
+              className="fr-responsive-vid"
+              src="https://www.youtube.com/embed/Al8aSdWTw94?si=QcyOIYjfsVZWUEGj"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </figure>
           <Grid container rowSpacing={4} sx={{ width: { xs: "100%", md: "66.6667%" }, mb: fr.spacing("12w") }}>
             {QUOTES.map((quote) => (
               <Quote key={quote.author} author={quote.author} text={quote.text} />
