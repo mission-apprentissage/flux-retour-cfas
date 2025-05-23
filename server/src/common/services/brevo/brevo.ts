@@ -136,7 +136,7 @@ export const createContactList = async (missionLocaleName: string) => {
 
   const contactList = new brevo.CreateList();
   contactList.name = `${ddmm} -  ${config.env} Rupturant - ${missionLocaleName}`;
-  contactList.folderId = 169; // Folder TBA
+  contactList.folderId = 5; // Folder TBA
   try {
     return await ContactInstance.createList(contactList);
   } catch (e) {
