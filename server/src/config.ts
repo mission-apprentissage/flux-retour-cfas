@@ -87,7 +87,9 @@ const config = {
   },
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
   bal: {
+    endpoint: env.get("MNA_TDB_BAL_API_URL").required().asString(),
     api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
+    bearer_key: env.get("MNA_TDB_BAL_BEARER_KEY").required().asString(),
   },
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
