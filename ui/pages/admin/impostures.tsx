@@ -12,7 +12,6 @@ import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCari
 import { InscriptionMissionLocale } from "@/modules/auth/inscription/InscriptionMissionLocale";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
-import { ExternalLinkLine } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -65,7 +64,6 @@ function ImposturesPage() {
             isUnderlined
           >
             référentiel
-            <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />
           </Link>
           .
           <SearchBySIRETForm organisation={organisation} setOrganisation={setOrganisation} />
