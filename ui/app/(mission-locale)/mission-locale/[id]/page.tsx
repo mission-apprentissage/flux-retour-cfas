@@ -41,24 +41,36 @@ export default function Page() {
     }
   );
 
-  function handleResult(success: boolean, goNext: boolean, nextId?: string) {
+  function computeRedirectUrl(
+    goNext: boolean,
+    nextId: string | undefined,
+    nomListe: API_EFFECTIF_LISTE,
+    total: number | undefined
+  ): string {
+    if (goNext && nextId) {
+      return `/mission-locale/${nextId}?nom_liste=${nomListe}`;
+    }
+
+    if (total === 1) {
+      return nomListe === API_EFFECTIF_LISTE.PRIORITAIRE
+        ? "/mission-locale/validation/prioritaire"
+        : "/mission-locale/validation";
+    }
+
+    return "/mission-locale";
+  }
+
+  function handleResult(success: boolean, goNext: boolean, nextId?: string): void {
     if (!success) {
       setSaveStatus("error");
       return;
     }
+
     setSaveStatus("success");
 
-    setTimeout(() => {
-      if (goNext && nextId) {
-        router.push(`/mission-locale/${nextId}?nom_liste=${nomListe}`);
-      } else {
-        const fallbackUrl =
-          nomListe === API_EFFECTIF_LISTE.PRIORITAIRE
-            ? "/mission-locale/validation/prioritaire"
-            : "/mission-locale/validation";
-        router.push(fallbackUrl);
-      }
-    }, SUCCESS_DISPLAY_TIME);
+    const targetUrl = computeRedirectUrl(goNext, nextId, nomListe, data?.total);
+
+    setTimeout(() => router.push(targetUrl), SUCCESS_DISPLAY_TIME);
   }
 
   async function handleSave(goNext: boolean, formData: any, effectifId: string, nextId?: string) {
