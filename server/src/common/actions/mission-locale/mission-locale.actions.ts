@@ -717,6 +717,37 @@ export const getEffectifsListByMisisonLocaleId = (
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
     {
+      $addFields: {
+        _effectif_choice_label: {
+          $switch: {
+            branches: [
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $eq: ["$brevo", null] }],
+                },
+                then: "Non contacté",
+              },
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $ne: ["$brevo", null] }],
+                },
+                then: "Sans réponse",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", true] },
+                then: "Oui",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", false] },
+                then: "Non",
+              },
+            ],
+            default: "Non contacté",
+          },
+        },
+      },
+    },
+    {
       $project: {
         nom: "$effectif_snapshot.apprenant.nom",
         prenom: "$effectif_snapshot.apprenant.prenom",
@@ -759,6 +790,7 @@ export const getEffectifsListByMisisonLocaleId = (
         organisme_code_postal: "$organisme.adresse.code_postal",
         organisme_contacts: "$organisme.contacts_from_referentiel",
         tdb_organisme_contacts: "$tdb_users",
+        effectif_choice: "$_effectif_choice_label",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
         ml_commentaires: "$commentaires",
