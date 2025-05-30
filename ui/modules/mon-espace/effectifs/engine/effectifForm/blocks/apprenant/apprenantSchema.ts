@@ -459,6 +459,13 @@ export const apprenantSchema = {
     label: "Situation de l'apprenant l’année dernière (N-1) :",
     options: [
       {
+        name: "Sans situation",
+        options: [
+          { label: "Non renseigné", value: null },
+          { label: "0 – Aucune situation", value: 0 },
+        ],
+      },
+      {
         name: "1er cycle second degré",
         options: [
           {

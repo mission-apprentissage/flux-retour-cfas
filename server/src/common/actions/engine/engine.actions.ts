@@ -221,7 +221,10 @@ export const mapEffectifQueueToEffectif = (
         "responsable_apprenant_mail1" in dossierApprenant ? dossierApprenant.responsable_apprenant_mail1 : null,
       responsable_mail2:
         "responsable_apprenant_mail2" in dossierApprenant ? dossierApprenant.responsable_apprenant_mail2 : null,
-      derniere_situation: "derniere_situation" in dossierApprenant ? dossierApprenant.derniere_situation : null,
+      derniere_situation:
+        "derniere_situation" in dossierApprenant && dossierApprenant.derniere_situation !== 0
+          ? dossierApprenant.derniere_situation
+          : null,
       dernier_organisme_uai:
         "dernier_organisme_uai" in dossierApprenant ? dossierApprenant.dernier_organisme_uai?.toString() : null,
       type_cfa: "type_cfa" in dossierApprenant ? dossierApprenant.type_cfa : null,
