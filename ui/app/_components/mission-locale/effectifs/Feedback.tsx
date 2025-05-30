@@ -10,20 +10,41 @@ export function Feedback({ situation }: { situation: IUpdateMissionLocaleEffecti
       <Typography fontWeight="bold" gutterBottom>
         Quel est votre retour sur la prise de contact ?
       </Typography>
-      <Stack direction="row" spacing={1} alignItems="center">
+
+      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
         <Tag>{situation.situation ? SITUATION_LABEL_ENUM[situation.situation] : "Situation inconnue"}</Tag>
-        {situation.situation === "AUTRE" && <Typography variant="body2">({situation.situation_autre})</Typography>}
+        {situation.situation === "AUTRE" && (
+          <Typography
+            variant="body2"
+            component="span"
+            sx={{
+              wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
+              ml: 1,
+            }}
+          >
+            ({situation.situation_autre})
+          </Typography>
+        )}
+
+        <Typography fontWeight="bold" gutterBottom>
+          Ce jeune était-il déjà connu de votre Mission Locale ?
+        </Typography>
+        <Tag>{situation.deja_connu ? "Oui" : "Non"}</Tag>
+
+        <Typography fontWeight="bold" gutterBottom>
+          Commentaires
+        </Typography>
+        <Typography
+          component="div"
+          sx={{
+            wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {situation.commentaires || "Aucun commentaire"}
+        </Typography>
       </Stack>
-
-      <Typography fontWeight="bold" gutterBottom>
-        Ce jeune était-il déjà connu de votre Mission Locale ?
-      </Typography>
-      <Tag>{situation.deja_connu ? "Oui" : "Non"}</Tag>
-
-      <Typography fontWeight="bold" gutterBottom>
-        Commentaires
-      </Typography>
-      <Typography>{situation.commentaires || "Aucun commentaire"}</Typography>
     </Stack>
   );
 }
