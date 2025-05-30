@@ -10,9 +10,19 @@ export function Feedback({ situation }: { situation: IUpdateMissionLocaleEffecti
       <Typography fontWeight="bold" gutterBottom>
         Quel est votre retour sur la prise de contact ?
       </Typography>
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack direction="column" spacing={1}>
         <Tag>{situation.situation ? SITUATION_LABEL_ENUM[situation.situation] : "Situation inconnue"}</Tag>
-        {situation.situation === "AUTRE" && <Typography variant="body2">({situation.situation_autre})</Typography>}
+        {situation.situation === "AUTRE" && (
+          <Typography
+            variant="body2"
+            sx={{
+              wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            ({situation.situation_autre})
+          </Typography>
+        )}
       </Stack>
 
       <Typography fontWeight="bold" gutterBottom>
@@ -23,7 +33,14 @@ export function Feedback({ situation }: { situation: IUpdateMissionLocaleEffecti
       <Typography fontWeight="bold" gutterBottom>
         Commentaires
       </Typography>
-      <Typography>{situation.commentaires || "Aucun commentaire"}</Typography>
+      <Typography
+        sx={{
+          wordBreak: "break-word",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {situation.commentaires || "Aucun commentaire"}
+      </Typography>
     </Stack>
   );
 }
