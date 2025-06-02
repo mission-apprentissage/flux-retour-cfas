@@ -16,6 +16,7 @@ import {
   zCodeStatutApprenant,
   zEffectifDernierSituation,
 } from "../../constants";
+import { getDomTomISOCountryCodeFromPhoneNumber } from "../../utils/phone";
 
 extendZodWithOpenApi(z);
 
@@ -47,7 +48,10 @@ export const extensions = {
           .toString()
           .trim()
           .replace(/[-.()\s]/g, "");
-        const parsed = parsePhoneNumberFromString(normalized, { defaultCountry: "FR", extract: false }); // Default indicator if none provided
+        const parsed = parsePhoneNumberFromString(normalized, {
+          defaultCountry: getDomTomISOCountryCodeFromPhoneNumber(normalized),
+          extract: false,
+        }); // Default indicator if none provided
 
         if (!parsed?.isPossible()) {
           ctx.addIssue({
