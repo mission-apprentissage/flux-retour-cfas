@@ -96,7 +96,7 @@ export function EffectifInfo({
               </Typography>
             </Box>
             <Typography variant="caption" color="grey" gutterBottom sx={{ fontStyle: "italic" }}>
-              {effectif.source === "API_DECA" ? (
+              {effectif.source === "DECA" ? (
                 <span>Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}</span>
               ) : (
                 <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
