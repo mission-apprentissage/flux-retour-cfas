@@ -12269,6 +12269,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.12.8":
+  version: 1.12.8
+  resolution: "libphonenumber-js@npm:1.12.8"
+  checksum: b3a50a9b5f63e43ad368ea88712a1d6cf38f7b26c01fdafb0c114e4c2f977fb1a7c19303bf09ce89680b8acfbbfaf127e848550999b43628c9d1573c816d68d5
+  languageName: node
+  linkType: hard
+
 "lie@npm:3.1.1":
   version: 3.1.1
   resolution: "lie@npm:3.1.1"
@@ -17748,7 +17755,7 @@ __metadata:
     bson: ^5.5.1
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.1
-    libphonenumber-js: ^1.11.19
+    libphonenumber-js: ^1.12.8
     lodash-es: ^4.17.21
     mongodb: ^5.9.2
     type-fest: ^4.26.1
