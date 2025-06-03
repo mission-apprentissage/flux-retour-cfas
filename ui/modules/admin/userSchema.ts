@@ -6,6 +6,8 @@ const userSchema = () =>
     prenom: z.string({ required_error: "Champ obligatoire" }),
     nom: z.string({ required_error: "Champ obligatoire" }),
     email: z.string({ required_error: "Champ obligatoire" }).email("Email invalide"),
+    fonction: z.string({ required_error: "Champ obligatoire" }),
+    telephone: z.string().optional(),
     account_status: z.boolean({}).optional(),
   });
 
