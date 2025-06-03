@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import type { ICertification } from "api-alternance-sdk";
 import { zCfd, zRncp } from "api-alternance-sdk/internal";
 import Boom from "boom";
@@ -224,40 +225,46 @@ export function getSessionCertification<C extends Pick<ICertification, "periode_
 }
 
 export async function getEffectifCertification(effectif: Pick<IEffectif, "formation">): Promise<ICertification | null> {
-  const { formation } = effectif;
+  try {
+    const { formation } = effectif;
 
-  if (!formation) {
-    return null;
-  }
-
-  const [cfd, rncp] = await Promise.all([resolveEffectiveCFD(effectif), resolveEffectiveRNCP(effectif)]);
-
-  const filter: Parameters<typeof apiAlternanceClient.certification.index>[0]["identifiant"] = {};
-
-  if (!cfd && !rncp) {
-    return null;
-  }
-
-  if (cfd) {
-    if (!zCfd.safeParse(cfd).success) {
+    if (!formation) {
       return null;
     }
 
-    filter.cfd = cfd;
-  }
+    const [cfd, rncp] = await Promise.all([resolveEffectiveCFD(effectif), resolveEffectiveRNCP(effectif)]);
 
-  if (rncp) {
-    if (!zRncp.safeParse(rncp).success) {
+    const filter: Parameters<typeof apiAlternanceClient.certification.index>[0]["identifiant"] = {};
+
+    if (!cfd && !rncp) {
       return null;
     }
 
-    filter.rncp = rncp;
+    if (cfd) {
+      if (!zCfd.safeParse(cfd).success) {
+        return null;
+      }
+
+      filter.cfd = cfd;
+    }
+
+    if (rncp) {
+      if (!zRncp.safeParse(rncp).success) {
+        return null;
+      }
+
+      filter.rncp = rncp;
+    }
+
+    const certifications = await apiAlternanceClient.certification.index({ identifiant: filter });
+    const session = getEffectifSession(effectif);
+
+    return getSessionCertification(session, certifications);
+  } catch (err) {
+    captureException(err);
+    logger.error("fiabilisation-certification: error while getting effectif certification", { err, effectif });
+    return null;
   }
-
-  const certifications = await apiAlternanceClient.certification.index({ identifiant: filter });
-  const session = getEffectifSession(effectif);
-
-  return getSessionCertification(session, certifications);
 }
 
 export async function fiabilisationEffectifFormation<T extends Pick<IEffectif, "formation">>(
