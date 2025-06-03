@@ -1,3 +1,4 @@
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 
 const userSchema = () =>
@@ -7,7 +8,7 @@ const userSchema = () =>
     nom: z.string({ required_error: "Champ obligatoire" }),
     email: z.string({ required_error: "Champ obligatoire" }).email("Email invalide"),
     fonction: z.string({ required_error: "Champ obligatoire" }),
-    telephone: z.string().optional(),
+    telephone: extensions.phone(),
     account_status: z.boolean({}).optional(),
   });
 
