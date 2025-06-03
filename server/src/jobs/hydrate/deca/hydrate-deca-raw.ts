@@ -4,7 +4,6 @@ import { captureException } from "@sentry/node";
 import * as Sentry from "@sentry/node";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
-import { IOrganisme } from "shared/models";
 import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
@@ -118,11 +117,13 @@ async function upsertEffectifDeca(
       // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
       if (retry && err instanceof MongoError && err.code === 11000) {
         return upsertEffectifDeca(effectif, count, false);
+      } else {
+        throw err;
       }
     }
   } else {
     const transmitted_at = new Date();
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: effectif, transmitted_at });
+    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: { ...effectif, transmitted_at } });
 
     // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
     //await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
@@ -195,18 +196,24 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
 
   if (startYear === endYear) {
     const anneeScolaire = `${startYear}-${startYear}`;
-    effectifs.push(await createEffectif(document, anneeScolaire));
+    const effectif = await createEffectif(document, anneeScolaire);
+    if (effectif) {
+      effectifs.push(effectif);
+    }
   } else {
     for (let year = startYear; year < endYear; year++) {
       const anneeScolaire = `${year}-${year + 1}`;
-      effectifs.push(await createEffectif(document, anneeScolaire));
+      const effectif = await createEffectif(document, anneeScolaire);
+      if (effectif) {
+        effectifs.push(effectif);
+      }
     }
   }
 
   return effectifs;
 }
 
-async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA>> {
+async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA> | null> {
   const {
     alternant,
     formation,
@@ -235,10 +242,10 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
-  const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
 
   if (!organisme) {
-    throw new Error("L'organisme n'a pas été trouvé dans la base de données.");
+    return null;
   }
 
   const currentTimestamp = new Date();
@@ -262,6 +269,13 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
 
   if (!startYear || !endYear) {
     throw new Error("L'année de début et l'année de fin doivent être définies");
+  }
+
+  if (adresseAlternant.code_postal.length !== 5) {
+    logger.warn(
+      `Le code postal de l'alternant est invalide. Document ID: ${document._id}, code postal: ${adresseAlternant.code_postal}`
+    );
+    return null;
   }
 
   const commune = await getAndFormatCommuneFromCode(null, adresseAlternant.code_postal);

@@ -133,7 +133,7 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
   const date_inscription_formation = new Date(new Date().setFullYear(parseInt(anneeScolaire.split("-")[0]), 8, 1));
   const date_entree_formation = new Date(date_inscription_formation);
   const date_fin_formation = new Date(
-    new Date(date_inscription_formation).setFullYear(parseInt(anneeScolaire.split("-")[1]), 5)
+    new Date(date_inscription_formation).setFullYear(parseInt(anneeScolaire.split("-")[1]), 7)
   );
   const { uai, siret } = getRandomEtablissement();
   return {
@@ -158,10 +158,10 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
 
 export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial<IDossierApprenantSchemaV3>) => {
   const dossier = createRandomDossierApprenantApiInputV3(params);
-
-  const contrat_date_debut = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 9, 1));
-  const contrat_date_rupture = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 10, 1));
-  const contrat_date_fin = new Date(new Date().setFullYear(parseInt(dossier.annee_scolaire.split("-")[0]), 11, 1));
+  const now = new Date();
+  const contrat_date_debut = new Date(new Date().setMonth(now.getMonth() - 3));
+  const contrat_date_rupture = new Date(new Date().setMonth(now.getMonth() - 2));
+  const contrat_date_fin = new Date(new Date().setMonth(now.getMonth() - 1));
   return {
     ...dossier,
     contrat_date_debut,

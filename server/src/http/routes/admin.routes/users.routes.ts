@@ -4,6 +4,7 @@ import { getWarningOnEmail } from "shared/models/data/organisations.model";
 import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
 import { z } from "zod";
 
+import { activateMissionLocaleAtFirstInvitation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
 import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
@@ -132,6 +133,7 @@ export default () => {
         throw Boom.notFound("Mission locale not found");
       }
       await inviteUserToOrganisation(req.user, email, organisation._id);
+      await activateMissionLocaleAtFirstInvitation(organisation._id, new Date());
     })
   );
 

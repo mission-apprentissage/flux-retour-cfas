@@ -86,6 +86,10 @@ export const plausibleGoals = [
   "telechargement_liste_organismes_nature_inconnue",
   "telechargement_liste_organismes_siret_ferme",
   "telechargement_liste_organismes_uai_non_determine",
+
+  // Mission locale
+  "telechargement_mission_locale_liste",
+  "reporting_mission_locale_effectif",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];

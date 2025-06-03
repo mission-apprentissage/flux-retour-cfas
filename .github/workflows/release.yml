@@ -141,5 +141,6 @@ jobs:
     secrets:
       DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
       DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      SLACK_WEBHOOK_NOTIF: ${{ secrets.SLACK_WEBHOOK }}
+      SLACK_WEBHOOK_ALERTING: ${{ secrets.SLACK_WEBHOOK_ALERTING }}
       VAULT_PWD: ${{ secrets.VAULT_PWD }}

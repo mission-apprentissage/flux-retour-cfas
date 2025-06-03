@@ -30,6 +30,7 @@ import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalog
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
+  hydrateMissionLocaleAdresse,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   updateMissionLocaleSnapshotFromLastStatus,
@@ -271,6 +272,11 @@ export async function setupJobProcessor() {
       "tmp:mission-locale-snapshot-update": {
         handler: async () => {
           return updateMissionLocaleSnapshotFromLastStatus();
+        },
+      },
+      "tmp:mission-locale-adresse-update": {
+        handler: async () => {
+          return hydrateMissionLocaleAdresse();
         },
       },
       "populate:reseaux": {

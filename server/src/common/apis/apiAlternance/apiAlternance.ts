@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/node";
 import type { ICommune, IMissionLocale } from "api-alternance-sdk";
+import { zCfd } from "api-alternance-sdk/internal";
 import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -10,6 +11,11 @@ import { apiAlternanceClient } from "./client";
 
 export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
   try {
+    if (!zCfd.safeParse(cfd).success) {
+      logger.warn(`getCfdInfo: invalid CFD "${cfd}"`);
+      return null;
+    }
+
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
 
     if (certifications.length === 0) {

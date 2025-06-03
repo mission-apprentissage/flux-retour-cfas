@@ -1,34 +1,40 @@
-import { telephoneConverter } from "shared/utils/frenchTelephoneNumber";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { it, expect, describe } from "vitest";
 
 describe("Validation Utils", () => {
   describe("validation des numeros de telephone", () => {
     const testCases = [
-      { input: null, output: null },
-      { input: undefined, output: undefined },
-      { input: 0, output: "0" },
-      { input: "", output: "" },
-      { input: "033638424988", output: "033638424988" },
-      { input: "0638424988", output: "0638424988" },
-      { input: "(+)33638424988", output: "+33638424988" },
-      { input: "+33638424988", output: "+33638424988" },
-      { input: "+33123456789", output: "+33123456789" },
-      { input: "33 6 38 42 49 88", output: "33638424988" },
-      { input: "12345678", output: "12345678" },
-      { input: "ABCDEFGH", output: "ABCDEFGH" },
-      { input: "06-38.42.49.88", output: "0638424988" },
-      { input: "06.38.42.49.88", output: "0638424988" },
-      { input: "06-38-42-49-88", output: "0638424988" },
-      { input: "06 (38) 42 49 88", output: "0638424988" },
-      { input: "  06 38 42 49 88  ", output: "0638424988" },
-      { input: "06abc38424988", output: "06abc38424988" },
-      { input: "+33(6)384-249-88", output: "+33638424988" },
-    ];
+      [null, { success: true, data: null }],
+      [undefined, { success: true, data: undefined }],
+      [0, { success: false, error: ["Format invalide"] }],
+      ["", { success: true, data: null }],
+      ["033638424988", { success: false, error: ["Format invalide"] }],
+      ["0638424988", { success: true, data: "0638424988" }],
+      ["(+)33638424988", { success: true, data: "0638424988" }],
+      ["+33638424988", { success: true, data: "0638424988" }],
+      ["+33123456789", { success: true, data: "0123456789" }],
+      ["33 6 38 42 49 88", { success: true, data: "0638424988" }],
+      ["12345678", { success: false, error: ["Format invalide"] }],
+      ["ABCDEFGH", { success: false, error: ["Format invalide"] }],
+      ["06-38.42.49.88", { success: true, data: "0638424988" }],
+      ["06.38.42.49.88", { success: true, data: "0638424988" }],
+      ["06-38-42-49-88", { success: true, data: "0638424988" }],
+      ["06 (38) 42 49 88", { success: true, data: "0638424988" }],
+      ["  06 38 42 49 88  ", { success: true, data: "0638424988" }],
+      ["06abc38424988", { success: false, error: ["Format invalide"] }],
+      ["+33(6)384-249-88", { success: true, data: "0638424988" }],
+      ["+262 0693 31 00 00", { success: true, data: "+262693310000" }],
+      ["06 93 31 00 00", { success: true, data: "+262693310000" }], // Réunion
+    ] as const;
 
-    testCases.forEach(({ input, output }) => {
-      it(`Vérifie qu'un numero de téléphone ${JSON.stringify(input)} est transformé en ${output}`, () => {
-        expect(telephoneConverter(input as any)).toStrictEqual(output);
-      });
+    it.each(testCases)(`Vérifie qu'un numero de téléphone %s est transformé en %s`, (input, expected) => {
+      const result = extensions.phone().nullish().safeParse(input);
+      if (expected.success) {
+        expect(result).toEqual(expected);
+      } else {
+        expect(result.success).toBe(false);
+        expect(result.error?.format()).toEqual({ _errors: expected.error });
+      }
     });
   });
 });

@@ -8,6 +8,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 
 import { _post } from "@/common/httpClient";
+import { AuthContext } from "@/common/internal/AuthContext";
+import { getAccountLabel } from "@/common/utils/accountUtils";
 
 import { useAuth } from "../_context/UserContext";
 
@@ -33,7 +35,7 @@ export const UserConnectedHeader = () => {
       {user && (
         <>
           <Button iconId="ri-account-circle-fill" priority="tertiary no outline" onClick={handleClick}>
-            Mon compte
+            {getAccountLabel(user as AuthContext)}
           </Button>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
             <MenuItem onClick={logout}>

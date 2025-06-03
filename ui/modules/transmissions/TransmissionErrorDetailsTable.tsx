@@ -5,7 +5,6 @@ import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDateNumericDayMonthYear, formatDateHourMinutesSecondsMs } from "@/common/utils/dateUtils";
 import EffectifQueueItemView from "@/components/Effectif/EffectifQueueItemView";
-import EffectifStatutTag from "@/components/Effectif/EffectifStatusTag";
 import TableWithPagination from "@/components/Table/TableWithPagination";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
@@ -27,13 +26,6 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     cell: ({ row }) => (
       <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.date_de_naissance_apprenant)}</Text>
     ),
-  },
-  {
-    size: 300,
-    header: () => "Statut",
-    accessorKey: "status",
-    enableSorting: false,
-    cell: ({ row }) => <EffectifStatutTag nature={row.original.statut_apprenant} />,
   },
   {
     size: 200,
