@@ -32,12 +32,6 @@ export const CODES_STATUT_APPRENANT_ENUM = [
   CODES_STATUT_APPRENANT.apprenti,
 ] satisfies ICodeStatutApprenant[];
 
-export const STATUT_APPRENANT_LABEL_MAP = {
-  [CODES_STATUT_APPRENANT.abandon]: { label: "Abandon", color: "#FCEEAC" },
-  [CODES_STATUT_APPRENANT.inscrit]: { label: "Sans contrat", color: "#FDDBFA" },
-  [CODES_STATUT_APPRENANT.apprenti]: { label: "Apprenti", color: "#BAFAEE" },
-};
-
 /**
  * Sexe des apprenants (M=Homme, F=Femme)
  */

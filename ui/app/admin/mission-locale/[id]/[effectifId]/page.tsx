@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid2";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { RightColumnSkeleton } from "@/app/_components/mission-locale/effectifs/RightColumnSkeleton";
@@ -55,7 +55,7 @@ export default function Page() {
     }, SUCCESS_DISPLAY_TIME);
   }
 
-  async function handleSave(formData: any, effectifId: string) {
+  async function handleSave(formData: IUpdateMissionLocaleEffectif, effectifId: string) {
     setSaveStatus("loading");
     const startTime = Date.now();
     let success = false;
@@ -113,7 +113,7 @@ export default function Page() {
               effectifPayload={data}
               nomListe={nomListe}
               saveStatus={saveStatus}
-              onSave={(formData) => handleSave(formData, data.effectif.id.toString())}
+              onSave={(_goNext, formData) => handleSave(formData, data.effectif.id.toString())}
               isAdmin
             />
           )}

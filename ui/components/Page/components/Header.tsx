@@ -18,6 +18,8 @@ import { useRouter } from "next/router";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { _delete, _post } from "@/common/httpClient";
+import { AuthContext } from "@/common/internal/AuthContext";
+import { getAccountLabel } from "@/common/utils/accountUtils";
 import Link from "@/components/Links/Link";
 import MenuItem from "@/components/Links/MenuItem";
 import useAuth from "@/hooks/useAuth";
@@ -87,7 +89,7 @@ const UserMenu = () => {
                 <UserFill mt="0.3rem" boxSize={4} />
                 <Box display={["none", "block"]} ml={2}>
                   <Text color="bluefrance" textStyle="sm" textOverflow="ellipsis" maxWidth="200px" overflow="hidden">
-                    Mon compte
+                    {getAccountLabel(auth as AuthContext)}
                   </Text>
                 </Box>
               </Flex>
