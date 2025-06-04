@@ -2,7 +2,7 @@ import type { ObjectId } from "bson";
 import { startOfDay, endOfDay } from "date-fns";
 import { TransmissionStat } from "shared/models";
 
-import { effectifsQueueDb } from "@/common/model/collections";
+import { effectifsQueueDb, transmissionDailyReportDb } from "@/common/model/collections";
 
 const groupPipeline = {
   total: {
@@ -482,23 +482,19 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
 export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, limit: number = 20) => {
   const aggr = [
     {
-      $group: {
-        _id: "$computed_day",
-        ...groupPipeline,
-      },
-    },
-    {
       $sort: {
-        _id: -1,
+        current_day: -1,
       },
     },
     {
       $project: {
         _id: 0,
-        day: "$_id",
-        success: "$success",
-        error: "$error",
-        total: "$total",
+        day: "$current_day",
+        success: "$success_count",
+        error: "$error_count",
+        total: {
+          $add: ["$success_count", "$error_count"],
+        },
       },
     },
     {
@@ -509,8 +505,9 @@ export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, li
     },
     { $unwind: { path: "$pagination" } },
   ];
-  const transmissions = await effectifsQueueDb().aggregate(aggr).next();
-  console.log(JSON.stringify(aggr, null, 2));
+
+  const transmissions = await transmissionDailyReportDb().aggregate(aggr).next();
+
   if (!transmissions) {
     return {
       pagination: {
@@ -529,7 +526,6 @@ export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, li
 };
 
 export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = async (selectedDay: Date) => {
-  console.log(selectedDay);
   const start = startOfDay(selectedDay);
   const end = endOfDay(selectedDay);
 
@@ -557,20 +553,9 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
         },
       },
       {
-        $lookup: {
-          from: "organismes",
-          localField: "source_organisme_id",
-          foreignField: "_id",
-          as: "source_organisme",
-        },
-      },
-      {
-        $unwind: "$source_organisme",
-      },
-      {
         $project: {
           _id: 0,
-          organisme_id: "$source_organisme._id",
+          organisme_id: "$source_organisme_id",
           success: "$success",
           error: "$error",
           total: "$total",
@@ -592,4 +577,65 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
 
 export const getAllTransmissionsDate = () => {
   return effectifsQueueDb().distinct("computed_day");
+};
+
+export const getPaginatedErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = async (
+  selectedDay: string,
+  page: number = 1,
+  limit: number = 20
+) => {
+  const aggr = [
+    {
+      $match: {
+        current_day: selectedDay,
+      },
+    },
+    {
+      $sort: {
+        current_day: -1,
+      },
+    },
+    {
+      $lookup: {
+        from: "organismes",
+        localField: "organisme_id",
+        foreignField: "_id",
+        as: "source_organisme",
+      },
+    },
+    {
+      $unwind: "$source_organisme",
+    },
+    {
+      $project: {
+        _id: 0,
+        day: "$current_day",
+        success: "$success_count",
+        error: "$error_count",
+        organisme: {
+          id: "$organisme_id",
+          uai: "$source_organisme.uai",
+          siret: "$source_organisme.siret",
+          nom: "$source_organisme.nom",
+        },
+        total: {
+          $add: ["$success_count", "$error_count"],
+        },
+      },
+    },
+    {
+      $facet: {
+        pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+        data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: { path: "$pagination" } },
+  ];
+
+  const transmissionsDailyReport = await transmissionDailyReportDb().aggregate(aggr).next();
+
+  if (!transmissionsDailyReport) {
+    return [];
+  }
+  return transmissionsDailyReport;
 };
