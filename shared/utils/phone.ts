@@ -42,7 +42,7 @@ export function getDomTomISOCountryCodeFromPhoneNumber(phoneNumber: string | nul
     case "692":
     case "693":
       return "RE"; // Réunion
+    default:
+      return "FR"; // France métropolitaine
   }
-
-  return "FR"; // Not a DOM-TOM number
 }
