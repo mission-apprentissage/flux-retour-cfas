@@ -25,6 +25,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
   [{ processed_at: 1, created_at: 1 }, {}],
+  [{ processed_at: -1 }, { name: "processed_at_-1_for_admin_transmissions" }],
+  [{ processed_at: -1, validation_errors: 1, error: 1 }, { name: "processed_at_-1_validation_errors_1_error_1" }],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;
