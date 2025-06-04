@@ -25,6 +25,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
   [{ processed_at: 1, created_at: 1 }, {}],
+  [{ computed_day: 1 }, {}],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;
@@ -58,6 +59,8 @@ const internalFields = {
       }
     )
     .nullish(),
+  computed_day: z.string().optional(),
+  has_error: z.boolean().optional(),
 };
 
 /**

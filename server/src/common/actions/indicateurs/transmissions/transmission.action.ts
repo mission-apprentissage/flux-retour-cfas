@@ -9,47 +9,10 @@ const groupPipeline = {
     $sum: 1,
   },
   error: {
-    $sum: {
-      $cond: {
-        if: {
-          $and: [
-            {
-              $ifNull: ["$validation_errors", false],
-            },
-          ],
-        },
-        then: 1,
-        else: 0,
-      },
-    },
+    $sum: { $cond: [{ $eq: ["$has_error", true] }, 1, 0] },
   },
   success: {
-    $sum: {
-      $cond: {
-        if: {
-          $and: [
-            {
-              $eq: [
-                {
-                  $type: "$error",
-                },
-                "missing",
-              ],
-            },
-            {
-              $eq: [
-                {
-                  $type: "$validation_errors",
-                },
-                "missing",
-              ],
-            },
-          ],
-        },
-        then: 1,
-        else: 0,
-      },
-    },
+    $sum: { $cond: [{ $eq: ["$has_error", false] }, 1, 0] },
   },
 };
 
@@ -517,43 +480,37 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
 };
 
 export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, limit: number = 20) => {
-  const transmissions = await effectifsQueueDb()
-    .aggregate([
-      {
-        $group: {
-          _id: {
-            $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$processed_at",
-            },
-          },
-          ...groupPipeline,
-        },
+  const aggr = [
+    {
+      $group: {
+        _id: "$computed_day",
+        ...groupPipeline,
       },
-      {
-        $sort: {
-          _id: -1,
-        },
+    },
+    {
+      $sort: {
+        _id: -1,
       },
-      {
-        $project: {
-          _id: 0,
-          day: "$_id",
-          success: "$success",
-          error: "$error",
-          total: "$total",
-        },
+    },
+    {
+      $project: {
+        _id: 0,
+        day: "$_id",
+        success: "$success",
+        error: "$error",
+        total: "$total",
       },
-      {
-        $facet: {
-          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
-          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
-        },
+    },
+    {
+      $facet: {
+        pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+        data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
       },
-      { $unwind: { path: "$pagination" } },
-    ])
-    .next();
-
+    },
+    { $unwind: { path: "$pagination" } },
+  ];
+  const transmissions = await effectifsQueueDb().aggregate(aggr).next();
+  console.log(JSON.stringify(aggr, null, 2));
   if (!transmissions) {
     return {
       pagination: {
@@ -571,16 +528,12 @@ export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, li
   return transmissions;
 };
 
-export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = async (
-  day: string,
-  page: number = 1,
-  limit: number = 20
-) => {
-  const selectedDay = new Date(day);
+export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = async (selectedDay: Date) => {
+  console.log(selectedDay);
   const start = startOfDay(selectedDay);
   const end = endOfDay(selectedDay);
 
-  const transmissionsDetails = await effectifsQueueDb()
+  const transmissionsDetails = (await effectifsQueueDb()
     .aggregate([
       {
         $match: {
@@ -604,64 +557,39 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
         },
       },
       {
-        $facet: {
-          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
-          data: [
-            { $sort: { error: -1 } },
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-            {
-              $lookup: {
-                from: "organismes",
-                localField: "source_organisme_id",
-                foreignField: "_id",
-                as: "source_organisme",
-              },
-            },
-            {
-              $unwind: "$source_organisme",
-            },
-            {
-              $project: {
-                _id: 0,
-                "organisme.nom": "$source_organisme.nom",
-                "organisme.id": "$source_organisme._id",
-                "organisme.uai": "$source_organisme.uai",
-                "organisme.siret": "$source_organisme.siret",
-                success: "$success",
-                error: "$error",
-                total: "$total",
-                successRate: {
-                  $multiply: [
-                    {
-                      $divide: ["$success", "$total"],
-                    },
-                    100,
-                  ],
-                },
-              },
-            },
-          ],
+        $lookup: {
+          from: "organismes",
+          localField: "source_organisme_id",
+          foreignField: "_id",
+          as: "source_organisme",
         },
       },
-      { $unwind: { path: "$pagination" } },
+      {
+        $unwind: "$source_organisme",
+      },
+      {
+        $project: {
+          _id: 0,
+          organisme_id: "$source_organisme._id",
+          success: "$success",
+          error: "$error",
+          total: "$total",
+        },
+      },
     ])
-    .next();
+    .toArray()) as Array<{
+    organisme_id: ObjectId;
+    success: number;
+    error: number;
+    total: number;
+  }>;
 
   if (!transmissionsDetails) {
-    return {
-      pagination: {
-        page,
-        limit,
-        lastPage: page,
-        total: 0,
-      },
-      data: [],
-    };
-  }
-
-  if (transmissionsDetails?.pagination) {
-    transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
+    return [];
   }
   return transmissionsDetails;
+};
+
+export const getAllTransmissionsDate = () => {
+  return effectifsQueueDb().distinct("computed_day");
 };
