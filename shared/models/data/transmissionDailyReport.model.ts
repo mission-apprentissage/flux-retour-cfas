@@ -4,7 +4,10 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "transmissionDailyReport";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1, current_day: 1 }, { unique: true }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ organisme_id: 1, current_day: 1 }, { unique: true }],
+  [{ current_day: 1 }, {}],
+];
 
 const zTransmissionDailyReport = z.object({
   _id: zObjectId,
