@@ -24,7 +24,11 @@ describe("Validation Utils", () => {
       ["06abc38424988", { success: false, error: ["Format invalide"] }],
       ["+33(6)384-249-88", { success: true, data: "0638424988" }],
       ["+262 0693 31 00 00", { success: true, data: "+262693310000" }],
-      ["06 93 31 00 00", { success: true, data: "+262693310000" }], // Réunion
+      ["06 93 31 00 00", { success: true, data: "+262693310000" }], // Réunion,
+      ["06 94 31 00 00", { success: true, data: "+594694310000" }], // Martinique
+      ["06 90 31 00 00", { success: true, data: "+590690310000" }], // Guadeloupe
+      ["06 96 31 00 00", { success: true, data: "+596696310000" }], // Martinique
+      ["06 92 31 00 00", { success: true, data: "+262692310000" }], // Réunion
     ] as const;
 
     it.each(testCases)(`Vérifie qu'un numero de téléphone %s est transformé en %s`, (input, expected) => {
