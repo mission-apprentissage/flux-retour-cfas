@@ -11,13 +11,7 @@ const groupPipeline = {
   error: {
     $sum: {
       $cond: {
-        if: {
-          $and: [
-            {
-              $ifNull: ["$validation_errors", false],
-            },
-          ],
-        },
+        if: { $ifNull: ["$validation_errors", false] },
         then: 1,
         else: 0,
       },
