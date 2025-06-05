@@ -29,6 +29,8 @@ describe("Validation Utils", () => {
       ["06 90 31 00 00", { success: true, data: "+590690310000" }], // Guadeloupe
       ["06 96 31 00 00", { success: true, data: "+596696310000" }], // Martinique
       ["06 92 31 00 00", { success: true, data: "+262692310000" }], // Réunion
+      ["02 62 31 00 00", { success: true, data: "+262262310000" }], // Mayotte
+      ["02 69 65 00 11", { success: true, data: "+262269650011" }], // Réunion
     ] as const;
 
     it.each(testCases)(`Vérifie qu'un numero de téléphone %s est transformé en %s`, (input, expected) => {
