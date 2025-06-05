@@ -9265,6 +9265,40 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "created_at": {
       "bsonType": "date",
     },
+    "current_status": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "value": {
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "enum": [
+                "ABANDON",
+                "PRE_INSCRIT",
+                "INSCRIT",
+                "APPRENTI",
+                "RUPTURANT",
+                "FIN_DE_FORMATION",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
     "deja_connu": {
       "bsonType": [
         "bool",
@@ -14297,6 +14331,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "created_at",
     "effectif_snapshot",
     "brevo",
+    "current_status",
   ],
 }
 `;
