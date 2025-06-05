@@ -117,12 +117,14 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
   };
   return (
     <Box>
-      {effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER ? (
+      {effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER && effectifQueueItem.validation_errors.length ? (
         <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
           <InfoIcon mr={2} />
           Veuillez corriger ces données directement dans votre ERP pour qu’elles soient correctement transmises.
         </Text>
-      ) : (
+      ) : null}
+
+      {effectifQueueItem.source === SOURCE_APPRENANT.FICHIER && effectifQueueItem.validation_errors.length ? (
         <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
           <InfoIcon mr={2} />
           Veuillez prendre connaissance des erreurs. Si des questions persistent, veuillez{" "}
@@ -130,7 +132,19 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
             nous contacter
           </Link>
         </Text>
-      )}
+      ) : null}
+
+      {effectifQueueItem.error ? (
+        <Text color="#CE0500" fontSize={15} mt={5} mb={5}>
+          <WarningTwoIcon mr={2} />
+          Une erreur s&apos;est produite lors de la transmission des effectifs. Aucune action de votre part n&apos;est
+          nécessaire. Si le problème persiste dans vos prochains rapports, veuillez nous contacter.
+          <InfoTooltip
+            headerComponent={() => <Text>Erreurs</Text>}
+            contentComponent={() => <DescriptionErrorListComponent errorList={[effectifQueueItem.error]} />}
+          />
+        </Text>
+      ) : null}
 
       <TableContainer>
         <Table variant="unstyled">
