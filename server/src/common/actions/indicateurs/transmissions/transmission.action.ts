@@ -187,9 +187,16 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
             $gte: start,
             $lte: end,
           },
-          validation_errors: {
-            $exists: true,
-          },
+          $or: [
+            { validation_errors: { $exists: true } },
+            {
+              error: {
+                $exists: true,
+                $ne: "",
+                $type: "string",
+              },
+            },
+          ],
         },
       },
       {
@@ -198,14 +205,31 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
             {
               $group: {
                 _id: null,
-                total: {
-                  $sum: { $size: "$validation_errors" },
+                validationErrors: {
+                  $sum: {
+                    $cond: [
+                      { $and: [{ $isArray: "$validation_errors" }, { $gt: [{ $size: "$validation_errors" }, 0] }] },
+                      { $size: "$validation_errors" },
+                      0,
+                    ],
+                  },
+                },
+                otherErrors: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $and: [{ $type: "$error" }, { $eq: [{ $type: "$error" }, "string"] }, { $ne: ["$error", ""] }],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
                 },
               },
             },
             {
               $project: {
-                total: "$total",
+                total: { $add: ["$validationErrors", "$otherErrors"] },
                 _id: 0,
               },
             },
@@ -324,9 +348,16 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
             $gte: start,
             $lte: end,
           },
-          validation_errors: {
-            $exists: true,
-          },
+          $or: [
+            { validation_errors: { $exists: true } },
+            {
+              error: {
+                $exists: true,
+                $ne: "",
+                $type: "string",
+              },
+            },
+          ],
         },
       },
       {
