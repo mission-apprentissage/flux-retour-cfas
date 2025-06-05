@@ -8247,6 +8247,9 @@ exports[`validation-schema > should create validation schema for effectifsQueue 
 Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
 *Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
     },
+    "computed_day": {
+      "bsonType": "string",
+    },
     "contrat_date_debut": {
       "description": "Date de début du contrat",
     },
@@ -8378,6 +8381,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "formation_rncp": {
       "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+    },
+    "has_error": {
+      "bsonType": "bool",
     },
     "has_nir": {
       "bsonType": [
@@ -16258,6 +16264,37 @@ exports[`validation-schema > should create validation schema for telechargementL
     "type",
     "telechargement_date",
     "user_id",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for transmissionDailyReport > transmissionDailyReport 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "current_day": {
+      "bsonType": "string",
+    },
+    "error_count": {
+      "bsonType": "number",
+    },
+    "organisme_id": {
+      "bsonType": "objectId",
+    },
+    "success_count": {
+      "bsonType": "number",
+    },
+  },
+  "required": [
+    "_id",
+    "organisme_id",
+    "success_count",
+    "error_count",
+    "current_day",
   ],
 }
 `;

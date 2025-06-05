@@ -31,6 +31,7 @@ import {
 import parentLogger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
+import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
@@ -160,9 +161,12 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   };
   let itemLogger = logger.child(ctx);
   const start = Date.now();
+  const currentDate = new Date();
+  const computed_day = formatDateYYYYMMDD(currentDate);
+
   try {
     //Process du nouveau schéma de données
-    await handleEffectifTransmission(effectifQueue, new Date());
+    await handleEffectifTransmission(effectifQueue, currentDate);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -192,8 +196,10 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           $set: {
             effectif_id: effectifId,
             organisme_id: organisme._id,
-            updated_at: new Date(),
-            processed_at: new Date(),
+            updated_at: currentDate,
+            processed_at: currentDate,
+            has_error: false,
+            computed_day,
           },
           $unset: {
             error: 1,
@@ -210,8 +216,10 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
         {
           $set: {
             validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
-            updated_at: new Date(),
-            processed_at: new Date(),
+            updated_at: currentDate,
+            processed_at: currentDate,
+            has_error: true,
+            computed_day,
           },
           $unset: {
             error: 1,
@@ -234,7 +242,9 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
         $set: {
           validation_errors: [],
           error: formatError(err).toString(),
-          processed_at: new Date(),
+          processed_at: currentDate,
+          has_error: true,
+          computed_day,
         },
       }
     );

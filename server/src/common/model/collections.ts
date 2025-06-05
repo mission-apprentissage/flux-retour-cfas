@@ -30,6 +30,9 @@ import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
 } from "shared/models/data/telechargementListesNomLogs.model";
+import transmissionDailyReportDescriptor, {
+  ITransmissionDailyReport,
+} from "shared/models/data/transmissionDailyReport.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
@@ -69,6 +72,7 @@ export const modelDescriptors = [
   brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
   brevoMissionLocaleListModelDescriptor,
+  transmissionDailyReportDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -104,6 +108,9 @@ export const brevoMissionLocaleTemplateDb = () =>
   getDbCollection<IBrevoMissionLocaleTemplate>(brevoMissionLocaleTemplateModelDescriptor.collectionName);
 export const brevoMissionLocaleListDb = () =>
   getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
+export const transmissionDailyReportDb = () =>
+  getDbCollection<ITransmissionDailyReport>(transmissionDailyReportDescriptor.collectionName);
+
 // v2
 
 export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
