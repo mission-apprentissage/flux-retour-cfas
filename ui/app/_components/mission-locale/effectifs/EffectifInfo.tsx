@@ -12,6 +12,23 @@ import { ConfirmReset } from "./ConfirmReset";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
 import { Feedback } from "./Feedback";
 
+const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
+  const now = new Date();
+  const defaultText = "Il a été indiqué que ce jeune a retrouvé un nouveau contrat";
+  if (!date) return defaultText;
+
+  const text =
+    new Date(date) < now
+      ? `${defaultText}, qui a débuté le ${formatDate(date)}`
+      : `${defaultText}, qui va débuter le ${formatDate(date)}`;
+  return (
+    <Box pl={32} mt={2}>
+      <Typography component="p" className="fr-text--sm" color="var(--background-flat-red-marianne)">
+        {text}
+      </Typography>
+    </Box>
+  );
+};
 export function EffectifInfo({
   effectif,
   nomListe,
@@ -114,6 +131,9 @@ export function EffectifInfo({
               (campagne emailing).
             </Typography>
           </Box>
+        )}
+        {effectif?.current_status?.value === "APPRENTI" && (
+          <StatusChangeInformation date={effectif?.current_status?.date} />
         )}
       </Stack>
 

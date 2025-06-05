@@ -33,6 +33,7 @@ import {
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
@@ -387,6 +388,11 @@ export async function setupJobProcessor() {
       },
       "hydrate:transmissions-all": {
         handler: hydrateAllTransmissions,
+      },
+      "tmp:migrate:mission-locale-current-status": {
+        handler: async () => {
+          return updateMissionLocaleEffectifCurrentStatus();
+        },
       },
     },
   });
