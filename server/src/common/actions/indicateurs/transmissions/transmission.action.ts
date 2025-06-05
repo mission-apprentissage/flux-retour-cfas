@@ -482,19 +482,25 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
 export const getAllTransmissionStatusGroupedByDate = async (page: number = 1, limit: number = 20) => {
   const aggr = [
     {
+      $group: {
+        _id: "$current_day",
+        success: { $sum: "$success_count" },
+        error: { $sum: "$error_count" },
+        total: { $sum: { $add: ["$success_count", "$error_count"] } },
+      },
+    },
+    {
       $sort: {
-        current_day: -1,
+        _id: -1,
       },
     },
     {
       $project: {
         _id: 0,
-        day: "$current_day",
-        success: "$success_count",
-        error: "$error_count",
-        total: {
-          $add: ["$success_count", "$error_count"],
-        },
+        day: "$_id",
+        success: "$success",
+        error: "$error",
+        total: "$total",
       },
     },
     {
