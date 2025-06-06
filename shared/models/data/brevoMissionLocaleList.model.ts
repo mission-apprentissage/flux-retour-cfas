@@ -7,8 +7,8 @@ export enum BREVO_LISTE_TYPE {
 }
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ name: 1, type: 1 }, { unique: true }],
-  [{ templateId: 1 }, { unique: true }],
+  [{ ml_id: 1, type: 1 }, { unique: true }],
+  [{ listId: 1 }, { unique: true }],
 ];
 
 const collectionName = "brevoMissionLocaleList";
