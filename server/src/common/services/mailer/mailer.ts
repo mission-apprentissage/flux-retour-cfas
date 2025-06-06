@@ -158,6 +158,7 @@ export type TemplatePayloads = {
       email: string;
     };
     resetPasswordToken: string;
+    role: string;
   };
   validation_user_by_orga_gestionnaire: {
     recipient: {

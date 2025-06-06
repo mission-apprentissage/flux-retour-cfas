@@ -15,6 +15,7 @@ import {
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { IOrganisation } from "shared";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
 
@@ -27,17 +28,26 @@ YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
+const getPasswordLengthFromRole = (role?: IOrganisation["type"]) => {
+  switch (role) {
+    case "ADMINISTRATEUR":
+      return 20;
+    default:
+      return 12;
+  }
+};
+
 const ResetPasswordPage = () => {
   const { toastSuccess } = useToaster();
   const router = useRouter();
-  const { passwordToken } = router.query;
+  const { passwordToken, role } = router.query;
 
   const [show, setShow] = React.useState(false);
   const onShowPassword = () => setShow(!show);
 
   // TODO on pourrait avoir le type d'organisation dans le token pour l'avoir
   // const minLength = auth?.organisation?.type === "ADMINISTRATEUR" ? 20 : 12;
-  const minLength = 12;
+  const minLength = getPasswordLengthFromRole(role as IOrganisation["type"]);
 
   const [conditions, setConditions] = useState({
     min: "unknown",

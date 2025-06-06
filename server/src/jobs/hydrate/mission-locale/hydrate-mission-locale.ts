@@ -158,3 +158,65 @@ export const hydrateMissionLocaleAdresse = async () => {
     }
   }
 };
+
+export const updateMissionLocaleEffectifCurrentStatus = async () => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+  });
+
+  while (await cursor.hasNext()) {
+    const orga = await cursor.next();
+    if (!orga) {
+      continue;
+    }
+    const cursor2 = missionLocaleEffectifsDb().find({ mission_locale_id: orga._id });
+    while (await cursor2.hasNext()) {
+      const eff = await cursor2.next();
+      if (!eff) {
+        continue;
+      }
+      const effectif = await effectifsDb()
+        .aggregate([
+          {
+            $unionWith: {
+              coll: "effectifsDECA",
+              pipeline: [{ $match: { _id: eff.effectif_id } }],
+            },
+          },
+          {
+            $match: {
+              _id: eff.effectif_id,
+            },
+          },
+          {
+            $project: {
+              parcours: "$_computed.statut.parcours",
+            },
+          },
+        ])
+        .next();
+      console.log("effectif", effectif);
+      if (!effectif) {
+        continue;
+      }
+      const lastStatusValue =
+        effectif.parcours && effectif.parcours.length > 0
+          ? effectif.parcours[effectif.parcours.length - 1].valeur
+          : null;
+      const lastStatusDate =
+        effectif.parcours && effectif.parcours.length > 0 ? effectif.parcours[effectif.parcours.length - 1].date : null;
+
+      if (lastStatusValue && lastStatusDate) {
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: eff._id },
+          {
+            $set: {
+              "current_status.value": lastStatusValue,
+              "current_status.date": lastStatusDate,
+            },
+          }
+        );
+      }
+    }
+  }
+};

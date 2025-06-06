@@ -32,17 +32,22 @@ export function getDomTomISOCountryCodeFromPhoneNumber(phoneNumber: string | nul
     ? phoneNumberWithoutSpaces.slice(1)
     : phoneNumberWithoutSpaces;
 
-  if (phoneNumberWithoutPrefix.startsWith("69")) {
-    return "RE"; // Réunion
-  } else if (phoneNumberWithoutPrefix.startsWith("80")) {
-    return "PF"; // Polynésie française
-  } else if (phoneNumberWithoutPrefix.startsWith("90")) {
-    return "NC"; // Nouvelle-Calédonie
-  } else if (phoneNumberWithoutPrefix.startsWith("97")) {
-    return "WF"; // Wallis-et-Futuna
-  } else if (phoneNumberWithoutPrefix.startsWith("98")) {
-    return "YT"; // Mayotte
+  switch (phoneNumberWithoutPrefix.slice(0, 3)) {
+    case "690":
+    case "590":
+      return "GP"; // Guadeloupe
+    case "694":
+    case "594":
+      return "GF"; // Guyane
+    case "696":
+    case "596":
+      return "MQ"; // Martinique
+    case "692":
+    case "693":
+    case "262":
+    case "269":
+      return "RE"; // Réunion et Mayotte
+    default:
+      return "FR"; // France métropolitaine
   }
-
-  return "FR"; // Not a DOM-TOM number
 }

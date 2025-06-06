@@ -6,6 +6,8 @@ const userSchema = () =>
     prenom: z.string(),
     nom: z.string(),
     email: z.string().email(),
+    fonction: z.string(),
+    telephone: z.string().optional(),
   });
 
 export default userSchema;

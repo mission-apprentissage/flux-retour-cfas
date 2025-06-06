@@ -161,6 +161,13 @@ const createDernierStatutFieldPipelineML = (date: Date) => [
       },
     },
   },
+  {
+    $addFields: {
+      statusChanged: {
+        $cond: [{ $ne: ["$dernierStatut.valeur", "$current_status.value"] }, true, false],
+      },
+    },
+  },
 ];
 
 /**
@@ -244,27 +251,35 @@ const addFieldFromActivationDate = (mlActivationDate?: Date) => {
 const addFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
   const A_RISQUE_CONDITION = {
-    $or: [
-      { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
-      { $eq: ["$effectif_choice.confirmation", true] },
+    $and: [
       {
-        $and: [
+        $or: [
+          { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
+          { $eq: ["$effectif_choice.confirmation", true] },
           {
-            $gte: [
-              "$effectif_snapshot.apprenant.date_de_naissance",
-              new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-            ],
-          },
-          {
-            $lte: [
-              "$effectif_snapshot.apprenant.date_de_naissance",
-              new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+            $and: [
+              {
+                $gte: [
+                  "$effectif_snapshot.apprenant.date_de_naissance",
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+                ],
+              },
+              {
+                $lte: [
+                  "$effectif_snapshot.apprenant.date_de_naissance",
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+                ],
+              },
             ],
           },
         ],
       },
+      {
+        $eq: ["$current_status.value", STATUT_APPRENANT.RUPTURANT],
+      },
     ],
   };
+
   const INJOIGNABLE_CONDITION = {
     $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR],
   };
@@ -680,6 +695,7 @@ export const getEffectifFromMissionLocaleId = async (
         "situation.commentaires": "$commentaires",
         contacts_tdb: "$tdb_users",
         prioritaire: "$a_risque",
+        current_status: "$current_status",
       },
     },
   ];
@@ -826,6 +842,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
             $match: {
               a_traiter: true,
               a_risque: true,
+              statusChanged: false,
             },
           },
           {
@@ -903,34 +920,38 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
 
-  if (mlFilter && rupturantFilter && (ageFilter || rqthFilter)) {
-    const mlData = await organisationsDb().findOne({
-      type: "MISSION_LOCALE",
-      ml_id: effectif.apprenant.adresse?.mission_locale_id,
-    });
+  const mlData = await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    ml_id: effectif.apprenant.adresse?.mission_locale_id,
+  });
 
-    const date = new Date();
+  const date = new Date();
 
-    if (mlData) {
-      await missionLocaleEffectifsDb().findOneAndUpdate(
-        {
-          mission_locale_id: mlData?._id,
-          effectif_id: effectif._id,
-        },
-        {
-          $setOnInsert: {
-            effectif_snapshot: { ...effectif, _id: effectif._id },
-            effectif_snapshot_date: date,
-            created_at: date,
-            brevo: {
-              token: uuidv4(),
-              token_created_at: date,
-            },
+  if (mlData) {
+    await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        mission_locale_id: mlData?._id,
+        effectif_id: effectif._id,
+      },
+      {
+        $set: {
+          current_status: {
+            value: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.valeur,
+            date: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.date,
           },
         },
-        { upsert: true }
-      );
-    }
+        $setOnInsert: {
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: date,
+          created_at: date,
+          brevo: {
+            token: uuidv4(),
+            token_created_at: date,
+          },
+        },
+      },
+      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
+    );
   }
 };
 

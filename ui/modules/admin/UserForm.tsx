@@ -42,9 +42,11 @@ const UserForm = ({
       nom: user?.nom || "",
       prenom: user?.prenom || "",
       email: user?.email || "",
+      fonction: user?.fonction || "",
+      telephone: user?.telephone || "",
     },
     enableReinitialize: true,
-    onSubmit: async ({ civility, nom, prenom, email }, { setSubmitting }) => {
+    onSubmit: async ({ civility, nom, prenom, email, fonction, telephone }, { setSubmitting }) => {
       let result;
       let error;
 
@@ -55,6 +57,8 @@ const UserForm = ({
             prenom,
             nom,
             email,
+            fonction,
+            telephone,
           };
           result = await _put(`/api/v1/admin/users/${user._id}`, body);
           if (result?.ok) {
@@ -70,6 +74,8 @@ const UserForm = ({
             prenom,
             nom,
             email,
+            fonction,
+            telephone,
           };
           result = await _post("/api/v1/admin/users", body).catch((err) => {
             if (err.statusCode === 409) {
@@ -194,24 +200,20 @@ const UserForm = ({
             <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} />
             {errors.email && touched.email && <FormErrorMessage>{errors.email as string}</FormErrorMessage>}
           </FormControl>
+          <FormControl py={2} isInvalid={!!errors.fonction}>
+            <FormLabel>Fonction</FormLabel>
+            <Input type="text" id="fonction" name="fonction" value={values.fonction} onChange={handleChange} />
+            {errors.fonction && touched.fonction && <FormErrorMessage>{errors.fonction as string}</FormErrorMessage>}
+          </FormControl>
+          <FormControl py={2} isInvalid={!!errors.telephone}>
+            <FormLabel>Téléphone</FormLabel>
+            <Input type="tel" id="telephone" name="telephone" value={values.telephone} onChange={handleChange} />
+            {errors.telephone && touched.telephone && <FormErrorMessage>{errors.telephone as string}</FormErrorMessage>}
+          </FormControl>
         </Grid>
 
         {user && (
           <>
-            <HStack spacing={5}>
-              <Text as="span">Fonction</Text>
-              <Text as="span" bgColor="galtDark" px={2}>
-                {user.fonction || "Non renseigné"}
-              </Text>
-            </HStack>
-
-            <HStack spacing={5}>
-              <Text as="span">Téléphone</Text>
-              <Text as="span" bgColor="galtDark" px={2}>
-                {user.telephone || "Non renseigné"}
-              </Text>
-            </HStack>
-
             <HStack spacing={5}>
               <Text as="span">Statut du compte</Text>
               <Text as="span" bgColor="galt2">

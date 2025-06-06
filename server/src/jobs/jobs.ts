@@ -34,6 +34,7 @@ import {
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
@@ -43,6 +44,8 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { computeDailyTransmissions, hydrateAllTransmissions } from "./hydrate/transmissions/hydrate-transmissions";
+import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
@@ -99,6 +102,8 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Mise à jour des effectifs DECA
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
+
+  await addJob({ name: "hydrate:transmissions-all", queued });
 
   await addJob({ name: "hydrate:bal-mails", queued });
 
@@ -381,6 +386,20 @@ export async function setupJobProcessor() {
       "hydrate:bal-mails": {
         handler: async () => {
           return verifyMissionLocaleEffectifMail();
+        },
+      },
+      "tmp:migrate:effectifs-queue": {
+        handler: updateEffectifQueueDateAndError,
+      },
+      "hydrate:transmission-daily": {
+        handler: computeDailyTransmissions,
+      },
+      "hydrate:transmissions-all": {
+        handler: hydrateAllTransmissions,
+      },
+      "tmp:migrate:mission-locale-current-status": {
+        handler: async () => {
+          return updateMissionLocaleEffectifCurrentStatus();
         },
       },
     },
