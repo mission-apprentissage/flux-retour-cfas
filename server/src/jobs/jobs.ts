@@ -105,7 +105,7 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "hydrate:transmissions-all", queued });
 
-  await addJob({ name: "hydrate:bal-mails", queued });
+  // await addJob({ name: "hydrate:bal-mails", queued });
 
   return 0;
 };

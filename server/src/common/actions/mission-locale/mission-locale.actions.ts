@@ -1032,10 +1032,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
-    { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
     {
       $match: {
-        email_status: "valid",
         soft_deleted: { $ne: true },
         "brevo.token": { $ne: null },
       },

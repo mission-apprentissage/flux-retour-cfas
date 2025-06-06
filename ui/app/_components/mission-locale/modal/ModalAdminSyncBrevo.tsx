@@ -73,7 +73,9 @@ export function ModalAdminSyncBrevo(params: { id: string }) {
         {!isSyncing && syncData && (
           <>
             <Box>
-              Sur les {syncData?.total} rupturants, seulement {syncData?.eligible} seront ajoutés dans la liste Brevo
+              Sur les {syncData?.total} rupturants, seulement {syncData?.eligible} ont un email vérifié par BAL.
+              <br />
+              <b>⚠️L&apos;intégralité des données sera néanmoins synchronisée dans Brevo.</b>
             </Box>
             <Box>Les données se répartissent comme suit :</Box>
             <List sx={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
