@@ -14286,6 +14286,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "invalid",
             "not_supported",
             "error",
+            "pending",
           ],
         },
         {

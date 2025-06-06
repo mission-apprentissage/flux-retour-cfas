@@ -8,6 +8,7 @@ import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
+import { verifyMissionLocaleEffectifMail } from "./bal/bal.job";
 import { purgeQueues } from "./clear/purge-queues";
 import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
@@ -103,6 +104,8 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
   await addJob({ name: "hydrate:transmissions-all", queued });
+
+  // await addJob({ name: "hydrate:bal-mails", queued });
 
   return 0;
 };
@@ -379,6 +382,11 @@ export async function setupJobProcessor() {
       },
       "tmp:migrate:effectifs": {
         handler: migrateEffectifs,
+      },
+      "hydrate:bal-mails": {
+        handler: async () => {
+          return verifyMissionLocaleEffectifMail();
+        },
       },
       "tmp:migrate:effectifs-queue": {
         handler: updateEffectifQueueDateAndError,
