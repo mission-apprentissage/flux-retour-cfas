@@ -1,25 +1,20 @@
 // eslint-disable-next-line import/no-named-as-default
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
-import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
-import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import Link from "next/link";
 import PlausibleProvider from "next-plausible";
 
 import { publicConfig } from "@/config.public";
 
-import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
-import { StartDsfr } from "./_dsfr-setup/start-dsfr";
+import { DsfrProvider } from "./_dsfr-setup/dsfrProvider";
+import { DsfrHead, getHtmlAttributes } from "./_dsfr-setup/server-only-index";
+
 import "./global.css";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   return (
-    <html {...getHtmlAttributes({ defaultColorScheme })}>
+    <html {...getHtmlAttributes({ lang: "fr" })}>
       <head>
-        <StartDsfr />
         <DsfrHead
-          Link={Link}
           preloadFonts={[
             //"Marianne-Light",
             //"Marianne-Light_Italic",
@@ -38,7 +33,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
       <body>
         {
           <AppRouterCacheProvider>
-            <DsfrProvider>
+            <DsfrProvider lang="fr">
               <MuiDsfrThemeProvider>{children}</MuiDsfrThemeProvider>
             </DsfrProvider>
           </AppRouterCacheProvider>
