@@ -161,6 +161,13 @@ const createDernierStatutFieldPipelineML = (date: Date) => [
       },
     },
   },
+  {
+    $addFields: {
+      statusChanged: {
+        $cond: [{ $ne: ["$dernierStatut.valeur", "$current_status.value"] }, true, false],
+      },
+    },
+  },
 ];
 
 /**
@@ -244,27 +251,35 @@ const addFieldFromActivationDate = (mlActivationDate?: Date) => {
 const addFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
   const A_RISQUE_CONDITION = {
-    $or: [
-      { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
-      { $eq: ["$effectif_choice.confirmation", true] },
+    $and: [
       {
-        $and: [
+        $or: [
+          { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
+          { $eq: ["$effectif_choice.confirmation", true] },
           {
-            $gte: [
-              "$effectif_snapshot.apprenant.date_de_naissance",
-              new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-            ],
-          },
-          {
-            $lte: [
-              "$effectif_snapshot.apprenant.date_de_naissance",
-              new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+            $and: [
+              {
+                $gte: [
+                  "$effectif_snapshot.apprenant.date_de_naissance",
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+                ],
+              },
+              {
+                $lte: [
+                  "$effectif_snapshot.apprenant.date_de_naissance",
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+                ],
+              },
             ],
           },
         ],
       },
+      {
+        $eq: ["$current_status.value", STATUT_APPRENANT.RUPTURANT],
+      },
     ],
   };
+
   const INJOIGNABLE_CONDITION = {
     $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR],
   };
@@ -680,6 +695,7 @@ export const getEffectifFromMissionLocaleId = async (
         "situation.commentaires": "$commentaires",
         contacts_tdb: "$tdb_users",
         prioritaire: "$a_risque",
+        current_status: "$current_status",
       },
     },
   ];
@@ -716,6 +732,37 @@ export const getEffectifsListByMisisonLocaleId = (
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
+    {
+      $addFields: {
+        _effectif_choice_label: {
+          $switch: {
+            branches: [
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $eq: ["$brevo", null] }],
+                },
+                then: "Non contacté",
+              },
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $ne: ["$brevo", null] }],
+                },
+                then: "Sans réponse",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", true] },
+                then: "Oui",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", false] },
+                then: "Non",
+              },
+            ],
+            default: "Non contacté",
+          },
+        },
+      },
+    },
     {
       $project: {
         nom: "$effectif_snapshot.apprenant.nom",
@@ -759,6 +806,7 @@ export const getEffectifsListByMisisonLocaleId = (
         organisme_code_postal: "$organisme.adresse.code_postal",
         organisme_contacts: "$organisme.contacts_from_referentiel",
         tdb_organisme_contacts: "$tdb_users",
+        effectif_choice: "$_effectif_choice_label",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
         ml_commentaires: "$commentaires",
@@ -794,6 +842,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
             $match: {
               a_traiter: true,
               a_risque: true,
+              statusChanged: false,
             },
           },
           {
@@ -871,34 +920,38 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
 
-  if (mlFilter && rupturantFilter && (ageFilter || rqthFilter)) {
-    const mlData = await organisationsDb().findOne({
-      type: "MISSION_LOCALE",
-      ml_id: effectif.apprenant.adresse?.mission_locale_id,
-    });
+  const mlData = await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    ml_id: effectif.apprenant.adresse?.mission_locale_id,
+  });
 
-    const date = new Date();
+  const date = new Date();
 
-    if (mlData) {
-      await missionLocaleEffectifsDb().findOneAndUpdate(
-        {
-          mission_locale_id: mlData?._id,
-          effectif_id: effectif._id,
-        },
-        {
-          $setOnInsert: {
-            effectif_snapshot: { ...effectif, _id: effectif._id },
-            effectif_snapshot_date: date,
-            created_at: date,
-            brevo: {
-              token: uuidv4(),
-              token_created_at: date,
-            },
+  if (mlData) {
+    await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        mission_locale_id: mlData?._id,
+        effectif_id: effectif._id,
+      },
+      {
+        $set: {
+          current_status: {
+            value: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.valeur,
+            date: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.date,
           },
         },
-        { upsert: true }
-      );
-    }
+        $setOnInsert: {
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: date,
+          created_at: date,
+          brevo: {
+            token: uuidv4(),
+            token_created_at: date,
+          },
+        },
+      },
+      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
+    );
   }
 };
 
@@ -922,6 +975,7 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
 
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+
     {
       $facet: {
         total: [{ $count: "total" }],
@@ -929,18 +983,47 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
           { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
           { $count: "total" },
         ],
+        details: [
+          {
+            $group: {
+              _id: { $ifNull: ["$email_status", "not_processed"] },
+              count: { $sum: 1 },
+            },
+          },
+        ],
       },
     },
     {
       $project: {
         total: { $arrayElemAt: ["$total.total", 0] },
         eligible: { $arrayElemAt: ["$eligible.total", 0] },
+        details: 1,
       },
     },
   ];
   const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return { total: data?.total ?? 0, eligible: data?.eligible ?? 0 };
+  return data;
 };
+
+export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
+  const fetchByType = (type: API_EFFECTIF_LISTE) =>
+    getEffectifsParMoisByMissionLocaleId(
+      missionLocaleId,
+      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
+      activationDate
+    );
+
+  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+    fetchByType(API_EFFECTIF_LISTE.TRAITE),
+    getEffectifARisqueByMissionLocaleId(missionLocaleId),
+    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+  ]);
+
+  return { a_traiter, traite, prioritaire, injoignable };
+}
+
+// BAL
 
 export const getEffectifMissionLocaleEligibleToBrevo = async (
   missionLocaleMongoId: ObjectId,
@@ -949,10 +1032,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
-    { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
     {
       $match: {
-        email_status: "valid",
         soft_deleted: { $ne: true },
         "brevo.token": { $ne: null },
       },
@@ -1048,24 +1129,24 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   }>;
 };
 
-export const getMissionLocaleRupturantToCheckMail = async () => {
-  return await missionLocaleEffectifsDb()
-    .aggregate([
-      {
-        $match: {
-          email_status: { $exists: false },
-          soft_deleted: { $ne: true },
-          "brevo.token": { $ne: null },
+export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
+  return (
+    await missionLocaleEffectifsDb()
+      .aggregate([
+        {
+          $match: {
+            email_status: { $exists: false },
+          },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          email: "$effectif_snapshot.apprenant.courriel",
+        {
+          $project: {
+            _id: 0,
+            email: "$effectif_snapshot.apprenant.courriel",
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray()
+  ).map(({ email }) => email) as Array<string>;
 };
 
 export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
@@ -1102,21 +1183,3 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
     );
   }
 };
-
-export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
-  const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(
-      missionLocaleId,
-      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
-      activationDate
-    );
-
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
-    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-    fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(missionLocaleId),
-    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
-  ]);
-
-  return { a_traiter, traite, prioritaire, injoignable };
-}

@@ -53,7 +53,11 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     header: () => "Erreurs",
     accessorKey: "errors",
     enableSorting: false,
-    cell: ({ row }) => <Text fontSize="1rem">{row.original.validation_errors?.length}</Text>,
+    cell: ({ row }) => {
+      const validationErrorsCount = row.original.validation_errors?.length || 0;
+      const hasError = row.original.error && row.original.error.trim().length > 0 ? 1 : 0;
+      return <Text fontSize="1rem">{validationErrorsCount + hasError}</Text>;
+    },
   },
   {
     size: 100,
