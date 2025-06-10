@@ -16,6 +16,10 @@ export const purgeQueues = async (NB_DAYS_TO_KEEP = 15) => {
           $exists: true,
           $ne: null,
         },
+        processed_at: {
+          $exists: true,
+          $ne: null,
+        },
       },
     },
     {
