@@ -457,7 +457,11 @@ export const primitivesV3 = {
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
   derniere_situation: z
-    .preprocess((v: unknown) => (typeof v === "string" ? parseInt(v, 10) : v), zEffectifDernierSituation)
+    .preprocess(
+      (v: unknown) => (typeof v === "string" ? parseInt(v, 10) : v),
+      zEffectifDernierSituation.or(z.literal(0))
+    )
+    .transform((v) => (v === 0 ? undefined : v))
     .describe("Situation de l'apprenant N-1"),
   dernier_organisme_uai: z.coerce
     .string()
