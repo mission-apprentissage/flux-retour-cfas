@@ -2,7 +2,7 @@ import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
-import { usersMigrationDb } from "@/common/model/collections";
+import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -41,6 +41,11 @@ describe("Password", () => {
 
     it("retourne 200 et envoie un mail si le mail est valide et l'utilisateur existe", async () => {
       vi.mocked(sendEmail).mockClear();
+      await organisationsDb().insertOne({
+        _id: new ObjectId(id(1)),
+        type: "ADMINISTRATEUR",
+        created_at: new Date(date),
+      });
       await usersMigrationDb().insertOne({
         _id: new ObjectId(),
         account_status: "CONFIRMED",

@@ -134,7 +134,7 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
   const date_inscription_formation = new Date(new Date().setFullYear(parseInt(anneeScolaire.split("-")[0]), 8, 1));
   const date_entree_formation = new Date(date_inscription_formation);
   const date_fin_formation = new Date(
-    new Date(date_inscription_formation).setFullYear(parseInt(anneeScolaire.split("-")[1]), 5)
+    new Date(date_inscription_formation).setFullYear(parseInt(anneeScolaire.split("-")[1]), 7)
   );
   const { uai, siret } = getRandomEtablissement();
   return {

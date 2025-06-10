@@ -52,6 +52,7 @@ export default () => {
         source,
         ...(user.source_organisme_id ? { source_organisme_id: user.source_organisme_id } : {}),
         api_version: "v3",
+        has_error: !!prettyValidationError,
       };
     });
 

@@ -12,6 +12,7 @@ type SearchableTableSectionProps = {
   title: string;
   data: MonthItem[];
   priorityData?: EffectifPriorityData[];
+  hadEffectifsPrioritaires?: boolean;
   isTraite: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
@@ -23,6 +24,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   title,
   data,
   priorityData,
+  hadEffectifsPrioritaires,
   isTraite,
   searchTerm,
   onSearchChange,
@@ -36,7 +38,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
       </h2>
       <div>
         <SearchBar
-          label="Rechercher par nom, prénom ou cfa"
+          label="Rechercher un dossier par nom et/ou prénom"
           renderInput={({ id, className, placeholder }) => (
             <input
               id={id}
@@ -49,8 +51,12 @@ export const SearchableTableSection = memo(function SearchableTableSection({
           )}
         />
       </div>
-      {!isTraite && priorityData && priorityData.length > 0 && (
-        <PriorityTable priorityData={priorityData} searchTerm={searchTerm} />
+      {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
+        <PriorityTable
+          priorityData={priorityData}
+          searchTerm={searchTerm}
+          hadEffectifsPrioritaires={hadEffectifsPrioritaires}
+        />
       )}
       {data.map((monthItem) => (
         <MonthTable

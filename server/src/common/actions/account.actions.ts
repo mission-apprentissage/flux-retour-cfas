@@ -9,7 +9,7 @@ import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
 
-import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
+import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
@@ -164,6 +164,7 @@ export async function sendForgotPasswordRequest(email: string) {
     logger.warn({ email }, "forgot-password: missing user");
     return;
   }
+  const orga = await getOrganisationById(user?.organisation_id);
 
   const token = createResetPasswordToken(user.email);
   sendEmail(user.email, "reset_password", {
@@ -174,6 +175,7 @@ export async function sendForgotPasswordRequest(email: string) {
       email: user.email,
     },
     resetPasswordToken: token,
+    role: orga.type,
   });
 }
 

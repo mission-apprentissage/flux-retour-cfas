@@ -13,8 +13,9 @@ import { useAuth } from "@/app/_context/UserContext";
 import { EffectifPriorityData } from "./types";
 
 type PriorityTableProps = {
-  priorityData: EffectifPriorityData[];
+  priorityData?: EffectifPriorityData[];
   searchTerm: string;
+  hadEffectifsPrioritaires?: boolean;
 };
 
 function formatMonthAndYear(dateStr: string | undefined): string {
@@ -34,7 +35,7 @@ function PriorityBadge({ priorityData }: { priorityData: EffectifPriorityData[] 
   );
 }
 
-export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) {
+export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrioritaires = false }: PriorityTableProps) {
   const { user } = useAuth();
   const params = useParams();
   const mlId = params?.id as string | undefined;
@@ -64,14 +65,18 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
     });
   }, [priorityData]);
 
+  if (priorityData.length === 0 && !hadEffectifsPrioritaires) {
+    return;
+  }
+
   return (
     <Stack p={{ xs: 2, md: 3 }} mt={4} sx={{ background: "var(--background-alt-blue-france)" }}>
-      {priorityData.length === 0 ? (
+      {priorityData.length === 0 && hadEffectifsPrioritaires && (
         <Stack direction="row" justifyContent="space-between">
           <Stack>
             <PriorityBadge priorityData={priorityData} />
             <Typography variant="body2" fontWeight="bold">
-              À traiter en priorité ({priorityData.length})
+              Tous les jeunes de cette liste ont été contactés !
             </Typography>
           </Stack>
           <Box
@@ -85,7 +90,9 @@ export function PriorityTable({ priorityData, searchTerm }: PriorityTableProps) 
             }}
           />
         </Stack>
-      ) : (
+      )}
+
+      {priorityData.length > 0 && (
         <>
           <PriorityBadge priorityData={priorityData} />
           <Typography variant="body2">

@@ -2,7 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { zEffectif } from "./effectifs.model";
+import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 import { zEffectifDECA } from "./effectifsDECA.model";
 
 const collectionName = "missionLocaleEffectif";
@@ -43,7 +43,7 @@ export enum API_EFFECTIF_LISTE {
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
-export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error"]);
+export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 
@@ -83,6 +83,10 @@ const zMissionLocaleEffectif = z.object({
       .nullish(),
   }),
   soft_deleted: z.boolean().nullish(),
+  current_status: z.object({
+    value: zStatutApprenantEnum.nullish(),
+    date: z.date().nullish(),
+  }),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

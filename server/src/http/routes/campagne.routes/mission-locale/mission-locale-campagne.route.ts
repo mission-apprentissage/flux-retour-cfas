@@ -1,6 +1,7 @@
 import { captureException } from "@sentry/node";
 import express from "express";
 import { BREVO_TEMPLATE_NAME, BREVO_TEMPLATE_TYPE } from "shared/models/data/brevoMissionLocaleTemplate.model";
+import { maskTelephone } from "shared/utils/phone";
 import { z } from "zod";
 
 import {
@@ -13,7 +14,6 @@ import {
 } from "@/common/actions/campagnes/campagnes.actions";
 import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
-import { maskTelephone } from "@/common/utils/phoneUtils";
 import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 

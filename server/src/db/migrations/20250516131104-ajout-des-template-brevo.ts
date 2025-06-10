@@ -8,7 +8,7 @@ export const up = async () => {
     _id: new ObjectId(),
     type: BREVO_TEMPLATE_TYPE.MISSION_LOCALE,
     name: BREVO_TEMPLATE_NAME.REFUS,
-    templateId: 827,
+    templateId: 2,
     created_at: new Date(),
     ml_id: 323,
   });
@@ -17,7 +17,7 @@ export const up = async () => {
     _id: new ObjectId(),
     type: BREVO_TEMPLATE_TYPE.MISSION_LOCALE,
     name: BREVO_TEMPLATE_NAME.CONFIRMATION,
-    templateId: 826,
+    templateId: 1,
     created_at: new Date(),
     ml_id: 323,
   });

@@ -8,6 +8,7 @@ import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
+import { verifyMissionLocaleEffectifMail } from "./bal/bal.job";
 import { purgeQueues } from "./clear/purge-queues";
 import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
@@ -33,6 +34,7 @@ import {
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
@@ -42,6 +44,8 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { computeDailyTransmissions, hydrateAllTransmissions } from "./hydrate/transmissions/hydrate-transmissions";
+import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
@@ -98,6 +102,10 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Mise à jour des effectifs DECA
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
+
+  await addJob({ name: "hydrate:transmissions-all", queued });
+
+  // await addJob({ name: "hydrate:bal-mails", queued });
 
   return 0;
 };
@@ -382,6 +390,25 @@ export async function setupJobProcessor() {
       },
       "tmp:migrate:effectifs": {
         handler: migrateEffectifs,
+      },
+      "hydrate:bal-mails": {
+        handler: async () => {
+          return verifyMissionLocaleEffectifMail();
+        },
+      },
+      "tmp:migrate:effectifs-queue": {
+        handler: updateEffectifQueueDateAndError,
+      },
+      "hydrate:transmission-daily": {
+        handler: computeDailyTransmissions,
+      },
+      "hydrate:transmissions-all": {
+        handler: hydrateAllTransmissions,
+      },
+      "tmp:migrate:mission-locale-current-status": {
+        handler: async () => {
+          return updateMissionLocaleEffectifCurrentStatus();
+        },
       },
     },
   });
