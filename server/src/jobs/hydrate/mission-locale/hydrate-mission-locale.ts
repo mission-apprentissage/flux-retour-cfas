@@ -195,7 +195,6 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
           },
         ])
         .next();
-      console.log("effectif", effectif);
       if (!effectif) {
         continue;
       }
