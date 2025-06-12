@@ -20,17 +20,7 @@ import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddlew
 export default () => {
   const router = express.Router();
 
-  router.get(
-    "/",
-    validateRequestMiddleware({
-      query: z.object({
-        utm_source: z.string(),
-        utm_medium: z.string(),
-        utm_campaign: z.string(),
-      }),
-    }),
-    getMissionLocaleEffectifInfoByToken
-  );
+  router.get("/", getMissionLocaleEffectifInfoByToken);
 
   router.get(
     "/confirmation/:confirmation",
@@ -44,13 +34,13 @@ export default () => {
 
 async function getMissionLocaleEffectifInfoByToken(req, res, next) {
   try {
-    const { utm_campaign, utm_medium, utm_source, rncp, cfd } = req.query;
+    const { rncp, cfd } = req.query;
     const token = res.locals.token;
     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
     const lbaUrl = await getLbaTrainingLinksWithCustomUtm(cfd, rncp, {
-      source: utm_source,
-      medium: utm_medium,
-      campaign: utm_campaign,
+      source: "tableau-de-bord",
+      medium: "web",
+      campaign: "tba_jeunes-rupturants_promotion-emplois",
     });
 
     const maskedTelephone = maskTelephone(effectif.telephone);
