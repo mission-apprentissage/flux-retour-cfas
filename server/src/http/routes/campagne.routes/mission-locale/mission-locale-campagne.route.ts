@@ -32,12 +32,11 @@ export default () => {
   return router;
 };
 
-async function getMissionLocaleEffectifInfoByToken(req, res, next) {
+async function getMissionLocaleEffectifInfoByToken(_req, res, next) {
   try {
-    const { rncp, cfd } = req.query;
     const token = res.locals.token;
     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
-    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(cfd, rncp, {
+    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(effectif.cfd, effectif.rncp, {
       source: "tableau-de-bord",
       medium: "web",
       campaign: "tba_jeunes-rupturants_promotion-emplois",
@@ -70,8 +69,7 @@ async function confirmEffectifChoiceAndRedirect(req, res, next) {
     } else {
       const templateId = await getBrevoTemplateId(
         isConfirmed ? BREVO_TEMPLATE_NAME.CONFIRMATION : BREVO_TEMPLATE_NAME.REFUS,
-        BREVO_TEMPLATE_TYPE.MISSION_LOCALE,
-        ml_id
+        BREVO_TEMPLATE_TYPE.MISSION_LOCALE
       );
       if (!templateId) {
         captureException(new Error(`Template ID not found for ${isConfirmed ? "confirmation" : "refus"} email`));

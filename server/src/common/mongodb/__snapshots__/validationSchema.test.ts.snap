@@ -81,9 +81,6 @@ exports[`validation-schema > should create validation schema for brevoMissionLoc
     "created_at": {
       "bsonType": "date",
     },
-    "ml_id": {
-      "bsonType": "number",
-    },
     "name": {
       "bsonType": "string",
       "enum": [
@@ -106,7 +103,6 @@ exports[`validation-schema > should create validation schema for brevoMissionLoc
     "templateId",
     "name",
     "type",
-    "ml_id",
   ],
 }
 `;
