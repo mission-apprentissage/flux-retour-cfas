@@ -6,7 +6,7 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import { useMemo, useState } from "react";
 import { IOrganisationMissionLocale } from "shared";
 
-import { Table } from "@/app/_components/table/Table";
+import { LightTable } from "@/app/_components/table/LightTable";
 import { _get } from "@/common/httpClient";
 
 export default function Page() {
@@ -64,7 +64,7 @@ export default function Page() {
           />
         )}
       />
-      <Table
+      <LightTable
         caption={`Tableau des Mission Locales (${dataRows.length})`}
         data={dataRows}
         columns={columns}
