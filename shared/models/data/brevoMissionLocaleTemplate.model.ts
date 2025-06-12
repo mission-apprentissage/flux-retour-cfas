@@ -1,5 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { number, z } from "zod";
+import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 export enum BREVO_TEMPLATE_NAME {
@@ -24,7 +24,6 @@ const zBrevoMissionLocaleTemplate = z.object({
   name: z.nativeEnum(BREVO_TEMPLATE_NAME),
   type: z.nativeEnum(BREVO_TEMPLATE_TYPE),
   created_at: z.date().default(() => new Date()),
-  ml_id: number(),
 });
 
 export type IBrevoMissionLocaleTemplate = z.output<typeof zBrevoMissionLocaleTemplate>;
