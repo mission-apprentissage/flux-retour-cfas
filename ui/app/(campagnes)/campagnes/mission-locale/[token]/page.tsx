@@ -72,7 +72,7 @@ export default function Page() {
       </Typography>
 
       <Typography>
-        Être accompagné par la Mission Locale {data?.missionLocale?.nom}, c’est bénéficier d’un accompagnement
+        Être accompagné(e) par la Mission Locale {data?.missionLocale?.nom}, c’est bénéficier d’un accompagnement
         personnalisé, de proximité et profiter d’un réseau de partenaires !
       </Typography>
 

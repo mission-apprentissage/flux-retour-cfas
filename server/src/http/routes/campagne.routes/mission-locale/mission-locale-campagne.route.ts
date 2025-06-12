@@ -12,7 +12,7 @@ import {
   getMissionLocaleEffectifInfoFromToken,
   updateEffectifPhoneNumberByTokenDbUpdate,
 } from "@/common/actions/campagnes/campagnes.actions";
-import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
+import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -21,6 +21,7 @@ export default () => {
   const router = express.Router();
 
   router.get("/", getMissionLocaleEffectifInfoByToken);
+
   router.get(
     "/confirmation/:confirmation",
     validateRequestMiddleware({ params: z.object({ confirmation: z.enum(["true", "false"]) }) }),
@@ -33,14 +34,14 @@ export default () => {
 
 async function getMissionLocaleEffectifInfoByToken(req, res, next) {
   try {
+    const { rncp, cfd } = req.query;
     const token = res.locals.token;
     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
-    const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
-
-    let lbaUrl = null;
-    if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
-      lbaUrl = lbaResponse.data[0].lien_lba;
-    }
+    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(cfd, rncp, {
+      source: "tableau-de-bord",
+      medium: "web",
+      campaign: "tba_jeunes-rupturants_promotion-emplois",
+    });
 
     const maskedTelephone = maskTelephone(effectif.telephone);
 
