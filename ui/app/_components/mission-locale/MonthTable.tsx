@@ -7,7 +7,7 @@ import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
-import { Table } from "@/app/_components/table/Table";
+import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifData, MonthItem, SelectedSection } from "./types";
@@ -171,7 +171,7 @@ export const MonthTable = memo(function MonthTable({
           )}
         </Stack>
       ) : (
-        <Table
+        <LightTable
           caption={`${label} (${monthItem.data.length})`}
           data={dataRows}
           columns={columns}

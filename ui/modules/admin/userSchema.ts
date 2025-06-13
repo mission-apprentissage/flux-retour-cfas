@@ -8,7 +8,7 @@ const userSchema = () =>
     nom: z.string({ required_error: "Champ obligatoire" }),
     email: z.string({ required_error: "Champ obligatoire" }).email("Email invalide"),
     fonction: z.string({ required_error: "Champ obligatoire" }),
-    telephone: extensions.phone(),
+    telephone: extensions.phone().optional(),
     account_status: z.boolean({}).optional(),
   });
 

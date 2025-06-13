@@ -2,7 +2,6 @@ import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
 import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
-import { z } from "zod";
 
 import { activateMissionLocaleAtFirstInvitation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -14,16 +13,13 @@ import {
   resendConfirmationEmail,
   updateUser,
 } from "@/common/actions/users.actions";
+import { buildFiltersFromQuery } from "@/common/utils/usersFiltersUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import paginationShema from "@/common/validation/paginationSchema";
-import searchShema from "@/common/validation/searchSchema";
 import userSchema from "@/common/validation/userSchema";
+import usersFiltersSchema, { UsersFiltersParams } from "@/common/validation/usersFiltersSchema";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
-
-const listSchema = paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict();
-type ListSchema = z.infer<typeof listSchema>;
 
 export default () => {
   const router = express.Router();
@@ -31,15 +27,11 @@ export default () => {
   router.get(
     "/",
     validateRequestMiddleware({
-      query: listSchema,
+      query: usersFiltersSchema(),
     }),
     async (req, res) => {
-      const { page, limit, sort, q } = req.query as ListSchema;
-      const query: any = {};
-      if (q) {
-        query.$text = { $search: q };
-      }
-
+      const { page, limit, sort } = req.query as UsersFiltersParams;
+      const query = buildFiltersFromQuery(req.query as UsersFiltersParams);
       const result = await getAllUsers(query, { page, limit, sort });
       return res.json(result);
     }

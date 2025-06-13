@@ -26,8 +26,14 @@ export default function Page() {
     <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
       <Box sx={{ pl: 2 }}>
         <Breadcrumb
-          currentPageLabel="Fiche Utilisateur"
+          currentPageLabel="Fiche utilisateur"
           segments={[
+            {
+              label: "Accueil",
+              linkProps: {
+                href: "/",
+              },
+            },
             {
               label: "Gestion des utilisateurs",
               linkProps: {

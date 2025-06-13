@@ -21,7 +21,7 @@ const collectionName = "organisations";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1 }, {}],
-  [{ ml_id: 1 }, { unique: true }],
+  [{ ml_id: 1 }, { unique: true, partialFilterExpression: { ml_id: { $exists: true } } }],
 ];
 
 const zOrganisationBase = z.object({

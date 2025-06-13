@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import React, { useMemo } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
-import { Table } from "@/app/_components/table/Table";
+import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifPriorityData } from "./types";
@@ -101,7 +101,7 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
             <strong>jeunes qui ont indiqué avoir besoin d’être accompagnés par vos services</strong> (campagne
             mailing)..
           </Typography>
-          <Table
+          <LightTable
             caption=""
             data={tableData}
             columns={columns}

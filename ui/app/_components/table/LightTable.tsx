@@ -14,13 +14,13 @@ interface ColumnData {
   searchable?: boolean;
 }
 
-interface TableRowData {
+interface LightTableRowData {
   [key: string]: any;
 }
 
-interface TableProps {
+interface LightTableProps {
   caption: string;
-  data: TableRowData[];
+  data: LightTableRowData[];
   columns: ColumnData[];
   itemsPerPage?: number;
   searchTerm?: string;
@@ -31,7 +31,7 @@ interface TableProps {
   emptyMessage?: string;
 }
 
-export function Table({
+export function LightTable({
   caption,
   data,
   columns,
@@ -41,7 +41,7 @@ export function Table({
   getRowLink,
   className,
   emptyMessage = "Aucun élément à afficher",
-}: TableProps) {
+}: LightTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -82,7 +82,7 @@ export function Table({
     setCurrentPage(page);
   };
 
-  const handleRowClick = (rowData: TableRowData) => {
+  const handleRowClick = (rowData: LightTableRowData) => {
     if (!getRowLink) return;
     const link = getRowLink(rowData);
     router.push(link);
