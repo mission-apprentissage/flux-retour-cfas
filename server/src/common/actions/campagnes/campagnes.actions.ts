@@ -69,6 +69,8 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
         telephone: "$effectif_snapshot.apprenant.telephone",
         formation: "$effectif_snapshot.formation",
         "organismeFormateur.nom": "$organismeFormateur.nom",
+        rncp: "$effectif_snapshot.formation.rncp",
+        cfd: "$effectif_snapshot.formation.cfd",
       },
     },
   ];
@@ -163,7 +165,7 @@ export const getEffectifMailFromToken = async (token: string) => {
   };
 };
 
-export const getBrevoTemplateId = async (name: BREVO_TEMPLATE_NAME, type: BREVO_TEMPLATE_TYPE, ml_id: number) => {
-  const data = await brevoMissionLocaleTemplateDb().findOne({ name, type, ml_id });
+export const getBrevoTemplateId = async (name: BREVO_TEMPLATE_NAME, type: BREVO_TEMPLATE_TYPE) => {
+  const data = await brevoMissionLocaleTemplateDb().findOne({ name, type });
   return data?.templateId;
 };

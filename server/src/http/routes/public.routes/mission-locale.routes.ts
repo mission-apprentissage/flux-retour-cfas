@@ -1,8 +1,8 @@
 import express from "express";
 import { z } from "zod";
 
+import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
-import { getLbaTrainingLinks, LBA_URL } from "@/common/apis/lba/lba.api";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -33,19 +33,11 @@ const getAllMissionsLocales = async () => {
 const getLbaLink = async (req, res, next) => {
   try {
     const { utm_campaign, utm_medium, utm_source, rncp, cfd } = req.query;
-    const lbaResponse = await getLbaTrainingLinks(cfd, rncp);
-
-    let lbaUrl: string = `${LBA_URL}/recherche-emploi`;
-
-    if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
-      lbaUrl = lbaResponse.data[0].lien_lba as string;
-    }
-
-    const url = new URL(lbaUrl);
-    url.searchParams.set("utm_source", utm_source);
-    url.searchParams.set("utm_medium", utm_medium);
-    url.searchParams.set("utm_campaign", utm_campaign);
-    lbaUrl = url.toString();
+    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(cfd, rncp, {
+      source: utm_source,
+      medium: utm_medium,
+      campaign: utm_campaign,
+    });
 
     res.redirect(302, lbaUrl);
   } catch (error) {
