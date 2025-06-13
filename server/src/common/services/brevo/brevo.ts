@@ -103,7 +103,7 @@ export const importContacts = async (
   try {
     return await ContactInstance.importContacts(contactImport);
   } catch (e) {
-    captureException(new Error(`Brevo importContacts error: ${e}`));
+    captureException(new Error(`Brevo importContacts error`, { cause: e }));
     return;
   }
 };
@@ -119,7 +119,7 @@ export const removeAllContactFromList = async (listeId: number) => {
   try {
     return await ContactInstance.removeContactFromList(listeId, contactList);
   } catch (e) {
-    captureException(new Error(`Brevo cleanContact error: ${e}`));
+    captureException(new Error(`Brevo cleanContact error`, { cause: e }));
     return;
   }
 };
@@ -140,7 +140,7 @@ export const createContactList = async (missionLocaleName: string) => {
   try {
     return await ContactInstance.createList(contactList);
   } catch (e) {
-    captureException(new Error(`Brevo createContactList error: ${e}`));
+    captureException(new Error(`Brevo createContactList error`, { cause: e }));
     return;
   }
 };
