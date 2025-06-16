@@ -40,13 +40,36 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   }
 
   const departementValues = parseStringToArray(departements);
+  const regionValues = parseStringToArray(regions);
+
+  const geoFilters: any[] = [];
+
   if (departementValues.length > 0) {
-    organizationFilters["organisation.organisme.adresse.departement"] = { $in: departementValues };
+    geoFilters.push({
+      $or: [
+        { "organisation.code_departement": { $in: departementValues } },
+        { "organisation.adresse.departement": { $in: departementValues } },
+        { "organisation.organisme.adresse.departement": { $in: departementValues } },
+      ],
+    });
   }
 
-  const regionValues = parseStringToArray(regions);
   if (regionValues.length > 0) {
-    organizationFilters["organisation.organisme.adresse.region"] = { $in: regionValues };
+    geoFilters.push({
+      $or: [
+        { "organisation.code_region": { $in: regionValues } },
+        { "organisation.adresse.region": { $in: regionValues } },
+        { "organisation.organisme.adresse.region": { $in: regionValues } },
+      ],
+    });
+  }
+
+  if (geoFilters.length > 0) {
+    if (geoFilters.length === 1) {
+      Object.assign(organizationFilters, geoFilters[0]);
+    } else {
+      organizationFilters.$and = geoFilters;
+    }
   }
 
   if (Object.keys(organizationFilters).length > 0) {
