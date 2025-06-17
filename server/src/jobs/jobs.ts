@@ -103,7 +103,7 @@ const dailyJobs = async (queued: boolean) => {
   // # Mise à jour des effectifs DECA
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
-  await addJob({ name: "hydrate:transmissions-all", queued });
+  await addJob({ name: "hydrate:transmission-daily", queued });
 
   // await addJob({ name: "hydrate:bal-mails", queued });
 
