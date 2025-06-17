@@ -65,7 +65,7 @@ export function EffectifInfo({
           <Stack direction="row" spacing={1} alignItems="center">
             {effectif.injoignable ? (
               <Badge severity="info">Contacté sans réponse</Badge>
-            ) : effectif.a_traiter && effectif.prioritaire ? (
+            ) : effectif.a_traiter && (effectif.prioritaire || effectif.a_contacter) ? (
               <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
                 <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
               </p>
