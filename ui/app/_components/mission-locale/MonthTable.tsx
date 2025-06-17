@@ -32,7 +32,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
       id: effectif.id,
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {effectif.prioritaire ? (
+          {effectif.prioritaire || effectif.a_contacter ? (
             <p className="fr-badge fr-badge--orange-terre-battue fr-badge--sm" style={{ gap: "0.2rem" }}>
               <i className="fr-icon-fire-fill fr-icon--xs" />
               Prioritaire
