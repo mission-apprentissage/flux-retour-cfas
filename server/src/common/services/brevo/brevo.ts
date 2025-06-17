@@ -47,7 +47,7 @@ export const sendTransactionalEmail = async (recipientEmail: string, templateId:
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
   } catch (e) {
-    captureException(new Error(`Brevo sendTransactionalEmail error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -59,7 +59,7 @@ export const getContactDetails = async (email: string) => {
   try {
     return (await ContactInstance.getContactInfo(email)).body.attributes;
   } catch (e) {
-    captureException(new Error(`Brevo getContactDetails error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -103,7 +103,7 @@ export const importContacts = async (
   try {
     return await ContactInstance.importContacts(contactImport);
   } catch (e) {
-    captureException(new Error(`Brevo importContacts error`, { cause: e }));
+    captureException(e);
     return;
   }
 };
@@ -119,7 +119,7 @@ export const removeAllContactFromList = async (listeId: number) => {
   try {
     return await ContactInstance.removeContactFromList(listeId, contactList);
   } catch (e) {
-    captureException(new Error(`Brevo cleanContact error`, { cause: e }));
+    captureException(e);
     return;
   }
 };
@@ -140,7 +140,7 @@ export const createContactList = async (missionLocaleName: string) => {
   try {
     return await ContactInstance.createList(contactList);
   } catch (e) {
-    captureException(new Error(`Brevo createContactList error`, { cause: e }));
+    captureException(e);
     return;
   }
 };
