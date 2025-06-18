@@ -271,6 +271,13 @@ export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMig
     throw new Error("Unable to find user");
   }
 
+  if (data.email && data.email !== user.email) {
+    const existingUser = await getUserByEmail(data.email);
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      throw Boom.conflict("Cet email est déjà utilisé.");
+    }
+  }
+
   const updated = await usersMigrationDb().findOneAndUpdate(
     { _id: user._id },
     {
