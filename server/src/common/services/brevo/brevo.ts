@@ -1,6 +1,7 @@
 import brevo, { ContactsApiApiKeys, TransactionalEmailsApiApiKeys } from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
+import { format } from "date-fns";
 
 import config from "@/config";
 
@@ -75,6 +76,8 @@ export const importContacts = async (
     nom_organisme?: string | null;
     mission_locale_id: string;
     nom_mission_locale: string;
+    date_de_naissance?: Date | null;
+    date_derniere_rupture?: Date | null;
   }>
 ) => {
   if (!ContactInstance) {
@@ -95,6 +98,8 @@ export const importContacts = async (
       NOM_ORGANISME: contact.nom_organisme,
       MISSION_LOCALE_ID: contact.mission_locale_id,
       MISSION_LOCALE: contact.nom_mission_locale,
+      DATE_DE_NAISSANCE: contact.date_de_naissance && format(contact.date_de_naissance, "yyyy-MM-dd"),
+      DATE_DERNIERE_RUPTURE: contact.date_derniere_rupture && format(contact.date_derniere_rupture, "yyyy-MM-dd"),
     };
     return contactData;
   });

@@ -1115,6 +1115,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
         nom_organisme: "$organisme.nom",
         nom_mission_locale: "$mission_locale.nom",
         mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
+        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+        date_derniere_rupture: "$dernierStatut.date",
       },
     },
   ];
@@ -1128,6 +1130,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     nom_organisme?: string | null;
     mission_locale_id: string;
     nom_mission_locale: string;
+    date_de_naissance?: Date | null;
+    date_derniere_rupture?: Date | null;
   }>;
 };
 
