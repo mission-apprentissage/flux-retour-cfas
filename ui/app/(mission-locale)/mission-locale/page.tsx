@@ -1,30 +1,11 @@
-"use client";
+import { Metadata } from "next";
 
-import { useQuery } from "@tanstack/react-query";
+import MissionLocaleClient from "./MissionLocaleClient";
 
-import { MissionLocaleDisplay } from "@/app/_components/mission-locale/MissionLocaleDisplay";
-import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
-import { MonthsData } from "@/app/_components/mission-locale/types";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _get } from "@/common/httpClient";
+export const metadata: Metadata = {
+  title: "Ruptures de contrat | Tableau de bord de l'apprentissage",
+};
 
 export default function Page() {
-  const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month-user"],
-    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
-    {
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
-
-  return (
-    <div className="fr-container">
-      <MLHeader />
-      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <MissionLocaleDisplay data={data} />}
-      </SuspenseWrapper>
-    </div>
-  );
+  return <MissionLocaleClient />;
 }
