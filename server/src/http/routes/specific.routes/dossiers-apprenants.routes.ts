@@ -8,6 +8,7 @@ import { updateOrganisme } from "@/common/actions/organismes/organismes.actions"
 import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
+import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 
@@ -42,17 +43,18 @@ export default () => {
 
       // Nous ne pouvons pas garder le `nir_apprenant` en base
       const { nir_apprenant, ...rest } = cleansedData;
-
+      const processedAt = new Date();
       return {
         ...rest,
         has_nir: Boolean(nir_apprenant),
         ...defaultValuesEffectifQueue(),
-        ...(prettyValidationError ? { processed_at: new Date() } : {}),
+        ...(prettyValidationError ? { processed_at: processedAt } : {}),
         validation_errors: prettyValidationError || [],
         source,
         ...(user.source_organisme_id ? { source_organisme_id: user.source_organisme_id } : {}),
         api_version: "v3",
         has_error: !!prettyValidationError,
+        computed_day: formatDateYYYYMMDD(processedAt),
       };
     });
 
