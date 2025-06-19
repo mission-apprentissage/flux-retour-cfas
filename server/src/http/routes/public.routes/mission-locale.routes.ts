@@ -2,14 +2,14 @@ import express from "express";
 import { z } from "zod";
 
 import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
-import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
+import { getAllMissionsLocales } from "@/common/actions/organisations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
   const router = express.Router();
 
-  router.get("/", returnResult(getAllMissionsLocales));
+  router.get("/", returnResult(getAllML));
   router.get(
     "/lba",
     validateRequestMiddleware({
@@ -26,8 +26,8 @@ export default () => {
   return router;
 };
 
-const getAllMissionsLocales = async () => {
-  return await getMissionsLocales();
+const getAllML = async () => {
+  return await getAllMissionsLocales();
 };
 
 const getLbaLink = async (req, res, next) => {

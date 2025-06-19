@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
-import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
+import { IOrganisationCreate, IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
@@ -369,3 +369,11 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
       return "ADMINISTRATEUR";
   }
 }
+
+export const getAllMissionsLocales = async (): Promise<IOrganisationMissionLocale[]> => {
+  const organisations = await organisationsDb().find<IOrganisationMissionLocale>({ type: "MISSION_LOCALE" }).toArray();
+  if (!organisations) {
+    throw Boom.notFound("Aucune mission locale trouvée");
+  }
+  return organisations;
+};
