@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Select } from "@chakra-ui/react";
+import { FormControl, FormLabel, Radio, RadioGroup, Select, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { IOrganisationMissionLocale, DEPARTEMENTS_BY_CODE } from "shared";
@@ -11,14 +11,17 @@ const typesOrganisation = [
   {
     label: "L'UNML (Union Nationale)",
     value: "UNML",
+    disabled: true,
   },
   {
     label: "Une ARML (Agence Régionale)",
     value: "ARML",
+    disabled: true,
   },
   {
     label: "Une Mission locale",
     value: "ML",
+    disabled: false,
   },
 ] as const;
 
@@ -65,37 +68,20 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
 
   return (
     <>
-      <FormControl isRequired onChange={(e: any) => setTypeOrganisation(e.target.value)} mb={4}>
+      <FormControl isRequired onChange={(e: any) => setTypeOrganisation(e.target.value)} mb={8}>
         <FormLabel>Vous représentez :</FormLabel>
-        <Select placeholder="Sélectionner un opérateur public">
-          {typesOrganisation.map((option, index) => (
-            <option value={option.value} key={index}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        <RadioGroup id="type" name="type" mt={8}>
+          <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
+            {typesOrganisation.map((item, i) => {
+              return (
+                <Radio key={i} value={item.value} size="lg" isDisabled={item.disabled}>
+                  {item.label}
+                </Radio>
+              );
+            })}
+          </VStack>
+        </RadioGroup>
       </FormControl>
-
-      {/* {typeOrganisation === "ARML" && (
-                <FormControl isRequired>
-                    <FormLabel>Votre territoire :</FormLabel>
-                    <Select
-                        placeholder="Sélectionner un territoire"
-                        onChange={(e) =>
-                            setOrganisation({
-                                type: typeOrganisation,
-                                code_academie: e.target.value as IAcademieCode,
-                            })
-                        }
-                    >
-                        {ACADEMIES_SORTED.map((option, index) => (
-                            <option value={option.code} key={index}>
-                                {option.nom}
-                            </option>
-                        ))}
-                    </Select>
-                </FormControl>
-            )} */}
 
       {typeOrganisation === "ML" && (
         <FormControl isRequired mb={4}>
