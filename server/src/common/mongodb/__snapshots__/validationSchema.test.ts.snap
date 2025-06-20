@@ -9119,6 +9119,46 @@ exports[`validation-schema > should create validation schema for invitations > i
 }
 `;
 
+exports[`validation-schema > should create validation schema for invitationsArchive > invitationsArchive 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "author_id": {
+      "bsonType": "objectId",
+      "description": "Auteur de l'invitation",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création en base de données",
+    },
+    "email": {
+      "bsonType": "string",
+      "description": "Email destinataire",
+    },
+    "organisation_id": {
+      "bsonType": "objectId",
+      "description": "Organisation cible de l'invitation",
+    },
+    "token": {
+      "bsonType": "string",
+      "description": "Jeton d'invitation",
+    },
+  },
+  "required": [
+    "_id",
+    "token",
+    "email",
+    "organisation_id",
+    "author_id",
+    "created_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for jwtSessions > jwtSessions 1`] = `
 {
   "additionalProperties": false,
@@ -14825,6 +14865,48 @@ exports[`validation-schema > should create validation schema for organisations >
         "type",
         "nom",
         "ml_id",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "activated_at": {
+          "bsonType": "date",
+          "description": "Date d'activation de la mission locale",
+        },
+        "created_at": {
+          "bsonType": "date",
+          "description": "Date de création en base de données",
+        },
+        "nom": {
+          "bsonType": "string",
+          "description": "Nom de l'ARML",
+        },
+        "region_list": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "pattern": "^[0-9]{2,3}$",
+          },
+        },
+        "telephone": {
+          "bsonType": "string",
+          "description": "Téléphone de la mission locale",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "_id",
+        "created_at",
+        "type",
+        "nom",
+        "region_list",
       ],
     },
     {

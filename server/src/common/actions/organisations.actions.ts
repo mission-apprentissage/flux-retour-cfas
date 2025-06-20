@@ -7,7 +7,13 @@ import { IOrganisationCreate, IOrganisation, IOrganisationMissionLocale } from "
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
-import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import {
+  invitationsArchiveDb,
+  invitationsDb,
+  organisationsDb,
+  organismesDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
@@ -145,6 +151,7 @@ export async function resendInvitationEmail(ctx: AuthContext, invitationId: stri
 }
 
 export async function cancelInvitation(ctx: AuthContext, invitationId: string): Promise<void> {
+  const invitation = await getInvitationById(ctx, new ObjectId(invitationId));
   const res = await invitationsDb().deleteOne({
     organisation_id: ctx.organisation_id,
     _id: new ObjectId(invitationId),
@@ -152,6 +159,7 @@ export async function cancelInvitation(ctx: AuthContext, invitationId: string): 
   if (res.deletedCount === 0) {
     throw Boom.forbidden("Permissions invalides");
   }
+  await invitationsArchiveDb().insertOne(invitation);
 }
 
 export async function validateMembre(ctx: AuthContext, userId: string): Promise<void> {
@@ -309,6 +317,7 @@ export async function rejectInvitation(token: string): Promise<void> {
   await invitationsDb().deleteOne({
     token,
   });
+  await invitationsArchiveDb().insertOne(invitation);
 }
 
 // utilitaires
@@ -329,6 +338,8 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
   switch (organisation.type) {
     case "MISSION_LOCALE":
       return `Mission locale ${organisation.nom}`;
+    case "ARML":
+      return `ARML ${organisation.nom}`;
     case "ORGANISME_FORMATION": {
       const organisme = await organismesDb().findOne({
         siret: organisation.siret,
