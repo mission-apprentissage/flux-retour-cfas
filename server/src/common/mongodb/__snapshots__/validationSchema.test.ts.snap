@@ -14874,6 +14874,48 @@ exports[`validation-schema > should create validation schema for organisations >
         "_id": {
           "bsonType": "objectId",
         },
+        "activated_at": {
+          "bsonType": "date",
+          "description": "Date d'activation de la mission locale",
+        },
+        "created_at": {
+          "bsonType": "date",
+          "description": "Date de création en base de données",
+        },
+        "nom": {
+          "bsonType": "string",
+          "description": "Nom de l'ARML",
+        },
+        "region_list": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "pattern": "^[0-9]{2,3}$",
+          },
+        },
+        "telephone": {
+          "bsonType": "string",
+          "description": "Téléphone de la mission locale",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "_id",
+        "created_at",
+        "type",
+        "nom",
+        "region_list",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
         "created_at": {
           "bsonType": "date",
           "description": "Date de création en base de données",

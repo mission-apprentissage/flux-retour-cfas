@@ -41,6 +41,14 @@ const zOrganisationMissionLocaleCreate = z.object({
   adresse: zAdresse.optional(),
 });
 
+const zOrganisationARMLCreate = z.object({
+  type: z.literal("ARML"),
+  nom: z.string({ description: "Nom de l'ARML" }),
+  telephone: z.string({ description: "Téléphone de la mission locale" }).optional(),
+  activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
+  region_list: z.array(zAdresse.shape.region),
+});
+
 const zOrganisationOrganismeCreate = z.object({
   type: z.literal("ORGANISME_FORMATION"),
   siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
@@ -91,6 +99,8 @@ const zOrganisationAdminCreate = z.object({
 });
 
 export const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
+const zOrganisationARML = zOrganisationBase.merge(zOrganisationARMLCreate);
+
 const zOrganisationOrganisme = zOrganisationBase.merge(zOrganisationOrganismeCreate);
 const zOrganisationReaseau = zOrganisationBase.merge(zOrganisationReaseauCreate);
 const zOrganisationRegional = zOrganisationBase.merge(zOrganisationRegionalCreate);
@@ -102,6 +112,7 @@ const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
 
 export const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationMissionLocale,
+  zOrganisationARML,
   zOrganisationOrganisme,
   zOrganisationReaseau,
   zOrganisationRegional,
@@ -114,6 +125,7 @@ export const zOrganisation = z.discriminatedUnion("type", [
 
 export const zOrganisationCreate = z.discriminatedUnion("type", [
   zOrganisationMissionLocaleCreate,
+  zOrganisationARMLCreate,
   zOrganisationOrganismeCreate,
   zOrganisationReaseauCreate,
   zOrganisationRegionalCreate,
@@ -125,6 +137,8 @@ export const zOrganisationCreate = z.discriminatedUnion("type", [
 ]);
 export type IOrganisationMissionLocale = z.output<typeof zOrganisationMissionLocale>;
 
+export type IOrganisationARML = z.output<typeof zOrganisationARML>;
+
 export type IOrganisationOrganismeFormation = z.output<typeof zOrganisationOrganisme>;
 
 export type IOrganisationOperateurPublicNational = z.output<typeof zOrganisationNational>;
@@ -134,6 +148,7 @@ export type IOrganisationOperateurPublicRegion = z.output<typeof zOrganisationRe
 export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisationAcademie>;
 
 export type IOrganisation = z.output<typeof zOrganisation>;
+
 export type IOrganisationJson = Jsonify<IOrganisation>;
 
 export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
@@ -151,6 +166,7 @@ export const TYPES_ORGANISATION = [
   { key: "DRAAF", nom: "DRAAF" },
   { key: "DREETS", nom: "DREETS" },
   { key: "MISSION_LOCALE", nom: "Mission locale" },
+  { key: "ARML", nom: "ARML" },
   { key: "OPERATEUR_PUBLIC_NATIONAL", nom: "Opérateur public national" },
   { key: "ORGANISME_FORMATION", nom: "Organisme de formation" },
   { key: "TETE_DE_RESEAU", nom: "Tête de réseau" },
@@ -160,6 +176,9 @@ export function getOrganisationLabel(organisation: IOrganisationCreate): string 
   switch (organisation.type) {
     case "MISSION_LOCALE":
       return `Mission locale ${organisation.nom}`;
+
+    case "ARML":
+      return `ARML ${organisation.nom}`;
 
     case "ORGANISME_FORMATION": {
       return `OFA UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
