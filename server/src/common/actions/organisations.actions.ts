@@ -338,6 +338,8 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
   switch (organisation.type) {
     case "MISSION_LOCALE":
       return `Mission locale ${organisation.nom}`;
+    case "ARML":
+      return `ARML ${organisation.nom}`;
     case "ORGANISME_FORMATION": {
       const organisme = await organismesDb().findOne({
         siret: organisation.siret,
