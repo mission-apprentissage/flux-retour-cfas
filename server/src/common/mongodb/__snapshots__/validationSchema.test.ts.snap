@@ -9119,6 +9119,46 @@ exports[`validation-schema > should create validation schema for invitations > i
 }
 `;
 
+exports[`validation-schema > should create validation schema for invitationsArchive > invitationsArchive 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "author_id": {
+      "bsonType": "objectId",
+      "description": "Auteur de l'invitation",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création en base de données",
+    },
+    "email": {
+      "bsonType": "string",
+      "description": "Email destinataire",
+    },
+    "organisation_id": {
+      "bsonType": "objectId",
+      "description": "Organisation cible de l'invitation",
+    },
+    "token": {
+      "bsonType": "string",
+      "description": "Jeton d'invitation",
+    },
+  },
+  "required": [
+    "_id",
+    "token",
+    "email",
+    "organisation_id",
+    "author_id",
+    "created_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for jwtSessions > jwtSessions 1`] = `
 {
   "additionalProperties": false,
