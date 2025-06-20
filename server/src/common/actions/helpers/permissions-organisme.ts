@@ -47,6 +47,23 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
+    case "ARML": {
+      return {
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
+        effectifsNominatifs: {
+          apprenant: false,
+          apprenti: false,
+          inscritSansContrat: false,
+          rupturant: false,
+          abandon: false,
+          inconnu: false,
+        },
+        manageEffectifs: false,
+        configurerModeTransmission: false,
+      };
+    }
     case "ORGANISME_FORMATION": {
       const userOrganisme = await organismesDb().findOne({
         siret: organisation.siret,
