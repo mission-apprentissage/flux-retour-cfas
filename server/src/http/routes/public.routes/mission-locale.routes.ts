@@ -10,6 +10,7 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllML));
+  router.get("/arml", returnResult(getAllARML));
   router.get(
     "/lba",
     validateRequestMiddleware({
@@ -28,6 +29,10 @@ export default () => {
 
 const getAllML = async () => {
   return await getAllMissionsLocales();
+};
+
+const getAllARML = async () => {
+  return await getAllARML();
 };
 
 const getLbaLink = async (req, res, next) => {

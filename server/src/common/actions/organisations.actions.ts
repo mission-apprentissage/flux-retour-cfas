@@ -3,7 +3,12 @@ import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
-import { IOrganisationCreate, IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import {
+  IOrganisationCreate,
+  IOrganisation,
+  IOrganisationMissionLocale,
+  IOrganisationARML,
+} from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
@@ -385,6 +390,14 @@ export const getAllMissionsLocales = async (): Promise<IOrganisationMissionLocal
   const organisations = await organisationsDb().find<IOrganisationMissionLocale>({ type: "MISSION_LOCALE" }).toArray();
   if (!organisations) {
     throw Boom.notFound("Aucune mission locale trouvée");
+  }
+  return organisations;
+};
+
+export const getAllARML = async (): Promise<IOrganisationARML[]> => {
+  const organisations = await organisationsDb().find<IOrganisationARML>({ type: "ARML" }).toArray();
+  if (!organisations) {
+    throw Boom.notFound("Aucune ARML trouvée");
   }
   return organisations;
 };
