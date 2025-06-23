@@ -1,7 +1,7 @@
 import { FormControl, FormLabel, Radio, RadioGroup, Select, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { IOrganisationMissionLocale, DEPARTEMENTS_BY_CODE } from "shared";
+import { IOrganisationMissionLocale, DEPARTEMENTS_BY_CODE, IOrganisationARML } from "shared";
 
 import { _get } from "@/common/httpClient";
 
@@ -16,7 +16,7 @@ const typesOrganisation = [
   {
     label: "Une ARML (Agence Régionale)",
     value: "ARML",
-    disabled: true,
+    disabled: false,
   },
   {
     label: "Une Mission locale",
@@ -36,6 +36,8 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
   const { data: missionLocales } = useQuery<Array<IOrganisationMissionLocale>>(["mission-locale"], async () =>
     _get("/api/v1/mission-locale")
   );
+
+  const { data: armls } = useQuery<Array<IOrganisationARML>>(["arml"], async () => _get("/api/v1/mission-locale/arml"));
 
   useEffect(() => {
     if (missionLocales) {
@@ -66,6 +68,13 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
     }
   };
 
+  const onSelectedArml = (armlId: string) => {
+    const arml = armls?.find(({ _id }) => _id.toString() === armlId);
+    if (arml) {
+      setOrganisation(arml);
+    }
+  };
+
   return (
     <>
       <FormControl isRequired onChange={(e: any) => setTypeOrganisation(e.target.value)} mb={8}>
@@ -82,6 +91,19 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
           </VStack>
         </RadioGroup>
       </FormControl>
+
+      {typeOrganisation === "ARML" && (
+        <FormControl isRequired mb={4}>
+          <FormLabel>Votre ARML :</FormLabel>
+          <Select placeholder="Sélectionner une ARML" onChange={(e) => onSelectedArml(e.target.value)}>
+            {armls?.sort().map((arml) => (
+              <option value={arml._id.toString()} key={arml._id.toString()}>
+                {arml.nom}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+      )}
 
       {typeOrganisation === "ML" && (
         <FormControl isRequired mb={4}>

@@ -22,10 +22,35 @@ async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   }
 }
 
+function redirectToHome(
+  session: AuthContext | null,
+  request: NextRequest,
+  requestNextData: { request: { headers: Headers } }
+) {
+  if (!session) {
+    return NextResponse.next(requestNextData);
+  }
+
+  switch (session.organisation?.type) {
+    case "MISSION_LOCALE":
+      return NextResponse.redirect(new URL("/mission-locale", request.url));
+    case "ARML":
+      return NextResponse.redirect(new URL("/arml", request.url));
+    default:
+      return NextResponse.redirect(new URL("/home", request.url));
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await fetchSession(request);
   const requestHeaders = new Headers(request.headers);
+
+  const requestNextData = {
+    request: {
+      headers: requestHeaders,
+    },
+  };
 
   if (session) {
     const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
@@ -34,20 +59,8 @@ export async function middleware(request: NextRequest) {
     requestHeaders.delete("x-session");
   }
 
-  const requestNextData = {
-    request: {
-      headers: requestHeaders,
-    },
-  };
-
   if (pathname === "/") {
-    if (session) {
-      if (session.organisation?.type === "MISSION_LOCALE") {
-        return NextResponse.redirect(new URL("/mission-locale", request.url));
-      }
-      return NextResponse.redirect(new URL("/home", request.url));
-    }
-    return NextResponse.next(requestNextData);
+    redirectToHome(session, request, requestNextData);
   }
 
   if (pathname === "/campagnes/mission-locale") {

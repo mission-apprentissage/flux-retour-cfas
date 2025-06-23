@@ -173,6 +173,12 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   Mission Locale {organisation.nom}
                 </Text>
               );
+            case "ARML":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  ARML {organisation.nom}
+                </Text>
+              );
           }
         })()}
       </Box>
