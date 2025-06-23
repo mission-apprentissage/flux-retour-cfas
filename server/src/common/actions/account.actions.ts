@@ -1,7 +1,13 @@
 import Boom from "boom";
 
 import logger from "@/common/logger";
-import { auditLogsDb, invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import {
+  auditLogsDb,
+  invitationsArchiveDb,
+  invitationsDb,
+  organisationsDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken, createResetPasswordToken } from "@/common/utils/jwtUtils";
 import { RegistrationSchema, RegistrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
@@ -65,6 +71,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         },
       }
     );
+    await invitationsArchiveDb().insertOne(invitation);
     await invitationsDb().deleteOne({ _id: invitation._id });
     return {
       account_status: "CONFIRMED",

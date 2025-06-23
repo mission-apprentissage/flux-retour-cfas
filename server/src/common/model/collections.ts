@@ -12,6 +12,7 @@ import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/dat
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
+import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 import missionLocaleEffectifDescriptor, {
@@ -50,6 +51,7 @@ export const modelDescriptors = [
   JwtSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
   invitationsModelDescriptor,
+  invitationsArchiveModelDescriptor,
   organisationsModelDescriptor,
   OrganismesModelDescriptor,
   effectifsModelDescriptor,
@@ -81,6 +83,8 @@ export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigr
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
+export const invitationsArchiveDb = () =>
+  getDbCollection<IInvitationArchive>(invitationsArchiveModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
