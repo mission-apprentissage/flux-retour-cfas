@@ -8,6 +8,8 @@ export const config = {
   matcher: ["/:path*"],
 };
 
+const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
+
 async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   try {
     const cookieHeader = request.headers.get("cookie");
@@ -20,6 +22,37 @@ async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   } catch {
     return null;
   }
+}
+
+async function buildHeaders(
+  request: NextRequest
+): Promise<{ requestNextData: { request: { headers: Headers } }; session: AuthContext | null }> {
+  const session = await fetchSession(request);
+  const requestHeaders = new Headers(request.headers);
+
+  if (session) {
+    const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
+    requestHeaders.set("x-session", encodedSession);
+  } else {
+    requestHeaders.delete("x-session");
+  }
+
+  const requestNextData = {
+    request: {
+      headers: requestHeaders,
+    },
+  };
+
+  return { requestNextData, session };
+}
+
+function handlePublicPaths(pathname: string, session: AuthContext | null, request: NextRequest): NextResponse | null {
+  if (publicPaths.includes(pathname)) {
+    if (session) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+  return NextResponse.next();
 }
 
 function redirectToHome(
@@ -43,21 +76,9 @@ function redirectToHome(
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const session = await fetchSession(request);
-  const requestHeaders = new Headers(request.headers);
+  const { requestNextData, session } = await buildHeaders(request);
 
-  const requestNextData = {
-    request: {
-      headers: requestHeaders,
-    },
-  };
-
-  if (session) {
-    const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
-    requestHeaders.set("x-session", encodedSession);
-  } else {
-    requestHeaders.delete("x-session");
-  }
+  handlePublicPaths(pathname, session, request);
 
   if (pathname === "/") {
     redirectToHome(session, request, requestNextData);
