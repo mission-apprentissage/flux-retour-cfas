@@ -46,13 +46,18 @@ async function buildHeaders(
   return { requestNextData, session };
 }
 
-function handlePublicPaths(pathname: string, session: AuthContext | null, request: NextRequest): NextResponse | null {
+function handlePublicPaths(
+  pathname: string,
+  session: AuthContext | null,
+  request: NextRequest,
+  requestNextData: { request: { headers: Headers } }
+): NextResponse | null {
   if (publicPaths.includes(pathname)) {
     if (session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+    return NextResponse.next(requestNextData);
   }
-  return NextResponse.next();
 }
 
 function redirectToHome(
@@ -63,7 +68,6 @@ function redirectToHome(
   if (!session) {
     return NextResponse.next(requestNextData);
   }
-
   switch (session.organisation?.type) {
     case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
@@ -78,10 +82,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const { requestNextData, session } = await buildHeaders(request);
 
-  handlePublicPaths(pathname, session, request);
+  const publicPath = handlePublicPaths(pathname, session, request, requestNextData);
+
+  if (publicPath) {
+    return publicPath;
+  }
 
   if (pathname === "/") {
-    redirectToHome(session, request, requestNextData);
+    return redirectToHome(session, request, requestNextData);
   }
 
   if (pathname === "/campagnes/mission-locale") {

@@ -14827,6 +14827,10 @@ exports[`validation-schema > should create validation schema for organisations >
             },
           },
         },
+        "arml_id": {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'ARML à laquelle la mission locale est rattachée",
+        },
         "created_at": {
           "bsonType": "date",
           "description": "Date de création en base de données",
