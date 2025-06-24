@@ -1,7 +1,19 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Table as MuiTable, TableBody, TableCell, TableContainer, TableRow, Paper, Typography } from "@mui/material";
+import {
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  Typography,
+  Box,
+} from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 import { matchSorter } from "match-sorter";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -12,6 +24,7 @@ interface ColumnData {
   width?: number | string;
   numeric?: boolean;
   searchable?: boolean;
+  sortable?: boolean;
 }
 
 interface LightTableRowData {
@@ -44,6 +57,14 @@ export function LightTable({
 }: LightTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<string>("");
+
+  const handleRequestSort = (property: string) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -60,19 +81,39 @@ export function LightTable({
     );
   }, [data, searchTerm, searchableColumns]);
 
+  const sortedData = useMemo(() => {
+    if (!orderBy) return filteredData;
+
+    return [...filteredData].sort((a, b) => {
+      const aValue = a.rawData[orderBy];
+      const bValue = b.rawData[orderBy];
+
+      if (aValue == null) return order === "asc" ? -1 : 1;
+      if (bValue == null) return order === "asc" ? 1 : -1;
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return order === "asc" ? aValue - bValue : bValue - aValue;
+      }
+
+      const aString = String(aValue).toLowerCase();
+      const bString = String(bValue).toLowerCase();
+      return order === "asc" ? aString.localeCompare(bString) : bString.localeCompare(aString);
+    });
+  }, [filteredData, orderBy, order]);
+
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
-  }, [filteredData, itemsPerPage]);
+    return Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+  }, [sortedData, itemsPerPage]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return filteredData.slice(startIndex, endIndex);
-  }, [filteredData, currentPage, itemsPerPage]);
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, currentPage, itemsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, data, itemsPerPage]);
+  }, [searchTerm, data, itemsPerPage, orderBy, order]);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -108,6 +149,47 @@ export function LightTable({
       ) : (
         <TableContainer component={Paper} elevation={0} sx={{ boxShadow: "none", overflowX: "auto" }}>
           <MuiTable sx={{ width: "100%", minWidth: 600 }}>
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.dataKey}
+                    align={column.numeric ? "right" : "left"}
+                    sortDirection={orderBy === column.dataKey ? order : false}
+                    sx={{
+                      width: column.width,
+                      fontWeight: "bold",
+                      borderBottomColor: "var(--blue-france-sun-113)",
+                      borderBottomStyle: "solid",
+                      borderBottomWidth: "3px",
+                      padding: "12px",
+                      paddingTop: "8px",
+                      color: "var(--text-action-high-blue-france)",
+                      "&:hover": {
+                        backgroundColor: "#F8F8F8",
+                      },
+                    }}
+                  >
+                    {column.sortable !== false ? (
+                      <TableSortLabel
+                        active={orderBy === column.dataKey}
+                        direction={orderBy === column.dataKey ? order : "asc"}
+                        onClick={() => handleRequestSort(column.dataKey)}
+                      >
+                        {column.label}
+                        {orderBy === column.dataKey ? (
+                          <Box component="span" sx={visuallyHidden}>
+                            {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
+                          </Box>
+                        ) : null}
+                      </TableSortLabel>
+                    ) : (
+                      column.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
             <TableBody>
               {paginatedData.map(({ rawData, element }, rowIndex) => (
                 <TableRow
