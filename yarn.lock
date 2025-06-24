@@ -97,6 +97,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.27.1":
+  version: 7.27.6
+  resolution: "@babel/runtime@npm:7.27.6"
+  checksum: 3f7b879df1823c0926bd5dbc941c62f5d60faa790c1aab9758c04799e1f04ee8d93553be9ec059d4e5882f19fe03cbe8933ee4f46212dced0f6d8205992c9c9a
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.25.7":
   version: 7.25.7
   resolution: "@babel/template@npm:7.25.7"
@@ -2895,6 +2902,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mui/types@npm:^7.4.3":
+  version: 7.4.3
+  resolution: "@mui/types@npm:7.4.3"
+  dependencies:
+    "@babel/runtime": ^7.27.1
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 4333a57be55972352c2247a4111a28badbf1b8bfff189ff59ac9a0c43a6a02d312ef3a860cc5befb11124482a750cb1ac88e025633c7b4596ddd63d194b0aeb4
+  languageName: node
+  linkType: hard
+
 "@mui/utils@npm:^6.4.6":
   version: 6.4.6
   resolution: "@mui/utils@npm:6.4.6"
@@ -2912,6 +2933,26 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 12a8032c20a2541e0a8aa5c415be2100fcf1c49686fe497d2bfe452efea1e13c3a5ce63b61db829c70c686ee07a9c2a159d5e0caad4f509c14c001acf07fae42
+  languageName: node
+  linkType: hard
+
+"@mui/utils@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "@mui/utils@npm:7.1.1"
+  dependencies:
+    "@babel/runtime": ^7.27.1
+    "@mui/types": ^7.4.3
+    "@types/prop-types": ^15.7.14
+    clsx: ^2.1.1
+    prop-types: ^15.8.1
+    react-is: ^19.1.0
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 5da2d843dc3ddc18ce7e3f6a235cd015f9a0b3db4c707a0f8ddbc8184c4922655103670b2901930722a88d229ee443a165fd23d957b0bcbc63e493b98c0285fc
   languageName: node
   linkType: hard
 
@@ -16410,6 +16451,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-is@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "react-is@npm:19.1.0"
+  checksum: 3eb4eac7f09bf178bdc6fa98d384f5f243b85de7c99679a88b0154ead4d818ad94386ccb00ea31ec52409ffd13299057f5ec6ca2eaec06f9f7eddc1ad4832332
+  languageName: node
+  linkType: hard
+
 "react-lazy-images@npm:^1.1.0":
   version: 1.1.0
   resolution: "react-lazy-images@npm:1.1.0"
@@ -19337,6 +19385,7 @@ __metadata:
     "@emotion/styled": ^11.14.0
     "@mui/material": ^6.4.7
     "@mui/material-nextjs": ^6.4.3
+    "@mui/utils": ^7.1.1
     "@nivo/pie": ^0.87.0
     "@sentry/integrations": ^7.114.0
     "@sentry/nextjs": ^7.119.2
