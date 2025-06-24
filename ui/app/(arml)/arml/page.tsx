@@ -1,6 +1,7 @@
 "use client";
 
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
+import { Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { IOrganisationARML } from "shared";
@@ -11,9 +12,20 @@ import { LightTable } from "@/app/_components/table/LightTable";
 import { _get } from "@/common/httpClient";
 
 export default function Page() {
-  const { data: armls = [], isLoading } = useQuery<Array<IOrganisationARML>>(["arml"], async () =>
-    _get("/api/v1/organisation/arml/mls")
-  );
+  const { data: armls = [], isLoading } = useQuery<Array<IOrganisationARML>>(["arml"], async () => {
+    const data = await _get("/api/v1/organisation/arml/mls");
+    return data.map(({ code_postal, nom, activated_at }) => {
+      return {
+        code_postal,
+        nom,
+        activated_at: activated_at ? (
+          new Date(activated_at).toLocaleDateString("fr-FR")
+        ) : (
+          <Typography color="error">Non activée</Typography>
+        ),
+      };
+    });
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -21,6 +33,7 @@ export default function Page() {
     () => [
       { label: "Code Postal", dataKey: "code_postal", width: 20 },
       { label: "Mission Locale", dataKey: "nom", width: 300 },
+      { label: "Activation", dataKey: "activated_at", width: 100 },
     ],
     []
   );
@@ -53,6 +66,7 @@ export default function Page() {
               searchTerm={searchTerm}
               searchableColumns={["nom"]}
               emptyMessage="Aucune mission locale à afficher"
+              withHeader={true}
             />
           </>
         )}

@@ -42,6 +42,7 @@ interface LightTableProps {
   getRowLink?: (rawData: any) => string;
   className?: string;
   emptyMessage?: string;
+  withHeader?: boolean;
 }
 
 export function LightTable({
@@ -54,6 +55,7 @@ export function LightTable({
   getRowLink,
   className,
   emptyMessage = "Aucun élément à afficher",
+  withHeader = false,
 }: LightTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,47 +151,49 @@ export function LightTable({
       ) : (
         <TableContainer component={Paper} elevation={0} sx={{ boxShadow: "none", overflowX: "auto" }}>
           <MuiTable sx={{ width: "100%", minWidth: 600 }}>
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.dataKey}
-                    align={column.numeric ? "right" : "left"}
-                    sortDirection={orderBy === column.dataKey ? order : false}
-                    sx={{
-                      width: column.width,
-                      fontWeight: "bold",
-                      borderBottomColor: "var(--blue-france-sun-113)",
-                      borderBottomStyle: "solid",
-                      borderBottomWidth: "3px",
-                      padding: "12px",
-                      paddingTop: "8px",
-                      color: "var(--text-action-high-blue-france)",
-                      "&:hover": {
-                        backgroundColor: "#F8F8F8",
-                      },
-                    }}
-                  >
-                    {column.sortable !== false ? (
-                      <TableSortLabel
-                        active={orderBy === column.dataKey}
-                        direction={orderBy === column.dataKey ? order : "asc"}
-                        onClick={() => handleRequestSort(column.dataKey)}
-                      >
-                        {column.label}
-                        {orderBy === column.dataKey ? (
-                          <Box component="span" sx={visuallyHidden}>
-                            {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
-                          </Box>
-                        ) : null}
-                      </TableSortLabel>
-                    ) : (
-                      column.label
-                    )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
+            {withHeader && (
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.dataKey}
+                      align={column.numeric ? "right" : "left"}
+                      sortDirection={orderBy === column.dataKey ? order : false}
+                      sx={{
+                        width: column.width,
+                        fontWeight: "bold",
+                        borderBottomColor: "var(--blue-france-sun-113)",
+                        borderBottomStyle: "solid",
+                        borderBottomWidth: "3px",
+                        padding: "12px",
+                        paddingTop: "8px",
+                        color: "var(--text-action-high-blue-france)",
+                        "&:hover": {
+                          backgroundColor: "#F8F8F8",
+                        },
+                      }}
+                    >
+                      {column.sortable !== false ? (
+                        <TableSortLabel
+                          active={orderBy === column.dataKey}
+                          direction={orderBy === column.dataKey ? order : "asc"}
+                          onClick={() => handleRequestSort(column.dataKey)}
+                        >
+                          {column.label}
+                          {orderBy === column.dataKey ? (
+                            <Box component="span" sx={visuallyHidden}>
+                              {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
+                            </Box>
+                          ) : null}
+                        </TableSortLabel>
+                      ) : (
+                        column.label
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+            )}
             <TableBody>
               {paginatedData.map(({ rawData, element }, rowIndex) => (
                 <TableRow

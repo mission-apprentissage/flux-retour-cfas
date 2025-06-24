@@ -6,7 +6,7 @@ export const getMissionsLocalesByArml = async (armlId: ObjectId) => {
   return organisationsDb()
     .find(
       { arml_id: armlId, type: "MISSION_LOCALE" },
-      { projection: { _id: 1, nom: 1, code_postal: "$adresse.code_postal" } }
+      { projection: { _id: 1, nom: 1, code_postal: "$adresse.code_postal", activated_at: 1 } }
     )
     .toArray();
 };
