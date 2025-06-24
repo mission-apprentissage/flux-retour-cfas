@@ -101,7 +101,10 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
       return [
         {
           $match: {
-            $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }],
+            $and: [
+              { a_traiter: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+            ],
           },
         },
       ];
@@ -844,7 +847,10 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
         prioritaire: [
           {
             $match: {
-              $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }],
+              $and: [
+                { a_traiter: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+              ],
             },
           },
           {
