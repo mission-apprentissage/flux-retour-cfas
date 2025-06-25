@@ -14449,6 +14449,67 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleStats > missionLocaleStats 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "mission_locale_id": {
+      "bsonType": "objectId",
+    },
+    "stats": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "a_traiter": {
+          "bsonType": "int",
+        },
+        "autre": {
+          "bsonType": "int",
+        },
+        "contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "deja_accompagne": {
+          "bsonType": "int",
+        },
+        "nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rdv_pris": {
+          "bsonType": "int",
+        },
+        "total": {
+          "bsonType": "int",
+        },
+        "traite": {
+          "bsonType": "int",
+        },
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+  },
+  "required": [
+    "_id",
+    "created_at",
+    "updated_at",
+    "mission_locale_id",
+    "stats",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for opcoRncp > opcoRncp 1`] = `
 {
   "additionalProperties": false,

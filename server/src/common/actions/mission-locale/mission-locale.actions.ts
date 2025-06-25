@@ -3,7 +3,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif, IUpdateMissionLocaleEffectif } from "shared/models";
+import { IEffectif, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
@@ -11,6 +11,7 @@ import {
   SITUATION_ENUM,
   zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
+import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -21,6 +22,8 @@ import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationD
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
+
+import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 /**
  *    EffectifsDb
  */
@@ -889,80 +892,6 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
   return result;
 };
 
-export const setEffectifMissionLocaleData = async (
-  missionLocaleId: ObjectId,
-  effectifId: ObjectId,
-  data: IUpdateMissionLocaleEffectif
-) => {
-  const { situation, situation_autre, commentaires, deja_connu } = data;
-
-  const setObject = {
-    situation,
-    deja_connu,
-    ...(situation_autre !== undefined ? { situation_autre } : {}),
-    ...(commentaires !== undefined ? { commentaires } : {}),
-  };
-
-  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
-    {
-      mission_locale_id: missionLocaleId,
-      effectif_id: new ObjectId(effectifId),
-    },
-    {
-      $set: {
-        ...setObject,
-        updated_at: new Date(),
-      },
-    },
-    { upsert: true, returnDocument: "after" }
-  );
-
-  return updated;
-};
-
-export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
-  const ageFilter = effectif?.apprenant?.date_de_naissance
-    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
-    : false;
-  const rqthFilter = effectif.apprenant.rqth;
-  const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
-  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
-
-  const mlData = await organisationsDb().findOne({
-    type: "MISSION_LOCALE",
-    ml_id: effectif.apprenant.adresse?.mission_locale_id,
-  });
-
-  const date = new Date();
-
-  if (mlData) {
-    await missionLocaleEffectifsDb().findOneAndUpdate(
-      {
-        mission_locale_id: mlData?._id,
-        effectif_id: effectif._id,
-      },
-      {
-        $set: {
-          current_status: {
-            value: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.valeur,
-            date: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.date,
-          },
-        },
-        $setOnInsert: {
-          effectif_snapshot: { ...effectif, _id: effectif._id },
-          effectif_snapshot_date: date,
-          created_at: date,
-          brevo: {
-            token: uuidv4(),
-            token_created_at: date,
-          },
-        },
-      },
-      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
-    );
-  }
-};
-
 const getEffectifMissionLocaleEligibleToBrevoAggregation = (
   missionLocaleMongoId: ObjectId,
   statut,
@@ -1193,5 +1122,153 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
         },
       }
     );
+  }
+};
+
+export const computeMissionLocaleStats = async (
+  missionLocaleId: ObjectId,
+  missionLocaleActivationDate?: Date
+): Promise<IMissionLocaleStats["stats"]> => {
+  const statut = [STATUT_APPRENANT.RUPTURANT];
+
+  const effectifsMissionLocaleAggregation = [
+    generateMissionLocaleMatchStage(missionLocaleId),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...filterByActivationDatePipelineMl(),
+    ...addFieldTraitementStatus(),
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+        a_traiter: { $sum: { $cond: ["$a_traiter", 1, 0] } },
+        traite: { $sum: { $cond: ["$a_traiter", 0, 1] } },
+        rdv_pris: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        nouveau_projet: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }, 1, 0] } },
+        deja_accompagne: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }, 1, 0] } },
+        contacte_sans_retour: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, 1, 0] } },
+        coordonnees_incorrectes: {
+          $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
+        },
+        autre: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        total: 1,
+        a_traiter: 1,
+        traite: 1,
+        rdv_pris: 1,
+        nouveau_projet: 1,
+        deja_accompagne: 1,
+        contacte_sans_retour: 1,
+        coordonnees_incorrectes: 1,
+        autre: 1,
+      },
+    },
+  ];
+
+  const data = (await missionLocaleEffectifsDb()
+    .aggregate(effectifsMissionLocaleAggregation)
+    .next()) as IMissionLocaleStats["stats"];
+  if (!data) {
+    return {
+      total: 0,
+      a_traiter: 0,
+      traite: 0,
+      rdv_pris: 0,
+      nouveau_projet: 0,
+      deja_accompagne: 0,
+      contacte_sans_retour: 0,
+      coordonnees_incorrectes: 0,
+      autre: 0,
+    };
+  }
+  return data;
+};
+
+/**
+ *
+ * Mise a jour des données de la mission locale
+ */
+
+export const setEffectifMissionLocaleData = async (
+  missionLocaleId: ObjectId,
+  effectifId: ObjectId,
+  data: IUpdateMissionLocaleEffectif
+) => {
+  const { situation, situation_autre, commentaires, deja_connu } = data;
+
+  const setObject = {
+    situation,
+    deja_connu,
+    ...(situation_autre !== undefined ? { situation_autre } : {}),
+    ...(commentaires !== undefined ? { commentaires } : {}),
+  };
+
+  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+    {
+      mission_locale_id: missionLocaleId,
+      effectif_id: new ObjectId(effectifId),
+    },
+    {
+      $set: {
+        ...setObject,
+        updated_at: new Date(),
+      },
+    },
+    { upsert: true, returnDocument: "after" }
+  );
+
+  await createOrUpdateMissionLocaleStats(missionLocaleId);
+  return updated;
+};
+
+export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+  const ageFilter = effectif?.apprenant?.date_de_naissance
+    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
+    : false;
+  const rqthFilter = effectif.apprenant.rqth;
+  const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
+  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
+
+  const mlData = (await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    ml_id: effectif.apprenant.adresse?.mission_locale_id,
+  })) as IOrganisationMissionLocale;
+
+  const date = new Date();
+
+  if (mlData) {
+    const mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        mission_locale_id: mlData?._id,
+        effectif_id: effectif._id,
+      },
+      {
+        $set: {
+          current_status: {
+            value: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.valeur,
+            date: effectif._computed?.statut?.parcours?.[effectif._computed?.statut?.parcours.length - 1]?.date,
+          },
+        },
+        $setOnInsert: {
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: date,
+          created_at: date,
+          brevo: {
+            token: uuidv4(),
+            token_created_at: date,
+          },
+        },
+      },
+      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
+    );
+
+    if (mongoInfo.lastErrorObject?.n > 0) {
+      createOrUpdateMissionLocaleStats(mlData._id);
+    }
   }
 };
