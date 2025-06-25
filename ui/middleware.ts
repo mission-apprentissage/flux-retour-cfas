@@ -51,7 +51,7 @@ function handlePublicPaths(
   session: AuthContext | null,
   request: NextRequest,
   requestNextData: { request: { headers: Headers } }
-): NextResponse | null {
+): NextResponse | undefined {
   if (publicPaths.includes(pathname)) {
     if (session) {
       return NextResponse.redirect(new URL("/", request.url));

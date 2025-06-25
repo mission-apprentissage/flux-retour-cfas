@@ -1,14 +1,40 @@
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
+import { CRISP_FAQ } from "shared";
 
 import { Impersonate } from "./Impersonate";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
 interface ConnectedHeaderProps {
-  navigation: Array<MainNavigationProps.Item>;
+  navigation?: Array<MainNavigationProps.Item>;
 }
 
-export function ConnectedHeader(props: ConnectedHeaderProps) {
+const defaultNavigation = [
+  {
+    text: "Mon tableau de bord",
+    isActive: true,
+    linkProps: {
+      href: "/mission-locale",
+      target: "_self",
+    },
+  },
+  {
+    text: "Aide et ressources",
+    menuLinks: [
+      {
+        linkProps: {
+          href: CRISP_FAQ,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+
+        text: "Centre d’aide",
+      },
+    ],
+  },
+];
+
+export function ConnectedHeader({ navigation = defaultNavigation }: ConnectedHeaderProps) {
   return (
     <DsfrHeader
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
@@ -19,7 +45,7 @@ export function ConnectedHeader(props: ConnectedHeaderProps) {
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
       quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
-      navigation={props.navigation}
+      navigation={navigation}
     />
   );
 }
