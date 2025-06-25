@@ -25,6 +25,7 @@ interface ColumnData {
   numeric?: boolean;
   searchable?: boolean;
   sortable?: boolean;
+  extraHeader?: React.ReactNode;
 }
 
 interface LightTableRowData {
@@ -43,6 +44,8 @@ interface LightTableProps {
   className?: string;
   emptyMessage?: string;
   withHeader?: boolean;
+  withStripes?: boolean;
+  defaultSort?: { order: "asc" | "desc"; orderBy: string } | null;
 }
 
 export function LightTable({
@@ -56,11 +59,13 @@ export function LightTable({
   className,
   emptyMessage = "Aucun élément à afficher",
   withHeader = false,
+  withStripes = false,
+  defaultSort = null,
 }: LightTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = useState<string>("");
+  const [order, setOrder] = useState<"asc" | "desc">(defaultSort ? defaultSort.order : "asc");
+  const [orderBy, setOrderBy] = useState<string>(defaultSort ? defaultSort.orderBy : "");
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === "asc";
@@ -131,6 +136,12 @@ export function LightTable({
     router.push(link);
   };
 
+  const computeStyle = (index) => {
+    return {
+      ...(!withStripes ? { borderBottom: "1px solid var(--border-default-grey)" } : {}),
+      ...(withStripes && index % 2 === 0 ? { backgroundColor: "#f5f5f5" } : {}),
+    };
+  };
   const isEmpty = filteredData.length === 0;
 
   return (
@@ -162,6 +173,7 @@ export function LightTable({
                       sx={{
                         width: column.width,
                         fontWeight: "bold",
+                        fontSize: "13px",
                         borderBottomColor: "var(--blue-france-sun-113)",
                         borderBottomStyle: "solid",
                         borderBottomWidth: "3px",
@@ -185,6 +197,7 @@ export function LightTable({
                               {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
                             </Box>
                           ) : null}
+                          {column.extraHeader ?? null}
                         </TableSortLabel>
                       ) : (
                         column.label
@@ -206,7 +219,7 @@ export function LightTable({
                     <TableCell
                       key={col.dataKey}
                       align={col.numeric ? "right" : "left"}
-                      sx={{ width: col.width, borderBottom: "1px solid var(--border-default-grey)" }}
+                      sx={{ width: col.width, ...computeStyle(rowIndex) }}
                     >
                       {element[col.dataKey]}
                     </TableCell>

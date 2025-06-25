@@ -20,6 +20,9 @@ const zMissionLocaleStats = z.object({
     coordonnees_incorrectes: z.number().int().default(0),
     autre: z.number().int().default(0),
     total: z.number().int().default(0),
+    deja_connu: z.number().int().default(0),
+    mineur: z.number().int().default(0),
+    abandon: z.number().int().default(0),
   }),
 });
 

@@ -30,6 +30,7 @@
     "@mui/material": "^6.4.7",
     "@mui/material-nextjs": "^6.4.3",
     "@mui/utils": "^7.1.1",
+    "@mui/x-charts": "^8.5.3",
     "@nivo/pie": "^0.87.0",
     "@sentry/integrations": "^7.114.0",
     "@sentry/nextjs": "^7.119.2",

@@ -7,6 +7,7 @@ import {
   inscritsSansContratsIndicator,
   rupturantsIndicator,
 } from "@/common/actions/effectifs/indicators";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 
@@ -94,6 +95,7 @@ export const transformRupturantsToAbandonsDepuis = async (nbJours = 180) => {
         throw new Error(`Unable to find effectif ${item._id.toString()}`);
       } else {
         await updateEffectifToAbandon(effectif, dateAbandonToSet);
+        await createMissionLocaleSnapshot(effectif);
         nbUpdated++;
       }
     })

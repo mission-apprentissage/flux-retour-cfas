@@ -1152,6 +1152,22 @@ export const computeMissionLocaleStats = async (
           $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
         },
         autre: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+        deja_connu: { $sum: { $cond: ["$deja_connu", 1, 0] } },
+        mineur: {
+          $sum: {
+            $cond: [
+              {
+                $gte: [
+                  "$effectif_snapshot.apprenant.date_de_naissance",
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },
       },
     },
     {
@@ -1166,6 +1182,9 @@ export const computeMissionLocaleStats = async (
         contacte_sans_retour: 1,
         coordonnees_incorrectes: 1,
         autre: 1,
+        deja_connu: 1,
+        mineur: 1,
+        abandon: 1,
       },
     },
   ];
@@ -1184,6 +1203,9 @@ export const computeMissionLocaleStats = async (
       contacte_sans_retour: 0,
       coordonnees_incorrectes: 0,
       autre: 0,
+      deja_connu: 0,
+      mineur: 0,
+      abandon: 0,
     };
   }
   return data;

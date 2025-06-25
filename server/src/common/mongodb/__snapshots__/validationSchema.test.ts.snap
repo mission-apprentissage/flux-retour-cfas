@@ -14470,6 +14470,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "a_traiter": {
           "bsonType": "int",
         },
+        "abandon": {
+          "bsonType": "int",
+        },
         "autre": {
           "bsonType": "int",
         },
@@ -14480,6 +14483,12 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
           "bsonType": "int",
         },
         "deja_accompagne": {
+          "bsonType": "int",
+        },
+        "deja_connu": {
+          "bsonType": "int",
+        },
+        "mineur": {
           "bsonType": "int",
         },
         "nouveau_projet": {
