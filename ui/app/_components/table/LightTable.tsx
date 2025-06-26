@@ -33,7 +33,7 @@ interface LightTableRowData {
 }
 
 interface LightTableProps {
-  caption: string;
+  caption?: string;
   data: LightTableRowData[];
   columns: ColumnData[];
   itemsPerPage?: number;
@@ -49,7 +49,7 @@ interface LightTableProps {
 }
 
 export function LightTable({
-  caption,
+  caption = undefined,
   data,
   columns,
   itemsPerPage = 10,
@@ -146,17 +146,19 @@ export function LightTable({
 
   return (
     <div className={className}>
-      <Typography
-        variant="h4"
-        sx={{
-          mt: 3,
-          mb: 2,
-          color: "var(--text-title-blue-france)",
-          textAlign: "left",
-        }}
-      >
-        {caption}
-      </Typography>
+      {caption && (
+        <Typography
+          variant="h4"
+          sx={{
+            mt: 3,
+            mb: 2,
+            color: "var(--text-title-blue-france)",
+            textAlign: "left",
+          }}
+        >
+          {caption}
+        </Typography>
+      )}
       {isEmpty ? (
         <div style={{ fontStyle: "italic" }}>{emptyMessage}</div>
       ) : (

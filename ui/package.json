@@ -27,6 +27,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.2",
     "@mui/material": "^6.4.7",
     "@mui/material-nextjs": "^6.4.3",
     "@mui/utils": "^7.1.1",
