@@ -187,23 +187,28 @@ export function LightTable({
                         },
                       }}
                     >
-                      {column.sortable !== false ? (
-                        <TableSortLabel
-                          active={orderBy === column.dataKey}
-                          direction={orderBy === column.dataKey ? order : "asc"}
-                          onClick={() => handleRequestSort(column.dataKey)}
-                        >
-                          {column.label}
-                          {orderBy === column.dataKey ? (
-                            <Box component="span" sx={visuallyHidden}>
-                              {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
-                            </Box>
-                          ) : null}
-                          {column.extraHeader ?? null}
-                        </TableSortLabel>
-                      ) : (
-                        column.label
-                      )}
+                      <Box>
+                        {column.sortable !== false ? (
+                          <TableSortLabel
+                            active={orderBy === column.dataKey}
+                            direction={orderBy === column.dataKey ? order : "asc"}
+                            onClick={() => handleRequestSort(column.dataKey)}
+                          >
+                            {column.label}
+                            {column.extraHeader ?? null}
+                            {orderBy === column.dataKey ? (
+                              <Box component="span" sx={visuallyHidden}>
+                                {order === "desc" ? "trié par ordre décroissant" : "trié par ordre croissant"}
+                              </Box>
+                            ) : null}
+                          </TableSortLabel>
+                        ) : (
+                          <Box display="flex">
+                            {column.label}
+                            {column.extraHeader ?? null}
+                          </Box>
+                        )}
+                      </Box>
                     </TableCell>
                   ))}
                 </TableRow>
