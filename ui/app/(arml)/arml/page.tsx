@@ -21,7 +21,7 @@ const colorMap = {
   nouveau_projet: { color: "#568AC3", label: "Nouveau projet" },
   deja_accompagne: { color: "#00386A", label: "Déjà acco." },
   contacte_sans_retour: { color: "#31A7AE", label: "Sans rép." },
-  coordonnees_incorrectes: { color: "#8B53C8", label: "Coord inc" },
+  coordonnees_incorrectes: { color: "#8B53C8", label: "Coord inc." },
   autre: { color: "#A78BCC", label: "Autre" },
 };
 
@@ -41,7 +41,7 @@ const LegendComponent = () => {
 const computePercentage = (part: number, total: number) => {
   if (total === 0 || part === 0) return "--";
 
-  return ((part / total) * 100).toFixed(1);
+  return Math.round((part / total) * 100);
 };
 
 const TotalPieChart = ({ data }) => {
@@ -176,6 +176,64 @@ const TraitePieChart = ({ data }) => {
   );
 };
 
+const TableauARML = ({ data }) => {
+  const transformedData = data.reduce(
+    (acc, { stats }) => {
+      return {
+        traite: (stats.traite || 0) + (acc.traite || 0),
+        a_traiter: (stats.a_traiter || 0) + (acc.a_traiter || 0),
+        rdv_pris: (stats.rdv_pris || 0) + (acc.rdv_pris || 0),
+        nouveau_projet: (stats.nouveau_projet || 0) + (acc.nouveau_projet || 0),
+        deja_accompagne: (stats.deja_accompagne || 0) + (acc.deja_accompagne || 0),
+        contacte_sans_retour: (stats.contacte_sans_retour || 0) + (acc.contacte_sans_retour || 0),
+        coordonnees_incorrectes: (stats.coordonnees_incorrectes || 0) + (acc.coordonnees_incorrectes || 0),
+        autre: (stats.autre || 0) + (acc.autre || 0),
+        total: (stats.total || 0) + (acc.total || 0),
+      };
+    },
+    {
+      traite: 0,
+      a_traiter: 0,
+      rdv_pris: 0,
+      nouveau_projet: 0,
+      deja_accompagne: 0,
+      contacte_sans_retour: 0,
+      coordonnees_incorrectes: 0,
+      autre: 0,
+      total: 0,
+    }
+  );
+
+  const columns = useMemo(
+    () => [
+      { label: "Total", dataKey: "total", width: 100, sortable: false },
+      { label: "À traiter", dataKey: "a_traiter", width: 100, sortable: false },
+      { label: "Traités", dataKey: "traite", width: 100, sortable: false },
+      { label: "Rdv pris", dataKey: "rdv_pris", width: 100, sortable: false },
+      { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 100, sortable: false },
+      { label: "Déjà acc.", dataKey: "deja_accompagne", width: 100, sortable: false },
+      { label: "Sans rép.", dataKey: "contacte_sans_retour", width: 100, sortable: false },
+      { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 100, sortable: false },
+      { label: "Autre", dataKey: "autre", width: 100, sortable: false },
+    ],
+    []
+  );
+  return (
+    <>
+      <LightTable
+        data={[{ element: transformedData, rawData: transformedData }]}
+        columns={columns}
+        itemsPerPage={1}
+        searchableColumns={["nom"]}
+        emptyMessage="Aucune mission locale à afficher"
+        withStripes={true}
+        withHeader={true}
+        defaultSort={{ order: "desc", orderBy: "total" }}
+      />
+    </>
+  );
+};
+
 const GlobalSearchBar = ({ searchTerm, setSearchTerm }) => {
   return (
     <SearchBar
@@ -200,7 +258,6 @@ const TableauMissionLocale = ({ data, searchTerm }) => {
       nom,
       a_traiter: stats.a_traiter,
       traite: stats.traite,
-      a_traiter_pourcentage: computePercentage(stats.a_traiter, stats.total),
       traite_pourcentage: computePercentage(stats.traite, stats.total),
       rdv_pris: stats.rdv_pris,
       nouveau_projet: stats.nouveau_projet,
@@ -222,7 +279,6 @@ const TableauMissionLocale = ({ data, searchTerm }) => {
       { label: "Mission Locale", dataKey: "nom", width: 300 },
       { label: "Total", dataKey: "total", width: 100 },
       { label: "À traiter", dataKey: "a_traiter", width: 100 },
-      { label: "À traiter %", dataKey: "a_traiter_pourcentage", width: 100 },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
       { label: "Activation", dataKey: "activated_at", width: 70 },
@@ -262,7 +318,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm }) => {
       code_postal,
       nom,
       traite: stats.traite,
-      traite_pourcentage: stats.total ? ((stats.traite / stats.total) * 100).toFixed(1) : null,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
       rdv_pris: stats.rdv_pris,
       nouveau_projet: stats.nouveau_projet,
       deja_accompagne: stats.deja_accompagne,
@@ -281,7 +337,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm }) => {
       { label: "Rdv pris", dataKey: "rdv_pris", width: 50 },
       { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 50 },
       { label: "Déjà acc.", dataKey: "deja_accompagne", width: 50 },
-      { label: "Cont. sans ret.", dataKey: "contacte_sans_retour", width: 50 },
+      { label: "Sans rép.", dataKey: "contacte_sans_retour", width: 50 },
       { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
       { label: "Autre", dataKey: "autre", width: 50 },
       { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
@@ -331,7 +387,7 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm }) => {
       { label: "Cont. sans ret. %", dataKey: "contacte_sans_retour_pourcentage", width: 50 },
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
-      { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
+      { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
     ],
     []
   );
@@ -440,11 +496,6 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm }) => {
         label: "Traités %",
         dataKey: "traite_pourcentage",
         width: 150,
-        extraHeader: (
-          <Typography fontSize={8} ml={0.5}>
-            total
-          </Typography>
-        ),
       },
     ],
     []
@@ -506,6 +557,9 @@ export default function Page() {
               </Grid2>
               <Grid2 size={6}>
                 <TraitePieChart data={armls} />
+              </Grid2>
+              <Grid2 size={12} mt={3}>
+                <TableauARML data={armls} />
               </Grid2>
             </Grid2>
             <Typography
