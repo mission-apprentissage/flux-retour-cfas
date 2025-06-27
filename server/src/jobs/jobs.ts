@@ -34,6 +34,7 @@ import {
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
+  hydrateMissionLocaleStats,
   updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
@@ -108,6 +109,8 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
   await addJob({ name: "hydrate:transmission-daily", queued });
+
+  await addJob({ name: "hydrate:mission-locale-stats", queued });
 
   // await addJob({ name: "hydrate:bal-mails", queued });
 
@@ -391,6 +394,9 @@ export async function setupJobProcessor() {
         handler: async () => {
           return verifyMissionLocaleEffectifMail();
         },
+      },
+      "hydrate:mission-locale-stats": {
+        handler: hydrateMissionLocaleStats,
       },
       "tmp:migrate:effectifs-queue": {
         handler: updateEffectifQueueDateAndError,

@@ -5,6 +5,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
@@ -217,5 +218,13 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
         );
       }
     }
+  }
+};
+
+export const hydrateMissionLocaleStats = async () => {
+  const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
+
+  for (const ml of mls) {
+    await createOrUpdateMissionLocaleStats(ml._id);
   }
 };

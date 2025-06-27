@@ -173,6 +173,12 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   Mission Locale {organisation.nom}
                 </Text>
               );
+            case "ARML":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  ARML {organisation.nom}
+                </Text>
+              );
           }
         })()}
       </Box>
@@ -226,6 +232,8 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
   const [showPasswordCharacters, setShowPasswordCharacters] = React.useState(false);
 
   const isOrganismeFormation = organisation.type === "ORGANISME_FORMATION";
+  const isMissionLocale = organisation.type === "MISSION_LOCALE";
+
   return (
     <Formik
       initialValues={{
@@ -441,13 +449,14 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
               </FormControl>
             )}
           </Field>
-          {isOrganismeFormation && (
+          {(isOrganismeFormation || isMissionLocale) && (
             <Field name="consent_of">
               {({ field, meta }) => (
                 <FormControl mb={6} isRequired isInvalid={meta.error && meta.touched}>
                   <Checkbox {...field} id={field.name} icon={<Check />}>
-                    J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, Académie, …). Mon email
-                    apparaîtra dans le profil dans mon organisme.
+                    J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, Académie, …){" "}
+                    {isMissionLocale && "ou un CFA de mon territoire"}. Mon email apparaîtra dans le profil dans mon
+                    organisme.
                   </Checkbox>
                   <FormErrorMessage>{meta.error}</FormErrorMessage>
                 </FormControl>

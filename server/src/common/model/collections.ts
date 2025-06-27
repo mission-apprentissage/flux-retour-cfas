@@ -21,6 +21,7 @@ import missionLocaleEffectifDescriptor, {
 import missionLocaleEffectifLogDescriptor, {
   IMissionLocaleEffectifLog,
 } from "shared/models/data/missionLocaleEffectifLog.model";
+import missionLocaleStatsDescriptor, { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
@@ -75,6 +76,7 @@ export const modelDescriptors = [
   missionLocaleEffectifLogDescriptor,
   brevoMissionLocaleListModelDescriptor,
   transmissionDailyReportDescriptor,
+  missionLocaleStatsDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -105,6 +107,8 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+export const missionLocaleStatsDb = () =>
+  getDbCollection<IMissionLocaleStats>(missionLocaleStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>
   getDbCollection<IMissionLocaleEffectifLog>(missionLocaleEffectifLogDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);

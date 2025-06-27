@@ -39,6 +39,7 @@ const zOrganisationMissionLocaleCreate = z.object({
   site_web: z.string({ description: "Site web de la mission locale" }).optional(),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
   adresse: zAdresse.optional(),
+  arml_id: zObjectId.optional().describe("Identifiant de l'ARML à laquelle la mission locale est rattachée"),
 });
 
 const zOrganisationARMLCreate = z.object({

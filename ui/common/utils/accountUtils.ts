@@ -14,6 +14,7 @@ export function getAccountLabel(auth: AuthContext): string {
     case "TETE_DE_RESEAU":
       return `${typeItem.nom} ${auth.organisation.reseau}`;
     case "MISSION_LOCALE":
+    case "ARML":
       return auth.organisation.nom ? `${typeItem.nom} ${auth.organisation.nom}` : typeItem.nom;
     case "ORGANISME_FORMATION":
     case "OPERATEUR_PUBLIC_NATIONAL":
