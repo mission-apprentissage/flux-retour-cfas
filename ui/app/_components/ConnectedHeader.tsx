@@ -1,3 +1,4 @@
+"use client";
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { CRISP_FAQ } from "shared";

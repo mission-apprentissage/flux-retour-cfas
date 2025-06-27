@@ -37,3 +37,44 @@ export const getMissionsLocalesByArml = async (armlId: ObjectId) => {
 
   return organisationsDb().aggregate(aggr).toArray();
 };
+
+export const getMissionLocaleStatsById = (mlId: ObjectId) => {
+  const aggr = [
+    {
+      $match: {
+        _id: mlId,
+      },
+    },
+    {
+      $lookup: {
+        from: "missionLocaleStats",
+        localField: "_id",
+        foreignField: "mission_locale_id",
+        as: "stats",
+      },
+    },
+    {
+      $unwind: {
+        path: "$stats",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        arml_id: 1,
+        nom: 1,
+        adresse: 1,
+        telephone: 1,
+        email: 1,
+        site_web: 1,
+        siret: 1,
+        code_postal: "$adresse.code_postal",
+        activated_at: 1,
+        stats: "$stats.stats",
+      },
+    },
+  ];
+
+  return organisationsDb().aggregate(aggr).next();
+};

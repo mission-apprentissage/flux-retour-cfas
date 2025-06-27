@@ -163,7 +163,7 @@ export function LightTable({
         <div style={{ fontStyle: "italic" }}>{emptyMessage}</div>
       ) : (
         <TableContainer component={Paper} elevation={0} sx={{ boxShadow: "none", overflowX: "auto" }}>
-          <MuiTable sx={{ width: "100%", minWidth: 600 }}>
+          <MuiTable sx={{ width: "100%" }}>
             {withHeader && (
               <TableHead>
                 <TableRow>
