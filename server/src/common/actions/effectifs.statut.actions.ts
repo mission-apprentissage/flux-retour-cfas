@@ -1,19 +1,16 @@
 import { captureException } from "@sentry/node";
-import Boom from "boom";
+import { formatISO } from "date-fns";
 import { cloneDeep } from "lodash-es";
 import { MongoServerError, UpdateFilter } from "mongodb";
-import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
+import { IContratV2, IEffectifV2 } from "shared/models";
 import type { IContrat } from "shared/models/data/effectifs/contrat.part";
 import type { IFormationEffectif } from "shared/models/data/effectifs/formation.part";
-import { IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
-import { addDaysUTC } from "shared/utils";
+import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
 import { IEffectifGenerique } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
+import { buildEffectifStatus } from "@/jobs/ingestion/status/effectif_status.builder";
 
 import logger from "../logger";
-
-const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
-const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
 
 type ICreateComputedStatutObjectParams = Readonly<{
   apprenant: Readonly<Pick<IEffectifApprenant, "historique_statut">>;
@@ -21,7 +18,8 @@ type ICreateComputedStatutObjectParams = Readonly<{
     | Readonly<Pick<IFormationEffectif, "date_entree" | "periode" | "date_fin" | "date_exclusion">>
     | null
     | undefined;
-  contrats?: Pick<IContrat, "date_debut" | "date_rupture">[] | null | undefined;
+  contrats?: Pick<IContrat, "date_debut" | "date_fin" | "cause_rupture" | "date_rupture">[] | null | undefined;
+  annee_scolaire: IEffectif["annee_scolaire"];
 }>;
 
 export async function updateEffectifStatut(
@@ -64,12 +62,7 @@ export function createComputedStatutObject(
   evaluationDate: Date
 ): IEffectifComputedStatut | null {
   try {
-    const parcours = generateUnifiedParcours(effectif, evaluationDate);
-
-    return {
-      en_cours: parcours[parcours.length - 1].valeur,
-      parcours,
-    };
+    return generateUnifiedParcours(effectif, evaluationDate);
   } catch (error) {
     logger.error(
       `Échec de la création de l'objet statut dans _computed: ${
@@ -116,129 +109,70 @@ function handleUpdateError(err: unknown, effectif: IEffectifGenerique) {
   captureException(err);
 }
 
-const generateUnifiedParcours = (
+function generateUnifiedParcours(
   effectif: ICreateComputedStatutObjectParams,
   evaluationDate: Date
-): { valeur: StatutApprenant; date: Date }[] => {
-  let parcours: { valeur: StatutApprenant; date: Date }[] = [];
-  const { formation, apprenant } = effectif;
-
-  let status: { valeur: StatutApprenant; date: Date }[] = [];
-  if (formation && formation.date_entree) {
-    status = determineStatutsByContrats(effectif, evaluationDate);
-  } else if (apprenant.historique_statut && formation?.periode) {
-    status = determineNewStatutFromHistorique(apprenant.historique_statut, formation.periode);
-  }
-  status.forEach((status) => parcours.push(status));
-
-  const lastStatus = parcours.length > 0 ? parcours[parcours.length - 1].valeur : null;
-  if (lastStatus !== STATUT_APPRENANT.ABANDON) {
-    if (formation?.date_fin) {
-      if (formation.date_fin <= evaluationDate) {
-        parcours.push({ valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date(formation.date_fin) });
-      }
-    } else if (formation?.periode && formation.periode.length === 2) {
-      const [startYear, endYear] = formation.periode;
-      let dateFinFormation = new Date(`${endYear}-12-31T00:00:00Z`);
-      if (startYear !== endYear) {
-        dateFinFormation = new Date(`${endYear}-07-31T00:00:00Z`);
-      }
-      if (dateFinFormation <= evaluationDate) {
-        parcours.push({ valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: dateFinFormation });
-      }
-    }
+): IEffectifComputedStatut {
+  if (!effectif.formation?.date_entree || !effectif.formation?.date_fin) {
+    // Legacy data
+    return determineNewStatutFromHistorique(effectif, evaluationDate);
   }
 
-  return deduplicateAndSortParcours(parcours);
-};
-
-function deduplicateAndSortParcours(parcours: { valeur: StatutApprenant; date: Date }[]) {
-  return parcours
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-    .filter((event, index, array) => index === 0 || event.valeur !== array[index - 1].valeur);
-}
-
-function determineStatutsByContrats(
-  effectif: ICreateComputedStatutObjectParams,
-  evaluationDate?: Date
-): { valeur: StatutApprenant; date: Date }[] {
-  if (!effectif.formation?.date_entree && !effectif.formation?.date_fin) {
-    return [];
-  }
-
-  const statuts: { valeur: StatutApprenant; date: Date }[] = [];
-  const currentDate = evaluationDate || new Date();
   const dateEntree = effectif.formation.date_entree;
-  const dateAbandon = effectif.formation.date_exclusion;
+  const dateFin = effectif.formation.date_fin;
 
-  const dateFin = effectif.formation.date_fin ? new Date(effectif.formation.date_fin) : currentDate;
-  const effectiveDateFin = dateFin < currentDate ? dateFin : currentDate;
+  const params: Pick<IEffectifV2, "session" | "contrats" | "exclusion"> = {
+    session: {
+      debut: dateEntree,
+      fin: dateFin,
+    },
+    contrats:
+      effectif.contrats?.reduce<IEffectifV2["contrats"]>((acc, c) => {
+        const debut = c.date_debut ?? new Date(0);
+        const day = formatISO(debut, { representation: "date" });
+        acc[day] = {
+          date_debut: debut,
+          date_fin: c.date_fin ?? dateFin,
+          rupture: c.date_rupture ? { date_rupture: c.date_rupture, cause: c.cause_rupture ?? null } : null,
+          employeur: { siret: null },
+        };
 
-  let contracts =
-    effectif.contrats
-      ?.map((contract) => ({
-        dateDebut: new Date(contract.date_debut ?? 0),
-        dateRupture: contract.date_rupture ? new Date(contract.date_rupture) : null,
-      }))
-      .sort((a, b) => a.dateDebut.getTime() - b.dateDebut.getTime()) || [];
+        return acc;
+      }, {}) ?? {},
+    exclusion: effectif.formation.date_exclusion
+      ? {
+          date: effectif.formation.date_exclusion,
+          cause: null,
+        }
+      : null,
+  };
 
-  const earliestContract = contracts[0]?.dateDebut;
-
-  if (dateEntree && earliestContract && earliestContract < dateEntree) {
-    statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: earliestContract });
-  } else if (dateEntree) {
-    statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: dateEntree });
-  }
-
-  let latestRuptureDate;
-  contracts.forEach((contract, index) => {
-    const { dateDebut, dateRupture } = contract;
-
-    if (dateDebut) {
-      if (!dateRupture || (dateRupture && dateDebut <= dateRupture)) {
-        // Gestion des rutptures avant démarrage
-        statuts.push({ valeur: STATUT_APPRENANT.APPRENTI, date: dateDebut });
-      }
-    }
-
-    if (dateRupture && dateDebut <= dateRupture) {
-      const nextContract = contracts[index + 1];
-      if (!nextContract) {
-        latestRuptureDate = dateRupture;
-      }
-      statuts.push({ valeur: STATUT_APPRENANT.RUPTURANT, date: dateRupture });
-    }
-  });
-
-  if (dateEntree && dateAbandon && dateAbandon <= effectiveDateFin && dateAbandon >= dateEntree) {
-    statuts.push({ valeur: STATUT_APPRENANT.ABANDON, date: dateAbandon });
-  } else {
-    if (latestRuptureDate && effectiveDateFin.getTime() - latestRuptureDate.getTime() > oneEightyDaysInMs) {
-      statuts.push({
-        valeur: STATUT_APPRENANT.ABANDON,
-        date: addDaysUTC(latestRuptureDate, 180),
-      });
-    }
-  }
-
-  if (statuts.length === 1 && dateEntree && effectiveDateFin.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
-    statuts.push({ valeur: STATUT_APPRENANT.ABANDON, date: addDaysUTC(dateEntree, 90) });
-  }
-
-  return statuts.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return buildEffectifStatus(params, evaluationDate);
 }
 
 function determineNewStatutFromHistorique(
-  historiqueStatut: IEffectifApprenant["historique_statut"],
-  formationPeriode: number[] | null | undefined
-): { valeur: StatutApprenant; date: Date }[] {
+  effectif: ICreateComputedStatutObjectParams,
+  evaluationDate: Date
+): IEffectifComputedStatut {
+  const historiqueStatut = effectif.apprenant.historique_statut;
   if (!historiqueStatut || historiqueStatut.length === 0) {
     throw new Error("Le statut historique est vide ou indéfini");
   }
 
-  if (!formationPeriode) {
-    throw new Error("La période de formation est nulle ou indéfinie");
+  const periode = effectif.formation?.periode ?? effectif.annee_scolaire.split("-").map((year) => parseInt(year, 10));
+
+  if (periode.length !== 2) {
+    throw new Error("La période de formation est invalide");
   }
+
+  const [startYear, endYear] = periode;
+  let dateEntreeFromPeriode =
+    startYear !== endYear ? new Date(`${startYear}-08-01T00:00:00Z`) : new Date(`${startYear}-01-01T00:00:00Z`);
+  const dateFinFromPeriode =
+    startYear !== endYear ? new Date(`${endYear}-07-31T00:00:00Z`) : new Date(`${endYear}-12-31T00:00:00Z`);
+
+  const dateDebut = effectif.formation?.date_entree ?? dateEntreeFromPeriode;
+  const dateFin = effectif.formation?.date_fin ?? dateFinFromPeriode;
 
   const clonedHistoriqueStatut = cloneDeep(historiqueStatut);
 
@@ -246,45 +180,46 @@ function determineNewStatutFromHistorique(
     (a, b) => new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime()
   );
 
-  const [startYear, endYear] = formationPeriode;
-  let inscriptionDate =
-    startYear !== endYear ? new Date(`${startYear}-08-01T00:00:00Z`) : new Date(`${startYear}-01-01T00:00:00Z`);
+  const contratsFromHistorique: IContratV2[] = [];
+  let currentContratStartDate: Date | null = null;
+  for (const statut of sortedHistoriqueStatut) {
+    if (currentContratStartDate === null && statut.valeur_statut === 3) {
+      currentContratStartDate = statut.date_statut;
+      continue;
+    }
 
-  if (sortedHistoriqueStatut[0].valeur_statut === 2) {
-    inscriptionDate = sortedHistoriqueStatut[0].date_statut;
-    sortedHistoriqueStatut.shift();
-  }
-
-  if (sortedHistoriqueStatut.length > 0 && sortedHistoriqueStatut[0].date_statut) {
-    let earliestStatutDate = new Date(sortedHistoriqueStatut[0].date_statut);
-
-    if (earliestStatutDate < inscriptionDate) {
-      inscriptionDate = earliestStatutDate;
+    if (currentContratStartDate !== null && statut.valeur_statut === 2) {
+      contratsFromHistorique.push({
+        date_debut: currentContratStartDate,
+        date_fin: dateFin,
+        rupture: { date_rupture: statut.date_statut, cause: null },
+        employeur: { siret: null },
+      });
+      currentContratStartDate = null;
     }
   }
 
-  const parcours: { valeur: StatutApprenant; date: Date }[] = [
-    { valeur: STATUT_APPRENANT.INSCRIT, date: inscriptionDate },
-  ];
+  const params: Pick<IEffectifV2, "session" | "contrats" | "exclusion"> = {
+    session: {
+      debut: dateDebut,
+      fin: dateFin,
+    },
+    contrats: Object.fromEntries(
+      contratsFromHistorique.map((contrat) => {
+        const day = formatISO(contrat.date_debut, { representation: "date" });
+        return [
+          day,
+          {
+            date_debut: contrat.date_debut,
+            date_fin: contrat.date_fin,
+            rupture: contrat.rupture,
+            employeur: { siret: null },
+          },
+        ];
+      })
+    ),
+    exclusion: null,
+  };
 
-  sortedHistoriqueStatut.forEach((statut) => {
-    parcours.push({
-      valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
-      date: new Date(statut.date_statut),
-    });
-  });
-
-  return parcours;
-}
-
-function mapValeurStatutToStatutApprenant(valeurStatut: number): StatutApprenant {
-  switch (valeurStatut) {
-    case 0:
-      return STATUT_APPRENANT.ABANDON;
-    case 2:
-      return STATUT_APPRENANT.RUPTURANT;
-    case 3:
-      return STATUT_APPRENANT.APPRENTI;
-  }
-  throw Boom.internal("Valeur de statut non trouvé", { valeurStatut });
+  return buildEffectifStatus(params, evaluationDate ?? new Date());
 }
