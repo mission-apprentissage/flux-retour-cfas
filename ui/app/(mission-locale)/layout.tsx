@@ -1,8 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
+import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
-import { ConnectedHeaderML } from "../_components/mission-locale/ConnectedHeaderML";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
@@ -12,7 +12,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
   return (
     <Providers>
       <UserContextProvider user={user}>
-        <ConnectedHeaderML />
+        <ConnectedHeader />
         <div
           style={{
             flex: 1,
