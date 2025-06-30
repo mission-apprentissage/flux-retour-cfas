@@ -83,6 +83,10 @@ fileignoreconfig:
   checksum: 7174dc73718c7b2fb9c175d783c7ca5e0d02dd85db8c7c1453a2a23d9c171461
 - filename: ui/pages/organismes-formation.tsx
   checksum: 10ba3e10dc58d0b882a87038c57b632173d3428e8a3c3ceee514deff720fdf67
+- filename: ui/app/(home)/auth/mot-de-passe-oublie/ForgotPasswordClient.tsx
+  checksum: 1c634f0c37729f0f33fd2e9be585a5fc5b0541cc32ae0acd01cc5e0790a641b0
+- filename: ui/app/(home)/auth/connexion/ConnexionClient.tsx
+  checksum: b8f93a25559cedb9e5caa7f3c887c376d371eadde25ed9d2782521c42e484158
 scopeconfig:
 - scope: node
 custom_patterns:

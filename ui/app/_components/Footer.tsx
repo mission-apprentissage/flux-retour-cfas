@@ -6,12 +6,12 @@ import { CRISP_FAQ } from "shared";
 export function Footer() {
   return (
     <DsfrFooter
+      accessibility="non compliant"
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)",
+        title: "Accueil - Nom de l'entité (ministère, secrétariat d'état, gouvernement)",
       }}
-      accessibility="non compliant"
       contentDescription={
         <>Cette plateforme est proposée par le Ministère du Travail, de la Santé, des Solidarités et des Familles.</>
       }
