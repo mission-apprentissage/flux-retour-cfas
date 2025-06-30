@@ -58,7 +58,6 @@ export const UserConnectedHeader = () => {
             onClose={handleClose}
             slotProps={{
               paper: {
-                dense: true,
                 sx: {
                   "& a": {
                     backgroundImage: "none !important",
