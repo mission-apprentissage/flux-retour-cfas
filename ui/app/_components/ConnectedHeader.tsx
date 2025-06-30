@@ -164,20 +164,6 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
-      baseItems.push({
-        text: "Aide et ressources",
-        menuLinks: [
-          {
-            linkProps: {
-              href: CRISP_FAQ,
-              target: "_blank",
-              rel: "noopener noreferrer",
-            },
-
-            text: "Centre d’aide",
-          },
-        ],
-      });
     }
 
     const aideMenuLinks: Array<{
