@@ -1,4 +1,5 @@
 import { siretFixtures } from "api-alternance-sdk/fixtures";
+import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import type { IEffectifV2 } from "shared/models";
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -10,14 +11,14 @@ import { ingestEffectifV2, type IIngestEffectifV2Params } from "./effectif.inges
 
 useMongo();
 
-const juil24 = new Date("2024-07-21");
-const aout24 = new Date("2024-08-31");
-const sept24 = new Date("2024-09-01");
-const nov24 = new Date("2024-11-30");
-const aout25 = new Date("2025-08-31");
-const aout26 = new Date("2026-08-31");
-const now = new Date("2024-12-28");
-const lastWeek = new Date("2024-12-21");
+const juil24 = new Date("2024-07-21T00:00:00.000Z");
+const aout24 = new Date("2024-08-31T00:00:00.000Z");
+const sept24 = new Date("2024-09-01T00:00:00.000Z");
+const nov24 = new Date("2024-11-30T00:00:00.000Z");
+const aout25 = new Date("2025-08-31T00:00:00.000Z");
+const aout26 = new Date("2026-08-31T00:00:00.000Z");
+const now = new Date("2024-12-28T00:00:00.000Z");
+const lastWeek = new Date("2024-12-21T00:00:00.000Z");
 
 const paris = {
   label: "123 Rue de Paris",
@@ -91,6 +92,7 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
+            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -131,6 +133,7 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
+            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -197,6 +200,7 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
+              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -257,6 +261,7 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
+              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -287,6 +292,7 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
+              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -336,6 +342,7 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: aout24, valeur: "INSCRIT" },
               { date: new Date("2024-11-29"), valeur: "ABANDON" },
+              { date: aout25, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -416,6 +423,7 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
+            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -477,6 +485,7 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
+            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -590,6 +599,15 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "APPRENTI" },
+              {
+                date: addDays(aout25, 1),
+                valeur: "RUPTURANT",
+              },
+              {
+                date: new Date("2026-02-28T00:00:00.000Z"),
+                valeur: "ABANDON",
+              },
+              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },

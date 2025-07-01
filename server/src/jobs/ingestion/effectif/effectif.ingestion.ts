@@ -181,6 +181,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
           acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
           return acc;
         }, {}),
+        exclusion: updateFields.exclusion,
       },
       new Date()
     ),

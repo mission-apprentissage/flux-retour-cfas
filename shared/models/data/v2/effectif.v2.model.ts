@@ -27,6 +27,8 @@ const zContrat = z.object({
     .nullable(),
 });
 
+export type IContratV2 = z.output<typeof zContrat>;
+
 const zEffectifV2 = z.object({
   _id: zObjectId,
 

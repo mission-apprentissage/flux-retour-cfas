@@ -147,10 +147,18 @@ export async function setupJobProcessor() {
 
             "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
               cron_string: "0 5 * * 6",
-              handler: async () => {
-                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
-                return 0;
+              handler: async (signal) => {
+                const evaluationDate = new Date();
+                return hydrateEffectifsComputedTypesGenerique(
+                  {
+                    query: {
+                      annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
+                    },
+                  },
+                  signal
+                );
               },
+              resumable: true,
             },
             "Validation des constantes de territoires": {
               cron_string: "5 4 1 * *",
