@@ -7,7 +7,7 @@ import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
-import { Table } from "@/app/_components/table/Table";
+import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
 import { EffectifData, MonthItem, SelectedSection } from "./types";
@@ -32,7 +32,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
       id: effectif.id,
       name: (
         <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {effectif.prioritaire ? (
+          {effectif.prioritaire || effectif.a_contacter ? (
             <p className="fr-badge fr-badge--orange-terre-battue fr-badge--sm" style={{ gap: "0.2rem" }}>
               <i className="fr-icon-fire-fill fr-icon--xs" />
               Prioritaire
@@ -171,7 +171,7 @@ export const MonthTable = memo(function MonthTable({
           )}
         </Stack>
       ) : (
-        <Table
+        <LightTable
           caption={`${label} (${monthItem.data.length})`}
           data={dataRows}
           columns={columns}

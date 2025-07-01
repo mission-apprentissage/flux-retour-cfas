@@ -53,7 +53,12 @@ const UserForm = ({
             fonction,
             telephone,
           };
-          result = await _put(`/api/v1/admin/users/${user._id}`, body);
+          result = await _put(`/api/v1/admin/users/${user._id}`, body).catch((err) => {
+            if (err.statusCode === 409) {
+              return { error: "Cet email est déjà utilisé par un autre utilisateur" };
+            }
+            throw err;
+          });
           if (result?.ok) {
             console.log({ body });
             setAlert({
@@ -62,6 +67,11 @@ const UserForm = ({
             });
             resetForm({
               values: body,
+            });
+          } else if (result?.error) {
+            setAlert({
+              message: result.error,
+              severity: "error",
             });
           } else {
             setAlert({

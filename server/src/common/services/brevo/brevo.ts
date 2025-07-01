@@ -1,6 +1,7 @@
 import brevo, { ContactsApiApiKeys, TransactionalEmailsApiApiKeys } from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
+import { format } from "date-fns";
 
 import config from "@/config";
 
@@ -47,7 +48,7 @@ export const sendTransactionalEmail = async (recipientEmail: string, templateId:
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
   } catch (e) {
-    captureException(new Error(`Brevo sendTransactionalEmail error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -59,7 +60,7 @@ export const getContactDetails = async (email: string) => {
   try {
     return (await ContactInstance.getContactInfo(email)).body.attributes;
   } catch (e) {
-    captureException(new Error(`Brevo getContactDetails error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -75,6 +76,8 @@ export const importContacts = async (
     nom_organisme?: string | null;
     mission_locale_id: string;
     nom_mission_locale: string;
+    date_de_naissance?: Date | null;
+    date_derniere_rupture?: Date | null;
   }>
 ) => {
   if (!ContactInstance) {
@@ -95,6 +98,8 @@ export const importContacts = async (
       NOM_ORGANISME: contact.nom_organisme,
       MISSION_LOCALE_ID: contact.mission_locale_id,
       MISSION_LOCALE: contact.nom_mission_locale,
+      DATE_DE_NAISSANCE: contact.date_de_naissance && format(contact.date_de_naissance, "yyyy-MM-dd"),
+      DATE_DERNIERE_RUPTURE: contact.date_derniere_rupture && format(contact.date_derniere_rupture, "yyyy-MM-dd"),
     };
     return contactData;
   });
@@ -103,7 +108,7 @@ export const importContacts = async (
   try {
     return await ContactInstance.importContacts(contactImport);
   } catch (e) {
-    captureException(new Error(`Brevo importContacts error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -119,7 +124,7 @@ export const removeAllContactFromList = async (listeId: number) => {
   try {
     return await ContactInstance.removeContactFromList(listeId, contactList);
   } catch (e) {
-    captureException(new Error(`Brevo cleanContact error: ${e}`));
+    captureException(e);
     return;
   }
 };
@@ -140,7 +145,7 @@ export const createContactList = async (missionLocaleName: string) => {
   try {
     return await ContactInstance.createList(contactList);
   } catch (e) {
-    captureException(new Error(`Brevo createContactList error: ${e}`));
+    captureException(e);
     return;
   }
 };

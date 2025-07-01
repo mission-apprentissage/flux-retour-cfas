@@ -47,6 +47,7 @@ const zEffectifMissionLocale = z
       .nullish(),
     situation: z.object(updateMissionLocaleEffectifApi).nullish(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
+    a_contacter: z.boolean().nullish(),
   })
   .merge(zApprenantPick);
 
