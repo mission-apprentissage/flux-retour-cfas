@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker/locale/fr";
+import { max } from "date-fns";
 import merge from "lodash-es/merge";
 import { ObjectId, WithoutId } from "mongodb";
 import RandExp from "randexp";
@@ -164,6 +165,7 @@ export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial
   const contrat_date_fin = new Date(new Date().setMonth(now.getMonth() - 1));
   return {
     ...dossier,
+    date_fin_formation: max([dossier.date_fin_formation, contrat_date_fin]),
     contrat_date_debut,
     contrat_date_rupture,
     contrat_date_fin,
