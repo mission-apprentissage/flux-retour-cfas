@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import { it, expect, describe, beforeEach } from "vitest";
+import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import {
   effectifsDb,
@@ -30,6 +30,9 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
   mockApiApprentissageCertificationApi();
 
   beforeEach(async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-04-09T10:00:00Z"));
+
     await organismesDb().insertMany([
       { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET }) },
       { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE }) },
@@ -47,10 +50,15 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     });
     await effectifsQueueDb().deleteMany({});
     await effectifsDb().deleteMany({});
+
+    return () => {
+      vi.useRealTimers();
+    };
   });
 
   it("Ajoute la mission locale dans l'adresse de l'apprenant", async () => {
     const payload = createRandomDossierApprenantApiInputV3({
+      annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
       etablissement_responsable_uai: UAI_RESPONSABLE,
@@ -79,6 +87,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
   it("L'ajout d'un effectif rupturant doit créer un effectifMissionLocale ", async () => {
     const payload = createRandomRupturantDossierApprenantApiInputV3({
+      annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
       etablissement_responsable_uai: UAI_RESPONSABLE,
@@ -108,6 +117,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
   it("L'ajout d'un effectif rupturant déja existant ne doit pas créer un effectifMissionLocale ", async () => {
     const payload = createRandomRupturantDossierApprenantApiInputV3({
+      annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
       etablissement_responsable_uai: UAI_RESPONSABLE,
@@ -135,8 +145,8 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     const effectif = await effectifsDb().findOne({ _id: effectifId });
     expect(effectif?.apprenant.adresse?.mission_locale_id).toStrictEqual(609);
 
-    const effectifML = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-    expect(effectifML?.effectif_snapshot).toEqual(effectif);
+    const effectifML = await missionLocaleEffectifsDb().find().toArray();
+    expect(effectifML[0]?.effectif_snapshot).toEqual(effectif);
 
     // Second ajout
 
@@ -144,6 +154,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
       _id: new ObjectId(),
       created_at: new Date(),
       ...payload,
+      contrat_date_debut_2: new Date(),
     });
     await processEffectifsQueue();
 
@@ -160,6 +171,8 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
     const effectifML2 = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId2 });
 
+    expect(effectif2).not.toEqual(effectif);
+    expect(effectif2?._computed?.statut?.en_cours).toEqual("APPRENTI");
     expect(effectifML2?.effectif_snapshot).toEqual(effectif);
     expect(effectifML2?.effectif_snapshot).not.toEqual(effectif2);
   });
