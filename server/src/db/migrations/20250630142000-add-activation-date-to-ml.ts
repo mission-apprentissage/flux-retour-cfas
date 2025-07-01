@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 
+import logger from "@/common/logger";
 import { organisationsDb } from "@/common/model/collections";
 
 export const up = async () => {
@@ -69,7 +70,7 @@ export const up = async () => {
     const { _id, first_effectif_created_at } =
       (mlOrganisation as unknown as { _id: ObjectId; first_effectif_created_at: Date }) || {};
     if (!first_effectif_created_at) {
-      console.warn(`No effectif created date found for organisation ${_id}, skipping update.`);
+      logger.warn(`No effectif created date found for organisation ${_id}, skipping update.`);
       continue;
     }
     await organisationsDb().updateOne(
@@ -80,6 +81,6 @@ export const up = async () => {
         },
       }
     );
-    console.log(`Updated organisation ${_id} with activation date ${first_effectif_created_at}`);
+    logger.info(`Updated organisation ${_id} with activation date ${first_effectif_created_at}`);
   }
 };
