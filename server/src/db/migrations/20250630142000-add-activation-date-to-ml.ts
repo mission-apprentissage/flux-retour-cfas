@@ -39,18 +39,18 @@ export const up = async () => {
         from: "missionLocaleEffectif",
         localField: "_id",
         foreignField: "mission_locale_id",
-        as: "users",
+        as: "effectif",
       },
     },
     {
       $sort: {
-        "users.created_at": 1,
+        "effectif.created_at": 1,
       },
     },
     {
       $addFields: {
         first_effectif_created_at: {
-          $arrayElemAt: ["$users.created_at", 0],
+          $arrayElemAt: ["$effectif.created_at", 0],
         },
       },
     },
