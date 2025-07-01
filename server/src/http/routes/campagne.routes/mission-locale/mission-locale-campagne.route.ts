@@ -12,7 +12,7 @@ import {
   getMissionLocaleEffectifInfoFromToken,
   updateEffectifPhoneNumberByTokenDbUpdate,
 } from "@/common/actions/campagnes/campagnes.actions";
-import { getLbaTrainingLinks } from "@/common/apis/lba/lba.api";
+import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -21,6 +21,7 @@ export default () => {
   const router = express.Router();
 
   router.get("/", getMissionLocaleEffectifInfoByToken);
+
   router.get(
     "/confirmation/:confirmation",
     validateRequestMiddleware({ params: z.object({ confirmation: z.enum(["true", "false"]) }) }),
@@ -31,16 +32,15 @@ export default () => {
   return router;
 };
 
-async function getMissionLocaleEffectifInfoByToken(req, res, next) {
+async function getMissionLocaleEffectifInfoByToken(_req, res, next) {
   try {
     const token = res.locals.token;
     const effectif = await getMissionLocaleEffectifInfoFromToken(token);
-    const lbaResponse = await getLbaTrainingLinks(effectif.formation.cfd, effectif.formation.rncp);
-
-    let lbaUrl = null;
-    if (lbaResponse && lbaResponse.data && lbaResponse.data.length) {
-      lbaUrl = lbaResponse.data[0].lien_lba;
-    }
+    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(effectif.cfd, effectif.rncp, {
+      source: "tableau-de-bord",
+      medium: "web",
+      campaign: "tba_jeunes-rupturants_promotion-emplois",
+    });
 
     const maskedTelephone = maskTelephone(effectif.telephone);
 
@@ -69,8 +69,7 @@ async function confirmEffectifChoiceAndRedirect(req, res, next) {
     } else {
       const templateId = await getBrevoTemplateId(
         isConfirmed ? BREVO_TEMPLATE_NAME.CONFIRMATION : BREVO_TEMPLATE_NAME.REFUS,
-        BREVO_TEMPLATE_TYPE.MISSION_LOCALE,
-        ml_id
+        BREVO_TEMPLATE_TYPE.MISSION_LOCALE
       );
       if (!templateId) {
         captureException(new Error(`Template ID not found for ${isConfirmed ? "confirmation" : "refus"} email`));

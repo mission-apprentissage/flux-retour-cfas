@@ -10,7 +10,6 @@ export const up = async () => {
     name: BREVO_TEMPLATE_NAME.REFUS,
     templateId: 2,
     created_at: new Date(),
-    ml_id: 323,
   });
 
   await brevoMissionLocaleTemplateDb().insertOne({
@@ -19,6 +18,5 @@ export const up = async () => {
     name: BREVO_TEMPLATE_NAME.CONFIRMATION,
     templateId: 1,
     created_at: new Date(),
-    ml_id: 323,
   });
 };

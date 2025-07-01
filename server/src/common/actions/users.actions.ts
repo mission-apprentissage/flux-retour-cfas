@@ -161,12 +161,17 @@ export const getDetailedUserById = async (_id: string | ObjectId) => {
  * Méthode de récupération de la liste des utilisateurs en base
  */
 export const getAllUsers = async (
-  query = {},
+  query: { [key: string]: any } = {},
   { page, limit, sort } = { page: 1, limit: 10, sort: { created_at: -1 } as { [key: string]: number } }
 ) => {
+  const organizationFilters = query._organizationFilters || {};
+
+  const userQuery = { ...query };
+  delete userQuery._organizationFilters;
+
   const result = await usersMigrationDb()
     .aggregate([
-      { $match: query },
+      { $match: userQuery },
       { $sort: sort },
       { $project: { password: 0, emails: 0, connection_history: 0, invalided_token: 0 } },
       {
@@ -211,6 +216,13 @@ export const getAllUsers = async (
         },
       },
       { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
+      ...(Object.keys(organizationFilters).length > 0
+        ? [
+            {
+              $match: organizationFilters,
+            },
+          ]
+        : []),
       {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
@@ -257,6 +269,13 @@ export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMig
 
   if (!user) {
     throw new Error("Unable to find user");
+  }
+
+  if (data.email && data.email !== user.email) {
+    const existingUser = await getUserByEmail(data.email);
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      throw Boom.conflict("Cet email est déjà utilisé.");
+    }
   }
 
   const updated = await usersMigrationDb().findOneAndUpdate(

@@ -44,7 +44,11 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
-import { computeDailyTransmissions, hydrateAllTransmissions } from "./hydrate/transmissions/hydrate-transmissions";
+import {
+  computeDailyTransmissions,
+  forceHydrateAllTransmissions,
+  hydrateAllTransmissions,
+} from "./hydrate/transmissions/hydrate-transmissions";
 import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
@@ -103,7 +107,7 @@ const dailyJobs = async (queued: boolean) => {
   // # Mise à jour des effectifs DECA
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
-  await addJob({ name: "hydrate:transmissions-all", queued });
+  await addJob({ name: "hydrate:transmission-daily", queued });
 
   // await addJob({ name: "hydrate:bal-mails", queued });
 
@@ -408,6 +412,11 @@ export async function setupJobProcessor() {
       "tmp:migrate:mission-locale-current-status": {
         handler: async () => {
           return updateMissionLocaleEffectifCurrentStatus();
+        },
+      },
+      "tmp:force-hydrate-transmissions": {
+        handler: async () => {
+          return forceHydrateAllTransmissions();
         },
       },
     },

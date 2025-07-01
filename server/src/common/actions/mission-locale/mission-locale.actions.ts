@@ -101,8 +101,10 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
       return [
         {
           $match: {
-            a_traiter: true,
-            a_risque: true,
+            $and: [
+              { a_traiter: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+            ],
           },
         },
       ];
@@ -250,12 +252,12 @@ const addFieldFromActivationDate = (mlActivationDate?: Date) => {
 
 const addFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
+  const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] };
   const A_RISQUE_CONDITION = {
     $and: [
       {
         $or: [
           { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
-          { $eq: ["$effectif_choice.confirmation", true] },
           {
             $and: [
               {
@@ -295,6 +297,9 @@ const addFieldTraitementStatus = () => {
         },
         injoignable: {
           $cond: [INJOIGNABLE_CONDITION, true, false],
+        },
+        a_contacter: {
+          $cond: [A_CONTACTER_CONDITION, true, false],
         },
       },
     },
@@ -595,6 +600,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
                 prioritaire: "$a_risque",
+                a_contacter: "$a_contacter",
               },
               null,
             ],
@@ -695,6 +701,7 @@ export const getEffectifFromMissionLocaleId = async (
         "situation.commentaires": "$commentaires",
         contacts_tdb: "$tdb_users",
         prioritaire: "$a_risque",
+        a_contacter: "$a_contacter",
         current_status: "$current_status",
       },
     },
@@ -840,9 +847,10 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
         prioritaire: [
           {
             $match: {
-              a_traiter: true,
-              a_risque: true,
-              statusChanged: false,
+              $and: [
+                { a_traiter: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+              ],
             },
           },
           {
@@ -1113,6 +1121,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
         nom_organisme: "$organisme.nom",
         nom_mission_locale: "$mission_locale.nom",
         mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
+        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+        date_derniere_rupture: "$dernierStatut.date",
       },
     },
   ];
@@ -1126,6 +1136,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     nom_organisme?: string | null;
     mission_locale_id: string;
     nom_mission_locale: string;
+    date_de_naissance?: Date | null;
+    date_derniere_rupture?: Date | null;
   }>;
 };
 
