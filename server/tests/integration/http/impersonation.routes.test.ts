@@ -150,7 +150,6 @@ it("End to end - imposture d'organisation", async () => {
     fonction: "Responsable administratif",
     has_accept_cgu_version: "v0.1",
     telephone: "",
-    invalided_token: false,
     created_at: expect.any(String),
     password_updated_at: expect.any(String),
     impersonating: true,
@@ -215,7 +214,6 @@ it("End to end - imposture d'organisation", async () => {
     fonction: "Responsable administratif",
     has_accept_cgu_version: "v0.1",
     telephone: "",
-    invalided_token: false,
     created_at: expect.any(String),
     password_updated_at: expect.any(String),
     organisation: {
