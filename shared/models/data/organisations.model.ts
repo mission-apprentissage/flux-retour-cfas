@@ -48,6 +48,7 @@ const zOrganisationARMLCreate = z.object({
   telephone: z.string({ description: "Téléphone de la mission locale" }).optional(),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
   region_list: z.array(zAdresse.shape.region),
+  can_register: z.boolean({ description: "Indique si l'ARML est ouverte à l'inscription sur le tdb" }).optional(),
 });
 
 const zOrganisationOrganismeCreate = z.object({

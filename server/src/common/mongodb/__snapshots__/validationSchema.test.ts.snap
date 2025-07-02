@@ -14952,6 +14952,10 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date d'activation de la mission locale",
         },
+        "can_register": {
+          "bsonType": "bool",
+          "description": "Indique si l'ARML est ouverte à l'inscription sur le tdb",
+        },
         "created_at": {
           "bsonType": "date",
           "description": "Date de création en base de données",
