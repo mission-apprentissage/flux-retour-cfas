@@ -27,7 +27,6 @@ export const createUser = async (user: UserRegistration, organisationId: ObjectI
   await usersMigrationDb().insertOne({
     _id: insertedId,
     account_status: "PENDING_EMAIL_VALIDATION",
-    invalided_token: false,
     password_updated_at: getCurrentTime(),
     connection_history: [],
     emails: [],
@@ -173,7 +172,7 @@ export const getAllUsers = async (
     .aggregate([
       { $match: userQuery },
       { $sort: sort },
-      { $project: { password: 0, emails: 0, connection_history: 0, invalided_token: 0 } },
+      { $project: { password: 0, emails: 0, connection_history: 0 } },
       {
         $lookup: {
           from: "organisations",

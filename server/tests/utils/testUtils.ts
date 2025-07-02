@@ -44,7 +44,6 @@ export async function initTestApp() {
       await usersMigrationDb().insertOne({
         _id: new ObjectId(),
         account_status: "CONFIRMED",
-        invalided_token: false,
         password_updated_at: new Date(),
         connection_history: [],
         emails: [],

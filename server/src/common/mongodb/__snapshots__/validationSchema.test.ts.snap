@@ -16501,10 +16501,6 @@ exports[`validation-schema > should create validation schema for usersMigration 
       "bsonType": "string",
       "description": "Version des cgu accepté par l'utilisateur",
     },
-    "invalided_token": {
-      "bsonType": "bool",
-      "description": "true si besoin de reset le token",
-    },
     "last_connection": {
       "bsonType": "date",
       "description": "Date de dernière connexion",
