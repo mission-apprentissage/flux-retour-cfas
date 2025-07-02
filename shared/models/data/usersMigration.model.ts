@@ -31,7 +31,6 @@ export const zUsersMigration = z.object({
   created_at: z.date().optional().describe("Date de création du compte"),
   last_connection: z.date().optional().describe("Date de dernière connexion"),
   connection_history: z.array(z.date()).optional().describe("Historique des dates de connexion"),
-  invalided_token: z.boolean().optional().describe("true si besoin de reset le token"),
   password_updated_at: z.date().optional().describe("Date de dernière mise à jour mot de passe"),
   reminder_missing_data_sent_date: z
     .date()

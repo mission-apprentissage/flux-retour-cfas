@@ -147,7 +147,6 @@ async function createUserWithStatus(accountStatus: IUsersMigration["account_stat
   await usersMigrationDb().insertOne({
     _id: new ObjectId(id(1)),
     account_status: accountStatus,
-    invalided_token: false,
     password_updated_at: new Date(),
     connection_history: [],
     emails: [],

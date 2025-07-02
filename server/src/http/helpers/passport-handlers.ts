@@ -7,8 +7,8 @@ import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
 
 import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
-import { findSessionByToken, removeSession } from "@/common/actions/sessions.actions";
-import { getUserByEmail, updateUser } from "@/common/actions/users.actions";
+import { findSessionByToken } from "@/common/actions/sessions.actions";
+import { getUserByEmail } from "@/common/actions/users.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
@@ -31,11 +31,7 @@ export const authMiddleware = () => {
           if (!user) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
-          // TODO champ probablement à supprimer
-          if (user.invalided_token) {
-            await updateUser(user._id, { invalided_token: false });
-            return done(null, { invalided_token: true });
-          }
+
           if (user.account_status !== "CONFIRMED") {
             throw Boom.forbidden("Votre compte n'est pas encore validé.");
           }
@@ -59,7 +55,6 @@ export const authMiddleware = () => {
             email: user.email,
             organisation_id: user.organisation_id,
             account_status: user.account_status,
-            invalided_token: user.invalided_token,
             has_accept_cgu_version: "",
             impersonating,
             organisation,
@@ -78,7 +73,6 @@ export const authMiddleware = () => {
           if ("username" in user && typeof user.username === "string") {
             ctx.username = user.username;
           }
-
           done(null, ctx);
         } catch (err) {
           done(err);
@@ -95,12 +89,7 @@ export const authMiddleware = () => {
       if (!activeSession) {
         return res.status(401).json({ error: "Accès non autorisé" });
       }
-      if (req.user.invalided_token) {
-        await removeSession(req.cookies[COOKIE_NAME]);
-        return res.clearCookie(COOKIE_NAME).status(401).json({
-          error: "Invalid jwt",
-        });
-      }
+
       const ctx: AuthContext = req.user;
       Sentry.setUser({
         ip: req.ip,

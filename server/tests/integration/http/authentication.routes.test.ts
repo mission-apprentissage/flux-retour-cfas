@@ -15,7 +15,6 @@ const date = "2022-10-10T00:00:00.000Z";
 const testUser: IUsersMigration = {
   _id: new ObjectId(id(1)),
   account_status: "CONFIRMED",
-  invalided_token: false,
   password_updated_at: new Date(date),
   connection_history: [],
   emails: [],
@@ -77,7 +76,6 @@ describe("Authentification", () => {
         email: "user@tdb.local",
         fonction: "Responsable administratif",
         has_accept_cgu_version: "v0.1",
-        invalided_token: false,
         last_connection: date,
         nom: "Dupont",
         organisation: {
