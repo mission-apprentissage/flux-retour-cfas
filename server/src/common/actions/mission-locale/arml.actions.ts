@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 
 import { organisationsDb } from "@/common/model/collections";
 
@@ -35,7 +36,9 @@ export const getMissionsLocalesByArml = async (armlId: ObjectId) => {
     },
   ];
 
-  return organisationsDb().aggregate(aggr).toArray();
+  return organisationsDb().aggregate(aggr).toArray() as Promise<
+    Array<{ _id: ObjectId; nom: string; code_postal: string; activated_at: Date; stats: IMissionLocaleStats["stats"] }>
+  >;
 };
 
 export const getMissionLocaleStatsById = (mlId: ObjectId) => {

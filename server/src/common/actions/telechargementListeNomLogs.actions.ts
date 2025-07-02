@@ -20,7 +20,8 @@ export const createTelechargementListeNomLog = async (
     | "sifa"
     | "ml_a_traiter"
     | "ml_traite"
-    | "ml_injoignable",
+    | "ml_injoignable"
+    | "arml",
   elementList: string[],
   date: Date,
   userId: ObjectId,
