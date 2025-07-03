@@ -1,10 +1,9 @@
 "use client";
 
-import { Box, Grid2, Typography } from "@mui/material";
 import { pieArcLabelClasses, PieChart } from "@mui/x-charts/PieChart";
 import { useMemo } from "react";
 
-import { LightTable } from "@/app/_components/table/LightTable";
+import { FullTable } from "@/app/_components/table/FullTable";
 import { _get } from "@/common/httpClient";
 
 const computePercentage = (part: number, total: number) => {
@@ -27,9 +26,9 @@ const TotalPieChart = ({ data }) => {
 
   if (transformedData.total === 0) {
     return (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography variant="body1">Aucune donnée disponible</Typography>
-      </Box>
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        <p>Aucune donnée disponible</p>
+      </div>
     );
   }
 
@@ -96,9 +95,9 @@ const TraitePieChart = ({ data }) => {
 
   if (transformedData.total === 0) {
     return (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography variant="body1">Aucune donnée disponible</Typography>
-      </Box>
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        <p>Aucune donnée disponible</p>
+      </div>
     );
   }
 
@@ -187,15 +186,10 @@ const TableauARMLTotal = ({ data }) => {
   );
   return (
     <>
-      <LightTable
+      <FullTable
         data={[{ element: transformedData, rawData: transformedData }]}
         columns={columns}
-        itemsPerPage={1}
-        searchableColumns={["nom"]}
         emptyMessage="Aucune mission locale à afficher"
-        withStripes={true}
-        withHeader={true}
-        defaultSort={{ order: "desc", orderBy: "total" }}
       />
     </>
   );
@@ -239,15 +233,10 @@ const TableauARMLTraite = ({ data }) => {
   );
   return (
     <>
-      <LightTable
+      <FullTable
         data={[{ element: transformedData, rawData: transformedData }]}
         columns={columns}
-        itemsPerPage={1}
-        searchableColumns={["nom"]}
         emptyMessage="Aucune mission locale à afficher"
-        withStripes={true}
-        withHeader={true}
-        defaultSort={{ order: "desc", orderBy: "total" }}
       />
     </>
   );
@@ -255,19 +244,19 @@ const TableauARMLTraite = ({ data }) => {
 
 export default function ARMLIndicateurGlobal({ armls }) {
   return (
-    <>
-      <Grid2 size={4}>
+    <div className="fr-grid-row fr-grid-row--gutters">
+      <div className="fr-col-md-4 fr-col-12">
         <TotalPieChart data={armls} />
-      </Grid2>
-      <Grid2 size={8}>
+      </div>
+      <div className="fr-col-md-8 fr-col-12">
         <TraitePieChart data={armls} />
-      </Grid2>
-      <Grid2 size={4}>
+      </div>
+      <div className="fr-col-md-4 fr-col-12">
         <TableauARMLTotal data={armls} />
-      </Grid2>
-      <Grid2 size={8} alignContent={"flex-start"}>
+      </div>
+      <div className="fr-col-md-8 fr-col-12">
         <TableauARMLTraite data={armls} />
-      </Grid2>
-    </>
+      </div>
+    </div>
   );
 }
