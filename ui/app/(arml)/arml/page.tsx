@@ -1,59 +1,46 @@
 "use client";
 
-import { Grid2, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { IOrganisationARML } from "shared";
+import { IOrganisationARML, IMissionLocaleWithStats } from "shared";
 
 import ARMLIndicateurGlobal from "@/app/_components/arml/ARMLIndicateurGlobal";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
 
-export default function Page() {
-  // TODO: Add type instead of any
-  const { data: armlData, isLoading } = useQuery<{ arml: IOrganisationARML; mlList: Array<any> }>(
+function ARMLContent() {
+  const { data: armlData } = useQuery<{ arml: IOrganisationARML; mlList: Array<IMissionLocaleWithStats> }>(
     ["arml"],
     async () => {
       const data = await _get("/api/v1/organisation/arml/mls");
       return data;
+    },
+    {
+      suspense: true,
     }
   );
 
   return (
-    <div className="fr-container">
-      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {isLoading || !armlData ? (
-          <p>Chargement…</p>
-        ) : (
-          <Grid2 container spacing={2}>
-            <Grid2 size={12}>
-              <Typography
-                variant="h3"
-                sx={{
-                  mb: 2,
-                  textAlign: "left",
-                  color: "var(--text-title-blue-france)",
-                }}
-              >
-                ARML {armlData.arml.nom}
-              </Typography>
-            </Grid2>
-            <Grid2 size={12}>
-              <Typography
-                variant="h4"
-                sx={{
-                  mb: 2,
-                  textAlign: "left",
-                  color: "var(--text-title-blue-france)",
-                }}
-              >
-                Indicateurs Globaux
-              </Typography>
-            </Grid2>
-            <ARMLIndicateurGlobal armls={armlData.mlList} />
-          </Grid2>
-        )}
-      </SuspenseWrapper>
+    <div className="fr-grid-row fr-grid-row--gutters">
+      <div className="fr-col-12">
+        <h3 className="fr-h3" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>
+          ARML {armlData!.arml.nom}
+        </h3>
+      </div>
+      <div className="fr-col-12">
+        <h4 className="fr-h4" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>
+          Indicateurs Globaux
+        </h4>
+      </div>
+      <ARMLIndicateurGlobal armls={armlData!.mlList} />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <SuspenseWrapper fallback={<TableSkeleton />}>
+      <ARMLContent />
+    </SuspenseWrapper>
   );
 }
