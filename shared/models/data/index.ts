@@ -8,6 +8,7 @@ export * from "./invitations.model";
 export * from "./jwtSessions.model";
 export * from "./maintenanceMessages.model";
 export * from "./missionLocaleEffectif.model";
+export * from "./missionLocaleStats.model";
 export * from "./organisations.model";
 export * from "./organismes.model";
 export * from "./organismesReferentiel.model";

@@ -27,4 +27,24 @@ const zMissionLocaleStats = z.object({
 });
 
 export type IMissionLocaleStats = z.output<typeof zMissionLocaleStats>;
+
+export interface IMissionLocaleWithStats {
+  _id: string;
+  code_postal: string;
+  nom: string;
+  activated_at?: string;
+  stats: {
+    a_traiter: number;
+    traite: number;
+    total: number;
+    rdv_pris: number;
+    nouveau_projet: number;
+    deja_accompagne: number;
+    contacte_sans_retour: number;
+    coordonnees_incorrectes: number;
+    autre: number;
+    deja_connu: number;
+  };
+}
+
 export default { zod: zMissionLocaleStats, indexes, collectionName };
