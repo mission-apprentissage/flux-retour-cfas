@@ -96,11 +96,14 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
         <FormControl isRequired mb={4}>
           <FormLabel>Votre ARML :</FormLabel>
           <Select placeholder="Sélectionner une ARML" onChange={(e) => onSelectedArml(e.target.value)}>
-            {armls?.sort().map((arml) => (
-              <option value={arml._id.toString()} key={arml._id.toString()}>
-                {arml.nom}
-              </option>
-            ))}
+            {armls
+              ?.filter((arml) => arml.can_register)
+              .sort()
+              .map((arml) => (
+                <option value={arml._id.toString()} key={arml._id.toString()}>
+                  {arml.nom}
+                </option>
+              ))}
           </Select>
         </FormControl>
       )}
