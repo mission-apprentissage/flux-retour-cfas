@@ -14,6 +14,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
       <UserContextProvider user={user}>
         <ConnectedHeader />
         <div
+          className="fr-container"
           style={{
             flex: 1,
             margin: "auto",
