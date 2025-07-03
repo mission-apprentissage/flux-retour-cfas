@@ -1,4 +1,5 @@
-import { SortingState } from "@tanstack/react-table";
+import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import { ReactNode } from "react";
 
 export interface ColumnData {
   label: string;
@@ -26,6 +27,11 @@ export interface FullTableProps {
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   onSortingChange?: (sorting: SortingState) => void;
+  onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
   sorting?: SortingState;
+  columnFilters?: ColumnFiltersState;
   pageSize?: number;
+  emptyMessage?: string;
+  caption?: string | null;
+  headerAction?: ReactNode;
 }
