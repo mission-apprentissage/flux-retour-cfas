@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
+import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -164,4 +164,50 @@ export const resetEffectifMissionLocaleDataAdmin = async (
   );
 
   await createOrUpdateMissionLocaleStats(missionLocaleId);
+};
+
+export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
+  const aggr = [
+    {
+      $match: {
+        type: "MISSION_LOCALE",
+        ...(arml && arml.length ? { arml_id: { $in: arml.map((id) => new ObjectId(id)) } } : {}),
+      },
+    },
+    {
+      $lookup: {
+        from: "missionLocaleStats",
+        localField: "_id",
+        foreignField: "mission_locale_id",
+        as: "stats",
+      },
+    },
+    {
+      $unwind: {
+        path: "$stats",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        nom: 1,
+        code_postal: "$adresse.code_postal",
+        activated_at: 1,
+        arml_id: 1,
+        stats: "$stats.stats",
+      },
+    },
+  ];
+
+  return organisationsDb().aggregate(aggr).toArray() as Promise<
+    Array<{
+      _id: ObjectId;
+      nom: string;
+      code_postal: string;
+      activated_at: Date;
+      arml_id: ObjectId;
+      stats: IMissionLocaleStats["stats"];
+    }>
+  >;
 };

@@ -33,6 +33,7 @@ interface TableBaseProps {
   data?: MissionLocale[];
   searchTerm: string;
   headerAction?: React.ReactNode;
+  withLinkToDetails?: boolean;
 }
 
 const colorMap = {
@@ -119,7 +120,7 @@ const ActivationStatus = ({ activatedAt }: { activatedAt?: string }) => {
   return <>{new Date(activatedAt).toLocaleDateString("fr-FR")}</>;
 };
 
-export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
+export const TableauMissionLocale = ({ data, searchTerm, withLinkToDetails }: TableBaseProps) => {
   const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm, [
     { id: "total", desc: true },
   ]);
@@ -149,7 +150,7 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
       { label: "Activation", dataKey: "activated_at", width: 70 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(withLinkToDetails ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -170,7 +171,7 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
   );
 };
 
-const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: TableBaseProps) => {
+const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, withLinkToDetails }: TableBaseProps) => {
   const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
@@ -200,7 +201,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: Table
       { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
       { label: "Autre", dataKey: "autre", width: 50 },
       { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(withLinkToDetails ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -222,7 +223,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: Table
   );
 };
 
-const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction }: TableBaseProps) => {
+const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, withLinkToDetails }: TableBaseProps) => {
   const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
@@ -252,7 +253,7 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction }: Tab
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(withLinkToDetails ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -335,7 +336,7 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
   );
 };
 
-const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction }: TableBaseProps) => {
+const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, withLinkToDetails }: TableBaseProps) => {
   const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
@@ -359,7 +360,7 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction }: Table
       },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 150 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(withLinkToDetails ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -423,21 +424,44 @@ export const RepartitionDataViews = ({
   data,
   searchTerm,
   onTypeVueChange,
+  withLinkToDetails = true,
 }: {
   typeVue: string | null;
   data?: MissionLocale[];
   searchTerm: string;
   onTypeVueChange: (type: string) => void;
+  withLinkToDetails?: boolean;
 }) => {
   const viewSelector = <ViewSelector typeVue={typeVue} setTypeVue={onTypeVueChange} />;
 
   switch (typeVue) {
     case "graph":
-      return <TableauRepartitionTraiteGraph data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraiteGraph
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          withLinkToDetails={withLinkToDetails}
+        />
+      );
     case "table":
-      return <TableauRepartitionTraiteTable data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraiteTable
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          withLinkToDetails={withLinkToDetails}
+        />
+      );
     case "percent":
-      return <TableauRepartitionTraitePercent data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraitePercent
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          withLinkToDetails={withLinkToDetails}
+        />
+      );
     default:
       return null;
   }
