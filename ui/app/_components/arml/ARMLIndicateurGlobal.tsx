@@ -42,18 +42,18 @@ const TotalPieChart = ({ data }) => {
           labelMarkType: "square",
           data: [
             {
-              id: "traite",
-              value: transformedData.traite,
-              label: "Traités",
-              labelMarkType: "square",
-              color: "#2846BC",
-            },
-            {
               id: "a_traiter",
               value: transformedData.a_traiter,
               label: "À traiter",
               labelMarkType: "square",
               color: "#31A7AE",
+            },
+            {
+              id: "traite",
+              value: transformedData.traite,
+              label: "Traités",
+              labelMarkType: "square",
+              color: "#2846BC",
             },
           ],
         },
@@ -178,16 +178,22 @@ const TableauARMLTotal = ({ data }) => {
 
   const columns = useMemo(
     () => [
-      { label: "Total", dataKey: "total", width: 50, sortable: false },
+      { label: "Total jeunes", dataKey: "total", width: 50, sortable: false },
       { label: "À traiter", dataKey: "a_traiter", width: 50, sortable: false },
       { label: "Traités", dataKey: "traite", width: 50, sortable: false },
     ],
     []
   );
+
+  const displayedData = {
+    ...transformedData,
+    total: <strong>{transformedData.total}</strong>,
+  };
+
   return (
     <>
       <FullTable
-        data={[{ element: transformedData, rawData: transformedData }]}
+        data={[{ element: displayedData, rawData: transformedData }]}
         columns={columns}
         emptyMessage="Aucune mission locale à afficher"
       />
@@ -221,20 +227,26 @@ const TableauARMLTraite = ({ data }) => {
 
   const columns = useMemo(
     () => [
-      { label: "Total", dataKey: "total", width: 100, sortable: false },
+      { label: "Total traités", dataKey: "total", width: 100, sortable: false },
       { label: "Rdv pris", dataKey: "rdv_pris", width: 100, sortable: false },
       { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 100, sortable: false },
       { label: "Déjà acc.", dataKey: "deja_accompagne", width: 100, sortable: false },
-      { label: "Sans rép.", dataKey: "contacte_sans_retour", width: 100, sortable: false },
+      { label: "Sans retour", dataKey: "contacte_sans_retour", width: 100, sortable: false },
       { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 100, sortable: false },
       { label: "Autre", dataKey: "autre", width: 100, sortable: false },
     ],
     []
   );
+
+  const displayData = {
+    ...transformedData,
+    total: <strong>{transformedData.total}</strong>,
+  };
+
   return (
     <>
       <FullTable
-        data={[{ element: transformedData, rawData: transformedData }]}
+        data={[{ element: displayData, rawData: transformedData }]}
         columns={columns}
         emptyMessage="Aucune mission locale à afficher"
       />
