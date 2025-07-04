@@ -8,6 +8,7 @@ import {
   typesMissionLocale,
   typesOrganismesIndicateurs,
   typesSIFA,
+  typesARML,
 } from "../../constants";
 
 const collectionName = "telechargementListeNomLogs";
@@ -20,6 +21,7 @@ const extendedTypesEffectifNominatif = [
   ...typesAffelnet,
   ...typesSIFA,
   ...typesMissionLocale,
+  ...typesARML,
 ] as const;
 
 const zTelechargementListeNomLogs = z.object({

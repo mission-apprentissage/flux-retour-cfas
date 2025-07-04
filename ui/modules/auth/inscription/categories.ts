@@ -8,6 +8,10 @@ export const categoriesCompteInscription = [
     value: "operateur_public",
   },
   {
+    text: "Une structure des Missions locales",
+    value: "missions_locales",
+  },
+  {
     text: "Un réseau d'organismes de formation",
     value: "tete_de_reseau",
   },

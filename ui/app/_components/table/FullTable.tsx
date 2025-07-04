@@ -3,8 +3,15 @@
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { Box } from "@mui/material";
-import { useReactTable, getCoreRowModel, flexRender, Header, Cell } from "@tanstack/react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  Header,
+  Cell,
+  getSortedRowModel,
+  getFilteredRowModel,
+} from "@tanstack/react-table";
 import { useCallback } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
@@ -25,25 +32,25 @@ function TableHeaderCell({ header }: { header: Header<TableRowData, unknown> }) 
   const canSort = header.column.getCanSort();
 
   return (
-    <Box
-      sx={{ cursor: "pointer", display: "flex" }}
+    <div
+      style={{ cursor: canSort ? "pointer" : "default", display: "flex" }}
       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
     >
       {flexRender(header.column.columnDef.header, header.getContext())}
       {canSort && <SortIcon isSorted={header.column.getIsSorted()} />}
-    </Box>
+    </div>
   );
 }
 
 function TableBodyCell({ cell }: { cell: Cell<TableRowData, unknown> }) {
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         maxWidth: "500px",
       }}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </Box>
+    </div>
   );
 }
 
@@ -107,8 +114,13 @@ export function FullTable({
   onPageChange,
   onPageSizeChange,
   onSortingChange,
+  onColumnFiltersChange,
   sorting = [],
+  columnFilters = [],
   pageSize = 20,
+  emptyMessage = "Aucun élément à afficher",
+  caption = null,
+  headerAction = null,
 }: FullTableProps) {
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
@@ -118,11 +130,17 @@ export function FullTable({
     columns: tableColumns,
     state: {
       sorting,
+      columnFilters,
     },
     onSortingChange: onSortingChange || (() => {}),
+    onColumnFiltersChange: onColumnFiltersChange || (() => {}),
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     enableSorting: true,
-    manualSorting: true,
+    enableColumnFilters: true,
+    manualSorting: false,
+    manualFiltering: false,
     manualPagination: true,
     pageCount: pagination?.lastPage || 1,
   });
@@ -148,9 +166,17 @@ export function FullTable({
   return (
     <>
       {isEmpty ? (
-        <p>Aucun élément à afficher</p>
+        <p>{emptyMessage}</p>
       ) : (
-        <>
+        <div>
+          {(caption || headerAction) && (
+            <div
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
+            >
+              {caption && <h4 style={{ margin: 0 }}>{caption}</h4>}
+              {headerAction && <div>{headerAction}</div>}
+            </div>
+          )}
           <Table
             headers={
               table
@@ -158,11 +184,11 @@ export function FullTable({
                 ?.headers.map((header) => <TableHeaderCell key={header.id} header={header} />) || []
             }
             data={table
-              .getCoreRowModel()
+              .getSortedRowModel()
               .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
           />
-          <Box
-            sx={{
+          <div
+            style={{
               display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
@@ -171,11 +197,13 @@ export function FullTable({
             {totalPages > 1 && (
               <TablePagination totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} />
             )}
-            <Box sx={{ width: "150px" }}>
-              <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
-            </Box>
-          </Box>
-        </>
+            {totalPages > 1 && (
+              <div style={{ width: "150px" }}>
+                <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </>
   );

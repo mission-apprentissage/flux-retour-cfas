@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
@@ -71,8 +71,8 @@ export default function MissionLocaleEffectifClient({
   }
 
   return (
-    <Grid container>
-      <Grid
+    <Grid2 container>
+      <Grid2
         size={{ xs: 12, md: 3 }}
         sx={{
           px: { xs: 2, md: 3 },
@@ -82,9 +82,9 @@ export default function MissionLocaleEffectifClient({
         <DsfrLink href={`/admin/mission-locale/${id}`} arrow="left">
           Retour à la liste
         </DsfrLink>
-      </Grid>
+      </Grid2>
 
-      <Grid
+      <Grid2
         size={{ xs: 12, md: 9 }}
         sx={{
           borderLeft: "1px solid",
@@ -105,7 +105,7 @@ export default function MissionLocaleEffectifClient({
             />
           )}
         </SuspenseWrapper>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   );
 }

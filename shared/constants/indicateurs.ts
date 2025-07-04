@@ -30,3 +30,5 @@ export type TypeOrganismesIndicateurs = (typeof typesOrganismesIndicateurs)[numb
 export const typesAffelnet = ["affelnet_concretise", "affelnet", "affelnet_non_concretise"];
 
 export const typesMissionLocale = ["ml_a_traiter", "ml_traite", "ml_injoignable"];
+
+export const typesARML = ["arml"];

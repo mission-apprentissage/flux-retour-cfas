@@ -8,6 +8,8 @@ export const config = {
   matcher: ["/:path*"],
 };
 
+const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
+
 async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   try {
     const cookieHeader = request.headers.get("cookie");
@@ -22,8 +24,9 @@ async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   }
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+async function buildHeaders(
+  request: NextRequest
+): Promise<{ requestNextData: { request: { headers: Headers } }; session: AuthContext | null }> {
   const session = await fetchSession(request);
   const requestHeaders = new Headers(request.headers);
 
@@ -40,14 +43,53 @@ export async function middleware(request: NextRequest) {
     },
   };
 
-  if (pathname === "/") {
+  return { requestNextData, session };
+}
+
+function handlePublicPaths(
+  pathname: string,
+  session: AuthContext | null,
+  request: NextRequest,
+  requestNextData: { request: { headers: Headers } }
+): NextResponse | undefined {
+  if (publicPaths.includes(pathname)) {
     if (session) {
-      if (session.organisation?.type === "MISSION_LOCALE") {
-        return NextResponse.redirect(new URL("/mission-locale", request.url));
-      }
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
+  }
+}
+
+function redirectToHome(
+  session: AuthContext | null,
+  request: NextRequest,
+  requestNextData: { request: { headers: Headers } }
+) {
+  if (!session) {
+    return NextResponse.next(requestNextData);
+  }
+  switch (session.organisation?.type) {
+    case "MISSION_LOCALE":
+      return NextResponse.redirect(new URL("/mission-locale", request.url));
+    case "ARML":
+      return NextResponse.redirect(new URL("/arml", request.url));
+    default:
+      return NextResponse.redirect(new URL("/home", request.url));
+  }
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const { requestNextData, session } = await buildHeaders(request);
+
+  const publicPath = handlePublicPaths(pathname, session, request, requestNextData);
+
+  if (publicPath) {
+    return publicPath;
+  }
+
+  if (pathname === "/") {
+    return redirectToHome(session, request, requestNextData);
   }
 
   if (pathname === "/campagnes/mission-locale") {

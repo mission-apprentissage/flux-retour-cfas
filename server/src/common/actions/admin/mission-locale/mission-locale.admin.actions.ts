@@ -7,6 +7,7 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
+import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
 
 export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
   const ml = await organisationsDb()
@@ -114,6 +115,8 @@ export const setEffectifMissionLocaleDataAdmin = async (
     { upsert: true, returnDocument: "after" }
   );
 
+  await createOrUpdateMissionLocaleStats(missionLocaleId);
+
   return updated;
 };
 
@@ -159,4 +162,6 @@ export const resetEffectifMissionLocaleDataAdmin = async (
       },
     }
   );
+
+  await createOrUpdateMissionLocaleStats(missionLocaleId);
 };

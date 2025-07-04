@@ -1,3 +1,5 @@
+"use client";
+
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 import { CRISP_FAQ } from "shared";
 

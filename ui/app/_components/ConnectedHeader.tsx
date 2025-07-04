@@ -1,6 +1,7 @@
 "use client";
 
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
+import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { useAuth } from "../_context/UserContext";
@@ -10,6 +11,7 @@ import { UserConnectedHeader } from "./UserConnectedHeader";
 
 export function ConnectedHeader() {
   const { user } = useAuth();
+  const pathname = usePathname();
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -145,6 +147,23 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
+    } else if (organisationType === ORGANISATION_TYPE.ARML) {
+      baseItems.push({
+        text: "Accueil",
+        // isActive: pathname === "/arml",
+        linkProps: {
+          href: "/arml",
+          target: "_self",
+        },
+      });
+      baseItems.push({
+        text: "Missions Locales",
+        isActive: pathname?.startsWith("/arml/missions-locales"),
+        linkProps: {
+          href: "/arml/missions-locales",
+          target: "_self",
+        },
+      });
     }
 
     const aideMenuLinks: Array<{
@@ -176,7 +195,7 @@ export function ConnectedHeader() {
       text: "Centre d'aide",
     });
 
-    if (organisationType !== ORGANISATION_TYPE.MISSION_LOCALE) {
+    if (organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && organisationType !== ORGANISATION_TYPE.ARML) {
       aideMenuLinks.push({
         linkProps: {
           href: "/referencement-organisme",
