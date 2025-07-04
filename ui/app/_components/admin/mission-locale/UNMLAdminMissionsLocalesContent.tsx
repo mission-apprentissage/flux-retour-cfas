@@ -17,18 +17,19 @@ export default function UNMLAdminMissionsLocalesContent({ unmlData }: UNMLAdminM
   const [searchTerm, setSearchTerm] = useState("");
   const [typeVue, setTypeVue] = useState<string | null>("graph");
 
+  const customNavigationPath = (id: string) => `/admin/mission-locale/${id}`;
   return (
     <>
       <div style={{ marginBottom: "2rem" }}>
         <GlobalSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
-      <TableauMissionLocale data={unmlData} searchTerm={searchTerm} withLinkToDetails={false} />
+      <TableauMissionLocale data={unmlData} searchTerm={searchTerm} customNavigationPath={customNavigationPath} />
       <RepartitionDataViews
         typeVue={typeVue}
         data={unmlData}
         searchTerm={searchTerm}
         onTypeVueChange={setTypeVue}
-        withLinkToDetails={false}
+        customNavigationPath={customNavigationPath}
       />
     </>
   );

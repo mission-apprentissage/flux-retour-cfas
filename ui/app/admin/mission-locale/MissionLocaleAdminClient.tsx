@@ -51,6 +51,11 @@ export default function MissionLocaleAdminClient() {
           />
         </div>
         <div className="fr-col-12">
+          <h3 className="fr-h3" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>
+            Vue nationale des Missions Locales
+          </h3>
+        </div>
+        <div className="fr-col-12">
           <UNMLAdminContent unmlData={unmlAdminData} />
         </div>
       </div>
