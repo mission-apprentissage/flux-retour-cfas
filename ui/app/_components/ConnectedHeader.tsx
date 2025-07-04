@@ -149,8 +149,8 @@ export function ConnectedHeader() {
       });
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
-        text: "Accueil",
-        // isActive: pathname === "/arml",
+        text: "Vue d'ensemble",
+        isActive: pathname === "/arml",
         linkProps: {
           href: "/arml",
           target: "_self",
