@@ -1,79 +1,64 @@
 "use client";
 
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
+import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useQuery } from "@tanstack/react-query";
-import type { IMissionLocale } from "api-alternance-sdk";
-import { useMemo, useState } from "react";
-import { IOrganisationMissionLocale } from "shared";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { IMissionLocaleWithStats } from "shared";
 
-import { LightTable } from "@/app/_components/table/LightTable";
+import UNMLAdminContent from "@/app/_components/admin/mission-locale/UNMLAdminContent";
+import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
+import { ARMLFiltersQuery, parseARMLFiltersFromQuery } from "@/modules/admin/arml/model/arml-filters";
 
 export default function MissionLocaleAdminClient() {
-  const { data: missionLocales, isLoading } = useQuery<
-    { organisation: IOrganisationMissionLocale; externalML: IMissionLocale }[]
-  >(["mission-locale"], async () => _get("/api/v1/admin/mission-locale"));
+  const searchParams = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const mlFilters = useMemo(() => {
+    if (!searchParams) return {};
+    const query = Object.fromEntries(searchParams.entries());
+    return parseARMLFiltersFromQuery(query as unknown as ARMLFiltersQuery);
+  }, [searchParams]);
 
-  const columns = useMemo(
-    () => [
-      { label: "ID", dataKey: "id", width: 20 },
-      { label: "Nom mission locale", dataKey: "nom", width: 300 },
-      { label: "Ville", dataKey: "ville", width: 200 },
-      { label: "", dataKey: "icon", width: 10 },
-    ],
-    []
+  const { data: unmlAdminData } = useQuery<Array<IMissionLocaleWithStats>>(
+    ["unml", mlFilters],
+    async () => {
+      const data = await _get("/api/v1/admin/mission-locale/stats", { params: mlFilters });
+      return data;
+    },
+    {
+      suspense: true,
+    }
   );
 
-  const dataRows = useMemo(() => {
-    if (!missionLocales) return [];
-    return missionLocales.map((ml) => {
-      return {
-        rawData: {
-          nom: ml.externalML.nom,
-          ville: ml.externalML.localisation?.ville,
-          organisationId: ml.organisation._id,
-        },
-        element: {
-          id: ml.externalML.id,
-          nom: ml.externalML.nom,
-          ville: ml.externalML.localisation?.ville,
-          icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
-        },
-      };
-    });
-  }, [missionLocales]);
-
-  if (isLoading) {
-    return <p>Chargement…</p>;
-  }
+  if (!unmlAdminData) return null;
 
   return (
-    <div>
-      <SearchBar
-        label="Recherche de mission locale"
-        renderInput={({ id, className, placeholder }) => (
-          <input
-            id={id}
-            className={className}
-            placeholder={placeholder}
-            type="search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <SuspenseWrapper fallback={<TableSkeleton />}>
+      <div className="fr-grid-row fr-grid-row--gutters">
+        <div className="fr-col-12">
+          <Breadcrumb
+            currentPageLabel="Gestion des missions locales"
+            segments={[
+              {
+                label: "Accueil",
+                linkProps: {
+                  href: "/",
+                },
+              },
+            ]}
           />
-        )}
-      />
-      <LightTable
-        caption={`Tableau des Mission Locales (${dataRows.length})`}
-        data={dataRows}
-        columns={columns}
-        itemsPerPage={10}
-        searchTerm={searchTerm}
-        searchableColumns={["nom", "ville"]}
-        getRowLink={(rowData) => `/admin/mission-locale/${rowData.organisationId}`}
-        emptyMessage="Aucune mission locale à afficher"
-      />
-    </div>
+        </div>
+        <div className="fr-col-12">
+          <h3 className="fr-h3" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>
+            Vue nationale des Missions Locales
+          </h3>
+        </div>
+        <div className="fr-col-12">
+          <UNMLAdminContent unmlData={unmlAdminData} />
+        </div>
+      </div>
+    </SuspenseWrapper>
   );
 }

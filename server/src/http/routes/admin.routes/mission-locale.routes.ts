@@ -14,6 +14,7 @@ import { z } from "zod";
 import {
   activateMissionLocale,
   getAllMlFromOrganisations,
+  getMissionsLocalesStatsAdmin,
   getMlFromOrganisations,
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
@@ -36,6 +37,24 @@ export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
+  router.get(
+    "/stats",
+    validateRequestMiddleware({
+      query: z.object({
+        arml: z
+          .array(
+            z
+              .string()
+              .regex(/^[0-9a-f]{24}$/)
+              .optional()
+          )
+          .optional()
+          .default([]),
+      }),
+    }),
+    returnResult(getAllMlsStats)
+  );
+
   router.get("/:id", returnResult(getMl));
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
@@ -85,6 +104,12 @@ const getAllMls = async () => {
   return organisationMl
     .map((orga) => ({ organisation: orga, externalML: externalML.find((ml) => ml.id === orga.ml_id) }))
     .filter((ml) => ml.externalML);
+};
+
+const getAllMlsStats = async ({ query }) => {
+  const { arml }: { arml: Array<string> } = query;
+  const mls = await getMissionsLocalesStatsAdmin(arml);
+  return mls;
 };
 
 const getMl = async (req) => {

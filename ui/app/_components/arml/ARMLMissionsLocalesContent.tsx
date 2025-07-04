@@ -20,6 +20,7 @@ export default function ARMLMissionsLocalesContent({ armlData }: ARMLMissionsLoc
   const [searchTerm, setSearchTerm] = useState("");
   const [typeVue, setTypeVue] = useState<string | null>("graph");
 
+  const customNavigationPath = (id: string) => `/arml/missions-locales/${id}`;
   return (
     <>
       <CustomBreadcrumb path={pathname} />
@@ -32,12 +33,17 @@ export default function ARMLMissionsLocalesContent({ armlData }: ARMLMissionsLoc
       <div style={{ marginBottom: "2rem" }}>
         <GlobalSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
-      <TableauMissionLocale data={armlData.mlList} searchTerm={searchTerm} />
+      <TableauMissionLocale
+        data={armlData.mlList}
+        searchTerm={searchTerm}
+        customNavigationPath={customNavigationPath}
+      />
       <RepartitionDataViews
         typeVue={typeVue}
         data={armlData.mlList}
         searchTerm={searchTerm}
         onTypeVueChange={setTypeVue}
+        customNavigationPath={customNavigationPath}
       />
     </>
   );

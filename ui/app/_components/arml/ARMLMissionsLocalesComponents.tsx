@@ -33,6 +33,7 @@ interface TableBaseProps {
   data?: MissionLocale[];
   searchTerm: string;
   headerAction?: React.ReactNode;
+  customNavigationPath?: (id: string) => string;
 }
 
 const colorMap = {
@@ -49,7 +50,11 @@ const computePercentage = (part: number, total: number): string | number => {
   return Math.round((part / total) * 100);
 };
 
-const useTableLogic = (searchTerm: string, defaultSorting?: SortingState) => {
+const useTableLogic = (
+  searchTerm: string,
+  customNavigationPath?: (id: string) => string,
+  defaultSorting?: SortingState
+) => {
   const [sorting, setSorting] = useState<SortingState>(defaultSorting || []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const router = useRouter();
@@ -66,7 +71,7 @@ const useTableLogic = (searchTerm: string, defaultSorting?: SortingState) => {
     <i
       className="fr-icon-arrow-right-line fr-icon--sm"
       style={{ cursor: "pointer" }}
-      onClick={() => router.push(`/arml/missions-locales/${id}`)}
+      onClick={() => customNavigationPath && router.push(customNavigationPath(id))}
     />
   );
 
@@ -119,10 +124,12 @@ const ActivationStatus = ({ activatedAt }: { activatedAt?: string }) => {
   return <>{new Date(activatedAt).toLocaleDateString("fr-FR")}</>;
 };
 
-export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm, [
-    { id: "total", desc: true },
-  ]);
+export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }: TableBaseProps) => {
+  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
+    searchTerm,
+    customNavigationPath,
+    [{ id: "total", desc: true }]
+  );
 
   const transformedData = (data || []).map(({ _id, nom, activated_at, stats }) => {
     const rawData = {
@@ -159,7 +166,7 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
       { label: "Activation", dataKey: "activated_at", width: 70 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -180,8 +187,11 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
   );
 };
 
-const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
+const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
+  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
+    searchTerm,
+    customNavigationPath
+  );
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
@@ -210,7 +220,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: Table
       { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
       { label: "Autre", dataKey: "autre", width: 50 },
       { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -232,8 +242,11 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: Table
   );
 };
 
-const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
+const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
+  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
+    searchTerm,
+    customNavigationPath
+  );
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
@@ -262,7 +275,7 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction }: Tab
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -345,8 +358,11 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
   );
 };
 
-const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(searchTerm);
+const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
+  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
+    searchTerm,
+    customNavigationPath
+  );
 
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
@@ -369,7 +385,7 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction }: Table
       },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 150 },
-      { label: "", dataKey: "icon", width: 10, sortable: false },
+      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
   );
@@ -433,21 +449,44 @@ export const RepartitionDataViews = ({
   data,
   searchTerm,
   onTypeVueChange,
+  customNavigationPath,
 }: {
   typeVue: string | null;
   data?: MissionLocale[];
   searchTerm: string;
   onTypeVueChange: (type: string) => void;
+  customNavigationPath?: (id: string) => string;
 }) => {
   const viewSelector = <ViewSelector typeVue={typeVue} setTypeVue={onTypeVueChange} />;
 
   switch (typeVue) {
     case "graph":
-      return <TableauRepartitionTraiteGraph data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraiteGraph
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          customNavigationPath={customNavigationPath}
+        />
+      );
     case "table":
-      return <TableauRepartitionTraiteTable data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraiteTable
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          customNavigationPath={customNavigationPath}
+        />
+      );
     case "percent":
-      return <TableauRepartitionTraitePercent data={data} searchTerm={searchTerm} headerAction={viewSelector} />;
+      return (
+        <TableauRepartitionTraitePercent
+          data={data}
+          searchTerm={searchTerm}
+          headerAction={viewSelector}
+          customNavigationPath={customNavigationPath}
+        />
+      );
     default:
       return null;
   }
