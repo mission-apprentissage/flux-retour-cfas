@@ -39,7 +39,7 @@ const colorMap = {
   rdv_pris: { color: "#2846BC", label: "Rdv pris" },
   nouveau_projet: { color: "#568AC3", label: "Nouveau projet" },
   deja_accompagne: { color: "#00386A", label: "Déjà acco." },
-  contacte_sans_retour: { color: "#31A7AE", label: "Sans rép." },
+  contacte_sans_retour: { color: "#31A7AE", label: "Sans retour" },
   coordonnees_incorrectes: { color: "#8B53C8", label: "Coord inc." },
   autre: { color: "#A78BCC", label: "Autre" },
 };
@@ -124,22 +124,32 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
     { id: "total", desc: true },
   ]);
 
-  const transformedData = (data || []).map(({ _id, nom, activated_at, stats }) => ({
-    _id,
-    nom,
-    a_traiter: stats.a_traiter,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    rdv_pris: stats.rdv_pris,
-    nouveau_projet: stats.nouveau_projet,
-    deja_accompagne: stats.deja_accompagne,
-    contacte_sans_retour: stats.contacte_sans_retour,
-    coordonnees_incorrectes: stats.coordonnees_incorrectes,
-    autre: stats.autre,
-    total: stats.total,
-    activated_at: <ActivationStatus activatedAt={activated_at} />,
-    icon: createNavigationIcon(_id),
-  }));
+  const transformedData = (data || []).map(({ _id, nom, activated_at, stats }) => {
+    const rawData = {
+      _id,
+      nom,
+      a_traiter: stats.a_traiter,
+      traite: stats.traite,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
+      rdv_pris: stats.rdv_pris,
+      nouveau_projet: stats.nouveau_projet,
+      deja_accompagne: stats.deja_accompagne,
+      contacte_sans_retour: stats.contacte_sans_retour,
+      coordonnees_incorrectes: stats.coordonnees_incorrectes,
+      autre: stats.autre,
+      total: stats.total,
+      activated_at,
+    };
+
+    const displayData = {
+      ...rawData,
+      total: <strong>{stats.total}</strong>,
+      activated_at: <ActivationStatus activatedAt={activated_at} />,
+      icon: createNavigationIcon(_id),
+    };
+
+    return { element: displayData, rawData };
+  });
 
   const columns = useMemo(
     () => [
@@ -157,7 +167,7 @@ export const TableauMissionLocale = ({ data, searchTerm }: TableBaseProps) => {
   return (
     <FullTable
       caption="Détails des Missions Locales"
-      data={transformedData.map((element) => ({ element, rawData: element }))}
+      data={transformedData}
       columns={columns}
       pageSize={50}
       emptyMessage="Aucune mission locale à afficher"
@@ -196,7 +206,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction }: Table
       { label: "Rdv pris", dataKey: "rdv_pris", width: 50 },
       { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 50 },
       { label: "Déjà acc.", dataKey: "deja_accompagne", width: 50 },
-      { label: "Sans rép.", dataKey: "contacte_sans_retour", width: 50 },
+      { label: "Sans retour", dataKey: "contacte_sans_retour", width: 50 },
       { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
       { label: "Autre", dataKey: "autre", width: 50 },
       { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
