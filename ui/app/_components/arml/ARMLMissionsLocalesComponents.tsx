@@ -138,7 +138,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
   const columns = useMemo(
     () => [
       { label: "Mission Locale", dataKey: "nom", width: 300 },
-      { label: "Total", dataKey: "total", width: 100 },
+      { label: "Total jeunes", dataKey: "total", width: 100 },
       { label: "À traiter", dataKey: "a_traiter", width: 100 },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
