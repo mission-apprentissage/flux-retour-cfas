@@ -16,7 +16,7 @@ export default function UNMLAdminContent({ unmlData }: ARMLContentProps) {
     <div className="fr-grid-row fr-grid-row--gutters">
       <div className="fr-col-12">
         <h3 className="fr-h3" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>
-          Vue nationale des ARML
+          Pilotage des Missions Locales
         </h3>
       </div>
       <div className="fr-col-12">

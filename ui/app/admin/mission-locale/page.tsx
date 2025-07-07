@@ -1,11 +1,11 @@
 import { Metadata } from "next";
 
-import MissionLocaleAdminClient from "./MissionLocaleAdminClient";
+import UNMLAdminClient from "./UNMLAdminClient";
 
 export const metadata: Metadata = {
   title: "Missions Locales | Tableau de bord de l'apprentissage",
 };
 
 export default function Page() {
-  return <MissionLocaleAdminClient />;
+  return <UNMLAdminClient />;
 }

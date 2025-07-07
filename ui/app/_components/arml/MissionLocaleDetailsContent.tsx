@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { IOrganisationMissionLocale } from "shared";
 
 import ARMLIndicateurGlobal from "@/app/_components/arml/ARMLIndicateurGlobal";
-import CustomBreadcrumb from "@/app/_components/Breadcrumb";
 
 interface MissionLocaleDetailsContentProps {
   ml: IOrganisationMissionLocale;
@@ -19,7 +18,6 @@ export default function MissionLocaleDetailsContent({ ml }: MissionLocaleDetails
 
   return (
     <>
-      <CustomBreadcrumb path={`/arml/missions-locales/[mlId]`} name={ml.nom} />
       <h3 className="fr-h3" style={{ marginBottom: "2rem", color: "var(--text-title-blue-france)" }}>
         Mission Locale {ml.nom}
       </h3>

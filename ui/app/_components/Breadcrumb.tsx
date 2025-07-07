@@ -20,6 +20,21 @@ export default function CustomBreadcrumb({ path, name = "Mission Locale" }) {
         },
       ],
     },
+    "/admin/mission-locale": {
+      pageLabel: "Pilotage des missions locales",
+      segments: [],
+    },
+    "/admin/mission-locale/[mlId]": {
+      pageLabel: name,
+      segments: [
+        {
+          label: "Pilotage des missions locales",
+          linkProps: {
+            href: "/admin/mission-locale",
+          },
+        },
+      ],
+    },
   };
 
   const currentPage = navigation[path] || { pageLabel: "Inconnu", segments: [] };
