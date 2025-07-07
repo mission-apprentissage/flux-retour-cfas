@@ -181,84 +181,6 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
   );
 };
 
-const TableauRepartitionTraiteTable = ({
-  data,
-  searchTerm,
-  headerAction,
-  customNavigationPath,
-  showArml,
-}: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    arml,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    rdv_pris: stats.rdv_pris,
-    nouveau_projet: stats.nouveau_projet,
-    deja_accompagne: stats.deja_accompagne,
-    contacte_sans_retour: stats.contacte_sans_retour,
-    coordonnees_incorrectes: stats.coordonnees_incorrectes,
-    autre: stats.autre,
-    deja_connu: stats.deja_connu,
-  }));
-
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
-
-  const {
-    data: paginatedData,
-    pagination,
-    sorting,
-    setSorting,
-    onPageChange,
-    onPageSizeChange,
-    pageSize,
-    createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
-
-  const dataWithIcons = paginatedData.map((item) => ({
-    ...item,
-    element: {
-      ...item.element,
-      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
-    },
-  }));
-
-  const columns = useMemo(
-    () => [
-      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
-      { label: "Mission Locale", dataKey: "nom", width: 200 },
-      { label: "Traités", dataKey: "traite", width: 50 },
-      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
-      { label: "Rdv pris", dataKey: "rdv_pris", width: 50 },
-      { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 50 },
-      { label: "Déjà acc.", dataKey: "deja_accompagne", width: 50 },
-      { label: "Sans retour", dataKey: "contacte_sans_retour", width: 50 },
-      { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
-      { label: "Autre", dataKey: "autre", width: 50 },
-      { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
-      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
-    ],
-    [customNavigationPath]
-  );
-
-  return (
-    <FullTable
-      caption="Résultats obtenus"
-      data={dataWithIcons}
-      columns={columns}
-      pageSize={pageSize}
-      emptyMessage="Aucune mission locale à afficher"
-      sorting={sorting}
-      onSortingChange={setSorting}
-      pagination={pagination}
-      onPageChange={onPageChange}
-      onPageSizeChange={onPageSizeChange}
-      headerAction={headerAction}
-    />
-  );
-};
-
 const TableauRepartitionTraitePercent = ({
   data,
   searchTerm,
@@ -487,13 +409,6 @@ export const ViewSelector = ({
         },
       },
       {
-        label: <i className="fr-icon-table-line" />,
-        nativeInputProps: {
-          checked: typeVue === "table",
-          onChange: () => setTypeVue("table"),
-        },
-      },
-      {
         label: "%",
         nativeInputProps: {
           checked: typeVue === "percent",
@@ -528,16 +443,6 @@ export const RepartitionDataViews = ({
     case "graph":
       return (
         <TableauRepartitionTraiteGraph
-          data={data}
-          searchTerm={searchTerm}
-          headerAction={viewSelector}
-          customNavigationPath={customNavigationPath}
-          showArml={showArml}
-        />
-      );
-    case "table":
-      return (
-        <TableauRepartitionTraiteTable
           data={data}
           searchTerm={searchTerm}
           headerAction={viewSelector}
