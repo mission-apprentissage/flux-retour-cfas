@@ -19,7 +19,7 @@ export function useTableColumns(columns: ColumnData[]) {
       columns.map((col) => ({
         accessorKey: col.dataKey,
         id: col.dataKey,
-        header: col.label,
+        header: () => col.label,
         size: typeof col.width === "string" ? parseInt(col.width.replace("%", "")) : col.width || 100,
         enableSorting: col.sortable !== false && col.dataKey !== "actions",
         accessorFn: (row) => row._rawData?.[col.dataKey] ?? row[col.dataKey],
