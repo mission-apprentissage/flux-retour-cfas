@@ -2,7 +2,7 @@ import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { ReactNode } from "react";
 
 export interface ColumnData {
-  label: string;
+  label: string | ReactNode;
   dataKey: string;
   width?: number | string;
   numeric?: boolean;
