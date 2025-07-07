@@ -167,7 +167,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
 
   return (
     <FullTable
-      caption="Détails des Missions Locales"
+      caption="Activation et traitement"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -244,7 +244,7 @@ const TableauRepartitionTraiteTable = ({
 
   return (
     <FullTable
-      caption="Répartition des données traitées par Mission Locale"
+      caption="Résultats obtenus"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -322,7 +322,7 @@ const TableauRepartitionTraitePercent = ({
 
   return (
     <FullTable
-      caption="Répartition des données traitées par Mission Locale"
+      caption="Résultats obtenus"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -455,7 +455,7 @@ const TableauRepartitionTraiteGraph = ({
 
   return (
     <FullTable
-      caption={"Répartition des données traitées par Mission Locale"}
+      caption="Résultats obtenus"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
