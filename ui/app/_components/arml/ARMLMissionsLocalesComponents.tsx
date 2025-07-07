@@ -194,7 +194,7 @@ const TableauRepartitionTraitePercent = ({
       _id,
       nom,
       arml,
-      traite: <strong>{stats.traite}</strong>,
+      traite: stats.traite,
       traite_pourcentage: computePercentage(stats.traite, stats.total),
       rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
       nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
@@ -217,7 +217,7 @@ const TableauRepartitionTraitePercent = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(transformedData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "traite", desc: true }], customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
@@ -376,13 +376,14 @@ const TableauRepartitionTraiteGraph = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(transformedData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "traite", desc: true }], customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      traite: <strong>{item.rawData.traite}</strong>,
       traite_pourcentage: <>{item.rawData.traite_pourcentage}%</>,
     },
   }));
