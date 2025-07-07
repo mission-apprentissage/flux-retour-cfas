@@ -189,12 +189,27 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
       },
     },
     {
+      $lookup: {
+        from: "organisations",
+        localField: "arml_id",
+        foreignField: "_id",
+        as: "arml",
+      },
+    },
+    {
+      $unwind: {
+        path: "$arml",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $project: {
         _id: 1,
         nom: 1,
         code_postal: "$adresse.code_postal",
         activated_at: 1,
         arml_id: 1,
+        arml: "$arml.nom",
         stats: "$stats.stats",
       },
     },

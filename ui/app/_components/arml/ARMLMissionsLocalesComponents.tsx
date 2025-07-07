@@ -26,6 +26,7 @@ interface MissionLocale {
   _id: string;
   nom: string;
   activated_at?: string;
+  arml?: string;
   stats: MissionLocaleStats;
 }
 
@@ -34,6 +35,7 @@ interface TableBaseProps {
   searchTerm: string;
   headerAction?: React.ReactNode;
   customNavigationPath?: (id: string) => string;
+  showArml?: boolean;
 }
 
 const colorMap = {
@@ -90,11 +92,12 @@ const ActivationStatus = ({ activatedAt }: { activatedAt?: string }) => {
   return <>{new Date(activatedAt).toLocaleDateString("fr-FR")}</>;
 };
 
-export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, activated_at, stats }) => {
+export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, showArml }: TableBaseProps) => {
+  const transformedData = (data || []).map(({ _id, nom, activated_at, stats, arml }) => {
     const rawData = {
       _id,
       nom,
+      arml,
       a_traiter: stats.a_traiter,
       traite: stats.traite,
       traite_pourcentage: computePercentage(stats.traite, stats.total),
@@ -138,6 +141,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
 
   const columns = useMemo(
     () => [
+      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 300 },
       { label: "Total jeunes", dataKey: "total", width: 100 },
       { label: "À traiter", dataKey: "a_traiter", width: 100 },
@@ -177,10 +181,17 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
   );
 };
 
-const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats }) => ({
+const TableauRepartitionTraiteTable = ({
+  data,
+  searchTerm,
+  headerAction,
+  customNavigationPath,
+  showArml,
+}: TableBaseProps) => {
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
     _id,
     nom,
+    arml,
     traite: stats.traite,
     traite_pourcentage: computePercentage(stats.traite, stats.total),
     rdv_pris: stats.rdv_pris,
@@ -215,6 +226,7 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customN
 
   const columns = useMemo(
     () => [
+      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 200 },
       { label: "Traités", dataKey: "traite", width: 50 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
@@ -247,10 +259,17 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customN
   );
 };
 
-const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats }) => ({
+const TableauRepartitionTraitePercent = ({
+  data,
+  searchTerm,
+  headerAction,
+  customNavigationPath,
+  showArml,
+}: TableBaseProps) => {
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
     _id,
     nom,
+    arml,
     traite: stats.traite,
     traite_pourcentage: computePercentage(stats.traite, stats.total),
     rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
@@ -285,6 +304,7 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, custo
 
   const columns = useMemo(
     () => [
+      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 200 },
       { label: "Traités", dataKey: "traite", width: 50 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
@@ -378,12 +398,19 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
   );
 };
 
-const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats }) => ({
+const TableauRepartitionTraiteGraph = ({
+  data,
+  searchTerm,
+  headerAction,
+  customNavigationPath,
+  showArml,
+}: TableBaseProps) => {
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
     _id,
     nom,
     traite: stats.traite,
     traite_pourcentage: computePercentage(stats.traite, stats.total),
+    arml,
     graph: <StatsBarChart stats={stats} nom={nom} />,
   }));
 
@@ -410,6 +437,7 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customN
 
   const columns = useMemo(
     () => [
+      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 300 },
       {
         label: "Répartition",
@@ -485,12 +513,14 @@ export const RepartitionDataViews = ({
   searchTerm,
   onTypeVueChange,
   customNavigationPath,
+  showArml = false,
 }: {
   typeVue: string | null;
   data?: MissionLocale[];
   searchTerm: string;
   onTypeVueChange: (type: string) => void;
   customNavigationPath?: (id: string) => string;
+  showArml?: boolean;
 }) => {
   const viewSelector = <ViewSelector typeVue={typeVue} setTypeVue={onTypeVueChange} />;
 
@@ -502,6 +532,7 @@ export const RepartitionDataViews = ({
           searchTerm={searchTerm}
           headerAction={viewSelector}
           customNavigationPath={customNavigationPath}
+          showArml={showArml}
         />
       );
     case "table":
@@ -511,6 +542,7 @@ export const RepartitionDataViews = ({
           searchTerm={searchTerm}
           headerAction={viewSelector}
           customNavigationPath={customNavigationPath}
+          showArml={showArml}
         />
       );
     case "percent":
@@ -520,6 +552,7 @@ export const RepartitionDataViews = ({
           searchTerm={searchTerm}
           headerAction={viewSelector}
           customNavigationPath={customNavigationPath}
+          showArml={showArml}
         />
       );
     default:

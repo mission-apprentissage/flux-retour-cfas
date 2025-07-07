@@ -23,13 +23,19 @@ export default function UNMLAdminMissionsLocalesContent({ unmlData }: UNMLAdminM
       <div style={{ marginBottom: "2rem" }}>
         <GlobalSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
-      <TableauMissionLocale data={unmlData} searchTerm={searchTerm} customNavigationPath={customNavigationPath} />
+      <TableauMissionLocale
+        data={unmlData}
+        searchTerm={searchTerm}
+        customNavigationPath={customNavigationPath}
+        showArml={true}
+      />
       <RepartitionDataViews
         typeVue={typeVue}
         data={unmlData}
         searchTerm={searchTerm}
         onTypeVueChange={setTypeVue}
         customNavigationPath={customNavigationPath}
+        showArml={true}
       />
     </>
   );
