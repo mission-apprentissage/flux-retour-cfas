@@ -220,6 +220,7 @@ const TableauRepartitionTraitePercent = ({
     ...item,
     element: {
       ...item.element,
+      traite: <strong>{item.rawData.traite}</strong>,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
     },
   }));
@@ -228,8 +229,6 @@ const TableauRepartitionTraitePercent = ({
     () => [
       ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 200 },
-      { label: "Traités", dataKey: "traite", width: 50 },
-      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
       { label: "Rdv pris %", dataKey: "rdv_pris_pourcentage", width: 50 },
       { label: "Nouv. proj. %", dataKey: "nouveau_projet_pourcentage", width: 50 },
       { label: "Déjà acc. %", dataKey: "deja_accompagne_pourcentage", width: 50 },
@@ -237,6 +236,8 @@ const TableauRepartitionTraitePercent = ({
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
+      { label: "Traités", dataKey: "traite", width: 50 },
+      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     [customNavigationPath]
