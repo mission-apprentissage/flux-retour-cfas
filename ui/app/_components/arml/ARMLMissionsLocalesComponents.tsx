@@ -262,7 +262,7 @@ const TableauRepartitionTraitePercent = ({
 
 const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string }) => {
   if (!stats.traite) {
-    return <span style={{ fontStyle: "italic" }}>Aucune donnée traitée</span>;
+    return <span style={{ fontStyle: "italic" }}>Pas encore de dossier traité</span>;
   }
 
   return (
