@@ -3,11 +3,10 @@
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
+import { useVirtualizedPagination } from "@/app/_hooks/useVirtualizedPagination";
 
 interface MissionLocaleStats {
   a_traiter: number;
@@ -50,40 +49,6 @@ const computePercentage = (part: number, total: number): string | number => {
   return Math.round((part / total) * 100);
 };
 
-const useTableLogic = (
-  searchTerm: string,
-  customNavigationPath?: (id: string) => string,
-  defaultSorting?: SortingState
-) => {
-  const [sorting, setSorting] = useState<SortingState>(defaultSorting || []);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const router = useRouter();
-
-  useMemo(() => {
-    if (searchTerm) {
-      setColumnFilters([{ id: "nom", value: searchTerm }]);
-    } else {
-      setColumnFilters([]);
-    }
-  }, [searchTerm]);
-
-  const createNavigationIcon = (id: string) => (
-    <i
-      className="fr-icon-arrow-right-line fr-icon--sm"
-      style={{ cursor: "pointer" }}
-      onClick={() => customNavigationPath && router.push(customNavigationPath(id))}
-    />
-  );
-
-  return {
-    sorting,
-    setSorting,
-    columnFilters,
-    setColumnFilters,
-    createNavigationIcon,
-  };
-};
-
 export const LegendComponent = () => (
   <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "0.5rem" }}>
     {Object.entries(colorMap).map(([key, { color, label }]) => (
@@ -103,7 +68,7 @@ export const GlobalSearchBar = ({
   setSearchTerm: (value: string) => void;
 }) => (
   <SearchBar
-    label="Recherche de mission locale"
+    label="Rechercher une Mission Locale par son nom"
     renderInput={({ id, className, placeholder }) => (
       <input
         id={id}
@@ -125,12 +90,6 @@ const ActivationStatus = ({ activatedAt }: { activatedAt?: string }) => {
 };
 
 export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
-    searchTerm,
-    customNavigationPath,
-    [{ id: "total", desc: true }]
-  );
-
   const transformedData = (data || []).map(({ _id, nom, activated_at, stats }) => {
     const rawData = {
       _id,
@@ -152,47 +111,60 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
       ...rawData,
       total: <strong>{stats.total}</strong>,
       activated_at: <ActivationStatus activatedAt={activated_at} />,
-      icon: createNavigationIcon(_id),
     };
 
     return { element: displayData, rawData };
   });
 
+  const {
+    data: paginatedData,
+    pagination,
+    sorting,
+    setSorting,
+    onPageChange,
+    onPageSizeChange,
+    pageSize,
+    createNavigationIcon,
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "total", desc: true }]);
+
+  const dataWithIcons = paginatedData.map((item) => ({
+    ...item,
+    element: {
+      ...item.element,
+      icon: createNavigationIcon(item.rawData._id),
+    },
+  }));
+
   const columns = useMemo(
     () => [
       { label: "Mission Locale", dataKey: "nom", width: 300 },
-      { label: "Total", dataKey: "total", width: 100 },
+      { label: "Total jeunes", dataKey: "total", width: 100 },
       { label: "À traiter", dataKey: "a_traiter", width: 100 },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
       { label: "Activation", dataKey: "activated_at", width: 70 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
-    []
+    [customNavigationPath]
   );
 
   return (
     <FullTable
       caption="Détails des Missions Locales"
-      data={transformedData}
+      data={dataWithIcons}
       columns={columns}
-      pageSize={50}
+      pageSize={pageSize}
       emptyMessage="Aucune mission locale à afficher"
       sorting={sorting}
       onSortingChange={setSorting}
-      columnFilters={columnFilters}
-      onColumnFiltersChange={setColumnFilters}
-      pagination={{ page: 1, lastPage: 1, total: transformedData.length, limit: 50 }}
+      pagination={pagination}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
     />
   );
 };
 
 const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
-    searchTerm,
-    customNavigationPath
-  );
-
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
     nom,
@@ -205,7 +177,27 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customN
     coordonnees_incorrectes: stats.coordonnees_incorrectes,
     autre: stats.autre,
     deja_connu: stats.deja_connu,
-    icon: createNavigationIcon(_id),
+  }));
+
+  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+
+  const {
+    data: paginatedData,
+    pagination,
+    sorting,
+    setSorting,
+    onPageChange,
+    onPageSizeChange,
+    pageSize,
+    createNavigationIcon,
+  } = useVirtualizedPagination(tableData, searchTerm);
+
+  const dataWithIcons = paginatedData.map((item) => ({
+    ...item,
+    element: {
+      ...item.element,
+      icon: createNavigationIcon(item.rawData._id),
+    },
   }));
 
   const columns = useMemo(
@@ -222,32 +214,27 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customN
       { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
-    []
+    [customNavigationPath]
   );
 
   return (
     <FullTable
       caption="Répartition des données traitées par Mission Locale"
-      data={transformedData.map((element) => ({ element, rawData: element }))}
+      data={dataWithIcons}
       columns={columns}
-      pageSize={50}
+      pageSize={pageSize}
       emptyMessage="Aucune mission locale à afficher"
       sorting={sorting}
       onSortingChange={setSorting}
-      columnFilters={columnFilters}
-      onColumnFiltersChange={setColumnFilters}
-      pagination={{ page: 1, lastPage: 1, total: transformedData.length, limit: 50 }}
+      pagination={pagination}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       headerAction={headerAction}
     />
   );
 };
 
 const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
-    searchTerm,
-    customNavigationPath
-  );
-
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
     nom,
@@ -260,7 +247,27 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, custo
     coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
     autre_pourcentage: computePercentage(stats.autre, stats.traite),
     deja_connu: computePercentage(stats.deja_connu, stats.traite),
-    icon: createNavigationIcon(_id),
+  }));
+
+  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+
+  const {
+    data: paginatedData,
+    pagination,
+    sorting,
+    setSorting,
+    onPageChange,
+    onPageSizeChange,
+    pageSize,
+    createNavigationIcon,
+  } = useVirtualizedPagination(tableData, searchTerm);
+
+  const dataWithIcons = paginatedData.map((item) => ({
+    ...item,
+    element: {
+      ...item.element,
+      icon: createNavigationIcon(item.rawData._id),
+    },
   }));
 
   const columns = useMemo(
@@ -277,21 +284,21 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, custo
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
-    []
+    [customNavigationPath]
   );
 
   return (
     <FullTable
       caption="Répartition des données traitées par Mission Locale"
-      data={transformedData.map((element) => ({ element, rawData: element }))}
+      data={dataWithIcons}
       columns={columns}
-      pageSize={20}
+      pageSize={pageSize}
       emptyMessage="Aucune mission locale à afficher"
       sorting={sorting}
       onSortingChange={setSorting}
-      columnFilters={columnFilters}
-      onColumnFiltersChange={setColumnFilters}
-      pagination={{ page: 1, lastPage: 1, total: transformedData.length, limit: 20 }}
+      pagination={pagination}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       headerAction={headerAction}
     />
   );
@@ -359,18 +366,33 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
 };
 
 const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customNavigationPath }: TableBaseProps) => {
-  const { sorting, setSorting, columnFilters, setColumnFilters, createNavigationIcon } = useTableLogic(
-    searchTerm,
-    customNavigationPath
-  );
-
   const transformedData = (data || []).map(({ _id, nom, stats }) => ({
     _id,
     nom,
     traite: stats.traite,
     traite_pourcentage: computePercentage(stats.traite, stats.total),
-    icon: createNavigationIcon(_id),
     graph: <StatsBarChart stats={stats} nom={nom} />,
+  }));
+
+  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+
+  const {
+    data: paginatedData,
+    pagination,
+    sorting,
+    setSorting,
+    onPageChange,
+    onPageSizeChange,
+    pageSize,
+    createNavigationIcon,
+  } = useVirtualizedPagination(tableData, searchTerm);
+
+  const dataWithIcons = paginatedData.map((item) => ({
+    ...item,
+    element: {
+      ...item.element,
+      icon: createNavigationIcon(item.rawData._id),
+    },
   }));
 
   const columns = useMemo(
@@ -387,21 +409,21 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customN
       { label: "Traités %", dataKey: "traite_pourcentage", width: 150 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
-    []
+    [customNavigationPath]
   );
 
   return (
     <FullTable
       caption={"Répartition des données traitées par Mission Locale"}
-      data={transformedData.map((element) => ({ element, rawData: element }))}
+      data={dataWithIcons}
       columns={columns}
-      pageSize={20}
+      pageSize={pageSize}
       emptyMessage="Aucune mission locale à afficher"
       sorting={sorting}
       onSortingChange={setSorting}
-      columnFilters={columnFilters}
-      onColumnFiltersChange={setColumnFilters}
-      pagination={{ page: 1, lastPage: 1, total: transformedData.length, limit: 20 }}
+      pagination={pagination}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       headerAction={headerAction}
     />
   );
