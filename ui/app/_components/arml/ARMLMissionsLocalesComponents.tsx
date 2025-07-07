@@ -48,7 +48,7 @@ const colorMap = {
 };
 
 const computePercentage = (part: number, total: number): string | number => {
-  if (total === 0 || part === 0) return "--";
+  if (total === 0 || part === 0) return 0;
   return Math.round((part / total) * 100);
 };
 
@@ -136,6 +136,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      traite_pourcentage: <>{item.element.traite_pourcentage}%</>,
     },
   }));
 
@@ -188,22 +189,24 @@ const TableauRepartitionTraitePercent = ({
   customNavigationPath,
   showArml,
 }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    arml,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
-    nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
-    deja_accompagne_pourcentage: computePercentage(stats.deja_accompagne, stats.traite),
-    contacte_sans_retour_pourcentage: computePercentage(stats.contacte_sans_retour, stats.traite),
-    coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
-    autre_pourcentage: computePercentage(stats.autre, stats.traite),
-    deja_connu: computePercentage(stats.deja_connu, stats.traite),
-  }));
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => {
+    const rawData = {
+      _id,
+      nom,
+      arml,
+      traite: <strong>{stats.traite}</strong>,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
+      rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
+      nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
+      deja_accompagne_pourcentage: computePercentage(stats.deja_accompagne, stats.traite),
+      contacte_sans_retour_pourcentage: computePercentage(stats.contacte_sans_retour, stats.traite),
+      coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
+      autre_pourcentage: computePercentage(stats.autre, stats.traite),
+      deja_connu: computePercentage(stats.deja_connu, stats.traite),
+    };
 
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+    return { element: rawData, rawData };
+  });
 
   const {
     data: paginatedData,
@@ -214,14 +217,22 @@ const TableauRepartitionTraitePercent = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, undefined, customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
-      traite: <strong>{item.rawData.traite}</strong>,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      rdv_pris_pourcentage: <>{item.rawData.rdv_pris_pourcentage}%</>,
+      nouveau_projet_pourcentage: <>{item.rawData.nouveau_projet_pourcentage}%</>,
+      deja_accompagne_pourcentage: <>{item.rawData.deja_accompagne_pourcentage}%</>,
+      contacte_sans_retour_pourcentage: <>{item.rawData.contacte_sans_retour_pourcentage}%</>,
+      coordonnees_incorrectes_pourcentage: <>{item.rawData.coordonnees_incorrectes_pourcentage}%</>,
+      autre_pourcentage: <>{item.rawData.autre_pourcentage}%</>,
+      deja_connu: <>{item.rawData.deja_connu}%</>,
+      traite: <strong>{item.rawData.traite}</strong>,
+      traite_pourcentage: <>{item.rawData.traite_pourcentage}%</>,
     },
   }));
 
@@ -328,16 +339,18 @@ const TableauRepartitionTraiteGraph = ({
   customNavigationPath,
   showArml,
 }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    arml,
-    graph: <StatsBarChart stats={stats} nom={nom} />,
-  }));
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => {
+    const rawData = {
+      _id,
+      nom,
+      traite: stats.traite,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
+      arml,
+      graph: <StatsBarChart stats={stats} nom={nom} />,
+    };
 
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+    return { element: rawData, rawData };
+  });
 
   const {
     data: paginatedData,
@@ -348,13 +361,14 @@ const TableauRepartitionTraiteGraph = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, undefined, customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      traite_pourcentage: <>{item.rawData.traite_pourcentage}%</>,
     },
   }));
 

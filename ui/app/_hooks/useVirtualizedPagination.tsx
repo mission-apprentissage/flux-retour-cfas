@@ -45,8 +45,11 @@ export const useVirtualizedPagination = (
         const aValue = a.rawData?.[sort.id] ?? a.element?.[sort.id];
         const bValue = b.rawData?.[sort.id] ?? b.element?.[sort.id];
 
-        if (typeof aValue === "number" && typeof bValue === "number") {
-          return sort.desc ? bValue - aValue : aValue - bValue;
+        const aNum = typeof aValue === "number" ? aValue : parseFloat(String(aValue));
+        const bNum = typeof bValue === "number" ? bValue : parseFloat(String(bValue));
+
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return sort.desc ? bNum - aNum : aNum - bNum;
         }
 
         const aStr = String(aValue || "").toLowerCase();
