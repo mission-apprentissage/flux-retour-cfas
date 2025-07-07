@@ -125,13 +125,13 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "total", desc: true }]);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "total", desc: true }], customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
-      icon: createNavigationIcon(item.rawData._id),
+      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
     },
   }));
 
@@ -190,13 +190,13 @@ const TableauRepartitionTraiteTable = ({ data, searchTerm, headerAction, customN
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm);
+  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
-      icon: createNavigationIcon(item.rawData._id),
+      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
     },
   }));
 
@@ -260,13 +260,13 @@ const TableauRepartitionTraitePercent = ({ data, searchTerm, headerAction, custo
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm);
+  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
-      icon: createNavigationIcon(item.rawData._id),
+      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
     },
   }));
 
@@ -385,13 +385,13 @@ const TableauRepartitionTraiteGraph = ({ data, searchTerm, headerAction, customN
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm);
+  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
-      icon: createNavigationIcon(item.rawData._id),
+      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
     },
   }));
 
