@@ -180,7 +180,7 @@ export const MonthTable = memo(function MonthTable({
           itemsPerPage={7}
           getRowLink={(rowData) => {
             return user.organisation.type === "ADMINISTRATEUR" && mlId
-              ? `/admin/mission-locale/${mlId}/${rowData.id}/?nom_liste=${listType}`
+              ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${listType}`
               : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
           }}
           emptyMessage="Aucun élément à afficher"

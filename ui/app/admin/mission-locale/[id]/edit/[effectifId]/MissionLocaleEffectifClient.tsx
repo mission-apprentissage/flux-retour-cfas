@@ -1,7 +1,8 @@
 "use client";
 
 import { Grid2 } from "@mui/material";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
@@ -9,26 +10,35 @@ import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { RightColumnSkeleton } from "@/app/_components/mission-locale/effectifs/RightColumnSkeleton";
 import { MissionLocaleEffectifDisplay } from "@/app/_components/mission-locale/MissionLocaleEffctifDisplay";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _put } from "@/common/httpClient";
+import { _get, _put } from "@/common/httpClient";
 
 const MIN_LOADING_TIME = 500;
 const SUCCESS_DISPLAY_TIME = 1000;
 
-interface MissionLocaleEffectifClientProps {
-  id: string;
-  effectifId: string;
-  data: IEffecifMissionLocale | null;
-}
-
-export default function MissionLocaleEffectifClient({
-  id,
-  effectifId: _effectifId,
-  data,
-}: MissionLocaleEffectifClientProps) {
+export default function MissionLocaleEffectifClient() {
+  const params = useParams();
+  const { id, effectifId } = params as { id: string; effectifId: string };
   const searchParams = useSearchParams();
   const router = useRouter();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const { data } = useQuery(
+    ["effectif", id, nomListe],
+    async () => {
+      if (!id) return null;
+      return await _get<IEffecifMissionLocale>(`/api/v1/admin/mission-locale/${id}/effectif/${effectifId}`, {
+        params: {
+          nom_liste: nomListe,
+        },
+      });
+    },
+    {
+      enabled: !!id,
+      suspense: true,
+      useErrorBoundary: true,
+    }
+  );
 
   function handleResult(success: boolean) {
     if (!success) {
@@ -38,7 +48,7 @@ export default function MissionLocaleEffectifClient({
     setSaveStatus("success");
 
     setTimeout(() => {
-      router.push(`/admin/mission-locale/${id}`);
+      router.push(`/admin/mission-locale/${id}/edit`);
     }, SUCCESS_DISPLAY_TIME);
   }
 
