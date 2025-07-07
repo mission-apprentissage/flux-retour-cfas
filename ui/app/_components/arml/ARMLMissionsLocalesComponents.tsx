@@ -2,6 +2,7 @@
 
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
@@ -165,7 +166,19 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath }:
       { label: "À traiter", dataKey: "a_traiter", width: 100 },
       { label: "Traités", dataKey: "traite", width: 100 },
       { label: "Traités %", dataKey: "traite_pourcentage", width: 100 },
-      { label: "Activation", dataKey: "activated_at", width: 70 },
+      {
+        label: (
+          <>
+            <span style={{ marginRight: "0.5rem" }}>Activation</span>
+            <Tooltip
+              kind="hover"
+              title="Une Mission Locale est activée dès lors qu’il existe au moins un compte utilisateur pour cette Mission Locale sur le Tableau de Bord."
+            />
+          </>
+        ),
+        dataKey: "activated_at",
+        width: 70,
+      },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     []
