@@ -6,7 +6,8 @@ export const useVirtualizedPagination = (
   allData: any[],
   searchTerm: string,
   defaultPageSize: number = 20,
-  defaultSorting?: SortingState
+  defaultSorting?: SortingState,
+  customNavigationPath?: (id: string) => string
 ) => {
   const [sorting, setSorting] = useState<SortingState>(defaultSorting || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,13 +18,15 @@ export const useVirtualizedPagination = (
     setCurrentPage(1);
   }, [searchTerm, sorting]);
 
-  const createNavigationIcon = (id: string) => (
-    <i
-      className="fr-icon-arrow-right-line fr-icon--sm"
-      style={{ cursor: "pointer" }}
-      onClick={() => router.push(`/arml/missions-locales/${id}`)}
-    />
-  );
+  const createNavigationIcon = customNavigationPath
+    ? (id: string) => (
+        <i
+          className="fr-icon-arrow-right-line fr-icon--sm"
+          style={{ cursor: "pointer" }}
+          onClick={() => router.push(customNavigationPath(id))}
+        />
+      )
+    : undefined;
 
   const { paginatedData, totalFiltered } = useMemo(() => {
     let filteredData = allData;
