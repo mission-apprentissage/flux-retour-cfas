@@ -111,7 +111,7 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
             searchableColumns={["nom", "prenom"]}
             getRowLink={(rowData) => {
               return user.organisation.type === "ADMINISTRATEUR" && mlId
-                ? `/admin/mission-locale/${mlId}/${rowData.id}/?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`
+                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`
                 : `/mission-locale/${rowData.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`;
             }}
           />

@@ -11,7 +11,7 @@ import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkele
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
 
-export default function MissionLocaleClient({ id }: { id: string }) {
+export default function MissionLocaleAdminEditClient({ id }: { id: string }) {
   const { data: missionLocaleData } = useQuery(
     ["mission-locale", id],
     () => _get(`/api/v1/admin/mission-locale/${id}`),
