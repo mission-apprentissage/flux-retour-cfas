@@ -276,6 +276,15 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
     return <span style={{ fontStyle: "italic" }}>Pas encore de dossier traité</span>;
   }
 
+  // Convertir les valeurs absolues en pourcentages pour homogénéiser l'affichage
+  const total = stats.traite;
+  const rdv_pris_pct = (stats.rdv_pris / total) * 100;
+  const nouveau_projet_pct = (stats.nouveau_projet / total) * 100;
+  const deja_accompagne_pct = (stats.deja_accompagne / total) * 100;
+  const contacte_sans_retour_pct = (stats.contacte_sans_retour / total) * 100;
+  const coordonnees_incorrectes_pct = (stats.coordonnees_incorrectes / total) * 100;
+  const autre_pct = (stats.autre / total) * 100;
+
   return (
     <BarChart
       height={50}
@@ -283,49 +292,55 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
       series={[
         {
           id: "rdv_pris",
-          data: [stats.rdv_pris],
+          data: [rdv_pris_pct],
           label: "Rdv pris",
           stack: "stack1",
           color: colorMap.rdv_pris.color,
+          valueFormatter: () => stats.rdv_pris.toString(),
         },
         {
           id: "nouveau_projet",
-          data: [stats.nouveau_projet],
+          data: [nouveau_projet_pct],
           label: "Nouveau projet",
           stack: "stack1",
           color: colorMap.nouveau_projet.color,
+          valueFormatter: () => stats.nouveau_projet.toString(),
         },
         {
           id: "deja_accompagne",
-          data: [stats.deja_accompagne],
+          data: [deja_accompagne_pct],
           label: "Déjà accompagné",
           stack: "stack1",
           color: colorMap.deja_accompagne.color,
+          valueFormatter: () => stats.deja_accompagne.toString(),
         },
         {
           id: "contacte_sans_retour",
-          data: [stats.contacte_sans_retour],
+          data: [contacte_sans_retour_pct],
           label: "Sans réponse",
           stack: "stack1",
           color: colorMap.contacte_sans_retour.color,
+          valueFormatter: () => stats.contacte_sans_retour.toString(),
         },
         {
           id: "coordonnees_incorrectes",
-          data: [stats.coordonnees_incorrectes],
+          data: [coordonnees_incorrectes_pct],
           label: "Coordonnées incorrectes",
           stack: "stack1",
           color: colorMap.coordonnees_incorrectes.color,
+          valueFormatter: () => stats.coordonnees_incorrectes.toString(),
         },
         {
           id: "autre",
-          data: [stats.autre],
+          data: [autre_pct],
           label: "Autre",
           stack: "stack1",
           color: colorMap.autre.color,
+          valueFormatter: () => stats.autre.toString(),
         },
       ]}
       hideLegend={true}
-      xAxis={[{ position: "none" }]}
+      xAxis={[{ min: 0, max: 100, position: "none" }]}
       yAxis={[{ position: "none", data: [nom] }]}
       margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
     />
