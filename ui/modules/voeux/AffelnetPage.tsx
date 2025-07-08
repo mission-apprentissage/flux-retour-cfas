@@ -14,7 +14,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AUTRE_AFFELNET_LINK } from "shared";
 
 import { _getBlob } from "@/common/httpClient";
@@ -24,10 +24,12 @@ import Button from "@/components/buttons/Button";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { useAffelnetCount } from "@/hooks/organismes";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
+import FiltreAffelnetDate from "../indicateurs/filters/FiltreAffelnetDate";
 import FiltreAffelnetDepartement from "../indicateurs/filters/FiltreAffelnetDepartement";
 import {
   EffectifsFiltersFullQuery,
@@ -40,7 +42,12 @@ import AffelnetChart from "./AffelnetChart";
 function VoeuxAffelnetPage() {
   const router = useRouter();
   const { organisme_departements } = router.query;
-  const { affelnetCount, isLoading } = useAffelnetCount(organisme_departements);
+  const [affelnetDate, setAffelnetDate] = useState(new Date());
+  const { affelnetCount, isLoading } = useAffelnetCount(affelnetDate, organisme_departements);
+
+  const affelnetYear = useMemo(() => {
+    return affelnetDate.getFullYear();
+  }, [affelnetDate]);
 
   const effectifsFilters = useMemo(
     () => parseEffectifsFiltersFullFromQuery(router.query as unknown as EffectifsFiltersFullQuery),
@@ -77,14 +84,26 @@ function VoeuxAffelnetPage() {
       <Container maxW="xl" p="8">
         <VStack spacing={8} alignItems="start">
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
-            Vœux Affelnet 2024
+            Vœux Affelnet
           </Heading>
+          <HStack spacing={8}>
+            <Text>Voir l&apos;année</Text>
+            <FiltreAffelnetDate
+              value={affelnetDate}
+              onChange={(date) => setAffelnetDate(date)}
+              button={({ isOpen, setIsOpen }) => (
+                <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
+                  {affelnetYear}
+                </SecondarySelectButton>
+              )}
+            />
+          </HStack>
           <HStack spacing={8}>
             <VStack alignItems="start" w="100%">
               <Text>
                 Retrouvez ci-dessous les{" "}
-                <strong>{isLoading ? "..." : formatNumber(affelnetCount?.voeuxFormules)}</strong> vœux formulés en 2024
-                via la plateforme Affelnet (offre post-3ème).
+                <strong>{isLoading ? "..." : formatNumber(affelnetCount?.voeuxFormules)}</strong> vœux formulés en{" "}
+                {affelnetYear} via la plateforme Affelnet (offre post-3ème).
               </Text>
               <Text as="i">
                 Source :{" "}
@@ -113,7 +132,7 @@ function VoeuxAffelnetPage() {
             </List>
           </Ribbons>
           <Heading as="h4" size="md">
-            En 2024
+            En {affelnetYear}
           </Heading>
           <HStack spacing={8}>
             <Text>Filtrer par</Text>
@@ -133,12 +152,12 @@ function VoeuxAffelnetPage() {
                   <Text>
                     vœux en apprentissage ont été formulés{" "}
                     <InfoTooltip
-                      headerComponent={() => <Text>Vœux en apprentissage formulés en 2024</Text>}
+                      headerComponent={() => <Text>Vœux en apprentissage formulés en {affelnetYear}</Text>}
                       contentComponent={() => (
                         <>
                           <Text>
-                            Il s’agit du nombre de vœux formulés sur l’année 2024, en cumulé sur les 3 fichiers globaux
-                            :
+                            Il s’agit du nombre de vœux formulés sur l’année {affelnetYear}, en cumulé sur les 3
+                            fichiers globaux :
                           </Text>
                           <List my={3} style={{ color: "black", listStyleType: "disc", paddingLeft: "1.5rem" }}>
                             <ListItem>29 mai : tous les vœux</ListItem>
@@ -214,9 +233,9 @@ function VoeuxAffelnetPage() {
                       </Text>
                       <Text>
                         Le premier onglet est dédié aux jeunes qui n’étaient plus présents dans le dernier fichier des
-                        vœux Affelnet (transmis le 8 juillet 2024) et le deuxième onglet est dédié aux jeunes que l’on
-                        ne retrouve pas inscrits en CFA sur le Tableau de bord de l’apprentissage. Dans chaque onglet,
-                        une colonne est dédiée au nombre de vœux exprimés pour chaque jeune.
+                        vœux Affelnet (transmis le 8 juillet {affelnetYear}) et le deuxième onglet est dédié aux jeunes
+                        que l’on ne retrouve pas inscrits en CFA sur le Tableau de bord de l’apprentissage. Dans chaque
+                        onglet, une colonne est dédiée au nombre de vœux exprimés pour chaque jeune.
                       </Text>
                       <Text>
                         Veuillez noter qu’il est impossible de restituer, pour chaque jeune, si il est retourné en voie
@@ -227,9 +246,11 @@ function VoeuxAffelnetPage() {
                           variant="primary"
                           action={async () => {
                             const params = organisme_departements
-                              ? `?organisme_departements=${organisme_departements}`
+                              ? `&organisme_departements=${organisme_departements}`
                               : "";
-                            const { data } = await _getBlob(`/api/v1/affelnet/export/non-concretise${params}`);
+                            const { data } = await _getBlob(
+                              `/api/v1/affelnet/export/non-concretise?year=${affelnetYear}${params}`
+                            );
                             downloadObject(data, `voeux_affelnet_non_concretise.csv`, "text/plain");
                           }}
                           isLoading={false}
@@ -296,8 +317,10 @@ function VoeuxAffelnetPage() {
                     mt="5px"
                     variant="link"
                     action={async () => {
-                      const params = organisme_departements ? `?organisme_departements=${organisme_departements}` : "";
-                      const { data } = await _getBlob(`/api/v1/affelnet/export/concretise${params}`);
+                      const params = organisme_departements ? `&organisme_departements=${organisme_departements}` : "";
+                      const { data } = await _getBlob(
+                        `/api/v1/affelnet/export/concretise?year=${affelnetYear}${params}`
+                      );
                       downloadObject(data, `voeux_affelnet_concretise.csv`, "text/plain");
                     }}
                     p={0}

@@ -13,13 +13,15 @@ const computeFilter = (departement: Array<string> | null, region: Array<string> 
 // Write indexes for this
 export const getAffelnetCountVoeuxNational = async (
   departement: Array<string> | null,
-  regions: Array<string> | null
+  regions: Array<string> | null,
+  year: string
 ) => {
   const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
           ...computeFilter(departement, regions),
+          annee_scolaire_rentree: year,
         },
       },
 
@@ -196,12 +198,17 @@ const AFFELNET_VOEUX_AGGREGATION = [
   },
 ];
 
-export const getAffelnetVoeuxConcretise = (departement: Array<string> | null, regions: Array<string> | null) =>
+export const getAffelnetVoeuxConcretise = (
+  departement: Array<string> | null,
+  regions: Array<string> | null,
+  year: number
+) =>
   voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
           ...computeFilter(departement, regions),
+          annee_scolaire_rentree: year,
         },
       },
       {
@@ -213,12 +220,17 @@ export const getAffelnetVoeuxConcretise = (departement: Array<string> | null, re
     ])
     .toArray();
 
-export const getAffelnetVoeuxNonConcretise = (departement: Array<string> | null, regions: Array<string> | null) =>
+export const getAffelnetVoeuxNonConcretise = (
+  departement: Array<string> | null,
+  regions: Array<string> | null,
+  year: number
+) =>
   voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
           ...computeFilter(departement, regions),
+          annee_scolaire_rentree: year,
         },
       },
       {

@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { format } from "date-fns";
 import express from "express";
 import { Parser } from "json2csv";
@@ -92,6 +93,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.coerce.number().optional(),
       }),
     }),
     returnResult(getNationalCount)
@@ -103,6 +105,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.coerce.number().optional(),
       }),
     }),
     returnResult(async (req, res) => {
@@ -118,6 +121,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.coerce.number().optional(),
       }),
     }),
     returnResult(async (req, res) => {
@@ -132,22 +136,32 @@ export default () => {
 
 const getNationalCount = async (req) => {
   const user = req.user as AuthContext;
+  const { organisme_departements, year } = req.query;
+
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
+
   const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
-  );
-  return await getAffelnetCountVoeuxNational(organisme_departements, organismes_regions);
+  const result = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
+  return await getAffelnetCountVoeuxNational(result.organisme_departements, result.organismes_regions, year);
 };
 
 const exportNonConcretisee = async (req) => {
   const user = req.user as AuthContext;
+  const { organisme_departements, year } = req.query;
+
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
+
   const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
+  const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
+  const listVoeux = await getAffelnetVoeuxNonConcretise(
+    results.organisme_departements,
+    results.organismes_regions,
+    year
   );
-  const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
 
   const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
@@ -180,12 +194,15 @@ const exportNonConcretisee = async (req) => {
 
 const exportConcretisee = async (req) => {
   const user = req.user as AuthContext;
+  const { organisme_departements, year } = req.query;
+
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
+
   const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
-  );
-  const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
+  const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
+  const listVoeux = await getAffelnetVoeuxConcretise(results.organisme_departements, results.organismes_regions, year);
 
   const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
     ...voeu,
