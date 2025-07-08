@@ -1,13 +1,17 @@
 "use client";
 
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { useMemo } from "react";
+import mime from "mime";
+import { useMemo, useState } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { useVirtualizedPagination } from "@/app/_hooks/useVirtualizedPagination";
+import { _getBlob } from "@/common/httpClient";
+import { downloadObject } from "@/common/utils/browser";
 
 interface MissionLocaleStats {
   a_traiter: number;
@@ -62,6 +66,41 @@ export const LegendComponent = () => (
     ))}
   </div>
 );
+
+export const ExportButton = ({ onError, onSuccess }: { onError?: (error: string) => void; onSuccess?: () => void }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const { data } = await _getBlob("/api/v1/organisation/arml/export/mls");
+      const fileName = `ARML_${new Date().toISOString().split("T")[0]}.xlsx`;
+      downloadObject(
+        data,
+        fileName,
+        mime.getType("xlsx") ?? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      onSuccess?.();
+    } catch (error) {
+      console.error("Erreur lors de l'export:", error);
+      onError?.("Une erreur est survenue lors de l'export des données. Veuillez réessayer.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleExport}
+      disabled={isExporting}
+      iconId={isExporting ? "ri-loader-line" : "ri-file-excel-2-line"}
+      priority="secondary"
+      size="small"
+    >
+      {isExporting ? "Export en cours..." : "Exporter en Excel"}
+    </Button>
+  );
+};
 
 export const GlobalSearchBar = ({
   searchTerm,
