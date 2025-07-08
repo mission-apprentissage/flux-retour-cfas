@@ -28,7 +28,7 @@ export default function ARMLMissionsLocalesContent({ armlData }: ARMLMissionsLoc
         className="fr-h2"
         style={{ marginTop: "0.5rem", marginBottom: "2rem", color: "var(--text-title-blue-france)" }}
       >
-        Répartitions des données
+        Informations détaillées par Mission Locale
       </h2>
       <div style={{ marginBottom: "2rem" }}>
         <GlobalSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

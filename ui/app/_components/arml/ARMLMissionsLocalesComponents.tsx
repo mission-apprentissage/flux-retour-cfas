@@ -48,7 +48,7 @@ const colorMap = {
 };
 
 const computePercentage = (part: number, total: number): string | number => {
-  if (total === 0 || part === 0) return "--";
+  if (total === 0 || part === 0) return 0;
   return Math.round((part / total) * 100);
 };
 
@@ -136,6 +136,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      traite_pourcentage: <>{item.element.traite_pourcentage}%</>,
     },
   }));
 
@@ -167,7 +168,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
 
   return (
     <FullTable
-      caption="Détails des Missions Locales"
+      caption="Activation et traitement"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -177,84 +178,6 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
       pagination={pagination}
       onPageChange={onPageChange}
       onPageSizeChange={onPageSizeChange}
-    />
-  );
-};
-
-const TableauRepartitionTraiteTable = ({
-  data,
-  searchTerm,
-  headerAction,
-  customNavigationPath,
-  showArml,
-}: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    arml,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    rdv_pris: stats.rdv_pris,
-    nouveau_projet: stats.nouveau_projet,
-    deja_accompagne: stats.deja_accompagne,
-    contacte_sans_retour: stats.contacte_sans_retour,
-    coordonnees_incorrectes: stats.coordonnees_incorrectes,
-    autre: stats.autre,
-    deja_connu: stats.deja_connu,
-  }));
-
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
-
-  const {
-    data: paginatedData,
-    pagination,
-    sorting,
-    setSorting,
-    onPageChange,
-    onPageSizeChange,
-    pageSize,
-    createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
-
-  const dataWithIcons = paginatedData.map((item) => ({
-    ...item,
-    element: {
-      ...item.element,
-      ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
-    },
-  }));
-
-  const columns = useMemo(
-    () => [
-      ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
-      { label: "Mission Locale", dataKey: "nom", width: 200 },
-      { label: "Traités", dataKey: "traite", width: 50 },
-      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
-      { label: "Rdv pris", dataKey: "rdv_pris", width: 50 },
-      { label: "Nouv. proj.", dataKey: "nouveau_projet", width: 50 },
-      { label: "Déjà acc.", dataKey: "deja_accompagne", width: 50 },
-      { label: "Sans retour", dataKey: "contacte_sans_retour", width: 50 },
-      { label: "Coord. inc.", dataKey: "coordonnees_incorrectes", width: 50 },
-      { label: "Autre", dataKey: "autre", width: 50 },
-      { label: "Déjà connu", dataKey: "deja_connu", width: 50 },
-      ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
-    ],
-    [customNavigationPath]
-  );
-
-  return (
-    <FullTable
-      caption="Répartition des données traitées par Mission Locale"
-      data={dataWithIcons}
-      columns={columns}
-      pageSize={pageSize}
-      emptyMessage="Aucune mission locale à afficher"
-      sorting={sorting}
-      onSortingChange={setSorting}
-      pagination={pagination}
-      onPageChange={onPageChange}
-      onPageSizeChange={onPageSizeChange}
-      headerAction={headerAction}
     />
   );
 };
@@ -266,22 +189,24 @@ const TableauRepartitionTraitePercent = ({
   customNavigationPath,
   showArml,
 }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    arml,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
-    nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
-    deja_accompagne_pourcentage: computePercentage(stats.deja_accompagne, stats.traite),
-    contacte_sans_retour_pourcentage: computePercentage(stats.contacte_sans_retour, stats.traite),
-    coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
-    autre_pourcentage: computePercentage(stats.autre, stats.traite),
-    deja_connu: computePercentage(stats.deja_connu, stats.traite),
-  }));
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => {
+    const rawData = {
+      _id,
+      nom,
+      arml,
+      traite: stats.traite,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
+      rdv_pris_pourcentage: computePercentage(stats.rdv_pris, stats.traite),
+      nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
+      deja_accompagne_pourcentage: computePercentage(stats.deja_accompagne, stats.traite),
+      contacte_sans_retour_pourcentage: computePercentage(stats.contacte_sans_retour, stats.traite),
+      coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
+      autre_pourcentage: computePercentage(stats.autre, stats.traite),
+      deja_connu: computePercentage(stats.deja_connu, stats.traite),
+    };
 
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+    return { element: rawData, rawData };
+  });
 
   const {
     data: paginatedData,
@@ -292,13 +217,22 @@ const TableauRepartitionTraitePercent = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "traite", desc: true }], customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      rdv_pris_pourcentage: <>{item.rawData.rdv_pris_pourcentage}%</>,
+      nouveau_projet_pourcentage: <>{item.rawData.nouveau_projet_pourcentage}%</>,
+      deja_accompagne_pourcentage: <>{item.rawData.deja_accompagne_pourcentage}%</>,
+      contacte_sans_retour_pourcentage: <>{item.rawData.contacte_sans_retour_pourcentage}%</>,
+      coordonnees_incorrectes_pourcentage: <>{item.rawData.coordonnees_incorrectes_pourcentage}%</>,
+      autre_pourcentage: <>{item.rawData.autre_pourcentage}%</>,
+      deja_connu: <>{item.rawData.deja_connu}%</>,
+      traite: <strong>{item.rawData.traite}</strong>,
+      traite_pourcentage: <>{item.rawData.traite_pourcentage}%</>,
     },
   }));
 
@@ -306,8 +240,6 @@ const TableauRepartitionTraitePercent = ({
     () => [
       ...(showArml ? [{ label: "ARML", dataKey: "arml", width: 100 }] : []),
       { label: "Mission Locale", dataKey: "nom", width: 200 },
-      { label: "Traités", dataKey: "traite", width: 50 },
-      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
       { label: "Rdv pris %", dataKey: "rdv_pris_pourcentage", width: 50 },
       { label: "Nouv. proj. %", dataKey: "nouveau_projet_pourcentage", width: 50 },
       { label: "Déjà acc. %", dataKey: "deja_accompagne_pourcentage", width: 50 },
@@ -315,6 +247,8 @@ const TableauRepartitionTraitePercent = ({
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
+      { label: "Traités", dataKey: "traite", width: 50 },
+      { label: "Traités %", dataKey: "traite_pourcentage", width: 50 },
       ...(customNavigationPath ? [{ label: "", dataKey: "icon", width: 10, sortable: false }] : []),
     ],
     [customNavigationPath]
@@ -322,7 +256,7 @@ const TableauRepartitionTraitePercent = ({
 
   return (
     <FullTable
-      caption="Répartition des données traitées par Mission Locale"
+      caption="Résultats obtenus"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -339,8 +273,17 @@ const TableauRepartitionTraitePercent = ({
 
 const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string }) => {
   if (!stats.traite) {
-    return <span style={{ fontStyle: "italic" }}>Aucune donnée traitée</span>;
+    return <span style={{ fontStyle: "italic" }}>Pas encore de dossier traité</span>;
   }
+
+  // Convertir les valeurs absolues en pourcentages pour homogénéiser l'affichage
+  const total = stats.traite;
+  const rdv_pris_pct = (stats.rdv_pris / total) * 100;
+  const nouveau_projet_pct = (stats.nouveau_projet / total) * 100;
+  const deja_accompagne_pct = (stats.deja_accompagne / total) * 100;
+  const contacte_sans_retour_pct = (stats.contacte_sans_retour / total) * 100;
+  const coordonnees_incorrectes_pct = (stats.coordonnees_incorrectes / total) * 100;
+  const autre_pct = (stats.autre / total) * 100;
 
   return (
     <BarChart
@@ -349,49 +292,55 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
       series={[
         {
           id: "rdv_pris",
-          data: [stats.rdv_pris],
+          data: [rdv_pris_pct],
           label: "Rdv pris",
           stack: "stack1",
           color: colorMap.rdv_pris.color,
+          valueFormatter: () => stats.rdv_pris.toString(),
         },
         {
           id: "nouveau_projet",
-          data: [stats.nouveau_projet],
+          data: [nouveau_projet_pct],
           label: "Nouveau projet",
           stack: "stack1",
           color: colorMap.nouveau_projet.color,
+          valueFormatter: () => stats.nouveau_projet.toString(),
         },
         {
           id: "deja_accompagne",
-          data: [stats.deja_accompagne],
+          data: [deja_accompagne_pct],
           label: "Déjà accompagné",
           stack: "stack1",
           color: colorMap.deja_accompagne.color,
+          valueFormatter: () => stats.deja_accompagne.toString(),
         },
         {
           id: "contacte_sans_retour",
-          data: [stats.contacte_sans_retour],
+          data: [contacte_sans_retour_pct],
           label: "Sans réponse",
           stack: "stack1",
           color: colorMap.contacte_sans_retour.color,
+          valueFormatter: () => stats.contacte_sans_retour.toString(),
         },
         {
           id: "coordonnees_incorrectes",
-          data: [stats.coordonnees_incorrectes],
+          data: [coordonnees_incorrectes_pct],
           label: "Coordonnées incorrectes",
           stack: "stack1",
           color: colorMap.coordonnees_incorrectes.color,
+          valueFormatter: () => stats.coordonnees_incorrectes.toString(),
         },
         {
           id: "autre",
-          data: [stats.autre],
+          data: [autre_pct],
           label: "Autre",
           stack: "stack1",
           color: colorMap.autre.color,
+          valueFormatter: () => stats.autre.toString(),
         },
       ]}
       hideLegend={true}
-      xAxis={[{ position: "none" }]}
+      xAxis={[{ min: 0, max: 100, position: "none" }]}
       yAxis={[{ position: "none", data: [nom] }]}
       margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
     />
@@ -405,16 +354,18 @@ const TableauRepartitionTraiteGraph = ({
   customNavigationPath,
   showArml,
 }: TableBaseProps) => {
-  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => ({
-    _id,
-    nom,
-    traite: stats.traite,
-    traite_pourcentage: computePercentage(stats.traite, stats.total),
-    arml,
-    graph: <StatsBarChart stats={stats} nom={nom} />,
-  }));
+  const transformedData = (data || []).map(({ _id, nom, stats, arml }) => {
+    const rawData = {
+      _id,
+      nom,
+      traite: stats.traite,
+      traite_pourcentage: computePercentage(stats.traite, stats.total),
+      arml,
+      graph: <StatsBarChart stats={stats} nom={nom} />,
+    };
 
-  const tableData = transformedData.map((element) => ({ element, rawData: element }));
+    return { element: rawData, rawData };
+  });
 
   const {
     data: paginatedData,
@@ -425,13 +376,15 @@ const TableauRepartitionTraiteGraph = ({
     onPageSizeChange,
     pageSize,
     createNavigationIcon,
-  } = useVirtualizedPagination(tableData, searchTerm, 20, undefined, customNavigationPath);
+  } = useVirtualizedPagination(transformedData, searchTerm, 20, [{ id: "traite", desc: true }], customNavigationPath);
 
   const dataWithIcons = paginatedData.map((item) => ({
     ...item,
     element: {
       ...item.element,
       ...(createNavigationIcon && { icon: createNavigationIcon(item.rawData._id) }),
+      traite: <strong>{item.rawData.traite}</strong>,
+      traite_pourcentage: <>{item.rawData.traite_pourcentage}%</>,
     },
   }));
 
@@ -455,7 +408,7 @@ const TableauRepartitionTraiteGraph = ({
 
   return (
     <FullTable
-      caption={"Répartition des données traitées par Mission Locale"}
+      caption="Résultats obtenus"
       data={dataWithIcons}
       columns={columns}
       pageSize={pageSize}
@@ -484,13 +437,6 @@ export const ViewSelector = ({
         nativeInputProps: {
           checked: typeVue === "graph",
           onChange: () => setTypeVue("graph"),
-        },
-      },
-      {
-        label: <i className="fr-icon-table-line" />,
-        nativeInputProps: {
-          checked: typeVue === "table",
-          onChange: () => setTypeVue("table"),
         },
       },
       {
@@ -528,16 +474,6 @@ export const RepartitionDataViews = ({
     case "graph":
       return (
         <TableauRepartitionTraiteGraph
-          data={data}
-          searchTerm={searchTerm}
-          headerAction={viewSelector}
-          customNavigationPath={customNavigationPath}
-          showArml={showArml}
-        />
-      );
-    case "table":
-      return (
-        <TableauRepartitionTraiteTable
           data={data}
           searchTerm={searchTerm}
           headerAction={viewSelector}
