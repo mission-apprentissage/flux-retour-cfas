@@ -93,7 +93,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.coerce.number().optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(getNationalCount)
@@ -105,7 +105,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.coerce.number().optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(async (req, res) => {
@@ -121,7 +121,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.coerce.number().optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(async (req, res) => {
