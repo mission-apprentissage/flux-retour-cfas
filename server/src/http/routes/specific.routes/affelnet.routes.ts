@@ -246,8 +246,8 @@ const exportConcretisee = async (req) => {
       ...contrats_deca.reduce((acc, curr, index) => {
         return {
           ...acc,
-          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
+          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
         };
       }, {}),
     }));

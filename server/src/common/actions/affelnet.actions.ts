@@ -227,46 +227,47 @@ const AFFELNET_VOEUX_AGGREGATION = [
 export const getAffelnetVoeuxConcretise = (
   departement: Array<string> | null,
   regions: Array<string> | null,
-  year: number
-) =>
-  voeuxAffelnetDb()
-    .aggregate([
-      {
-        $match: {
-          ...computeFilter(departement, regions),
-          annee_scolaire_rentree: year,
-        },
+  year: string
+) => {
+  const aggreg = [
+    {
+      $match: {
+        ...computeFilter(departement, regions),
+        annee_scolaire_rentree: year,
       },
-      {
-        $match: {
-          $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
-        },
+    },
+    {
+      $match: {
+        $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
       },
-      ...AFFELNET_VOEUX_AGGREGATION,
-    ])
-    .toArray();
+    },
+    ...AFFELNET_VOEUX_AGGREGATION,
+  ];
+  return voeuxAffelnetDb().aggregate(aggreg).toArray();
+};
 
 export const getAffelnetVoeuxNonConcretise = (
   departement: Array<string> | null,
   regions: Array<string> | null,
-  year: number
-) =>
-  voeuxAffelnetDb()
-    .aggregate([
-      {
-        $match: {
-          ...computeFilter(departement, regions),
-          annee_scolaire_rentree: year,
-        },
+  year: string
+) => {
+  const aggreg = [
+    {
+      $match: {
+        ...computeFilter(departement, regions),
+        annee_scolaire_rentree: year,
       },
-      {
-        $match: {
-          $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
-        },
+    },
+    {
+      $match: {
+        $and: [{ effectif_id: { $exists: false } }, { effectif_deca_id: { $exists: false } }],
       },
-      ...AFFELNET_VOEUX_AGGREGATION,
-    ])
-    .toArray();
+    },
+    ...AFFELNET_VOEUX_AGGREGATION,
+  ];
+
+  return voeuxAffelnetDb().aggregate(aggreg).toArray();
+};
 
 export const updateVoeuxAffelnetEffectif = async (
   effectif_id: ObjectId,
