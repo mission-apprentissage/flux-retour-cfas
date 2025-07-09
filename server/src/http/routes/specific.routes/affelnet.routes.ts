@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 import express from "express";
@@ -163,49 +164,54 @@ const exportNonConcretisee = async (req) => {
     throw Boom.badRequest("Year is required");
   }
 
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
-  const listVoeux = await getAffelnetVoeuxNonConcretise(
-    results.organisme_departements,
-    results.organismes_regions,
-    year
-  );
+  try {
+    const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+    const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
+    const listVoeux = await getAffelnetVoeuxNonConcretise(
+      results.organisme_departements,
+      results.organismes_regions,
+      year
+    );
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
-    ...voeu,
-    formations_demandees: formations_demandees.join(", "),
-    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
-    contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-    ...contrats.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
-      };
-    }, {}),
-    ...contrats_deca.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-        [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
-      };
-    }, {}),
-  }));
+    const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
+      ...voeu,
+      formations_demandees: formations_demandees.join(", "),
+      contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+      contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
+      ...contrats.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+          [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+        };
+      }, {}),
+      ...contrats_deca.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+        };
+      }, {}),
+    }));
 
-  const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog(
-    "affelnet_non_concretise",
-    ids,
-    new Date(),
-    req.user._id,
-    undefined,
-    new ObjectId(orga._id)
-  );
+    const ids = listVoeux.map((voeu) => voeu._id);
+    await createTelechargementListeNomLog(
+      "affelnet_non_concretise",
+      ids,
+      new Date(),
+      req.user._id,
+      undefined,
+      new ObjectId(orga._id)
+    );
 
-  const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(transformedVoeux);
-
-  return csv;
+    const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
+    const csv = await json2csvParser.parse(transformedVoeux);
+    return csv;
+  } catch (error) {
+    captureException(error);
+    console.error("Error exporting non-concretise:", error);
+    throw Boom.internal("Failed to export non-concretise");
+  }
 };
 
 const exportConcretisee = async (req) => {
@@ -216,43 +222,53 @@ const exportConcretisee = async (req) => {
     throw Boom.badRequest("Year is required");
   }
 
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
-  const listVoeux = await getAffelnetVoeuxConcretise(results.organisme_departements, results.organismes_regions, year);
+  try {
+    const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+    const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
+    const listVoeux = await getAffelnetVoeuxConcretise(
+      results.organisme_departements,
+      results.organismes_regions,
+      year
+    );
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
-    ...voeu,
-    formations_demandees: formations_demandees.join(", "),
-    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
-    contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-    ...contrats.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
-        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
-      };
-    }, {}),
-    ...contrats_deca.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-        [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
-      };
-    }, {}),
-  }));
+    const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
+      ...voeu,
+      formations_demandees: formations_demandees.join(", "),
+      contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+      contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
+      ...contrats.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
+          [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
+        };
+      }, {}),
+      ...contrats_deca.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+        };
+      }, {}),
+    }));
 
-  const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog(
-    "affelnet_concretise",
-    ids,
-    new Date(),
-    req.user._id,
-    undefined,
-    new ObjectId(orga._id)
-  );
+    const ids = listVoeux.map((voeu) => voeu._id);
+    await createTelechargementListeNomLog(
+      "affelnet_concretise",
+      ids,
+      new Date(),
+      req.user._id,
+      undefined,
+      new ObjectId(orga._id)
+    );
 
-  const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(transformedVoeux);
+    const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
+    const csv = await json2csvParser.parse(transformedVoeux);
 
-  return csv;
+    return csv;
+  } catch (error) {
+    captureException(error);
+    console.error("Error exporting concretise:", error);
+    throw Boom.internal("Failed to export concretise");
+  }
 };
