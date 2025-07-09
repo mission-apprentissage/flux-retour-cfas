@@ -8,12 +8,13 @@ export const parseStringToArray = (value: string | undefined): string[] => {
     .filter((s) => s.length > 0);
 };
 
-export const buildTextSearchQuery = (searchTerm: string) => [
-  { nom: { $regex: searchTerm, $options: "i" } },
-  { prenom: { $regex: searchTerm, $options: "i" } },
-  { email: { $regex: searchTerm, $options: "i" } },
-  { fonction: { $regex: searchTerm, $options: "i" } },
-];
+export const buildTextSearchQuery = (searchTerm: string) => {
+  if (searchTerm.length < 2) {
+    return [];
+  }
+
+  return [{ $text: { $search: searchTerm, $language: "french" } }];
+};
 
 export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const { q, account_status, type_utilisateur, reseaux, departements, regions } = queryParams;

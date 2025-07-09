@@ -171,8 +171,21 @@ export const getAllUsers = async (
   const result = await usersMigrationDb()
     .aggregate([
       { $match: userQuery },
-      { $sort: sort },
-      { $project: { password: 0, emails: 0, connection_history: 0 } },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          nom: 1,
+          prenom: 1,
+          civility: 1,
+          fonction: 1,
+          telephone: 1,
+          account_status: 1,
+          organisation_id: 1,
+          created_at: 1,
+          has_accept_cgu_version: 1,
+        },
+      },
       {
         $lookup: {
           from: "organisations",
@@ -180,6 +193,19 @@ export const getAllUsers = async (
           foreignField: "_id",
           as: "organisation",
           pipeline: [
+            {
+              $project: {
+                _id: 1,
+                type: 1,
+                nom: 1,
+                uai: 1,
+                siret: 1,
+                code_departement: 1,
+                code_region: 1,
+                code_academie: 1,
+                adresse: 1,
+              },
+            },
             {
               $lookup: {
                 from: "organismes",
@@ -222,6 +248,7 @@ export const getAllUsers = async (
             },
           ]
         : []),
+      { $sort: sort },
       {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
@@ -232,7 +259,7 @@ export const getAllUsers = async (
     ])
     .next();
 
-  result?.data?.map((user) => {
+  result?.data?.forEach((user) => {
     if (user?.organisation) {
       user.organisation.label = getOrganisationLabel(user.organisation);
     }
