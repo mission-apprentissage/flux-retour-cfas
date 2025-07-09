@@ -1,5 +1,7 @@
 import { ObjectId } from "bson";
+import { WithoutId } from "mongodb";
 import { IEffectif } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { voeuxAffelnetDb } from "../model/collections";
 
@@ -64,7 +66,9 @@ export const getAffelnetCountVoeuxNational = async (
           ],
           apprenantsRetrouves: [
             {
-              $match: { effectif_id: { $exists: true } },
+              $match: {
+                $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
+              },
             },
             {
               $group: {
@@ -159,6 +163,27 @@ const AFFELNET_VOEUX_AGGREGATION = [
     },
   },
   {
+    $lookup: {
+      from: "effectifsDECA",
+      localField: "apprenant.effectif_deca_id",
+      foreignField: "_id",
+      as: "effectifDeca",
+      pipeline: [
+        {
+          $project: {
+            contrats: 1,
+          },
+        },
+      ],
+    },
+  },
+  {
+    $unwind: {
+      path: "$effectifDeca",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
     $project: {
       _id: "$_id",
       ine: "$apprenant.raw.ine",
@@ -188,6 +213,7 @@ const AFFELNET_VOEUX_AGGREGATION = [
       type_etablissement_accueil: "$apprenant.raw.type_etab_accueil",
       libelle_pulic_etablissement_accueil: "$apprenant.raw.libelle_etab_accueil",
       contrats: "$effectif.contrats",
+      contrats_deca: "$effectifDeca.contrats",
     },
   },
   {
@@ -213,7 +239,7 @@ export const getAffelnetVoeuxConcretise = (
       },
       {
         $match: {
-          effectif_id: { $exists: true },
+          $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
         },
       },
       ...AFFELNET_VOEUX_AGGREGATION,
@@ -235,9 +261,7 @@ export const getAffelnetVoeuxNonConcretise = (
       },
       {
         $match: {
-          effectif_id: {
-            $exists: false,
-          },
+          $or: [{ effectif_id: { $exists: true } }, { effectif_deca_id: { $exists: true } }],
         },
       },
       ...AFFELNET_VOEUX_AGGREGATION,
@@ -261,5 +285,25 @@ export const updateVoeuxAffelnetEffectif = async (
   const voeuxId = voeux.map((v) => v._id);
   if (voeuxId.length) {
     return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_id: effectif_id } });
+  }
+};
+
+export const updateVoeuxAffelnetEffectifDeca = async (
+  effectif_id: ObjectId,
+  effectif: WithoutId<IEffectifDECA>,
+  uai: string | undefined | null
+) => {
+  const { apprenant, annee_scolaire } = effectif;
+  const { nom, prenom } = apprenant;
+  const filter = {
+    "raw.uai_etatblissement_formateur": uai,
+    "raw.prenom_1": { $regex: `^${prenom.toLowerCase()}$`, $options: "i" },
+    "raw.nom": { $regex: `^${nom.toLowerCase()}$`, $options: "i" },
+    annee_scolaire_rentree: annee_scolaire.substring(0, 4),
+  };
+  const voeux = await voeuxAffelnetDb().find(filter).toArray();
+  const voeuxId = voeux.map((v) => v._id);
+  if (voeuxId.length) {
+    return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_deca_id: effectif_id } });
   }
 };

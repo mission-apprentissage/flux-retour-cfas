@@ -85,6 +85,7 @@ const zVoeuAffelnet = z.object({
   organisme_formateur_id: zObjectId.describe("Identifiant de l'organisme formateur").nullish(),
   organisme_responsable_id: zObjectId.describe("Identifiant de l'organisme responsable").nullish(),
   effectif_id: zObjectId.describe("Identifiant de l'effectif").nullish(),
+  effectif_deca_id: zObjectId.describe("Identifiant de l'effectif DECA").nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),
   updated_at: z.date({ description: "Date de mise à jour" }),
   deleted_at: z.date({ description: "Date de suppresion du voeux" }).nullish(),

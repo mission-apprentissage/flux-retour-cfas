@@ -18,7 +18,10 @@ import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
-import { hydrateVoeuxEffectifsRelations } from "./hydrate/affelnet/hydrate-voeux-effectifs";
+import {
+  hydrateVoeuxEffectifsDECARelations,
+  hydrateVoeuxEffectifsRelations,
+} from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -276,7 +279,9 @@ export async function setupJobProcessor() {
       },
       "hydrate:voeux-effectifs-relations": {
         handler: async () => {
-          return hydrateVoeuxEffectifsRelations();
+          await hydrateVoeuxEffectifsRelations();
+          await hydrateVoeuxEffectifsDECARelations();
+          return;
         },
       },
       "hydrate:mission-locale-effectif-snapshot": {

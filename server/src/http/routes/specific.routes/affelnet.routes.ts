@@ -44,7 +44,8 @@ const AFFELNET_FIELDS = [
   { label: "Uai Cio Etab Accueil", value: "uai_cio_etablissement_accueil" },
   { label: "Type Etab Accueil", value: "type_etablissement_accueil" },
   { label: "Libelle Public Etab Accueil", value: "libelle_pulic_etablissement_accueil" },
-  { label: "Contrat signé", value: "contrat_signe" },
+  { label: "Contrat signé (CFA)", value: "contrat_signe" },
+  { label: "Contrat signé (DECA)", value: "contrat_deca_signe" },
 ];
 
 const computeFields = (data) => {
@@ -55,7 +56,14 @@ const computeFields = (data) => {
     extraFields.push({ label: `Date fin contrat ${i + 1}`, value: `date_fin_contrat_${i + 1}` });
   }
 
-  return [...AFFELNET_FIELDS, ...extraFields];
+  const maxContratsDeca = Math.max(...data.map((d) => (d.contrats_deca ? d.contrats_deca.length : 0)));
+  const extraFieldsDeca: Array<{ label: string; value: string }> = [];
+  for (let i = 0; i < maxContratsDeca; i++) {
+    extraFieldsDeca.push({ label: `Date début contrat DECA ${i + 1}`, value: `deca_date_debut_contrat_${i + 1}` });
+    extraFieldsDeca.push({ label: `Date fin contrat DECA ${i + 1}`, value: `deca_date_fin_contrat_${i + 1}` });
+  }
+
+  return [...AFFELNET_FIELDS, ...extraFields, ...extraFieldsDeca];
 };
 
 const getRegionAndDepartementFromOrganisation = (
@@ -163,15 +171,23 @@ const exportNonConcretisee = async (req) => {
     year
   );
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
     contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+    contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
     ...contrats.reduce((acc, curr, index) => {
       return {
         ...acc,
         [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
         [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+      };
+    }, {}),
+    ...contrats_deca.reduce((acc, curr, index) => {
+      return {
+        ...acc,
+        [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+        [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
       };
     }, {}),
   }));
