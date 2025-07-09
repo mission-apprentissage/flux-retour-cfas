@@ -220,15 +220,23 @@ const exportConcretisee = async (req) => {
   const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
   const listVoeux = await getAffelnetVoeuxConcretise(results.organisme_departements, results.organismes_regions, year);
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
+  const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
     ...voeu,
     formations_demandees: formations_demandees.join(", "),
     contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+    contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
     ...contrats.reduce((acc, curr, index) => {
       return {
         ...acc,
         [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
         [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
+      };
+    }, {}),
+    ...contrats_deca.reduce((acc, curr, index) => {
+      return {
+        ...acc,
+        [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+        [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
       };
     }, {}),
   }));
