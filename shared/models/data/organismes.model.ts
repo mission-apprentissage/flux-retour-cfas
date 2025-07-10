@@ -79,6 +79,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "adresse.departement": 1 }, { name: "departement" }],
   [{ "adresse.region": 1 }, { name: "region" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ reseaux: 1 }, { name: "reseaux" }],
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"

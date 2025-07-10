@@ -17,7 +17,6 @@ import {
   UserNameCell,
 } from "@/app/_components/admin/UserTableCells";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { useAllUsers } from "@/app/_hooks/useAllUsers";
 import { usersExportColumns } from "@/common/exports";
@@ -97,7 +96,10 @@ export default function UsersAdminClient() {
     users: allUsers,
     pagination,
     isLoading,
+    isFetching,
   } = useAllUsers(currentPage, itemsPerPage, sorting, searchTerm, usersFilters);
+
+  const showSkeleton = isLoading || isFetching;
 
   const handleSortingChange = useCallback((newSorting: SortingState) => {
     setSorting(newSorting);
@@ -111,6 +113,16 @@ export default function UsersAdminClient() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
+
+  const hasFiltersOrSearch = useMemo(() => {
+    const hasActiveFilters = Object.values(usersFilters).some((value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value !== undefined && value !== null && value !== "";
+    });
+    return searchTerm !== "" || hasActiveFilters;
+  }, [searchTerm, usersFilters]);
 
   const displayCount = useMemo(() => {
     if (!pagination) return { current: 0, total: 0 };
@@ -151,76 +163,83 @@ export default function UsersAdminClient() {
     exportDataAsXlsx("users.xlsx", exportData, usersExportColumns);
   }, [allUsers]);
 
-  if (isLoading) {
-    return <TableSkeleton />;
-  }
-
   return (
-    <SuspenseWrapper fallback={<TableSkeleton />}>
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <Breadcrumb
-          currentPageLabel="Gestion des utilisateurs"
-          segments={[
-            {
-              label: "Accueil",
-              linkProps: {
-                href: "/",
-              },
+    <Stack spacing={3} sx={{ p: 3 }}>
+      <Breadcrumb
+        currentPageLabel="Gestion des utilisateurs"
+        segments={[
+          {
+            label: "Accueil",
+            linkProps: {
+              href: "/",
             },
-          ]}
-        />
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="h1">Gestion des utilisateurs</Typography>
-          <Stack direction="row" spacing={2}>
-            <Button onClick={handleExport} iconId="ri-download-line" iconPosition="left" priority="secondary">
-              Télécharger la liste
-            </Button>
-          </Stack>
-        </Box>
+          },
+        ]}
+      />
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h1">Gestion des utilisateurs</Typography>
+        <Stack direction="row" spacing={2}>
+          <Button onClick={handleExport} iconId="ri-download-line" iconPosition="left" priority="secondary">
+            Télécharger la liste
+          </Button>
+        </Stack>
+      </Box>
+      <Stack spacing={3}>
+        <UsersFiltersPanel />
         <Stack spacing={3}>
-          <UsersFiltersPanel />
-          <Stack spacing={3}>
-            <SearchBar
-              label="Rechercher un utilisateur"
-              onButtonClick={(value) => setSearchTerm(value)}
-              renderInput={({ className, id, type }) => (
-                <input
-                  className={className}
-                  id={id}
-                  placeholder="Nom, prénom, email, organisation..."
-                  type={type}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              )}
-            />
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
-                {displayCount.current > 1 ? "s" : ""}
-                {displayCount.total !== displayCount.current && ` (${displayCount.total} au total)`}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                width: "100%",
-                overflow: "hidden",
-              }}
-            >
-              <FullTable
-                data={tableData}
-                columns={USERS_TABLE_COLUMNS}
-                pagination={pagination}
-                onPageChange={handlePageChange}
-                onPageSizeChange={setItemsPerPage}
-                pageSize={itemsPerPage}
-                sorting={sorting}
-                onSortingChange={handleSortingChange}
+          <SearchBar
+            label="Rechercher un utilisateur"
+            onButtonClick={(value) => setSearchTerm(value)}
+            renderInput={({ className, id, type }) => (
+              <input
+                className={className}
+                id={id}
+                placeholder="Nom, prénom, email..."
+                type={type}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </Box>
-          </Stack>
+            )}
+          />
+          {showSkeleton ? (
+            <TableSkeleton />
+          ) : (
+            <>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  {hasFiltersOrSearch ? (
+                    <>
+                      {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
+                      {displayCount.current > 1 ? "s" : ""} ({pagination.globalTotal} au total)
+                    </>
+                  ) : (
+                    <>
+                      {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
+                    </>
+                  )}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: "100%",
+                  overflow: "hidden",
+                }}
+              >
+                <FullTable
+                  data={tableData}
+                  columns={USERS_TABLE_COLUMNS}
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={setItemsPerPage}
+                  pageSize={itemsPerPage}
+                  sorting={sorting}
+                  onSortingChange={handleSortingChange}
+                />
+              </Box>
+            </>
+          )}
         </Stack>
       </Stack>
-    </SuspenseWrapper>
+    </Stack>
   );
 }
