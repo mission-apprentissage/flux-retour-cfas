@@ -34,22 +34,32 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   }
 
   const typeValues = parseStringToArray(type_utilisateur);
-  if (typeValues.length > 0) {
-    organizationFilters["organisation.type"] = { $in: typeValues };
-  }
-
   const reseauxValues = parseStringToArray(reseaux);
-  if (reseauxValues.length > 0) {
-    organizationFilters["organisation.organisme.reseaux"] = { $in: reseauxValues };
-  }
-
   const departementValues = parseStringToArray(departements);
   const regionValues = parseStringToArray(regions);
 
-  const geoFilters: any[] = [];
+  const orgAndFilters: any[] = [];
+
+  if (typeValues.length > 0) {
+    orgAndFilters.push({
+      "organisation.type": { $in: typeValues },
+    });
+  }
+
+  if (reseauxValues.length > 0) {
+    orgAndFilters.push({
+      $or: [
+        { "organisation.organisme.reseaux": { $in: reseauxValues } },
+        {
+          "organisation.type": "TETE_DE_RESEAU",
+          "organisation.reseau": { $in: reseauxValues },
+        },
+      ],
+    });
+  }
 
   if (departementValues.length > 0) {
-    geoFilters.push({
+    orgAndFilters.push({
       $or: [
         { "organisation.code_departement": { $in: departementValues } },
         { "organisation.adresse.departement": { $in: departementValues } },
@@ -59,20 +69,21 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   }
 
   if (regionValues.length > 0) {
-    geoFilters.push({
+    orgAndFilters.push({
       $or: [
         { "organisation.code_region": { $in: regionValues } },
         { "organisation.adresse.region": { $in: regionValues } },
         { "organisation.organisme.adresse.region": { $in: regionValues } },
+        { "organisation.region_list": { $in: regionValues } },
       ],
     });
   }
 
-  if (geoFilters.length > 0) {
-    if (geoFilters.length === 1) {
-      Object.assign(organizationFilters, geoFilters[0]);
+  if (orgAndFilters.length > 0) {
+    if (orgAndFilters.length === 1) {
+      Object.assign(organizationFilters, orgAndFilters[0]);
     } else {
-      organizationFilters.$and = geoFilters;
+      organizationFilters.$and = orgAndFilters;
     }
   }
 

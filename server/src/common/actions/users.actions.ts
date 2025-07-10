@@ -194,19 +194,6 @@ export const getAllUsers = async (
           as: "organisation",
           pipeline: [
             {
-              $project: {
-                _id: 1,
-                type: 1,
-                nom: 1,
-                uai: 1,
-                siret: 1,
-                code_departement: 1,
-                code_region: 1,
-                code_academie: 1,
-                adresse: 1,
-              },
-            },
-            {
               $lookup: {
                 from: "organismes",
                 as: "organisme",
