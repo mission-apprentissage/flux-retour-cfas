@@ -37,6 +37,7 @@ export function useAllUsers(
     data: usersPaginated,
     refetch: refetchUsers,
     isLoading,
+    isFetching,
   } = useQuery({
     queryKey: ["admin/users", queryParams],
     queryFn: () => _get("/api/v1/admin/users/", { params: queryParams }),
@@ -62,7 +63,7 @@ export function useAllUsers(
         });
       }
     }
-  }, [usersPaginated, isLoading, queryParams]);
+  }, [usersPaginated, isLoading, queryParams, queryClient]);
 
   return useMemo(() => {
     const users = usersPaginated?.data?.map(toUserNormalized) ?? [];
@@ -78,6 +79,7 @@ export function useAllUsers(
       },
       refetchUsers,
       isLoading,
+      isFetching,
     };
-  }, [usersPaginated, refetchUsers, isLoading]);
+  }, [usersPaginated, refetchUsers, isLoading, isFetching]);
 }
