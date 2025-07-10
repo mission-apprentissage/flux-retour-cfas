@@ -16826,6 +16826,18 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       ],
       "description": "Date de suppresion du voeux",
     },
+    "effectif_deca_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'effectif DECA",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'effectif DECA",
+    },
     "effectif_id": {
       "anyOf": [
         {
