@@ -112,6 +112,16 @@ export default function UsersAdminClient() {
     setCurrentPage(page);
   }, []);
 
+  const hasFiltersOrSearch = useMemo(() => {
+    const hasActiveFilters = Object.values(usersFilters).some((value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value !== undefined && value !== null && value !== "";
+    });
+    return searchTerm !== "" || hasActiveFilters;
+  }, [searchTerm, usersFilters]);
+
   const displayCount = useMemo(() => {
     if (!pagination) return { current: 0, total: 0 };
     return {
@@ -187,7 +197,7 @@ export default function UsersAdminClient() {
                 <input
                   className={className}
                   id={id}
-                  placeholder="Nom, prénom, email, organisation..."
+                  placeholder="Nom, prénom, email..."
                   type={type}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -196,9 +206,17 @@ export default function UsersAdminClient() {
             />
             <Box>
               <Typography variant="body2" color="text.secondary">
-                {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
-                {displayCount.current > 1 ? "s" : ""}
-                {displayCount.total !== displayCount.current && ` (${displayCount.total} au total)`}
+                {hasFiltersOrSearch ? (
+                  <>
+                    {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
+                    {displayCount.current > 1 ? "s" : ""}
+                    {displayCount.total !== displayCount.current && ` (${displayCount.total} au total)`}
+                  </>
+                ) : (
+                  <>
+                    {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} au total
+                  </>
+                )}
               </Typography>
             </Box>
             <Box
