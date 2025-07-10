@@ -5,24 +5,19 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { voeuxAffelnetDb } from "../model/collections";
 
-const computeFilter = (departement: Array<string> | null, region: Array<string> | null) => {
+const computeFilter = (academie_list: Array<string> | null) => {
   return {
-    ...(departement ? { "_computed.organisme.departement": { $in: departement } } : {}),
-    ...(region ? { "_computed.organisme.region": { $in: region } } : {}),
+    ...(academie_list ? { academie_code: { $in: academie_list } } : {}),
   };
 };
 
 // Write indexes for this
-export const getAffelnetCountVoeuxNational = async (
-  departement: Array<string> | null,
-  regions: Array<string> | null,
-  year: string
-) => {
+export const getAffelnetCountVoeuxNational = async (academie_list: Array<string> | null, year: string) => {
   const voeuxCount = await voeuxAffelnetDb()
     .aggregate([
       {
         $match: {
-          ...computeFilter(departement, regions),
+          ...computeFilter(academie_list),
           annee_scolaire_rentree: year,
         },
       },
@@ -224,15 +219,11 @@ const AFFELNET_VOEUX_AGGREGATION = [
   },
 ];
 
-export const getAffelnetVoeuxConcretise = (
-  departement: Array<string> | null,
-  regions: Array<string> | null,
-  year: string
-) => {
+export const getAffelnetVoeuxConcretise = (academie_list: Array<string> | null, year: string) => {
   const aggreg = [
     {
       $match: {
-        ...computeFilter(departement, regions),
+        ...computeFilter(academie_list),
         annee_scolaire_rentree: year,
       },
     },
@@ -246,15 +237,11 @@ export const getAffelnetVoeuxConcretise = (
   return voeuxAffelnetDb().aggregate(aggreg).toArray();
 };
 
-export const getAffelnetVoeuxNonConcretise = (
-  departement: Array<string> | null,
-  regions: Array<string> | null,
-  year: string
-) => {
+export const getAffelnetVoeuxNonConcretise = (academie_list: Array<string> | null, year: string) => {
   const aggreg = [
     {
       $match: {
-        ...computeFilter(departement, regions),
+        ...computeFilter(academie_list),
         annee_scolaire_rentree: year,
       },
     },

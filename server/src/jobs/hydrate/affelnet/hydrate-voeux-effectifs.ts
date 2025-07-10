@@ -1,4 +1,6 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
+import { getAcademieById } from "shared/constants";
 
 import logger from "@/common/logger";
 import { effectifsDb, effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
@@ -83,4 +85,66 @@ export const hydrateVoeuxEffectifsDECARelations = async () => {
     }
   }
   logger.info(` ${foundCount} voeux trouvés sur un total de ${totalFound} voeux`);
+};
+
+export const hydrateAcademieInVoeux = async () => {
+  const INSERT_BATCH_SIZE = 1_000;
+  let batch: Array<{ _id: ObjectId; academie_code?: string }> = [];
+
+  const cursor = voeuxAffelnetDb().find({ academie_code: { $exists: false } });
+
+  const processBatch = (currentBatch: Array<{ _id: ObjectId; academie_code?: string }>) => {
+    if (currentBatch.length === 0) {
+      return;
+    }
+
+    try {
+      const mapped = currentBatch.map(({ _id, academie_code }) => ({
+        updateOne: {
+          filter: { _id },
+          update: {
+            $set: {
+              academie_code,
+            },
+          },
+        },
+      }));
+
+      return voeuxAffelnetDb().bulkWrite(mapped);
+    } catch (e) {
+      captureException(e);
+    }
+  };
+
+  while (await cursor.hasNext()) {
+    const voeu = await cursor.next();
+    if (!voeu?.raw?.academie) {
+      continue;
+    }
+    const code = getAcademieById(voeu.raw.academie)?.code;
+
+    if (!code) {
+      continue;
+    }
+
+    batch.push({
+      _id: voeu._id,
+      academie_code: code,
+    });
+
+    if (batch.length === INSERT_BATCH_SIZE) {
+      await processBatch(batch);
+      batch = [];
+    }
+  }
+
+  while (await cursor.hasNext()) {
+    const voeu = await cursor.next();
+    if (voeu?.raw?.academie) {
+      const code = getAcademieById(voeu.raw.academie)?.code;
+      await voeuxAffelnetDb().updateOne({ _id: voeu._id }, { $set: { academie_code: code } });
+    }
+  }
+
+  await processBatch(batch);
 };

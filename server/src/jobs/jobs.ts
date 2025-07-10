@@ -21,6 +21,7 @@ import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/u
 import {
   hydrateVoeuxEffectifsDECARelations,
   hydrateVoeuxEffectifsRelations,
+  hydrateAcademieInVoeux,
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -282,6 +283,11 @@ export async function setupJobProcessor() {
           await hydrateVoeuxEffectifsRelations();
           await hydrateVoeuxEffectifsDECARelations();
           return;
+        },
+      },
+      "hydrate:voeux-academie-code": {
+        handler: async () => {
+          await hydrateAcademieInVoeux();
         },
       },
       "hydrate:mission-locale-effectif-snapshot": {

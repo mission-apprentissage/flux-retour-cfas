@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
-import { ACADEMIES_DEPARTEMENT_MAP, ORGANISATION_TYPE } from "shared/constants";
 import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
@@ -67,32 +66,6 @@ const computeFields = (data) => {
   return [...AFFELNET_FIELDS, ...extraFields, ...extraFieldsDeca];
 };
 
-const getRegionAndDepartementFromOrganisation = (
-  orga: IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie,
-  organisme_departements
-) => {
-  const handleDreetsAndDrafpic = (organisation: IOrganisationOperateurPublicRegion) => {
-    return { organismes_regions: organisation.code_region ? [organisation.code_region] : [], organisme_departements };
-  };
-
-  const handleAcademie = (organisation: IOrganisationOperateurPublicAcademie) => {
-    return {
-      organismes_regions: null,
-      organisme_departements: organisme_departements ?? ACADEMIES_DEPARTEMENT_MAP[organisation.code_academie],
-    };
-  };
-
-  switch (orga.type) {
-    case ORGANISATION_TYPE.DREETS:
-    case ORGANISATION_TYPE.DRAFPIC:
-      return handleDreetsAndDrafpic(orga as IOrganisationOperateurPublicRegion);
-    case ORGANISATION_TYPE.ACADEMIE:
-      return handleAcademie(orga as IOrganisationOperateurPublicAcademie);
-    default:
-      return { organismes_regions: null, organisme_departements: null };
-  }
-};
-
 export default () => {
   const router = express.Router();
 
@@ -118,7 +91,7 @@ export default () => {
       }),
     }),
     returnResult(async (req, res) => {
-      const affelnetCsv = await exportConcretisee(req);
+      const affelnetCsv = await exportConcretisee(req, res);
       res.attachment(`voeux_affelnet_concretisee.csv`);
       return affelnetCsv;
     })
@@ -134,7 +107,7 @@ export default () => {
       }),
     }),
     returnResult(async (req, res) => {
-      const affelnetCsv = await exportNonConcretisee(req);
+      const affelnetCsv = await exportNonConcretisee(req, res);
       res.attachment(`voeux_affelnet_non_concretisee.csv`);
       return affelnetCsv;
     })
@@ -143,35 +116,28 @@ export default () => {
   return router;
 };
 
-const getNationalCount = async (req) => {
-  const user = req.user as AuthContext;
-  const { organisme_departements, year } = req.query;
+const getNationalCount = async (req, { locals }) => {
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
 
   if (!year) {
     throw Boom.badRequest("Year is required");
   }
 
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const result = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
-  return await getAffelnetCountVoeuxNational(result.organisme_departements, result.organismes_regions, year);
+  return await getAffelnetCountVoeuxNational(academie_list, year);
 };
 
-const exportNonConcretisee = async (req) => {
+const exportNonConcretisee = async (req, { locals }) => {
   const user = req.user as AuthContext;
-  const { organisme_departements, year } = req.query;
-
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
   if (!year) {
     throw Boom.badRequest("Year is required");
   }
 
   try {
     const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-    const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
-    const listVoeux = await getAffelnetVoeuxNonConcretise(
-      results.organisme_departements,
-      results.organismes_regions,
-      year
-    );
+    const listVoeux = await getAffelnetVoeuxNonConcretise(academie_list, year);
 
     const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
       ...voeu,
@@ -214,9 +180,10 @@ const exportNonConcretisee = async (req) => {
   }
 };
 
-const exportConcretisee = async (req) => {
+const exportConcretisee = async (req, { locals }) => {
   const user = req.user as AuthContext;
-  const { organisme_departements, year } = req.query;
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
 
   if (!year) {
     throw Boom.badRequest("Year is required");
@@ -224,12 +191,7 @@ const exportConcretisee = async (req) => {
 
   try {
     const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-    const results = getRegionAndDepartementFromOrganisation(orga, organisme_departements);
-    const listVoeux = await getAffelnetVoeuxConcretise(
-      results.organisme_departements,
-      results.organismes_regions,
-      year
-    );
+    const listVoeux = await getAffelnetVoeuxConcretise(academie_list, year);
 
     const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
       ...voeu,

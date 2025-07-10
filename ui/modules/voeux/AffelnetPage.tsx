@@ -14,7 +14,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AUTRE_AFFELNET_LINK } from "shared";
 
 import { _getBlob } from "@/common/httpClient";
@@ -30,12 +30,6 @@ import { useAffelnetCount } from "@/hooks/organismes";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 
 import FiltreAffelnetDate from "../indicateurs/filters/FiltreAffelnetDate";
-import FiltreAffelnetDepartement from "../indicateurs/filters/FiltreAffelnetDepartement";
-import {
-  EffectifsFiltersFullQuery,
-  parseEffectifsFiltersFullFromQuery,
-  TerritoireFilters,
-} from "../models/effectifs-filters";
 
 import AffelnetChart from "./AffelnetChart";
 
@@ -48,36 +42,6 @@ function VoeuxAffelnetPage() {
   const affelnetYear = useMemo(() => {
     return affelnetDate.getFullYear();
   }, [affelnetDate]);
-
-  const effectifsFilters = useMemo(
-    () => parseEffectifsFiltersFullFromQuery(router.query as unknown as EffectifsFiltersFullQuery),
-    [router.query]
-  );
-
-  const updateState = useCallback(
-    (newDepartements: Pick<TerritoireFilters, "organisme_departements">) => {
-      const validDepartements = newDepartements.organisme_departements.filter((dept) => dept.trim() !== "");
-
-      const updatedQuery = {
-        ...router.query,
-        ...(validDepartements.length > 0 ? { organisme_departements: validDepartements.join(",") } : {}),
-      };
-
-      if (!validDepartements.length) {
-        delete updatedQuery.organisme_departements;
-      }
-
-      router.push(
-        {
-          pathname: router.pathname,
-          query: updatedQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
-    },
-    [router]
-  );
 
   return (
     <SimplePage title="Mes vœux Affelnet">
@@ -134,13 +98,6 @@ function VoeuxAffelnetPage() {
           <Heading as="h4" size="md">
             En {affelnetYear}
           </Heading>
-          <HStack spacing={8}>
-            <Text>Filtrer par</Text>
-            <FiltreAffelnetDepartement
-              value={effectifsFilters.organisme_departements}
-              onChange={(departements) => updateState({ organisme_departements: departements })}
-            />
-          </HStack>
           <Grid templateColumns="repeat(4, 1fr)" templateRows="repeat(3, 1fr)" gap={4} height="290px" mx="auto">
             <GridItem colSpan={1} rowSpan={2} bg="galt" borderBottomWidth={4} borderBottomColor="#C2B24C" p={4}>
               <Box p={4}>
@@ -245,11 +202,8 @@ function VoeuxAffelnetPage() {
                         <Button
                           variant="primary"
                           action={async () => {
-                            const params = organisme_departements
-                              ? `&organisme_departements=${organisme_departements}`
-                              : "";
                             const { data } = await _getBlob(
-                              `/api/v1/affelnet/export/non-concretise?year=${affelnetYear}${params}`
+                              `/api/v1/affelnet/export/non-concretise?year=${affelnetYear}`
                             );
                             downloadObject(data, `voeux_affelnet_non_concretise.csv`, "text/plain");
                           }}
@@ -317,10 +271,7 @@ function VoeuxAffelnetPage() {
                     mt="5px"
                     variant="link"
                     action={async () => {
-                      const params = organisme_departements ? `&organisme_departements=${organisme_departements}` : "";
-                      const { data } = await _getBlob(
-                        `/api/v1/affelnet/export/concretise?year=${affelnetYear}${params}`
-                      );
+                      const { data } = await _getBlob(`/api/v1/affelnet/export/concretise?year=${affelnetYear}`);
                       downloadObject(data, `voeux_affelnet_concretise.csv`, "text/plain");
                     }}
                     p={0}

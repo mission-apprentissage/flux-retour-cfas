@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { IEffectif, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
+import { getAcademieListByRegion, IEffectif, IRegionCode, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -117,14 +117,21 @@ export function requireEffectifOrganismePermission<TParams = any, TQuery = any, 
   };
 }
 
-export function requireOrganismeRegional(req: Request, _res: Response, next: NextFunction) {
+export function requireOrganismeRegional(req: Request, res: Response, next: NextFunction) {
   ensureValidUser(req.user);
-  if (
-    req.user.organisation.type !== (ORGANISATION_TYPE.DREETS as "DREETS") &&
-    req.user.organisation.type !== (ORGANISATION_TYPE.DRAFPIC as "DRAFPIC") &&
-    req.user.organisation.type !== (ORGANISATION_TYPE.ACADEMIE as "ACADEMIE")
-  ) {
-    throw Boom.forbidden("Accès non autorisé");
+
+  switch (req.user.organisation.type) {
+    case ORGANISATION_TYPE.DREETS:
+      res.locals.academie_list = getAcademieListByRegion(req.user.organisation.code_region as IRegionCode);
+      break;
+    case ORGANISATION_TYPE.DRAFPIC:
+      res.locals.academie_list = getAcademieListByRegion(req.user.organisation.code_region as IRegionCode);
+      break;
+    case ORGANISATION_TYPE.ACADEMIE:
+      res.locals.academie_list = [req.user.organisation.code_academie];
+      break;
+    default:
+      throw Boom.forbidden("Accès non autorisé");
   }
   next();
 }
