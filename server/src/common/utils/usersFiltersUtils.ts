@@ -22,7 +22,10 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const organizationFilters: any = {};
 
   if (q && q.trim()) {
-    query.$or = buildTextSearchQuery(q.trim());
+    const textSearchQuery = buildTextSearchQuery(q.trim());
+    if (textSearchQuery.length > 0) {
+      query.$or = textSearchQuery;
+    }
   }
 
   const statusValues = parseStringToArray(account_status);
