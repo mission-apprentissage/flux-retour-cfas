@@ -76,6 +76,7 @@ export function useAllUsers(
         page: paginationData.page ?? 1,
         limit: paginationData.limit ?? 20,
         lastPage: paginationData.lastPage ?? 1,
+        globalTotal: paginationData.globalTotal ?? 0,
       },
       refetchUsers,
       isLoading,

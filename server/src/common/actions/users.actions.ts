@@ -168,6 +168,8 @@ export const getAllUsers = async (
   const userQuery = { ...query };
   delete userQuery._organizationFilters;
 
+  const globalTotalResult = await usersMigrationDb().countDocuments({});
+
   const result = await usersMigrationDb()
     .aggregate([
       { $match: userQuery },
@@ -254,7 +256,9 @@ export const getAllUsers = async (
 
   if (result?.pagination) {
     result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+    result.pagination.globalTotal = globalTotalResult;
   }
+
   return result;
 };
 

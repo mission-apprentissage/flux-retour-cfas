@@ -210,12 +210,11 @@ export default function UsersAdminClient() {
                   {hasFiltersOrSearch ? (
                     <>
                       {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
-                      {displayCount.current > 1 ? "s" : ""}
-                      {displayCount.total !== displayCount.current && ` (${displayCount.total} au total)`}
+                      {displayCount.current > 1 ? "s" : ""} ({pagination.globalTotal} au total)
                     </>
                   ) : (
                     <>
-                      {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} au total
+                      {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
                     </>
                   )}
                 </Typography>
