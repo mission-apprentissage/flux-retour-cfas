@@ -4,7 +4,7 @@ import { IMissionLocaleWithStats } from "shared";
 
 import ARMLIndicateurGlobal from "@/app/_components/arml/ARMLIndicateurGlobal";
 
-import { MissionsLocalesFilterPanel } from "./MissionsLocalesFilterPanel";
+import { ARMLFilterPanel } from "./ARMLFilterPanel";
 import UNMLAdminMissionsLocalesContent from "./UNMLAdminMissionsLocalesContent";
 
 interface ARMLContentProps {
@@ -20,7 +20,7 @@ export default function UNMLAdminContent({ unmlData }: ARMLContentProps) {
         </h3>
       </div>
       <div className="fr-col-12">
-        <MissionsLocalesFilterPanel />
+        <ARMLFilterPanel />
       </div>
       <div className="fr-col-12">
         <h4 className="fr-h4" style={{ marginBottom: "1rem", color: "var(--text-title-blue-france)" }}>

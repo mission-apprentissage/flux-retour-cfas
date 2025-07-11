@@ -5,6 +5,8 @@ import { IOrganisationMissionLocale } from "shared";
 
 import ARMLIndicateurGlobal from "@/app/_components/arml/ARMLIndicateurGlobal";
 
+import { MissionLocaleFilterPanel } from "../admin/mission-locale/MissionLocaleFilterPanel";
+
 interface MissionLocaleDetailsContentProps {
   ml: IOrganisationMissionLocale;
 }
@@ -73,6 +75,9 @@ export default function MissionLocaleDetailsContent({ ml }: MissionLocaleDetails
               <p style={{ textAlign: "left", marginBottom: "0.5rem" }}>{ml.telephone ?? "--"}</p>
             </div>
           </div>
+        </div>
+        <div className="fr-col-12">
+          <MissionLocaleFilterPanel />
         </div>
         <div className="fr-col-12">
           <ARMLIndicateurGlobal armls={[ml]} />
