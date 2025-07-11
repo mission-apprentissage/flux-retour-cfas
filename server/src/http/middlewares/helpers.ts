@@ -1,7 +1,14 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { getAcademieListByRegion, IEffectif, IRegionCode, ORGANISATION_TYPE, PermissionOrganisme } from "shared";
+import {
+  getAcademieListByRegion,
+  IEffectif,
+  IOrganisationOperateurPublicAcademie,
+  IOrganisationOperateurPublicRegion,
+  ORGANISATION_TYPE,
+  PermissionOrganisme,
+} from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -122,13 +129,17 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
 
   switch (req.user.organisation.type) {
     case ORGANISATION_TYPE.DREETS:
-      res.locals.academie_list = getAcademieListByRegion(req.user.organisation.code_region as IRegionCode);
+      res.locals.academie_list = getAcademieListByRegion(
+        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
+      );
       break;
     case ORGANISATION_TYPE.DRAFPIC:
-      res.locals.academie_list = getAcademieListByRegion(req.user.organisation.code_region as IRegionCode);
+      res.locals.academie_list = getAcademieListByRegion(
+        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
+      );
       break;
     case ORGANISATION_TYPE.ACADEMIE:
-      res.locals.academie_list = [req.user.organisation.code_academie];
+      res.locals.academie_list = [(req.user.organisation as IOrganisationOperateurPublicAcademie).code_academie];
       break;
     default:
       throw Boom.forbidden("Accès non autorisé");
