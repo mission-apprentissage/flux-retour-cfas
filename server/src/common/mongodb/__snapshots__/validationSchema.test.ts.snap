@@ -16797,6 +16797,13 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       "bsonType": "objectId",
       "description": "Identifiant unique MongoDB de l'instance voeu",
     },
+    "academie_code": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Code de l'académie du voeu",
+    },
     "annee_scolaire_rentree": {
       "anyOf": [
         {
