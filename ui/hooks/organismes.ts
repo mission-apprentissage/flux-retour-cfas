@@ -190,7 +190,7 @@ export function useOrganismesDuplicatsLists() {
   return { organismesDuplicats, isLoading };
 }
 
-export function useAffelnetCount(organisme_departements?: string | string[] | undefined) {
+export function useAffelnetCount(affelnetYear: Date, organisme_departements?: string | string[] | undefined) {
   const normalizedDepartements = useMemo(() => {
     if (typeof organisme_departements === "string") {
       return organisme_departements
@@ -202,14 +202,20 @@ export function useAffelnetCount(organisme_departements?: string | string[] | un
   }, [organisme_departements]);
 
   const queryKey = useMemo(
-    () => ["affelnet/national/count", { organisme_departements: normalizedDepartements }],
-    [normalizedDepartements]
+    () => [
+      "affelnet/national/count",
+      { organisme_departements: normalizedDepartements, year: affelnetYear.getFullYear() },
+    ],
+    [normalizedDepartements, affelnetYear]
   );
 
   const queryFn = () => {
     let url = `/api/v1/affelnet/national/count`;
+
+    url += `?year=${affelnetYear.getFullYear()}`;
+
     if (normalizedDepartements.length > 0) {
-      url += `?organisme_departements=${normalizedDepartements.join(",")}`;
+      url += `&organisme_departements=${normalizedDepartements.join(",")}`;
     }
     return _get(url);
   };

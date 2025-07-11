@@ -95,6 +95,12 @@ export const REGIONS_BY_CODE: Record<IRegionCode, IRegion> = REGIONS.reduce<Reco
   {} as Record<IRegionCode, IRegion>
 );
 
+export type IAcademie = {
+  code: string;
+  nom: string;
+  id: string;
+};
+
 export const DEPARTEMENTS = [
   {
     nom: "Ain",
@@ -1369,8 +1375,41 @@ export const DEPARTEMENTS = [
   nom: string;
   code: string;
   region: Pick<IRegion, "nom" | "code">;
-  academie: IAcademie;
+  academie: Pick<IAcademie, "code" | "nom">;
 }>;
+
+export const ACADEMIES_PAR_REGION: Record<IRegionCode, { code: string; nom: string }[]> = (() => {
+  const academiesParRegion: Record<string, Set<string>> = {};
+
+  const academiesMap: Record<string, string> = {};
+
+  DEPARTEMENTS.forEach((departement) => {
+    const regionCode = departement.region.code;
+    const academieCode = departement.academie.code;
+    const academieName = departement.academie.nom;
+
+    academiesMap[academieCode] = academieName;
+
+    if (!academiesParRegion[regionCode]) {
+      academiesParRegion[regionCode] = new Set();
+    }
+
+    academiesParRegion[regionCode].add(academieCode);
+  });
+
+  const result: Record<string, { code: string; nom: string }[]> = {};
+
+  Object.entries(academiesParRegion).forEach(([regionCode, academieCodesSet]) => {
+    result[regionCode] = Array.from(academieCodesSet)
+      .map((academieCode) => ({
+        code: academieCode,
+        nom: academiesMap[academieCode],
+      }))
+      .sort((a, b) => a.nom.localeCompare(b.nom));
+  });
+
+  return result as Record<IRegionCode, { code: string; nom: string }[]>;
+})();
 
 type IDepartements = typeof DEPARTEMENTS;
 export type IDepartement = IDepartements[number];
@@ -1385,41 +1424,41 @@ export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPAR
 );
 
 const ACADEMIES = [
-  { nom: "Étranger", code: "00" },
-  { nom: "Paris", code: "01" },
-  { nom: "Aix-Marseille", code: "02" },
-  { nom: "Besançon", code: "03" },
-  { nom: "Bordeaux", code: "04" },
-  { nom: "Clermont-Ferrand", code: "06" },
-  { nom: "Dijon", code: "07" },
-  { nom: "Grenoble", code: "08" },
-  { nom: "Lille", code: "09" },
-  { nom: "Lyon", code: "10" },
-  { nom: "Montpellier", code: "11" },
-  { nom: "Nancy-Metz", code: "12" },
-  { nom: "Poitiers", code: "13" },
-  { nom: "Rennes", code: "14" },
-  { nom: "Strasbourg", code: "15" },
-  { nom: "Toulouse", code: "16" },
-  { nom: "Nantes", code: "17" },
-  { nom: "Orléans-Tours", code: "18" },
-  { nom: "Reims", code: "19" },
-  { nom: "Amiens", code: "20" },
-  { nom: "Limoges", code: "22" },
-  { nom: "Nice", code: "23" },
-  { nom: "Créteil", code: "24" },
-  { nom: "Versailles", code: "25" },
-  { nom: "Corse", code: "27" },
-  { nom: "La Réunion", code: "28" },
-  { nom: "Martinique", code: "31" },
-  { nom: "Guadeloupe", code: "32" },
-  { nom: "Guyane", code: "33" },
-  { nom: "Mayotte", code: "43" },
-  { nom: "Nouvelle-Calédonie", code: "40" },
-  { nom: "Polynésie Française", code: "41" },
-  { nom: "Wallis et Futuna", code: "42" },
-  { nom: "Saint-Pierre-et-Miquelon", code: "44" },
-  { nom: "Normandie", code: "70" },
+  { nom: "Étranger", code: "00", id: "ETRANGER" },
+  { nom: "Paris", code: "01", id: "PARIS" },
+  { nom: "Aix-Marseille", code: "02", id: "AIX-MARSEILLE" },
+  { nom: "Besançon", code: "03", id: "BESANCON" },
+  { nom: "Bordeaux", code: "04", id: "BORDEAUX" },
+  { nom: "Clermont-Ferrand", code: "06", id: "CLERMONT-FERRAND" },
+  { nom: "Dijon", code: "07", id: "DIJON" },
+  { nom: "Grenoble", code: "08", id: "GRENOBLE" },
+  { nom: "Lille", code: "09", id: "LILLE" },
+  { nom: "Lyon", code: "10", id: "LYON" },
+  { nom: "Montpellier", code: "11", id: "MONTPELLIER" },
+  { nom: "Nancy-Metz", code: "12", id: "NANCY-METZ" },
+  { nom: "Poitiers", code: "13", id: "POITIERS" },
+  { nom: "Rennes", code: "14", id: "RENNES" },
+  { nom: "Strasbourg", code: "15", id: "STRASBOURG" },
+  { nom: "Toulouse", code: "16", id: "TOULOUSE" },
+  { nom: "Nantes", code: "17", id: "NANTES" },
+  { nom: "Orléans-Tours", code: "18", id: "ORLEANS-TOURS" },
+  { nom: "Reims", code: "19", id: "REIMS" },
+  { nom: "Amiens", code: "20", id: "AMIENS" },
+  { nom: "Limoges", code: "22", id: "LIMOGES" },
+  { nom: "Nice", code: "23", id: "NICE" },
+  { nom: "Créteil", code: "24", id: "CRETEIL" },
+  { nom: "Versailles", code: "25", id: "VERSAILLES" },
+  { nom: "Corse", code: "27", id: "CORSE" },
+  { nom: "La Réunion", code: "28", id: "LA REUNION" },
+  { nom: "Martinique", code: "31", id: "MARTINIQUE" },
+  { nom: "Guadeloupe", code: "32", id: "GUADELOUPE" },
+  { nom: "Guyane", code: "33", id: "GUYANE" },
+  { nom: "Mayotte", code: "43", id: "MAYOTTE" },
+  { nom: "Nouvelle-Calédonie", code: "40", id: "NOUVELLE-CALEDONIE" },
+  { nom: "Polynésie Française", code: "41", id: "POLYNESIE-FRANCAISE" },
+  { nom: "Wallis et Futuna", code: "42", id: "WALLIS-ET-FUTUNA" },
+  { nom: "Saint-Pierre-et-Miquelon", code: "44", id: "SAINT-PIERRE-ET-MIQUELON" },
+  { nom: "Normandie", code: "70", id: "NORMANDIE" },
 ] as const;
 
 export const ACADEMIES_DEPARTEMENT_MAP: Record<any, Array<any>> = DEPARTEMENTS.reduce(
@@ -1432,9 +1471,8 @@ export const ACADEMIES_DEPARTEMENT_MAP: Record<any, Array<any>> = DEPARTEMENTS.r
   {} as Record<IAcademieCode, Array<IDepartmentCode>>
 );
 
-type IAcademies = typeof ACADEMIES;
-export type IAcademie = IAcademies[number];
 export type IAcademieCode = IAcademie["code"];
+export type IAcademieId = IAcademie["id"];
 
 export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.reduce(
   (acc, academie) => {
@@ -1442,6 +1480,14 @@ export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.red
     return acc;
   },
   {} as Record<IAcademieCode, IAcademie>
+);
+
+export const ACADEMIES_BY_ID: Record<IAcademieId, IAcademie> = ACADEMIES.reduce(
+  (acc, academie) => {
+    acc[academie.id] = academie;
+    return acc;
+  },
+  {} as Record<IAcademieId, IAcademie>
 );
 
 function isAcademieCode(code: string | number): code is IAcademieCode {
@@ -1460,6 +1506,18 @@ function normalizeAcademieCode(code: string | number): IAcademieCode | null {
 export function getAcademieByCode(code: string | number): IAcademie | null {
   const normalizedCode = normalizeAcademieCode(code);
   return normalizedCode === null ? null : ACADEMIES_BY_CODE[normalizedCode];
+}
+
+export function getAcademieById(id: string): IAcademie | null {
+  return ACADEMIES_BY_ID[id as IAcademieId] ?? null;
+}
+
+export function getAcademieListByRegion(regionCode: IRegionCode): string[] {
+  const academies = ACADEMIES_PAR_REGION[regionCode];
+  if (!academies) {
+    return [];
+  }
+  return academies.map(({ code }) => code) as string[];
 }
 
 const TERRITOIRE_TYPE = {

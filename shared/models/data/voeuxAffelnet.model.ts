@@ -80,16 +80,16 @@ const zVoeuAffelnetRaw = z.object({
 });
 const zVoeuAffelnet = z.object({
   _id: zObjectId.describe("Identifiant unique MongoDB de l'instance voeu"),
-  //voeu_id: zObjectId.describe("Identifant du voeu"),
-  //revision: z.number({ description: "Numéro de révision du voeu" }),
   organisme_formateur_id: zObjectId.describe("Identifiant de l'organisme formateur").nullish(),
   organisme_responsable_id: zObjectId.describe("Identifiant de l'organisme responsable").nullish(),
   effectif_id: zObjectId.describe("Identifiant de l'effectif").nullish(),
+  effectif_deca_id: zObjectId.describe("Identifiant de l'effectif DECA").nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),
   updated_at: z.date({ description: "Date de mise à jour" }),
   deleted_at: z.date({ description: "Date de suppresion du voeux" }).nullish(),
   is_contacted: z.boolean({ description: "Indique si le jeune a été contacté" }),
   formation_catalogue_id: zObjectId.nullish(),
+  academie_code: z.string().nullish().describe("Code de l'académie du voeu"),
   annee_scolaire_rentree: z
     .string({
       description: `Année scolaire du voeux`,

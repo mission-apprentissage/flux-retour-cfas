@@ -1,4 +1,10 @@
-import { DEPARTEMENTS_BY_CODE, IRegionCode, REGIONS_BY_CODE, TYPES_ORGANISATION } from "shared";
+import {
+  DEPARTEMENTS_BY_CODE,
+  getAcademieByCode,
+  IOrganisationOperateurPublicAcademieJson,
+  IRegionCode,
+  TYPES_ORGANISATION,
+} from "shared";
 
 import { AuthContext } from "../internal/AuthContext";
 
@@ -26,13 +32,8 @@ export function getAccountLabel(auth: AuthContext): string {
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
     case "ACADEMIE": {
-      const codeRegion =
-        "code_region" in auth.organisation
-          ? auth.organisation.code_region
-          : "code_academie" in auth.organisation
-            ? auth.organisation.code_academie
-            : undefined;
-      return `${typeItem.nom} ${codeRegion ? REGIONS_BY_CODE[codeRegion as IRegionCode]?.nom || codeRegion : ""}`;
+      const codeAcademie = (auth.organisation as IOrganisationOperateurPublicAcademieJson).code_academie;
+      return `${typeItem.nom} ${codeAcademie ? getAcademieByCode(codeAcademie)?.nom : ""}`;
     }
     case "DDETS":
       return `${typeItem.nom} ${

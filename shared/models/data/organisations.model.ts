@@ -153,6 +153,8 @@ export type IOrganisation = z.output<typeof zOrganisation>;
 
 export type IOrganisationJson = Jsonify<IOrganisation>;
 
+export type IOrganisationOperateurPublicAcademieJson = Jsonify<IOrganisationOperateurPublicAcademie>;
+
 export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
 
 export type IOrganisationType = IOrganisation["type"];
