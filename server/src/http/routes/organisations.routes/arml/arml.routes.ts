@@ -1,17 +1,31 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import { IOrganisationMissionLocale } from "shared/models";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
+import { z } from "zod";
 
-import { getMissionLocaleStatsById, getMissionsLocalesByArml } from "@/common/actions/mission-locale/arml.actions";
+import { getMissionsLocalesByArml } from "@/common/actions/mission-locale/arml.actions";
+import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
+import { getOrganisationById } from "@/common/actions/organisations.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
   const router = express.Router();
   router.get("/mls", returnResult(getMissionLocales));
-  router.get("/mls/:mlId", returnResult(getMissionLocale));
+  router.get(
+    "/mls/:mlId",
+    validateRequestMiddleware({
+      query: z.object({
+        rqth_only: z.enum(["true", "false"]).optional(),
+        mineur_only: z.enum(["true", "false"]).optional(),
+      }),
+    }),
+    returnResult(getMissionLocale)
+  );
   router.get("/export/mls", returnResult(exportMissionLocalesData));
 
   return router;
@@ -23,19 +37,24 @@ const getMissionLocales = async (_req, { locals }) => {
   return { arml, mlList };
 };
 
-const getMissionLocale = async ({ params }, { locals }) => {
+const getMissionLocale = async ({ params, query }, { locals }) => {
   const mlId = params.mlId;
-  const ml = await getMissionLocaleStatsById(new ObjectId(mlId));
+  const ml = (await getOrganisationById(new ObjectId(mlId))) as IOrganisationMissionLocale;
 
   if (!ml) {
     throw Boom.notFound("Mission locale not found");
   }
 
-  if (ml.arml_id.toString() !== locals.arml._id.toString()) {
+  if (ml.type !== "MISSION_LOCALE" || ml.arml_id?.toString() !== locals.arml._id.toString()) {
     throw Boom.forbidden("Mission locale does not belong to this ARML");
   }
 
-  return ml;
+  const rqth_only = query.rqth_only === "true";
+  const mineur_only = query.mineur_only === "true";
+
+  const mlStat = await getMissionLocaleStat(new ObjectId(mlId), ml.activated_at, mineur_only, rqth_only);
+
+  return mlStat;
 };
 
 const exportMissionLocalesData = async (req, res) => {

@@ -22,7 +22,6 @@ const SIFAEffectifsFilterPanel: React.FC<SIFAEffectifsFilterPanelProps> = ({
   resetFilters,
 }) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
-  console.log(filters.only_sifa_missing_fields);
   const handleCheckboxChange = (filterKey: string, selectedValues: string[]) => {
     const updatedFilters = { ...filters, [filterKey]: selectedValues };
     onFilterChange(updatedFilters);

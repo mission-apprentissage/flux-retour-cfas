@@ -28,7 +28,7 @@ const defaultFilters: ARMLFilters = {
   arml: [],
 };
 
-export const MissionsLocalesFilterPanel = () => {
+export const ARMLFilterPanel = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 

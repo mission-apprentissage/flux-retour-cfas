@@ -2,7 +2,7 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 
 import MissionLocaleDetailsContent from "@/app/_components/arml/MissionLocaleDetailsContent";
@@ -14,9 +14,15 @@ import { _get } from "@/common/httpClient";
 export default function MissionLocaleDetailsClient({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
+
+  const searchParams = useSearchParams();
+
+  const rqth_only = searchParams?.get("rqth_only");
+  const mineur_only = searchParams?.get("mineur_only");
+
   const { data: missionLocaleData } = useQuery(
-    ["mission-locale", id],
-    () => _get(`/api/v1/admin/mission-locale/${id}/stats`),
+    ["mission-locale", id, rqth_only, mineur_only],
+    () => _get(`/api/v1/admin/mission-locale/${id}/stats`, { params: { rqth_only, mineur_only } }),
     {
       suspense: true,
       useErrorBoundary: true,
