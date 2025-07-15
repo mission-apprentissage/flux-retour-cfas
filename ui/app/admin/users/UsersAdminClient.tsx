@@ -108,7 +108,7 @@ export default function UsersAdminClient() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [usersFilters]);
+  }, [usersFilters, searchTerm]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
