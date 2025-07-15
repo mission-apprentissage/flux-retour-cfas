@@ -8,6 +8,7 @@ import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
+import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
 
 export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
   const ml = await organisationsDb()
@@ -227,44 +228,11 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
   >;
 };
 
-export const getMissionsLocalesStatsAdminById = async (mlId: ObjectId) => {
-  const aggr = [
-    {
-      $match: {
-        type: "MISSION_LOCALE",
-        _id: mlId,
-      },
-    },
-    {
-      $lookup: {
-        from: "missionLocaleStats",
-        localField: "_id",
-        foreignField: "mission_locale_id",
-        as: "stats",
-      },
-    },
-    {
-      $unwind: {
-        path: "$stats",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        arml_id: 1,
-        nom: 1,
-        adresse: 1,
-        telephone: 1,
-        email: 1,
-        site_web: 1,
-        siret: 1,
-        code_postal: "$adresse.code_postal",
-        activated_at: 1,
-        stats: "$stats.stats",
-      },
-    },
-  ];
-
-  return organisationsDb().aggregate(aggr).next();
+export const getMissionsLocalesStatsAdminById = async (
+  missionLocaleId: ObjectId,
+  missionLocaleActivationDate?: Date,
+  mineur?: boolean,
+  rqth?: boolean
+) => {
+  return getMissionLocaleStat(missionLocaleId, missionLocaleActivationDate, mineur, rqth);
 };
