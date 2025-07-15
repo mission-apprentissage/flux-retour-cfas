@@ -8,8 +8,12 @@ const collectionName = "usersMigration";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ email: 1 }, { unique: true }],
   [{ "emails.token": 1 }, {}],
-  [{ email: "text", nom: "text", prenom: "text" }, {}],
+  [
+    { email: "text", nom: "text", prenom: "text", fonction: "text" },
+    { name: "nom_prenom_email_fonction", default_language: "french" },
+  ],
   [{ organisation_id: 1 }, {}],
+  [{ account_status: 1, created_at: -1 }, { name: "account_status_created_at" }],
 ];
 
 export const zUsersMigration = z.object({

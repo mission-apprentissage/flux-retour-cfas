@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 import { _get } from "@/common/httpClient";
 import { toUserNormalized } from "@/modules/admin/users/models/users";
@@ -13,6 +13,8 @@ export function useAllUsers(
   search = "",
   filters: Partial<UsersFilters> = {}
 ) {
+  const queryClient = useQueryClient();
+
   const queryParams = useMemo(() => {
     const params: Record<string, any> = {
       page,
@@ -35,11 +37,33 @@ export function useAllUsers(
     data: usersPaginated,
     refetch: refetchUsers,
     isLoading,
+    isFetching,
   } = useQuery({
     queryKey: ["admin/users", queryParams],
     queryFn: () => _get("/api/v1/admin/users/", { params: queryParams }),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (usersPaginated?.pagination && !isLoading) {
+      const paginationData = usersPaginated.pagination;
+      const nextPage = page + 1;
+
+      if (nextPage <= paginationData.lastPage) {
+        const nextPageParams = {
+          ...queryParams,
+          page: nextPage,
+        };
+
+        queryClient.prefetchQuery({
+          queryKey: ["admin/users", nextPageParams],
+          queryFn: () => _get("/api/v1/admin/users/", { params: nextPageParams }),
+          staleTime: 5 * 60 * 1000,
+        });
+      }
+    }
+  }, [usersPaginated, isLoading, queryParams, queryClient]);
 
   return useMemo(() => {
     const users = usersPaginated?.data?.map(toUserNormalized) ?? [];
@@ -52,9 +76,11 @@ export function useAllUsers(
         page: paginationData.page ?? 1,
         limit: paginationData.limit ?? 20,
         lastPage: paginationData.lastPage ?? 1,
+        globalTotal: paginationData.globalTotal ?? 0,
       },
       refetchUsers,
       isLoading,
+      isFetching,
     };
-  }, [usersPaginated, refetchUsers, isLoading]);
+  }, [usersPaginated, refetchUsers, isLoading, isFetching]);
 }
