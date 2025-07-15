@@ -13,7 +13,11 @@ export const buildTextSearchQuery = (searchTerm: string) => {
     return [];
   }
 
-  return [{ $text: { $search: searchTerm, $language: "french" } }];
+  return [
+    { nom: { $regex: searchTerm, $options: "i" } },
+    { prenom: { $regex: searchTerm, $options: "i" } },
+    { email: { $regex: searchTerm, $options: "i" } },
+  ];
 };
 
 export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
