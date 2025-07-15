@@ -125,10 +125,10 @@ export default function UsersAdminClient() {
   }, [searchTerm, usersFilters]);
 
   const displayCount = useMemo(() => {
-    if (!pagination) return { current: 0, total: 0 };
+    if (!pagination) return { total: 0, globalTotal: 0 };
     return {
-      current: allUsers.length,
       total: pagination.total,
+      globalTotal: pagination.globalTotal,
     };
   }, [allUsers.length, pagination]);
 
@@ -209,8 +209,8 @@ export default function UsersAdminClient() {
                 <Typography variant="body2" color="text.secondary">
                   {hasFiltersOrSearch ? (
                     <>
-                      {displayCount.current} utilisateur{displayCount.current > 1 ? "s" : ""} trouvé
-                      {displayCount.current > 1 ? "s" : ""} ({pagination.globalTotal} au total)
+                      {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} trouvé
+                      {displayCount.total > 1 ? "s" : ""} ({pagination.globalTotal} au total)
                     </>
                   ) : (
                     <>
