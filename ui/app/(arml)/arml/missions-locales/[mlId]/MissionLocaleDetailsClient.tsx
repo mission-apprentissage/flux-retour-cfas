@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { use } from "react";
 import { IOrganisationMissionLocale } from "shared";
 
@@ -12,10 +13,15 @@ import { _get } from "@/common/httpClient";
 
 export default function MissionLocaleDetailsClient({ params }: { params: Promise<{ mlId: string }> }) {
   const { mlId } = use(params);
+  const searchParams = useSearchParams();
+
+  const rqth_only = searchParams?.get("rqth_only");
+  const mineur_only = searchParams?.get("mineur_only");
+
   const { data: ml } = useQuery<IOrganisationMissionLocale>(
-    ["ml", mlId],
+    ["ml", mlId, rqth_only, mineur_only],
     async () => {
-      const data = await _get(`/api/v1/organisation/arml/mls/${mlId}`);
+      const data = await _get(`/api/v1/organisation/arml/mls/${mlId}`, { params: { rqth_only, mineur_only } });
       return data;
     },
     {

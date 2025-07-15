@@ -57,7 +57,16 @@ export default () => {
   );
 
   router.get("/:id", returnResult(getMl));
-  router.get("/:id/stats", returnResult(getMlStats));
+  router.get(
+    "/:id/stats",
+    validateRequestMiddleware({
+      query: z.object({
+        rqth_only: z.enum(["true", "false"]).optional(),
+        mineur_only: z.enum(["true", "false"]).optional(),
+      }),
+    }),
+    returnResult(getMlStats)
+  );
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
   router.get("/:id/brevo/sync", returnResult(getSyncBrevoContactInfo));
@@ -123,14 +132,25 @@ const getMl = async (req) => {
   return organisationMl;
 };
 
-const getMlStats = async (req) => {
-  const id = req.params.id;
+const getMlStats = async ({ params, query }) => {
+  const id = params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
-  const ml = await getMissionsLocalesStatsAdminById(organisationMl._id);
-  return ml;
+  const rqth_only = query.rqth_only === "true";
+  const mineur_only = query.mineur_only === "true";
+
+  const ml = await getMissionsLocalesStatsAdminById(
+    organisationMl._id,
+    organisationMl.activated_at,
+    mineur_only,
+    rqth_only
+  );
+  return {
+    ...organisationMl,
+    stats: ml,
+  };
 };
 
 export const getEffectifsParMoisMissionLocale = async (req) => {
