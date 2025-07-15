@@ -108,7 +108,7 @@ export default function UsersAdminClient() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [usersFilters]);
+  }, [usersFilters, searchTerm]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -194,7 +194,7 @@ export default function UsersAdminClient() {
               <input
                 className={className}
                 id={id}
-                placeholder="Nom, prénom, email..."
+                placeholder="Nom, prénom, email"
                 type={type}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
