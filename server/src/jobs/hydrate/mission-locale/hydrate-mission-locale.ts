@@ -228,3 +228,24 @@ export const hydrateMissionLocaleStats = async () => {
     await createOrUpdateMissionLocaleStats(ml._id);
   }
 };
+
+export const updateMissionLocaleAdresseFromExternalData = async (
+  data: Array<{ ml_id: number; corrected_cp: string }>
+) => {
+  for (let i = 0; i < data.length; i++) {
+    const { ml_id, corrected_cp } = data[i];
+    const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, corrected_cp);
+
+    await organisationsDb().updateOne(
+      { type: "MISSION_LOCALE", ml_id: ml_id },
+      {
+        $set: {
+          adresse: {
+            ...rest,
+          },
+        },
+      }
+    );
+  }
+  return data;
+};
