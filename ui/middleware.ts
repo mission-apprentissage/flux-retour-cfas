@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ORGANISATION_TYPE } from "shared";
 
 import { AuthContext } from "@/common/internal/AuthContext";
 
@@ -29,7 +30,6 @@ async function buildHeaders(
 ): Promise<{ requestNextData: { request: { headers: Headers } }; session: AuthContext | null }> {
   const session = await fetchSession(request);
   const requestHeaders = new Headers(request.headers);
-
   if (session) {
     const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
     requestHeaders.set("x-session", encodedSession);
@@ -69,10 +69,12 @@ function redirectToHome(
     return NextResponse.next(requestNextData);
   }
   switch (session.organisation?.type) {
-    case "MISSION_LOCALE":
+    case ORGANISATION_TYPE.MISSION_LOCALE:
       return NextResponse.redirect(new URL("/mission-locale", request.url));
-    case "ARML":
+    case ORGANISATION_TYPE.ARML:
       return NextResponse.redirect(new URL("/arml", request.url));
+    case ORGANISATION_TYPE.ACADEMIE:
+      return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     default:
       return NextResponse.redirect(new URL("/home", request.url));
   }

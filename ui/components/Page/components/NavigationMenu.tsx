@@ -108,32 +108,52 @@ function NavBarTransverse(): React.ReactElement {
   const { organisationType, organisation } = useAuth();
   const { trackPlausibleEvent } = usePlausibleTracking();
 
-  return (
-    <>
-      <NavItem to="/home" exactMatch>
-        Mon tableau de bord
-      </NavItem>
-      <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
-      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
-      {(organisationType === ORGANISATION_TYPE.DREETS ||
-        organisationType === ORGANISATION_TYPE.DRAFPIC ||
-        organisationType === ORGANISATION_TYPE.ACADEMIE) && (
-        <NavItem
-          to="/voeux-affelnet"
-          onClick={() =>
-            trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
-              organisation_type: organisation ? organisation.type : "",
-              organisation_code_region: organisation && "code_region" in organisation ? organisation.code_region : "",
-            })
-          }
-        >
-          Vœux Affelnet
-        </NavItem>
-      )}
-      <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
-      <MenuQuestions />
-    </>
-  );
+  switch (organisationType) {
+    case ORGANISATION_TYPE.ACADEMIE:
+      return (
+        <>
+          <NavItem
+            exactMatch
+            to="/voeux-affelnet"
+            onClick={() =>
+              trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
+                organisation_type: organisation ? organisation.type : "",
+                organisation_code_region: organisation && "code_region" in organisation ? organisation.code_region : "",
+              })
+            }
+          >
+            Vœux Affelnet
+          </NavItem>
+          <MenuQuestions />
+        </>
+      );
+    default:
+      return (
+        <>
+          <NavItem to="/home" exactMatch>
+            Mon tableau de bord
+          </NavItem>
+          <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+          <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+          {(organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DRAFPIC) && (
+            <NavItem
+              to="/voeux-affelnet"
+              onClick={() =>
+                trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
+                  organisation_type: organisation ? organisation.type : "",
+                  organisation_code_region:
+                    organisation && "code_region" in organisation ? organisation.code_region : "",
+                })
+              }
+            >
+              Vœux Affelnet
+            </NavItem>
+          )}
+          <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
+          <MenuQuestions />
+        </>
+      );
+  }
 }
 
 function NavBarOrganismeFormation(): ReactElement {
