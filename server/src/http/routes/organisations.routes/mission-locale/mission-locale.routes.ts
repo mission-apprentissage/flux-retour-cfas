@@ -122,28 +122,6 @@ const exportEffectifMissionLocale = async (req, res) => {
   };
 
   const worksheetsInfo = await computeFileInfo(filters.type);
-
-  const getLatestAutorisationContactDate = (): Date | null => {
-    let latestDate: Date | null = null;
-
-    worksheetsInfo.forEach(({ data }) => {
-      data.forEach((row) => {
-        const autorisationDate = row.effectif_choice_date;
-        if (autorisationDate) {
-          const currentDate = new Date(autorisationDate);
-          if (!latestDate || currentDate > latestDate) {
-            latestDate = currentDate;
-          }
-        }
-      });
-    });
-
-    return latestDate;
-  };
-
-  const latestAutorisationDate = getLatestAutorisationContactDate();
-  const latestDateFormatted = latestAutorisationDate ? latestAutorisationDate.toLocaleDateString("fr-FR") : "";
-
   const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
 
   const columns = [
@@ -175,10 +153,7 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Téléphone du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "telephone" },
     { name: "Email du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "email" },
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
-    {
-      name: latestDateFormatted ? `Dernière campagne mailing (${latestDateFormatted})` : "Dernière campagne mailing",
-      id: "effectif_choice",
-    },
+    { name: "Souhaite être contacté", id: "effectif_choice" },
     {
       name: "Quel est votre retour sur la prise de contact ?",
       id: "ml_situation",
