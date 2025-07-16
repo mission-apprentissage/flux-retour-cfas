@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ORGANISATION_TYPE } from "shared";
 
 import { AuthContext } from "@/common/internal/AuthContext";
 
@@ -69,11 +68,11 @@ function redirectToHome(
     return NextResponse.next(requestNextData);
   }
   switch (session.organisation?.type) {
-    case ORGANISATION_TYPE.MISSION_LOCALE:
+    case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
-    case ORGANISATION_TYPE.ARML:
+    case "ARML":
       return NextResponse.redirect(new URL("/arml", request.url));
-    case ORGANISATION_TYPE.ACADEMIE:
+    case "ACADEMIE":
       return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     default:
       return NextResponse.redirect(new URL("/home", request.url));
