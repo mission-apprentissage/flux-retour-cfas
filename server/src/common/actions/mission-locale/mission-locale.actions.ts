@@ -751,24 +751,24 @@ export const getEffectifsListByMisisonLocaleId = (
                 case: {
                   $and: [{ $eq: ["$effectif_choice", null] }, { $eq: ["$brevo", null] }],
                 },
-                then: "Non contacté",
+                then: "Non inclus dans la campagne",
               },
               {
                 case: {
                   $and: [{ $eq: ["$effectif_choice", null] }, { $ne: ["$brevo", null] }],
                 },
-                then: "Sans réponse",
+                then: "Pas de clic",
               },
               {
                 case: { $eq: ["$effectif_choice.confirmation", true] },
-                then: "Oui",
+                then: "Clic + souhaite un accompagnement",
               },
               {
                 case: { $eq: ["$effectif_choice.confirmation", false] },
-                then: "Non",
+                then: "Clic + ne souhaite pas d'accompagnement",
               },
             ],
-            default: "Non contacté",
+            default: "Non inclus dans la campagne",
           },
         },
       },
