@@ -34,4 +34,5 @@ export interface FullTableProps {
   emptyMessage?: string;
   caption?: string | null;
   headerAction?: ReactNode;
+  hasPagination?: boolean;
 }

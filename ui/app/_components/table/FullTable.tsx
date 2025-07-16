@@ -63,8 +63,6 @@ function TablePagination({
   currentPage: number;
   onPageChange: (page: number) => void;
 }) {
-  if (totalPages <= 1) return null;
-
   return (
     <div style={{ flex: "none" }}>
       <Pagination
@@ -121,6 +119,7 @@ export function FullTable({
   emptyMessage = "Aucun élément à afficher",
   caption = null,
   headerAction = null,
+  hasPagination = true,
 }: FullTableProps) {
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
@@ -155,6 +154,7 @@ export function FullTable({
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
       onPageSizeChange?.(newPageSize);
+      handlePageChange(1);
     },
     [onPageSizeChange]
   );
@@ -187,22 +187,21 @@ export function FullTable({
               .getSortedRowModel()
               .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
           />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            {totalPages > 1 && (
+          {hasPagination && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: "1rem",
+              }}
+            >
               <TablePagination totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} />
-            )}
-            {totalPages > 1 && (
               <div style={{ width: "150px" }}>
                 <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </>
