@@ -14998,6 +14998,10 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "is_mission_locale_beta": {
+          "bsonType": "bool",
+          "description": "Indique si l'organisme est un beta testeur pour la feature des missions locales",
+        },
         "organisme_id": {
           "bsonType": "string",
           "description": "Identifiant de l'organisme",
