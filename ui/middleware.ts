@@ -29,7 +29,6 @@ async function buildHeaders(
 ): Promise<{ requestNextData: { request: { headers: Headers } }; session: AuthContext | null }> {
   const session = await fetchSession(request);
   const requestHeaders = new Headers(request.headers);
-
   if (session) {
     const encodedSession = Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
     requestHeaders.set("x-session", encodedSession);
@@ -73,6 +72,8 @@ function redirectToHome(
       return NextResponse.redirect(new URL("/mission-locale", request.url));
     case "ARML":
       return NextResponse.redirect(new URL("/arml", request.url));
+    case "ACADEMIE":
+      return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     default:
       return NextResponse.redirect(new URL("/home", request.url));
   }

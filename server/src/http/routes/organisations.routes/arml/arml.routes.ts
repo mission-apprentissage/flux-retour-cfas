@@ -2,16 +2,29 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
+import { z } from "zod";
 
-import { getMissionLocaleStatsById, getMissionsLocalesByArml } from "@/common/actions/mission-locale/arml.actions";
+import { getMlFromOrganisations } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getMissionsLocalesByArml } from "@/common/actions/mission-locale/arml.actions";
+import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
   const router = express.Router();
   router.get("/mls", returnResult(getMissionLocales));
-  router.get("/mls/:mlId", returnResult(getMissionLocale));
+  router.get(
+    "/mls/:mlId",
+    validateRequestMiddleware({
+      query: z.object({
+        rqth_only: z.enum(["true", "false"]).optional(),
+        mineur_only: z.enum(["true", "false"]).optional(),
+      }),
+    }),
+    returnResult(getMissionLocale)
+  );
   router.get("/export/mls", returnResult(exportMissionLocalesData));
 
   return router;
@@ -23,19 +36,26 @@ const getMissionLocales = async (_req, { locals }) => {
   return { arml, mlList };
 };
 
-const getMissionLocale = async ({ params }, { locals }) => {
-  const mlId = params.mlId;
-  const ml = await getMissionLocaleStatsById(new ObjectId(mlId));
-
-  if (!ml) {
-    throw Boom.notFound("Mission locale not found");
+const getMissionLocale = async ({ params, query }, { locals }) => {
+  const id = params.mlId;
+  const organisationMl = await getMlFromOrganisations(id);
+  if (!organisationMl) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
 
-  if (ml.arml_id.toString() !== locals.arml._id.toString()) {
+  if (organisationMl.type !== "MISSION_LOCALE" || organisationMl.arml_id?.toString() !== locals.arml._id.toString()) {
     throw Boom.forbidden("Mission locale does not belong to this ARML");
   }
 
-  return ml;
+  const rqth_only = query.rqth_only === "true";
+  const mineur_only = query.mineur_only === "true";
+
+  const mlStat = await getMissionLocaleStat(organisationMl._id, organisationMl.activated_at, mineur_only, rqth_only);
+
+  return {
+    ...organisationMl,
+    stats: mlStat,
+  };
 };
 
 const exportMissionLocalesData = async (req, res) => {

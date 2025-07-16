@@ -14491,10 +14491,61 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur": {
           "bsonType": "int",
         },
+        "mineur_a_traiter": {
+          "bsonType": "int",
+        },
+        "mineur_autre": {
+          "bsonType": "int",
+        },
+        "mineur_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "mineur_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "mineur_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "mineur_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "mineur_rdv_pris": {
+          "bsonType": "int",
+        },
+        "mineur_traite": {
+          "bsonType": "int",
+        },
         "nouveau_projet": {
           "bsonType": "int",
         },
         "rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth": {
+          "bsonType": "int",
+        },
+        "rqth_a_traiter": {
+          "bsonType": "int",
+        },
+        "rqth_autre": {
+          "bsonType": "int",
+        },
+        "rqth_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "rqth_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "rqth_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "rqth_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rqth_rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth_traite": {
           "bsonType": "int",
         },
         "total": {
@@ -16801,6 +16852,13 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       "bsonType": "objectId",
       "description": "Identifiant unique MongoDB de l'instance voeu",
     },
+    "academie_code": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Code de l'académie du voeu",
+    },
     "annee_scolaire_rentree": {
       "anyOf": [
         {
@@ -16829,6 +16887,18 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
         },
       ],
       "description": "Date de suppresion du voeux",
+    },
+    "effectif_deca_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'effectif DECA",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'effectif DECA",
     },
     "effectif_id": {
       "anyOf": [

@@ -22,6 +22,7 @@ const collectionName = "organisations";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1 }, {}],
   [{ ml_id: 1 }, { unique: true, partialFilterExpression: { ml_id: { $exists: true } } }],
+  [{ type: 1, code_departement: 1, code_region: 1 }, { name: "type_code_departement_code_region" }],
 ];
 
 const zOrganisationBase = z.object({
@@ -155,6 +156,8 @@ export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisation
 export type IOrganisation = z.output<typeof zOrganisation>;
 
 export type IOrganisationJson = Jsonify<IOrganisation>;
+
+export type IOrganisationOperateurPublicAcademieJson = Jsonify<IOrganisationOperateurPublicAcademie>;
 
 export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
 

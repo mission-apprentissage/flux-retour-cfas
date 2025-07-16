@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -63,8 +63,6 @@ function TablePagination({
   currentPage: number;
   onPageChange: (page: number) => void;
 }) {
-  if (totalPages <= 1) return null;
-
   return (
     <div style={{ flex: "none" }}>
       <Pagination
@@ -121,9 +119,28 @@ export function FullTable({
   emptyMessage = "Aucun élément à afficher",
   caption = null,
   headerAction = null,
+  hasPagination = true,
 }: FullTableProps) {
+  const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
+
+  const scrollToTop = useCallback(() => {
+    if (tableRef.current) {
+      setTimeout(() => {
+        if (tableRef.current) {
+          const rect = tableRef.current.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - 20;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
+  }, []);
 
   const table = useReactTable({
     data: tableData,
@@ -148,15 +165,17 @@ export function FullTable({
   const handlePageChange = useCallback(
     (page: number) => {
       onPageChange?.(page);
+      scrollToTop();
     },
-    [onPageChange]
+    [onPageChange, scrollToTop]
   );
 
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
       onPageSizeChange?.(newPageSize);
+      handlePageChange(1);
     },
-    [onPageSizeChange]
+    [onPageSizeChange, handlePageChange]
   );
 
   const isEmpty = data.length === 0;
@@ -168,7 +187,7 @@ export function FullTable({
       {isEmpty ? (
         <p>{emptyMessage}</p>
       ) : (
-        <div>
+        <div ref={tableRef}>
           {(caption || headerAction) && (
             <div
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
@@ -187,22 +206,21 @@ export function FullTable({
               .getSortedRowModel()
               .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
           />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            {totalPages > 1 && (
+          {hasPagination && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: "1rem",
+              }}
+            >
               <TablePagination totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} />
-            )}
-            {totalPages > 1 && (
               <div style={{ width: "150px" }}>
                 <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </>

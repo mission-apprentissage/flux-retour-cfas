@@ -196,6 +196,7 @@ const TableauARMLTotal = ({ data }) => {
         data={[{ element: displayedData, rawData: transformedData }]}
         columns={columns}
         emptyMessage="Aucune mission locale à afficher"
+        hasPagination={false}
       />
     </>
   );
@@ -249,6 +250,7 @@ const TableauARMLTraite = ({ data }) => {
         data={[{ element: displayData, rawData: transformedData }]}
         columns={columns}
         emptyMessage="Aucune mission locale à afficher"
+        hasPagination={false}
       />
     </>
   );

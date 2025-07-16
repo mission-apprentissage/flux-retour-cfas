@@ -1,8 +1,9 @@
+import { captureException } from "@sentry/node";
+import Boom from "boom";
 import { format } from "date-fns";
 import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
-import { ACADEMIES_DEPARTEMENT_MAP, ORGANISATION_TYPE } from "shared/constants";
 import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
 import { z } from "zod";
 
@@ -43,44 +44,44 @@ const AFFELNET_FIELDS = [
   { label: "Uai Cio Etab Accueil", value: "uai_cio_etablissement_accueil" },
   { label: "Type Etab Accueil", value: "type_etablissement_accueil" },
   { label: "Libelle Public Etab Accueil", value: "libelle_pulic_etablissement_accueil" },
-  { label: "Contrat signé", value: "contrat_signe" },
+  { label: "Contrat signé (selon le CFA)", value: "contrat_signe" },
+  { label: "Contrat signé (selon DECA)", value: "contrat_deca_signe" },
 ];
 
 const computeFields = (data) => {
   const maxContrats = Math.max(...data.map((d) => (d.contrats ? d.contrats.length : 0)));
   const extraFields: Array<{ label: string; value: string }> = [];
-  for (let i = 0; i < maxContrats; i++) {
-    extraFields.push({ label: `Date début contrat ${i + 1}`, value: `date_debut_contrat_${i + 1}` });
-    extraFields.push({ label: `Date fin contrat ${i + 1}`, value: `date_fin_contrat_${i + 1}` });
+
+  if (maxContrats === 1) {
+    extraFields.push({ label: `Date début contrat (selon le CFA)`, value: `date_debut_contrat_1` });
+    extraFields.push({ label: `Date fin contrat (selon le CFA)}`, value: `date_fin_contrat_1` });
+  } else {
+    for (let i = 0; i < maxContrats; i++) {
+      extraFields.push({ label: `Date début contrat n°${i + 1} (selon le CFA)`, value: `date_debut_contrat_${i + 1}` });
+      extraFields.push({ label: `Date fin contrat n°${i + 1} (selon le CFA)`, value: `date_fin_contrat_${i + 1}` });
+    }
   }
 
-  return [...AFFELNET_FIELDS, ...extraFields];
-};
+  const maxContratsDeca = Math.max(...data.map((d) => (d.contrats_deca ? d.contrats_deca.length : 0)));
+  const extraFieldsDeca: Array<{ label: string; value: string }> = [];
 
-const getRegionAndDepartementFromOrganisation = (
-  orga: IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie,
-  organisme_departements
-) => {
-  const handleDreetsAndDrafpic = (organisation: IOrganisationOperateurPublicRegion) => {
-    return { organismes_regions: organisation.code_region ? [organisation.code_region] : [], organisme_departements };
-  };
-
-  const handleAcademie = (organisation: IOrganisationOperateurPublicAcademie) => {
-    return {
-      organismes_regions: null,
-      organisme_departements: organisme_departements ?? ACADEMIES_DEPARTEMENT_MAP[organisation.code_academie],
-    };
-  };
-
-  switch (orga.type) {
-    case ORGANISATION_TYPE.DREETS:
-    case ORGANISATION_TYPE.DRAFPIC:
-      return handleDreetsAndDrafpic(orga as IOrganisationOperateurPublicRegion);
-    case ORGANISATION_TYPE.ACADEMIE:
-      return handleAcademie(orga as IOrganisationOperateurPublicAcademie);
-    default:
-      return { organismes_regions: null, organisme_departements: null };
+  if (maxContratsDeca === 1) {
+    extraFieldsDeca.push({ label: `Date début contrat (selon DECA)`, value: `deca_date_debut_contrat_1` });
+    extraFieldsDeca.push({ label: `Date fin contrat (selon DECA)`, value: `deca_date_fin_contrat_1` });
+  } else {
+    for (let i = 0; i < maxContratsDeca; i++) {
+      extraFieldsDeca.push({
+        label: `Date début contrat DECA n°${i + 1} (selon DECA)`,
+        value: `deca_date_debut_contrat_${i + 1}`,
+      });
+      extraFieldsDeca.push({
+        label: `Date fin contrat DECA n°${i + 1} (selon DECA)`,
+        value: `deca_date_fin_contrat_${i + 1}`,
+      });
+    }
   }
+
+  return [...AFFELNET_FIELDS, ...extraFields, ...extraFieldsDeca];
 };
 
 export default () => {
@@ -92,6 +93,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(getNationalCount)
@@ -103,10 +105,11 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(async (req, res) => {
-      const affelnetCsv = await exportConcretisee(req);
+      const affelnetCsv = await exportConcretisee(req, res);
       res.attachment(`voeux_affelnet_concretisee.csv`);
       return affelnetCsv;
     })
@@ -118,10 +121,11 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+        year: z.string().optional(),
       }),
     }),
     returnResult(async (req, res) => {
-      const affelnetCsv = await exportNonConcretisee(req);
+      const affelnetCsv = await exportNonConcretisee(req, res);
       res.attachment(`voeux_affelnet_non_concretisee.csv`);
       return affelnetCsv;
     })
@@ -130,88 +134,121 @@ export default () => {
   return router;
 };
 
-const getNationalCount = async (req) => {
-  const user = req.user as AuthContext;
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
-  );
-  return await getAffelnetCountVoeuxNational(organisme_departements, organismes_regions);
+const getNationalCount = async (req, { locals }) => {
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
+
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
+
+  return await getAffelnetCountVoeuxNational(academie_list, year);
 };
 
-const exportNonConcretisee = async (req) => {
+const exportNonConcretisee = async (req, { locals }) => {
   const user = req.user as AuthContext;
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
-  );
-  const listVoeux = await getAffelnetVoeuxNonConcretise(organisme_departements, organismes_regions);
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
-    ...voeu,
-    formations_demandees: formations_demandees.join(", "),
-    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
-    ...contrats.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
-        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
-      };
-    }, {}),
-  }));
+  try {
+    const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+    const listVoeux = await getAffelnetVoeuxNonConcretise(academie_list, year);
 
-  const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog(
-    "affelnet_non_concretise",
-    ids,
-    new Date(),
-    req.user._id,
-    undefined,
-    new ObjectId(orga._id)
-  );
+    const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
+      ...voeu,
+      formations_demandees: formations_demandees.join(", "),
+      contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+      contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
+      ...contrats.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+          [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+        };
+      }, {}),
+      ...contrats_deca.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
+          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
+        };
+      }, {}),
+    }));
 
-  const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(transformedVoeux);
+    const ids = listVoeux.map((voeu) => voeu._id);
+    await createTelechargementListeNomLog(
+      "affelnet_non_concretise",
+      ids,
+      new Date(),
+      req.user._id,
+      undefined,
+      new ObjectId(orga._id)
+    );
 
-  return csv;
+    const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
+    const csv = await json2csvParser.parse(transformedVoeux);
+    return csv;
+  } catch (error) {
+    captureException(error);
+    console.error("Error exporting non-concretise:", error);
+    throw Boom.internal("Failed to export non-concretise");
+  }
 };
 
-const exportConcretisee = async (req) => {
+const exportConcretisee = async (req, { locals }) => {
   const user = req.user as AuthContext;
-  const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-  const { organisme_departements, organismes_regions } = getRegionAndDepartementFromOrganisation(
-    orga,
-    req.query.organisme_departements
-  );
-  const listVoeux = await getAffelnetVoeuxConcretise(organisme_departements, organismes_regions);
+  const { year } = req.query;
+  const academie_list = locals.academie_list as string[];
 
-  const transformedVoeux = listVoeux.map(({ contrats = [], formations_demandees, ...voeu }) => ({
-    ...voeu,
-    formations_demandees: formations_demandees.join(", "),
-    contrat_signe: contrats && contrats.length ? "Oui" : "Non",
-    ...contrats.reduce((acc, curr, index) => {
-      return {
-        ...acc,
-        [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
-        [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
-      };
-    }, {}),
-  }));
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
 
-  const ids = listVoeux.map((voeu) => voeu._id);
-  await createTelechargementListeNomLog(
-    "affelnet_concretise",
-    ids,
-    new Date(),
-    req.user._id,
-    undefined,
-    new ObjectId(orga._id)
-  );
+  try {
+    const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
+    const listVoeux = await getAffelnetVoeuxConcretise(academie_list, year);
 
-  const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
-  const csv = await json2csvParser.parse(transformedVoeux);
+    const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
+      ...voeu,
+      formations_demandees: formations_demandees.join(", "),
+      contrat_signe: contrats && contrats.length ? "Oui" : "Non",
+      contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
+      ...contrats.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
+          [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
+        };
+      }, {}),
+      ...contrats_deca.reduce((acc, curr, index) => {
+        return {
+          ...acc,
+          [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
+          [`deca_date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
+        };
+      }, {}),
+    }));
 
-  return csv;
+    const ids = listVoeux.map((voeu) => voeu._id);
+    await createTelechargementListeNomLog(
+      "affelnet_concretise",
+      ids,
+      new Date(),
+      req.user._id,
+      undefined,
+      new ObjectId(orga._id)
+    );
+
+    const json2csvParser = new Parser({ fields: computeFields(listVoeux), delimiter: ";", withBOM: true });
+    const csv = await json2csvParser.parse(transformedVoeux);
+
+    return csv;
+  } catch (error) {
+    captureException(error);
+    console.error("Error exporting concretise:", error);
+    throw Boom.internal("Failed to export concretise");
+  }
 };

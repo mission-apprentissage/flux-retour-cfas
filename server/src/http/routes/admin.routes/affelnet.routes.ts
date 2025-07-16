@@ -1,8 +1,10 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import { parse } from "csv-parse/sync";
 import express from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
+import { getAcademieById } from "shared/constants";
 import { IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
@@ -133,7 +135,7 @@ const createVoeux = async (req, res) => {
         updated_at: currentDate,
         is_contacted: false,
         history: [],
-        annee_scolaire: voeuRaw.annee_scolaire_rentree,
+        annee_scolaire_rentree: voeuRaw.annee_scolaire_rentree,
         raw: voeuRaw,
         _computed: {
           formation: {},
@@ -199,6 +201,7 @@ const createVoeux = async (req, res) => {
 
       voeu.organisme_formateur_id = orgaFormateur._id;
       voeu.organisme_responsable_id = orgaResponsable._id;
+      voeu.academie_code = getAcademieById(voeuRaw.academie)?.code;
 
       const previous = await voeuxAffelnetDb().findOne({
         "raw.ine": voeuRaw.ine,
@@ -229,6 +232,7 @@ const createVoeux = async (req, res) => {
           );
         }
       } catch (e) {
+        captureException(e);
         logger.error(e);
       }
     });
