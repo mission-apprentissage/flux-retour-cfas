@@ -44,23 +44,41 @@ const AFFELNET_FIELDS = [
   { label: "Uai Cio Etab Accueil", value: "uai_cio_etablissement_accueil" },
   { label: "Type Etab Accueil", value: "type_etablissement_accueil" },
   { label: "Libelle Public Etab Accueil", value: "libelle_pulic_etablissement_accueil" },
-  { label: "Contrat signé (CFA)", value: "contrat_signe" },
-  { label: "Contrat signé (DECA)", value: "contrat_deca_signe" },
+  { label: "Contrat signé (selon le CFA)", value: "contrat_signe" },
+  { label: "Contrat signé (selon DECA)", value: "contrat_deca_signe" },
 ];
 
 const computeFields = (data) => {
   const maxContrats = Math.max(...data.map((d) => (d.contrats ? d.contrats.length : 0)));
   const extraFields: Array<{ label: string; value: string }> = [];
-  for (let i = 0; i < maxContrats; i++) {
-    extraFields.push({ label: `Date début contrat ${i + 1}`, value: `date_debut_contrat_${i + 1}` });
-    extraFields.push({ label: `Date fin contrat ${i + 1}`, value: `date_fin_contrat_${i + 1}` });
+
+  if (maxContrats === 1) {
+    extraFields.push({ label: `Date début contrat (selon le CFA)`, value: `date_debut_contrat_1` });
+    extraFields.push({ label: `Date fin contrat (selon le CFA)}`, value: `date_fin_contrat_1` });
+  } else {
+    for (let i = 0; i < maxContrats; i++) {
+      extraFields.push({ label: `Date début contrat n°${i + 1} (selon le CFA)`, value: `date_debut_contrat_${i + 1}` });
+      extraFields.push({ label: `Date fin contrat n°${i + 1} (selon le CFA)`, value: `date_fin_contrat_${i + 1}` });
+    }
   }
 
   const maxContratsDeca = Math.max(...data.map((d) => (d.contrats_deca ? d.contrats_deca.length : 0)));
   const extraFieldsDeca: Array<{ label: string; value: string }> = [];
-  for (let i = 0; i < maxContratsDeca; i++) {
-    extraFieldsDeca.push({ label: `Date début contrat DECA ${i + 1}`, value: `deca_date_debut_contrat_${i + 1}` });
-    extraFieldsDeca.push({ label: `Date fin contrat DECA ${i + 1}`, value: `deca_date_fin_contrat_${i + 1}` });
+
+  if (maxContratsDeca === 1) {
+    extraFieldsDeca.push({ label: `Date début contrat (selon DECA)`, value: `deca_date_debut_contrat_1` });
+    extraFieldsDeca.push({ label: `Date fin contrat (selon DECA)`, value: `deca_date_fin_contrat_1` });
+  } else {
+    for (let i = 0; i < maxContratsDeca; i++) {
+      extraFieldsDeca.push({
+        label: `Date début contrat DECA n°${i + 1} (selon DECA)`,
+        value: `deca_date_debut_contrat_${i + 1}`,
+      });
+      extraFieldsDeca.push({
+        label: `Date fin contrat DECA n°${i + 1} (selon DECA)`,
+        value: `deca_date_fin_contrat_${i + 1}`,
+      });
+    }
   }
 
   return [...AFFELNET_FIELDS, ...extraFields, ...extraFieldsDeca];
