@@ -11,6 +11,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
+import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
@@ -107,7 +108,7 @@ async function upsertEffectifDeca(
     try {
       const id = new ObjectId();
       await effectifsDECADb().insertOne({ ...effectif, _id: id });
-
+      await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id?.toString());
       // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
       //await createMissionLocaleSnapshot({ ...effectif, _id: id });
 

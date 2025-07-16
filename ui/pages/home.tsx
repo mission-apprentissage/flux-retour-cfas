@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
@@ -18,7 +19,6 @@ function getDashboardComponent(organisationType: IOrganisationType) {
     case "ORGANISME_FORMATION": {
       return <DashboardOwnOrganisme />;
     }
-
     case "TETE_DE_RESEAU":
     case "DREETS":
     case "DRAAF":
@@ -26,7 +26,6 @@ function getDashboardComponent(organisationType: IOrganisationType) {
     case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
     case "DDETS":
-    case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
@@ -36,8 +35,17 @@ function getDashboardComponent(organisationType: IOrganisationType) {
 
 function DashboardPage() {
   const { organisationType } = useAuth();
+  const router = useRouter();
 
-  return <SimplePage title="Tableau de bord de l’apprentissage">{getDashboardComponent(organisationType)}</SimplePage>;
+  switch (organisationType) {
+    case "ACADEMIE":
+      router.push("/voeux-affelnet");
+      return;
+    default:
+      return (
+        <SimplePage title="Tableau de bord de l’apprentissage">{getDashboardComponent(organisationType)}</SimplePage>
+      );
+  }
 }
 
 export default withAuth(DashboardPage);

@@ -16848,6 +16848,13 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       "bsonType": "objectId",
       "description": "Identifiant unique MongoDB de l'instance voeu",
     },
+    "academie_code": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Code de l'académie du voeu",
+    },
     "annee_scolaire_rentree": {
       "anyOf": [
         {
@@ -16876,6 +16883,18 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
         },
       ],
       "description": "Date de suppresion du voeux",
+    },
+    "effectif_deca_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Identifiant de l'effectif DECA",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant de l'effectif DECA",
     },
     "effectif_id": {
       "anyOf": [
