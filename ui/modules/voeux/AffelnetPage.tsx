@@ -106,30 +106,7 @@ function VoeuxAffelnetPage() {
                   {isLoading ? "..." : formatNumber(affelnetCount?.voeuxFormules)}
                 </Text>
                 <Flex alignItems="center" gap={3}>
-                  <Text>
-                    vœux en apprentissage ont été formulés{" "}
-                    <InfoTooltip
-                      headerComponent={() => <Text>Vœux en apprentissage formulés en {affelnetYear}</Text>}
-                      contentComponent={() => (
-                        <>
-                          <Text>
-                            Il s’agit du nombre de vœux formulés sur l’année {affelnetYear}, en cumulé sur les 3
-                            fichiers globaux :
-                          </Text>
-                          <List my={3} style={{ color: "black", listStyleType: "disc", paddingLeft: "1.5rem" }}>
-                            <ListItem>29 mai : tous les vœux</ListItem>
-                            <ListItem>
-                              7 juin : avancée des vœux. Certains vœux peuvent se rajouter si les jeunes n’ont pas eu le
-                              temps de se déclarer
-                            </ListItem>
-                            <ListItem>
-                              Début juillet : fin de validation des vœux. Source : Plateforme des vœux (DNE)
-                            </ListItem>
-                          </List>
-                        </>
-                      )}
-                    />
-                  </Text>
+                  <Text>vœux en apprentissage ont été formulés</Text>
                 </Flex>
               </Box>
             </GridItem>
@@ -156,9 +133,8 @@ function VoeuxAffelnetPage() {
                     headerComponent={() => <Text>Calcul des vœux en apprentissage non concrétisés</Text>}
                     contentComponent={() => (
                       <Text>
-                        Ce chiffre expose le nombre de jeunes ayant formulé un vœu non concrétisé à ce jour (pour
-                        différentes raisons : en recherche de CFA , et/ou en recherche d&apos;un contrat pour valider
-                        son inscription).
+                        Ce chiffre expose le nombre de jeunes présents dans le fichier de voeux et que l’on ne retrouve
+                        pas encore inscrit pour la rentrée dans un centre de formation.
                       </Text>
                     )}
                   />
@@ -185,14 +161,10 @@ function VoeuxAffelnetPage() {
                   >
                     <Flex flexDirection="column" gap={6}>
                       <Text>
-                        La liste est nominative et au format Excel : elle contient 2 onglets avec les contacts des
-                        jeunes n’ayant pas concrétisé leur vœu en apprentissage.
-                      </Text>
-                      <Text>
-                        Le premier onglet est dédié aux jeunes qui n’étaient plus présents dans le dernier fichier des
-                        vœux Affelnet (transmis le 8 juillet {affelnetYear}) et le deuxième onglet est dédié aux jeunes
-                        que l’on ne retrouve pas inscrits en CFA sur le Tableau de bord de l’apprentissage. Dans chaque
-                        onglet, une colonne est dédiée au nombre de vœux exprimés pour chaque jeune.
+                        La liste est nominative et au format Excel : elle contient les contacts des jeunes dont nous
+                        pensons qu’ils n’ont pas concrétisé leur vœu en apprentissage pour l’instant. Certains jeunes
+                        vont se trouver dans cet onglet parce que nous n’avons pas encore eu les informations
+                        nécessaires.
                       </Text>
                       <Text>
                         Veuillez noter qu’il est impossible de restituer, pour chaque jeune, si il est retourné en voie
@@ -241,8 +213,8 @@ function VoeuxAffelnetPage() {
                         <Text>Ce chiffre se base à la fois sur :</Text>
                         <UnorderedList>
                           <ListItem>
-                            les transmissions d’effectifs au Tableau de bord par les OFA qui ont des jeunes inscrits sur
-                            2024-2025 (avec ou sans contrat d’apprentissage)
+                            les transmissions d’effectifs au Tableau de bord par les OFA qui ont des jeunes inscrits sur{" "}
+                            {affelnetYear}-{affelnetYear + 1} (avec ou sans contrat d’apprentissage)
                           </ListItem>
                           <ListItem>
                             la base{" "}
@@ -257,11 +229,6 @@ function VoeuxAffelnetPage() {
                             (pour ceux ayant signé un contrat)
                           </ListItem>
                         </UnorderedList>
-                        <Text>
-                          Ce chiffre n’est pas exhaustif. Il est mis à jour toutes les semaines (chaque lundi).
-                          Retrouvez la liste des jeunes dans votre onglet “Mes indicateurs” (fichier Excel de listes
-                          nominatives).
-                        </Text>
                       </Flex>
                     )}
                   />
