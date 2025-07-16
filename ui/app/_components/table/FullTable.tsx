@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -121,8 +121,26 @@ export function FullTable({
   headerAction = null,
   hasPagination = true,
 }: FullTableProps) {
+  const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
+
+  const scrollToTop = useCallback(() => {
+    if (tableRef.current) {
+      setTimeout(() => {
+        if (tableRef.current) {
+          const rect = tableRef.current.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - 20;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
+  }, []);
 
   const table = useReactTable({
     data: tableData,
@@ -147,8 +165,9 @@ export function FullTable({
   const handlePageChange = useCallback(
     (page: number) => {
       onPageChange?.(page);
+      scrollToTop();
     },
-    [onPageChange]
+    [onPageChange, scrollToTop]
   );
 
   const handlePageSizeChange = useCallback(
@@ -156,7 +175,7 @@ export function FullTable({
       onPageSizeChange?.(newPageSize);
       handlePageChange(1);
     },
-    [onPageSizeChange]
+    [onPageSizeChange, handlePageChange]
   );
 
   const isEmpty = data.length === 0;
@@ -168,7 +187,7 @@ export function FullTable({
       {isEmpty ? (
         <p>{emptyMessage}</p>
       ) : (
-        <div>
+        <div ref={tableRef}>
           {(caption || headerAction) && (
             <div
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
