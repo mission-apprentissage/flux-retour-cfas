@@ -1,10 +1,12 @@
 "use client";
 
-import { Box, Skeleton, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE } from "shared";
 
+import { Spinner } from "@/app/_components/common/Spinner";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+
+import styles from "./PageHeader.module.css";
 
 export function PageHeader({
   previous,
@@ -34,61 +36,55 @@ export function PageHeader({
   const getHref = (id: string) => `${basePath}/${id}${listQuery}`;
 
   return (
-    <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      p={2}
-      sx={{ border: "1px solid var(--border-default-grey)" }}
-    >
+    <div className={styles.pageHeaderContainer}>
       {previous ? (
         <DsfrLink href={getHref(previous.id)} arrow="none" className="fr-link--icon-left fr-icon-arrow-left-s-line">
           Précédent
         </DsfrLink>
       ) : (
-        <Box />
+        <div />
       )}
 
-      <Box display="flex" alignItems="center">
+      <div className={styles.pageHeaderCenter}>
         {!isLoading && total !== undefined ? (
           <>
-            <Box display={{ xs: "none", sm: "flex" }} alignItems="center">
+            <div className={styles.pageHeaderDesktopText}>
               {nomListe === API_EFFECTIF_LISTE.PRIORITAIRE ? (
-                <Typography fontWeight="bold">
+                <p className={styles.pageHeaderText}>
                   Dossier n°{currentIndex + 1} sur {total} à traiter en priorité
-                </Typography>
+                </p>
               ) : nomListe === API_EFFECTIF_LISTE.INJOIGNABLE ? (
-                <Typography fontWeight="bold">
+                <p className={styles.pageHeaderText}>
                   Dossier n°{currentIndex + 1} sur {total} injoignable
-                </Typography>
+                </p>
               ) : (
-                <Typography fontWeight="bold">
+                <p className={styles.pageHeaderText}>
                   Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
-                </Typography>
+                </p>
               )}
-              <Typography component="span" sx={{ ml: 1 }}>
-                (tous mois confondus)
-              </Typography>
-            </Box>
+              <span className={styles.pageHeaderSubtext}>(tous mois confondus)</span>
+            </div>
 
-            <Box display={{ xs: "flex", sm: "none" }} alignItems="center">
-              <Typography fontWeight="bold">
+            <div className={styles.pageHeaderMobileText}>
+              <p className={styles.pageHeaderText}>
                 {currentIndex + 1}/{total}
-              </Typography>
-            </Box>
+              </p>
+            </div>
           </>
         ) : (
-          <Skeleton animation="wave" variant="text" width={180} />
+          <div className={styles.pageHeaderCenter}>
+            <Spinner size="20px" color="var(--text-action-high-blue-france)" />
+          </div>
         )}
-      </Box>
+      </div>
 
       {next ? (
         <DsfrLink href={getHref(next.id)} arrow="none" className="fr-link--icon-right fr-icon-arrow-right-s-line">
           Suivant
         </DsfrLink>
       ) : (
-        <Box />
+        <div />
       )}
-    </Box>
+    </div>
   );
 }
