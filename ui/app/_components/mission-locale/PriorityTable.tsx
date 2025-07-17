@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, Stack, Typography } from "@mui/material";
 import { format } from "date-fns/index";
 import { fr } from "date-fns/locale";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useMemo } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
@@ -10,6 +10,7 @@ import { API_EFFECTIF_LISTE } from "shared";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
+import styles from "./PriorityTable.module.css";
 import { EffectifPriorityData } from "./types";
 
 type PriorityTableProps = {
@@ -70,37 +71,45 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
   }
 
   return (
-    <Stack p={{ xs: 2, md: 3 }} mt={4} sx={{ background: "var(--background-alt-blue-france)" }}>
+    <div
+      style={{
+        padding: "16px",
+        marginTop: "32px",
+        background: "var(--background-alt-blue-france)",
+      }}
+      className={styles.priorityContainer}
+    >
       {priorityData.length === 0 && hadEffectifsPrioritaires && (
-        <Stack direction="row" justifyContent="space-between">
-          <Stack>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
             <PriorityBadge priorityData={priorityData} />
-            <Typography variant="body2" fontWeight="bold">
+            <p style={{ fontWeight: "bold", margin: "0", fontSize: "14px" }}>
               Tous les jeunes de cette liste ont été contactés !
-            </Typography>
-          </Stack>
-          <Box
-            component="img"
-            src={"/images/mission-locale-valid-tick.svg"}
-            alt={""}
-            sx={{
+            </p>
+          </div>
+          <Image
+            src="/images/mission-locale-valid-tick.svg"
+            alt=""
+            width={50}
+            height={50}
+            style={{
               width: "50px",
               height: "auto",
               userSelect: "none",
             }}
           />
-        </Stack>
+        </div>
       )}
 
       {priorityData.length > 0 && (
         <>
           <PriorityBadge priorityData={priorityData} />
-          <Typography variant="body2">
+          <p style={{ margin: "0 0 16px 0", fontSize: "14px" }}>
             Nous affichons dans cette liste <strong>les jeunes âgés de 16 à 18 ans</strong> (obligation de formation)
             ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong> et les{" "}
-            <strong>jeunes qui ont indiqué avoir besoin d’être accompagnés par vos services</strong> (campagne
+            <strong>jeunes qui ont indiqué avoir besoin d&apos;être accompagnés par vos services</strong> (campagne
             mailing)..
-          </Typography>
+          </p>
           <LightTable
             caption=""
             data={tableData}
@@ -117,6 +126,6 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
           />
         </>
       )}
-    </Stack>
+    </div>
   );
 }
