@@ -1,0 +1,110 @@
+.effectifInfoResponsive {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .effectifInfoResponsive {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+.effectifInfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.effectifInfoInner {
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .effectifInfoInner {
+    padding: 1.5rem;
+  }
+}
+
+.statusChangeInfo {
+  padding-left: 256px;
+  margin-top: 16px;
+}
+
+.statusChangeText {
+  color: var(--background-flat-red-marianne);
+  margin: 0;
+  font-weight: bold;
+}
+
+.effectifHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flexCenterGap8 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badgeGap {
+  gap: 0.5rem;
+  font-weight: bold;
+}
+
+.adminActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.effectifContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effectifTitle {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.noticeContainer {
+  padding: 0;
+}
+
+.noticeContainer :global(.fr-container) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.noticeContainer :global(.fr-notice__title) {
+  font-weight: bold;
+}
+
+.noticeText {
+  margin: 0;
+}
+
+.transmissionInfo {
+  font-size: 0.75rem;
+  color: grey;
+  margin: 0;
+  font-style: italic;
+}
+
+.highlightMargin {
+  margin-top: 16px;
+}
+
+.highlightText {
+  margin: 0;
+}

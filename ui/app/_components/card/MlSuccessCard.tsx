@@ -1,7 +1,9 @@
-import { Box, Typography, Link, Stack } from "@mui/material";
+import Image from "next/image";
 import React from "react";
 
 import { SelectedSection } from "../mission-locale/types";
+
+import styles from "./MlSuccessCard.module.css";
 
 export const MlSuccessCard = ({
   handleSectionChange,
@@ -9,38 +11,30 @@ export const MlSuccessCard = ({
   handleSectionChange?: (section: SelectedSection) => void;
 }) => {
   return (
-    <Stack
-      direction="row"
-      spacing={2}
-      alignItems="center"
-      p={3}
-      sx={{
-        border: "1px solid var(--border-default-grey)",
-        width: "100%",
-      }}
-    >
-      <Box
-        component="img"
-        src={"/images/mission-locale-valid-tick.svg"}
-        alt={""}
-        sx={{
-          width: "50px",
-          height: "auto",
-          userSelect: "none",
-        }}
+    <div className={styles.mlSuccessCardContainer}>
+      <Image
+        src="/images/mission-locale-valid-tick.svg"
+        alt=""
+        width={50}
+        height={50}
+        className={styles.mlSuccessCardImage}
       />
 
-      <Box>
-        <Typography variant="body1" fontWeight="bold" textAlign="left">
+      <div>
+        <p className={`fr-text--bold ${styles.mlSuccessCardTitle}`}>
           Tous les jeunes en rupture ce mois-ci ont été contacté !
-        </Typography>
-        <Typography variant="body2" textAlign="left">
+        </p>
+        <p className={`fr-text--sm ${styles.mlSuccessCardText}`}>
           Retrouvez-les dans la liste{" "}
-          <Link href="#" className="fr-link" color="primary" onClick={() => handleSectionChange?.("deja-traite")}>
+          <button
+            type="button"
+            className={`fr-link ${styles.mlSuccessCardLink}`}
+            onClick={() => handleSectionChange?.("deja-traite")}
+          >
             des dossiers déjà traités →
-          </Link>
-        </Typography>
-      </Box>
-    </Stack>
+          </button>
+        </p>
+      </div>
+    </div>
   );
 };

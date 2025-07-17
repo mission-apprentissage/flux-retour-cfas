@@ -1,15 +1,16 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Typography, Stack } from "@mui/material";
 import { useParams } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
-import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
+import { MlSuccessCard } from "../card/MlSuccessCard";
+
+import styles from "./MonthTable.module.css";
 import { EffectifData, MonthItem, SelectedSection } from "./types";
 import { formatMonthAndYear, anchorFromLabel } from "./utils";
 
@@ -31,14 +32,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     return {
       id: effectif.id,
       name: (
-        <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
           {effectif.prioritaire || effectif.a_contacter ? (
-            <p className="fr-badge fr-badge--orange-terre-battue fr-badge--sm" style={{ gap: "0.2rem" }}>
+            <p className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}>
               <i className="fr-icon-fire-fill fr-icon--xs" />
               Prioritaire
             </p>
           ) : (
-            <Badge severity="new" small style={{ whiteSpace: "nowrap" }}>
+            <Badge severity="new" small className={styles.noWrapBadge}>
               à traiter
             </Badge>
           )}
@@ -59,9 +60,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
         </Badge>
       ),
       name: (
-        <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {`${effectif.nom} ${effectif.prenom}`}
-        </div>
+        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
       ),
       formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
       icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -77,9 +76,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
         </Badge>
       ),
       name: (
-        <div className="fr-text--bold" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {`${effectif.nom} ${effectif.prenom}`}
-        </div>
+        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
       ),
       formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
       icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -147,29 +144,14 @@ export const MonthTable = memo(function MonthTable({
   return (
     <div id={anchorId} className="fr-mb-4w fr-mt-4w">
       {monthItem.data.length === 0 ? (
-        <Stack mt={2} alignItems="flex-start" spacing={4}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: "var(--text-title-blue-france)",
-              textAlign: "left",
-            }}
-          >
-            {`${label} (${monthItem.data.length})`}
-          </Typography>
+        <div className={styles.monthTableEmpty}>
+          <h4 className={styles.monthTableTitle}>{`${label} (${monthItem.data.length})`}</h4>
           {monthItem.treated_count && monthItem.treated_count > 0 ? (
             <MlSuccessCard handleSectionChange={handleSectionChange} />
           ) : (
-            <Typography
-              variant="body1"
-              color="textSecondary"
-              textAlign="left"
-              style={{ color: "var(--text-disabled-grey)", fontStyle: "italic" }}
-            >
-              Pas de rupturant à afficher ce mois-ci
-            </Typography>
+            <p className={styles.monthTableEmptyText}>Pas de rupturant à afficher ce mois-ci</p>
           )}
-        </Stack>
+        </div>
       ) : (
         <LightTable
           caption={`${label} (${monthItem.data.length})`}
