@@ -153,7 +153,7 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Téléphone du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "telephone" },
     { name: "Email du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "email" },
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
-    { name: "Souhaite être contacté", id: "effectif_choice" },
+    { name: "Dernière campagne mailing", id: "effectif_choice" },
     {
       name: "Quel est votre retour sur la prise de contact ?",
       id: "ml_situation",
