@@ -37,7 +37,7 @@ export async function createOrganisation(organisation: IOrganisationCreate): Pro
     });
 
     return {
-      ...data,
+      ...organisation,
       organisme_id: organisme?._id.toString(),
     } as IOrganisationOrganismeFormation;
   };

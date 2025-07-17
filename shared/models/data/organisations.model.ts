@@ -61,7 +61,7 @@ const zOrganisationOrganismeCreate = z.object({
     })
     .regex(UAI_REGEX)
     .nullable(),
-  organisme_id: z.string({ description: "Identifiant de l'organisme" }).optional(),
+  organisme_id: z.string({ description: "Identifiant de l'organisme" }).nullish(),
   ml_beta_activated_at: z.coerce.date({ description: "Date d'activation de la feature mission locale" }).optional(),
 });
 

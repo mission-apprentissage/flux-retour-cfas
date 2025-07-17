@@ -15084,7 +15084,10 @@ exports[`validation-schema > should create validation schema for organisations >
           "description": "Date d'activation de la feature mission locale",
         },
         "organisme_id": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Identifiant de l'organisme",
         },
         "siret": {
