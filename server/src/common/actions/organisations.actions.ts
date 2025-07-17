@@ -30,10 +30,36 @@ import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
 
 export async function createOrganisation(organisation: IOrganisationCreate): Promise<ObjectId> {
+  const formatOrganisme = async (organisation) => {
+    const organisme = await organismesDb().findOne({
+      siret: organisation.siret,
+      ...(organisation.uai ? { uai: organisation.uai } : {}),
+    });
+
+    return {
+      ...data,
+      organisme_id: organisme?._id.toString(),
+    } as IOrganisationOrganismeFormation;
+  };
+
+  const formatDetaultOrganisation = (organisation: IOrganisationCreate) => {
+    return organisation;
+  };
+
+  let data: IOrganisationCreate | null = null;
+
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION":
+      data = await formatOrganisme(organisation);
+      break;
+    default:
+      data = formatDetaultOrganisation(organisation);
+  }
+
   const { insertedId } = await organisationsDb().insertOne({
     _id: new ObjectId(),
     created_at: getCurrentTime(),
-    ...organisation,
+    ...data,
   });
   return insertedId;
 }
@@ -286,13 +312,36 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
   };
 }
 
-export const getOrganisationOrganismeByOrganismeId = (
+export const getOrganisationOrganismeByOrganismeId = async (
   organismeId: ObjectId
 ): Promise<WithId<IOrganisationOrganismeFormation> | null> => {
-  return organisationsDb().findOne({
-    organisme_id: organismeId,
+  const found = await organisationsDb().findOne({
+    organisme_id: organismeId.toString(),
     type: "ORGANISME_FORMATION",
-  }) as Promise<WithId<IOrganisationOrganismeFormation> | null>;
+  });
+
+  if (!found) {
+    const organisme = await organismesDb().findOne({
+      _id: organismeId,
+    });
+
+    if (!organisme?.siret) {
+      return null;
+    }
+
+    const id = await createOrganisation({
+      type: "ORGANISME_FORMATION",
+      uai: organisme?.uai ?? null,
+      siret: organisme.siret ?? null,
+    });
+
+    return organisationsDb().findOne({
+      _id: id,
+      type: "ORGANISME_FORMATION",
+    }) as Promise<WithId<IOrganisationOrganismeFormation>>;
+  }
+
+  return found as WithId<IOrganisationOrganismeFormation>;
 };
 
 export async function getInvitationByToken(token: string): Promise<any> {
