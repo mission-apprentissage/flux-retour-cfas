@@ -8,6 +8,7 @@ import {
   IOrganisation,
   IOrganisationMissionLocale,
   IOrganisationARML,
+  IOrganisationOrganismeFormation,
 } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -284,6 +285,15 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
     },
   };
 }
+
+export const getOrganisationOrganismeByOrganismeId = (
+  organismeId: ObjectId
+): Promise<WithId<IOrganisationOrganismeFormation> | null> => {
+  return organisationsDb().findOne({
+    organisme_id: organismeId,
+    type: "ORGANISME_FORMATION",
+  }) as Promise<WithId<IOrganisationOrganismeFormation> | null>;
+};
 
 export async function getInvitationByToken(token: string): Promise<any> {
   const invitation = await invitationsDb().findOne({

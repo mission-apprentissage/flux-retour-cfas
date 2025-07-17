@@ -13,12 +13,14 @@ import { z } from "zod";
 
 import {
   activateMissionLocale,
+  activateOrganisme,
   getAllMlFromOrganisations,
   getMissionsLocalesStatsAdmin,
   getMissionsLocalesStatsAdminById,
   getMlFromOrganisations,
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
+  updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 import {
@@ -28,7 +30,7 @@ import {
   getEffectifMissionLocaleEligibleToBrevoCount,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
-import { organisationsDb } from "@/common/model/collections";
+import { organisationsDb, organismesDb } from "@/common/model/collections";
 import { importContacts, removeAllContactFromList } from "@/common/services/brevo/brevo";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -56,21 +58,6 @@ export default () => {
     returnResult(getAllMlsStats)
   );
 
-  router.get("/:id", returnResult(getMl));
-  router.get(
-    "/:id/stats",
-    validateRequestMiddleware({
-      query: z.object({
-        rqth_only: z.enum(["true", "false"]).optional(),
-        mineur_only: z.enum(["true", "false"]).optional(),
-      }),
-    }),
-    returnResult(getMlStats)
-  );
-  router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
-  router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
-  router.get("/:id/brevo/sync", returnResult(getSyncBrevoContactInfo));
-  router.post("/:id/brevo/sync", returnResult(syncBrevoContactMissionLocale));
   router.post(
     "/activate",
     validateRequestMiddleware({
@@ -101,6 +88,33 @@ export default () => {
     }),
     returnResult(resetMissionLocaleEffectif)
   );
+
+  router.post(
+    "/organismes/activate",
+    validateRequestMiddleware({
+      body: z.object({
+        date: z.coerce.date(),
+        organismes_ids_list: z.array(extensions.objectIdString()),
+      }),
+    }),
+    returnResult(activateOrganismeAtDate)
+  );
+
+  router.get("/:id", returnResult(getMl));
+  router.get(
+    "/:id/stats",
+    validateRequestMiddleware({
+      query: z.object({
+        rqth_only: z.enum(["true", "false"]).optional(),
+        mineur_only: z.enum(["true", "false"]).optional(),
+      }),
+    }),
+    returnResult(getMlStats)
+  );
+  router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
+  router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
+  router.get("/:id/brevo/sync", returnResult(getSyncBrevoContactInfo));
+  router.post("/:id/brevo/sync", returnResult(syncBrevoContactMissionLocale));
 
   return router;
 };
@@ -229,4 +243,23 @@ const syncBrevoContactMissionLocale = async (req) => {
 
   await removeAllContactFromList(listId);
   await importContacts(listId, getMissionLocaleEffectif);
+};
+
+export const activateOrganismeAtDate = async (req) => {
+  const { date, organismes_ids_list } = req.body;
+
+  const organismes = await organismesDb()
+    .find({
+      _id: { $in: organismes_ids_list.map((id) => new ObjectId(id)) },
+    })
+    .toArray();
+
+  if (!organismes.length) {
+    throw Boom.notFound(`No Organisations found for ids: ${organismes_ids_list.join(", ")}`);
+  }
+
+  for (const organisme of organismes) {
+    await activateOrganisme(new Date(date), organisme._id);
+    await updateMissionLocaleEffectifComputedOrganisme(new Date(date), organisme._id);
+  }
 };

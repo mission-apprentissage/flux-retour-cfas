@@ -62,9 +62,7 @@ const zOrganisationOrganismeCreate = z.object({
     .regex(UAI_REGEX)
     .nullable(),
   organisme_id: z.string({ description: "Identifiant de l'organisme" }).optional(),
-  is_mission_locale_beta: z
-    .boolean({ description: "Indique si l'organisme est un beta testeur pour la feature des missions locales" })
-    .optional(),
+  ml_beta_activated_at: z.coerce.date({ description: "Date d'activation de la feature mission locale" }).optional(),
 });
 
 const zOrganisationReaseauCreate = z.object({

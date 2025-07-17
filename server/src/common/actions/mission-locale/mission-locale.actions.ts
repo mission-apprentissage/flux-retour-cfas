@@ -22,6 +22,7 @@ import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationD
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
+import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 /**
@@ -1382,6 +1383,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
   const date = new Date();
 
   if (mlData) {
+    const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
     const mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
       {
         mission_locale_id: mlData?._id,
@@ -1401,6 +1403,11 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
           brevo: {
             token: uuidv4(),
             token_created_at: date,
+          },
+          computed: {
+            organisme: {
+              ml_beta_activated_at: organisation?.ml_beta_activated_at,
+            },
           },
         },
       },
