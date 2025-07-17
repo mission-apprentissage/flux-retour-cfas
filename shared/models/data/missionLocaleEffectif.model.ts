@@ -87,6 +87,13 @@ const zMissionLocaleEffectif = z.object({
     value: zStatutApprenantEnum.nullish(),
     date: z.date().nullish(),
   }),
+  computed: z.object({
+    organisme: z
+      .object({
+        ml_beta_activated_at: z.date().nullish(),
+      })
+      .nullish(),
+  }),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

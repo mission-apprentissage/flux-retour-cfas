@@ -9304,6 +9304,35 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "commentaires": {
       "bsonType": "string",
     },
+    "computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "organisme": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "ml_beta_activated_at": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
     "created_at": {
       "bsonType": "date",
     },
@@ -14375,6 +14404,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_snapshot",
     "brevo",
     "current_status",
+    "computed",
   ],
 }
 `;
@@ -15049,12 +15079,15 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
-        "is_mission_locale_beta": {
-          "bsonType": "bool",
-          "description": "Indique si l'organisme est un beta testeur pour la feature des missions locales",
+        "ml_beta_activated_at": {
+          "bsonType": "date",
+          "description": "Date d'activation de la feature mission locale",
         },
         "organisme_id": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Identifiant de l'organisme",
         },
         "siret": {
