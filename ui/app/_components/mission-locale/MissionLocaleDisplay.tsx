@@ -1,8 +1,6 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import { Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
@@ -153,8 +151,8 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
   ]);
 
   return (
-    <Grid container>
-      <Grid size={{ xs: 12, md: 3 }}>
+    <div className="fr-grid-row">
+      <div className="fr-col-12 fr-col-md-3">
         <SideMenu
           align="left"
           burgerMenuButtonText="Dans cette rubrique"
@@ -162,18 +160,18 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
           items={sideMenuItems}
           style={{ paddingRight: 0 }}
         />
-      </Grid>
-      <Grid size={{ xs: 12, md: 9 }} pl={{ sx: 0, md: 4 }}>
+      </div>
+      <div className="fr-col-12 fr-col-md-9" style={{ paddingLeft: "2rem" }}>
         {selectedSection === "a-traiter" && groupedDataATraiter.length === 0 && (
           <MlCard
             title="Il n’y pas de nouveaux jeunes à contacter pour le moment"
             imageSrc="/images/mission-locale-not-treated.svg"
             imageAlt="Personnes discutant et travaillant devant un tableau"
             body={
-              <Typography>
+              <p>
                 <strong>Nous vous invitons à vous reconnecter dans 1 semaine</strong> pour prendre connaissance de
                 nouvelles situations.
-              </Typography>
+              </p>
             }
           />
         )}
@@ -184,7 +182,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
             imageSrc="/images/mission-locale-treated.svg"
             imageAlt="Personnes discutant et travaillant dans un bureau"
             body={
-              <Typography>
+              <p>
                 <strong>Nous vous invitons à consulter</strong>{" "}
                 <a
                   className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
@@ -193,7 +191,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
                 >
                   les dossiers à traiter
                 </a>
-              </Typography>
+              </p>
             }
           />
         )}
@@ -250,7 +248,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
             />
           </SuspenseWrapper>
         )}
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }

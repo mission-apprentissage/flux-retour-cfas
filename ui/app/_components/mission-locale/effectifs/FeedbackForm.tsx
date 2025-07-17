@@ -4,10 +4,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { IUpdateMissionLocaleEffectif, SITUATION_ENUM, SITUATION_LABEL_ENUM } from "shared";
 
+import { Spinner } from "@/app/_components/common/Spinner";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export function FeedbackForm({
@@ -35,7 +35,12 @@ export function FeedbackForm({
 
   return (
     <>
-      <Box p={3} sx={{ border: "1px solid var(--border-default-blue-france)" }}>
+      <div
+        style={{
+          padding: "24px",
+          border: "1px solid var(--border-default-blue-france)",
+        }}
+      >
         <RadioButtons
           legend="Quel est votre retour sur la prise de contact ?"
           orientation="vertical"
@@ -190,11 +195,9 @@ export function FeedbackForm({
           }}
           style={{ fontWeight: "bold" }}
         />
-      </Box>
+      </div>
       {hasError && (
-        <Typography color="error" sx={{ mt: 2 }}>
-          Une erreur est survenue. Veuillez réessayer.
-        </Typography>
+        <p style={{ color: "red", marginTop: "16px", margin: 0 }}>Une erreur est survenue. Veuillez réessayer.</p>
       )}
       <FormActions
         isFormValid={isFormValid}
@@ -238,7 +241,7 @@ function FormActions({
   const disabled = !isFormValid || isSaving || hasSuccess || (isInjoignable && !didChangeSituation);
 
   return (
-    <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", marginTop: "16px" }}>
       <SaveButton
         type="saveAndQuit"
         selectedButton={selectedButton}
@@ -261,7 +264,7 @@ function FormActions({
           Valider et passer au suivant
         </SaveButton>
       )}
-    </Stack>
+    </div>
   );
 }
 
@@ -306,7 +309,7 @@ function renderButtonContent({
   if (isSaving) {
     return (
       <>
-        <CircularProgress size="1em" sx={{ mr: 1 }} />
+        <Spinner size="1rem" color="currentColor" style={{ marginRight: "0.5rem" }} />
         En cours...
       </>
     );

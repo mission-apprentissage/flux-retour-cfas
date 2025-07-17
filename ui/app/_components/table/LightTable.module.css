@@ -1,0 +1,59 @@
+.caption {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-title-blue-france);
+  text-align: left;
+}
+
+.empty {
+  font-style: italic;
+  padding: 2rem;
+  text-align: center;
+}
+
+.wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  display: grid;
+  width: 100%;
+  font-size: 14px;
+}
+
+.row {
+  display: contents;
+}
+
+.row.striped .cell {
+  background-color: #f9f9f9;
+}
+
+.row.clickable {
+  cursor: pointer;
+}
+
+.row.clickable:hover .cell {
+  background-color: #f8f8f8 !important;
+}
+
+.cell {
+  padding: 12px 20px 12px 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  transition: background-color 0.2s ease;
+}
+
+.cell.numeric {
+  justify-content: flex-end;
+}
+
+.cell.text {
+  justify-content: flex-start;
+}
+
+.pagination {
+  margin-top: 1rem;
+}
