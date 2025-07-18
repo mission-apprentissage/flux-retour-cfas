@@ -74,11 +74,6 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: "/cfa/:path*",
-        destination: "/reinscription",
-        permanent: true,
-      },
       // {
       //   source: "/mission-locale",
       //   destination: "/",

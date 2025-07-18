@@ -1,0 +1,15 @@
+@media (min-width: 768px) {
+  .priorityContainer {
+    padding: 24px;
+  }
+}
+
+.priorityContainer div[style*="grid"] > div,
+.priorityContainer div[style*="grid"] > div > div,
+.priorityContainer div[style*="backgroundColor"] {
+  background-color: white !important;
+}
+
+.priorityContainer div[style*="grid"] > div:hover > div {
+  background-color: #f8f8f8 !important;
+}

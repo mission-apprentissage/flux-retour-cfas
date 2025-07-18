@@ -1,6 +1,5 @@
 "use client";
 
-import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
   IEffecifMissionLocale,
@@ -52,7 +51,7 @@ export function MissionLocaleEffectifDisplay({
   }, [effectif]);
 
   if (!effectif) {
-    return <Typography sx={{ marginTop: 2 }}>Aucune donnée à afficher.</Typography>;
+    return <p style={{ marginTop: "1rem" }}>Aucune donnée à afficher.</p>;
   }
 
   const isFormValid =

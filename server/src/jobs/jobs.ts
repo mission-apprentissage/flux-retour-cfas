@@ -58,6 +58,7 @@ import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
+import { updateOrganismeIdInOrganisations } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
@@ -434,6 +435,11 @@ export async function setupJobProcessor() {
       "tmp:force-hydrate-transmissions": {
         handler: async () => {
           return forceHydrateAllTransmissions();
+        },
+      },
+      "tmp:migration:organisation-organisme": {
+        handler: async () => {
+          return updateOrganismeIdInOrganisations();
         },
       },
     },

@@ -9,6 +9,7 @@ import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
+import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
 export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
   const ml = await organisationsDb()
@@ -235,4 +236,36 @@ export const getMissionsLocalesStatsAdminById = async (
   rqth?: boolean
 ) => {
   return getMissionLocaleStat(missionLocaleId, missionLocaleActivationDate, mineur, rqth);
+};
+
+// CFA
+
+export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
+  const organisation = await getOrganisationOrganismeByOrganismeId(organisme_id);
+
+  if (!organisation) {
+    throw Boom.notFound(`No organisation found for id: ${organisme_id}`);
+  }
+
+  await organisationsDb().updateOne(
+    { _id: organisation._id, type: "ORGANISME_FORMATION" },
+    {
+      $set: {
+        ml_beta_activated_at: date,
+      },
+    }
+  );
+
+  return organisation;
+};
+
+export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organismeId: ObjectId) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    {
+      $set: {
+        "computed.organisme.ml_beta_activated_at": date,
+      },
+    }
+  );
 };

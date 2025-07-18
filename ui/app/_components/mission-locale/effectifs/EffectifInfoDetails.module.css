@@ -1,0 +1,35 @@
+.effectifInfoDetailsContainer {
+  background-color: var(--background-default-grey-active);
+  padding: 1.5rem;
+}
+
+.effectifInfoDetailsContainer p {
+  margin: 0.25rem 0;
+}
+
+.detailsSection {
+  margin-top: 1rem;
+}
+
+.detailsSection > div > p:first-child {
+  margin: 0;
+  font-weight: bold;
+}
+
+.detailsTitleWithMargin {
+  font-weight: bold;
+}
+
+.contractItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.effectifInfoDetailsContainer .fr-col-md-4 p:first-child {
+  font-weight: bold;
+}
+
+.noDataSpan {
+  color: #666666;
+  font-style: italic;
+}
