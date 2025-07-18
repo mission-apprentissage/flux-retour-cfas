@@ -196,6 +196,16 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
+const filterByJointOrganismePipelineMl = () => {
+  return [
+    {
+      $match: {
+        in_joint_organisme_range: true,
+      },
+    },
+  ];
+};
+
 /**
  * Création du match sur les dernier statuts
  * @param statut Liste de statuts à matcher
@@ -248,6 +258,30 @@ const addFieldFromActivationDate = (mlActivationDate?: Date) => {
       $addFields: {
         in_activation_range: {
           $cond: [IN_ACTIVATION_RANGE_CONDITION, true, false],
+        },
+      },
+    },
+  ];
+};
+
+const addFieldFromJointOrganisme = () => {
+  const IN_JOINT_ORGANISME_RANGE_CONDITION = {
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
+      },
+      {
+        $gte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+      },
+    ],
+  };
+
+  // TODO ajout ici des conditions pour afficher les effectifs qui ont été créés après l'activation de la mission locale
+  return [
+    {
+      $addFields: {
+        in_joint_organisme_range: {
+          $cond: [IN_JOINT_ORGANISME_RANGE_CONDITION, true, false],
         },
       },
     },
@@ -473,6 +507,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
+    ...addFieldFromJointOrganisme(),
+    ...filterByJointOrganismePipelineMl(),
     ...addFieldTraitementStatus(),
     ...matchTraitementEffectifPipelineMl(nom_liste),
     {
@@ -552,6 +588,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
+    ...addFieldFromJointOrganisme(),
+    ...filterByJointOrganismePipelineMl(),
   ];
 
   if (traite) {
@@ -741,6 +779,8 @@ export const getEffectifsListByMisisonLocaleId = (
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
+    ...addFieldFromJointOrganisme(),
+    ...filterByJointOrganismePipelineMl(),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
     {
@@ -903,6 +943,8 @@ const getEffectifMissionLocaleEligibleToBrevoAggregation = (
   ...filterByDernierStatutPipelineMl(statut as any, new Date()),
   ...addFieldFromActivationDate(missionLocaleActivationDate),
   ...filterByActivationDatePipelineMl(),
+  ...addFieldFromJointOrganisme(),
+  ...filterByJointOrganismePipelineMl(),
 ];
 
 export const getEffectifMissionLocaleEligibleToBrevoCount = async (
@@ -1147,6 +1189,8 @@ export const computeMissionLocaleStats = async (
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
+    ...addFieldFromJointOrganisme(),
+    ...filterByJointOrganismePipelineMl(),
     {
       $group: {
         _id: null,
@@ -1459,6 +1503,8 @@ export const getMissionLocaleStat = async (
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
+    ...addFieldFromJointOrganisme(),
+    ...filterByJointOrganismePipelineMl(),
     ...addFieldTraitementStatus(),
     {
       $group: {
