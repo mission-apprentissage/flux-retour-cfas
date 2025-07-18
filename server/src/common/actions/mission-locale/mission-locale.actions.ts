@@ -3,7 +3,12 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
+import {
+  IEffectif,
+  IOrganisationMissionLocale,
+  IOrganisationOrganismeFormation,
+  IUpdateMissionLocaleEffectif,
+} from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
@@ -196,16 +201,6 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-const filterByJointOrganismePipelineMl = () => {
-  return [
-    {
-      $match: {
-        in_joint_organisme_range: true,
-      },
-    },
-  ];
-};
-
 /**
  * Création du match sur les dernier statuts
  * @param statut Liste de statuts à matcher
@@ -225,14 +220,41 @@ const matchDernierStatutPipelineMl = (statut): any => {
  * @param missionLocaleId Id de la mission locale
  * @returns Objet match
  */
-const generateMissionLocaleMatchStage = (missionLocaleId: ObjectId) => {
-  return {
-    $match: {
-      mission_locale_id: missionLocaleId,
-      "effectif_snapshot.annee_scolaire": { $in: getAnneesScolaireListFromDate(new Date()) },
+const generateOrganisationMatchStage = (organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation) => {
+  const matchStage = [
+    {
+      $match: {
+        "effectif_snapshot.annee_scolaire": { $in: getAnneesScolaireListFromDate(new Date()) },
+      },
     },
-  };
+    ...matchFromJointOrganisme(organisation.type),
+  ];
+  switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return [
+        {
+          $match: {
+            mission_locale_id: (organisation as IOrganisationMissionLocale)._id,
+          },
+        },
+        ...matchStage,
+      ];
+    case "ORGANISME_FORMATION":
+      return [
+        {
+          $match: {
+            "effectif_snapshot.organisme_id": new ObjectId(
+              (organisation as IOrganisationOrganismeFormation).organisme_id as string
+            ),
+          },
+        },
+        ...matchStage,
+      ];
+    default:
+      throw new Error(`Unknown organisation type: ${organisation}`);
+  }
 };
+
 const addFieldFromActivationDate = (mlActivationDate?: Date) => {
   let thresholdDate: Date | null = null;
 
@@ -264,8 +286,8 @@ const addFieldFromActivationDate = (mlActivationDate?: Date) => {
   ];
 };
 
-const addFieldFromJointOrganisme = () => {
-  const IN_JOINT_ORGANISME_RANGE_CONDITION = {
+const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  const MISSION_LOCALE_CONDITION = {
     $or: [
       {
         $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
@@ -273,7 +295,23 @@ const addFieldFromJointOrganisme = () => {
       {
         $gte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
       },
+      {
+        $eq: ["$organisme_data.acc_conjoint", true],
+      },
     ],
+  };
+
+  const ORGANISME_CONDITION = {
+    $lte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+  };
+
+  const condition = () => {
+    switch (visibility) {
+      case "MISSION_LOCALE":
+        return { $cond: [MISSION_LOCALE_CONDITION, true, false] };
+      case "ORGANISME_FORMATION":
+        return { $cond: [ORGANISME_CONDITION, true, false] };
+    }
   };
 
   // TODO ajout ici des conditions pour afficher les effectifs qui ont été créés après l'activation de la mission locale
@@ -281,14 +319,44 @@ const addFieldFromJointOrganisme = () => {
     {
       $addFields: {
         in_joint_organisme_range: {
-          $cond: [IN_JOINT_ORGANISME_RANGE_CONDITION, true, false],
+          ...condition(),
+        },
+      },
+    },
+    {
+      $match: {
+        in_joint_organisme_range: true,
+      },
+    },
+  ];
+};
+
+const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  switch (visibility) {
+    case "MISSION_LOCALE":
+      return addMissionLocaleFieldTraitementStatus();
+    case "ORGANISME_FORMATION":
+      return addOrganismeFieldTraitementStatus();
+  }
+};
+
+const addOrganismeFieldTraitementStatus = () => {
+  const A_TRAITER_CONDIITON = {
+    $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
+  };
+
+  return [
+    {
+      $addFields: {
+        a_traiter: {
+          $cond: [A_TRAITER_CONDIITON, true, false],
         },
       },
     },
   ];
 };
 
-const addFieldTraitementStatus = () => {
+const addMissionLocaleFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
   const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] };
   const A_RISQUE_CONDITION = {
@@ -495,21 +563,19 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 }
 
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
   missionLocaleActivationDate?: Date
 ) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
-    ...addFieldFromJointOrganisme(),
-    ...filterByJointOrganismePipelineMl(),
-    ...addFieldTraitementStatus(),
+    ...addFieldTraitementStatus(organisation.type),
     ...matchTraitementEffectifPipelineMl(nom_liste),
     {
       $sort: {
@@ -550,7 +616,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 };
 
 export const getEffectifsParMoisByMissionLocaleId = async (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
   missionLocaleActivationDate?: Date
 ) => {
@@ -583,13 +649,11 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
   const organismeMissionLocaleAggregation: any[] = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
-    ...addFieldTraitementStatus(),
-    ...addFieldFromJointOrganisme(),
-    ...filterByJointOrganismePipelineMl(),
+    ...addFieldTraitementStatus(organisation.type),
   ];
 
   if (traite) {
@@ -701,19 +765,19 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 };
 
 export const getEffectifFromMissionLocaleId = async (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   missionLocaleActivationDate?: Date
 ) => {
   const aggregation = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...generateOrganisationMatchStage(organisation),
     {
       $match: {
         "effectif_snapshot._id": new ObjectId(effectifId),
       },
     },
-    ...addFieldTraitementStatus(),
+    ...addFieldTraitementStatus(organisation.type),
     ...createDernierStatutFieldPipelineML(new Date()),
     ...lookUpOrganisme(true),
     {
@@ -756,7 +820,7 @@ export const getEffectifFromMissionLocaleId = async (
   }
 
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
-    missionLocaleMongoId,
+    organisation,
     new ObjectId(effectifId),
     nom_liste,
     missionLocaleActivationDate
@@ -765,7 +829,7 @@ export const getEffectifFromMissionLocaleId = async (
 };
 
 export const getEffectifsListByMisisonLocaleId = (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
   missionLocaleActivationDate?: Date
 ) => {
@@ -773,14 +837,12 @@ export const getEffectifsListByMisisonLocaleId = (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const effectifsMissionLocaleAggregation = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(),
-    ...addFieldFromJointOrganisme(),
-    ...filterByJointOrganismePipelineMl(),
+    ...addFieldTraitementStatus(organisation.type),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
     {
@@ -869,14 +931,16 @@ export const getEffectifsListByMisisonLocaleId = (
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
-export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
+export const getEffectifARisqueByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
   const pipeline = [
-    generateMissionLocaleMatchStage(missionLocaleMongoId),
+    ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
-    ...addFieldTraitementStatus(),
+    ...addFieldTraitementStatus(organisation.type),
     {
       $facet: {
         hadEffectifs: [
@@ -934,27 +998,25 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
 };
 
 const getEffectifMissionLocaleEligibleToBrevoAggregation = (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   statut,
   missionLocaleActivationDate?: Date
 ) => [
-  generateMissionLocaleMatchStage(missionLocaleMongoId),
+  ...generateOrganisationMatchStage(organisation),
   ...EFF_MISSION_LOCALE_FILTER,
   ...filterByDernierStatutPipelineMl(statut as any, new Date()),
   ...addFieldFromActivationDate(missionLocaleActivationDate),
   ...filterByActivationDatePipelineMl(),
-  ...addFieldFromJointOrganisme(),
-  ...filterByJointOrganismePipelineMl(),
 ];
 
 export const getEffectifMissionLocaleEligibleToBrevoCount = async (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   missionLocaleActivationDate?: Date
 ) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
 
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation, statut, missionLocaleActivationDate),
 
     {
       $facet: {
@@ -985,10 +1047,13 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
   return data;
 };
 
-export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activationDate?: Date) {
+export async function getAllEffectifsParMois(
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  activationDate?: Date
+) {
   const fetchByType = (type: API_EFFECTIF_LISTE) =>
     getEffectifsParMoisByMissionLocaleId(
-      missionLocaleId,
+      organisation,
       { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
       activationDate
     );
@@ -996,7 +1061,7 @@ export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activati
   const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
     fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(missionLocaleId),
+    getEffectifARisqueByMissionLocaleId(organisation),
     fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
   ]);
 
@@ -1006,12 +1071,12 @@ export async function getAllEffectifsParMois(missionLocaleId: ObjectId, activati
 // BAL
 
 export const getEffectifMissionLocaleEligibleToBrevo = async (
-  missionLocaleMongoId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   missionLocaleActivationDate?: Date
 ) => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation, statut, missionLocaleActivationDate),
     {
       $match: {
         soft_deleted: { $ne: true },
@@ -1169,7 +1234,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export const computeMissionLocaleStats = async (
-  missionLocaleId: ObjectId,
+  missionLocale: IOrganisationMissionLocale,
   missionLocaleActivationDate?: Date
 ): Promise<IMissionLocaleStats["stats"]> => {
   const statut = [STATUT_APPRENANT.RUPTURANT];
@@ -1183,14 +1248,12 @@ export const computeMissionLocaleStats = async (
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
   const effectifsMissionLocaleAggregation = [
-    generateMissionLocaleMatchStage(missionLocaleId),
+    ...generateOrganisationMatchStage(missionLocale),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(),
-    ...addFieldFromJointOrganisme(),
-    ...filterByJointOrganismePipelineMl(),
+    ...addFieldTraitementStatus(missionLocale.type),
     {
       $group: {
         _id: null,
@@ -1465,7 +1528,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
 };
 
 export const getMissionLocaleStat = async (
-  missionLocaleId: ObjectId,
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   missionLocaleActivationDate?: Date,
   mineur?: boolean,
   rqth?: boolean
@@ -1498,14 +1561,12 @@ export const getMissionLocaleStat = async (
   };
 
   const effectifsMissionLocaleAggregation = [
-    generateMissionLocaleMatchStage(missionLocaleId),
+    ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(statut as any, new Date()),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
-    ...addFieldFromJointOrganisme(),
-    ...filterByJointOrganismePipelineMl(),
-    ...addFieldTraitementStatus(),
+    ...addFieldTraitementStatus(organisation.type),
     {
       $group: {
         _id: null,

@@ -230,12 +230,12 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
 };
 
 export const getMissionsLocalesStatsAdminById = async (
-  missionLocaleId: ObjectId,
+  missionLocale: IOrganisationMissionLocale,
   missionLocaleActivationDate?: Date,
   mineur?: boolean,
   rqth?: boolean
 ) => {
-  return getMissionLocaleStat(missionLocaleId, missionLocaleActivationDate, mineur, rqth);
+  return getMissionLocaleStat(missionLocale, missionLocaleActivationDate, mineur, rqth);
 };
 
 // CFA

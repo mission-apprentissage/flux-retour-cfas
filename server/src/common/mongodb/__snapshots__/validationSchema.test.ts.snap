@@ -14362,6 +14362,62 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "mission_locale_id": {
       "bsonType": "objectId",
     },
+    "organisme_data": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "acc_conjoint": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif",
+            },
+            "commentaires": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "motif": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "enum": [
+                      "MOBILITE",
+                      "LOGEMENT",
+                      "SANTE",
+                      "FINANCE",
+                      "ADMINISTRATIF",
+                      "REORIENTATION",
+                      "RECHERCHE_EMPLOI",
+                      "AUTRE",
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "rupture": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Indique si l'effectif est signalé en rupture par le CFA",
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "situation": {
       "anyOf": [
         {
