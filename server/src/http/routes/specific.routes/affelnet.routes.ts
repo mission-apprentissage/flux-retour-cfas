@@ -54,7 +54,7 @@ const computeFields = (data) => {
 
   if (maxContrats === 1) {
     extraFields.push({ label: `Date début contrat (selon le CFA)`, value: `date_debut_contrat_1` });
-    extraFields.push({ label: `Date fin contrat (selon le CFA)}`, value: `date_fin_contrat_1` });
+    extraFields.push({ label: `Date fin contrat (selon le CFA)`, value: `date_fin_contrat_1` });
   } else {
     for (let i = 0; i < maxContrats; i++) {
       extraFields.push({ label: `Date début contrat n°${i + 1} (selon le CFA)`, value: `date_debut_contrat_${i + 1}` });
