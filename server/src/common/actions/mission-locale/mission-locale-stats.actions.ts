@@ -9,7 +9,7 @@ import { computeMissionLocaleStats } from "./mission-locale.actions";
 
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId) => {
   const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const mlStats = await computeMissionLocaleStats(ml._id, ml.activated_at);
+  const mlStats = await computeMissionLocaleStats(ml, ml.activated_at);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
