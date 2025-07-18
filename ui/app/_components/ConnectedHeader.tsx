@@ -57,6 +57,13 @@ export function ConnectedHeader() {
             target: "_self",
           },
         });
+        baseItems.push({
+          text: "Paramètres",
+          linkProps: {
+            href: "/parametres",
+            target: "_self",
+          },
+        });
       } else {
         baseItems.push({
           text: "Mon tableau de bord",
@@ -223,7 +230,7 @@ export function ConnectedHeader() {
       text: "Glossaire",
     });
 
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
+    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !user?.organisation?.ml_beta_activated_at) {
       baseItems.push({
         text: "Paramètres",
         linkProps: {
