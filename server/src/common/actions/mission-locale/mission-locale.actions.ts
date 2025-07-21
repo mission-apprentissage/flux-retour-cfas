@@ -415,6 +415,78 @@ const addMissionLocaleFieldTraitementStatus = () => {
   ];
 };
 
+const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  switch (visibility) {
+    case "MISSION_LOCALE":
+      return [
+        {
+          $project: {
+            id: "$effectif_snapshot._id",
+            nom: "$effectif_snapshot.apprenant.nom",
+            prenom: "$effectif_snapshot.apprenant.prenom",
+            date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+            adresse: "$effectif_snapshot.apprenant.adresse",
+            formation: "$effectif_snapshot.formation",
+            courriel: "$effectif_snapshot.apprenant.courriel",
+            telephone: "$effectif_snapshot.apprenant.telephone",
+            telephone_corrected: "$effectif_choice.telephone",
+            autorisation_contact: "$effectif_choice.confirmation",
+            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
+            rqth: "$effectif_snapshot.apprenant.rqth",
+            a_traiter: "$a_traiter",
+            injoignable: "$injoignable",
+            transmitted_at: "$effectif_snapshot.transmitted_at",
+            source: "$effectif_snapshot.source",
+            dernier_statut: "$dernierStatut",
+            organisme: "$organisme",
+            contrats: "$effectif_snapshot.contrats",
+            "situation.situation": "$situation",
+            "situation.situation_autre": "$situation_autre",
+            "situation.deja_connu": "$deja_connu",
+            "situation.commentaires": "$commentaires",
+            contacts_tdb: "$tdb_users",
+            prioritaire: "$a_risque",
+            a_contacter: "$a_contacter",
+            current_status: "$current_status",
+            organisme_data: "$organisme_data",
+          },
+        },
+      ];
+    case "ORGANISME_FORMATION":
+      return [
+        {
+          $project: {
+            id: "$effectif_snapshot._id",
+            nom: "$effectif_snapshot.apprenant.nom",
+            prenom: "$effectif_snapshot.apprenant.prenom",
+            date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+            adresse: "$effectif_snapshot.apprenant.adresse",
+            formation: "$effectif_snapshot.formation",
+            courriel: "$effectif_snapshot.apprenant.courriel",
+            telephone: "$effectif_snapshot.apprenant.telephone",
+            telephone_corrected: "$effectif_choice.telephone",
+            autorisation_contact: "$effectif_choice.confirmation",
+            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
+            rqth: "$effectif_snapshot.apprenant.rqth",
+            a_traiter: "$a_traiter",
+            transmitted_at: "$effectif_snapshot.transmitted_at",
+            source: "$effectif_snapshot.source",
+            dernier_statut: "$dernierStatut",
+            organisme: "$organisme",
+            contrats: "$effectif_snapshot.contrats",
+            "situation.situation": "$situation",
+            "situation.situation_autre": "$situation_autre",
+            "situation.deja_connu": "$deja_connu",
+            "situation.commentaires": "$commentaires",
+            contacts_tdb: "$tdb_users",
+            current_status: "$current_status",
+            organisme_data: "$organisme_data",
+          },
+        },
+      ];
+  }
+};
+
 const lookUpOrganisme = (withContacts: boolean = false) => {
   return [
     {
@@ -783,37 +855,7 @@ export const getEffectifFromMissionLocaleId = async (
     ...addFieldTraitementStatus(organisation.type),
     ...createDernierStatutFieldPipelineML(new Date()),
     ...lookUpOrganisme(true),
-    {
-      $project: {
-        id: "$effectif_snapshot._id",
-        nom: "$effectif_snapshot.apprenant.nom",
-        prenom: "$effectif_snapshot.apprenant.prenom",
-        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        adresse: "$effectif_snapshot.apprenant.adresse",
-        formation: "$effectif_snapshot.formation",
-        courriel: "$effectif_snapshot.apprenant.courriel",
-        telephone: "$effectif_snapshot.apprenant.telephone",
-        telephone_corrected: "$effectif_choice.telephone",
-        autorisation_contact: "$effectif_choice.confirmation",
-        responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
-        rqth: "$effectif_snapshot.apprenant.rqth",
-        a_traiter: "$a_traiter",
-        injoignable: "$injoignable",
-        transmitted_at: "$effectif_snapshot.transmitted_at",
-        source: "$effectif_snapshot.source",
-        dernier_statut: "$dernierStatut",
-        organisme: "$organisme",
-        contrats: "$effectif_snapshot.contrats",
-        "situation.situation": "$situation",
-        "situation.situation_autre": "$situation_autre",
-        "situation.deja_connu": "$deja_connu",
-        "situation.commentaires": "$commentaires",
-        contacts_tdb: "$tdb_users",
-        prioritaire: "$a_risque",
-        a_contacter: "$a_contacter",
-        current_status: "$current_status",
-      },
-    },
+    ...getEffectifProjectionStage(organisation.type),
   ];
 
   const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
