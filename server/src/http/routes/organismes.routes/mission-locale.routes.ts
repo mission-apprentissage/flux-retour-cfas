@@ -58,12 +58,7 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
 
 const getEffectifMissionLocale = async (req, { locals }) => {
   const { nom_liste } = await validateFullZodObjectSchema(req.query, {
-    nom_liste: z.enum([
-      API_EFFECTIF_LISTE.PRIORITAIRE,
-      API_EFFECTIF_LISTE.INJOIGNABLE,
-      API_EFFECTIF_LISTE.A_TRAITER,
-      API_EFFECTIF_LISTE.TRAITE,
-    ]),
+    nom_liste: z.enum([API_EFFECTIF_LISTE.A_TRAITER, API_EFFECTIF_LISTE.TRAITE]),
   });
 
   const effectifId = req.params.id;
