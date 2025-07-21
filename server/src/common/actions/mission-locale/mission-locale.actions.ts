@@ -351,6 +351,9 @@ const addOrganismeFieldTraitementStatus = () => {
         a_traiter: {
           $cond: [A_TRAITER_CONDIITON, true, false],
         },
+        a_risque: false,
+        injoignable: false,
+        a_contacter: false,
       },
     },
   ];
