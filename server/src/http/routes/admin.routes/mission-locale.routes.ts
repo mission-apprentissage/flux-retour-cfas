@@ -156,7 +156,7 @@ const getMlStats = async ({ params, query }) => {
   const mineur_only = query.mineur_only === "true";
 
   const ml = await getMissionsLocalesStatsAdminById(
-    organisationMl._id,
+    organisationMl,
     organisationMl.activated_at,
     mineur_only,
     rqth_only
@@ -178,7 +178,7 @@ export const getEffectifsParMoisMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
 
-  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
 };
 
 const getEffectifMissionLocale = async (req) => {
@@ -191,7 +191,7 @@ const getEffectifMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${mlId}`);
   }
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const updateMissionLocaleEffectif = async (req) => {
@@ -221,7 +221,7 @@ const getSyncBrevoContactInfo = async (req) => {
   if (!organisationMl) {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
-  return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl?._id, organisationMl?.activated_at);
+  return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl, organisationMl?.activated_at);
 };
 
 const syncBrevoContactMissionLocale = async (req) => {
@@ -232,7 +232,7 @@ const syncBrevoContactMissionLocale = async (req) => {
   }
 
   const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(
-    organisationMl?._id,
+    organisationMl,
     organisationMl?.activated_at
   );
   const listId = await getOrCreateBrevoList(organisationMl.ml_id, organisationMl?.nom, BREVO_LISTE_TYPE.MISSION_LOCALE);

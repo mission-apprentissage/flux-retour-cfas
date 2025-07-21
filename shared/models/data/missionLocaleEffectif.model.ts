@@ -33,6 +33,17 @@ export enum SITUATION_LABEL_ENUM {
   AUTRE = "Autre situation / retour",
 }
 
+export enum ACC_CONJOINT_MOTIF_ENUM {
+  MOBILITE = "MOBILITE",
+  LOGEMENT = "LOGEMENT",
+  SANTE = "SANTE",
+  FINANCE = "FINANCE",
+  ADMINISTRATIF = "ADMINISTRATIF",
+  REORIENTATION = "REORIENTATION",
+  RECHERCHE_EMPLOI = "RECHERCHE_EMPLOI",
+  AUTRE = "AUTRE",
+}
+
 export enum API_EFFECTIF_LISTE {
   PRIORITAIRE = "prioritaire",
   INJOIGNABLE = "injoignable",
@@ -41,6 +52,7 @@ export enum API_EFFECTIF_LISTE {
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
+export const zAccConjointMotifEnum = z.nativeEnum(ACC_CONJOINT_MOTIF_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
 export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
@@ -60,6 +72,16 @@ const zMissionLocaleEffectif = z.object({
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
   email_status: zEmailStatusEnum.nullish(),
+  organisme_data: z
+    .object({
+      rupture: z.boolean({ description: "Indique si l'effectif est signalé en rupture par le CFA" }).nullish(),
+      acc_conjoint: z
+        .boolean({ description: "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif" })
+        .nullish(),
+      motif: z.array(zAccConjointMotifEnum).nullish(),
+      commentaires: z.string().nullish(),
+    })
+    .nullish(),
   effectif_choice: z
     .object({
       confirmation: z.boolean().nullish(),
