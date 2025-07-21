@@ -16,7 +16,7 @@ export default () => {
   const router = express.Router();
 
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
-  router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
+  router.put("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
 
   return router;
 };
