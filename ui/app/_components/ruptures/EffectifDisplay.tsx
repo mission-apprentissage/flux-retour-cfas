@@ -18,8 +18,7 @@ import {
   formatMonthAndYear,
   anchorFromLabel,
 } from "../../_utils/ruptures.utils";
-
-import { SearchableTableSection } from "./SearchableTableSection";
+import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
 export function EffectifDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
