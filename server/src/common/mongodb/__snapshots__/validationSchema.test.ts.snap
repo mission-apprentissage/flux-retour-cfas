@@ -9341,6 +9341,16 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "date_rupture": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "deja_connu": {
       "bsonType": [
         "bool",
