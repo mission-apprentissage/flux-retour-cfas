@@ -16,8 +16,7 @@ import {
   formatMonthAndYear,
   anchorFromLabel,
 } from "../../_utils/ruptures.utils";
-
-import { SearchableTableSection } from "./SearchableTableSection";
+import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
 export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
