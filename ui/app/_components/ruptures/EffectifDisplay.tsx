@@ -1,6 +1,7 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
+import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
@@ -23,6 +24,9 @@ export function EffectifDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
+
+  const pathname = usePathname();
+  const isCfaPage = pathname === "/cfa";
 
   const aTraiter = data.a_traiter || [];
   const injoignableList = data.injoignable || [];
@@ -92,7 +96,7 @@ export function EffectifDisplay({ data }: { data: MonthsData }) {
       });
     };
 
-    return [
+    const items = [
       {
         text: totalToTreat > 0 ? <strong>{`A traiter (${totalToTreat})`}</strong> : `A traiter (${totalToTreat})`,
         linkProps: {
@@ -107,6 +111,21 @@ export function EffectifDisplay({ data }: { data: MonthsData }) {
         items: getItems(groupedDataATraiter, "a-traiter"),
       },
       {
+        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
+        linkProps: {
+          href: "#",
+          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            handleSectionChange("deja-traite");
+          },
+        },
+        isActive: selectedSection === "deja-traite",
+        expandedByDefault: selectedSection === "deja-traite",
+        items: getItems(sortedDataTraite, "deja-traite"),
+      },
+    ];
+    if (!isCfaPage) {
+      items.splice(1, 0, {
         text:
           totalInjoignable > 0 ? (
             <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
@@ -123,21 +142,9 @@ export function EffectifDisplay({ data }: { data: MonthsData }) {
         isActive: selectedSection === "injoignable",
         expandedByDefault: selectedSection === "injoignable",
         items: getItems(groupedInjoignable, "injoignable"),
-      },
-      {
-        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
-        linkProps: {
-          href: "#",
-          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
-            e.preventDefault();
-            handleSectionChange("deja-traite");
-          },
-        },
-        isActive: selectedSection === "deja-traite",
-        expandedByDefault: selectedSection === "deja-traite",
-        items: getItems(sortedDataTraite, "deja-traite"),
-      },
-    ];
+      });
+    }
+    return items;
   }, [
     selectedSection,
     groupedDataATraiter,
@@ -149,6 +156,7 @@ export function EffectifDisplay({ data }: { data: MonthsData }) {
     totalToTreat,
     totalInjoignable,
     totalTraite,
+    isCfaPage,
   ]);
 
   return (
