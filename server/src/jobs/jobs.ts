@@ -36,6 +36,7 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
   hydrateMissionLocaleAdresse,
+  hydrateMissionLocaleEffectifDateRupture,
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
@@ -434,6 +435,11 @@ export async function setupJobProcessor() {
       "tmp:force-hydrate-transmissions": {
         handler: async () => {
           return forceHydrateAllTransmissions();
+        },
+      },
+      "tmp:migration:ml-date-rupture": {
+        handler: async () => {
+          return hydrateMissionLocaleEffectifDateRupture();
         },
       },
     },

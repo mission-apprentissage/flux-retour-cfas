@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationMissionLocale } from "shared/models";
@@ -248,4 +249,62 @@ export const updateMissionLocaleAdresseFromExternalData = async (
     );
   }
   return data;
+};
+
+export const hydrateMissionLocaleEffectifDateRupture = async () => {
+  const BATCH_SIZE = 1000;
+
+  let batch: Array<{ _id: ObjectId; date_rupture: Date }> = [];
+
+  const processBatch = (currentBatch: Array<{ _id: ObjectId; date_rupture: Date }>) => {
+    if (currentBatch.length === 0) {
+      return;
+    }
+
+    try {
+      const mapped = currentBatch.map(({ _id, date_rupture }) => ({
+        updateOne: {
+          filter: { _id },
+          update: {
+            $set: {
+              date_rupture,
+            },
+          },
+        },
+      }));
+
+      return missionLocaleEffectifsDb().bulkWrite(mapped);
+    } catch (e) {
+      captureException(e);
+    }
+  };
+
+  const cursor = missionLocaleEffectifsDb().find({ date_rupture: { $exists: false } });
+
+  while (await cursor.hasNext()) {
+    const eff = await cursor.next();
+    if (!eff) {
+      continue;
+    }
+    const parcours = eff?.effectif_snapshot?._computed?.statut?.parcours;
+
+    if (!parcours || parcours.length === 0) {
+      continue;
+    }
+
+    const lastRuptureDate = parcours.findLast((statut) => statut.valeur === "RUPTURANT")?.date;
+
+    lastRuptureDate &&
+      batch.push({
+        _id: eff._id,
+        date_rupture: lastRuptureDate,
+      });
+
+    if (batch.length === BATCH_SIZE) {
+      await processBatch(batch);
+      batch = [];
+    }
+  }
+
+  await processBatch(batch);
 };

@@ -11,10 +11,7 @@ export type EffectifData = {
 };
 
 export type EffectifPriorityData = EffectifData & {
-  dernier_statut: {
-    date: string;
-    statut: string;
-  };
+  date_rupture: string;
 };
 
 export type MonthItem = {

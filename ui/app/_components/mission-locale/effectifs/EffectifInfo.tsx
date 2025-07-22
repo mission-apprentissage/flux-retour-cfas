@@ -74,7 +74,7 @@ export function EffectifInfo({
             ) : (
               <Badge severity="success">traité</Badge>
             )}
-            <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.dernier_statut?.date)}</p>
+            <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
           </Stack>
 
           {isAdmin && !effectif.a_traiter && (
