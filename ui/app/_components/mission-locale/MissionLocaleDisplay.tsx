@@ -8,15 +8,16 @@ import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 
-import { SearchableTableSection } from "./SearchableTableSection";
-import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "./types";
+import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "../../../common/types/ruptures";
 import {
   groupMonthsOlderThanSixMonths,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
-} from "./utils";
+} from "../../_utils/ruptures.utils";
+
+import { SearchableTableSection } from "./SearchableTableSection";
 
 export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");

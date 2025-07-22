@@ -8,11 +8,11 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
+import { EffectifData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
+import { formatMonthAndYear, anchorFromLabel } from "../../_utils/ruptures.utils";
 import { MlSuccessCard } from "../card/MlSuccessCard";
 
 import styles from "./MonthTable.module.css";
-import { EffectifData, MonthItem, SelectedSection } from "./types";
-import { formatMonthAndYear, anchorFromLabel } from "./utils";
 
 type MonthTableProps = {
   monthItem: MonthItem;
