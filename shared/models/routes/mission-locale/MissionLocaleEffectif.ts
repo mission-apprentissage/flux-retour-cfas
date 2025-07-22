@@ -39,7 +39,7 @@ const zEffectifMissionLocale = z
     prioritaire: z.boolean().nullish(),
     injoignable: z.boolean().nullish(),
     autorisation_contact: z.boolean().nullish(),
-    dernier_statut: z
+    date_rupture: z
       .object({
         date: z.date(),
         valeur: zStatutApprenantEnum,
