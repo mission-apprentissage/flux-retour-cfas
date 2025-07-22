@@ -184,7 +184,7 @@ const matchDernierStatutPipelineMl = (): any => {
   const match = {
     $match: {
       "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-      $date_rupture: { $lte: Date.now() },
+      date_rupture: { $lte: Date.now() },
     },
   };
   return match;
@@ -869,7 +869,6 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
 
 const getEffectifMissionLocaleEligibleToBrevoAggregation = (
   missionLocaleMongoId: ObjectId,
-  statut,
   missionLocaleActivationDate?: Date
 ) => [
   generateMissionLocaleMatchStage(missionLocaleMongoId),
@@ -884,7 +883,7 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
   missionLocaleActivationDate?: Date
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, missionLocaleActivationDate),
 
     {
       $facet: {
@@ -940,7 +939,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   missionLocaleActivationDate?: Date
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, missionLocaleActivationDate),
     {
       $match: {
         soft_deleted: { $ne: true },
