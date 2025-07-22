@@ -7,6 +7,7 @@ import { API_EFFECTIF_LISTE } from "shared";
 import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { _get } from "@/common/httpClient";
 
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "../../../common/types/ruptures";
 import {
@@ -18,7 +19,7 @@ import {
 } from "../../_utils/ruptures.utils";
 import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
-export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
+export function EffectifDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");

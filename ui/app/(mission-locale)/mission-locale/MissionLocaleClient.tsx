@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { MissionLocaleDisplay } from "@/app/_components/mission-locale/MissionLocaleDisplay";
 import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
+import { EffectifDisplay } from "@/app/_components/ruptures/EffectifDisplay";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
@@ -23,7 +23,7 @@ export default function MissionLocaleClient() {
     <div className="fr-container">
       <MLHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <MissionLocaleDisplay data={data} />}
+        {data && <EffectifDisplay data={data} />}
       </SuspenseWrapper>
     </div>
   );
