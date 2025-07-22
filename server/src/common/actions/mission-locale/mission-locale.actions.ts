@@ -184,7 +184,7 @@ const matchDernierStatutPipelineMl = (): any => {
   const match = {
     $match: {
       "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-      date_rupture: { $lte: Date.now() },
+      date_rupture: { $lte: new Date() },
     },
   };
   return match;
