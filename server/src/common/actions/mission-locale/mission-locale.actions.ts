@@ -2,7 +2,7 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor } from "mongodb";
-import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
@@ -58,12 +58,10 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
 export const getAllEffectifForMissionLocaleCursor = (
   mission_locale_id: number
 ): AggregationCursor<IEffectif | IEffectifDECA> => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const effectifsMissionLocaleAggregation = [
     ...unionWithDecaForMissionLocale(mission_locale_id),
     ...createDernierStatutFieldPipeline(new Date()),
-    matchDernierStatutPipelineMl(statut),
+    matchDernierStatutPipelineMl(),
     {
       $unset: ["dernierStatutDureeInDay"],
     },
@@ -140,11 +138,11 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
   }
 };
 
-const createDernierStatutFieldPipelineML = (date: Date) => [
+const createDernierStatutFieldPipelineML = () => [
   {
     $addFields: {
       dernierStatutDureeInDay: {
-        $dateDiff: { startDate: "$date_rupture", endDate: date, unit: "day" },
+        $dateDiff: { startDate: "$date_rupture", endDate: new Date(), unit: "day" },
       },
     },
   },
@@ -163,8 +161,8 @@ const createDernierStatutFieldPipelineML = (date: Date) => [
  * @param date Date de calcul du filtre
  * @returns Une liste de addFields et de match
  */
-const filterByDernierStatutPipelineMl = (statut: Array<StatutApprenant>, date: Date) => {
-  return [...createDernierStatutFieldPipelineML(date), matchDernierStatutPipelineMl(statut)];
+const filterByDernierStatutPipelineMl = () => {
+  return [...createDernierStatutFieldPipelineML(), matchDernierStatutPipelineMl()];
 };
 
 const filterByActivationDatePipelineMl = () => {
@@ -182,10 +180,11 @@ const filterByActivationDatePipelineMl = () => {
  * @param statut Liste de statuts à matcher
  * @returns Un obet match
  */
-const matchDernierStatutPipelineMl = (statut): any => {
+const matchDernierStatutPipelineMl = (): any => {
   const match = {
     $match: {
-      $or: statut.map((s) => ({ "effectif_snapshot._computed.statut.en_cours": s })),
+      "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+      $date_rupture: { $lte: Date.now() },
     },
   };
   return match;
@@ -447,11 +446,10 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   nom_liste: API_EFFECTIF_LISTE,
   missionLocaleActivationDate?: Date
 ) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
   const aggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
@@ -525,12 +523,10 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     return dates;
   };
 
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const organismeMissionLocaleAggregation: any[] = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...addFieldTraitementStatus(),
   ];
@@ -657,7 +653,7 @@ export const getEffectifFromMissionLocaleId = async (
       },
     },
     ...addFieldTraitementStatus(),
-    ...createDernierStatutFieldPipelineML(new Date()),
+    ...createDernierStatutFieldPipelineML(),
     ...lookUpOrganisme(true),
     {
       $project: {
@@ -677,7 +673,7 @@ export const getEffectifFromMissionLocaleId = async (
         injoignable: "$injoignable",
         transmitted_at: "$effectif_snapshot.transmitted_at",
         source: "$effectif_snapshot.source",
-        dernier_statut: "$dernierStatut",
+        date_rupture: "$date_rupture",
         organisme: "$organisme",
         contrats: "$effectif_snapshot.contrats",
         "situation.situation": "$situation",
@@ -712,13 +708,12 @@ export const getEffectifsListByMisisonLocaleId = (
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
   missionLocaleActivationDate?: Date
 ) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
@@ -811,12 +806,10 @@ export const getEffectifsListByMisisonLocaleId = (
 };
 
 export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: ObjectId) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const pipeline = [
     generateMissionLocaleMatchStage(missionLocaleMongoId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldTraitementStatus(),
     {
       $facet: {
@@ -840,7 +833,7 @@ export const getEffectifARisqueByMissionLocaleId = async (missionLocaleMongoId: 
           },
           {
             $sort: {
-              "dernierStatut.date": -1,
+              date_rupture: -1,
             },
           },
           ...lookUpOrganisme(),
@@ -881,7 +874,7 @@ const getEffectifMissionLocaleEligibleToBrevoAggregation = (
 ) => [
   generateMissionLocaleMatchStage(missionLocaleMongoId),
   ...EFF_MISSION_LOCALE_FILTER,
-  ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+  ...filterByDernierStatutPipelineMl(),
   ...addFieldFromActivationDate(missionLocaleActivationDate),
   ...filterByActivationDatePipelineMl(),
 ];
@@ -890,8 +883,6 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
   missionLocaleMongoId: ObjectId,
   missionLocaleActivationDate?: Date
 ) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
 
@@ -948,7 +939,6 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   missionLocaleMongoId: ObjectId,
   missionLocaleActivationDate?: Date
 ) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
   const effectifsMissionLocaleAggregation = [
     ...getEffectifMissionLocaleEligibleToBrevoAggregation(missionLocaleMongoId, statut, missionLocaleActivationDate),
     {
@@ -1111,8 +1101,6 @@ export const computeMissionLocaleStats = async (
   missionLocaleId: ObjectId,
   missionLocaleActivationDate?: Date
 ): Promise<IMissionLocaleStats["stats"]> => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const mineurCondition = {
     $gte: [
       "$effectif_snapshot.apprenant.date_de_naissance",
@@ -1124,7 +1112,7 @@ export const computeMissionLocaleStats = async (
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
@@ -1406,8 +1394,6 @@ export const getMissionLocaleStat = async (
   mineur?: boolean,
   rqth?: boolean
 ) => {
-  const statut = [STATUT_APPRENANT.RUPTURANT];
-
   const mineurCondition = {
     $gte: [
       "$effectif_snapshot.apprenant.date_de_naissance",
@@ -1436,7 +1422,7 @@ export const getMissionLocaleStat = async (
   const effectifsMissionLocaleAggregation = [
     generateMissionLocaleMatchStage(missionLocaleId),
     ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(statut as any, new Date()),
+    ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(missionLocaleActivationDate),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(),
