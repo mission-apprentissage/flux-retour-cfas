@@ -70,9 +70,7 @@ export function EffectifInfo({
               ) : (
                 <Badge severity="success">traité</Badge>
               )}
-              <p className="fr-badge fr-badge--beige-gris-galet">
-                {getMonthYearFromDate(effectif.dernier_statut?.date)}
-              </p>
+              <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
             {isAdmin && !effectif.a_traiter && (
@@ -99,9 +97,7 @@ export function EffectifInfo({
               }}
               title="Date de la rupture du contrat d'apprentissage :"
               description={
-                formatDate(effectif.contrats?.[0]?.date_rupture)
-                  ? `le ${formatDate(effectif.contrats?.[0]?.date_rupture)}`
-                  : "non renseignée"
+                formatDate(effectif.date_rupture) ? `le ${formatDate(effectif.date_rupture)}` : "non renseignée"
               }
             />
             <p className={styles.transmissionInfo}>

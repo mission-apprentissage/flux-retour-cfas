@@ -52,7 +52,7 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
 
   const tableData = useMemo(() => {
     return priorityData.map((effectif) => {
-      const labelMonth = formatMonthAndYear(effectif.dernier_statut.date || "");
+      const labelMonth = formatMonthAndYear(effectif.date_rupture || "");
       return {
         rawData: effectif,
         element: {

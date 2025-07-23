@@ -31,7 +31,7 @@ export function PageHeader({
   const nomListe = rawList || API_EFFECTIF_LISTE.A_TRAITER;
   const listQuery = `?nom_liste=${nomListe}`;
 
-  const basePath = effectifId ? `/admin/mission-locale/${mlId}` : `/mission-locale`;
+  const basePath = effectifId ? `/admin/mission-locale/${mlId}/edit` : `/mission-locale`;
 
   const getHref = (id: string) => `${basePath}/${id}${listQuery}`;
 
