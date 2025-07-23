@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   IEffecifMissionLocale,
@@ -13,7 +14,7 @@ import { EffectifInfo } from "./effectifs/EffectifInfo";
 import { FeedbackForm } from "./effectifs/FeedbackForm";
 import { PageHeader } from "./effectifs/PageHeader";
 
-interface MissionLocaleEffectifDisplayProps {
+interface EffectifDetailDisplayProps {
   effectifPayload: IEffecifMissionLocale;
   nomListe: IMissionLocaleEffectifList;
   saveStatus: "idle" | "loading" | "success" | "error";
@@ -21,16 +22,19 @@ interface MissionLocaleEffectifDisplayProps {
   isAdmin?: boolean;
 }
 
-export function MissionLocaleEffectifDisplay({
+export function EffectifDetailDisplay({
   effectifPayload,
   nomListe,
   saveStatus,
   onSave,
   isAdmin = false,
-}: MissionLocaleEffectifDisplayProps) {
+}: EffectifDetailDisplayProps) {
   const { effectif, total, next, previous, currentIndex } = effectifPayload || {};
   const { a_traiter, injoignable } = effectif || {};
   const [isEditable, setIsEditable] = useState(false);
+
+  const pathname = usePathname();
+  const isCfaPage = pathname?.startsWith("/cfa/");
 
   const [formData, setFormData] = useState<IUpdateMissionLocaleEffectif>({
     situation: "" as unknown as SITUATION_ENUM,
@@ -76,7 +80,7 @@ export function MissionLocaleEffectifDisplay({
 
       <EffectifInfo effectif={effectif} nomListe={nomListe} isAdmin={isAdmin} setIsEditable={setIsEditable} />
 
-      {(a_traiter || injoignable || isEditable) && (
+      {(a_traiter || injoignable || isEditable) && !isCfaPage && (
         <FeedbackForm
           formData={formData}
           setFormData={setFormData}

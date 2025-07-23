@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE } from "shared";
 
 import { Spinner } from "@/app/_components/common/Spinner";
@@ -24,6 +24,7 @@ export function PageHeader({
   isATraiter?: boolean;
 }) {
   const params = useParams();
+  const pathname = usePathname();
   const mlId = params?.id;
   const effectifId = params && "effectifId" in params ? params.effectifId : undefined;
   const searchParams = useSearchParams();
@@ -31,7 +32,12 @@ export function PageHeader({
   const nomListe = rawList || API_EFFECTIF_LISTE.A_TRAITER;
   const listQuery = `?nom_liste=${nomListe}`;
 
-  const basePath = effectifId ? `/admin/mission-locale/${mlId}/edit` : `/mission-locale`;
+  const basePath = (() => {
+    if (pathname && pathname.startsWith("/cfa")) {
+      return `/cfa`;
+    }
+    return effectifId ? `/admin/mission-locale/${mlId}/edit` : `/mission-locale`;
+  })();
 
   const getHref = (id: string) => `${basePath}/${id}${listQuery}`;
 
