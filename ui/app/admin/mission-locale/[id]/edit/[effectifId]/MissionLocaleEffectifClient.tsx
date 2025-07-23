@@ -7,8 +7,8 @@ import { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
-import { MissionLocaleEffectifDisplay } from "@/app/_components/ruptures/MissionLocaleEffectifDisplay";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
 
@@ -106,7 +106,7 @@ export default function MissionLocaleEffectifClient() {
       >
         <SuspenseWrapper fallback={<RightColumnSkeleton />}>
           {data && (
-            <MissionLocaleEffectifDisplay
+            <EffectifDetailDisplay
               effectifPayload={data}
               nomListe={nomListe}
               saveStatus={saveStatus}

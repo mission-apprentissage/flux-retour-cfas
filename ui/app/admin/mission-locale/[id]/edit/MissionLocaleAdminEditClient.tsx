@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { ModalAdminSyncBrevo } from "@/app/_components/mission-locale/modal/ModalAdminSyncBrevo";
-import { EffectifDisplay } from "@/app/_components/ruptures/EffectifDisplay";
+import { EffectifListDisplay } from "@/app/_components/ruptures/EffectifListDisplay";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
@@ -56,7 +56,7 @@ export default function MissionLocaleAdminEditClient({ id }: { id: string }) {
 
         <Box component="hr" className="fr-hr" />
 
-        {effectifsData && <EffectifDisplay data={effectifsData} />}
+        {effectifsData && <EffectifListDisplay data={effectifsData} />}
       </div>
     </SuspenseWrapper>
   );

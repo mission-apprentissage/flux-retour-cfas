@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
@@ -100,6 +100,7 @@ export const MonthTable = memo(function MonthTable({
 }: MonthTableProps) {
   const { user } = useAuth();
   const params = useParams();
+  const pathname = usePathname();
   const mlId = params?.id as string | undefined;
   const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
@@ -141,6 +142,16 @@ export const MonthTable = memo(function MonthTable({
     element: buildRowData(effectif, listType),
   }));
 
+  const getRowLink = (rowData) => {
+    if (pathname && pathname.startsWith("/cfa")) {
+      return `/cfa/${rowData.id}?nom_liste=${listType}`;
+    }
+
+    return user.organisation.type === "ADMINISTRATEUR" && mlId
+      ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${listType}`
+      : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
+  };
+
   return (
     <div id={anchorId} className="fr-mb-4w fr-mt-4w">
       {monthItem.data.length === 0 ? (
@@ -160,11 +171,7 @@ export const MonthTable = memo(function MonthTable({
           searchTerm={searchTerm}
           searchableColumns={["nom", "prenom"]}
           itemsPerPage={7}
-          getRowLink={(rowData) => {
-            return user.organisation.type === "ADMINISTRATEUR" && mlId
-              ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${listType}`
-              : `/mission-locale/${rowData.id}?nom_liste=${listType}`;
-          }}
+          getRowLink={getRowLink}
           emptyMessage="Aucun élément à afficher"
         />
       )}

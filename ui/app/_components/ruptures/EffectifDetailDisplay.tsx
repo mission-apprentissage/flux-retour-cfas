@@ -13,7 +13,7 @@ import { EffectifInfo } from "./effectifs/EffectifInfo";
 import { FeedbackForm } from "./effectifs/FeedbackForm";
 import { PageHeader } from "./effectifs/PageHeader";
 
-interface MissionLocaleEffectifDisplayProps {
+interface EffectifDetailDisplayProps {
   effectifPayload: IEffecifMissionLocale;
   nomListe: IMissionLocaleEffectifList;
   saveStatus: "idle" | "loading" | "success" | "error";
@@ -21,13 +21,13 @@ interface MissionLocaleEffectifDisplayProps {
   isAdmin?: boolean;
 }
 
-export function MissionLocaleEffectifDisplay({
+export function EffectifDetailDisplay({
   effectifPayload,
   nomListe,
   saveStatus,
   onSave,
   isAdmin = false,
-}: MissionLocaleEffectifDisplayProps) {
+}: EffectifDetailDisplayProps) {
   const { effectif, total, next, previous, currentIndex } = effectifPayload || {};
   const { a_traiter, injoignable } = effectif || {};
   const [isEditable, setIsEditable] = useState(false);

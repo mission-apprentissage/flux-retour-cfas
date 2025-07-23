@@ -1,18 +1,19 @@
 "use client";
 
 import Grid from "@mui/material/Grid2";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
-import { MissionLocaleEffectifDisplay } from "@/app/_components/ruptures/MissionLocaleEffectifDisplay";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _post } from "@/common/httpClient";
 
 export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -23,17 +24,19 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     nomListe: API_EFFECTIF_LISTE,
     total: number | undefined
   ): string {
+    const orgType = pathname && pathname.startsWith("/cfa") ? "cfa" : "mission-locale";
+
     if (goNext && nextId) {
-      return `/mission-locale/${nextId}?nom_liste=${nomListe}`;
+      return `/${orgType}/${nextId}?nom_liste=${nomListe}`;
     }
 
     if (total === 1) {
       return nomListe === API_EFFECTIF_LISTE.PRIORITAIRE
-        ? "/mission-locale/validation/prioritaire"
-        : "/mission-locale/validation";
+        ? `/${orgType}/validation/prioritaire`
+        : `/${orgType}/validation`;
     }
 
-    return "/mission-locale";
+    return `/${orgType}`;
   }
 
   function handleResult(success: boolean, goNext: boolean, nextId?: string): void {
@@ -75,6 +78,8 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     }
   }
 
+  const backUrl = pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale";
+
   return (
     <Grid container>
       <Grid
@@ -84,7 +89,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
           py: { xs: 2, md: 2 },
         }}
       >
-        <DsfrLink href={`/mission-locale`} arrow="left">
+        <DsfrLink href={backUrl} arrow="left">
           Retour à la liste
         </DsfrLink>
       </Grid>
@@ -101,7 +106,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
       >
         <SuspenseWrapper fallback={<RightColumnSkeleton />}>
           {data && (
-            <MissionLocaleEffectifDisplay
+            <EffectifDetailDisplay
               effectifPayload={data}
               nomListe={nomListe}
               saveStatus={saveStatus}

@@ -20,7 +20,7 @@ import {
 } from "../../_utils/ruptures.utils";
 import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
-export function EffectifDisplay({ data }: { data: MonthsData }) {
+export function EffectifListDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
