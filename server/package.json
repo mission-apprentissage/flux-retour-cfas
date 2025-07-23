@@ -66,7 +66,7 @@
     "migrate-mongo": "10.0.0",
     "mjml": "^4.15.3",
     "mongodb": "^5.9.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.2",
     "node-xlsx": "^0.24.0",
     "nodemailer": "^6.9.15",
     "nodemailer-html-to-text": "3.2.0",
