@@ -1,66 +1,61 @@
 "use client";
 
-import { Grid2 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import Grid from "@mui/material/Grid2";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, IEffecifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
 import { MissionLocaleEffectifDisplay } from "@/app/_components/ruptures/MissionLocaleEffectifDisplay";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _get, _put } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
 
-const MIN_LOADING_TIME = 500;
-const SUCCESS_DISPLAY_TIME = 1000;
-
-export default function MissionLocaleEffectifClient() {
-  const params = useParams();
-  const { id, effectifId } = params as { id: string; effectifId: string };
-  const searchParams = useSearchParams();
+export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const { data } = useQuery(
-    ["effectif", id, nomListe],
-    async () => {
-      if (!id) return null;
-      return await _get<IEffecifMissionLocale>(`/api/v1/admin/mission-locale/${id}/effectif/${effectifId}`, {
-        params: {
-          nom_liste: nomListe,
-        },
-      });
-    },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
+  function computeRedirectUrl(
+    goNext: boolean,
+    nextId: string | undefined,
+    nomListe: API_EFFECTIF_LISTE,
+    total: number | undefined
+  ): string {
+    if (goNext && nextId) {
+      return `/mission-locale/${nextId}?nom_liste=${nomListe}`;
     }
-  );
 
-  function handleResult(success: boolean) {
+    if (total === 1) {
+      return nomListe === API_EFFECTIF_LISTE.PRIORITAIRE
+        ? "/mission-locale/validation/prioritaire"
+        : "/mission-locale/validation";
+    }
+
+    return "/mission-locale";
+  }
+
+  function handleResult(success: boolean, goNext: boolean, nextId?: string): void {
     if (!success) {
       setSaveStatus("error");
       return;
     }
+
     setSaveStatus("success");
 
-    setTimeout(() => {
-      router.push(`/admin/mission-locale/${id}/edit`);
-    }, SUCCESS_DISPLAY_TIME);
+    const targetUrl = computeRedirectUrl(goNext, nextId, nomListe, data?.total);
+
+    setTimeout(() => router.push(targetUrl), 600);
   }
 
-  async function handleSave(formData: IUpdateMissionLocaleEffectif, effectifId: string) {
+  async function handleSave(goNext: boolean, formData: any, effectifId: string, nextId?: string) {
     setSaveStatus("loading");
     const startTime = Date.now();
     let success = false;
 
     try {
-      await _put(`/api/v1/admin/mission-locale/effectif`, {
-        mission_locale_id: id,
-        effectif_id: effectifId,
+      await _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, {
         situation: formData.situation,
         situation_autre: formData.situation === SITUATION_ENUM.AUTRE ? formData.situation_autre : "",
         commentaires: formData.commentaires,
@@ -71,30 +66,30 @@ export default function MissionLocaleEffectifClient() {
       success = false;
     } finally {
       const elapsedTime = Date.now() - startTime;
-      const remainingTime = MIN_LOADING_TIME - elapsedTime;
+      const remainingTime = 1500 - elapsedTime;
       if (remainingTime > 0) {
-        setTimeout(() => handleResult(success), remainingTime);
+        setTimeout(() => handleResult(success, goNext, nextId), remainingTime);
       } else {
-        handleResult(success);
+        handleResult(success, goNext, nextId);
       }
     }
   }
 
   return (
-    <Grid2 container>
-      <Grid2
+    <Grid container>
+      <Grid
         size={{ xs: 12, md: 3 }}
         sx={{
           px: { xs: 2, md: 3 },
           py: { xs: 2, md: 2 },
         }}
       >
-        <DsfrLink href={`/admin/mission-locale/${id}`} arrow="left">
+        <DsfrLink href={`/mission-locale`} arrow="left">
           Retour à la liste
         </DsfrLink>
-      </Grid2>
+      </Grid>
 
-      <Grid2
+      <Grid
         size={{ xs: 12, md: 9 }}
         sx={{
           borderLeft: "1px solid",
@@ -110,12 +105,11 @@ export default function MissionLocaleEffectifClient() {
               effectifPayload={data}
               nomListe={nomListe}
               saveStatus={saveStatus}
-              onSave={(_goNext, formData) => handleSave(formData, data.effectif.id.toString())}
-              isAdmin
+              onSave={(goNext, formData) => handleSave(goNext, formData, data.effectif.id.toString(), data.next?.id)}
             />
           )}
         </SuspenseWrapper>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 }
