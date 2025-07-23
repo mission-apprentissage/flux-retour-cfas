@@ -4,12 +4,12 @@ import { Stack, Box } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { MissionLocaleDisplay } from "@/app/_components/mission-locale/MissionLocaleDisplay";
 import { ModalAdminSyncBrevo } from "@/app/_components/mission-locale/modal/ModalAdminSyncBrevo";
-import { MonthsData } from "@/app/_components/mission-locale/types";
+import { EffectifDisplay } from "@/app/_components/ruptures/EffectifDisplay";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
+import { MonthsData } from "@/common/types/ruptures";
 
 export default function MissionLocaleAdminEditClient({ id }: { id: string }) {
   const { data: missionLocaleData } = useQuery(
@@ -56,7 +56,7 @@ export default function MissionLocaleAdminEditClient({ id }: { id: string }) {
 
         <Box component="hr" className="fr-hr" />
 
-        {effectifsData && <MissionLocaleDisplay data={effectifsData} />}
+        {effectifsData && <EffectifDisplay data={effectifsData} />}
       </div>
     </SuspenseWrapper>
   );

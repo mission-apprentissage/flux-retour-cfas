@@ -10,8 +10,9 @@ import { API_EFFECTIF_LISTE } from "shared";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
+import { EffectifPriorityData } from "../../../common/types/ruptures";
+
 import styles from "./PriorityTable.module.css";
-import { EffectifPriorityData } from "./types";
 
 type PriorityTableProps = {
   priorityData?: EffectifPriorityData[];

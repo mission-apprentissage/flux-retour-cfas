@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 
-import { SelectedSection } from "../mission-locale/types";
+import { SelectedSection } from "../../../common/types/ruptures";
 
 import styles from "./MlSuccessCard.module.css";
 

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import styles from "./CfaClient.module.css";
+import styles from "./CfaHeader.module.css";
 
-export default function CfaClient() {
+export default function CfaHeader() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -13,7 +13,7 @@ export default function CfaClient() {
   };
 
   return (
-    <div className={styles.container}>
+    <>
       <h1 className={styles.title}>Liste des jeunes en rupture de 16 à 25 ans</h1>
       <p className={styles.description}>
         <strong>
@@ -50,6 +50,6 @@ export default function CfaClient() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

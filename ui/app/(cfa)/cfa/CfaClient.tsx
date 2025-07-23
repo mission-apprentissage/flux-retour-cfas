@@ -2,17 +2,20 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
+import CfaHeader from "@/app/_components/cfa/CfaHeader";
 import { EffectifDisplay } from "@/app/_components/ruptures/EffectifDisplay";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { useAuth } from "@/app/_context/UserContext";
 import { _get } from "@/common/httpClient";
-import { MonthsData } from "@/common/types/ruptures";
 
-export default function MissionLocaleClient() {
+import { MonthsData } from "../../../common/types/ruptures";
+
+export default function CfaClient() {
+  const { user } = useAuth();
   const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month-user"],
-    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
+    ["effectifs-per-month-user-cfa", user?.organisation?.organisme_id],
+    () => _get(`/api/v1/organismes/${user?.organisation?.organisme_id}/mission-locale/effectifs-per-month`),
     {
       suspense: true,
       useErrorBoundary: true,
@@ -21,7 +24,7 @@ export default function MissionLocaleClient() {
 
   return (
     <div className="fr-container">
-      <MLHeader />
+      <CfaHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
         {data && <EffectifDisplay data={data} />}
       </SuspenseWrapper>
