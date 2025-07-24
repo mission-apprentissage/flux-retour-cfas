@@ -18,7 +18,7 @@ delete_cleartext() {
 }
 trap delete_cleartext EXIT
 
-ansible-vault view "${ansible_extra_opts[@]}" "$VAULT_FILE" | yq '.vault.SEED_GPG_PASSPHRASE' > "$PASSPHRASE"
+ansible-vault view "${ansible_extra_opts[@]}" "$VAULT_FILE" | yq -r '.vault.SEED_GPG_PASSPHRASE' > "$PASSPHRASE"
 
 # Make sur the file exists
 touch /tmp/deploy.log
