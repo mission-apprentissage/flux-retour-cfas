@@ -1,22 +1,34 @@
 "use client";
 
 import Grid from "@mui/material/Grid2";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, SITUATION_ENUM } from "shared";
+import {
+  API_EFFECTIF_LISTE,
+  IEffecifMissionLocale,
+  IUpdateMissionLocaleEffectif,
+  IUpdateOrganismeFormationEffectif,
+  SITUATION_ENUM,
+} from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _get, _post } from "@/common/httpClient";
+import { useAuth } from "@/app/_context/UserContext";
+import { _post, _put } from "@/common/httpClient";
 
 export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const isCfaPage = pathname?.startsWith("/cfa/");
 
   function computeRedirectUrl(
     goNext: boolean,
@@ -39,43 +51,64 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     return `/${orgType}`;
   }
 
-  function handleResult(success: boolean, goNext: boolean, nextId?: string): void {
-    if (!success) {
-      setSaveStatus("error");
-      return;
-    }
+  const updateEffectifMutation = useMutation({
+    mutationFn: async ({
+      effectifId,
+      formData,
+      goNext,
+      nextId,
+    }: {
+      effectifId: string;
+      formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif;
+      goNext: boolean;
+      nextId?: string;
+    }) => {
+      const organismeId = user?.organisation?.organisme_id;
 
-    setSaveStatus("success");
-
-    const targetUrl = computeRedirectUrl(goNext, nextId, nomListe, data?.total);
-
-    setTimeout(() => router.push(targetUrl), 600);
-  }
-
-  async function handleSave(goNext: boolean, formData: any, effectifId: string, nextId?: string) {
-    setSaveStatus("loading");
-    const startTime = Date.now();
-    let success = false;
-
-    try {
-      await _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, {
-        situation: formData.situation,
-        situation_autre: formData.situation === SITUATION_ENUM.AUTRE ? formData.situation_autre : "",
-        commentaires: formData.commentaires,
-        deja_connu: formData.deja_connu,
-      });
-      success = true;
-    } catch (error) {
-      success = false;
-    } finally {
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = 1500 - elapsedTime;
-      if (remainingTime > 0) {
-        setTimeout(() => handleResult(success, goNext, nextId), remainingTime);
+      if (isCfaPage) {
+        const result = await _put(`/api/v1/organismes/${organismeId}/mission-locale/effectif/${effectifId}`, formData);
+        return { result, goNext, nextId };
       } else {
-        handleResult(success, goNext, nextId);
+        const missionLocaleData = formData as IUpdateMissionLocaleEffectif;
+        const result = await _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, {
+          situation: missionLocaleData.situation,
+          situation_autre:
+            missionLocaleData.situation === SITUATION_ENUM.AUTRE ? missionLocaleData.situation_autre : "",
+          commentaires: missionLocaleData.commentaires,
+          deja_connu: missionLocaleData.deja_connu,
+        });
+        return { result, goNext, nextId };
       }
-    }
+    },
+    onMutate: () => {
+      setSaveStatus("loading");
+    },
+    onSuccess: (mutationData) => {
+      setSaveStatus("success");
+      queryClient.invalidateQueries(["effectif"]);
+
+      if (mutationData.goNext || mutationData.nextId) {
+        const targetUrl = computeRedirectUrl(mutationData.goNext, mutationData.nextId, nomListe, data?.total);
+        setTimeout(() => router.push(targetUrl), 600);
+      }
+    },
+    onError: () => {
+      setSaveStatus("error");
+    },
+  });
+
+  function handleSave(
+    goNext: boolean,
+    formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif,
+    effectifId: string,
+    nextId?: string
+  ) {
+    updateEffectifMutation.mutate({
+      effectifId,
+      formData,
+      goNext,
+      nextId,
+    });
   }
 
   const backUrl = pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale";

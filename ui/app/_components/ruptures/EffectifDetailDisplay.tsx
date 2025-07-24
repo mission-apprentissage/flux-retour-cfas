@@ -77,7 +77,7 @@ export function EffectifDetailDisplay({
     rupture: null,
     acc_conjoint: null,
     motif: null,
-    commentaires: null,
+    commentaires: "",
   });
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function EffectifDetailDisplay({
             rupture: null,
             acc_conjoint: null,
             motif: null,
-            commentaires: null,
+            commentaires: "",
           });
         }
       }
