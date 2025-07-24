@@ -1,0 +1,65 @@
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
+
+import { SourceApprenantEnum } from "shared/constants/effectifs";
+import zMissionLocaleEffectif, { zAccConjointMotifEnum } from "shared/models/data/missionLocaleEffectif.model";
+
+import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
+import { zApprenant } from "../../data/effectifs/apprenant.part";
+import { zContrat } from "../../data/effectifs/contrat.part";
+import { zFormationEffectif } from "../../data/effectifs/formation.part";
+
+const zApprenantPick = zApprenant.pick({
+  nom: true,
+  prenom: true,
+  date_de_naissance: true,
+  adresse: true,
+  telephone: true,
+  courriel: true,
+  rqth: true,
+  responsable_mail1: true,
+});
+
+export const updateOrganismeFormationEffectifApi = {
+  rupture: z.boolean().nullish(),
+  acc_conjoint: z.boolean().nullish(),
+  motif: z.array(zAccConjointMotifEnum).nullish(),
+  commentaires: z.string().nullish(),
+};
+
+const zEffectifOrganismeFormation = z
+  .object({
+    id: zObjectId,
+    formation: zFormationEffectif,
+    contrats: z.array(zContrat).nullish(),
+    organisme: zEffectifComputedOrganisme,
+    source: SourceApprenantEnum,
+    a_traiter: z.boolean(),
+    transmitted_at: z.date().nullish(),
+    prioritaire: z.boolean().nullish(),
+    injoignable: z.boolean().nullish(),
+    autorisation_contact: z.boolean().nullish(),
+    date_rupture: z
+      .object({
+        date: z.date(),
+        valeur: zStatutApprenantEnum,
+      })
+      .nullish(),
+    organisme_data: z.object(updateOrganismeFormationEffectifApi).optional(),
+    current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
+    a_contacter: z.boolean().nullish(),
+  })
+  .merge(zApprenantPick);
+
+const zPrevIousNext = z.object({ id: z.string(), nom: z.string(), prenom: z.string() });
+
+const zResponseEffectifOrganismeFormation = z.object({
+  effectif: zEffectifOrganismeFormation,
+  previous: zPrevIousNext.nullish(),
+  next: zPrevIousNext.nullish(),
+  currentIndex: z.number(),
+  total: z.number(),
+});
+
+export type IEffectifOrganismeFormation = z.infer<typeof zResponseEffectifOrganismeFormation>;
+export type IUpdateOrganismeFormationEffectif = z.output<z.ZodObject<typeof updateOrganismeFormationEffectifApi>>;
