@@ -4,11 +4,13 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
 
+import { CfaFeedback } from "./CfaFeedback";
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
@@ -42,6 +44,8 @@ export function EffectifInfo({
   setIsEditable?: (isEditable: boolean) => void;
 }) {
   const [infosOpen, setInfosOpen] = useState(false);
+  const pathname = usePathname();
+  const isCfaPage = pathname?.startsWith("/cfa/");
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
   const computeTransmissionDate = (date) => {
@@ -122,9 +126,18 @@ export function EffectifInfo({
           )}
         </div>
 
-        {!effectif.a_traiter && !effectif.injoignable && <Feedback situation={effectif.situation || {}} />}
+        {!effectif.a_traiter && !effectif.injoignable && !isCfaPage && effectif.situation && (
+          <Feedback situation={effectif.situation} />
+        )}
       </div>
       <EffectifInfoDetails effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
+      {!effectif.a_traiter &&
+      !effectif.injoignable &&
+      isCfaPage &&
+      "organisme_data" in effectif &&
+      effectif.organisme_data ? (
+        <CfaFeedback organismeData={effectif.organisme_data} transmittedAt={effectif.transmitted_at} />
+      ) : null}
     </div>
   );
 }
