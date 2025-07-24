@@ -200,20 +200,18 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
       if (!effectif) {
         continue;
       }
-      const lastStatusValue =
-        effectif.parcours && effectif.parcours.length > 0
-          ? effectif.parcours[effectif.parcours.length - 1].valeur
-          : null;
-      const lastStatusDate =
-        effectif.parcours && effectif.parcours.length > 0 ? effectif.parcours[effectif.parcours.length - 1].date : null;
 
-      if (lastStatusValue && lastStatusDate) {
+      const currentStatus =
+        effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+        effectif._computed?.statut?.parcours.slice(-1)[0];
+
+      if (currentStatus) {
         await missionLocaleEffectifsDb().updateOne(
           { _id: eff._id },
           {
             $set: {
-              "current_status.value": lastStatusValue,
-              "current_status.date": lastStatusDate,
+              "current_status.value": currentStatus.valeur,
+              "current_status.date": currentStatus.date,
             },
           }
         );
