@@ -57,7 +57,7 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
