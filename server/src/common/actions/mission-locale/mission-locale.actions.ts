@@ -418,7 +418,6 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             injoignable: "$injoignable",
             transmitted_at: "$effectif_snapshot.transmitted_at",
             source: "$effectif_snapshot.source",
-            dernier_statut: "$dernierStatut",
             organisme: "$organisme",
             contrats: "$effectif_snapshot.contrats",
             "situation.situation": "$situation",
@@ -430,6 +429,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             a_contacter: "$a_contacter",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
+            date_rupture: "$date_rupture",
           },
         },
       ];
@@ -452,7 +452,6 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             a_traiter: "$a_traiter",
             transmitted_at: "$effectif_snapshot.transmitted_at",
             source: "$effectif_snapshot.source",
-            dernier_statut: "$dernierStatut",
             organisme: "$organisme",
             contrats: "$effectif_snapshot.contrats",
             "situation.situation": "$situation",
@@ -462,6 +461,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             contacts_tdb: "$tdb_users",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
+            date_rupture: "$date_rupture",
           },
         },
       ];
