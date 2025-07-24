@@ -13,7 +13,7 @@ import {
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getAnneeScolaireListFromDateRange } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -24,6 +24,8 @@ import config from "@/config";
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+
+const DATE_START = new Date("2025-01-01");
 /**
  *    EffectifsDb
  */
@@ -50,7 +52,7 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
   {
     $match: {
       "apprenant.adresse.mission_locale_id": missionLocaleId,
-      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+      annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
     },
   },
 ];
@@ -199,7 +201,7 @@ const generateMissionLocaleMatchStage = (missionLocaleId: ObjectId) => {
   return {
     $match: {
       mission_locale_id: missionLocaleId,
-      "effectif_snapshot.annee_scolaire": { $in: getAnneesScolaireListFromDate(new Date()) },
+      "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
     },
   };
 };
