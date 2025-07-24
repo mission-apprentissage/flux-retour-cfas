@@ -202,8 +202,7 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
       }
 
       const currentStatus =
-        effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-        effectif._computed?.statut?.parcours.slice(-1)[0];
+        effectif.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] || effectif.parcours.slice(-1)[0];
 
       if (currentStatus) {
         await missionLocaleEffectifsDb().updateOne(
