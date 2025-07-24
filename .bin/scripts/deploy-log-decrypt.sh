@@ -5,15 +5,15 @@ set -euo pipefail
 if [ -z "${1:-}" ]; then
   read -p "Veuillez renseigner l'ID du run: " RUN_ID
 else
-    readonly RUN_ID="$1"
-    shift
+  readonly RUN_ID="$1"
+  shift
 fi
 
 if [ -z "${1:-}" ]; then
   read -p "Veuillez renseigner l'ID du job: " JOB_ID
 else
-    readonly JOB_ID="$1"
-    shift
+  readonly JOB_ID="$1"
+  shift
 fi
 
 if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
@@ -26,10 +26,11 @@ readonly PASSPHRASE="$ROOT_DIR/.bin/SEED_PASSPHRASE.txt"
 readonly VAULT_FILE="${ROOT_DIR}/.infra/vault/vault.yml"
 
 delete_cleartext() {
-  rm -f "$PASSPHRASE"
+  if [ -f "$PASSPHRASE" ]; then
+    shred -f -n 10 -u "$PASSPHRASE"
+  fi
 }
 trap delete_cleartext EXIT
-
 
 rm -f /tmp/deploy.log.gpg
 
