@@ -197,7 +197,7 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
           },
         ])
         .next();
-      if (!effectif) {
+      if (!effectif || !effectif.parcours || effectif.parcours.length === 0) {
         continue;
       }
 
