@@ -4,7 +4,13 @@ import { Grid2 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import {
+  API_EFFECTIF_LISTE,
+  IEffecifMissionLocale,
+  IUpdateMissionLocaleEffectif,
+  IUpdateOrganismeFormationEffectif,
+  SITUATION_ENUM,
+} from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
@@ -52,20 +58,27 @@ export default function MissionLocaleEffectifClient() {
     }, SUCCESS_DISPLAY_TIME);
   }
 
-  async function handleSave(formData: IUpdateMissionLocaleEffectif, effectifId: string) {
+  async function handleSave(
+    formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif,
+    effectifId: string
+  ) {
     setSaveStatus("loading");
     const startTime = Date.now();
     let success = false;
 
     try {
-      await _put(`/api/v1/admin/mission-locale/effectif`, {
-        mission_locale_id: id,
-        effectif_id: effectifId,
-        situation: formData.situation,
-        situation_autre: formData.situation === SITUATION_ENUM.AUTRE ? formData.situation_autre : "",
-        commentaires: formData.commentaires,
-        deja_connu: formData.deja_connu,
-      });
+      if ("situation" in formData) {
+        const missionLocaleData = formData as IUpdateMissionLocaleEffectif;
+        await _put(`/api/v1/admin/mission-locale/effectif`, {
+          mission_locale_id: id,
+          effectif_id: effectifId,
+          situation: missionLocaleData.situation,
+          situation_autre:
+            missionLocaleData.situation === SITUATION_ENUM.AUTRE ? missionLocaleData.situation_autre : "",
+          commentaires: missionLocaleData.commentaires || "",
+          deja_connu: missionLocaleData.deja_connu,
+        });
+      }
       success = true;
     } catch (error) {
       success = false;
