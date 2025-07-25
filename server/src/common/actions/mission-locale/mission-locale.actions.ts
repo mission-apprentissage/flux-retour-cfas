@@ -462,6 +462,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
+            mission_locale_organisation: "$mission_locale_organisation",
           },
         },
       ];
@@ -833,6 +834,31 @@ export const getEffectifFromMissionLocaleId = async (
     ...addFieldTraitementStatus(organisation.type),
     ...createDernierStatutFieldPipelineML(),
     ...lookUpOrganisme(true),
+    {
+      $lookup: {
+        from: "organisations",
+        let: { mission_locale_id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$mission_locale_id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+              email: 1,
+              telephone: 1,
+              activated_at: 1,
+            },
+          },
+        ],
+        as: "mission_locale_organisation",
+      },
+    },
+    {
+      $unwind: {
+        path: "$mission_locale_organisation",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
     ...getEffectifProjectionStage(organisation.type),
   ];
 
