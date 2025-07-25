@@ -163,6 +163,7 @@ export function EffectifDetailDisplay({
           hasSuccess={hasSuccess}
           hasError={hasError}
           isAdmin={isAdmin}
+          hasNext={!!next}
         />
       )}
     </>
