@@ -1,11 +1,17 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate, getAge } from "@/app/_utils/date.utils";
 
 import styles from "./EffectifInfoDetails.module.css";
+import { MissionLocaleContact } from "./MissionLocaleContact";
 
 export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }) {
+  const pathname = usePathname();
+  const isCfaPage = pathname?.startsWith("/cfa/");
+
   const withDefaultFallback = (data, defaultText, value?) => {
     const defaultValue = value ?? "";
     return data ? defaultValue : <span className={styles.noDataSpan}>{defaultText}</span>;
@@ -43,17 +49,20 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }) {
             )}
           </p>
           <p>RQTH : {effectif.rqth ? "oui" : "non"}</p>
-          <DsfrLink
-            href="#"
-            arrow="none"
-            onClick={() => setInfosOpen((open) => !open)}
-            className={`fr-link--icon-right ${infosOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
-          >
-            Informations complémentaires
-          </DsfrLink>
+          {isCfaPage && <MissionLocaleContact missionLocaleOrganisation={effectif.mission_locale_organisation} />}
+          {!isCfaPage && (
+            <DsfrLink
+              href="#"
+              arrow="none"
+              onClick={() => setInfosOpen((open) => !open)}
+              className={`fr-link--icon-right ${infosOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
+            >
+              Informations complémentaires
+            </DsfrLink>
+          )}
         </div>
 
-        {infosOpen && (
+        {infosOpen && !isCfaPage && (
           <div className={styles.detailsSection}>
             <div>
               <p>Contrat d&apos;apprentissage</p>
