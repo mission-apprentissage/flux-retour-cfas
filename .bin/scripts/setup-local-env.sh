@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 echo "Updating local server/.env & ui/.env"
 
 delete_cleartext() {
-  rm -f "${ROOT_DIR}/.vault_pwd.txt"
+  if [ -f "${ROOT_DIR}/.vault_pwd.txt" ]; then
+    shred -f -n 10 -u "${ROOT_DIR}/.vault_pwd.txt"
+  fi
 }
 
 trap delete_cleartext EXIT

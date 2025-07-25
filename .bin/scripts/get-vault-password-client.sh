@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 # echo "Command line interface to view the vault password"
@@ -35,7 +36,13 @@ elif [ ! -z "$DOCUMENT_CONTENT" ] && [ "$DOCUMENT_CONTENT" != "$(cat "${vault_pa
     vault_password_file_clear_text="${VAULT_DIR}/new_clear_text"
 
     delete_cleartext() {
-      rm -f "$previous_vault_password_file_clear_text" "$vault_password_file_clear_text"
+      if [ -f "$previous_vault_password_file_clear_text" ]; then
+        shred -f -n 10 -u "$previous_vault_password_file_clear_text"
+      fi
+
+      if [ -f "$vault_password_file_clear_text" ]; then
+        shred -f -n 10 -u "$vault_password_file_clear_text"
+      fi
     }
     trap delete_cleartext EXIT
 
@@ -50,9 +57,7 @@ elif [ ! -z "$DOCUMENT_CONTENT" ] && [ "$DOCUMENT_CONTENT" != "$(cat "${vault_pa
     delete_cleartext
 fi
 
-
 decrypt_password() {
-  ## Decrypt
 
   if test -f "${vault_password_file}"; then
     gpg --quiet --batch --use-agent --decrypt "${vault_password_file}"
@@ -61,8 +66,6 @@ decrypt_password() {
     echo "not-yet-generated"
   fi
 
-  gpgconf --kill gpg-agent
 }
-
 
 decrypt_password
