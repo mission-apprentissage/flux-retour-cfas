@@ -57,7 +57,7 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
@@ -65,7 +65,7 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
@@ -85,7 +85,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "À traiter",
             logsTag: "ml_a_traiter" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,
@@ -96,7 +96,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "Déjà traités",
             logsTag: "ml_traite" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,
@@ -107,7 +107,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "Injoignable",
             logsTag: "ml_injoignable" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,

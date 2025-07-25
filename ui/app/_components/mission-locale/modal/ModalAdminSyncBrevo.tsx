@@ -3,11 +3,12 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import { Box, CircularProgress, List, ListItemText } from "@mui/material";
 import { captureException } from "@sentry/nextjs";
 import React, { useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
+
+import { Spinner } from "../../common/Spinner";
 
 const modal = createModal({
   id: "sync-brevo-admin-modal",
@@ -57,7 +58,7 @@ export function ModalAdminSyncBrevo(params: { id: string }) {
         iconId="ri-arrow-right-line"
         iconPosition="right"
       >
-        {isFetching && <CircularProgress size="1em" sx={{ mr: 1 }} />}
+        {isFetching && <Spinner style={{ marginRight: "0.5rem" }} />}
         Synchroniser liste Brevo
       </Button>
       <modal.Component
@@ -69,22 +70,22 @@ export function ModalAdminSyncBrevo(params: { id: string }) {
           },
         ]}
       >
-        {isSyncing && <CircularProgress size="1em" sx={{ mr: 1 }} />}
+        {isSyncing && <Spinner style={{ marginRight: "0.5rem" }} />}
         {!isSyncing && syncData && (
           <>
-            <Box>
+            <div>
               Sur les {syncData?.total} rupturants, seulement {syncData?.eligible} ont un email vérifié par BAL.
               <br />
               <b>⚠️L&apos;intégralité des données sera néanmoins synchronisée dans Brevo.</b>
-            </Box>
-            <Box>Les données se répartissent comme suit :</Box>
-            <List sx={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
+            </div>
+            <div>Les données se répartissent comme suit :</div>
+            <ul style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>
               {syncData.details.map((item) => (
-                <ListItemText key={item._id} sx={{ display: "list-item" }}>
+                <li key={item._id}>
                   {item._id} : {item.count}
-                </ListItemText>
+                </li>
               ))}
-            </List>
+            </ul>
           </>
         )}
       </modal.Component>

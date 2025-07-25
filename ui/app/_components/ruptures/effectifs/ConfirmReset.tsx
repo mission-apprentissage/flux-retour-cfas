@@ -2,11 +2,12 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { Typography, Box } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { _post } from "@/common/httpClient";
+
+import styles from "./ConfirmReset.module.css";
 
 const myModal = createModal({
   id: "reset-effectif",
@@ -89,11 +90,9 @@ export function ConfirmReset({ onSuccess, onError }: { onSuccess?: () => void; o
     switch (status) {
       case "success":
         return (
-          <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <Typography fontWeight="bold" color="success.main">
-              Réinitialisation effectuée !
-            </Typography>
-            <Typography variant="body2">Les données de suivi ont bien été réinitialisées.</Typography>
+          <div className={styles.modalContainerWithMargin}>
+            <p className={`${styles.modalTitle} ${styles.successText}`}>Réinitialisation effectuée !</p>
+            <p className={styles.modalDescription}>Les données de suivi ont bien été réinitialisées.</p>
             <Button
               onClick={() => {
                 myModal.close();
@@ -102,26 +101,24 @@ export function ConfirmReset({ onSuccess, onError }: { onSuccess?: () => void; o
             >
               Retour à la liste
             </Button>
-          </Box>
+          </div>
         );
       case "error":
         return (
-          <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <Typography fontWeight="bold" color="error.main">
-              Échec de la réinitialisation
-            </Typography>
-            <Typography variant="body2">
+          <div className={styles.modalContainerWithMargin}>
+            <p className={`${styles.modalTitle} ${styles.errorText}`}>Échec de la réinitialisation</p>
+            <p className={styles.modalDescription}>
               Impossible de réinitialiser les données. Veuillez réessayer ou contacter le support si le problème
               persiste.
-            </Typography>
-          </Box>
+            </p>
+          </div>
         );
       default:
         return (
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography fontWeight="bold">Voulez-vous vraiment réinitialiser cet effectif&nbsp;?</Typography>
-            <Typography variant="body2">Toutes les données de suivi seront réinitialisées.</Typography>
-          </Box>
+          <div className={styles.modalContainer}>
+            <p className={styles.modalTitle}>Voulez-vous vraiment réinitialiser cet effectif&nbsp;?</p>
+            <p className={styles.modalDescription}>Toutes les données de suivi seront réinitialisées.</p>
+          </div>
         );
     }
   }

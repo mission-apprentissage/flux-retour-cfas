@@ -1,10 +1,10 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { Stack, Box } from "@mui/material";
 
 import { _getBlob } from "@/common/httpClient";
 
+import styles from "./MLHeader.module.css";
 import { ModalRupturantExcel } from "./modal/ModalRupturantExcel";
 
 export const MLHeader = () => {
@@ -21,9 +21,9 @@ export const MLHeader = () => {
         }}
       />
 
-      <Stack spacing={3}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems="end">
-          <Box flex="1">
+      <div className={styles.mlHeaderContainer}>
+        <div className={styles.mlHeaderTop}>
+          <div className={styles.mlHeaderContent}>
             <h1 className="fr-h1 fr-text--blue-france fr-mb-1w">Liste des jeunes en ruptures de contrat</h1>
             <p className="fr-text--sm fr-text--bold fr-mb-1w">
               Nous affichons sur le TBA tous les jeunes ayant un statut de rupture, en les classant par date de rupture
@@ -39,14 +39,14 @@ export const MLHeader = () => {
                 DECA
               </a>
             </p>
-          </Box>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="flex-end" alignItems="center">
+          </div>
+          <div className={styles.mlHeaderActions}>
             <ModalRupturantExcel />
-          </Stack>
-        </Stack>
+          </div>
+        </div>
 
-        <Box component="hr" className="fr-hr" />
-      </Stack>
+        <hr className="fr-hr" />
+      </div>
     </>
   );
 };

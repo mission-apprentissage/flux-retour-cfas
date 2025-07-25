@@ -1,5 +1,7 @@
-import { Box, Stack, Typography } from "@mui/material";
+import Image from "next/image";
 import React, { ReactNode } from "react";
+
+import styles from "./MlCard.module.css";
 
 export interface MlCardProps {
   title: string;
@@ -11,50 +13,16 @@ export interface MlCardProps {
 
 export function MlCard({ title, subtitle, body, imageSrc, imageAlt }: MlCardProps) {
   return (
-    <Stack
-      px={16}
-      py={12}
-      spacing={4}
-      sx={{
-        border: "1px solid var(--border-default-grey)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        margin: "0 auto",
-        textAlign: "center",
-      }}
-    >
-      <Typography
-        variant="h3"
-        sx={{
-          marginBottom: "8px",
-          color: "var(--text-title-blue-france)",
-        }}
-      >
-        {title}
-      </Typography>
+    <div className={styles.mlCardContainer}>
+      <h3 className={`fr-h3 ${styles.mlCardTitle}`}>{title}</h3>
 
-      {subtitle && (
-        <Typography variant="h6" sx={{ marginBottom: "16px", fontWeight: 400 }}>
-          {subtitle}
-        </Typography>
-      )}
+      {subtitle && <h6 className={`${styles.mlCardSubtitle}`}>{subtitle}</h6>}
 
       {imageSrc && (
-        <Box
-          component="img"
-          src={imageSrc}
-          alt={imageAlt || ""}
-          sx={{
-            width: "350px",
-            height: "auto",
-            userSelect: "none",
-            marginBottom: "16px",
-          }}
-        />
+        <Image src={imageSrc} alt={imageAlt || ""} width={350} height={250} className={styles.mlCardImage} />
       )}
 
-      {body && <Box sx={{ marginBottom: "16px" }}>{body}</Box>}
-    </Stack>
+      {body && <div className={styles.mlCardBody}>{body}</div>}
+    </div>
   );
 }
