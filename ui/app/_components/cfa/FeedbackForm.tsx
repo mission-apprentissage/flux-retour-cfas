@@ -33,6 +33,7 @@ interface CfaFeedbackFormProps {
   hasSuccess: boolean;
   hasError: boolean;
   isAdmin?: boolean;
+  hasNext?: boolean;
 }
 
 export function CfaFeedbackForm({
@@ -44,6 +45,7 @@ export function CfaFeedbackForm({
   hasSuccess,
   hasError,
   isAdmin,
+  hasNext,
 }: CfaFeedbackFormProps) {
   const [didChangeRupture, setDidChangeRupture] = useState(false);
 
@@ -108,6 +110,7 @@ export function CfaFeedbackForm({
         hasSuccess={hasSuccess}
         didChangeRupture={didChangeRupture}
         isAdmin={isAdmin}
+        hasNext={hasNext}
       />
     </>
   );
@@ -235,9 +238,18 @@ interface FormActionsProps {
   hasSuccess: boolean;
   didChangeRupture: boolean;
   isAdmin?: boolean;
+  hasNext?: boolean;
 }
 
-function FormActions({ isFormValid, onSave, isSaving, hasSuccess, didChangeRupture, isAdmin }: FormActionsProps) {
+function FormActions({
+  isFormValid,
+  onSave,
+  isSaving,
+  hasSuccess,
+  didChangeRupture,
+  isAdmin,
+  hasNext,
+}: FormActionsProps) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
@@ -267,7 +279,7 @@ function FormActions({ isFormValid, onSave, isSaving, hasSuccess, didChangeRuptu
           selectedButton={selectedButton}
           isSaving={isSaving}
           hasSuccess={hasSuccess}
-          disabled={disabled}
+          disabled={disabled || !hasNext}
           onClick={() => handleClick("saveAndNext", true)}
         >
           Valider et passer au suivant
