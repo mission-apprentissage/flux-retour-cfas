@@ -62,6 +62,53 @@ describe("Mission Locale Routes", () => {
     });
   });
 
+  describe("Envoi avant activation du CFA", () => {
+    it("La ML doit voir le nouvel effectif, le CFA ne doit pas la voir", async () => {
+      const payload = createRandomRupturantDossierApprenantApiInputV3({
+        annee_scolaire: "2024-2025",
+        etablissement_formateur_uai: UAI,
+        etablissement_formateur_siret: SIRET,
+        etablissement_responsable_uai: UAI,
+        etablissement_responsable_siret: SIRET,
+        code_postal_apprenant: "75001",
+      });
+
+      await effectifsQueueDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        ...payload,
+      });
+
+      await processEffectifsQueue();
+
+      await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "post",
+        "/api/v1/admin/mission-locale/organismes/activate",
+        {
+          date: new Date().toISOString(),
+          organismes_ids_list: [ORGANISME_ID.toString()],
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs-per-month`
+      );
+
+      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+
+      const res2 = await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "get",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
+      );
+
+      expect(res2.data.a_traiter).toStrictEqual([]);
+    });
+  });
+
   describe("CFA activé", async () => {
     beforeEach(async () => {
       await requestAsOrganisation(
@@ -91,6 +138,24 @@ describe("Mission Locale Routes", () => {
       await processEffectifsQueue();
       const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
       EFFECTIF_ID = effQ?.effectif_id as ObjectId;
+
+      await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "post",
+        "/api/v1/admin/mission-locale/organismes/activate",
+        {
+          date: new Date().toISOString(),
+          organismes_ids_list: [ORGANISME_ID.toString()],
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "get",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
+      );
+
+      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
     });
 
     it("La ML ne doit pas voir l'effectif", async () => {
