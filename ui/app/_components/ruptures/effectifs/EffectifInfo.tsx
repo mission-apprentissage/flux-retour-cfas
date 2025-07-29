@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
+import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
 
 import { CfaFeedback } from "./CfaFeedback";
@@ -43,6 +44,7 @@ export function EffectifInfo({
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
 }) {
+  const { user } = useAuth();
   const [infosOpen, setInfosOpen] = useState(false);
   const pathname = usePathname();
   const isCfaPage = pathname?.startsWith("/cfa/");
@@ -131,12 +133,13 @@ export function EffectifInfo({
         )}
       </div>
       <EffectifInfoDetails effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
-      {!effectif.a_traiter &&
-      !effectif.injoignable &&
-      isCfaPage &&
-      "organisme_data" in effectif &&
-      effectif.organisme_data ? (
-        <CfaFeedback organismeData={effectif.organisme_data} transmittedAt={effectif.transmitted_at} />
+
+      {"organisme_data" in effectif && effectif.organisme_data ? (
+        <CfaFeedback
+          organismeData={effectif.organisme_data}
+          transmittedAt={effectif.transmitted_at}
+          visibility={user.organisation.type}
+        />
       ) : null}
     </div>
   );
