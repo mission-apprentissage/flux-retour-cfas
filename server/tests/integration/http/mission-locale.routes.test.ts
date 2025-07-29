@@ -139,16 +139,6 @@ describe("Mission Locale Routes", () => {
       const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
       EFFECTIF_ID = effQ?.effectif_id as ObjectId;
 
-      await requestAsOrganisation(
-        { type: "ADMINISTRATEUR" },
-        "post",
-        "/api/v1/admin/mission-locale/organismes/activate",
-        {
-          date: new Date().toISOString(),
-          organismes_ids_list: [ORGANISME_ID.toString()],
-        }
-      );
-
       const res = await requestAsOrganisation(
         { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
         "get",
