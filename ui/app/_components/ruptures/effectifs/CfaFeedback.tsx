@@ -108,9 +108,9 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility }: CfaFee
 
   switch (visibility) {
     case "ADMINISTRATEUR":
-    case "ORGANISME_FORMATION":
-      return organismeFormationLayout();
     case "MISSION_LOCALE":
+      return organismeFormationLayout();
+    case "ORGANISME_FORMATION":
       return missionLocaleLayout();
     default:
       return null;
