@@ -112,7 +112,7 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
           $match: {
             $and: [
               { a_traiter: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
             ],
           },
         },
@@ -156,8 +156,8 @@ const createDernierStatutFieldPipelineML = () => [
   },
   {
     $addFields: {
-      statusChanged: {
-        $cond: [{ $ne: ["$effectif_snapshot._computed.statut.en_cours", "$current_status.value"] }, true, false],
+      nouveau_contrat: {
+        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
       },
     },
   },
@@ -366,10 +366,13 @@ const addMissionLocaleFieldTraitementStatus = () => {
               },
             ],
           },
+          {
+            $eq: ["$organisme_data.acc_conjoint", true],
+          },
         ],
       },
       {
-        $eq: ["$current_status.value", STATUT_APPRENANT.RUPTURANT],
+        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
       },
     ],
   };
@@ -1005,7 +1008,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
             $match: {
               $and: [
                 { a_traiter: true },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { statusChanged: false }] }] },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
               ],
             },
           },
