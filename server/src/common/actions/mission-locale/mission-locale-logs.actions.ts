@@ -1,9 +1,18 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 
 import { missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-export const createEffectifMissionLocaleLog = (missionLocaleEffectifId: ObjectId, data: any, user: AuthContext) => {
+export const createEffectifMissionLocaleLog = (
+  missionLocaleEffectifId: ObjectId | null | undefined,
+  data: any,
+  user: AuthContext
+) => {
+  if (!missionLocaleEffectifId || !data || !user) {
+    captureException(new Error("createEffectifMissionLocaleLog: Missing required parameters"));
+    return;
+  }
   return missionLocaleEffectifsLogDb().insertOne({
     _id: new ObjectId(),
     mission_locale_effectif_id: missionLocaleEffectifId,

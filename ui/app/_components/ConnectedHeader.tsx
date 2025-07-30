@@ -49,48 +49,65 @@ export function ConnectedHeader() {
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
-      baseItems.push({
-        text: "Mon tableau de bord",
-        linkProps: {
-          href: "/",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mes organismes",
-        linkProps: {
-          href: "/organismes",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mes indicateurs",
-        linkProps: {
-          href: "/indicateurs",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mes effectifs",
-        linkProps: {
-          href: "/effectifs",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mon enquête SIFA",
-        linkProps: {
-          href: "/enquete-sifa",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Indicateurs Nationaux",
-        linkProps: {
-          href: "/national/indicateurs",
-          target: "_self",
-        },
-      });
+      if (user?.organisation?.ml_beta_activated_at) {
+        baseItems.push({
+          text: "Mon tableau de bord",
+          linkProps: {
+            href: "/cfa",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Paramètres",
+          linkProps: {
+            href: "/parametres",
+            target: "_self",
+          },
+        });
+      } else {
+        baseItems.push({
+          text: "Mon tableau de bord",
+          linkProps: {
+            href: "/",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Mes organismes",
+          linkProps: {
+            href: "/organismes",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Mes indicateurs",
+          linkProps: {
+            href: "/indicateurs",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Mes effectifs",
+          linkProps: {
+            href: "/effectifs",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Mon enquête SIFA",
+          linkProps: {
+            href: "/enquete-sifa",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Indicateurs Nationaux",
+          linkProps: {
+            href: "/national/indicateurs",
+            target: "_self",
+          },
+        });
+      }
     } else if (
       [
         ORGANISATION_TYPE.TETE_DE_RESEAU,
@@ -213,12 +230,7 @@ export function ConnectedHeader() {
       text: "Glossaire",
     });
 
-    baseItems.push({
-      text: "Aide et ressources",
-      menuLinks: aideMenuLinks,
-    });
-
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
+    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !user?.organisation?.ml_beta_activated_at) {
       baseItems.push({
         text: "Paramètres",
         linkProps: {
@@ -227,6 +239,11 @@ export function ConnectedHeader() {
         },
       });
     }
+
+    baseItems.push({
+      text: "Aide et ressources",
+      menuLinks: aideMenuLinks,
+    });
 
     return baseItems;
   };

@@ -3,12 +3,12 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { CircularProgress } from "@mui/material";
 import mime from "mime";
 import qs from "qs";
 import React, { useState } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
+import { Spinner } from "@/app/_components/common/Spinner";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
@@ -50,7 +50,7 @@ export function ModalRupturantExcel() {
         iconId="ri-arrow-right-line"
         iconPosition="right"
       >
-        {isFetching && <CircularProgress size="1em" sx={{ mr: 1 }} />}
+        {isFetching && <Spinner size="1em" style={{ marginRight: "0.5rem" }} />}
         Télécharger la liste
       </Button>
       <modal.Component

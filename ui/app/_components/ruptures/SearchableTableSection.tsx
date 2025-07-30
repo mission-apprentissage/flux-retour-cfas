@@ -4,9 +4,10 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
+import { EffectifPriorityData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
+
 import { MonthTable } from "./MonthTable";
 import { PriorityTable } from "./PriorityTable";
-import { EffectifPriorityData, MonthItem, SelectedSection } from "./types";
 
 type SearchableTableSectionProps = {
   title: string;

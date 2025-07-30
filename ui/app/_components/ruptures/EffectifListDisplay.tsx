@@ -1,29 +1,32 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import { Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
 import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { _get } from "@/common/httpClient";
 
-import { SearchableTableSection } from "./SearchableTableSection";
-import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "./types";
+import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "../../../common/types/ruptures";
 import {
   groupMonthsOlderThanSixMonths,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
-} from "./utils";
+} from "../../_utils/ruptures.utils";
+import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
-export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
+export function EffectifListDisplay({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
+
+  const pathname = usePathname();
+  const isCfaPage = pathname === "/cfa";
 
   const aTraiter = data.a_traiter || [];
   const injoignableList = data.injoignable || [];
@@ -93,7 +96,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
       });
     };
 
-    return [
+    const items = [
       {
         text: totalToTreat > 0 ? <strong>{`A traiter (${totalToTreat})`}</strong> : `A traiter (${totalToTreat})`,
         linkProps: {
@@ -108,6 +111,21 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
         items: getItems(groupedDataATraiter, "a-traiter"),
       },
       {
+        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
+        linkProps: {
+          href: "#",
+          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            handleSectionChange("deja-traite");
+          },
+        },
+        isActive: selectedSection === "deja-traite",
+        expandedByDefault: selectedSection === "deja-traite",
+        items: getItems(sortedDataTraite, "deja-traite"),
+      },
+    ];
+    if (!isCfaPage) {
+      items.splice(1, 0, {
         text:
           totalInjoignable > 0 ? (
             <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
@@ -124,21 +142,9 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
         isActive: selectedSection === "injoignable",
         expandedByDefault: selectedSection === "injoignable",
         items: getItems(groupedInjoignable, "injoignable"),
-      },
-      {
-        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
-        linkProps: {
-          href: "#",
-          onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
-            e.preventDefault();
-            handleSectionChange("deja-traite");
-          },
-        },
-        isActive: selectedSection === "deja-traite",
-        expandedByDefault: selectedSection === "deja-traite",
-        items: getItems(sortedDataTraite, "deja-traite"),
-      },
-    ];
+      });
+    }
+    return items;
   }, [
     selectedSection,
     groupedDataATraiter,
@@ -150,11 +156,12 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
     totalToTreat,
     totalInjoignable,
     totalTraite,
+    isCfaPage,
   ]);
 
   return (
-    <Grid container>
-      <Grid size={{ xs: 12, md: 3 }}>
+    <div className="fr-grid-row">
+      <div className="fr-col-12 fr-col-md-3">
         <SideMenu
           align="left"
           burgerMenuButtonText="Dans cette rubrique"
@@ -162,18 +169,18 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
           items={sideMenuItems}
           style={{ paddingRight: 0 }}
         />
-      </Grid>
-      <Grid size={{ xs: 12, md: 9 }} pl={{ sx: 0, md: 4 }}>
+      </div>
+      <div className="fr-col-12 fr-col-md-9" style={{ paddingLeft: "2rem" }}>
         {selectedSection === "a-traiter" && groupedDataATraiter.length === 0 && (
           <MlCard
             title="Il n’y pas de nouveaux jeunes à contacter pour le moment"
             imageSrc="/images/mission-locale-not-treated.svg"
             imageAlt="Personnes discutant et travaillant devant un tableau"
             body={
-              <Typography>
+              <p>
                 <strong>Nous vous invitons à vous reconnecter dans 1 semaine</strong> pour prendre connaissance de
                 nouvelles situations.
-              </Typography>
+              </p>
             }
           />
         )}
@@ -184,7 +191,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
             imageSrc="/images/mission-locale-treated.svg"
             imageAlt="Personnes discutant et travaillant dans un bureau"
             body={
-              <Typography>
+              <p>
                 <strong>Nous vous invitons à consulter</strong>{" "}
                 <a
                   className="fr-link fr-icon-arrow-right-line fr-link--icon-right"
@@ -193,7 +200,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
                 >
                   les dossiers à traiter
                 </a>
-              </Typography>
+              </p>
             }
           />
         )}
@@ -250,7 +257,7 @@ export function MissionLocaleDisplay({ data }: { data: MonthsData }) {
             />
           </SuspenseWrapper>
         )}
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
