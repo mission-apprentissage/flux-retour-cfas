@@ -35,10 +35,11 @@ export default () => {
   return router;
 };
 
-const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => {
-  const effectifId = params.id;
+const updateEffectifMissionLocaleData = async (req, { locals }) => {
+  const effectifId = req.params.id;
+  const user = req.user;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
+  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
@@ -48,7 +49,7 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
   }
-  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
+  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data, user);
 };
 
 const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {

@@ -24,11 +24,13 @@ import { v4 as uuidv4 } from "uuid";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 
+import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 
 const DATE_START = new Date("2025-01-01");
@@ -468,6 +470,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
             mission_locale_organisation: "$mission_locale_organisation",
+            mission_locale_logs: "$ml_logs",
           },
         },
       ];
@@ -798,7 +801,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       },
     }
   );
-
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
 
   const oldestRealDataIndex = result.findLastIndex(
@@ -856,6 +858,19 @@ export const getEffectifFromMissionLocaleId = async (
           },
         ],
         as: "mission_locale_organisation",
+      },
+    },
+    {
+      $lookup: {
+        from: "missionLocaleEffectifLog",
+        let: { mission_locale_effectif_id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$mission_locale_effectif_id"] } } },
+          {
+            $sort: { created_at: 1 },
+          },
+        ],
+        as: "ml_logs",
       },
     },
     {
@@ -1490,7 +1505,8 @@ export const computeMissionLocaleStats = async (
 export const setEffectifMissionLocaleData = async (
   missionLocaleId: ObjectId,
   effectifId: ObjectId,
-  data: IUpdateMissionLocaleEffectif
+  data: IUpdateMissionLocaleEffectif,
+  user: AuthContext
 ) => {
   const { situation, situation_autre, commentaires, deja_connu } = data;
 
@@ -1514,7 +1530,7 @@ export const setEffectifMissionLocaleData = async (
     },
     { upsert: true, returnDocument: "after" }
   );
-
+  await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
   await createOrUpdateMissionLocaleStats(missionLocaleId);
   return updated;
 };
