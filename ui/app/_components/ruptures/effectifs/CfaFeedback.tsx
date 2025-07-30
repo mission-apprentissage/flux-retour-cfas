@@ -30,7 +30,7 @@ const MOTIF_LABELS = {
 };
 
 export function CfaFeedback({ organismeData, transmittedAt, visibility }: CfaFeedbackProps) {
-  const organismeFormationLayout = () => {
+  const missionLocaleLayout = () => {
     return (
       <>
         <div className={styles.effectifFeedbackContainer}>
@@ -50,7 +50,7 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility }: CfaFee
     );
   };
 
-  const missionLocaleLayout = () => {
+  const organismeFormationLayout = () => {
     return (
       <>
         {transmittedAt && organismeData.rupture && organismeData.acc_conjoint && (
@@ -108,9 +108,9 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility }: CfaFee
 
   switch (visibility) {
     case "ADMINISTRATEUR":
-    case "MISSION_LOCALE":
-      return organismeFormationLayout();
     case "ORGANISME_FORMATION":
+      return organismeFormationLayout();
+    case "MISSION_LOCALE":
       return missionLocaleLayout();
     default:
       return null;
