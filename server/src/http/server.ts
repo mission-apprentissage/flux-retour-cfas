@@ -159,7 +159,7 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
-
+import membreRoutes from "./routes/organisations.routes/habilitations/membre.routes";
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
 /**
@@ -844,40 +844,6 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/membres",
-        returnResult(async (req) => {
-          return await listOrganisationMembers(req.user);
-        })
-      )
-      .post(
-        "/membres",
-        returnResult(async (req) => {
-          await inviteUserToOrganisation(
-            req.user,
-            req.body.email.toLowerCase(),
-            (req.user as AuthContext).organisation_id
-          );
-        })
-      )
-      .delete(
-        "/membres/:userId",
-        returnResult(async (req) => {
-          await removeUserFromOrganisation(req.user, req.params.userId);
-        })
-      )
-      .post(
-        "/membres/:userId/validate",
-        returnResult(async (req) => {
-          await validateMembre(req.user, req.params.userId);
-        })
-      )
-      .post(
-        "/membres/:userId/reject",
-        returnResult(async (req) => {
-          await rejectMembre(req.user, req.params.userId);
-        })
-      )
-      .get(
         "/invitations",
         returnResult(async (req) => {
           return await listOrganisationPendingInvitations(req.user);
@@ -897,6 +863,7 @@ function setupRoutes(app: Application) {
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
       .use("/arml", requireARML, armlAuthentRoutes())
+      .use("/membres", membreRoutes())
   );
 
   /********************************

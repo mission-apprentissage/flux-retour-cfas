@@ -54,6 +54,8 @@ const zOrganisationARMLCreate = z.object({
 
 const zOrganisationOrganismeCreate = z.object({
   type: z.literal("ORGANISME_FORMATION"),
+  role: z.enum(["RESPONSABLE", "FORMATEUR"]).nullish(),
+  responsable_id: zObjectId.nullish().describe("Identifiant du responsable de l'organisme de formation"),
   siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
   uai: z
     .string({
@@ -195,21 +197,18 @@ export function getOrganisationLabel(organisation: IOrganisationCreate): string 
 
     case "DREETS":
     case "DRAAF":
-      return `${organisation.type} ${
-        REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
-      }`;
+      return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
+        }`;
     case "CONSEIL_REGIONAL":
-      return `Conseil régional ${
-        REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
-      }`;
+      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
+        }`;
     case "CARIF_OREF_REGIONAL":
       return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region}`;
     case "DRAFPIC":
       return `DRAFPIC ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region}`;
     case "DDETS":
-      return `DDETS ${
-        DEPARTEMENTS_BY_CODE[organisation.code_departement as IDepartmentCode]?.nom || organisation.code_departement
-      }`;
+      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement as IDepartmentCode]?.nom || organisation.code_departement
+        }`;
     case "ACADEMIE":
       return `Académie ${getAcademieByCode(organisation.code_academie)?.nom ?? organisation.code_academie}`;
 

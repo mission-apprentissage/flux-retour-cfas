@@ -72,31 +72,6 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<IOr
   return organisation;
 }
 
-export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<IUsersMigration[]>> {
-  return await usersMigrationDb()
-    .find(
-      {
-        organisation_id: ctx.organisation_id,
-        account_status: {
-          $in: ["PENDING_ADMIN_VALIDATION", "CONFIRMED"],
-        },
-      },
-      {
-        projection: {
-          _id: 1,
-          nom: 1,
-          prenom: 1,
-          email: 1,
-          telephone: 1,
-          account_status: 1,
-          created_at: 1,
-          last_connection: 1,
-        },
-      }
-    )
-    .toArray();
-}
-
 export async function listContactsOrganisation(organisationId: ObjectId): Promise<Partial<IUsersMigration>[]> {
   return await usersMigrationDb()
     .find(
@@ -412,9 +387,8 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
       if (!organisme) {
         logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
       }
-      return `${organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme"} - SIRET : ${
-        organisation.siret
-      }, UAI : ${organisation.uai}`;
+      return `${organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme"} - SIRET : ${organisation.siret
+        }, UAI : ${organisation.uai}`;
     }
 
     case "TETE_DE_RESEAU":
