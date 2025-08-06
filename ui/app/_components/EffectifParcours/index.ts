@@ -1,0 +1,1 @@
+export { EffectifParcours } from "./EffectifParcours";
