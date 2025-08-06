@@ -51,11 +51,7 @@ export function CfaFeedbackForm({
 
   const handleRuptureChange = (rupture: boolean) => {
     setFormData({
-      ...formData,
       rupture,
-      acc_conjoint: rupture ? formData.acc_conjoint : null,
-      motif: rupture ? formData.motif : null,
-      commentaires: rupture ? formData.commentaires : null,
     });
     setDidChangeRupture(true);
   };
@@ -64,8 +60,6 @@ export function CfaFeedbackForm({
     setFormData({
       ...formData,
       acc_conjoint,
-      motif: acc_conjoint ? formData.motif : null,
-      commentaires: acc_conjoint ? formData.commentaires : null,
     });
   };
 
