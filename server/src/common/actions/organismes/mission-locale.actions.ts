@@ -18,6 +18,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
   const setObject = {
     rupture,
     acc_conjoint,
+    reponse_at: new Date(),
     ...(motif !== undefined ? { motif } : []),
     ...(commentaires !== undefined ? { commentaires } : {}),
   };

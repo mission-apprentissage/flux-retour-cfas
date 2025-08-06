@@ -33,7 +33,9 @@ export function MLFeedback({ situation, visibility, logs }: MLFeedbackProps) {
                 <p className="fr-mb-1v fr-mt-3v">
                   <b>Quel est le retour sur la prise de contact ?</b>
                 </p>
-                <Tag>{log.situation ? SITUATION_LABEL_ENUM[log.situation] : "Situation inconnue"}</Tag>
+                <Tag>
+                  <b>{log.situation ? SITUATION_LABEL_ENUM[log.situation] : "Situation inconnue"}</b>
+                </Tag>
 
                 {log.commentaires && (
                   <>

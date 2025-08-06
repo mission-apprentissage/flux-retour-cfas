@@ -12,6 +12,7 @@ import {
   SITUATION_ENUM,
 } from "shared";
 
+import { EffectifParcours } from "@/app/_components/EffectifParcours";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
@@ -125,6 +126,11 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
         <DsfrLink href={backUrl} arrow="left">
           Retour à la liste
         </DsfrLink>
+        {data && (
+          <div style={{ marginTop: "8rem" }}>
+            <EffectifParcours effectif={data.effectif} />
+          </div>
+        )}
       </Grid>
 
       <Grid
