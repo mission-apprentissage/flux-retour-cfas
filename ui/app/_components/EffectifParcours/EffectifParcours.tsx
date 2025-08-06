@@ -62,9 +62,9 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     });
   }
 
-  if (effectif.transmitted_at && "organisme_data" in effectif) {
-    const transmittedDate = effectif.transmitted_at?.date || effectif.transmitted_at;
-    const date = transmittedDate instanceof Date ? transmittedDate : new Date(transmittedDate);
+  if ("organisme_data" in effectif) {
+    const reponseDate = eff.organisme_data.reponse_at;
+    const date = reponseDate instanceof Date ? reponseDate : new Date(reponseDate);
 
     if (eff.organisme_data.rupture === false) {
       events.push({
@@ -137,7 +137,7 @@ const getIcon = (type: TimelineEventType) => {
       TIMELINE_EVENTS.TRAITE_CFA_SUIVI,
       TIMELINE_EVENTS.TRAITE_ML,
       TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION,
-    ].includes(type)
+    ].includes(type as any)
   ) {
     return <Image src="/images/parcours-dossier-traite.svg" alt="Dossier traité" width={18} height={18} />;
   }
