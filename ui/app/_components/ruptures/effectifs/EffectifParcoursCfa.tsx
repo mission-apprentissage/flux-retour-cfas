@@ -145,7 +145,7 @@ const getIcon = (type: TimelineEventType) => {
   );
 };
 
-export const EffectifParcours = memo(function EffectifParcours({ effectif, className }: EffectifParcoursProps) {
+export const EffectifParcoursCfa = memo(function EffectifParcours({ effectif, className }: EffectifParcoursProps) {
   const timeline = buildTimeline(effectif);
 
   if (timeline.length === 0) {
