@@ -14414,6 +14414,18 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 },
               ],
             },
+            "reponse_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                  "description": "Date de réponse au formulaire par le CFA",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de réponse au formulaire par le CFA",
+            },
             "rupture": {
               "bsonType": [
                 "bool",
