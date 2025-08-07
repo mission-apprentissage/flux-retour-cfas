@@ -437,6 +437,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
+            mission_locale_organisation: "$mission_locale_organisation",
+            mission_locale_logs: "$ml_logs",
           },
         },
       ];

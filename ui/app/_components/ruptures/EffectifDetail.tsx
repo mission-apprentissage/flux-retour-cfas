@@ -12,7 +12,7 @@ import {
   SITUATION_ENUM,
 } from "shared";
 
-import { EffectifParcours } from "@/app/_components/EffectifParcours";
+import { EffectifParcours, EffectifParcoursMissionLocale } from "@/app/_components/EffectifParcours";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
@@ -113,6 +113,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
   }
 
   const backUrl = pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale";
+  const isMissionLocaleView = pathname?.startsWith("/mission-locale");
 
   return (
     <Grid container>
@@ -128,7 +129,11 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
         </DsfrLink>
         {data && (
           <div style={{ marginTop: "8rem" }}>
-            <EffectifParcours effectif={data.effectif} />
+            {isMissionLocaleView ? (
+              <EffectifParcoursMissionLocale effectif={data.effectif} />
+            ) : (
+              <EffectifParcours effectif={data.effectif} />
+            )}
           </div>
         )}
       </Grid>
