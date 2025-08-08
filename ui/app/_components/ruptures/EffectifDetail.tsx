@@ -12,9 +12,10 @@ import {
   SITUATION_ENUM,
 } from "shared";
 
-import { EffectifParcours } from "@/app/_components/EffectifParcours";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
+import { EffectifParcoursCfa } from "@/app/_components/ruptures/effectifs/EffectifParcoursCfa";
+import { EffectifParcoursMissionLocale } from "@/app/_components/ruptures/effectifs/EffectifParcoursMissionLocale";
 import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { useAuth } from "@/app/_context/UserContext";
@@ -113,6 +114,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
   }
 
   const backUrl = pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale";
+  const isMissionLocaleView = pathname?.startsWith("/mission-locale");
 
   return (
     <Grid container>
@@ -128,7 +130,11 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
         </DsfrLink>
         {data && (
           <div style={{ marginTop: "8rem" }}>
-            <EffectifParcours effectif={data.effectif} />
+            {isMissionLocaleView ? (
+              <EffectifParcoursMissionLocale effectif={data.effectif} />
+            ) : (
+              <EffectifParcoursCfa effectif={data.effectif} />
+            )}
           </div>
         )}
       </Grid>

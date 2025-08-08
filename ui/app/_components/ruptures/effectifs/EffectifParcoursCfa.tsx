@@ -18,11 +18,6 @@ const TIMELINE_EVENTS = {
   TRAITE_ML: "TRAITE_ML",
 } as const;
 
-const TIMELINE_STATUS = {
-  COMPLETED: "completed",
-  CURRENT: "current",
-} as const;
-
 const EVENT_LABELS = {
   [TIMELINE_EVENTS.RUPTURE]: "Rupture du contrat d'apprentissage",
   [TIMELINE_EVENTS.TRAITE_CFA]: "Dossier traité",
@@ -34,12 +29,10 @@ const EVENT_LABELS = {
 } as const;
 
 type TimelineEventType = (typeof TIMELINE_EVENTS)[keyof typeof TIMELINE_EVENTS];
-type TimelineStatusType = (typeof TIMELINE_STATUS)[keyof typeof TIMELINE_STATUS];
 
 interface TimelineEvent {
   date: Date;
   type: TimelineEventType;
-  status: TimelineStatusType;
   label: string;
 }
 
@@ -57,7 +50,6 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     events.push({
       date: ruptureDate instanceof Date ? ruptureDate : new Date(ruptureDate),
       type: TIMELINE_EVENTS.RUPTURE,
-      status: TIMELINE_STATUS.COMPLETED,
       label: EVENT_LABELS[TIMELINE_EVENTS.RUPTURE],
     });
   }
@@ -70,21 +62,18 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA,
-        status: TIMELINE_STATUS.COMPLETED,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
       });
     } else if (eff.organisme_data.rupture === true && eff.organisme_data.acc_conjoint === false) {
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA_SUIVI,
-        status: TIMELINE_STATUS.COMPLETED,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA_SUIVI],
       });
     } else if (eff.organisme_data.rupture === true && eff.organisme_data.acc_conjoint === true) {
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA_PARTAGE,
-        status: TIMELINE_STATUS.COMPLETED,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA_PARTAGE],
       });
     }
@@ -100,14 +89,12 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION,
-        status: TIMELINE_STATUS.COMPLETED,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION],
       });
     } else if (situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
       events.push({
         date,
         type: TIMELINE_EVENTS.EN_COURS_ML,
-        status: TIMELINE_STATUS.CURRENT,
         label: EVENT_LABELS[TIMELINE_EVENTS.EN_COURS_ML],
       });
     } else if (
@@ -118,7 +105,6 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_ML,
-        status: TIMELINE_STATUS.COMPLETED,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML],
       });
     }
@@ -159,7 +145,7 @@ const getIcon = (type: TimelineEventType) => {
   );
 };
 
-export const EffectifParcours = memo(function EffectifParcours({ effectif, className }: EffectifParcoursProps) {
+export const EffectifParcoursCfa = memo(function EffectifParcours({ effectif, className }: EffectifParcoursProps) {
   const timeline = buildTimeline(effectif);
 
   if (timeline.length === 0) {
@@ -174,7 +160,7 @@ export const EffectifParcours = memo(function EffectifParcours({ effectif, class
           <div key={`${event.type}-${event.date.getTime()}`} className={styles.timelineItem}>
             <div className={styles.timelineIcon}>{getIcon(event.type)}</div>
             <div className={styles.timelineContent}>
-              <p className={`${styles.timelineText} ${event.status === TIMELINE_STATUS.CURRENT ? styles.current : ""}`}>
+              <p className={styles.timelineText}>
                 Le {formatDate(event.date)} : <strong>{event.label}</strong>
               </p>
             </div>
