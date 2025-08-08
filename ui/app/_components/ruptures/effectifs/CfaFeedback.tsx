@@ -2,12 +2,25 @@
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useState } from "react";
-import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
+import { ACC_CONJOINT_MOTIF_ENUM, IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate } from "@/app/_utils/date.utils";
 
 import styles from "./Feedback.module.css";
+
+type EffectifWithContacts = (IEffecifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
+  organisme?: {
+    contacts_from_referentiel?: IOrganisme["contacts_from_referentiel"];
+  };
+  contacts_tdb?: Array<{
+    email?: string;
+    telephone?: string;
+    nom?: string;
+    prenom?: string;
+    fonction?: string;
+  }>;
+};
 
 interface CfaFeedbackProps {
   organismeData: {
@@ -18,18 +31,7 @@ interface CfaFeedbackProps {
   };
   transmittedAt?: Date | null;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
-  effectif?: {
-    organisme?: {
-      contacts_from_referentiel?: Array<{ email?: string }>;
-    };
-    contacts_tdb?: Array<{
-      email?: string;
-      telephone?: string;
-      nom?: string;
-      prenom?: string;
-      fonction?: string;
-    }>;
-  };
+  effectif?: EffectifWithContacts;
 }
 
 const MOTIF_LABELS = {
