@@ -38,12 +38,16 @@ describe("Mission Locale Routes", () => {
   describe("CFA non activé", () => {
     it("La ML doit voir le nouvel effectif", async () => {
       const payload = createRandomRupturantDossierApprenantApiInputV3({
-        annee_scolaire: "2024-2025",
+        annee_scolaire: "2025-2026",
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
         etablissement_responsable_siret: SIRET,
         code_postal_apprenant: "75001",
+        date_de_naissance_apprenant: new Date("2005-01-01"),
+        date_inscription_formation: new Date("2025-09-01"),
+        date_entree_formation: new Date("2025-09-01"),
+        date_fin_formation: new Date("2026-08-01"),
       });
 
       await effectifsQueueDb().insertOne({
@@ -65,12 +69,16 @@ describe("Mission Locale Routes", () => {
   describe("Envoi avant activation du CFA", () => {
     it("La ML doit voir le nouvel effectif, le CFA ne doit pas la voir", async () => {
       const payload = createRandomRupturantDossierApprenantApiInputV3({
-        annee_scolaire: "2024-2025",
+        annee_scolaire: "2025-2026",
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
         etablissement_responsable_siret: SIRET,
         code_postal_apprenant: "75001",
+        date_de_naissance_apprenant: new Date("2005-01-01"),
+        date_inscription_formation: new Date("2025-09-01"),
+        date_entree_formation: new Date("2025-09-01"),
+        date_fin_formation: new Date("2026-08-01"),
       });
 
       await effectifsQueueDb().insertOne({
@@ -97,7 +105,7 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
 
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(res.data.a_traiter.reduce((acc: number, curr: any) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
 
       const res2 = await requestAsOrganisation(
         { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
@@ -122,12 +130,16 @@ describe("Mission Locale Routes", () => {
       );
 
       const payload = createRandomRupturantDossierApprenantApiInputV3({
-        annee_scolaire: "2024-2025",
+        annee_scolaire: "2025-2026",
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
         etablissement_responsable_siret: SIRET,
         code_postal_apprenant: "75001",
+        date_de_naissance_apprenant: new Date("2005-01-01"),
+        date_inscription_formation: new Date("2025-09-01"),
+        date_entree_formation: new Date("2025-09-01"),
+        date_fin_formation: new Date("2026-08-01"),
       });
 
       const { insertedId } = await effectifsQueueDb().insertOne({
