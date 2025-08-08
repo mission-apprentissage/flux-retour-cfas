@@ -44,7 +44,12 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility }: CfaFee
               </Tag>
             ))}
           </div>
-          <div className="fr-mb-2v">{organismeData.commentaires}</div>
+          {organismeData.commentaires ? (
+            <div className="fr-mb-2v fr-mt-4v">
+              <b>Commentaires de l’organisme de formation</b>
+              <div className="fr-mb-2v fr-mt-4v">{organismeData.commentaires}</div>
+            </div>
+          ) : null}
         </div>
       </>
     );
