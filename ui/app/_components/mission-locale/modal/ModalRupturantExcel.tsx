@@ -66,7 +66,7 @@ export function ModalRupturantExcel() {
         <Checkbox
           options={[
             {
-              label: "A traiter",
+              label: "À traiter",
               nativeInputProps: {
                 name: API_EFFECTIF_LISTE.A_TRAITER,
                 value: API_EFFECTIF_LISTE.A_TRAITER,

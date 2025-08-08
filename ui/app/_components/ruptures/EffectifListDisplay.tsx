@@ -98,7 +98,7 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
 
     const items = [
       {
-        text: totalToTreat > 0 ? <strong>{`A traiter (${totalToTreat})`}</strong> : `A traiter (${totalToTreat})`,
+        text: totalToTreat > 0 ? <strong>{`À traiter (${totalToTreat})`}</strong> : `À traiter (${totalToTreat})`,
         linkProps: {
           href: "#",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -213,11 +213,11 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
           />
         )}
 
-        {/* A traiter */}
+        {/* À traiter */}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
-              title="A traiter"
+              title="À traiter"
               data={groupedDataATraiter}
               priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
               hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}

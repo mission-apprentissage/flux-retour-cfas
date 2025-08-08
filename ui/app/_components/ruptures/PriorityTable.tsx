@@ -4,9 +4,10 @@ import { format } from "date-fns/index";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
+import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 
@@ -41,6 +42,7 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
   const { user } = useAuth();
   const params = useParams();
   const mlId = params?.id as string | undefined;
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const columns = useMemo(() => {
     return [
@@ -105,12 +107,60 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
       {priorityData.length > 0 && (
         <>
           <PriorityBadge priorityData={priorityData} />
-          <p style={{ margin: "0 0 16px 0", fontSize: "14px" }}>
-            Nous affichons dans cette liste <strong>les jeunes âgés de 16 à 18 ans</strong> (obligation de formation)
-            ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong> et les{" "}
-            <strong>jeunes qui ont indiqué avoir besoin d&apos;être accompagnés par vos services</strong> (campagne
-            mailing)..
-          </p>
+          {user.organisation.type === "MISSION_LOCALE" && (
+            <div style={{ marginBottom: "16px" }}>
+              <DsfrLink
+                href="#"
+                arrow="none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setInfoOpen((open) => !open);
+                }}
+                className={`fr-link--icon-right ${infoOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
+              >
+                Qui sont les jeunes affichés dans cette liste ?
+              </DsfrLink>
+
+              {infoOpen && (
+                <div style={{ marginTop: "12px", fontSize: "14px", lineHeight: "1.4" }}>
+                  <p style={{ margin: "0 0 8px 0" }}>Nous affichons dans cette liste :</p>
+                  <ul style={{ margin: "0 0 12px 20px", padding: "0" }}>
+                    <li>
+                      <strong>les jeunes âgés de 16 à 18 ans (obligation de formation)</strong>
+                    </li>
+                    <li>
+                      <strong>les jeunes en situation de handicap (RQTH)</strong>
+                    </li>
+                    <li>
+                      <strong>les jeunes ayant exprimé un besoin d&apos;accompagnement (campagne mailing)</strong>
+                    </li>
+                    <li>
+                      <strong>les jeunes en situation de rupture total dans moins d&apos;1 mois</strong>
+                    </li>
+                  </ul>
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    Dans le cadre d&apos;une expérimentation avec les CFA, cette liste inclut également :
+                  </p>
+                  <ul style={{ margin: "0 0 0 20px", padding: "0" }}>
+                    <li>
+                      <strong>
+                        les jeunes pour lesquels un CFA a formulé une demande d&apos;accompagnement conjoint avec la
+                        Mission Locale
+                      </strong>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {user.organisation.type !== "MISSION_LOCALE" && (
+            <p style={{ margin: "0 0 16px 0", fontSize: "14px" }}>
+              Nous affichons dans cette liste <strong>les jeunes âgés de 16 à 18 ans</strong> (obligation de formation)
+              ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong> et les{" "}
+              <strong>jeunes qui ont indiqué avoir besoin d&apos;être accompagnés par vos services</strong> (campagne
+              mailing)..
+            </p>
+          )}
           <LightTable
             caption=""
             data={tableData}

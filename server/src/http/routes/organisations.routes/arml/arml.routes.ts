@@ -126,7 +126,7 @@ const exportMissionLocalesData = async (req, res) => {
       id: "total",
     },
     {
-      name: "A traiter",
+      name: "À traiter",
       id: "a_traiter",
     },
     {

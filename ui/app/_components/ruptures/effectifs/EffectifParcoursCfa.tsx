@@ -24,7 +24,7 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.TRAITE_CFA_SUIVI]: "Dossier traité - suivi par le CFA",
   [TIMELINE_EVENTS.TRAITE_CFA_PARTAGE]: "Dossier traité - partagé à la Mission Locale",
   [TIMELINE_EVENTS.EN_COURS_ML]: "Dossier en cours de traitement par la Mission Locale",
-  [TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION]: "Dossier traité – Nouvelle situation",
+  [TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION]: "Dossier traité - Nouvelle situation",
   [TIMELINE_EVENTS.TRAITE_ML]: "Dossier traité - par la Mission Locale",
 } as const;
 
