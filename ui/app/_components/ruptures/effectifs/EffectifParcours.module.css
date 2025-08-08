@@ -1,0 +1,55 @@
+.parcours {
+  background-color: white;
+}
+
+.parcoursTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.timelineIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timelineContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineText {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-mention-grey);
+}
+
+.timelineText.current {
+  color: var(--text-title-blue-france);
+}
+
+.timelineText strong {
+  font-weight: 600;
+}
+
+.timelineText.current strong {
+  font-weight: 700;
+}

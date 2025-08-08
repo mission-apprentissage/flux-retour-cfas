@@ -1,0 +1,26 @@
+.mlHeaderContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mlHeaderTop {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.mlHeaderContent {
+  flex: 1;
+}
+
+.mlHeaderActions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: flex-end;
+  align-items: center;
+}

@@ -35,10 +35,11 @@ export default () => {
   return router;
 };
 
-const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => {
-  const effectifId = params.id;
+const updateEffectifMissionLocaleData = async (req, { locals }) => {
+  const effectifId = req.params.id;
+  const user = req.user;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
+  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
@@ -48,7 +49,7 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
   }
-  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
+  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data, user);
 };
 
 const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
@@ -57,7 +58,7 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
@@ -65,7 +66,7 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, missionLocale.activated_at);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
@@ -85,7 +86,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "À traiter",
             logsTag: "ml_a_traiter" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,
@@ -96,7 +97,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "Déjà traités",
             logsTag: "ml_traite" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,
@@ -107,7 +108,7 @@ const exportEffectifMissionLocale = async (req, res) => {
             worksheetName: "Injoignable",
             logsTag: "ml_injoignable" as const,
             data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
+              missionLocale,
               { type },
               missionLocale.activated_at
             )) as Array<Record<string, string>>,

@@ -8,6 +8,7 @@ import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
 import { zContrat } from "../../data/effectifs/contrat.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
+import { zMissionLocaleEffectifLog } from "../../data/missionLocaleEffectifLog.model";
 
 const zApprenantPick = zApprenant.pick({
   nom: true,
@@ -48,6 +49,7 @@ const zEffectifMissionLocale = z
     situation: z.object(updateMissionLocaleEffectifApi).nullish(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),
+    mission_locale_logs: z.array(zMissionLocaleEffectifLog).nullish(),
   })
   .merge(zApprenantPick);
 

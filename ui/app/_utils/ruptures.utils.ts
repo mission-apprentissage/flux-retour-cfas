@@ -1,7 +1,7 @@
 import format from "date-fns/format/index";
 import { fr } from "date-fns/locale";
 
-import { MonthItem } from "./types";
+import { MonthItem } from "../../common/types/ruptures";
 
 export const formatMonthAndYear = (dateString: string): string => {
   const date = new Date(dateString);

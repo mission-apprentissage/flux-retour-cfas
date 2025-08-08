@@ -151,6 +151,7 @@ import emails from "./routes/emails.routes";
 import armlAuthentRoutes from "./routes/organisations.routes/arml/arml.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
+import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
@@ -658,6 +659,7 @@ function setupRoutes(app: Application) {
       )
       .use("/transmission", transmissionRoutes())
       .use("/effectifs", effectifsOrganismeRoutes())
+      .use("/mission-locale", requireOrganismePermission("manageEffectifs"), missionLocaleOrganismeRoutes())
   );
 
   /********************************

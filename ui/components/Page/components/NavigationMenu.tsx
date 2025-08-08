@@ -158,6 +158,20 @@ function NavBarTransverse(): React.ReactElement {
 
 function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
+  const { auth } = useAuth();
+
+  if (auth?.organisation?.type === "ORGANISME_FORMATION" && auth?.organisation?.ml_beta_activated_at) {
+    return (
+      <>
+        <NavItem to="/cfa" exactMatch>
+          Mon tableau de bord
+        </NavItem>
+        <NavItem to="/parametres">Paramètres</NavItem>
+        <MenuQuestions />
+      </>
+    );
+  }
+
   return (
     <>
       <NavItem to="/home" exactMatch>
