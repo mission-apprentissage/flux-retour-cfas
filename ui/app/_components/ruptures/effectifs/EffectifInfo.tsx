@@ -132,6 +132,7 @@ export function EffectifInfo({
           organismeData={effectif.organisme_data}
           transmittedAt={effectif.transmitted_at}
           visibility={user.organisation.type}
+          effectif={effectif}
         />
       ) : null}
 

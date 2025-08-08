@@ -54,7 +54,10 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }) {
             <DsfrLink
               href="#"
               arrow="none"
-              onClick={() => setInfosOpen((open) => !open)}
+              onClick={(e) => {
+                e.preventDefault();
+                setInfosOpen((open) => !open);
+              }}
               className={`fr-link--icon-right ${infosOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
             >
               Informations complémentaires
@@ -71,21 +74,6 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }) {
                   <p>Date de début : {formatDate(c.date_debut) || "non renseignée"}</p>
                   <p>Date de fin : {formatDate(c.date_fin) || "non renseignée"}</p>
                   <p>Cause de rupture : {c.cause_rupture || "non renseignée"}</p>
-                </div>
-              ))}
-              <p className={styles.detailsTitleWithMargin}>Coordonnées du CFA</p>
-              {effectif.organisme?.contacts_from_referentiel?.map((contact, idx) => (
-                <div key={idx} className={styles.contractItem}>
-                  <p>E-mail : {contact.email || "non renseigné"}</p>
-                </div>
-              ))}
-              {effectif.contacts_tdb?.map(({ email, telephone, nom, prenom, fonction }, idx) => (
-                <div key={idx} className={styles.contractItem}>
-                  <p>
-                    {nom} {prenom} {fonction ? `(${fonction})` : ""}
-                  </p>
-                  <p>E-mail : {email || "non renseigné"}</p>
-                  <p>Téléphone : {telephone || "non renseigné"}</p>
                 </div>
               ))}
             </div>

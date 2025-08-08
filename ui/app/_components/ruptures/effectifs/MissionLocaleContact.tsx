@@ -25,7 +25,10 @@ export function MissionLocaleContact({ missionLocaleOrganisation }: MissionLocal
       <DsfrLink
         href="#"
         arrow="none"
-        onClick={() => setContactsOpen((open) => !open)}
+        onClick={(e) => {
+          e.preventDefault();
+          setContactsOpen((open) => !open);
+        }}
         className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
       >
         Contacts de la Mission Locale
