@@ -25,8 +25,6 @@ fileignoreconfig:
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
 - filename: .infra/files/configs/mongodb/seed.gpg
   checksum: b0b306f4d3167c6bf2f70352fd6fd0e282f13a4e6ba409f2e1a97b427da242fc
-- filename: .infra/vault/vault.yml
-  checksum: db7e77746a11ecf69130abc062b34078e94edfc7f422e39609604588c845064e
 - filename: server/src/common/actions/formations.actions.ts
   checksum: c5e0d6f4a69dbae2c808fae2f8a2b9f9a54f4ff6ce2369b1d08f3b4034cffbcd
 - filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
@@ -87,6 +85,8 @@ fileignoreconfig:
   checksum: 1c634f0c37729f0f33fd2e9be585a5fc5b0541cc32ae0acd01cc5e0790a641b0
 - filename: ui/app/(home)/auth/connexion/ConnexionClient.tsx
   checksum: b8f93a25559cedb9e5caa7f3c887c376d371eadde25ed9d2782521c42e484158
+- filename: .infra/vault/vault.yml
+  checksum: 3aab1b0f15318f2e2598af1382c122ce6989ae0796224bdb2fae027e2a016ef3
 scopeconfig:
 - scope: node
 custom_patterns:
