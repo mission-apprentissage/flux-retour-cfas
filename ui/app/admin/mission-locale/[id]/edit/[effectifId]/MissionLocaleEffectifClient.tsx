@@ -19,7 +19,7 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
 
 const MIN_LOADING_TIME = 500;
-const SUCCESS_DISPLAY_TIME = 1000;
+const SUCCESS_DISPLAY_TIME = 1500;
 
 export default function MissionLocaleEffectifClient() {
   const params = useParams();

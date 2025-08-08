@@ -21,6 +21,8 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { useAuth } from "@/app/_context/UserContext";
 import { _post, _put } from "@/common/httpClient";
 
+const REDIRECTION_DELAY = 1500;
+
 export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -31,6 +33,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const isCfaPage = pathname?.startsWith("/cfa/");
+  const orgType = pathname && pathname.startsWith("/cfa") ? "cfa" : "mission-locale";
 
   function computeRedirectUrl(
     goNext: boolean,
@@ -38,8 +41,6 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     nomListe: API_EFFECTIF_LISTE,
     total: number | undefined
   ): string {
-    const orgType = pathname && pathname.startsWith("/cfa") ? "cfa" : "mission-locale";
-
     if (goNext && nextId) {
       return `/${orgType}/${nextId}?nom_liste=${nomListe}`;
     }
@@ -87,11 +88,18 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     },
     onSuccess: (mutationData) => {
       setSaveStatus("success");
-      queryClient.invalidateQueries(["effectif"]);
 
       if (mutationData.goNext || mutationData.nextId) {
         const targetUrl = computeRedirectUrl(mutationData.goNext, mutationData.nextId, nomListe, data?.total);
-        setTimeout(() => router.push(targetUrl), 600);
+        setTimeout(() => {
+          queryClient.invalidateQueries(["effectif"]);
+          router.push(targetUrl);
+        }, REDIRECTION_DELAY);
+      } else {
+        setTimeout(() => {
+          queryClient.invalidateQueries(["effectif"]);
+          router.push(`/${orgType}`);
+        }, REDIRECTION_DELAY);
       }
     },
     onError: () => {
