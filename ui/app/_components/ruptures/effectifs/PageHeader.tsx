@@ -61,7 +61,7 @@ export function PageHeader({
                 </p>
               ) : nomListe === API_EFFECTIF_LISTE.INJOIGNABLE ? (
                 <p className={styles.pageHeaderText}>
-                  Dossier n°{currentIndex + 1} sur {total} injoignable
+                  Dossier n°{currentIndex + 1} sur {total} à recontacter
                 </p>
               ) : (
                 <p className={styles.pageHeaderText}>

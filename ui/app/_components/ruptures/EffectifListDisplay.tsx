@@ -40,6 +40,21 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
 
+  const priorityDataInjoignable = useMemo(() => {
+    if (!data.prioritaire?.effectifs) return [];
+
+    return groupedInjoignable.flatMap((month) =>
+      month.data
+        .filter((effectif) => effectif.prioritaire === true)
+        .map((effectif) => ({
+          ...effectif,
+          date_rupture: month.month === "plus-de-6-mois" ? "+ de 6 mois" : month.month,
+        }))
+    );
+  }, [groupedInjoignable, data.prioritaire?.effectifs]);
+
+  const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
+
   useEffect(() => {
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
@@ -128,9 +143,9 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
       items.splice(1, 0, {
         text:
           totalInjoignable > 0 ? (
-            <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
+            <strong>{`À recontacter (${totalInjoignable})`}</strong>
           ) : (
-            `Contactés sans réponse (${totalInjoignable})`
+            `À recontacter (${totalInjoignable})`
           ),
         linkProps: {
           href: "#",
@@ -248,11 +263,14 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
         {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
           <SuspenseWrapper fallback={<TableSkeleton />}>
             <SearchableTableSection
-              title="Contactés sans réponse"
+              title="À recontacter"
               data={groupedInjoignable}
+              priorityData={priorityDataInjoignable}
+              hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
               isTraite={false}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              handleSectionChange={handleSectionChange}
               listType={API_EFFECTIF_LISTE.INJOIGNABLE}
             />
           </SuspenseWrapper>

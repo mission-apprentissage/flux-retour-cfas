@@ -9,6 +9,7 @@ import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList }
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
+import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
 import { CfaFeedback } from "./CfaFeedback";
 import { ConfirmReset } from "./ConfirmReset";
@@ -63,10 +64,13 @@ export function EffectifInfo({
           <div className={styles.effectifHeader}>
             <div className={styles.flexCenterGap8}>
               {effectif.injoignable ? (
-                <Badge severity="info">Contacté sans réponse</Badge>
+                <p className="fr-badge fr-badge--purple-glycine">
+                  <i className="fr-icon-phone-fill fr-icon--xs" />
+                  <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
+                </p>
               ) : effectif.a_traiter && (effectif.prioritaire || effectif.a_contacter) ? (
                 <p className={`fr-badge fr-badge--orange-terre-battue ${styles.badgeGap}`}>
-                  <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
+                  <i className="fr-icon-fire-fill fr-icon--sm" /> {getPriorityLabel(nomListe)}
                 </p>
               ) : effectif.a_traiter ? (
                 <Badge severity="new">à traiter</Badge>

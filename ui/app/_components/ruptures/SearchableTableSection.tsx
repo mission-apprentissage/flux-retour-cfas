@@ -57,6 +57,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
           priorityData={priorityData}
           searchTerm={searchTerm}
           hadEffectifsPrioritaires={hadEffectifsPrioritaires}
+          listType={listType}
         />
       )}
       {data.map((monthItem) => (
