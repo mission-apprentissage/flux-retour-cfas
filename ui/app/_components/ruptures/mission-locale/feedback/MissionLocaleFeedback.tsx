@@ -6,15 +6,15 @@ import { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffec
 
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./Feedback.module.css";
+import styles from "../../shared/ui/Feedback.module.css";
 
-interface MLFeedbackProps {
+interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
   logs?: Array<IMissionLocaleEffectifLog> | null;
 }
 
-export function MLFeedback({ situation, visibility, logs }: MLFeedbackProps) {
+export function MissionLocaleFeedback({ situation, visibility, logs }: MissionLocaleFeedbackProps) {
   if (!situation.situation) {
     return null;
   }

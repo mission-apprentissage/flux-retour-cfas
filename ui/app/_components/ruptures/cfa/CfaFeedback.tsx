@@ -7,7 +7,7 @@ import { ACC_CONJOINT_MOTIF_ENUM, IOrganisme, IEffecifMissionLocale, IEffectifOr
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./Feedback.module.css";
+import styles from "../shared/ui/Feedback.module.css";
 
 type EffectifWithContacts = (IEffecifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
   organisme?: {

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import CfaHeader from "@/app/_components/cfa/CfaHeader";
-import { EffectifListDisplay } from "@/app/_components/ruptures/EffectifListDisplay";
+import { EffectifsListView } from "@/app/_components/ruptures/mission-locale/EffectifsListView";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { useAuth } from "@/app/_context/UserContext";
@@ -26,7 +26,7 @@ export default function CfaClient() {
     <div className="fr-container">
       <CfaHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <EffectifListDisplay data={data} />}
+        {data && <EffectifsListView data={data} />}
       </SuspenseWrapper>
     </div>
   );

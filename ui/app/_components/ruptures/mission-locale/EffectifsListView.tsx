@@ -8,20 +8,21 @@ import { API_EFFECTIF_LISTE } from "shared";
 import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _get } from "@/common/httpClient";
-
-import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "../../../common/types/ruptures";
 import {
   groupMonthsOlderThanSixMonths,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
-} from "../../_utils/ruptures.utils";
-import { DownloadSection } from "../ruptures/DownloadSection";
-import { SearchableTableSection } from "../ruptures/SearchableTableSection";
+} from "@/app/_utils/ruptures.utils";
+import { _get } from "@/common/httpClient";
+import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
-export function EffectifListDisplay({ data }: { data: MonthsData }) {
+import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
+
+import { DownloadSection } from "./DownloadSection";
+
+export function EffectifsListView({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
@@ -237,7 +238,7 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
             </h2>
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
-              <SearchableTableSection
+              <EffectifsSearchableTable
                 data={groupedDataATraiter}
                 priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
                 hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
@@ -259,7 +260,7 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
             </h2>
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
-              <SearchableTableSection
+              <EffectifsSearchableTable
                 data={sortedDataTraite}
                 isTraite={true}
                 searchTerm={searchTerm}
@@ -278,7 +279,7 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
             </h2>
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
-              <SearchableTableSection
+              <EffectifsSearchableTable
                 data={groupedInjoignable}
                 priorityData={priorityDataInjoignable}
                 hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}

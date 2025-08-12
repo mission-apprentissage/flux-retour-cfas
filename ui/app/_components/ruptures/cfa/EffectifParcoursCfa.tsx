@@ -6,7 +6,7 @@ import { IEffecifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./EffectifParcours.module.css";
+import styles from "../shared/ui/EffectifParcours.module.css";
 
 const TIMELINE_EVENTS = {
   RUPTURE: "RUPTURE",

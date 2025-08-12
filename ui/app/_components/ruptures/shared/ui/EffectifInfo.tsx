@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
@@ -11,11 +10,14 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
 import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
-import { CfaFeedback } from "./CfaFeedback";
+import { CfaFeedback } from "../../cfa";
+import { ContactForm, ContactHistory, MissionLocaleFeedback } from "../../mission-locale";
+import { shouldShowContactForm } from "../utils";
+
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
-import { MLFeedback } from "./MLFeedback";
+import { EffectifStatusBadge } from "./EffectifStatusBadge";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
   const now = new Date();
@@ -45,14 +47,21 @@ export function EffectifInfo({
   setIsEditable?: (isEditable: boolean) => void;
 }) {
   const { user } = useAuth();
+  const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
   const priorityLabel = useMemo(() => getPriorityLabel(nomListe), [nomListe]);
 
-  const computeTransmissionDate = (date) => {
+  const computeTransmissionDate = (date: Date | null | undefined) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
+
+  const handleContactFormSuccess = () => {
+    setEffectifUpdated(true);
+  };
+
+  const showContactForm = shouldShowContactForm(user.organisation.type, effectif, effectifUpdated);
 
   return (
     <div className={styles.effectifInfoResponsive}>
@@ -65,23 +74,7 @@ export function EffectifInfo({
         <div className={styles.effectifInfoInner}>
           <div className={styles.effectifHeader}>
             <div className={styles.flexCenterGap8}>
-              {effectif.injoignable ? (
-                <p className="fr-badge fr-badge--purple-glycine" aria-label="Effectif à recontacter">
-                  <i className="fr-icon-phone-fill fr-icon--xs" />
-                  <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
-                </p>
-              ) : effectif.a_traiter && (effectif.prioritaire || effectif.a_contacter) ? (
-                <p
-                  className={`fr-badge fr-badge--orange-terre-battue ${styles.badgeGap}`}
-                  aria-label="Effectif prioritaire"
-                >
-                  <i className="fr-icon-fire-fill fr-icon--sm" /> {priorityLabel}
-                </p>
-              ) : effectif.a_traiter ? (
-                <Badge severity="new">à traiter</Badge>
-              ) : (
-                <Badge severity="success">traité</Badge>
-              )}
+              <EffectifStatusBadge effectif={effectif} priorityLabel={priorityLabel} />
               <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
@@ -146,11 +139,23 @@ export function EffectifInfo({
       ) : null}
 
       {!effectif.a_traiter && !effectif.injoignable && effectif.situation && (
-        <MLFeedback
+        <MissionLocaleFeedback
           situation={effectif.situation}
           visibility={user.organisation.type}
           logs={effectif.mission_locale_logs}
         />
+      )}
+
+      {showContactForm && (
+        <>
+          <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} onCancel={() => {}} />
+          {effectif.situation && (
+            <ContactHistory
+              situation={effectif.situation}
+              lastContactDate={effectif.mission_locale_logs?.[effectif.mission_locale_logs.length - 1]?.created_at}
+            />
+          )}
+        </>
       )}
     </div>
   );

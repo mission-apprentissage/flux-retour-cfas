@@ -5,12 +5,11 @@ import { useParams, usePathname } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
+import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
-
-import { EffectifData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
-import { formatMonthAndYear, anchorFromLabel } from "../../_utils/ruptures.utils";
-import { MlSuccessCard } from "../card/MlSuccessCard";
+import { formatMonthAndYear, anchorFromLabel } from "@/app/_utils/ruptures.utils";
+import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
 import styles from "./MonthTable.module.css";
 
@@ -24,7 +23,7 @@ const PriorityBadge = () => (
   </p>
 );
 
-type MonthTableProps = {
+type EffectifsMonthTableProps = {
   monthItem: MonthItem;
   searchTerm: string;
   handleSectionChange?: (section: SelectedSection) => void;
@@ -103,12 +102,12 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
   };
 }
 
-export const MonthTable = memo(function MonthTable({
+export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   monthItem,
   searchTerm,
   handleSectionChange,
   listType,
-}: MonthTableProps) {
+}: EffectifsMonthTableProps) {
   const { user } = useAuth();
   const params = useParams();
   const pathname = usePathname();

@@ -11,12 +11,13 @@ import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
 import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
+import { EffectifPriorityData } from "@/common/types/ruptures";
 
-import { EffectifPriorityData } from "../../../common/types/ruptures";
+import { isMissionLocaleUser } from "../utils";
 
 import styles from "./PriorityTable.module.css";
 
-type PriorityTableProps = {
+type EffectifsPriorityTableProps = {
   priorityData?: EffectifPriorityData[];
   searchTerm: string;
   hadEffectifsPrioritaires?: boolean;
@@ -47,12 +48,12 @@ function PriorityBadge({
   );
 }
 
-export function PriorityTable({
+export function EffectifsPriorityTable({
   priorityData = [],
   searchTerm,
   hadEffectifsPrioritaires = false,
   listType,
-}: PriorityTableProps) {
+}: EffectifsPriorityTableProps) {
   const { user } = useAuth();
   const params = useParams();
   const mlId = params?.id as string | undefined;
@@ -121,7 +122,7 @@ export function PriorityTable({
       {priorityData.length > 0 && (
         <>
           <PriorityBadge priorityData={priorityData} listType={listType} />
-          {user.organisation.type === "MISSION_LOCALE" && (
+          {isMissionLocaleUser(user.organisation.type) && (
             <div style={{ marginBottom: "16px" }}>
               <DsfrLink
                 href="#"

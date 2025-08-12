@@ -4,12 +4,12 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
-import { EffectifPriorityData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
+import { EffectifPriorityData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
-import { MonthTable } from "./MonthTable";
-import { PriorityTable } from "./PriorityTable";
+import { EffectifsMonthTable } from "./EffectifsMonthTable";
+import { EffectifsPriorityTable } from "./EffectifsPriorityTable";
 
-type SearchableTableSectionProps = {
+type EffectifsSearchableTableProps = {
   data: MonthItem[];
   priorityData?: EffectifPriorityData[];
   hadEffectifsPrioritaires?: boolean;
@@ -20,7 +20,7 @@ type SearchableTableSectionProps = {
   listType: IMissionLocaleEffectifList;
 };
 
-export const SearchableTableSection = memo(function SearchableTableSection({
+export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   data,
   priorityData,
   hadEffectifsPrioritaires,
@@ -29,7 +29,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   onSearchChange,
   handleSectionChange,
   listType,
-}: SearchableTableSectionProps) {
+}: EffectifsSearchableTableProps) {
   return (
     <div>
       <div>
@@ -48,7 +48,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
         />
       </div>
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
-        <PriorityTable
+        <EffectifsPriorityTable
           priorityData={priorityData}
           searchTerm={searchTerm}
           hadEffectifsPrioritaires={hadEffectifsPrioritaires}
@@ -56,7 +56,7 @@ export const SearchableTableSection = memo(function SearchableTableSection({
         />
       )}
       {data.map((monthItem) => (
-        <MonthTable
+        <EffectifsMonthTable
           key={monthItem.month}
           monthItem={monthItem}
           searchTerm={searchTerm}

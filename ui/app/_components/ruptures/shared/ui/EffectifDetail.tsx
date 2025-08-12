@@ -13,13 +13,15 @@ import {
 } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
-import { EffectifParcoursCfa } from "@/app/_components/ruptures/effectifs/EffectifParcoursCfa";
-import { EffectifParcoursMissionLocale } from "@/app/_components/ruptures/effectifs/EffectifParcoursMissionLocale";
-import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { useAuth } from "@/app/_context/UserContext";
 import { _post, _put } from "@/common/httpClient";
+
+import { EffectifParcoursCfa } from "../../cfa/EffectifParcoursCfa";
+import { EffectifParcoursMissionLocale } from "../../mission-locale/EffectifParcoursMissionLocale";
+
+import { EffectifDetailDisplay } from "./EffectifDetailDisplay";
+import { RightColumnSkeleton } from "./RightColumnSkeleton";
 
 const REDIRECTION_DELAY = 1500;
 
