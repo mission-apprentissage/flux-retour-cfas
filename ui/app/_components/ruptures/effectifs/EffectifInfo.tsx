@@ -4,7 +4,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
@@ -48,6 +48,8 @@ export function EffectifInfo({
   const [infosOpen, setInfosOpen] = useState(false);
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
+  const priorityLabel = useMemo(() => getPriorityLabel(nomListe), [nomListe]);
+
   const computeTransmissionDate = (date) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
@@ -64,13 +66,16 @@ export function EffectifInfo({
           <div className={styles.effectifHeader}>
             <div className={styles.flexCenterGap8}>
               {effectif.injoignable ? (
-                <p className="fr-badge fr-badge--purple-glycine">
+                <p className="fr-badge fr-badge--purple-glycine" aria-label="Effectif à recontacter">
                   <i className="fr-icon-phone-fill fr-icon--xs" />
                   <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
                 </p>
               ) : effectif.a_traiter && (effectif.prioritaire || effectif.a_contacter) ? (
-                <p className={`fr-badge fr-badge--orange-terre-battue ${styles.badgeGap}`}>
-                  <i className="fr-icon-fire-fill fr-icon--sm" /> {getPriorityLabel(nomListe)}
+                <p
+                  className={`fr-badge fr-badge--orange-terre-battue ${styles.badgeGap}`}
+                  aria-label="Effectif prioritaire"
+                >
+                  <i className="fr-icon-fire-fill fr-icon--sm" /> {priorityLabel}
                 </p>
               ) : effectif.a_traiter ? (
                 <Badge severity="new">à traiter</Badge>

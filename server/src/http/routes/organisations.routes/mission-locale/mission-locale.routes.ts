@@ -105,7 +105,7 @@ const exportEffectifMissionLocale = async (req, res) => {
           break;
         case API_EFFECTIF_LISTE.INJOIGNABLE:
           dataArr.push({
-            worksheetName: "Injoignable",
+            worksheetName: "À recontacter",
             logsTag: "ml_injoignable" as const,
             data: (await getEffectifsListByMisisonLocaleId(
               missionLocale,
@@ -213,16 +213,18 @@ const exportEffectifMissionLocale = async (req, res) => {
   res.contentType("xlsx");
 
   const date = new Date();
-  worksheetsInfo.forEach(async ({ logsTag, data }) => {
-    await createTelechargementListeNomLog(
-      logsTag,
-      data.map(({ _id }) => _id.toString()),
-      date,
-      req.user?._id,
-      undefined,
-      missionLocale._id
-    );
-  });
+  await Promise.all(
+    worksheetsInfo.map(async ({ logsTag, data }) => {
+      return createTelechargementListeNomLog(
+        logsTag,
+        data.map(({ _id }) => _id.toString()),
+        date,
+        req.user?._id,
+        undefined,
+        missionLocale._id
+      );
+    })
+  );
 
   return templateFile?.xlsx.writeBuffer();
 };

@@ -1,5 +1,7 @@
 import ExcelJs from "exceljs";
 
+import logger from "@/common/logger";
+
 export const parseLocalXlsx = async (relativePath: string) => {
   const workbook = new ExcelJs.Workbook();
   const data = await workbook.xlsx.readFile(`static/${relativePath}`);
@@ -20,12 +22,18 @@ export const addSheetToXlscFile = async (
   const workbook = await parseLocalXlsx(relativePath);
   const wsList = workbook.worksheets.map(({ name }) => name);
   const toDelete = wsList.filter((x) => !worksheetList.map(({ worksheetName }) => worksheetName).includes(x));
-  toDelete.forEach((element) => workbook.removeWorksheet(element));
+  toDelete.forEach((element) => {
+    try {
+      workbook.removeWorksheet(element);
+    } catch (error) {
+      logger.warn(`Impossible de supprimer la feuille Excel ${element}`);
+    }
+  });
 
   for (const { worksheetName, data } of worksheetList) {
-    const ws = workbook.getWorksheet(worksheetName);
+    let ws = workbook.getWorksheet(worksheetName);
     if (!ws) {
-      return null;
+      ws = workbook.addWorksheet(worksheetName);
     }
 
     const formattedData = formatJsonToXlsx(data, columns);
@@ -102,7 +110,7 @@ export const formatJsonToXlsx = (
 
       if (array) {
         const arrValues = item[array] || [];
-        const extended = arrValues.map((arrAttr) => computeSingleData(arrAttr[id] ?? null));
+        const extended = arrValues.map((arrAttr: any) => computeSingleData(arrAttr[id] ?? null));
 
         const neededSize = attributeSizeMap[array] || 0;
         return [...rowAcc, ...extendArrayWithSize(extended, neededSize)];

@@ -14,6 +14,16 @@ import { MlSuccessCard } from "../card/MlSuccessCard";
 
 import styles from "./MonthTable.module.css";
 
+const PriorityBadge = () => (
+  <p
+    className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}
+    aria-label="Effectif prioritaire"
+  >
+    <i className="fr-icon-fire-fill fr-icon--xs" />
+    Prioritaire
+  </p>
+);
+
 type MonthTableProps = {
   monthItem: MonthItem;
   searchTerm: string;
@@ -34,10 +44,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
       name: (
         <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
           {effectif.prioritaire || effectif.a_contacter ? (
-            <p className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}>
-              <i className="fr-icon-fire-fill fr-icon--xs" />
-              Prioritaire
-            </p>
+            <PriorityBadge />
           ) : (
             <Badge severity="new" small className={styles.noWrapBadge}>
               à traiter
@@ -71,19 +78,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     return {
       id: effectif.id,
       badge: (
-        <p className="fr-badge fr-badge--purple-glycine fr-badge--sm">
+        <p className="fr-badge fr-badge--purple-glycine fr-badge--sm" aria-label="Effectif à recontacter">
           <i className="fr-icon-phone-fill fr-icon--xs" />
           <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
         </p>
       ),
       name: (
         <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
-          {effectif.prioritaire && (
-            <p className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}>
-              <i className="fr-icon-fire-fill fr-icon--xs" />
-              Prioritaire
-            </p>
-          )}
+          {effectif.prioritaire && <PriorityBadge />}
           {`${effectif.nom} ${effectif.prenom}`}
         </div>
       ),

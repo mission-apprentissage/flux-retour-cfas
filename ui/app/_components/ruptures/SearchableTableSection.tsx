@@ -10,7 +10,6 @@ import { MonthTable } from "./MonthTable";
 import { PriorityTable } from "./PriorityTable";
 
 type SearchableTableSectionProps = {
-  title: string;
   data: MonthItem[];
   priorityData?: EffectifPriorityData[];
   hadEffectifsPrioritaires?: boolean;
@@ -22,7 +21,6 @@ type SearchableTableSectionProps = {
 };
 
 export const SearchableTableSection = memo(function SearchableTableSection({
-  title,
   data,
   priorityData,
   hadEffectifsPrioritaires,
@@ -34,9 +32,6 @@ export const SearchableTableSection = memo(function SearchableTableSection({
 }: SearchableTableSectionProps) {
   return (
     <div>
-      <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
-        {title}
-      </h2>
       <div>
         <SearchBar
           label="Rechercher un dossier par nom et/ou prénom"

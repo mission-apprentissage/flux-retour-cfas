@@ -18,6 +18,7 @@ import {
   formatMonthAndYear,
   anchorFromLabel,
 } from "../../_utils/ruptures.utils";
+import { DownloadSection } from "../ruptures/DownloadSection";
 import { SearchableTableSection } from "../ruptures/SearchableTableSection";
 
 export function EffectifListDisplay({ data }: { data: MonthsData }) {
@@ -230,50 +231,65 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
 
         {/* À traiter */}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="À traiter"
-              data={groupedDataATraiter}
-              priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
-              hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
-              isTraite={false}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              handleSectionChange={handleSectionChange}
-              listType={API_EFFECTIF_LISTE.A_TRAITER}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              À traiter
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <SearchableTableSection
+                data={groupedDataATraiter}
+                priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
+                hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
+                isTraite={false}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                handleSectionChange={handleSectionChange}
+                listType={API_EFFECTIF_LISTE.A_TRAITER}
+              />
+            </SuspenseWrapper>
+          </>
         )}
 
         {/* Déjà traité */}
         {selectedSection === "deja-traite" && sortedDataTraite.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="Déjà traité"
-              data={sortedDataTraite}
-              isTraite={true}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              listType={API_EFFECTIF_LISTE.TRAITE}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              Déjà traité
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <SearchableTableSection
+                data={sortedDataTraite}
+                isTraite={true}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                listType={API_EFFECTIF_LISTE.TRAITE}
+              />
+            </SuspenseWrapper>
+          </>
         )}
 
         {/* Injoignable */}
         {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="À recontacter"
-              data={groupedInjoignable}
-              priorityData={priorityDataInjoignable}
-              hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
-              isTraite={false}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              handleSectionChange={handleSectionChange}
-              listType={API_EFFECTIF_LISTE.INJOIGNABLE}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              À recontacter
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <SearchableTableSection
+                data={groupedInjoignable}
+                priorityData={priorityDataInjoignable}
+                hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
+                isTraite={false}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                handleSectionChange={handleSectionChange}
+                listType={API_EFFECTIF_LISTE.INJOIGNABLE}
+              />
+            </SuspenseWrapper>
+          </>
         )}
       </div>
     </div>
