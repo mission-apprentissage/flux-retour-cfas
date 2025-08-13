@@ -11,13 +11,14 @@ import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
 import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
 import { CfaFeedback } from "../../cfa";
-import { ContactForm, ContactHistory, MissionLocaleFeedback } from "../../mission-locale";
+import { ContactForm, MissionLocaleFeedback } from "../../mission-locale";
 import { shouldShowContactForm } from "../utils";
 
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
 import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { ProblematiquesJeune } from "./ProblematiquesJeune";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
   const now = new Date();
@@ -129,16 +130,15 @@ export function EffectifInfo({
       </div>
       <EffectifInfoDetails effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
 
-      {"organisme_data" in effectif && effectif.organisme_data ? (
-        <CfaFeedback
-          organismeData={effectif.organisme_data}
-          transmittedAt={effectif.transmitted_at}
-          visibility={user.organisation.type}
-          effectif={effectif}
-        />
+      {user.organisation.type === "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
+        <ProblematiquesJeune organismeData={effectif.organisme_data} effectif={effectif} showContacts={false} />
       ) : null}
 
-      {!effectif.a_traiter && !effectif.injoignable && effectif.situation && (
+      {showContactForm && (
+        <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} onCancel={() => {}} />
+      )}
+
+      {effectif.situation && (
         <MissionLocaleFeedback
           situation={effectif.situation}
           visibility={user.organisation.type}
@@ -146,17 +146,14 @@ export function EffectifInfo({
         />
       )}
 
-      {showContactForm && (
-        <>
-          <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} onCancel={() => {}} />
-          {effectif.situation && (
-            <ContactHistory
-              situation={effectif.situation}
-              lastContactDate={effectif.mission_locale_logs?.[effectif.mission_locale_logs.length - 1]?.created_at}
-            />
-          )}
-        </>
-      )}
+      {user.organisation.type !== "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
+        <CfaFeedback
+          organismeData={effectif.organisme_data}
+          transmittedAt={effectif.transmitted_at}
+          visibility={user.organisation.type}
+          effectif={effectif}
+        />
+      ) : null}
     </div>
   );
 }

@@ -14,7 +14,7 @@ const fetchEffectifDetails = async (effectifId: string) => {
 };
 
 const updateEffectif = async ({ effectifId, data }: { effectifId: string; data: IUpdateMissionLocaleEffectif }) => {
-  return _post(`/api/mission-locale/effectif/${effectifId}`, { body: data });
+  return _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, data);
 };
 
 export function useEffectifDetails(effectifId: string, enabled = true) {

@@ -6,6 +6,7 @@ import { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffec
 
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { calculateDaysSince, formatContactTimeText } from "../../shared";
 import styles from "../../shared/ui/Feedback.module.css";
 
 interface MissionLocaleFeedbackProps {
@@ -14,19 +15,23 @@ interface MissionLocaleFeedbackProps {
   logs?: Array<IMissionLocaleEffectifLog> | null;
 }
 
-export function MissionLocaleFeedback({ situation, visibility, logs }: MissionLocaleFeedbackProps) {
-  if (!situation.situation) {
+export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbackProps) {
+  if (!logs?.length) {
     return null;
   }
+  const sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
 
   const organismeFormationLayout = () => {
     return (
       <>
-        {logs?.map((log) => (
+        {sortedLogs.map((log) => (
           <div key={log._id.toString()}>
             <>
               {log.created_at && log.situation && (
-                <h4 className="fr-mb-2v">Retour / Action de la Mission Locale le {formatDate(log.created_at)}</h4>
+                <h4 className="fr-mb-2v">
+                  Retour / Action de la Mission Locale le {formatDate(log.created_at)},{" "}
+                  {formatContactTimeText(calculateDaysSince(log.created_at))}
+                </h4>
               )}
 
               <div className={styles.feedbackContainer}>
@@ -57,25 +62,41 @@ export function MissionLocaleFeedback({ situation, visibility, logs }: MissionLo
 
   const missionLocaleLayout = () => {
     return (
-      <div className={styles.feedbackContainer}>
-        <p className="fr-mb-1v">
-          <b>Quel est votre retour sur la prise de contact ?</b>
-        </p>
-        <div className={styles.feedbackSituationContainer}>
-          <Tag>{situation.situation ? SITUATION_LABEL_ENUM[situation.situation] : "Situation inconnue"}</Tag>
-          {situation.situation === "AUTRE" && <p className={styles.feedbackText}>({situation.situation_autre})</p>}
-        </div>
+      <>
+        {sortedLogs.map((log, index) => (
+          <div key={index}>
+            <h6 className="fr-mb-2v">
+              Le {formatDate(log.created_at)}, {formatContactTimeText(calculateDaysSince(log.created_at))}
+            </h6>
+            <div className={styles.feedbackContainer}>
+              <p className="fr-mb-1v">
+                <b>Quel est votre retour sur la prise de contact ?</b>
+              </p>
+              <div className={styles.feedbackSituationContainer}>
+                <Tag>{log.situation ? SITUATION_LABEL_ENUM[log.situation] : "Situation inconnue"}</Tag>
+                {log.situation === "AUTRE" && <p className={styles.feedbackText}>({log.situation_autre})</p>}
+              </div>
+              {index === sortedLogs.length - 1 && (
+                <>
+                  <p className="fr-mb-1v">
+                    <b>Ce jeune était-il déjà connu de votre Mission Locale ?</b>
+                  </p>
+                  <Tag>{log.deja_connu ? "Oui" : "Non"}</Tag>
+                </>
+              )}
 
-        <p className="fr-mb-1v">
-          <b>Ce jeune était-il déjà connu de votre Mission Locale ?</b>
-        </p>
-        <Tag>{situation.deja_connu ? "Oui" : "Non"}</Tag>
-
-        <p className="fr-mb-1v">
-          <b>Commentaires</b>
-        </p>
-        <p className={styles.feedbackText}>{situation.commentaires || "Aucun commentaire"}</p>
-      </div>
+              {log.commentaires ? (
+                <>
+                  <p className="fr-mb-1v">
+                    <b>Commentaires</b>
+                  </p>
+                  <p className={styles.feedbackText}>{log.commentaires}</p>
+                </>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </>
     );
   };
 

@@ -14,6 +14,7 @@ const TIMELINE_EVENTS = {
   TRAITE_CFA_SUIVI: "TRAITE_CFA_SUIVI",
   TRAITE_CFA_PARTAGE: "TRAITE_CFA_PARTAGE",
   EN_COURS_ML: "EN_COURS_ML",
+  CONTACTE_SANS_REPONSE: "CONTACTE_SANS_REPONSE",
   TRAITE_ML_NOUVELLE_SITUATION: "TRAITE_ML_NOUVELLE_SITUATION",
   TRAITE_ML: "TRAITE_ML",
 } as const;
@@ -24,8 +25,9 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.TRAITE_CFA_SUIVI]: "Dossier traité - suivi par le CFA",
   [TIMELINE_EVENTS.TRAITE_CFA_PARTAGE]: "Dossier traité - partagé à la Mission Locale",
   [TIMELINE_EVENTS.EN_COURS_ML]: "Dossier en cours de traitement par la Mission Locale",
+  [TIMELINE_EVENTS.CONTACTE_SANS_REPONSE]: "Contacté sans réponse par la Mission Locale",
   [TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION]: "Dossier traité - Nouvelle situation",
-  [TIMELINE_EVENTS.TRAITE_ML]: "Dossier traité - par la Mission Locale",
+  [TIMELINE_EVENTS.TRAITE_ML]: "Dossier traité par la Mission Locale",
 } as const;
 
 type TimelineEventType = (typeof TIMELINE_EVENTS)[keyof typeof TIMELINE_EVENTS];
@@ -79,35 +81,37 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     }
   }
 
-  if ("organisme_data" in effectif && eff.organisme_data?.acc_conjoint === true) {
-    const situation = "situation" in effectif ? eff.situation?.situation : undefined;
-    const actionDate =
-      ("mission_locale_logs" in effectif ? eff.mission_locale_logs?.[0]?.created_at : undefined) || new Date();
-    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
+  if (
+    "organisme_data" in effectif &&
+    eff.organisme_data?.acc_conjoint === true &&
+    "mission_locale_logs" in effectif &&
+    eff.mission_locale_logs
+  ) {
+    eff.mission_locale_logs.forEach((log: any) => {
+      if (log.created_at && log.situation) {
+        const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
 
-    if (situation === SITUATION_ENUM.NOUVEAU_PROJET) {
-      events.push({
-        date,
-        type: TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION,
-        label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION],
-      });
-    } else if (situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
-      events.push({
-        date,
-        type: TIMELINE_EVENTS.EN_COURS_ML,
-        label: EVENT_LABELS[TIMELINE_EVENTS.EN_COURS_ML],
-      });
-    } else if (
-      situation &&
-      situation !== SITUATION_ENUM.NOUVEAU_PROJET &&
-      situation !== SITUATION_ENUM.CONTACTE_SANS_RETOUR
-    ) {
-      events.push({
-        date,
-        type: TIMELINE_EVENTS.TRAITE_ML,
-        label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML],
-      });
-    }
+        if (log.situation === SITUATION_ENUM.NOUVEAU_PROJET) {
+          events.push({
+            date,
+            type: TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION,
+            label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION],
+          });
+        } else if (log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+          events.push({
+            date,
+            type: TIMELINE_EVENTS.CONTACTE_SANS_REPONSE,
+            label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_SANS_REPONSE],
+          });
+        } else {
+          events.push({
+            date,
+            type: TIMELINE_EVENTS.TRAITE_ML,
+            label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_ML],
+          });
+        }
+      }
+    });
   }
 
   return events.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -139,6 +143,11 @@ const getIcon = (type: TimelineEventType) => {
   }
   if (type === TIMELINE_EVENTS.EN_COURS_ML) {
     return <Image src="/images/parcours-en-cours-traitement.svg" alt="En cours de traitement" width={17} height={17} />;
+  }
+  if (type === TIMELINE_EVENTS.CONTACTE_SANS_REPONSE) {
+    return (
+      <Image src="/images/parcours-contacte-sans-reponse.svg" alt="Contacté sans réponse" width={18} height={17} />
+    );
   }
   return (
     <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--text-disabled-grey)" }} />

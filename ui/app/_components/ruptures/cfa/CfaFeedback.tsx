@@ -1,13 +1,12 @@
 "use client";
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
-import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate } from "@/app/_utils/date.utils";
 
 import styles from "../shared/ui/Feedback.module.css";
+import { ProblematiquesJeune } from "../shared/ui/ProblematiquesJeune";
 
 type EffectifWithContacts = (IEffecifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
   organisme?: {
@@ -46,71 +45,8 @@ const MOTIF_LABELS = {
 };
 
 export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif }: CfaFeedbackProps) {
-  const [contactsOpen, setContactsOpen] = useState(false);
-
   const missionLocaleLayout = () => {
-    return (
-      <>
-        <div className={styles.effectifFeedbackContainer}>
-          <div className="fr-mb-2v">
-            <b>Problématiques rencontrées par le jeune :</b>
-          </div>
-          <div className="fr-mb-2v">
-            {organismeData?.motif?.map((motif, index) => (
-              <Tag key={index} className={styles.effectifFeedbackTag}>
-                <b>{MOTIF_LABELS[motif] || motif}</b>
-              </Tag>
-            ))}
-          </div>
-          {organismeData.commentaires ? (
-            <div className="fr-mb-2v fr-mt-4v">
-              <b>Commentaires de l&apos;organisme de formation</b>
-              <div className="fr-mb-2v fr-mt-4v">{organismeData.commentaires}</div>
-            </div>
-          ) : null}
-
-          <div className="fr-mt-4v">
-            <DsfrLink
-              href="#"
-              arrow="none"
-              onClick={(e) => {
-                e.preventDefault();
-                setContactsOpen((open) => !open);
-              }}
-              className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
-            >
-              Contacts du CFA
-            </DsfrLink>
-          </div>
-
-          {contactsOpen && (
-            <div className="fr-mt-2v">
-              {effectif?.organisme?.contacts_from_referentiel?.map((contact, idx) => (
-                <p key={`ref-${idx}`} className="fr-mb-1v">
-                  Email : {contact.email || "non renseigné"}
-                </p>
-              ))}
-              {effectif?.contacts_tdb?.map(({ email, telephone, nom, prenom, fonction }, idx) => (
-                <div key={`tdb-${idx}`} className="fr-mb-1v fr-mt-4v">
-                  <p className="fr-mb-0">
-                    <b>
-                      {nom} {prenom} {fonction ? `(${fonction})` : ""}
-                    </b>
-                  </p>
-                  {email && <p className="fr-mb-0">Email : {email}</p>}
-                  {telephone && <p className="fr-mb-1v">Téléphone : {telephone}</p>}
-                </div>
-              ))}
-              {!effectif?.organisme?.contacts_from_referentiel?.length && !effectif?.contacts_tdb?.length && (
-                <p className="fr-text--sm" style={{ color: "#666", fontStyle: "italic" }}>
-                  Aucun contact disponible
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </>
-    );
+    return <ProblematiquesJeune organismeData={organismeData} effectif={effectif} showContacts={true} />;
   };
 
   const organismeFormationLayout = () => {

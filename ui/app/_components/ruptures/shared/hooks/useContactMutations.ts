@@ -13,24 +13,24 @@ interface ContactPayload {
 }
 
 const recordContact = async ({ effectifId, payload }: { effectifId: string; payload: ContactPayload }) => {
-  return _post(`/api/mission-locale/effectif/${effectifId}`, { body: payload });
+  return _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, payload);
 };
 
 export const createContactSuccessPayload = (
   situation: SITUATION_ENUM,
   situationAutre?: string,
-  commentaires?: string
+  commentaires?: string,
+  dejaConnu?: boolean
 ): ContactPayload => ({
   situation,
   situation_autre: situation === SITUATION_ENUM.AUTRE ? situationAutre : undefined,
   commentaires: commentaires || undefined,
-  deja_connu: false,
+  deja_connu: dejaConnu || undefined,
 });
 
 export const createContactFailurePayload = (probleme: string, action: "garder" | "traiter"): ContactPayload => ({
   situation: action === "traiter" ? SITUATION_ENUM.CONTACTE_SANS_RETOUR : null,
   commentaires: probleme,
-  deja_connu: false,
 });
 
 export function useRecordContact() {
