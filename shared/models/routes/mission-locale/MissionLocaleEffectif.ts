@@ -2,7 +2,10 @@ import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import { SourceApprenantEnum } from "shared/constants/effectifs";
-import zMissionLocaleEffectif, { zSituationEnum } from "shared/models/data/missionLocaleEffectif.model";
+import zMissionLocaleEffectif, {
+  zSituationEnum,
+  zProblemeTypeEnum,
+} from "shared/models/data/missionLocaleEffectif.model";
 
 import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
@@ -26,6 +29,8 @@ export const updateMissionLocaleEffectifApi = {
   situation_autre: zMissionLocaleEffectif.zod.shape.situation_autre.optional(),
   commentaires: zMissionLocaleEffectif.zod.shape.commentaires.optional(),
   deja_connu: z.boolean().nullish(),
+  probleme_type: zProblemeTypeEnum.optional(),
+  probleme_detail: z.string().optional(),
 };
 
 const zEffectifMissionLocale = z

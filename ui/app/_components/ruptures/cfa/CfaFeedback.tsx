@@ -53,25 +53,23 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif
     return (
       <>
         {transmittedAt && organismeData.rupture && organismeData.acc_conjoint && (
-          <h4 className="fr-mb-2v">Dossier partagé à la Mission Locale le {formatDate(transmittedAt)}</h4>
+          <h3 className="fr-mb-2v" style={{ fontSize: "20px" }}>
+            Dossier partagé à la Mission Locale le {formatDate(transmittedAt)}
+          </h3>
         )}
 
         <div className={styles.feedbackContainer}>
           <p className="fr-mb-1v fr-mt-3v">
             <b>Ce jeune est-il toujours en rupture de contrat d&apos;apprentissage ?</b>
           </p>
-          <Tag>
-            <b>{organismeData.rupture ? "Oui" : "Non"}</b>
-          </Tag>
+          <Tag>{organismeData.rupture ? "Oui" : "Non"}</Tag>
 
           {organismeData.rupture && (
             <>
               <p className="fr-mb-1v fr-mt-3v">
                 <b>Souhaitez-vous démarrer un accompagnement conjoint avec la Mission Locale ?</b>
               </p>
-              <Tag>
-                <b>{organismeData.acc_conjoint ? "Oui" : "Non"}</b>
-              </Tag>
+              <Tag>{organismeData.acc_conjoint ? "Oui" : "Non"}</Tag>
 
               {organismeData.acc_conjoint && organismeData.motif && organismeData.motif.length > 0 && (
                 <>
@@ -80,9 +78,7 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif
                   </p>
                   <div className={styles.feedbackSituationContainer}>
                     {organismeData.motif.map((motif, index) => (
-                      <Tag key={index}>
-                        <b>{MOTIF_LABELS[motif] || motif}</b>
-                      </Tag>
+                      <Tag key={index}>{MOTIF_LABELS[motif] || motif}</Tag>
                     ))}
                   </div>
                 </>

@@ -1510,13 +1510,15 @@ export const setEffectifMissionLocaleData = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { situation, situation_autre, commentaires, deja_connu } = data;
+  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
 
   const setObject = {
     situation,
     deja_connu,
     ...(situation_autre !== undefined ? { situation_autre } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
+    ...(probleme_type !== undefined ? { probleme_type } : {}),
+    ...(probleme_detail !== undefined ? { probleme_detail } : {}),
   };
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
