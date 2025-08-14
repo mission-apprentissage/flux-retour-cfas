@@ -14,6 +14,7 @@ import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
+import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
@@ -150,6 +151,14 @@ export async function setupJobProcessor() {
               cron_string: "0 7 * * *",
               handler: async () => {
                 await addJob({ name: "send-reminder-emails", queued: true });
+                return 0;
+              },
+            },
+
+            "Send ML weekly recap at 14h30 on Mondays": {
+              cron_string: "30 14 * * 1",
+              handler: async () => {
+                await addJob({ name: "send-mission-locale-weekly-recap", queued: true });
                 return 0;
               },
             },
@@ -339,6 +348,11 @@ export async function setupJobProcessor() {
       "send-reminder-emails": {
         handler: async () => {
           return sendReminderEmails();
+        },
+      },
+      "send-mission-locale-weekly-recap": {
+        handler: async () => {
+          return sendMissionLocaleWeeklyRecap();
         },
       },
       "process:effectifs-queue:remove-duplicates": {

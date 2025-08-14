@@ -22,9 +22,26 @@ import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable"
 
 import { DownloadSection } from "./DownloadSection";
 
-export function EffectifsListView({ data }: { data: MonthsData }) {
+interface EffectifsListViewProps {
+  data: MonthsData;
+  initialStatut?: string | null;
+}
+
+export function EffectifsListView({ data, initialStatut }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
+
+  const getInitialSection = (statut: string | null): SelectedSection => {
+    switch (statut) {
+      case "a-traiter":
+        return "a-traiter";
+      case "a-recontacter":
+        return "injoignable";
+      default:
+        return "a-traiter";
+    }
+  };
+
+  const [selectedSection, setSelectedSection] = useState<SelectedSection>(getInitialSection(initialStatut || null));
   const [activeAnchor, setActiveAnchor] = useState("");
 
   const pathname = usePathname();

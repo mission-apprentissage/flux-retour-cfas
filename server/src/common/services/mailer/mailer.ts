@@ -74,6 +74,8 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
   validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
   register_unknown_network: () => `[ADMIN] Demande d'accès au tableau de bord : nouveau réseau signalé`,
+  mission_locale_weekly_recap: (payload) =>
+    `${payload.total} jeune${payload.total > 1 ? "s" : ""} en rupture de contrat ${payload.total > 1 ? "attendent" : "attend"} votre aide cette semaine`,
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -188,6 +190,22 @@ export type TemplatePayloads = {
   register_unknown_network: {
     email: string;
     reseau: string;
+  };
+  mission_locale_weekly_recap: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    effectifs_prioritaire: number;
+    effectifs_a_traiter: number;
+    effectifs_a_recontacter: number;
+    total: number;
+    date_debut: string;
+    date_fin: string;
+    mission_locale: {
+      id: number;
+      nom: string;
+    };
   };
 };
 
