@@ -17,6 +17,7 @@ export enum SITUATION_ENUM {
   DEJA_ACCOMPAGNE = "DEJA_ACCOMPAGNE",
   CONTACTE_SANS_RETOUR = "CONTACTE_SANS_RETOUR",
   COORDONNEES_INCORRECT = "COORDONNEES_INCORRECT",
+  INJOIGNABLE_APRES_RELANCES = "INJOIGNABLE_APRES_RELANCES",
   AUTRE = "AUTRE",
 }
 
@@ -30,6 +31,7 @@ export enum SITUATION_LABEL_ENUM {
   DEJA_ACCOMPAGNE = "Déjà accompagné par la Mission Locale et/ou un partenaire",
   CONTACTE_SANS_RETOUR = "Contacté mais sans réponse",
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
+  INJOIGNABLE_APRES_RELANCES = "Injoignable après plusieurs tentatives",
   AUTRE = "Autre situation / retour",
 }
 

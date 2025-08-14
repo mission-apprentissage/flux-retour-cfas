@@ -14,7 +14,12 @@ export const formatContactTimeText = (daysSince: number): string => {
 
 export const calculateDaysSince = (date: Date | string): number => {
   const contactDate = new Date(date);
-  return Math.floor((new Date().getTime() - contactDate.getTime()) / (1000 * 60 * 60 * 24));
+  const today = new Date();
+
+  const contactDateNormalized = new Date(contactDate.getFullYear(), contactDate.getMonth(), contactDate.getDate());
+  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return Math.floor((todayNormalized.getTime() - contactDateNormalized.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 export const shouldShowContactForm = (

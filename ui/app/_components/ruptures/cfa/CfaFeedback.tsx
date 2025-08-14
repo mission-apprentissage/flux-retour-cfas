@@ -1,10 +1,11 @@
 "use client";
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { ACC_CONJOINT_MOTIF_ENUM, IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
+import { IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { MOTIF_LABELS } from "../shared/constants";
 import styles from "../shared/ui/Feedback.module.css";
 import { ProblematiquesJeune } from "../shared/ui/ProblematiquesJeune";
 
@@ -27,22 +28,12 @@ interface CfaFeedbackProps {
     acc_conjoint?: boolean | null;
     motif?: string[] | null;
     commentaires?: string | null;
+    reponse_at?: Date | null;
   };
   transmittedAt?: Date | null;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
   effectif?: EffectifWithContacts;
 }
-
-const MOTIF_LABELS = {
-  [ACC_CONJOINT_MOTIF_ENUM.MOBILITE]: "Mobilité",
-  [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT]: "Logement",
-  [ACC_CONJOINT_MOTIF_ENUM.SANTE]: "Santé",
-  [ACC_CONJOINT_MOTIF_ENUM.FINANCE]: "Finance",
-  [ACC_CONJOINT_MOTIF_ENUM.ADMINISTRATIF]: "Administratif",
-  [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]: "Réorientation",
-  [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]: "Recherche d'emploi",
-  [ACC_CONJOINT_MOTIF_ENUM.AUTRE]: "Autre",
-};
 
 export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif }: CfaFeedbackProps) {
   const missionLocaleLayout = () => {
@@ -53,8 +44,8 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif
     return (
       <>
         {transmittedAt && organismeData.rupture && organismeData.acc_conjoint && (
-          <h3 className="fr-mb-2v" style={{ fontSize: "20px" }}>
-            Dossier partagé à la Mission Locale le {formatDate(transmittedAt)}
+          <h3 className="fr-mb-0" style={{ fontSize: "20px" }}>
+            Dossier partagé à la Mission Locale le {formatDate(organismeData.reponse_at)}
           </h3>
         )}
 
@@ -91,9 +82,7 @@ export function CfaFeedback({ organismeData, transmittedAt, visibility, effectif
               <p className="fr-mb-1v fr-mt-3v">
                 <b>Commentaires</b>
               </p>
-              <p className={styles.feedbackText}>
-                <b>{organismeData.commentaires}</b>
-              </p>
+              <p className={styles.feedbackText}>{organismeData.commentaires}</p>
             </>
           )}
         </div>

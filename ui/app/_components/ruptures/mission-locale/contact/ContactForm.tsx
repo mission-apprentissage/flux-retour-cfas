@@ -5,19 +5,19 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Formik, Form } from "formik";
-import { SITUATION_ENUM, PROBLEME_TYPE_ENUM } from "shared";
+import { SITUATION_ENUM, PROBLEME_TYPE_ENUM, IEffecifMissionLocale } from "shared";
 
 import {
-  BaseFormProps,
   useRecordContact,
   createContactSuccessPayload,
   createContactFailurePayload,
+  effectifQueryKeys,
 } from "../../shared";
 
 import styles from "./ContactForm.module.css";
-
-interface ContactFormProps extends BaseFormProps {}
+import { SecondAttemptGuidance } from "./SecondAttemptGuidance";
 
 interface FormValues {
   contactSuccess: boolean | null;
@@ -69,8 +69,27 @@ const validate = (values: FormValues) => {
   return errors;
 };
 
-export function ContactForm({ effectifId, onSuccess }: ContactFormProps) {
+const hasMultipleContactAttempts = (effectif: IEffecifMissionLocale["effectif"]): boolean => {
+  if (!effectif?.mission_locale_logs) return false;
+
+  const contactAttempts = effectif.mission_locale_logs.filter(
+    (log) => log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR
+  );
+
+  return contactAttempts.length >= 2;
+};
+
+export function ContactForm({
+  effectifId,
+  effectif,
+  onSuccess,
+}: {
+  effectifId: string;
+  effectif?: IEffecifMissionLocale["effectif"];
+  onSuccess: () => void;
+}) {
   const recordContactMutation = useRecordContact();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (values: FormValues) => {
     try {
@@ -79,11 +98,35 @@ export function ContactForm({ effectifId, onSuccess }: ContactFormProps) {
         : createContactFailurePayload(values.probleme, values.problemeAutre, values.action!);
 
       await recordContactMutation.mutateAsync({ effectifId, payload });
+
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
+
       onSuccess();
     } catch (error) {
       console.log(error);
     }
   };
+
+  const handleReset = (setFieldValue: any) => {
+    setFieldValue("contactSuccess", null);
+  };
+
+  const handleTraiter = async () => {
+    try {
+      const payload = createContactSuccessPayload(SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES);
+      await recordContactMutation.mutateAsync({ effectifId, payload });
+
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
+
+      onSuccess();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const shouldShowGuidance = effectif && hasMultipleContactAttempts(effectif);
 
   return (
     <div className={styles.container}>
@@ -214,103 +257,108 @@ export function ContactForm({ effectifId, onSuccess }: ContactFormProps) {
                   </>
                 )}
 
-                {values.contactSuccess === false && (
-                  <>
-                    <RadioButtons
-                      legend="Quel est le problème selon vous ?"
-                      name="probleme"
-                      options={[
-                        {
-                          label: "Coordonnées incorrectes",
-                          nativeInputProps: {
-                            value: PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES,
-                            checked: values.probleme === PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES,
-                            onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES),
+                {values.contactSuccess === false &&
+                  (shouldShowGuidance ? (
+                    <SecondAttemptGuidance onReset={() => handleReset(setFieldValue)} onTraiter={handleTraiter} />
+                  ) : (
+                    <>
+                      <RadioButtons
+                        legend="Quel est le problème selon vous ?"
+                        name="probleme"
+                        options={[
+                          {
+                            label: "Coordonnées incorrectes",
+                            nativeInputProps: {
+                              value: PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES,
+                              checked: values.probleme === PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES,
+                              onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES),
+                            },
                           },
-                        },
-                        {
-                          label: "Le jeune est injoignable",
-                          nativeInputProps: {
-                            value: PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE,
-                            checked: values.probleme === PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE,
-                            onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE),
+                          {
+                            label: "Le jeune est injoignable",
+                            nativeInputProps: {
+                              value: PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE,
+                              checked: values.probleme === PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE,
+                              onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE),
+                            },
                           },
-                        },
-                        {
-                          label: "Autre (préciser)",
-                          nativeInputProps: {
-                            value: PROBLEME_TYPE_ENUM.AUTRE,
-                            checked: values.probleme === PROBLEME_TYPE_ENUM.AUTRE,
-                            onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.AUTRE),
+                          {
+                            label: "Autre (préciser)",
+                            nativeInputProps: {
+                              value: PROBLEME_TYPE_ENUM.AUTRE,
+                              checked: values.probleme === PROBLEME_TYPE_ENUM.AUTRE,
+                              onChange: () => setFieldValue("probleme", PROBLEME_TYPE_ENUM.AUTRE),
+                            },
                           },
-                        },
-                      ]}
-                      state="default"
-                    />
-
-                    {values.probleme === PROBLEME_TYPE_ENUM.AUTRE && (
-                      <Input
-                        label=""
-                        textArea
-                        nativeTextAreaProps={{
-                          value: values.problemeAutre,
-                          onChange: (e) => setFieldValue("problemeAutre", e.target.value),
-                          placeholder: "Précisez le problème...",
-                          rows: 3,
-                        }}
+                        ]}
+                        state="default"
                       />
-                    )}
 
-                    <RadioButtons
-                      legend="Que souhaitez-vous faire ?"
-                      name="action"
-                      options={[
-                        {
-                          label: (
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              Garder le jeune dans ma liste
-                              <p className="fr-badge fr-badge--purple-glycine" style={{ margin: 0 }}>
-                                <i className="fr-icon-phone-fill fr-icon--sm" />
-                                <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
-                              </p>
-                            </div>
-                          ),
-                          nativeInputProps: {
-                            value: "garder",
-                            checked: values.action === "garder",
-                            onChange: () => setFieldValue("action", "garder"),
+                      {values.probleme === PROBLEME_TYPE_ENUM.AUTRE && (
+                        <Input
+                          label=""
+                          textArea
+                          nativeTextAreaProps={{
+                            value: values.problemeAutre,
+                            onChange: (e) => setFieldValue("problemeAutre", e.target.value),
+                            placeholder: "Précisez le problème...",
+                            rows: 3,
+                          }}
+                        />
+                      )}
+
+                      <RadioButtons
+                        legend="Que souhaitez-vous faire ?"
+                        name="action"
+                        options={[
+                          {
+                            label: (
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                Garder le jeune dans ma liste
+                                <span className="fr-badge fr-badge--purple-glycine" style={{ margin: 0 }}>
+                                  <i className="fr-icon-phone-fill fr-icon--sm" />
+                                  <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
+                                </span>
+                              </div>
+                            ),
+                            nativeInputProps: {
+                              value: "garder",
+                              checked: values.action === "garder",
+                              onChange: () => setFieldValue("action", "garder"),
+                            },
+                            hintText: "Ce jeune restera à recontacter",
                           },
-                          hintText: "Ce jeune restera à recontacter",
-                        },
-                        {
-                          label: (
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              Marquer le dossier du jeune comme
-                              <Badge severity="success">traité</Badge>
-                            </div>
-                          ),
-                          nativeInputProps: {
-                            value: "traiter",
-                            checked: values.action === "traiter",
-                            onChange: () => setFieldValue("action", "traiter"),
+                          {
+                            label: (
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                Marquer le dossier du jeune comme
+                                <Badge severity="success">traité</Badge>
+                              </div>
+                            ),
+                            nativeInputProps: {
+                              value: "traiter",
+                              checked: values.action === "traiter",
+                              onChange: () => setFieldValue("action", "traiter"),
+                            },
+                            hintText: "Ce jeune passera dans les dossiers traités",
                           },
-                          hintText: "Ce jeune passera dans les dossiers traités",
-                        },
-                      ]}
-                      state="default"
-                    />
-                  </>
-                )}
+                        ]}
+                        state="default"
+                      />
+                    </>
+                  ))}
               </div>
 
-              <div className={styles.buttonContainer}>
-                <Button priority="secondary" type="submit" disabled={isSubmitting || !isFormComplete}>
-                  Valider et quitter
-                </Button>
-                <Button type="submit" disabled={isSubmitting || !isFormComplete}>
-                  {isSubmitting ? "Validation..." : "Valider et passer au suivant"}
-                </Button>
-              </div>
+              {(!shouldShowGuidance || values.contactSuccess === true) && (
+                <div className={styles.buttonContainer}>
+                  <Button priority="secondary" type="submit" disabled={isSubmitting || !isFormComplete}>
+                    Valider et quitter
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting || !isFormComplete}>
+                    {isSubmitting ? "Validation..." : "Valider et passer au suivant"}
+                  </Button>
+                </div>
+              )}
             </Form>
           );
         }}

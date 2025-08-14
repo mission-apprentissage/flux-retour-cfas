@@ -135,7 +135,7 @@ export function EffectifInfo({
       ) : null}
 
       {showContactForm && (
-        <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} onCancel={() => {}} />
+        <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} effectif={effectif} />
       )}
 
       {effectif.situation && (

@@ -2,9 +2,11 @@
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useState } from "react";
-import { ACC_CONJOINT_MOTIF_ENUM, IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
+import { IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+
+import { MOTIF_LABELS } from "../constants";
 
 import styles from "./Feedback.module.css";
 
@@ -29,17 +31,6 @@ interface ProblematiquesJeuneProps {
   effectif?: EffectifWithContacts;
   showContacts?: boolean;
 }
-
-const MOTIF_LABELS = {
-  [ACC_CONJOINT_MOTIF_ENUM.MOBILITE]: "Mobilité",
-  [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT]: "Logement",
-  [ACC_CONJOINT_MOTIF_ENUM.SANTE]: "Santé",
-  [ACC_CONJOINT_MOTIF_ENUM.FINANCE]: "Finance",
-  [ACC_CONJOINT_MOTIF_ENUM.ADMINISTRATIF]: "Administratif",
-  [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]: "Réorientation",
-  [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]: "Recherche d'emploi",
-  [ACC_CONJOINT_MOTIF_ENUM.AUTRE]: "Autre",
-};
 
 export function ProblematiquesJeune({ organismeData, effectif, showContacts = true }: ProblematiquesJeuneProps) {
   const [contactsOpen, setContactsOpen] = useState(false);

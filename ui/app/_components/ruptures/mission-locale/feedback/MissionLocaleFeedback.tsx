@@ -1,8 +1,8 @@
 "use client";
 
-import Badge from "@codegouvfr/react-dsfr/Badge";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { IUpdateMissionLocaleEffectif, SITUATION_LABEL_ENUM, PROBLEME_TYPE_ENUM } from "shared";
+import { IUpdateMissionLocaleEffectif, SITUATION_LABEL_ENUM, PROBLEME_TYPE_ENUM, SITUATION_ENUM } from "shared";
 import { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
 import { formatDate } from "@/app/_utils/date.utils";
@@ -36,6 +36,16 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
               )}
 
               {(() => {
+                if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
+                  return (
+                    <div className={styles.feedbackContainer}>
+                      <p className="fr-mb-0">
+                        <b>Ce jeune est resté injoignable.</b>
+                      </p>
+                    </div>
+                  );
+                }
+
                 const isSecondAttemptOrMore = index < sortedLogs.length - 1 && log.probleme_type;
 
                 if (isSecondAttemptOrMore) {
@@ -44,7 +54,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                       <p className="fr-mb-1v fr-mt-3v">
                         <b>La Mission Locale a t-elle pu rentrer en contact avec le jeune ?</b>
                       </p>
-                      <Tag>{log.situation === "CONTACTE_SANS_RETOUR" ? "Non" : "Oui"}</Tag>
+                      <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
 
                       {log.probleme_type && (
                         <>
@@ -64,15 +74,15 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                         <b>Elle a décidé de</b>
                       </p>
                       <Tag>
-                        {log.situation === "CONTACTE_SANS_RETOUR" ? (
+                        {log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? (
                           <>
                             Garder le jeune dans la liste{" "}
-                            <p className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
+                            <span className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
                               <i className="fr-icon-phone-fill fr-icon--sm" />
                               <span style={{ marginLeft: "5px" }}>
                                 <b>À RECONTACTER</b>
                               </span>
-                            </p>
+                            </span>
                           </>
                         ) : (
                           <>
@@ -96,9 +106,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                         <p className="fr-mb-1v fr-mt-3v">
                           <b>Commentaires</b>
                         </p>
-                        <p className={styles.feedbackText}>
-                          <b>{log?.commentaires}</b>
-                        </p>
+                        <p className={styles.feedbackText}>{log?.commentaires}</p>
                       </>
                     )}
                   </div>
@@ -120,6 +128,16 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
               Le {formatDate(log.created_at)}, {formatContactTimeText(calculateDaysSince(log.created_at))}
             </h6>
             {(() => {
+              if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
+                return (
+                  <div className={styles.feedbackContainer}>
+                    <p className="fr-mb-0">
+                      <b>Ce jeune est resté injoignable.</b>
+                    </p>
+                  </div>
+                );
+              }
+
               const isSecondAttemptOrMore = index < sortedLogs.length - 1 && log.probleme_type;
               if (isSecondAttemptOrMore) {
                 return (
@@ -127,7 +145,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                     <p className="fr-mb-1v">
                       <b>Avez-vous pu rentrer en contact avec le jeune ?</b>
                     </p>
-                    <Tag>{log.situation === "CONTACTE_SANS_RETOUR" ? "Non" : "Oui"}</Tag>
+                    <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
 
                     {log.probleme_type && (
                       <>
@@ -149,13 +167,13 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                       <b>Vous avez décidé</b>
                     </p>
                     <Tag>
-                      {log.situation === "CONTACTE_SANS_RETOUR" ? (
+                      {log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? (
                         <>
                           Garder le jeune dans la liste{" "}
-                          <div className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
+                          <span className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
                             <i className="fr-icon-phone-fill fr-icon--sm" />
                             <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
-                          </div>
+                          </span>
                         </>
                       ) : (
                         <>

@@ -1,0 +1,75 @@
+.container {
+  margin-top: 1rem;
+}
+
+.messageBox {
+  background-color: var(--background-alt-blue-france);
+  padding: 2.5rem 5rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-title-grey);
+}
+
+.thankYou {
+  margin-bottom: 1rem;
+  color: var(--text-default-grey);
+}
+
+.advice {
+  margin-bottom: 0.5rem;
+  color: var(--text-default-grey);
+  line-height: 1.5;
+}
+
+.alternative {
+  margin-bottom: 2rem;
+  color: var(--text-default-grey);
+  line-height: 1.5;
+}
+
+.illustration {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.actionSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--background-alt-grey-active);
+}
+
+.actionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-title-grey);
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .messageBox {
+    padding: 1.5rem;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buttonContainer button {
+    width: 100%;
+    max-width: 300px;
+  }
+}

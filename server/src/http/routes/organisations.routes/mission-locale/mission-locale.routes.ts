@@ -174,6 +174,8 @@ const exportEffectifMissionLocale = async (req, res) => {
             return SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR;
           case "COORDONNEES_INCORRECT":
             return SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT;
+          case "INJOIGNABLE_APRES_RELANCES":
+            return SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES;
           case "AUTRE": {
             return SITUATION_LABEL_ENUM.AUTRE;
           }
@@ -188,6 +190,7 @@ const exportEffectifMissionLocale = async (req, res) => {
         SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE,
         SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
         SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT,
+        SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES,
         SITUATION_LABEL_ENUM.AUTRE,
       ],
     },
