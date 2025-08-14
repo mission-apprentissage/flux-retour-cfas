@@ -6,7 +6,8 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikHelpers } from "formik";
+import { useState } from "react";
 import { SITUATION_ENUM, PROBLEME_TYPE_ENUM, IEffecifMissionLocale } from "shared";
 
 import {
@@ -27,6 +28,12 @@ interface FormValues {
   probleme: string;
   problemeAutre: string;
   action: "garder" | "traiter" | null;
+}
+
+interface ContactFormProps {
+  effectifId: string;
+  effectif?: IEffecifMissionLocale["effectif"];
+  onSuccess: (shouldContinue?: boolean) => void;
 }
 
 const initialValues: FormValues = {
@@ -79,50 +86,47 @@ const hasMultipleContactAttempts = (effectif: IEffecifMissionLocale["effectif"])
   return contactAttempts.length >= 2;
 };
 
-export function ContactForm({
-  effectifId,
-  effectif,
-  onSuccess,
-}: {
-  effectifId: string;
-  effectif?: IEffecifMissionLocale["effectif"];
-  onSuccess: () => void;
-}) {
+export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProps) {
   const recordContactMutation = useRecordContact();
   const queryClient = useQueryClient();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitAction, setSubmitAction] = useState<"quit" | "continue" | null>(null);
+
+  const invalidateEffectifQueries = (effectifId: string) => {
+    queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
+    queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
+  };
 
   const handleSubmit = async (values: FormValues) => {
     try {
+      setErrorMessage(null);
       const payload = values.contactSuccess
         ? createContactSuccessPayload(values.situation!, values.situationAutre, values.commentaires)
         : createContactFailurePayload(values.probleme, values.problemeAutre, values.action!);
 
       await recordContactMutation.mutateAsync({ effectifId, payload });
+      invalidateEffectifQueries(effectifId);
 
-      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
-      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
-
-      onSuccess();
+      const shouldContinue = submitAction === "continue";
+      onSuccess(shouldContinue);
     } catch (error) {
-      console.log(error);
+      setErrorMessage("Une erreur est survenue lors de l'enregistrement du contact. Veuillez réessayer.");
     }
   };
 
-  const handleReset = (setFieldValue: any) => {
+  const handleReset = (setFieldValue: FormikHelpers<FormValues>["setFieldValue"]) => {
     setFieldValue("contactSuccess", null);
   };
 
   const handleTraiter = async () => {
     try {
+      setErrorMessage(null);
       const payload = createContactSuccessPayload(SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES);
       await recordContactMutation.mutateAsync({ effectifId, payload });
-
-      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
-      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
-
-      onSuccess();
+      invalidateEffectifQueries(effectifId);
+      onSuccess(false);
     } catch (error) {
-      console.log(error);
+      setErrorMessage("Une erreur est survenue lors du traitement du dossier. Veuillez réessayer.");
     }
   };
 
@@ -133,7 +137,7 @@ export function ContactForm({
       <h3 className={`fr-mb-1w ${styles.title}`}>Que se passe-t-il aujourd&apos;hui ?</h3>
 
       <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
-        {({ values, setFieldValue, isSubmitting, status }) => {
+        {({ values, setFieldValue, isSubmitting }) => {
           const isFormComplete =
             values.contactSuccess !== null &&
             (values.contactSuccess === true
@@ -145,14 +149,14 @@ export function ContactForm({
           return (
             <Form>
               <div className={styles.formWrapper}>
-                {status && (
+                {errorMessage && (
                   <Alert
                     severity="error"
                     title="Une erreur s'est produite"
-                    description={status}
+                    description={errorMessage}
                     className="fr-mb-3w"
                     closable
-                    onClose={() => (status = null)}
+                    onClose={() => setErrorMessage(null)}
                   />
                 )}
 
@@ -313,11 +317,11 @@ export function ContactForm({
                         options={[
                           {
                             label: (
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <div className={styles.actionLabelContainer}>
                                 Garder le jeune dans ma liste
-                                <span className="fr-badge fr-badge--purple-glycine" style={{ margin: 0 }}>
+                                <span className={`fr-badge fr-badge--purple-glycine ${styles.recontacterBadge}`}>
                                   <i className="fr-icon-phone-fill fr-icon--sm" />
-                                  <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
+                                  <span className={styles.recontacterIcon}>À RECONTACTER</span>
                                 </span>
                               </div>
                             ),
@@ -330,7 +334,7 @@ export function ContactForm({
                           },
                           {
                             label: (
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <div className={styles.actionLabelContainer}>
                                 Marquer le dossier du jeune comme
                                 <Badge severity="success">traité</Badge>
                               </div>
@@ -351,10 +355,19 @@ export function ContactForm({
 
               {(!shouldShowGuidance || values.contactSuccess === true) && (
                 <div className={styles.buttonContainer}>
-                  <Button priority="secondary" type="submit" disabled={isSubmitting || !isFormComplete}>
+                  <Button
+                    priority="secondary"
+                    type="submit"
+                    disabled={isSubmitting || !isFormComplete}
+                    onClick={() => setSubmitAction("quit")}
+                  >
                     Valider et quitter
                   </Button>
-                  <Button type="submit" disabled={isSubmitting || !isFormComplete}>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !isFormComplete}
+                    onClick={() => setSubmitAction("continue")}
+                  >
                     {isSubmitting ? "Validation..." : "Valider et passer au suivant"}
                   </Button>
                 </div>

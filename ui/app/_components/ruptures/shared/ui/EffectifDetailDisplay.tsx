@@ -136,7 +136,13 @@ export function EffectifDetailDisplay({
         isATraiter={a_traiter}
       />
 
-      <EffectifInfo effectif={effectif} nomListe={nomListe} isAdmin={isAdmin} setIsEditable={setIsEditable} />
+      <EffectifInfo
+        effectif={effectif}
+        nomListe={nomListe}
+        isAdmin={isAdmin}
+        setIsEditable={setIsEditable}
+        nextEffectifId={next?.id || undefined}
+      />
 
       {(a_traiter || isEditable) && !isCfaPage && (
         <FeedbackForm

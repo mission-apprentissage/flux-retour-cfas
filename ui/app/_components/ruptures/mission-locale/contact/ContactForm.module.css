@@ -17,3 +17,17 @@
   gap: 16px;
   margin-top: 16px;
 }
+
+.actionLabelContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recontacterBadge {
+  margin: 0;
+}
+
+.recontacterIcon {
+  margin-left: 5px;
+}

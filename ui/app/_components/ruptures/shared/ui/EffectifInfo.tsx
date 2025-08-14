@@ -3,6 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import { useRouter, usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
@@ -41,13 +42,17 @@ export function EffectifInfo({
   nomListe,
   isAdmin = false,
   setIsEditable,
+  nextEffectifId,
 }: {
   effectif: IEffecifMissionLocale["effectif"];
   nomListe: IMissionLocaleEffectifList;
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
+  nextEffectifId?: string;
 }) {
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
@@ -58,8 +63,21 @@ export function EffectifInfo({
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
 
-  const handleContactFormSuccess = () => {
+  const handleContactFormSuccess = (shouldContinue?: boolean) => {
     setEffectifUpdated(true);
+
+    if (shouldContinue) {
+      if (nextEffectifId && pathname) {
+        const pathSegments = pathname.split("/");
+        pathSegments[pathSegments.length - 1] = nextEffectifId;
+        const newPath = pathSegments.join("/");
+        router.push(newPath);
+      } else {
+        router.push("/");
+      }
+    } else {
+      router.push("/");
+    }
   };
 
   const showContactForm = shouldShowContactForm(user.organisation.type, effectif, effectifUpdated);
