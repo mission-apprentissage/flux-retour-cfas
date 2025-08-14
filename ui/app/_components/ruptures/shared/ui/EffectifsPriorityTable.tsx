@@ -5,20 +5,23 @@ import { fr } from "date-fns/locale";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useMemo, useState } from "react";
-import { API_EFFECTIF_LISTE } from "shared";
+import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
+import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
+import { EffectifPriorityData } from "@/common/types/ruptures";
 
-import { EffectifPriorityData } from "../../../common/types/ruptures";
+import { isMissionLocaleUser } from "../utils";
 
 import styles from "./PriorityTable.module.css";
 
-type PriorityTableProps = {
+type EffectifsPriorityTableProps = {
   priorityData?: EffectifPriorityData[];
   searchTerm: string;
   hadEffectifsPrioritaires?: boolean;
+  listType?: IMissionLocaleEffectifList;
 };
 
 function formatMonthAndYear(dateStr: string | undefined): string {
@@ -28,17 +31,29 @@ function formatMonthAndYear(dateStr: string | undefined): string {
   return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
-function PriorityBadge({ priorityData }: { priorityData: EffectifPriorityData[] }) {
+function PriorityBadge({
+  priorityData,
+  listType,
+}: {
+  priorityData: EffectifPriorityData[];
+  listType?: IMissionLocaleEffectifList;
+}) {
+  const label = listType ? getPriorityLabel(listType) : "À TRAITER EN PRIORITÉ";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
       <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
-        <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ ({priorityData.length})
+        <i className="fr-icon-fire-fill fr-icon--sm" /> {label} ({priorityData.length})
       </p>
     </div>
   );
 }
 
-export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrioritaires = false }: PriorityTableProps) {
+export function EffectifsPriorityTable({
+  priorityData = [],
+  searchTerm,
+  hadEffectifsPrioritaires = false,
+  listType,
+}: EffectifsPriorityTableProps) {
   const { user } = useAuth();
   const params = useParams();
   const mlId = params?.id as string | undefined;
@@ -85,7 +100,7 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
       {priorityData.length === 0 && hadEffectifsPrioritaires && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <PriorityBadge priorityData={priorityData} />
+            <PriorityBadge priorityData={priorityData} listType={listType} />
             <p style={{ fontWeight: "bold", margin: "0", fontSize: "14px" }}>
               Tous les jeunes de cette liste ont été contactés !
             </p>
@@ -106,8 +121,8 @@ export function PriorityTable({ priorityData = [], searchTerm, hadEffectifsPrior
 
       {priorityData.length > 0 && (
         <>
-          <PriorityBadge priorityData={priorityData} />
-          {user.organisation.type === "MISSION_LOCALE" && (
+          <PriorityBadge priorityData={priorityData} listType={listType} />
+          {isMissionLocaleUser(user.organisation.type) && (
             <div style={{ marginBottom: "16px" }}>
               <DsfrLink
                 href="#"

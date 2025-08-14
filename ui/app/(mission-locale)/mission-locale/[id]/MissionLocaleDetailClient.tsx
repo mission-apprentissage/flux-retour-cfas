@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale } from "shared";
 
-import EffectifDetail from "@/app/_components/ruptures/EffectifDetail";
+import EffectifDetail from "@/app/_components/ruptures/shared/ui/EffectifDetail";
 import { _get, _post } from "@/common/httpClient";
 
 export default function MissionLocaleDetailClient({ id }: { id: string }) {

@@ -4,13 +4,12 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
-import { EffectifPriorityData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
+import { EffectifPriorityData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
-import { MonthTable } from "./MonthTable";
-import { PriorityTable } from "./PriorityTable";
+import { EffectifsMonthTable } from "./EffectifsMonthTable";
+import { EffectifsPriorityTable } from "./EffectifsPriorityTable";
 
-type SearchableTableSectionProps = {
-  title: string;
+type EffectifsSearchableTableProps = {
   data: MonthItem[];
   priorityData?: EffectifPriorityData[];
   hadEffectifsPrioritaires?: boolean;
@@ -21,8 +20,7 @@ type SearchableTableSectionProps = {
   listType: IMissionLocaleEffectifList;
 };
 
-export const SearchableTableSection = memo(function SearchableTableSection({
-  title,
+export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   data,
   priorityData,
   hadEffectifsPrioritaires,
@@ -31,12 +29,9 @@ export const SearchableTableSection = memo(function SearchableTableSection({
   onSearchChange,
   handleSectionChange,
   listType,
-}: SearchableTableSectionProps) {
+}: EffectifsSearchableTableProps) {
   return (
     <div>
-      <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
-        {title}
-      </h2>
       <div>
         <SearchBar
           label="Rechercher un dossier par nom et/ou prénom"
@@ -53,14 +48,15 @@ export const SearchableTableSection = memo(function SearchableTableSection({
         />
       </div>
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
-        <PriorityTable
+        <EffectifsPriorityTable
           priorityData={priorityData}
           searchTerm={searchTerm}
           hadEffectifsPrioritaires={hadEffectifsPrioritaires}
+          listType={listType}
         />
       )}
       {data.map((monthItem) => (
-        <MonthTable
+        <EffectifsMonthTable
           key={monthItem.month}
           monthItem={monthItem}
           searchTerm={searchTerm}

@@ -1,5 +1,6 @@
 import format from "date-fns/format/index";
 import { fr } from "date-fns/locale";
+import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MonthItem } from "../../common/types/ruptures";
 
@@ -50,3 +51,7 @@ export function groupMonthsOlderThanSixMonths(items: MonthItem[]): MonthItem[] {
 
   return result;
 }
+
+export const getPriorityLabel = (listType: IMissionLocaleEffectifList): string => {
+  return listType === API_EFFECTIF_LISTE.INJOIGNABLE ? "À RECONTACTER EN PRIORITÉ" : "À TRAITER EN PRIORITÉ";
+};

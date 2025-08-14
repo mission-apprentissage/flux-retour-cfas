@@ -13,8 +13,8 @@ import {
 } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { EffectifDetailDisplay } from "@/app/_components/ruptures/EffectifDetailDisplay";
-import { RightColumnSkeleton } from "@/app/_components/ruptures/effectifs/RightColumnSkeleton";
+import { EffectifDetailDisplay } from "@/app/_components/ruptures/shared/ui/EffectifDetailDisplay";
+import { RightColumnSkeleton } from "@/app/_components/ruptures/shared/ui/RightColumnSkeleton";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
 

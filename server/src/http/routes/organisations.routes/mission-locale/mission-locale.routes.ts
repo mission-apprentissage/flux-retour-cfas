@@ -105,7 +105,7 @@ const exportEffectifMissionLocale = async (req, res) => {
           break;
         case API_EFFECTIF_LISTE.INJOIGNABLE:
           dataArr.push({
-            worksheetName: "Injoignable",
+            worksheetName: "À recontacter",
             logsTag: "ml_injoignable" as const,
             data: (await getEffectifsListByMisisonLocaleId(
               missionLocale,
@@ -174,6 +174,8 @@ const exportEffectifMissionLocale = async (req, res) => {
             return SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR;
           case "COORDONNEES_INCORRECT":
             return SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT;
+          case "INJOIGNABLE_APRES_RELANCES":
+            return SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES;
           case "AUTRE": {
             return SITUATION_LABEL_ENUM.AUTRE;
           }
@@ -188,6 +190,7 @@ const exportEffectifMissionLocale = async (req, res) => {
         SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE,
         SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
         SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT,
+        SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES,
         SITUATION_LABEL_ENUM.AUTRE,
       ],
     },
@@ -213,16 +216,18 @@ const exportEffectifMissionLocale = async (req, res) => {
   res.contentType("xlsx");
 
   const date = new Date();
-  worksheetsInfo.forEach(async ({ logsTag, data }) => {
-    await createTelechargementListeNomLog(
-      logsTag,
-      data.map(({ _id }) => _id.toString()),
-      date,
-      req.user?._id,
-      undefined,
-      missionLocale._id
-    );
-  });
+  await Promise.all(
+    worksheetsInfo.map(async ({ logsTag, data }) => {
+      return createTelechargementListeNomLog(
+        logsTag,
+        data.map(({ _id }) => _id.toString()),
+        date,
+        req.user?._id,
+        undefined,
+        missionLocale._id
+      );
+    })
+  );
 
   return templateFile?.xlsx.writeBuffer();
 };

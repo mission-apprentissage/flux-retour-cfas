@@ -6,7 +6,7 @@ import { IEffecifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./EffectifParcours.module.css";
+import styles from "../shared/ui/EffectifParcours.module.css";
 
 const TIMELINE_EVENTS = {
   RUPTURE: "RUPTURE",
@@ -41,45 +41,12 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
   const events: TimelineEvent[] = [];
   const eff = effectif as any;
 
-  const hasNouveauContrat = "situation" in effectif && eff.situation?.situation === SITUATION_ENUM.NOUVEAU_PROJET;
-  const hasContacteSansReponse =
-    "situation" in effectif && eff.situation?.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR;
-
   if (effectif.date_rupture) {
     const ruptureDate = effectif.date_rupture?.date || effectif.date_rupture;
     events.push({
       date: ruptureDate instanceof Date ? ruptureDate : new Date(ruptureDate),
       type: TIMELINE_EVENTS.RUPTURE,
       label: EVENT_LABELS[TIMELINE_EVENTS.RUPTURE],
-    });
-  }
-
-  if (
-    !hasNouveauContrat &&
-    !hasContacteSansReponse &&
-    "mission_locale_logs" in effectif &&
-    eff.mission_locale_logs &&
-    eff.mission_locale_logs.length > 0
-  ) {
-    const traitementDate = eff.mission_locale_logs[0].created_at;
-    const date = traitementDate instanceof Date ? traitementDate : new Date(traitementDate);
-
-    events.push({
-      date,
-      type: TIMELINE_EVENTS.TRAITE_CFA,
-      label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
-    });
-  }
-
-  if (hasContacteSansReponse) {
-    const actionDate =
-      ("mission_locale_logs" in effectif ? eff.mission_locale_logs?.[0]?.created_at : undefined) || new Date();
-    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
-
-    events.push({
-      date,
-      type: TIMELINE_EVENTS.CONTACTE_SANS_REPONSE,
-      label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_SANS_REPONSE],
     });
   }
 
@@ -94,15 +61,25 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     });
   }
 
-  if (hasNouveauContrat) {
-    const actionDate =
-      ("mission_locale_logs" in effectif ? eff.mission_locale_logs?.[0]?.created_at : undefined) || new Date();
-    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
+  if ("mission_locale_logs" in effectif && eff.mission_locale_logs && eff.mission_locale_logs.length > 0) {
+    eff.mission_locale_logs.forEach((log: any) => {
+      if (log.created_at && log.situation) {
+        const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
 
-    events.push({
-      date,
-      type: TIMELINE_EVENTS.NOUVEAU_CONTRAT,
-      label: EVENT_LABELS[TIMELINE_EVENTS.NOUVEAU_CONTRAT],
+        if (log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+          events.push({
+            date,
+            type: TIMELINE_EVENTS.CONTACTE_SANS_REPONSE,
+            label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_SANS_REPONSE],
+          });
+        } else {
+          events.push({
+            date,
+            type: TIMELINE_EVENTS.TRAITE_CFA,
+            label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
+          });
+        }
+      }
     });
   }
 

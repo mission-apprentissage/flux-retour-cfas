@@ -5,16 +5,25 @@ import { useParams, usePathname } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
+import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { LightTable } from "@/app/_components/table/LightTable";
 import { useAuth } from "@/app/_context/UserContext";
-
-import { EffectifData, MonthItem, SelectedSection } from "../../../common/types/ruptures";
-import { formatMonthAndYear, anchorFromLabel } from "../../_utils/ruptures.utils";
-import { MlSuccessCard } from "../card/MlSuccessCard";
+import { formatMonthAndYear, anchorFromLabel } from "@/app/_utils/ruptures.utils";
+import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
 import styles from "./MonthTable.module.css";
 
-type MonthTableProps = {
+const PriorityBadge = () => (
+  <p
+    className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}
+    aria-label="Effectif prioritaire"
+  >
+    <i className="fr-icon-fire-fill fr-icon--xs" />
+    Prioritaire
+  </p>
+);
+
+type EffectifsMonthTableProps = {
   monthItem: MonthItem;
   searchTerm: string;
   handleSectionChange?: (section: SelectedSection) => void;
@@ -34,10 +43,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
       name: (
         <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
           {effectif.prioritaire || effectif.a_contacter ? (
-            <p className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}>
-              <i className="fr-icon-fire-fill fr-icon--xs" />
-              Prioritaire
-            </p>
+            <PriorityBadge />
           ) : (
             <Badge severity="new" small className={styles.noWrapBadge}>
               à traiter
@@ -71,12 +77,16 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     return {
       id: effectif.id,
       badge: (
-        <Badge severity="info" small>
-          sans réponse
-        </Badge>
+        <p className="fr-badge fr-badge--purple-glycine fr-badge--sm" aria-label="Effectif à recontacter">
+          <i className="fr-icon-phone-fill fr-icon--xs" />
+          <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
+        </p>
       ),
       name: (
-        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
+        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
+          {effectif.prioritaire && <PriorityBadge />}
+          {`${effectif.nom} ${effectif.prenom}`}
+        </div>
       ),
       formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
       icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -92,12 +102,12 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
   };
 }
 
-export const MonthTable = memo(function MonthTable({
+export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   monthItem,
   searchTerm,
   handleSectionChange,
   listType,
-}: MonthTableProps) {
+}: EffectifsMonthTableProps) {
   const { user } = useAuth();
   const params = useParams();
   const pathname = usePathname();
@@ -124,8 +134,8 @@ export const MonthTable = memo(function MonthTable({
 
       case API_EFFECTIF_LISTE.INJOIGNABLE:
         return [
-          { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "Apprenant", dataKey: "name", width: 300 },
+          { label: "Formation", dataKey: "formation", width: 300 },
           { label: "Statut", dataKey: "badge", width: 200 },
           { label: "", dataKey: "icon", width: 10 },
         ];

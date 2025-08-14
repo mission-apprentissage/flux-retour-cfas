@@ -8,19 +8,21 @@ import { API_EFFECTIF_LISTE } from "shared";
 import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
-import { _get } from "@/common/httpClient";
-
-import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "../../../common/types/ruptures";
 import {
   groupMonthsOlderThanSixMonths,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
-} from "../../_utils/ruptures.utils";
-import { SearchableTableSection } from "../ruptures/SearchableTableSection";
+} from "@/app/_utils/ruptures.utils";
+import { _get } from "@/common/httpClient";
+import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
-export function EffectifListDisplay({ data }: { data: MonthsData }) {
+import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
+
+import { DownloadSection } from "./DownloadSection";
+
+export function EffectifsListView({ data }: { data: MonthsData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
   const [activeAnchor, setActiveAnchor] = useState("");
@@ -39,6 +41,21 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
   const totalToTreat = useMemo(() => getTotalEffectifs(groupedDataATraiter), [groupedDataATraiter]);
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
+
+  const priorityDataInjoignable = useMemo(() => {
+    if (!data.prioritaire?.effectifs) return [];
+
+    return groupedInjoignable.flatMap((month) =>
+      month.data
+        .filter((effectif) => effectif.prioritaire === true)
+        .map((effectif) => ({
+          ...effectif,
+          date_rupture: month.month === "plus-de-6-mois" ? "+ de 6 mois" : month.month,
+        }))
+    );
+  }, [groupedInjoignable, data.prioritaire?.effectifs]);
+
+  const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
 
   useEffect(() => {
     if (!activeAnchor) {
@@ -128,9 +145,9 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
       items.splice(1, 0, {
         text:
           totalInjoignable > 0 ? (
-            <strong>{`Contactés sans réponse (${totalInjoignable})`}</strong>
+            <strong>{`À recontacter (${totalInjoignable})`}</strong>
           ) : (
-            `Contactés sans réponse (${totalInjoignable})`
+            `À recontacter (${totalInjoignable})`
           ),
         linkProps: {
           href: "#",
@@ -215,47 +232,65 @@ export function EffectifListDisplay({ data }: { data: MonthsData }) {
 
         {/* À traiter */}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="À traiter"
-              data={groupedDataATraiter}
-              priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
-              hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
-              isTraite={false}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              handleSectionChange={handleSectionChange}
-              listType={API_EFFECTIF_LISTE.A_TRAITER}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              À traiter
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <EffectifsSearchableTable
+                data={groupedDataATraiter}
+                priorityData={data.prioritaire.effectifs as EffectifPriorityData[]}
+                hadEffectifsPrioritaires={data.prioritaire.hadEffectifsPrioritaires}
+                isTraite={false}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                handleSectionChange={handleSectionChange}
+                listType={API_EFFECTIF_LISTE.A_TRAITER}
+              />
+            </SuspenseWrapper>
+          </>
         )}
 
         {/* Déjà traité */}
         {selectedSection === "deja-traite" && sortedDataTraite.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="Déjà traité"
-              data={sortedDataTraite}
-              isTraite={true}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              listType={API_EFFECTIF_LISTE.TRAITE}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              Déjà traité
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <EffectifsSearchableTable
+                data={sortedDataTraite}
+                isTraite={true}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                listType={API_EFFECTIF_LISTE.TRAITE}
+              />
+            </SuspenseWrapper>
+          </>
         )}
 
         {/* Injoignable */}
         {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
-          <SuspenseWrapper fallback={<TableSkeleton />}>
-            <SearchableTableSection
-              title="Contactés sans réponse"
-              data={groupedInjoignable}
-              isTraite={false}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              listType={API_EFFECTIF_LISTE.INJOIGNABLE}
-            />
-          </SuspenseWrapper>
+          <>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+              À recontacter
+            </h2>
+            {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
+            <SuspenseWrapper fallback={<TableSkeleton />}>
+              <EffectifsSearchableTable
+                data={groupedInjoignable}
+                priorityData={priorityDataInjoignable}
+                hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
+                isTraite={false}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                handleSectionChange={handleSectionChange}
+                listType={API_EFFECTIF_LISTE.INJOIGNABLE}
+              />
+            </SuspenseWrapper>
+          </>
         )}
       </div>
     </div>

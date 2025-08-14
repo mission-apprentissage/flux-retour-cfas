@@ -2,10 +2,7 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 
-import { _getBlob } from "@/common/httpClient";
-
 import styles from "./MLHeader.module.css";
-import { ModalRupturantExcel } from "./modal/ModalRupturantExcel";
 
 export const MLHeader = () => {
   return (
@@ -40,9 +37,7 @@ export const MLHeader = () => {
               </a>
             </p>
           </div>
-          <div className={styles.mlHeaderActions}>
-            <ModalRupturantExcel />
-          </div>
+          <div className={styles.mlHeaderActions}></div>
         </div>
 
         <hr className="fr-hr" />

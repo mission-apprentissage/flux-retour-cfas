@@ -1,20 +1,25 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import React, { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
+import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
-import { CfaFeedback } from "./CfaFeedback";
+import { CfaFeedback } from "../../cfa";
+import { ContactForm, MissionLocaleFeedback } from "../../mission-locale";
+import { shouldShowContactForm } from "../utils";
+
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
-import { MLFeedback } from "./MLFeedback";
+import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { ProblematiquesJeune } from "./ProblematiquesJeune";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
   const now = new Date();
@@ -37,19 +42,45 @@ export function EffectifInfo({
   nomListe,
   isAdmin = false,
   setIsEditable,
+  nextEffectifId,
 }: {
   effectif: IEffecifMissionLocale["effectif"];
   nomListe: IMissionLocaleEffectifList;
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
+  nextEffectifId?: string;
 }) {
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
-  const computeTransmissionDate = (date) => {
+  const priorityLabel = useMemo(() => getPriorityLabel(nomListe), [nomListe]);
+
+  const computeTransmissionDate = (date: Date | null | undefined) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
+
+  const handleContactFormSuccess = (shouldContinue?: boolean) => {
+    setEffectifUpdated(true);
+
+    if (shouldContinue) {
+      if (nextEffectifId && pathname) {
+        const pathSegments = pathname.split("/");
+        pathSegments[pathSegments.length - 1] = nextEffectifId;
+        const newPath = pathSegments.join("/");
+        router.push(newPath);
+      } else {
+        router.push("/");
+      }
+    } else {
+      router.push("/");
+    }
+  };
+
+  const showContactForm = shouldShowContactForm(user.organisation.type, effectif, effectifUpdated);
 
   return (
     <div className={styles.effectifInfoResponsive}>
@@ -62,17 +93,7 @@ export function EffectifInfo({
         <div className={styles.effectifInfoInner}>
           <div className={styles.effectifHeader}>
             <div className={styles.flexCenterGap8}>
-              {effectif.injoignable ? (
-                <Badge severity="info">Contacté sans réponse</Badge>
-              ) : effectif.a_traiter && (effectif.prioritaire || effectif.a_contacter) ? (
-                <p className={`fr-badge fr-badge--orange-terre-battue ${styles.badgeGap}`}>
-                  <i className="fr-icon-fire-fill fr-icon--sm" /> À TRAITER EN PRIORITÉ
-                </p>
-              ) : effectif.a_traiter ? (
-                <Badge severity="new">à traiter</Badge>
-              ) : (
-                <Badge severity="success">traité</Badge>
-              )}
+              <EffectifStatusBadge effectif={effectif} priorityLabel={priorityLabel} />
               <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
@@ -127,7 +148,23 @@ export function EffectifInfo({
       </div>
       <EffectifInfoDetails effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
 
-      {"organisme_data" in effectif && effectif.organisme_data ? (
+      {user.organisation.type === "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
+        <ProblematiquesJeune organismeData={effectif.organisme_data} effectif={effectif} showContacts={false} />
+      ) : null}
+
+      {showContactForm && (
+        <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} effectif={effectif} />
+      )}
+
+      {effectif.situation && (
+        <MissionLocaleFeedback
+          situation={effectif.situation}
+          visibility={user.organisation.type}
+          logs={effectif.mission_locale_logs}
+        />
+      )}
+
+      {user.organisation.type !== "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
         <CfaFeedback
           organismeData={effectif.organisme_data}
           transmittedAt={effectif.transmitted_at}
@@ -135,14 +172,6 @@ export function EffectifInfo({
           effectif={effectif}
         />
       ) : null}
-
-      {!effectif.a_traiter && !effectif.injoignable && effectif.situation && (
-        <MLFeedback
-          situation={effectif.situation}
-          visibility={user.organisation.type}
-          logs={effectif.mission_locale_logs}
-        />
-      )}
     </div>
   );
 }

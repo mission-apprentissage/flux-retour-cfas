@@ -14440,6 +14440,27 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         },
       ],
     },
+    "probleme_detail": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "probleme_type": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "coordonnees_incorrectes",
+            "jeune_injoignable",
+            "autre",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "situation": {
       "anyOf": [
         {
@@ -14450,6 +14471,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "DEJA_ACCOMPAGNE",
             "CONTACTE_SANS_RETOUR",
             "COORDONNEES_INCORRECT",
+            "INJOIGNABLE_APRES_RELANCES",
             "AUTRE",
           ],
         },
@@ -14524,6 +14546,27 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "mission_locale_effectif_id": {
       "bsonType": "objectId",
     },
+    "probleme_detail": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "probleme_type": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "coordonnees_incorrectes",
+            "jeune_injoignable",
+            "autre",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "situation": {
       "anyOf": [
         {
@@ -14534,6 +14577,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "DEJA_ACCOMPAGNE",
             "CONTACTE_SANS_RETOUR",
             "COORDONNEES_INCORRECT",
+            "INJOIGNABLE_APRES_RELANCES",
             "AUTRE",
           ],
         },

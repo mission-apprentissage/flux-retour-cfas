@@ -8,15 +8,14 @@ import {
   IUpdateMissionLocaleEffectif,
   IUpdateOrganismeFormationEffectif,
   SITUATION_ENUM,
-  API_EFFECTIF_LISTE,
   IMissionLocaleEffectifList,
 } from "shared";
 
-import { CfaFeedbackForm } from "../cfa/FeedbackForm";
+import { CfaFeedbackForm } from "@/app/_components/cfa/FeedbackForm";
 
-import { EffectifInfo } from "./effectifs/EffectifInfo";
-import { FeedbackForm } from "./effectifs/FeedbackForm";
-import { PageHeader } from "./effectifs/PageHeader";
+import { EffectifInfo } from "./EffectifInfo";
+import { FeedbackForm } from "./FeedbackForm";
+import { PageHeader } from "./PageHeader";
 
 function validateCfaForm(cfaFormData: IUpdateOrganismeFormationEffectif): boolean {
   if (typeof cfaFormData.rupture !== "boolean") {
@@ -137,16 +136,22 @@ export function EffectifDetailDisplay({
         isATraiter={a_traiter}
       />
 
-      <EffectifInfo effectif={effectif} nomListe={nomListe} isAdmin={isAdmin} setIsEditable={setIsEditable} />
+      <EffectifInfo
+        effectif={effectif}
+        nomListe={nomListe}
+        isAdmin={isAdmin}
+        setIsEditable={setIsEditable}
+        nextEffectifId={next?.id || undefined}
+      />
 
-      {(a_traiter || injoignable || isEditable) && !isCfaPage && (
+      {(a_traiter || isEditable) && !isCfaPage && (
         <FeedbackForm
           formData={formData}
           setFormData={setFormData}
           isFormValid={isFormValid}
           onSave={(goNext) => onSave(goNext, formData)}
           isSaving={isSaving}
-          isInjoignable={nomListe === API_EFFECTIF_LISTE.INJOIGNABLE}
+          isInjoignable={!!injoignable}
           hasSuccess={hasSuccess}
           hasError={hasError}
           isAdmin={isAdmin}
