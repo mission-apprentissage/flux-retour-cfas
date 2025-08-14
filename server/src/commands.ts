@@ -302,6 +302,12 @@ program
   .action(createJobAction("send-reminder-emails"));
 
 program
+  .command("send-mission-locale-weekly-recap")
+  .description("Envoi des emails hebdomadaires aux missions locales")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("send-mission-locale-weekly-recap"));
+
+program
   .command("hydrate:contrats-deca-raw")
   .description("Manually trigger the creation of deca effectifs")
   .option("-q, --queued", "Run job asynchronously", false)

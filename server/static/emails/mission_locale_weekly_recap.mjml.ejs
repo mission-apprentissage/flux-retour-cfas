@@ -1,0 +1,331 @@
+<mjml>
+    <mj-head>
+    <mj-style>
+
+      .mobile-tag-center {
+        text-align: left !important;
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mj-outlook-group-fix { 
+          width: 100% !important; 
+          max-width: 100% !important;
+        }
+        
+        body { 
+          width: 100% !important; 
+          max-width: 100% !important;
+          margin: 0 !important; 
+          padding: 0 !important; 
+        }
+        
+        .mobile-section-padding > tbody > tr > td {
+          padding: 8px 2px 6px !important;
+        }
+        
+        .mobile-wrapper-padding > tbody > tr > td {
+          padding: 0 1px 8px 1px !important;
+        }
+        
+        .mobile-stack {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        
+        table[role="presentation"] {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        
+        .mj-wrapper .outlook-group-fix {
+          width: 100% !important;
+        }
+        
+        td {
+          padding-left: 5px !important;
+          padding-right: 5px !important;
+        }
+        
+        img[alt*="logo"], 
+        img[src*="logo"],
+        .header img,
+        mj-image img {
+          width: 50% !important;
+          max-width: 50% !important;
+          height: auto !important;
+          margin: 0 auto !important;
+        }
+        
+        .mobile-center {
+          text-align: center !important;
+        }
+        
+        .mobile-tag-center {
+          margin: 0 auto !important;
+          text-align: center !important;
+        }
+        
+        .mobile-tag-center > tbody > tr > td {
+          text-align: center !important;
+          padding-bottom: 8px !important;
+        }
+        
+        .mobile-tag-center > tbody > tr > td > div {
+          text-align: center !important;
+          margin: auto !important;
+          width: fit-content !important;
+        }
+        
+        .mobile-tag-center span {
+          display: inline-block !important;
+          text-align: center !important;
+          margin: 0 auto !important;
+          max-width: 200px !important;
+        }
+        
+        .mobile-tag-center[align="left"] {
+          text-align: center !important;
+        }
+        
+        .mobile-tag-center > tbody > tr > td[align="left"] {
+          text-align: center !important;
+        }
+        
+        .mobile-text-left-indent {
+          text-align: center !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          padding-top: 8px !important;
+        }
+        
+        .mobile-text-left-indent > tbody > tr > td {
+          text-align: center !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          padding-top: 8px !important;
+        }
+        
+        .mobile-text-left-indent div {
+          text-align: center !important;
+          margin: 0 auto !important;
+        }
+        
+        .mobile-text-left-indent > tbody > tr > td > div {
+          text-align: center !important;
+          margin: 0 auto !important;
+        }
+        
+        .mobile-text-left-indent span {
+          text-align: center !important;
+          display: block !important;
+          width: 100% !important;
+        }
+        
+        .desktop-btn table {
+          float: none !important;
+        }
+        
+        .desktop-btn td {
+          text-align: center !important;
+        }
+        
+        div[class*="mj-button-outlook"] {
+          text-align: center !important;
+        }
+        
+        table[class*="mj-button-table"] {
+          margin: 0 auto !important;
+        }
+        
+        .mobile-divider {
+          display: none !important;
+        }
+        
+        .mobile-divider > tbody > tr > td {
+          display: none !important;
+        }
+        
+      }
+    </mj-style>
+  </mj-head>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc" width="773px">
+    <%- include('./common/header.ejs'); %>
+
+    <mj-wrapper padding="0 20px 10px 20px" css-class="mobile-wrapper-padding">
+      <mj-section background-color="#ffffff" padding="10px 20px 5px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-text font-weight="700" font-size="22px" line-height="28px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" color="#161616">
+            Bonjour <strong><%= data.recipient.prenom %></strong> !
+          </mj-text>
+          <mj-text font-size="16px" line-height="24px" padding-top="5px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" color="#161616">
+            Voici votre rapport hebdomadaire pour le suivi des dossiers des jeunes rupturants avec le Tableau de Bord de
+            l’apprentissage.
+          </mj-text>
+          <mj-text font-size="16px" line-height="24px" font-weight="500" padding-top="5px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" color="#161616">
+            Merci pour votre collaboration.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 20px 5px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-text font-size="22px" font-weight="700" color="#161616" padding-bottom="5px" line-height="28px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Semaine du <%= data.date_debut %> au <%= data.date_fin %>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="20px 20px 15px" css-class="mobile-section-padding">
+        <mj-column width="50%" vertical-align="top" css-class="mobile-stack">
+          <mj-text font-size="14px" font-weight="600" color="#755348" padding-bottom="4px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-tag-center">
+            <span style="background-color: #FEE9E5; padding: 0 8px; border-radius: 4px; display: inline-block; line-height: 24px;">
+              <svg width="10" height="15" viewBox="0 0 10 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M5 14.3333C2.23857 14.3333 0 12.0947 0 9.33333C0 7.89747 0.60524 6.603 1.57453 5.69107C2.46935 4.84917 4.66667 3.33301 4.33333 0C8.33333 2.66667 10.3333 5.33333 6.33333 9.33333C7 9.33333 8 9.33333 9.66667 7.6864C9.84647 8.20213 10 8.75633 10 9.33333C10 12.0947 7.7614 14.3333 5 14.3333Z" fill="#755348"/>
+              </svg>
+              PRIORITÉ
+            </span>
+          </mj-text>
+          <mj-text font-size="18px" font-weight="700" color="#161616" align="left" padding="8px 0 0 25px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-center mobile-text-left-indent">
+            <span style="font-size: 24px"><%= data.effectifs_prioritaire %></span> dossier<%= data.effectifs_prioritaire > 1 ? 's' : '' %> prioritaire<%= data.effectifs_prioritaire > 1 ? 's' : '' %>
+          </mj-text>
+        </mj-column>
+        <mj-column width="50%" vertical-align="bottom" css-class="mobile-stack">
+          <% if (data.effectifs_prioritaire > 0) { %>
+          <mj-button
+            href="<%= utils.getPublicUrl(`/mission-locale`) %>"
+            background-color="#000091"
+            color="white"
+            font-size="16px"
+            font-weight="400"
+            line-height="24px"
+            font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+            inner-padding="8px 12px"
+            align="right"
+            text-align="center"
+            border-radius="0px"
+            css-class="desktop-btn"
+          >
+            Voir <%= data.effectifs_prioritaire === 1 ? 'le jeune' : `les ${data.effectifs_prioritaire} jeunes` %> →
+          </mj-button>
+          <% } %>
+        </mj-column>
+        </mj-column>
+        <mj-column width="100%">
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="20px 20px 0 20px" css-class="mobile-divider"></mj-divider>
+        </mj-column>
+      </mj-section>
+
+
+      <mj-section background-color="#ffffff" padding="10px 20px 15px" css-class="mobile-section-padding">
+        <mj-column width="50%" vertical-align="top" css-class="mobile-stack">
+          <mj-text font-size="14px" font-weight="700" color="#716043" padding-bottom="4px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-tag-center">
+            <span style="background-color: #FEECC2; padding: 0 8px; border-radius: 4px; display: inline-block; line-height: 24px;">
+              <svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M6.66406 6.66406H11.3307L5.33073 15.3307V9.33073H0.664062L6.66406 0.664062V6.66406Z" fill="#716043"/>
+              </svg>
+              À TRAITER
+            </span>
+          </mj-text>
+          <mj-text font-size="18px" font-weight="700" color="#161616" align="left" padding="8px 0 0 25px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-center mobile-text-left-indent">
+            <span style="font-size: 24px"><%= data.effectifs_a_traiter %></span> dossier<%= data.effectifs_a_traiter > 1 ? 's' : '' %> à traiter
+          </mj-text>
+        </mj-column>
+        <mj-column width="50%" vertical-align="bottom" css-class="mobile-stack">
+          <% if (data.effectifs_a_traiter > 0) { %>
+          <mj-button
+            href="<%= utils.getPublicUrl(`/mission-locale`) %>"
+            background-color="#000091"
+            color="white"
+            font-size="16px"
+            font-weight="500"
+            line-height="24px"
+            font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+            inner-padding="8px 12px"
+            align="right"
+            text-align="center"
+            border-radius="0px"
+            css-class="desktop-btn"
+          >
+            Voir <%= data.effectifs_a_traiter === 1 ? 'le jeune' : `les ${data.effectifs_a_traiter} jeunes` %> →
+          </mj-button>
+          <% } %>
+        </mj-column>
+        </mj-column>
+        <mj-column width="100%">
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="20px 20px 0 20px" css-class="mobile-divider"></mj-divider>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 20px 15px" css-class="mobile-section-padding">
+        <mj-column width="50%" vertical-align="top" css-class="mobile-stack">
+          <mj-text font-size="14px" font-weight="700" color="#417DC4" padding-bottom="4px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-tag-center">
+            <span style="background-color: #E5FBFD; padding: 0 8px; border-radius: 4px; display: inline-block; line-height: 24px;">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M12 8.94667V11.304C12.0001 11.4728 11.9361 11.6353 11.8211 11.7588C11.706 11.8823 11.5484 11.9575 11.38 11.9693C11.0887 11.9893 10.8507 12 10.6667 12C4.77533 12 0 7.22467 0 1.33333C0 1.14933 0.01 0.911334 0.0306667 0.62C0.0424816 0.451629 0.117721 0.294007 0.241202 0.178939C0.364684 0.0638712 0.527215 -7.62887e-05 0.696 1.71053e-07H3.05333C3.13603 -8.35563e-05 3.2158 0.0305727 3.27715 0.0860136C3.33851 0.141455 3.37706 0.217722 3.38533 0.3C3.40067 0.453334 3.41467 0.575333 3.428 0.668C3.56049 1.59262 3.832 2.49189 4.23333 3.33533C4.29667 3.46867 4.25533 3.628 4.13533 3.71333L2.69667 4.74133C3.5763 6.79097 5.2097 8.42436 7.25933 9.304L8.286 7.868C8.32796 7.80933 8.38919 7.76725 8.459 7.7491C8.52881 7.73095 8.60277 7.73787 8.668 7.76867C9.51135 8.16924 10.4104 8.44008 11.3347 8.572C11.4273 8.58533 11.5493 8.6 11.7013 8.61467C11.7835 8.62309 11.8596 8.66171 11.9149 8.72305C11.9702 8.78439 12.0008 8.86408 12.0007 8.94667H12Z" fill="#417DC4"/>
+              </svg>
+              À RECONTACTER
+            </span>
+          </mj-text>
+          <mj-text font-size="18px" font-weight="700" color="#161616"  align="left" padding="8px 0 0 25px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-center mobile-text-left-indent">
+            <span style="font-size: 24px"><%= data.effectifs_a_recontacter %></span> dossier<%= data.effectifs_a_recontacter > 1 ? 's' : '' %> à recontacter
+          </mj-text>
+        </mj-column>
+        <mj-column width="50%" vertical-align="bottom" css-class="mobile-stack">
+          <% if (data.effectifs_a_recontacter > 0) { %>
+          <mj-button
+            href="<%= utils.getPublicUrl(`/mission-locale?statut=a-recontacter`) %>"
+            background-color="#000091"
+            color="white"
+            font-size="16px"
+            font-weight="400"
+            line-height="24px"
+            font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+            inner-padding="8px 12px"
+            align="right"
+            text-align="center"
+            border-radius="0px"
+            css-class="desktop-btn"
+          >
+            Voir <%= data.effectifs_a_recontacter === 1 ? 'le jeune' : `les ${data.effectifs_a_recontacter} jeunes` %> →
+          </mj-button>
+          <% } %>
+        </mj-column>
+        <mj-column width="100%">
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="20px 20px 0 20px" css-class="mobile-divider"></mj-divider>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="15px 20px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-text font-size="20px" font-weight="700" color="#161616" padding-bottom="8px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Pourquoi vous recevez ce rapport ?
+          </mj-text>
+          <mj-text font-size="14px" font-weight="500" line-height="24px" padding-bottom="8px" color="#3A3A3A" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Ce rapport est généré automatiquement à partir de l'outil Tableau de Bord de l'apprentissage.
+          </mj-text>
+          <mj-text font-size="14px" font-weight="500" line-height="24px" padding-bottom="8px" color="#3A3A3A" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Votre Mission locale travaille avec cet outil dans le cadre de l'expérimentation de la collaboration entre Missions locales et CFA pour lutter contre les ruptures nettes que subissent de trop nombreux jeunes en apprentissages.
+          </mj-text>
+          <mj-text font-size="14px" font-weight="500" line-height="24px" padding-bottom="15px" color="#3A3A3A" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            L'objectif du Tableau de Bord est de mettre en relation tous les acteurs de l'apprentissage pour favoriser le suivi du jeune en rupture et améliorer ses chances de retrouver un contrat le plus rapidement possible.
+          </mj-text>
+          
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="10px 20px" css-class="mobile-divider"></mj-divider>
+          
+          <mj-text font-size="12px" font-weight="400" line-height="20px" padding-bottom="15px" color="#3A3A3A" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Ce courriel est généré automatiquement, vous ne pouvez pas y répondre. <br />Pour toute question écrivez-nous à <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091; text-decoration: none;">tableaudebord@apprentissage.beta.gouv.fr</a>
+          </mj-text>
+          
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="10px 20px" css-class="mobile-divider"></mj-divider>
+          
+          <mj-text font-size="12px" font-weight="700" line-height="20px" padding-bottom="15px" color="#3A3A3A" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif">
+            Ce service est développé par l'équipe du Tableau de bord de l'apprentissage conformément aux missions d'intérêt public du Ministère du Travail.
+          </mj-text>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>
