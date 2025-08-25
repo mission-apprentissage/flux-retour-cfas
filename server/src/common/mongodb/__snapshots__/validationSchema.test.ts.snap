@@ -9305,33 +9305,40 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       "bsonType": "string",
     },
     "computed": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "organisme": {
-          "anyOf": [
-            {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "ml_beta_activated_at": {
-                  "anyOf": [
-                    {
-                      "bsonType": "date",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "organisme": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "ml_beta_activated_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
                     },
-                    {
-                      "bsonType": "null",
-                    },
-                  ],
+                  },
                 },
-              },
+                {
+                  "bsonType": "null",
+                },
+              ],
             },
-            {
-              "bsonType": "null",
-            },
-          ],
+          },
         },
-      },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "created_at": {
       "bsonType": "date",
@@ -14504,7 +14511,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_snapshot",
     "brevo",
     "current_status",
-    "computed",
   ],
 }
 `;
