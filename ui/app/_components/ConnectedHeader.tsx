@@ -60,7 +60,7 @@ export function ConnectedHeader() {
         baseItems.push({
           text: "Paramètres",
           linkProps: {
-            href: "/parametres",
+            href: "/cfa/parametres",
             target: "_self",
           },
         });
