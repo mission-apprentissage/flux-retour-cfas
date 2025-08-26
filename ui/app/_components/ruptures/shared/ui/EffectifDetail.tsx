@@ -139,7 +139,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
           Retour à la liste
         </DsfrLink>
         {data && (
-          <div style={{ marginTop: "8rem" }}>
+          <div style={{ marginTop: "4rem" }}>
             {isMissionLocaleView ? (
               <EffectifParcoursMissionLocale effectif={data.effectif} />
             ) : (
