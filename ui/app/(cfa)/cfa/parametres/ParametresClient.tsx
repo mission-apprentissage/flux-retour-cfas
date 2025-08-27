@@ -103,7 +103,7 @@ export default function ParametresClient() {
                           {organisme.mode_de_transmission_configuration_author_fullname})
                         </p>
                       )}
-                      <DsfrLink href="/cfa/effectifs" className="fr-mt-2w fr-btn">
+                      <DsfrLink href="/cfa" className="fr-mt-2w">
                         Mes effectifs
                       </DsfrLink>
                     </>
