@@ -12,6 +12,7 @@ const UAI = "0802004U";
 const SIRET = "77937827200016";
 
 const ORGANISME_ID = new ObjectId();
+const ML_ID = new ObjectId();
 const ML_DATA = { ml_id: 609, nom: "MA MISSION LOCALE", type: "MISSION_LOCALE" as const };
 
 let EFFECTIF_ID: ObjectId;
@@ -24,7 +25,7 @@ describe("Mission Locale Routes", () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
     await organisationsDb().insertOne({
-      _id: new ObjectId(),
+      _id: ML_ID,
       created_at: new Date(),
       email: "",
       telephone: "",
@@ -89,6 +90,10 @@ describe("Mission Locale Routes", () => {
 
       await processEffectifsQueue();
 
+      await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
+        date: new Date("2025-01-01").toISOString(),
+        missionLocaleId: ML_ID.toString(),
+      });
       await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",
@@ -119,6 +124,11 @@ describe("Mission Locale Routes", () => {
 
   describe("CFA activé", async () => {
     beforeEach(async () => {
+      await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
+        date: new Date("2025-01-01").toISOString(),
+        missionLocaleId: ML_ID.toString(),
+      });
+
       await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",
