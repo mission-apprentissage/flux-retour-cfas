@@ -41,6 +41,7 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
@@ -460,6 +461,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-date-rupture": {
         handler: async () => {
           return hydrateMissionLocaleEffectifDateRupture();
+        },
+      },
+      "tmp:migration:ml-activation-date": {
+        handler: async () => {
+          return updateMissionLocaleEffectifActivationDate();
         },
       },
     },

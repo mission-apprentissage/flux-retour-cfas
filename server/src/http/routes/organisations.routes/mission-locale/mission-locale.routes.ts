@@ -58,7 +58,7 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
@@ -66,7 +66,7 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
@@ -85,33 +85,21 @@ const exportEffectifMissionLocale = async (req, res) => {
           dataArr.push({
             worksheetName: "À traiter",
             logsTag: "ml_a_traiter" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         case API_EFFECTIF_LISTE.TRAITE:
           dataArr.push({
             worksheetName: "Déjà traités",
             logsTag: "ml_traite" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         case API_EFFECTIF_LISTE.INJOIGNABLE:
           dataArr.push({
             worksheetName: "À recontacter",
             logsTag: "ml_injoignable" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         default:

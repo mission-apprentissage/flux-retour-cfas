@@ -155,12 +155,7 @@ const getMlStats = async ({ params, query }) => {
   const rqth_only = query.rqth_only === "true";
   const mineur_only = query.mineur_only === "true";
 
-  const ml = await getMissionsLocalesStatsAdminById(
-    organisationMl,
-    organisationMl.activated_at,
-    mineur_only,
-    rqth_only
-  );
+  const ml = await getMissionsLocalesStatsAdminById(organisationMl, mineur_only, rqth_only);
   return {
     ...organisationMl,
     stats: ml,
@@ -178,7 +173,7 @@ export const getEffectifsParMoisMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
 
-  return await getAllEffectifsParMois(missionLocale, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale);
 };
 
 const getEffectifMissionLocale = async (req) => {
@@ -191,7 +186,7 @@ const getEffectifMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${mlId}`);
   }
 
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
 };
 
 const updateMissionLocaleEffectif = async (req) => {
@@ -221,7 +216,7 @@ const getSyncBrevoContactInfo = async (req) => {
   if (!organisationMl) {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
-  return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl, organisationMl?.activated_at);
+  return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl);
 };
 
 const syncBrevoContactMissionLocale = async (req) => {
@@ -231,10 +226,7 @@ const syncBrevoContactMissionLocale = async (req) => {
     throw Boom.notFound(`No Mission Locale found for id: ${id}`);
   }
 
-  const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(
-    organisationMl,
-    organisationMl?.activated_at
-  );
+  const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(organisationMl);
   const listId = await getOrCreateBrevoList(organisationMl.ml_id, organisationMl?.nom, BREVO_LISTE_TYPE.MISSION_LOCALE);
 
   if (!listId) {

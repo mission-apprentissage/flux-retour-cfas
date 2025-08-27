@@ -305,3 +305,23 @@ export const hydrateMissionLocaleEffectifDateRupture = async () => {
 
   await processBatch(batch);
 };
+
+export const updateMissionLocaleEffectifActivationDate = async () => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+    activated_at: { $ne: null },
+  });
+
+  while (await cursor.hasNext()) {
+    const ml = (await cursor.next()) as IOrganisationMissionLocale;
+
+    await missionLocaleEffectifsDb().updateMany(
+      { mission_locale_id: ml._id },
+      {
+        $set: {
+          "computed.mission_locale.activated_at": ml.activated_at,
+        },
+      }
+    );
+  }
+};
