@@ -126,5 +126,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(requestNextData);
   }
 
+  if (pathname === "/parametres") {
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (session.organisation?.type !== "ORGANISME_FORMATION") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    if (session.organisation?.ml_beta_activated_at) {
+      const url = new URL("/cfa/parametres", request.url);
+
+      const originalUrl = new URL(request.url);
+      originalUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+      });
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next(requestNextData);
+  }
+
   return NextResponse.next(requestNextData);
 }
