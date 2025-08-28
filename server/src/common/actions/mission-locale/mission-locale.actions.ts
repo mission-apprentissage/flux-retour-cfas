@@ -1634,6 +1634,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
             },
+            ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
         },
       },

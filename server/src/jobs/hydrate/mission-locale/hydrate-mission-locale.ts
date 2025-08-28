@@ -104,7 +104,7 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
   }
 };
 
-export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLocaleId: ObjectId) => {
+export const updateEffectifMissionLocaleSnapshotAtMLActivation = async (missionLocaleId: ObjectId) => {
   const cursor = missionLocaleEffectifsDb().find({
     mission_locale_id: new ObjectId(missionLocaleId),
   });
@@ -133,7 +133,41 @@ export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLoc
     if (!upToDateEffectif || upToDateEffectif.length === 0) {
       continue;
     }
-    updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
+    await updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
+  }
+};
+
+export const updateEffectifMissionLocaleSnapshotAtOrganismeActivation = async (organismeId: ObjectId) => {
+  const cursor = missionLocaleEffectifsDb().find({
+    "effectif_snapshot.organisme_id": new ObjectId(organismeId),
+    "computed.mission_locale.activated_at": { $exists: false },
+  });
+
+  while (await cursor.hasNext()) {
+    const effML = await cursor.next();
+    if (!effML) {
+      continue;
+    }
+    const upToDateEffectif = (await effectifsDb()
+      .aggregate([
+        {
+          $unionWith: {
+            coll: "effectifsDECA",
+            pipeline: [{ $match: { _id: effML.effectif_id } }],
+          },
+        },
+        {
+          $match: {
+            _id: effML.effectif_id,
+          },
+        },
+      ])
+      .toArray()) as Array<IEffectif | IEffectifDECA>;
+
+    if (!upToDateEffectif || upToDateEffectif.length === 0) {
+      continue;
+    }
+    await updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
   }
 };
 

@@ -4,7 +4,10 @@ import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEf
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
+import {
+  updateEffectifMissionLocaleSnapshotAtMLActivation,
+  updateEffectifMissionLocaleSnapshotAtOrganismeActivation,
+} from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
@@ -55,7 +58,7 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
     }
   );
 
-  await updateEffectifMissionLocaleSnapshotAtActivation(missionLocaleId);
+  await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
   await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
 };
 
@@ -255,7 +258,7 @@ export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
       },
     }
   );
-
+  await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organisme_id);
   return organisation;
 };
 
