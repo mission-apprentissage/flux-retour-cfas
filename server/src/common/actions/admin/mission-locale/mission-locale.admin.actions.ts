@@ -259,6 +259,7 @@ export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
     }
   );
   await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organisme_id);
+  await updateMissionLocaleEffectifComputedOrganisme(date, organisme_id);
   return organisation;
 };
 

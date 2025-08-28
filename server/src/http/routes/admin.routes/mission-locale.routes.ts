@@ -20,7 +20,6 @@ import {
   getMlFromOrganisations,
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
-  updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 import {
@@ -252,6 +251,5 @@ export const activateOrganismeAtDate = async (req) => {
 
   for (const organisme of organismes) {
     await activateOrganisme(new Date(date), organisme._id);
-    await updateMissionLocaleEffectifComputedOrganisme(new Date(date), organisme._id);
   }
 };
