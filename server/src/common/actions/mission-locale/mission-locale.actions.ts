@@ -279,7 +279,14 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
       },
       {
-        $gte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+        $and: [
+          {
+            $gte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+          },
+          {
+            $gte: ["$computed.organisme.ml_beta_activated_at", "$computed.mission_locale.activated_at"],
+          },
+        ],
       },
       {
         $eq: ["$organisme_data.acc_conjoint", true],
@@ -294,6 +301,9 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       },
       {
         $lte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+      },
+      {
+        $lte: ["$computed.organisme.ml_beta_activated_at", "$computed.mission_locale.activated_at"],
       },
     ],
   };
