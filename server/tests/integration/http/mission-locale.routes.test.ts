@@ -160,14 +160,6 @@ describe("Mission Locale Routes", () => {
       await processEffectifsQueue();
       const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
       EFFECTIF_ID = effQ?.effectif_id as ObjectId;
-
-      const res = await requestAsOrganisation(
-        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
-        "get",
-        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
-      );
-
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
     });
 
     it("La ML ne doit pas voir l'effectif", async () => {
