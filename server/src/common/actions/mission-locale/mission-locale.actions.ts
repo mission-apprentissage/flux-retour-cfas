@@ -1626,6 +1626,8 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
 
     if (mongoInfo.lastErrorObject?.n > 0) {
       createOrUpdateMissionLocaleStats(mlData._id);
+      mongoInfo.lastErrorObject?.upserted &&
+        (await checkMissionLocaleEffectifDoublon(new ObjectId(mongoInfo.lastErrorObject.upserted), effectif._id));
     }
   }
 };
@@ -1707,4 +1709,20 @@ export const getMissionLocaleStat = async (
     };
   }
   return data;
+};
+
+export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, effectifId: ObjectId) => {
+  const results = await missionLocaleEffectifsDb().updateMany(
+    {
+      _id: { $ne: mlEffectifId },
+      effectif_id: effectifId,
+    },
+    {
+      $set: {
+        soft_deleted: true,
+      },
+    }
+  );
+
+  logger.info(`Soft deleted ${results.modifiedCount} duplicates for effectif ${effectifId}`);
 };

@@ -41,6 +41,7 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  softDeleteDoublonEffectifML,
   updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
@@ -466,6 +467,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-activation-date": {
         handler: async () => {
           return updateMissionLocaleEffectifActivationDate();
+        },
+      },
+      "tmp:migration:ml-duplication": {
+        handler: async () => {
+          return softDeleteDoublonEffectifML();
         },
       },
     },

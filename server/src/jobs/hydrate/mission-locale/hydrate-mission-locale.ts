@@ -8,6 +8,7 @@ import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions"
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
+  checkMissionLocaleEffectifDoublon,
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
   updateOrDeleteMissionLocaleSnapshot,
@@ -358,5 +359,35 @@ export const updateMissionLocaleEffectifActivationDate = async () => {
         },
       }
     );
+  }
+};
+
+export const softDeleteDoublonEffectifML = async () => {
+  const data = await missionLocaleEffectifsDb()
+    .aggregate([
+      {
+        $group: {
+          _id: "$effectif_id",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          count: { $gt: 1 },
+        },
+      },
+    ])
+    .toArray();
+
+  for (const doc of data) {
+    const mlEff = await missionLocaleEffectifsDb()
+      .find({ effectif_id: doc._id })
+      .sort({ created_at: -1 })
+      .limit(1)
+      .next();
+
+    if (mlEff) {
+      checkMissionLocaleEffectifDoublon(mlEff._id, doc._id);
+    }
   }
 };
