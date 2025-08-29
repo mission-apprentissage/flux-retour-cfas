@@ -284,12 +284,23 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
     ],
   };
 
+  const ORGANISME_CONDITION = {
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$situation", null] }, null],
+      },
+      {
+        $eq: ["$organisme_data.acc_conjoint", true],
+      },
+    ],
+  };
+
   const condition = () => {
     switch (visibility) {
       case "MISSION_LOCALE":
         return { $cond: [MISSION_LOCALE_CONDITION, true, false] };
       case "ORGANISME_FORMATION":
-        return true;
+        return { $cond: [ORGANISME_CONDITION, true, false] };
     }
   };
 
@@ -297,7 +308,9 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
   return [
     {
       $addFields: {
-        in_joint_organisme_range: condition(),
+        in_joint_organisme_range: {
+          ...condition(),
+        },
       },
     },
     {
