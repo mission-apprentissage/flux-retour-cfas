@@ -68,7 +68,7 @@ describe("Mission Locale Routes", () => {
   });
 
   describe("Envoi avant activation du CFA", () => {
-    it("La ML doit voir le nouvel effectif, le CFA ne doit pas la voir", async () => {
+    it("La ML doit voir le nouvel effectif, le CFA foit le voir aussi", async () => {
       const payload = createRandomRupturantDossierApprenantApiInputV3({
         annee_scolaire: "2025-2026",
         etablissement_formateur_uai: UAI,
@@ -110,15 +110,15 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
 
-      expect(res.data.a_traiter.reduce((acc: number, curr: any) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(res.data.a_traiter).toStrictEqual([]);
 
       const res2 = await requestAsOrganisation(
         { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
         "get",
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
-
-      expect(res2.data.a_traiter).toStrictEqual([]);
+      expect(res2.data.a_traiter.reduce((acc: number, curr: any) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      //expect(res2.data.a_traiter).toStrictEqual([]);
     });
   });
 
