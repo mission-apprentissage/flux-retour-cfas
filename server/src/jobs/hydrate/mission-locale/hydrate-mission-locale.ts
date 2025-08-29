@@ -141,6 +141,7 @@ export const updateEffectifMissionLocaleSnapshotAtMLActivation = async (missionL
 export const updateEffectifMissionLocaleSnapshotAtOrganismeActivation = async (organismeId: ObjectId) => {
   const cursor = missionLocaleEffectifsDb().find({
     "effectif_snapshot.organisme_id": new ObjectId(organismeId),
+    situation: { $exists: false },
   });
 
   while (await cursor.hasNext()) {
