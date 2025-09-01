@@ -4,11 +4,11 @@ export const isMissionLocaleUser = (userType: string): userType is "MISSION_LOCA
 
 export const formatContactTimeText = (daysSince: number): string => {
   if (daysSince === 0) {
-    return "aujourd'hui";
+    return "";
   } else if (daysSince === 1) {
-    return "il y a 1 jour";
+    return ", il y a 1 jour";
   } else {
-    return `il y a ${daysSince} jours`;
+    return `, il y a ${daysSince} jours`;
   }
 };
 
