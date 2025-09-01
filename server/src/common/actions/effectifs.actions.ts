@@ -180,6 +180,24 @@ export const withComputedFields = async <T extends WithoutId<IEffectif | IEffect
   };
 };
 
+export async function getEffectifByIdWithCollection(
+  effectifId: ObjectId
+): Promise<{ effectif: IEffectif | IEffectifDECA; collection: any } | null> {
+  let effectif: IEffectif | IEffectifDECA | null;
+
+  effectif = await effectifsDb().findOne({ _id: effectifId });
+  if (effectif) {
+    return { effectif, collection: effectifsDb };
+  }
+
+  effectif = await effectifsDECADb().findOne({ _id: effectifId });
+  if (effectif) {
+    return { effectif, collection: effectifsDECADb };
+  }
+
+  return null;
+}
+
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
   let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: effectifId });
 
