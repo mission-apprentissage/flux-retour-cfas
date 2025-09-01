@@ -30,7 +30,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
             <>
               {log.created_at && log.situation && (
                 <h3 className="fr-mb-2v" style={{ fontSize: "20px" }}>
-                  Retour / Action de la Mission Locale le {formatDate(log.created_at)},{" "}
+                  Retour / Action de la Mission Locale le {formatDate(log.created_at)}
                   {formatContactTimeText(calculateDaysSince(log.created_at))}
                 </h3>
               )}
@@ -125,7 +125,8 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
         {sortedLogs.map((log, index) => (
           <div key={index}>
             <h6 className="fr-mb-2v">
-              Le {formatDate(log.created_at)}, {formatContactTimeText(calculateDaysSince(log.created_at))}
+              Le {formatDate(log.created_at)}
+              {formatContactTimeText(calculateDaysSince(log.created_at))}
             </h6>
             {(() => {
               if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
