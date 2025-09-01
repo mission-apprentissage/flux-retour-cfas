@@ -25,8 +25,12 @@ import {
   hydrateAcademieInVoeux,
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
-import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
+import {
+  hydrateEffectifsComputedTypesGenerique,
+  hydratePreviousYearMissionLocaleEffectifStatut,
+} from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
+import { hydrateWeeklyEffectifStatut } from "./hydrate/effectifs/hydrate-effectifs-statut";
 import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
@@ -169,14 +173,8 @@ export async function setupJobProcessor() {
               cron_string: "0 5 * * 6",
               handler: async (signal) => {
                 const evaluationDate = new Date();
-                return hydrateEffectifsComputedTypesGenerique(
-                  {
-                    query: {
-                      annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
-                    },
-                  },
-                  signal
-                );
+                await hydrateWeeklyEffectifStatut(signal, evaluationDate);
+                await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
               },
               resumable: true,
             },
@@ -443,6 +441,12 @@ export async function setupJobProcessor() {
       },
       "hydrate:transmissions-all": {
         handler: hydrateAllTransmissions,
+      },
+      "hydrate:mission-locale-effectif-statut": {
+        handler: async () => {
+          const evaluationDate = new Date();
+          await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate);
+        },
       },
       "tmp:migrate:mission-locale-current-status": {
         handler: async () => {
