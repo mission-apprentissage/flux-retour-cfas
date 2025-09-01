@@ -87,7 +87,7 @@ const ConfirmationPage = () => {
           <>
             <Image src="/images/attente_validation_compte.png" maxW={300} alt="Demande en cours d'étude" />
             <Heading as="h2" fontSize="2xl" my={[3, 6]}>
-              Finalisation de votre inscription.
+              Votre compte est en attente de validation.
             </Heading>
             <Text textAlign="center">
               {validationByGestionnaire ? (
@@ -104,8 +104,8 @@ const ConfirmationPage = () => {
                 </>
               )}
               <br />
-              Vous serez notifié par courriel dès que votre demande aura été validée (n’oubliez pas de vérifier vos
-              spams).
+              Vous serez notifié(e) par email dès que votre demande aura été validée (n&apos;oubliez pas de vérifier vos
+              courriers indésirables).
             </Text>
           </>
         )}

@@ -17,12 +17,12 @@ const BravoPage = () => {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/advancedOutline.svg" alt="felicitation" />
         <Heading as="h2" fontSize="2xl" my={[3, 6]}>
-          Félicitations, vous venez de créer votre compte !
+          Vérifiez votre boite mail !
         </Heading>
         <Text textAlign="center">
-          Vous allez recevoir un courriel de confirmation à l&apos;adresse renseignée
+          Vous allez recevoir un email de confirmation vous permettant de valider votre compte
           <br />
-          (n&apos;oubliez pas de vérifier vos indésirables).
+          (n&apos;oubliez pas de vérifier vos courriers indésirables).
         </Text>
       </Center>
     </Page>
