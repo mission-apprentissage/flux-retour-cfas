@@ -20,7 +20,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
   if (!logs?.length) {
     return null;
   }
-  const sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
+  const sortedLogs = logs?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
 
   const organismeFormationLayout = () => {
     return (
