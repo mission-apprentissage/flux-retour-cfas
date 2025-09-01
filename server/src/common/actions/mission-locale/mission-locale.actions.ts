@@ -1286,7 +1286,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
           effectif_snapshot: { ...effectif, _id: effectif._id },
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
-          date_rupture: currentStatus?.date,
+          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
         },
       }
     );
