@@ -9310,6 +9310,29 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "additionalProperties": false,
           "bsonType": "object",
           "properties": {
+            "mission_locale": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "activated_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
             "organisme": {
               "anyOf": [
                 {

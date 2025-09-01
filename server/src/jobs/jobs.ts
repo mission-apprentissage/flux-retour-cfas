@@ -41,6 +41,8 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  softDeleteDoublonEffectifML,
+  updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
@@ -460,6 +462,16 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-date-rupture": {
         handler: async () => {
           return hydrateMissionLocaleEffectifDateRupture();
+        },
+      },
+      "tmp:migration:ml-activation-date": {
+        handler: async () => {
+          return updateMissionLocaleEffectifActivationDate();
+        },
+      },
+      "tmp:migration:ml-duplication": {
+        handler: async () => {
+          return softDeleteDoublonEffectifML();
         },
       },
     },

@@ -44,15 +44,10 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
 };
 
 export async function getAllEffectifsParMois(
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  activationDate?: Date
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) {
   const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(
-      organisation,
-      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
-      activationDate
-    );
+    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema);
 
   const [a_traiter, traite] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),

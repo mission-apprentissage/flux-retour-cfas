@@ -8,6 +8,7 @@ import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions"
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
+  checkMissionLocaleEffectifDoublon,
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
   updateOrDeleteMissionLocaleSnapshot,
@@ -104,9 +105,10 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
   }
 };
 
-export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLocaleId: ObjectId) => {
+export const updateEffectifMissionLocaleSnapshotAtMLActivation = async (missionLocaleId: ObjectId) => {
   const cursor = missionLocaleEffectifsDb().find({
     mission_locale_id: new ObjectId(missionLocaleId),
+    "computed.organisme.ml_beta_activated_at": { $exists: false },
   });
 
   while (await cursor.hasNext()) {
@@ -133,7 +135,41 @@ export const updateEffectifMissionLocaleSnapshotAtActivation = async (missionLoc
     if (!upToDateEffectif || upToDateEffectif.length === 0) {
       continue;
     }
-    updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
+    await updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
+  }
+};
+
+export const updateEffectifMissionLocaleSnapshotAtOrganismeActivation = async (organismeId: ObjectId) => {
+  const cursor = missionLocaleEffectifsDb().find({
+    "effectif_snapshot.organisme_id": new ObjectId(organismeId),
+    situation: { $exists: false },
+  });
+
+  while (await cursor.hasNext()) {
+    const effML = await cursor.next();
+    if (!effML) {
+      continue;
+    }
+    const upToDateEffectif = (await effectifsDb()
+      .aggregate([
+        {
+          $unionWith: {
+            coll: "effectifsDECA",
+            pipeline: [{ $match: { _id: effML.effectif_id } }],
+          },
+        },
+        {
+          $match: {
+            _id: effML.effectif_id,
+          },
+        },
+      ])
+      .toArray()) as Array<IEffectif | IEffectifDECA>;
+
+    if (!upToDateEffectif || upToDateEffectif.length === 0) {
+      continue;
+    }
+    await updateOrDeleteMissionLocaleSnapshot(upToDateEffectif[0]);
   }
 };
 
@@ -304,4 +340,54 @@ export const hydrateMissionLocaleEffectifDateRupture = async () => {
   }
 
   await processBatch(batch);
+};
+
+export const updateMissionLocaleEffectifActivationDate = async () => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+    activated_at: { $ne: null },
+  });
+
+  while (await cursor.hasNext()) {
+    const ml = (await cursor.next()) as IOrganisationMissionLocale;
+
+    await missionLocaleEffectifsDb().updateMany(
+      { mission_locale_id: ml._id },
+      {
+        $set: {
+          "computed.mission_locale.activated_at": ml.activated_at,
+        },
+      }
+    );
+  }
+};
+
+export const softDeleteDoublonEffectifML = async () => {
+  const data = await missionLocaleEffectifsDb()
+    .aggregate([
+      {
+        $group: {
+          _id: "$effectif_id",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          count: { $gt: 1 },
+        },
+      },
+    ])
+    .toArray();
+
+  for (const doc of data) {
+    const mlEff = await missionLocaleEffectifsDb()
+      .find({ effectif_id: doc._id })
+      .sort({ created_at: -1 })
+      .limit(1)
+      .next();
+
+    if (mlEff) {
+      checkMissionLocaleEffectifDoublon(mlEff._id, doc._id);
+    }
+  }
 };

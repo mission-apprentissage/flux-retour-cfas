@@ -129,6 +129,11 @@ const zMissionLocaleEffectif = z.object({
           ml_beta_activated_at: z.date().nullish(),
         })
         .nullish(),
+      mission_locale: z
+        .object({
+          activated_at: z.date().nullish(),
+        })
+        .nullish(),
     })
     .nullish(),
 });

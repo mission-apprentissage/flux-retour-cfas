@@ -240,24 +240,25 @@ const generateOrganisationMatchStage = (organisation: IOrganisationMissionLocale
   }
 };
 
-const addFieldFromActivationDate = (mlActivationDate?: Date) => {
-  let thresholdDate: Date | null = null;
-
-  if (!mlActivationDate) {
-    return [
-      {
-        $addFields: {
-          in_activation_range: true,
-        },
-      },
-    ];
-  }
-
-  thresholdDate = new Date(mlActivationDate);
-  thresholdDate.setDate(thresholdDate.getDate() - 180);
-
+const addFieldFromActivationDate = () => {
   const IN_ACTIVATION_RANGE_CONDITION = {
-    $gte: ["$date_rupture", thresholdDate],
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null],
+      },
+      {
+        $gte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: "$computed.mission_locale.activated_at",
+              unit: "day",
+              amount: 180,
+            },
+          },
+        ],
+      },
+    ],
   };
 
   return [
@@ -278,16 +279,20 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
       },
       {
-        $gte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
-      },
-      {
         $eq: ["$organisme_data.acc_conjoint", true],
       },
     ],
   };
 
   const ORGANISME_CONDITION = {
-    $lte: ["$computed.organisme.ml_beta_activated_at", "$created_at"],
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$situation", null] }, null],
+      },
+      {
+        $eq: ["$organisme_data.acc_conjoint", true],
+      },
+    ],
   };
 
   const condition = () => {
@@ -632,14 +637,13 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
-  nom_liste: API_EFFECTIF_LISTE,
-  missionLocaleActivationDate?: Date
+  nom_liste: API_EFFECTIF_LISTE
 ) => {
   const aggregation = [
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
     ...matchTraitementEffectifPipelineMl(nom_liste),
@@ -683,8 +687,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 
 export const getEffectifsParMoisByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
-  missionLocaleActivationDate?: Date
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
 
@@ -716,7 +719,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
   ];
 
@@ -830,8 +833,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 export const getEffectifFromMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: string,
-  nom_liste: API_EFFECTIF_LISTE,
-  missionLocaleActivationDate?: Date
+  nom_liste: API_EFFECTIF_LISTE
 ) => {
   const aggregation = [
     ...generateOrganisationMatchStage(organisation),
@@ -893,16 +895,14 @@ export const getEffectifFromMissionLocaleId = async (
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
     organisation,
     new ObjectId(effectifId),
-    nom_liste,
-    missionLocaleActivationDate
+    nom_liste
   );
   return { effectif, ...next };
 };
 
 export const getEffectifsListByMisisonLocaleId = (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
-  missionLocaleActivationDate?: Date
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
 
@@ -910,7 +910,7 @@ export const getEffectifsListByMisisonLocaleId = (
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
     ...matchTraitementEffectifPipelineMl(type),
@@ -1066,22 +1066,20 @@ export const getEffectifARisqueByMissionLocaleId = async (
 };
 
 const getEffectifMissionLocaleEligibleToBrevoAggregation = (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  missionLocaleActivationDate?: Date
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => [
   ...generateOrganisationMatchStage(organisation),
   ...EFF_MISSION_LOCALE_FILTER,
   ...filterByDernierStatutPipelineMl(),
-  ...addFieldFromActivationDate(missionLocaleActivationDate),
+  ...addFieldFromActivationDate(),
   ...filterByActivationDatePipelineMl(),
 ];
 
 export const getEffectifMissionLocaleEligibleToBrevoCount = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  missionLocaleActivationDate?: Date
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
 
     {
       $facet: {
@@ -1113,15 +1111,10 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
 };
 
 export async function getAllEffectifsParMois(
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  activationDate?: Date
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) {
   const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(
-      organisation,
-      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
-      activationDate
-    );
+    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema);
 
   const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
@@ -1136,11 +1129,10 @@ export async function getAllEffectifsParMois(
 // BAL
 
 export const getEffectifMissionLocaleEligibleToBrevo = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  missionLocaleActivationDate?: Date
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation, missionLocaleActivationDate),
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
     {
       $match: {
         soft_deleted: { $ne: true },
@@ -1298,8 +1290,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export const computeMissionLocaleStats = async (
-  missionLocale: IOrganisationMissionLocale,
-  missionLocaleActivationDate?: Date
+  missionLocale: IOrganisationMissionLocale
 ): Promise<IMissionLocaleStats["stats"]> => {
   const mineurCondition = {
     $gte: [
@@ -1313,7 +1304,7 @@ export const computeMissionLocaleStats = async (
     ...generateOrganisationMatchStage(missionLocale),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(missionLocale.type),
     {
@@ -1626,6 +1617,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
             },
+            ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
         },
       },
@@ -1634,13 +1626,14 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
 
     if (mongoInfo.lastErrorObject?.n > 0) {
       createOrUpdateMissionLocaleStats(mlData._id);
+      mongoInfo.lastErrorObject?.upserted &&
+        (await checkMissionLocaleEffectifDoublon(new ObjectId(mongoInfo.lastErrorObject.upserted), effectif._id));
     }
   }
 };
 
 export const getMissionLocaleStat = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  missionLocaleActivationDate?: Date,
   mineur?: boolean,
   rqth?: boolean
 ) => {
@@ -1673,7 +1666,7 @@ export const getMissionLocaleStat = async (
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(missionLocaleActivationDate),
+    ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
     {
@@ -1716,4 +1709,20 @@ export const getMissionLocaleStat = async (
     };
   }
   return data;
+};
+
+export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, effectifId: ObjectId) => {
+  const results = await missionLocaleEffectifsDb().updateMany(
+    {
+      _id: { $ne: mlEffectifId },
+      effectif_id: effectifId,
+    },
+    {
+      $set: {
+        soft_deleted: true,
+      },
+    }
+  );
+
+  logger.info(`Soft deleted ${results.modifiedCount} duplicates for effectif ${effectifId}`);
 };

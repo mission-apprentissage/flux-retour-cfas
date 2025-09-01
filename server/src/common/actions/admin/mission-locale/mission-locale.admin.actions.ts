@@ -4,7 +4,10 @@ import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEf
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
+import {
+  updateEffectifMissionLocaleSnapshotAtMLActivation,
+  updateEffectifMissionLocaleSnapshotAtOrganismeActivation,
+} from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
@@ -55,7 +58,8 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
     }
   );
 
-  await updateEffectifMissionLocaleSnapshotAtActivation(missionLocaleId);
+  await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
+  await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
@@ -231,11 +235,10 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
 
 export const getMissionsLocalesStatsAdminById = async (
   missionLocale: IOrganisationMissionLocale,
-  missionLocaleActivationDate?: Date,
   mineur?: boolean,
   rqth?: boolean
 ) => {
-  return getMissionLocaleStat(missionLocale, missionLocaleActivationDate, mineur, rqth);
+  return getMissionLocaleStat(missionLocale, mineur, rqth);
 };
 
 // CFA
@@ -255,7 +258,8 @@ export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
       },
     }
   );
-
+  await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organisme_id);
+  await updateMissionLocaleEffectifComputedOrganisme(date, organisme_id);
   return organisation;
 };
 
@@ -265,6 +269,17 @@ export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organis
     {
       $set: {
         "computed.organisme.ml_beta_activated_at": date,
+      },
+    }
+  );
+};
+
+export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { mission_locale_id: missionLocaleId },
+    {
+      $set: {
+        "computed.mission_locale.activated_at": date,
       },
     }
   );

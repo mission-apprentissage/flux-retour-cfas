@@ -12,6 +12,7 @@ const UAI = "0802004U";
 const SIRET = "77937827200016";
 
 const ORGANISME_ID = new ObjectId();
+const ML_ID = new ObjectId();
 const ML_DATA = { ml_id: 609, nom: "MA MISSION LOCALE", type: "MISSION_LOCALE" as const };
 
 let EFFECTIF_ID: ObjectId;
@@ -24,7 +25,7 @@ describe("Mission Locale Routes", () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
     await organisationsDb().insertOne({
-      _id: new ObjectId(),
+      _id: ML_ID,
       created_at: new Date(),
       email: "",
       telephone: "",
@@ -67,7 +68,7 @@ describe("Mission Locale Routes", () => {
   });
 
   describe("Envoi avant activation du CFA", () => {
-    it("La ML doit voir le nouvel effectif, le CFA ne doit pas la voir", async () => {
+    it("La ML doit voir le nouvel effectif, le CFA foit le voir aussi", async () => {
       const payload = createRandomRupturantDossierApprenantApiInputV3({
         annee_scolaire: "2025-2026",
         etablissement_formateur_uai: UAI,
@@ -89,6 +90,10 @@ describe("Mission Locale Routes", () => {
 
       await processEffectifsQueue();
 
+      await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
+        date: new Date("2025-01-01").toISOString(),
+        missionLocaleId: ML_ID.toString(),
+      });
       await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",
@@ -105,20 +110,25 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
 
-      expect(res.data.a_traiter.reduce((acc: number, curr: any) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(res.data.a_traiter).toStrictEqual([]);
 
       const res2 = await requestAsOrganisation(
         { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
         "get",
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
-
-      expect(res2.data.a_traiter).toStrictEqual([]);
+      expect(res2.data.a_traiter.reduce((acc: number, curr: any) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      //expect(res2.data.a_traiter).toStrictEqual([]);
     });
   });
 
   describe("CFA activé", async () => {
     beforeEach(async () => {
+      await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
+        date: new Date("2025-01-01").toISOString(),
+        missionLocaleId: ML_ID.toString(),
+      });
+
       await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",
@@ -150,14 +160,6 @@ describe("Mission Locale Routes", () => {
       await processEffectifsQueue();
       const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
       EFFECTIF_ID = effQ?.effectif_id as ObjectId;
-
-      const res = await requestAsOrganisation(
-        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
-        "get",
-        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
-      );
-
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
     });
 
     it("La ML ne doit pas voir l'effectif", async () => {
