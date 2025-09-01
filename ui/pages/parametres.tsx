@@ -46,6 +46,7 @@ const desiredOrder = [
   "scform",
   "fcamanager",
   "aimaira",
+  "ammon",
   "cactus",
   "myclic",
   "gescicca",
