@@ -279,7 +279,7 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
       },
       {
-        $ne: ["$situation", null],
+        $ne: [{ $ifNull: ["$situation", null] }, null],
       },
       {
         $eq: ["$organisme_data.acc_conjoint", true],

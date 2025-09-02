@@ -108,7 +108,10 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
 export const updateEffectifMissionLocaleSnapshotAtMLActivation = async (missionLocaleId: ObjectId) => {
   const cursor = missionLocaleEffectifsDb().find({
     mission_locale_id: new ObjectId(missionLocaleId),
-    "computed.organisme.ml_beta_activated_at": { $in: [null, { $exists: false }] },
+    $or: [
+      { "computed.organisme.ml_beta_activated_at": null },
+      { "computed.organisme.ml_beta_activated_at": { $exists: false } },
+    ],
   });
 
   while (await cursor.hasNext()) {
