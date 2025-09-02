@@ -151,14 +151,14 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
           <Tbody>
             {attributes.map((rowItem, index) => (
               <Tr key={index}>
-                <Td fontStyle="italic">
+                <Td fontStyle="italic" width="35%" whiteSpace="normal" wordBreak="break-word">
                   {rowItem.label}
                   {computeRequired(rowItem.value)}
                 </Td>
-                <Td>
+                <Td width="25%" whiteSpace="normal" wordBreak="break-word">
                   {rowItem.value} {computeRequired(rowItem.value)}
                 </Td>
-                <Td fontWeight="bold">
+                <Td fontWeight="bold" width="40%" whiteSpace="normal" wordBreak="break-word">
                   {validationErrorFormated[rowItem.value] ? <WarningTwoIcon color="#CE0500" mr={1} /> : null}
                   {effectifQueueItem[rowItem.value]}
                   {validationErrorFormated[rowItem.value] ? (
