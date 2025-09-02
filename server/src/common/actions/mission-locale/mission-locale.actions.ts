@@ -840,6 +840,7 @@ export const getEffectifFromMissionLocaleId = async (
     {
       $match: {
         "effectif_snapshot._id": new ObjectId(effectifId),
+        soft_deleted: { $ne: true },
       },
     },
     ...addFieldTraitementStatus(organisation.type),
