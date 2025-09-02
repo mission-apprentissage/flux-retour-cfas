@@ -279,6 +279,9 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
       },
       {
+        $ne: ["$situation", null],
+      },
+      {
         $eq: ["$organisme_data.acc_conjoint", true],
       },
     ],
@@ -661,7 +664,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
       },
     },
   ];
-
+  console.log(JSON.stringify(aggregation, null, 2));
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
@@ -999,6 +1002,7 @@ export const getEffectifsListByMisisonLocaleId = (
     },
   ];
 
+  console.log(JSON.stringify(effectifsMissionLocaleAggregation, null, 2));
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
