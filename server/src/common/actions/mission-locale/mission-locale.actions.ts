@@ -1272,7 +1272,10 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
 
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
-  const rupturantFilter = effectif._computed?.statut?.en_cours === "RUPTURANT";
+  const currentStatus =
+    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
   if (eff) {
     await missionLocaleEffectifsDb().updateOne(
@@ -1283,6 +1286,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
           effectif_snapshot: { ...effectif, _id: effectif._id },
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
+          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
         },
       }
     );
