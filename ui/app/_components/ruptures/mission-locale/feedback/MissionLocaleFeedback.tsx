@@ -46,9 +46,9 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                   );
                 }
 
-                const isSecondAttemptOrMore = index < sortedLogs.length - 1 && log.probleme_type;
+                const isSecondAttempt = index === 1 && log.probleme_type;
 
-                if (isSecondAttemptOrMore) {
+                if (isSecondAttempt) {
                   return (
                     <div className={styles.feedbackContainer}>
                       <p className="fr-mb-1v fr-mt-3v">
