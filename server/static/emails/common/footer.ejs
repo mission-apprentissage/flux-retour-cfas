@@ -1,29 +1,23 @@
 <mj-wrapper padding="10px 20px">
-    <mj-section padding-top="0">
-        <mj-column padding-top="0">
+  <mj-section padding-top="0">
+    <mj-column padding-top="0">
+      <mj-text align="center" font-size="12px" line-height="20px">
+        <a href="<%= utils.getPublicUrl(`/api/emails/${data.token}/preview`) %>" class="link-nostyle">
+          Voir cet email dans votre navigateur
+        </a>
+      </mj-text>
 
-            <mj-text align="center" font-size="12px" line-height="20px">
-                <a
-                        href="<%= utils.getPublicUrl(`/api/emails/${data.token}/preview`) %>"
-                        class="link-nostyle">
-                    Voir cet email dans votre navigateur
-                </a>
-            </mj-text>
-
-            <mj-text align="left" font-size="12px" line-height="20px">
-                Cet email a été envoyé à <%= to %>
-                <br/>
-                Vous avez reçu cet email suite à une action sur le tableau de bord de l'apprentissage.
-                <br/>
-                Pour vous désinscrire,
-                <a href="<%= utils.getPublicUrl(`/api/emails/${data.token}/unsubscribe`) %>" class="link-nostyle">cliquez
-                    ici</a>
-            </mj-text>
-            <mj-image
-                    width="1px"
-                    alt="Pixel"
-                    src="<%= utils.getPublicUrl(`/api/emails/${data.token}/markAsOpened`) %>"/>
-        </mj-column>
-    </mj-section>
+      <mj-text align="left" font-size="12px" line-height="20px">
+        Cet email a été envoyé à <%= to %>
+        <br />
+        Vous avez reçu cet email suite à une action sur le Tableau de bord de l'apprentissage.
+        <br />
+        Pour vous désinscrire,
+        <a href="<%= utils.getPublicUrl(`/api/emails/${data.token}/unsubscribe`) %>" class="link-nostyle"
+          >cliquez ici</a
+        >
+      </mj-text>
+      <mj-image width="1px" alt="Pixel" src="<%= utils.getPublicUrl(`/api/emails/${data.token}/markAsOpened`) %>" />
+    </mj-column>
+  </mj-section>
 </mj-wrapper>
-
