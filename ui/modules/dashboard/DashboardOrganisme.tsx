@@ -384,7 +384,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           siret: organisme.siret,
                           uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
                         });
-                        location.href = "/home";
+                        location.href = "/";
                       }}
                     >
                       Imposture

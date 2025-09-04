@@ -171,3 +171,20 @@ export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial
     contrat_date_fin,
   };
 };
+export const createRandomDossierApprenantApiInputV3WithFixedDates = (params?: Partial<IDossierApprenantSchemaV3>) => {
+  const dossier = createRandomDossierApprenantApiInputV3(params);
+  const [startYear] = dossier.annee_scolaire.split("-").map(Number);
+
+  // Set fixed dates
+  const contrat_date_debut = new Date(startYear, 7, 20); // August 20th
+  const contrat_date_rupture = new Date(startYear, 7, 25); // August 25th
+  const contrat_date_fin = new Date(startYear + 1, 5, 20); // June 20th of following year
+
+  return {
+    ...dossier,
+    date_fin_formation: max([dossier.date_fin_formation, contrat_date_fin]),
+    contrat_date_debut,
+    contrat_date_rupture,
+    contrat_date_fin,
+  };
+};

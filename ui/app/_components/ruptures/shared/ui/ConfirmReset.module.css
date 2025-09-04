@@ -1,0 +1,30 @@
+.modalContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalContainerWithMargin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.modalTitle {
+  margin: 0;
+  font-weight: bold;
+}
+
+.modalDescription {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.successText {
+  color: green;
+}
+
+.errorText {
+  color: red;
+}

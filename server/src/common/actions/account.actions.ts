@@ -44,6 +44,7 @@ export async function register(registration: RegistrationSchema): Promise<{
     if (!organisme) {
       throw Boom.badRequest("Aucun organisme trouvé");
     }
+    registrationExtraData.organisme_id = organisme._id.toString();
   }
 
   const organisation = await organisationsDb().findOne(orga);

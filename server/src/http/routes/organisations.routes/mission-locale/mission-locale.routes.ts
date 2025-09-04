@@ -35,10 +35,11 @@ export default () => {
   return router;
 };
 
-const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => {
-  const effectifId = params.id;
+const updateEffectifMissionLocaleData = async (req, { locals }) => {
+  const effectifId = req.params.id;
+  const user = req.user;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifApi);
+  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
@@ -48,7 +49,7 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
   }
-  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data);
+  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data, user);
 };
 
 const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
@@ -57,7 +58,7 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale._id, missionLocale.activated_at);
+  return await getAllEffectifsParMois(missionLocale);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
@@ -65,7 +66,7 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale._id, effectifId, nom_liste, missionLocale.activated_at);
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
@@ -84,33 +85,21 @@ const exportEffectifMissionLocale = async (req, res) => {
           dataArr.push({
             worksheetName: "À traiter",
             logsTag: "ml_a_traiter" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         case API_EFFECTIF_LISTE.TRAITE:
           dataArr.push({
             worksheetName: "Déjà traités",
             logsTag: "ml_traite" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         case API_EFFECTIF_LISTE.INJOIGNABLE:
           dataArr.push({
-            worksheetName: "Injoignable",
+            worksheetName: "À recontacter",
             logsTag: "ml_injoignable" as const,
-            data: (await getEffectifsListByMisisonLocaleId(
-              missionLocale._id,
-              { type },
-              missionLocale.activated_at
-            )) as Array<Record<string, string>>,
+            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
           });
           break;
         default:
@@ -173,6 +162,8 @@ const exportEffectifMissionLocale = async (req, res) => {
             return SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR;
           case "COORDONNEES_INCORRECT":
             return SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT;
+          case "INJOIGNABLE_APRES_RELANCES":
+            return SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES;
           case "AUTRE": {
             return SITUATION_LABEL_ENUM.AUTRE;
           }
@@ -187,6 +178,7 @@ const exportEffectifMissionLocale = async (req, res) => {
         SITUATION_LABEL_ENUM.DEJA_ACCOMPAGNE,
         SITUATION_LABEL_ENUM.CONTACTE_SANS_RETOUR,
         SITUATION_LABEL_ENUM.COORDONNEES_INCORRECT,
+        SITUATION_LABEL_ENUM.INJOIGNABLE_APRES_RELANCES,
         SITUATION_LABEL_ENUM.AUTRE,
       ],
     },
@@ -212,16 +204,18 @@ const exportEffectifMissionLocale = async (req, res) => {
   res.contentType("xlsx");
 
   const date = new Date();
-  worksheetsInfo.forEach(async ({ logsTag, data }) => {
-    await createTelechargementListeNomLog(
-      logsTag,
-      data.map(({ _id }) => _id.toString()),
-      date,
-      req.user?._id,
-      undefined,
-      missionLocale._id
-    );
-  });
+  await Promise.all(
+    worksheetsInfo.map(async ({ logsTag, data }) => {
+      return createTelechargementListeNomLog(
+        logsTag,
+        data.map(({ _id }) => _id.toString()),
+        date,
+        req.user?._id,
+        undefined,
+        missionLocale._id
+      );
+    })
+  );
 
   return templateFile?.xlsx.writeBuffer();
 };

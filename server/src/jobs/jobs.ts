@@ -14,6 +14,7 @@ import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
+import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
@@ -24,8 +25,12 @@ import {
   hydrateAcademieInVoeux,
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
-import { hydrateEffectifsComputedTypesGenerique } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
+import {
+  hydrateEffectifsComputedTypesGenerique,
+  hydratePreviousYearMissionLocaleEffectifStatut,
+} from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
+import { hydrateWeeklyEffectifStatut } from "./hydrate/effectifs/hydrate-effectifs-statut";
 import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
@@ -40,6 +45,8 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  softDeleteDoublonEffectifML,
+  updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
   updateMissionLocaleSnapshotFromLastStatus,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
@@ -59,6 +66,7 @@ import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
+import { updateOrganismeIdInOrganisations } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
@@ -153,18 +161,20 @@ export async function setupJobProcessor() {
               },
             },
 
+            "Send ML weekly recap at 14h30 on Mondays": {
+              cron_string: "30 14 * * 1",
+              handler: async () => {
+                await addJob({ name: "send-mission-locale-weekly-recap", queued: true });
+                return 0;
+              },
+            },
+
             "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
               cron_string: "0 5 * * 6",
               handler: async (signal) => {
                 const evaluationDate = new Date();
-                return hydrateEffectifsComputedTypesGenerique(
-                  {
-                    query: {
-                      annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
-                    },
-                  },
-                  signal
-                );
+                await hydrateWeeklyEffectifStatut(signal, evaluationDate);
+                await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
               },
               resumable: true,
             },
@@ -340,6 +350,11 @@ export async function setupJobProcessor() {
           return sendReminderEmails();
         },
       },
+      "send-mission-locale-weekly-recap": {
+        handler: async () => {
+          return sendMissionLocaleWeeklyRecap();
+        },
+      },
       "process:effectifs-queue:remove-duplicates": {
         handler: async () => {
           return removeDuplicatesEffectifsQueue();
@@ -427,6 +442,12 @@ export async function setupJobProcessor() {
       "hydrate:transmissions-all": {
         handler: hydrateAllTransmissions,
       },
+      "hydrate:mission-locale-effectif-statut": {
+        handler: async () => {
+          const evaluationDate = new Date();
+          await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate);
+        },
+      },
       "tmp:migrate:mission-locale-current-status": {
         handler: async () => {
           return updateMissionLocaleEffectifCurrentStatus();
@@ -437,9 +458,24 @@ export async function setupJobProcessor() {
           return forceHydrateAllTransmissions();
         },
       },
+      "tmp:migration:organisation-organisme": {
+        handler: async () => {
+          return updateOrganismeIdInOrganisations();
+        },
+      },
       "tmp:migration:ml-date-rupture": {
         handler: async () => {
           return hydrateMissionLocaleEffectifDateRupture();
+        },
+      },
+      "tmp:migration:ml-activation-date": {
+        handler: async () => {
+          return updateMissionLocaleEffectifActivationDate();
+        },
+      },
+      "tmp:migration:ml-duplication": {
+        handler: async () => {
+          return softDeleteDoublonEffectifML();
         },
       },
     },

@@ -90,6 +90,9 @@ export const plausibleGoals = [
   // Mission locale
   "telechargement_mission_locale_liste",
   "reporting_mission_locale_effectif",
+
+  // cfa
+  "reporting_cfa_effectif",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];

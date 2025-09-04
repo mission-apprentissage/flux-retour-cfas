@@ -17,6 +17,7 @@ export enum SITUATION_ENUM {
   DEJA_ACCOMPAGNE = "DEJA_ACCOMPAGNE",
   CONTACTE_SANS_RETOUR = "CONTACTE_SANS_RETOUR",
   COORDONNEES_INCORRECT = "COORDONNEES_INCORRECT",
+  INJOIGNABLE_APRES_RELANCES = "INJOIGNABLE_APRES_RELANCES",
   AUTRE = "AUTRE",
 }
 
@@ -30,7 +31,25 @@ export enum SITUATION_LABEL_ENUM {
   DEJA_ACCOMPAGNE = "Déjà accompagné par la Mission Locale et/ou un partenaire",
   CONTACTE_SANS_RETOUR = "Contacté mais sans réponse",
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
+  INJOIGNABLE_APRES_RELANCES = "Injoignable après plusieurs tentatives",
   AUTRE = "Autre situation / retour",
+}
+
+export enum PROBLEME_TYPE_ENUM {
+  COORDONNEES_INCORRECTES = "coordonnees_incorrectes",
+  JEUNE_INJOIGNABLE = "jeune_injoignable",
+  AUTRE = "autre",
+}
+
+export enum ACC_CONJOINT_MOTIF_ENUM {
+  MOBILITE = "MOBILITE",
+  LOGEMENT = "LOGEMENT",
+  SANTE = "SANTE",
+  FINANCE = "FINANCE",
+  ADMINISTRATIF = "ADMINISTRATIF",
+  REORIENTATION = "REORIENTATION",
+  RECHERCHE_EMPLOI = "RECHERCHE_EMPLOI",
+  AUTRE = "AUTRE",
 }
 
 export enum API_EFFECTIF_LISTE {
@@ -41,6 +60,8 @@ export enum API_EFFECTIF_LISTE {
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
+export const zProblemeTypeEnum = z.nativeEnum(PROBLEME_TYPE_ENUM);
+export const zAccConjointMotifEnum = z.nativeEnum(ACC_CONJOINT_MOTIF_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
 export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
@@ -58,9 +79,22 @@ const zMissionLocaleEffectif = z.object({
   updated_at: z.date().optional(),
   deja_connu: z.boolean().nullish(),
   commentaires: z.string().optional(),
+  probleme_type: zProblemeTypeEnum.nullish(),
+  probleme_detail: z.string().nullish(),
   effectif_snapshot: zEffectif.or(zEffectifDECA),
   effectif_snapshot_date: z.date().optional(),
   email_status: zEmailStatusEnum.nullish(),
+  organisme_data: z
+    .object({
+      rupture: z.boolean({ description: "Indique si l'effectif est signalé en rupture par le CFA" }).nullish(),
+      acc_conjoint: z
+        .boolean({ description: "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif" })
+        .nullish(),
+      motif: z.array(zAccConjointMotifEnum).nullish(),
+      commentaires: z.string().nullish(),
+      reponse_at: z.date({ description: "Date de réponse au formulaire par le CFA" }).nullish(),
+    })
+    .nullish(),
   effectif_choice: z
     .object({
       confirmation: z.boolean().nullish(),
@@ -88,6 +122,20 @@ const zMissionLocaleEffectif = z.object({
     value: zStatutApprenantEnum.nullish(),
     date: z.date().nullish(),
   }),
+  computed: z
+    .object({
+      organisme: z
+        .object({
+          ml_beta_activated_at: z.date().nullish(),
+        })
+        .nullish(),
+      mission_locale: z
+        .object({
+          activated_at: z.date().nullish(),
+        })
+        .nullish(),
+    })
+    .nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

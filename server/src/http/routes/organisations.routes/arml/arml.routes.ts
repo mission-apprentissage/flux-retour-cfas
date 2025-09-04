@@ -50,7 +50,7 @@ const getMissionLocale = async ({ params, query }, { locals }) => {
   const rqth_only = query.rqth_only === "true";
   const mineur_only = query.mineur_only === "true";
 
-  const mlStat = await getMissionLocaleStat(organisationMl._id, organisationMl.activated_at, mineur_only, rqth_only);
+  const mlStat = await getMissionLocaleStat(organisationMl, mineur_only, rqth_only);
 
   return {
     ...organisationMl,
@@ -126,7 +126,7 @@ const exportMissionLocalesData = async (req, res) => {
       id: "total",
     },
     {
-      name: "A traiter",
+      name: "À traiter",
       id: "a_traiter",
     },
     {
