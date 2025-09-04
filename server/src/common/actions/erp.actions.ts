@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { erpDb } from "../model/collections";
 import { slugify } from "../utils/stringUtils";
 
-export const createERP = async (name: string) => {
+export const createERP = async (name: string, helpFilePath = null) => {
   const uniqueId = slugify(name);
 
   return erpDb().insertOne({
@@ -13,6 +13,7 @@ export const createERP = async (name: string) => {
     created_at: new Date(),
     apiV3: true,
     unique_id: uniqueId,
+    helpFilePath,
   });
 };
 
