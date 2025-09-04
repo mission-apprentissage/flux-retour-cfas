@@ -14,32 +14,12 @@ import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-l
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
-export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
-  const ml = await organisationsDb()
-    .aggregate([
-      {
-        $match: {
-          type: "MISSION_LOCALE",
-          _id: missionLocaleId,
-        },
-      },
-      {
-        $lookup: {
-          from: "usersMigration",
-          localField: "_id",
-          foreignField: "organisation_id",
-          as: "users",
-        },
-      },
-      {
-        $match: {
-          "users.0": {
-            $exists: false,
-          },
-        },
-      },
-    ])
-    .next();
+export const activateMissionLocaleAtAdminValidation = async (missionLocaleId: ObjectId, date: Date) => {
+  const ml = await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    _id: missionLocaleId,
+    activated_at: { $exists: false },
+  });
 
   if (!ml) {
     return;

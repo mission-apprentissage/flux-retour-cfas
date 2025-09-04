@@ -87,6 +87,44 @@ describe("Routes users", () => {
 
       expectForbiddenError(response);
     });
+
+    it("Active une Mission Locale lors de la validation admin du premier utilisateur", async () => {
+      await createMissionLocale(false);
+
+      await createUserWithStatus("PENDING_ADMIN_VALIDATION", id(2));
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "put",
+        `/api/v1/admin/users/${id(1)}/validate`
+      );
+
+      expect(response.status).toStrictEqual(200);
+      expect(response.data).toStrictEqual({
+        message: "success",
+      });
+
+      const ml = await organisationsDb().findOne({ _id: new ObjectId(id(2)), type: "MISSION_LOCALE" });
+      expect((ml as any)?.activated_at).toBeDefined();
+    });
+
+    it("N'active pas une Mission Locale déjà activée", async () => {
+      await createMissionLocale(true);
+      const mlBefore = await organisationsDb().findOne({ _id: new ObjectId(id(2)), type: "MISSION_LOCALE" });
+
+      await createUserWithStatus("PENDING_ADMIN_VALIDATION", id(2));
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "put",
+        `/api/v1/admin/users/${id(1)}/validate`
+      );
+
+      expect(response.status).toStrictEqual(200);
+
+      const mlAfter = await organisationsDb().findOne({ _id: new ObjectId(id(2)), type: "MISSION_LOCALE" });
+      expect((mlAfter as any)?.activated_at).toEqual((mlBefore as any)?.activated_at);
+    });
   });
 
   describe("PUT /api/v1/admin/users/:id/reject - rejet d'un compte", () => {
@@ -143,7 +181,18 @@ describe("Routes users", () => {
   });
 });
 
-async function createUserWithStatus(accountStatus: IUsersMigration["account_status"]) {
+async function createMissionLocale(hasActivatedAt = false) {
+  await organisationsDb().insertOne({
+    _id: new ObjectId(id(2)),
+    type: "MISSION_LOCALE",
+    nom: "Mission Locale Test",
+    ml_id: 123,
+    created_at: new Date(),
+    ...(hasActivatedAt && { activated_at: new Date() }),
+  });
+}
+
+async function createUserWithStatus(accountStatus: IUsersMigration["account_status"], organisationId?: string) {
   await usersMigrationDb().insertOne({
     _id: new ObjectId(id(1)),
     account_status: accountStatus,
@@ -159,6 +208,6 @@ async function createUserWithStatus(accountStatus: IUsersMigration["account_stat
     telephone: "",
     password: testPasswordHash,
     has_accept_cgu_version: "v0.1",
-    organisation_id: new ObjectId(id(1)),
+    organisation_id: new ObjectId(organisationId || id(1)),
   });
 }
