@@ -45,6 +45,13 @@ export const useVirtualizedPagination = (
         const aValue = a.rawData?.[sort.id] ?? a.element?.[sort.id];
         const bValue = b.rawData?.[sort.id] ?? b.element?.[sort.id];
 
+        if (sort.id.includes("_at") || sort.id.includes("date")) {
+          const aDate = new Date(aValue).getTime();
+          const bDate = new Date(bValue).getTime();
+
+          return sort.desc ? bDate - aDate : aDate - bDate;
+        }
+
         const aNum = typeof aValue === "number" ? aValue : parseFloat(String(aValue));
         const bNum = typeof bValue === "number" ? bValue : parseFloat(String(bValue));
 

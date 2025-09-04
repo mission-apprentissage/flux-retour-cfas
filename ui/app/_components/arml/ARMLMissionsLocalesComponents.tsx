@@ -147,7 +147,7 @@ export const TableauMissionLocale = ({ data, searchTerm, customNavigationPath, s
       coordonnees_incorrectes: stats.coordonnees_incorrectes,
       autre: stats.autre,
       total: stats.total,
-      activated_at,
+      activated_at: activated_at || "1970-01-01T00:00:00.000Z", // permet de gérer le tri si mission locale pas activé
     };
 
     const displayData = {
