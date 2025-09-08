@@ -12,6 +12,8 @@ const logger = parentLogger.child({
 });
 
 export async function sendMissionLocaleWeeklyRecap() {
+  logger.info("Mission locale weekly recap email disabled, exiting job");
+  return;
   logger.info("Starting mission locale weekly recap email job");
 
   const missionsLocales = (await organisationsDb()
