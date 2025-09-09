@@ -15,6 +15,7 @@ import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 // import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
+import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
@@ -352,8 +353,7 @@ export async function setupJobProcessor() {
       },
       "send-mission-locale-weekly-recap": {
         handler: async () => {
-          return null;
-          //return sendMissionLocaleWeeklyRecap();
+          return sendMissionLocaleWeeklyRecap();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
