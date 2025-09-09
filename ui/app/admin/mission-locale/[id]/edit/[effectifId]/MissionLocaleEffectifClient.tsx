@@ -102,7 +102,7 @@ export default function MissionLocaleEffectifClient() {
           py: { xs: 2, md: 2 },
         }}
       >
-        <DsfrLink href={`/admin/mission-locale/${id}`} arrow="left">
+        <DsfrLink href={`/admin/mission-locale/${id}/edit`} arrow="left">
           Retour à la liste
         </DsfrLink>
       </Grid2>
