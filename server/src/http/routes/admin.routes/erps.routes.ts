@@ -12,7 +12,7 @@ export default () => {
   router.post(
     "/",
     validateRequestMiddleware({
-      body: z.object({ name: z.string() }),
+      body: z.object({ name: z.string(), helpFilePath: z.string().optional() }),
     }),
     returnResult(addERP)
   );
@@ -29,8 +29,8 @@ export default () => {
 };
 
 const addERP = ({ body }) => {
-  const { name } = body;
-  return createERP(name);
+  const { name, helpFilePath } = body;
+  return createERP(name, helpFilePath);
 };
 
 const deleteERP = ({ params }) => {
