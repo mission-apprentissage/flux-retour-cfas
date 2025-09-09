@@ -15,7 +15,6 @@ import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
 
-import { activateMissionLocaleAtFirstInvitation } from "./admin/mission-locale/mission-locale.admin.actions.js";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
@@ -55,9 +54,6 @@ export async function register(registration: RegistrationSchema): Promise<{
         ...registrationExtraData,
       });
 
-  if (orga.type === "MISSION_LOCALE") {
-    await activateMissionLocaleAtFirstInvitation(organisationId, new Date());
-  }
   const userId = await createUser(registration.user, organisationId);
 
   // si l'utilisateur est invité, alors on juge son email comme validé et ses permissions valides

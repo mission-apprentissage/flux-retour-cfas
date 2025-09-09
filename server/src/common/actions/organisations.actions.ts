@@ -25,6 +25,7 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
+import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
@@ -218,6 +219,10 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   );
 
   const userOrganisation = await getOrganisationById(user.organisation_id);
+
+  if (userOrganisation.type === "MISSION_LOCALE") {
+    await activateMissionLocaleAtAdminValidation(user.organisation_id, new Date());
+  }
 
   await sendEmail(
     user.email,
