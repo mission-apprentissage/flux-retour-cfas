@@ -4,38 +4,22 @@ import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEf
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { updateEffectifMissionLocaleSnapshotAtActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
+import {
+  updateEffectifMissionLocaleSnapshotAtMLActivation,
+  updateEffectifMissionLocaleSnapshotAtOrganismeActivation,
+} from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
+import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
-export const activateMissionLocaleAtFirstInvitation = async (missionLocaleId: ObjectId, date: Date) => {
-  const ml = await organisationsDb()
-    .aggregate([
-      {
-        $match: {
-          type: "MISSION_LOCALE",
-          _id: missionLocaleId,
-        },
-      },
-      {
-        $lookup: {
-          from: "usersMigration",
-          localField: "_id",
-          foreignField: "organisation_id",
-          as: "users",
-        },
-      },
-      {
-        $match: {
-          "users.0": {
-            $exists: false,
-          },
-        },
-      },
-    ])
-    .next();
+export const activateMissionLocaleAtAdminValidation = async (missionLocaleId: ObjectId, date: Date) => {
+  const ml = await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    _id: missionLocaleId,
+    activated_at: { $exists: false },
+  });
 
   if (!ml) {
     return;
@@ -54,7 +38,8 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
     }
   );
 
-  await updateEffectifMissionLocaleSnapshotAtActivation(missionLocaleId);
+  await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
+  await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
@@ -229,10 +214,53 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
 };
 
 export const getMissionsLocalesStatsAdminById = async (
-  missionLocaleId: ObjectId,
-  missionLocaleActivationDate?: Date,
+  missionLocale: IOrganisationMissionLocale,
   mineur?: boolean,
   rqth?: boolean
 ) => {
-  return getMissionLocaleStat(missionLocaleId, missionLocaleActivationDate, mineur, rqth);
+  return getMissionLocaleStat(missionLocale, mineur, rqth);
+};
+
+// CFA
+
+export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
+  const organisation = await getOrganisationOrganismeByOrganismeId(organisme_id);
+
+  if (!organisation) {
+    throw Boom.notFound(`No organisation found for id: ${organisme_id}`);
+  }
+
+  await organisationsDb().updateOne(
+    { _id: organisation._id, type: "ORGANISME_FORMATION" },
+    {
+      $set: {
+        ml_beta_activated_at: date,
+      },
+    }
+  );
+  await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organisme_id);
+  await updateMissionLocaleEffectifComputedOrganisme(date, organisme_id);
+  return organisation;
+};
+
+export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organismeId: ObjectId) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    {
+      $set: {
+        "computed.organisme.ml_beta_activated_at": date,
+      },
+    }
+  );
+};
+
+export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { mission_locale_id: missionLocaleId },
+    {
+      $set: {
+        "computed.mission_locale.activated_at": date,
+      },
+    }
+  );
 };

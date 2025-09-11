@@ -9304,6 +9304,65 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "commentaires": {
       "bsonType": "string",
     },
+    "computed": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "mission_locale": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "activated_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "organisme": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "ml_beta_activated_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "created_at": {
       "bsonType": "date",
     },
@@ -14343,6 +14402,95 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "mission_locale_id": {
       "bsonType": "objectId",
     },
+    "organisme_data": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "acc_conjoint": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif",
+            },
+            "commentaires": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "motif": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "enum": [
+                      "MOBILITE",
+                      "LOGEMENT",
+                      "SANTE",
+                      "FINANCE",
+                      "ADMINISTRATIF",
+                      "REORIENTATION",
+                      "RECHERCHE_EMPLOI",
+                      "AUTRE",
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "reponse_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                  "description": "Date de réponse au formulaire par le CFA",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de réponse au formulaire par le CFA",
+            },
+            "rupture": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Indique si l'effectif est signalé en rupture par le CFA",
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "probleme_detail": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "probleme_type": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "coordonnees_incorrectes",
+            "jeune_injoignable",
+            "autre",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "situation": {
       "anyOf": [
         {
@@ -14353,6 +14501,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "DEJA_ACCOMPAGNE",
             "CONTACTE_SANS_RETOUR",
             "COORDONNEES_INCORRECT",
+            "INJOIGNABLE_APRES_RELANCES",
             "AUTRE",
           ],
         },
@@ -14426,6 +14575,27 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "mission_locale_effectif_id": {
       "bsonType": "objectId",
     },
+    "probleme_detail": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "probleme_type": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "coordonnees_incorrectes",
+            "jeune_injoignable",
+            "autre",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "situation": {
       "anyOf": [
         {
@@ -14436,6 +14606,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "DEJA_ACCOMPAGNE",
             "CONTACTE_SANS_RETOUR",
             "COORDONNEES_INCORRECT",
+            "INJOIGNABLE_APRES_RELANCES",
             "AUTRE",
           ],
         },
@@ -15059,8 +15230,15 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "ml_beta_activated_at": {
+          "bsonType": "date",
+          "description": "Date d'activation de la feature mission locale",
+        },
         "organisme_id": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Identifiant de l'organisme",
         },
         "siret": {

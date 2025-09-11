@@ -8,6 +8,7 @@ import {
   IOrganisation,
   IOrganisationMissionLocale,
   IOrganisationARML,
+  IOrganisationOrganismeFormation,
 } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -24,15 +25,42 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
+import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
 
 export async function createOrganisation(organisation: IOrganisationCreate): Promise<ObjectId> {
+  const formatOrganisme = async (organisation) => {
+    const organisme = await organismesDb().findOne({
+      siret: organisation.siret,
+      ...(organisation.uai ? { uai: organisation.uai } : {}),
+    });
+
+    return {
+      ...organisation,
+      organisme_id: organisme?._id.toString(),
+    } as IOrganisationOrganismeFormation;
+  };
+
+  const formatDetaultOrganisation = (organisation: IOrganisationCreate) => {
+    return organisation;
+  };
+
+  let data: IOrganisationCreate | null = null;
+
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION":
+      data = await formatOrganisme(organisation);
+      break;
+    default:
+      data = formatDetaultOrganisation(organisation);
+  }
+
   const { insertedId } = await organisationsDb().insertOne({
     _id: new ObjectId(),
     created_at: getCurrentTime(),
-    ...organisation,
+    ...data,
   });
   return insertedId;
 }
@@ -192,6 +220,10 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
 
   const userOrganisation = await getOrganisationById(user.organisation_id);
 
+  if (userOrganisation.type === "MISSION_LOCALE") {
+    await activateMissionLocaleAtAdminValidation(user.organisation_id, new Date());
+  }
+
   await sendEmail(
     user.email,
     userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
@@ -284,6 +316,38 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
     },
   };
 }
+
+export const getOrganisationOrganismeByOrganismeId = async (
+  organismeId: ObjectId
+): Promise<WithId<IOrganisationOrganismeFormation> | null> => {
+  const found = await organisationsDb().findOne({
+    organisme_id: organismeId.toString(),
+    type: "ORGANISME_FORMATION",
+  });
+
+  if (!found) {
+    const organisme = await organismesDb().findOne({
+      _id: organismeId,
+    });
+
+    if (!organisme?.siret) {
+      return null;
+    }
+
+    const id = await createOrganisation({
+      type: "ORGANISME_FORMATION",
+      uai: organisme?.uai ?? null,
+      siret: organisme.siret ?? null,
+    });
+
+    return organisationsDb().findOne({
+      _id: id,
+      type: "ORGANISME_FORMATION",
+    }) as Promise<WithId<IOrganisationOrganismeFormation>>;
+  }
+
+  return found as WithId<IOrganisationOrganismeFormation>;
+};
 
 export async function getInvitationByToken(token: string): Promise<any> {
   const invitation = await invitationsDb().findOne({
