@@ -112,7 +112,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const params = useParams();
   const pathname = usePathname();
   const mlId = params?.id as string | undefined;
-  const label = monthItem.month === "plus-de-6-mois" ? "+ de 6 mois" : formatMonthAndYear(monthItem.month);
+  const label = monthItem.month === "plus-de-180-j" ? "+ de 180j" : formatMonthAndYear(monthItem.month);
   const anchorId = anchorFromLabel(label);
 
   function getColumns(listType: API_EFFECTIF_LISTE): ColumnData[] {
