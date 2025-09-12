@@ -14,7 +14,6 @@ import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
-// import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
