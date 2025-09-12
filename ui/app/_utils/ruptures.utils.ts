@@ -22,9 +22,9 @@ export const getTotalEffectifs = (data: MonthItem[]): number => {
   return data.reduce((acc, item) => acc + item.data.length, 0);
 };
 
-export function groupMonthsOlderThanSixMonths(items: MonthItem[]): MonthItem[] {
+export function groupMonthsOlderThan180Days(items: MonthItem[]): MonthItem[] {
   const now = new Date();
-  const cutoff = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  const cutoff = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
   const recent: MonthItem[] = [];
   const older: MonthItem[] = [];
 
@@ -43,7 +43,7 @@ export function groupMonthsOlderThanSixMonths(items: MonthItem[]): MonthItem[] {
   const result = sortDataByMonthDescending(recent);
   if (combinedOlderData.length > 0) {
     result.push({
-      month: "plus-de-6-mois",
+      month: "plus-de-180-j",
       treated_count: combinedOlderTreated,
       data: combinedOlderData,
     });
