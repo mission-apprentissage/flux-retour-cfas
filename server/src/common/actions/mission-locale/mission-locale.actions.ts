@@ -637,18 +637,26 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
   return contacts;
 }
 
-const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  effectifId: ObjectId,
-  nom_liste: API_EFFECTIF_LISTE
+export const missionLocaleBaseAggregation = (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
-  const aggregation = [
+  return [
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
+  ];
+};
+
+const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifId: ObjectId,
+  nom_liste: API_EFFECTIF_LISTE
+) => {
+  const aggregation = [
+    ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(nom_liste),
     {
       $sort: {
@@ -911,12 +919,7 @@ export const getEffectifsListByMisisonLocaleId = (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
     {
@@ -1299,7 +1302,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export const computeMissionLocaleStats = async (
-  missionLocale: IOrganisationMissionLocale
+  organisation: IOrganisationMissionLocale
 ): Promise<IMissionLocaleStats["stats"]> => {
   const mineurCondition = {
     $gte: [
@@ -1310,12 +1313,7 @@ export const computeMissionLocaleStats = async (
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(missionLocale),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(missionLocale.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $group: {
         _id: null,
@@ -1672,12 +1670,7 @@ export const getMissionLocaleStat = async (
   };
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $group: {
         _id: null,
