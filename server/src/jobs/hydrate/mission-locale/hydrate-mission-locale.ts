@@ -4,6 +4,7 @@ import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
+import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
@@ -392,5 +393,19 @@ export const softDeleteDoublonEffectifML = async () => {
     if (mlEff) {
       checkMissionLocaleEffectifDoublon(mlEff._id, doc._id);
     }
+  }
+};
+
+export const updateMissionLocaleEffectifSnapshot = async (activationDate: Date) => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+  });
+  while (await cursor.hasNext()) {
+    const orga = await cursor.next();
+    if (!orga) {
+      continue;
+    }
+
+    await activateMissionLocale(orga._id, activationDate);
   }
 };
