@@ -399,6 +399,7 @@ export const softDeleteDoublonEffectifML = async () => {
 export const updateMissionLocaleEffectifSnapshot = async (activationDate: Date) => {
   const cursor = organisationsDb().find({
     type: "MISSION_LOCALE",
+    activated_at: { $ne: null },
   });
   while (await cursor.hasNext()) {
     const orga = await cursor.next();
