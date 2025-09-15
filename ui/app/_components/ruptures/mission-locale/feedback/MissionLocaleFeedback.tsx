@@ -16,11 +16,22 @@ interface MissionLocaleFeedbackProps {
   logs?: Array<IMissionLocaleEffectifLog> | null;
 }
 
-export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbackProps) {
-  if (!logs?.length) {
-    return null;
+export function MissionLocaleFeedback({ visibility, logs, situation }: MissionLocaleFeedbackProps) {
+  let sortedLogs = logs?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
+
+  // pour gerer les effectifs legacy sans logs
+  if (!sortedLogs.length && situation?.situation) {
+    const virtualLog = {
+      _id: { toString: () => "virtual-log" } as any,
+      created_at: new Date(),
+      mission_locale_effectif_id: "virtual" as any,
+      situation: situation.situation,
+      situation_autre: situation.situation_autre,
+      commentaires: situation.commentaires,
+      deja_connu: situation.deja_connu,
+    };
+    sortedLogs = [virtualLog];
   }
-  const sortedLogs = logs?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
 
   const organismeFormationLayout = () => {
     return (
@@ -123,10 +134,11 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
     return (
       <>
         {sortedLogs.map((log, index) => (
-          <div key={index}>
+          <div key={log._id?.toString() || index}>
             <h6 className="fr-mb-2v">
-              Le {formatDate(log.created_at)}
-              {formatContactTimeText(calculateDaysSince(log.created_at))}
+              {log._id?.toString() === "virtual-log"
+                ? "Situation actuelle"
+                : `Le ${formatDate(log.created_at)}${formatContactTimeText(calculateDaysSince(log.created_at))}`}
             </h6>
             {(() => {
               if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
@@ -224,6 +236,10 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
       </>
     );
   };
+
+  if (!sortedLogs.length && !situation?.situation) {
+    return null;
+  }
 
   switch (visibility) {
     case "ADMINISTRATEUR":
