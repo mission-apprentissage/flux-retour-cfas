@@ -24,30 +24,47 @@ export const getTotalEffectifs = (data: MonthItem[]): number => {
 
 export function groupMonthsOlderThan180Days(items: MonthItem[]): MonthItem[] {
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-  const recent: MonthItem[] = [];
-  const older: MonthItem[] = [];
+  const cutoff180Days = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+
+  const sevenMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+
+  const recentMonths: MonthItem[] = [];
+  const monthsToCheck: MonthItem[] = [];
 
   items.forEach((m) => {
     const thisMonth = new Date(m.month);
-    if (thisMonth >= cutoff) {
-      recent.push(m);
+    if (thisMonth >= sevenMonthsAgo) {
+      recentMonths.push(m);
     } else {
-      older.push(m);
+      monthsToCheck.push(m);
     }
   });
 
-  const combinedOlderData = older.flatMap((m) => m.data);
-  const combinedOlderTreated = older.reduce((sum, m) => sum + (m.treated_count || 0), 0);
+  const monthsToKeepSeparate: MonthItem[] = [];
+  const monthsToGroup: MonthItem[] = [];
 
-  const result = sortDataByMonthDescending(recent);
-  if (combinedOlderData.length > 0) {
-    result.push({
-      month: "plus-de-180-j",
-      treated_count: combinedOlderTreated,
-      data: combinedOlderData,
-    });
-  }
+  monthsToCheck.forEach((m) => {
+    const monthDate = new Date(m.month);
+    const lastDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+
+    if (lastDayOfMonth < cutoff180Days) {
+      monthsToGroup.push(m);
+    } else {
+      monthsToKeepSeparate.push(m);
+    }
+  });
+
+  const allSeparateMonths = [...recentMonths, ...monthsToKeepSeparate];
+  const result = sortDataByMonthDescending(allSeparateMonths);
+
+  const combinedOlderData = monthsToGroup.flatMap((m) => m.data);
+  const combinedOlderTreated = monthsToGroup.reduce((sum, m) => sum + (m.treated_count || 0), 0);
+
+  result.push({
+    month: "plus-de-180-j",
+    treated_count: combinedOlderTreated,
+    data: combinedOlderData,
+  });
 
   return result;
 }
