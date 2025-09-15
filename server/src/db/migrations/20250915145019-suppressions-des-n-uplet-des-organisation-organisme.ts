@@ -4,7 +4,9 @@ import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 // Suppression des organisations de type ORGANISME_FORMATION n'ayant aucun utilisateur rattaché
 export const up = async () => {
   let deletionCount = 0;
-  const data = await organisationsDb().find({ type: "ORGANISME_FORMATION" }).toArray();
+  const data = await organisationsDb()
+    .find({ type: "ORGANISME_FORMATION", ml_beta_activated_at: { $exists: false } })
+    .toArray();
 
   for (const orga of data) {
     const users = await usersMigrationDb().find({ organisation_id: orga._id }).toArray();
