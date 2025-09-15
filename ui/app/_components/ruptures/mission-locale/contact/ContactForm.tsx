@@ -50,7 +50,7 @@ const validate = (values: FormValues) => {
   const errors: any = {};
 
   if (values.contactSuccess === null) {
-    errors.contactSuccess = "Veuillez indiquer si vous avez pu rentrer en contact avec le jeune";
+    errors.contactSuccess = "Veuillez indiquer si vous êtes entré en contact avec ce jeune";
     return errors;
   }
 
@@ -161,7 +161,7 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
                 )}
 
                 <RadioButtons
-                  legend="Avez-vous pu rentrer en contact le jeune ?"
+                  legend="Êtes-vous entré en contact avec ce jeune ?"
                   name="contact-success"
                   options={[
                     {

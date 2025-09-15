@@ -52,7 +52,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                   return (
                     <div className={styles.feedbackContainer}>
                       <p className="fr-mb-1v fr-mt-3v">
-                        <b>La Mission Locale a t-elle pu rentrer en contact avec le jeune ?</b>
+                        <b>La Mission Locale a-t-elle pu entrer en contact avec ce jeune ?</b>
                       </p>
                       <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
 
@@ -145,7 +145,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                 return (
                   <div className={styles.feedbackContainer}>
                     <p className="fr-mb-1v">
-                      <b>Avez-vous pu rentrer en contact avec le jeune ?</b>
+                      <b>Êtes-vous entré en contact avec ce jeune ?</b>
                     </p>
                     <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
 
