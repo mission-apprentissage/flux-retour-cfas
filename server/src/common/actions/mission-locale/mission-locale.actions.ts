@@ -244,6 +244,9 @@ const addFieldFromActivationDate = () => {
   const IN_ACTIVATION_RANGE_CONDITION = {
     $or: [
       {
+        $ne: [{ $ifNull: ["$situation", null] }, null],
+      },
+      {
         $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null],
       },
       {
