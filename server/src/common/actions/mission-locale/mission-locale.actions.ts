@@ -672,7 +672,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
       },
     },
   ];
-  console.log(JSON.stringify(aggregation, null, 2));
+
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
@@ -773,7 +773,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
           $push: {
             $cond: [
               {
-                $and: [{ $eq: ["$$ROOT.a_traiter", aTraiter] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+                $or: [{ $eq: ["$$ROOT.a_traiter", !aTraiter] }, { $eq: ["$$ROOT.in_activation_range", true] }],
               },
               {
                 id: "$$ROOT.effectif_snapshot._id",
@@ -1005,7 +1005,6 @@ export const getEffectifsListByMisisonLocaleId = (
     },
   ];
 
-  console.log(JSON.stringify(effectifsMissionLocaleAggregation, null, 2));
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
