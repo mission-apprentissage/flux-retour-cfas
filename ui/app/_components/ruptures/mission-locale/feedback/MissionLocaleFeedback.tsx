@@ -17,7 +17,7 @@ interface MissionLocaleFeedbackProps {
 }
 
 export function MissionLocaleFeedback({ visibility, logs, situation }: MissionLocaleFeedbackProps) {
-  let sortedLogs = logs?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
+  let sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
 
   // pour gerer les effectifs legacy sans logs
   if (!sortedLogs.length && situation?.situation) {
