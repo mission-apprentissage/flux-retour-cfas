@@ -114,7 +114,7 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     });
   }
 
-  return events.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return events.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
 const getIcon = (type: TimelineEventType) => {

@@ -120,7 +120,7 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     }
   }
 
-  return events.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return events.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
 const getIcon = (type: TimelineEventType) => {
