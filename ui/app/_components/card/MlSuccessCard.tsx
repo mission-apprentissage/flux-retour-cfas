@@ -22,7 +22,7 @@ export const MlSuccessCard = ({
 
       <div>
         <p className={`fr-text--bold ${styles.mlSuccessCardTitle}`}>
-          Tous les jeunes en rupture ce mois-ci ont été contacté !
+          Tous les jeunes en rupture ce mois-ci ont été contactés !
         </p>
         <p className={`fr-text--sm ${styles.mlSuccessCardText}`}>
           Retrouvez-les dans la liste{" "}

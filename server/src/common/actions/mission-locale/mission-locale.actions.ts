@@ -244,6 +244,9 @@ const addFieldFromActivationDate = () => {
   const IN_ACTIVATION_RANGE_CONDITION = {
     $or: [
       {
+        $ne: [{ $ifNull: ["$situation", null] }, null],
+      },
+      {
         $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null],
       },
       {
@@ -672,7 +675,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
       },
     },
   ];
-  console.log(JSON.stringify(aggregation, null, 2));
+
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
@@ -703,8 +706,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
-  const traite = type === API_EFFECTIF_LISTE.TRAITE;
-  const injoignable = type === API_EFFECTIF_LISTE.INJOIGNABLE;
 
   const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
     if (!firstDate) {
@@ -726,6 +727,24 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     return dates;
   };
 
+  const getGroupPushCondition = () => {
+    switch (type) {
+      case API_EFFECTIF_LISTE.TRAITE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }],
+        };
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", true] }],
+        };
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
+    }
+  };
+
   const organismeMissionLocaleAggregation: any[] = [
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
@@ -733,21 +752,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
   ];
-
-  if (traite) {
-    organismeMissionLocaleAggregation.push({
-      $match: {
-        a_traiter: false,
-        injoignable: false,
-      },
-    });
-  } else if (injoignable) {
-    organismeMissionLocaleAggregation.push({
-      $match: {
-        injoignable: true,
-      },
-    });
-  }
 
   organismeMissionLocaleAggregation.push(
     {
@@ -772,9 +776,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         data: {
           $push: {
             $cond: [
-              {
-                $and: [{ $eq: ["$$ROOT.a_traiter", aTraiter] }, { $eq: ["$$ROOT.in_activation_range", true] }],
-              },
+              getGroupPushCondition(),
               {
                 id: "$$ROOT.effectif_snapshot._id",
                 nom: "$$ROOT.effectif_snapshot.apprenant.nom",
@@ -1005,7 +1007,6 @@ export const getEffectifsListByMisisonLocaleId = (
     },
   ];
 
-  console.log(JSON.stringify(effectifsMissionLocaleAggregation, null, 2));
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
