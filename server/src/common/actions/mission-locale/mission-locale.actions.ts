@@ -1014,10 +1014,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const pipeline = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $facet: {
         hadEffectifs: [
