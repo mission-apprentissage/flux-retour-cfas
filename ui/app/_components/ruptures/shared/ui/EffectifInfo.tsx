@@ -156,6 +156,14 @@ export function EffectifInfo({
         <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} effectif={effectif} />
       )}
 
+      {effectif.situation && (
+        <MissionLocaleFeedback
+          situation={effectif.situation}
+          visibility={user.organisation.type}
+          logs={effectif.mission_locale_logs}
+        />
+      )}
+
       {user.organisation.type !== "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
         <CfaFeedback
           organismeData={effectif.organisme_data}
@@ -164,14 +172,6 @@ export function EffectifInfo({
           effectif={effectif}
         />
       ) : null}
-
-      {effectif.situation && (
-        <MissionLocaleFeedback
-          situation={effectif.situation}
-          visibility={user.organisation.type}
-          logs={effectif.mission_locale_logs}
-        />
-      )}
     </div>
   );
 }
