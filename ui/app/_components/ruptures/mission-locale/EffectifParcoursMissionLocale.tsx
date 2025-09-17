@@ -22,7 +22,7 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.TRAITE_CFA]: "Dossier traité",
   [TIMELINE_EVENTS.CONTACTE_SANS_REPONSE]: "Contacté sans réponse",
   [TIMELINE_EVENTS.DOSSIER_PARTAGE_PAR_CFA]: "Dossier partagé par le CFA",
-  [TIMELINE_EVENTS.NOUVEAU_CONTRAT]: "Nouveau contrat d'apprentissage",
+  [TIMELINE_EVENTS.NOUVEAU_CONTRAT]: "Le jeune a débuté un nouveau contrat",
   [TIMELINE_EVENTS.NOUVEAU_PROJET]: "Nouveau projet en cours",
 } as const;
 
@@ -86,6 +86,18 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     });
   }
 
+  if (effectif.nouveau_contrat && effectif.current_status?.date) {
+    const date =
+      effectif.current_status.date instanceof Date
+        ? effectif.current_status.date
+        : new Date(effectif.current_status.date);
+    events.push({
+      date,
+      type: TIMELINE_EVENTS.NOUVEAU_CONTRAT,
+      label: EVENT_LABELS[TIMELINE_EVENTS.NOUVEAU_CONTRAT],
+    });
+  }
+
   if ("situation" in effectif && eff.situation?.situation) {
     const currentSituation = eff.situation;
 
@@ -139,7 +151,14 @@ const getIcon = (type: TimelineEventType) => {
     );
   }
   if (type === TIMELINE_EVENTS.NOUVEAU_CONTRAT) {
-    return <Image src="/images/parcours-dossier-traite.svg" alt="Nouveau contrat" width={18} height={18} />;
+    return (
+      <Image
+        src="/images/parcours-dossier-traite.svg"
+        alt="Le jeune a débuté un nouveau contrat"
+        width={18}
+        height={18}
+      />
+    );
   }
   if (type === TIMELINE_EVENTS.NOUVEAU_PROJET) {
     return <Image src="/images/parcours-dossier-traite.svg" alt="Nouveau projet" width={18} height={18} />;
