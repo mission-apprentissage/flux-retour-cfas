@@ -7,6 +7,10 @@ interface EffectifStatusBadgeProps {
 }
 
 export function EffectifStatusBadge({ effectif, priorityLabel }: EffectifStatusBadgeProps) {
+  if (effectif.nouveau_contrat && effectif.a_traiter && !effectif.injoignable) {
+    return <Badge severity="info">Nouveau contrat</Badge>;
+  }
+
   if (effectif.injoignable) {
     return (
       <p className="fr-badge fr-badge--purple-glycine" aria-label="Effectif à recontacter">

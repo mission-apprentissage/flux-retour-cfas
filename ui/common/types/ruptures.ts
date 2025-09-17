@@ -8,6 +8,7 @@ export type EffectifData = {
   organisme_enseigne: string;
   prioritaire: boolean;
   a_contacter: boolean;
+  nouveau_contrat: boolean;
 };
 
 export type EffectifPriorityData = EffectifData & {
