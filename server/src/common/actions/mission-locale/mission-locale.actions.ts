@@ -520,6 +520,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             mineur: "$a_risque_mineur",
             presque_6_mois: "$a_risque_presque_6_mois",
             acc_conjoint: "$a_risque_accompagnement_conjoint",
+            nouveau_contrat: "$nouveau_contrat",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
@@ -554,6 +555,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$deja_connu",
             "situation.commentaires": "$commentaires",
             contacts_tdb: "$tdb_users",
+            nouveau_contrat: "$nouveau_contrat",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
@@ -596,49 +598,49 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
     },
     ...(withContacts
       ? [
-          {
-            $lookup: {
-              from: "organisations",
-              let: { id: { $toString: "$organisme._id" } },
-              pipeline: [
-                { $match: { type: "ORGANISME_FORMATION" } },
-                { $match: { $expr: { $eq: ["$organisme_id", "$$id"] } } },
-                {
-                  $project: {
-                    _id: 1,
-                  },
+        {
+          $lookup: {
+            from: "organisations",
+            let: { id: { $toString: "$organisme._id" } },
+            pipeline: [
+              { $match: { type: "ORGANISME_FORMATION" } },
+              { $match: { $expr: { $eq: ["$organisme_id", "$$id"] } } },
+              {
+                $project: {
+                  _id: 1,
                 },
-              ],
-              as: "organisation",
-            },
+              },
+            ],
+            as: "organisation",
           },
-          {
-            $unwind: {
-              path: "$organisation",
-              preserveNullAndEmptyArrays: true,
-            },
+        },
+        {
+          $unwind: {
+            path: "$organisation",
+            preserveNullAndEmptyArrays: true,
           },
-          {
-            $lookup: {
-              from: "usersMigration",
-              let: { id: "$organisation._id" },
-              pipeline: [
-                { $match: { $expr: { $eq: ["$organisation_id", "$$id"] } } },
-                {
-                  $project: {
-                    _id: 0,
-                    email: 1,
-                    telephone: 1,
-                    nom: 1,
-                    prenom: 1,
-                    fonction: 1,
-                  },
+        },
+        {
+          $lookup: {
+            from: "usersMigration",
+            let: { id: "$organisation._id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$organisation_id", "$$id"] } } },
+              {
+                $project: {
+                  _id: 0,
+                  email: 1,
+                  telephone: 1,
+                  nom: 1,
+                  prenom: 1,
+                  fonction: 1,
                 },
-              ],
-              as: "tdb_users",
-            },
+              },
+            ],
+            as: "tdb_users",
           },
-        ]
+        },
+      ]
       : []),
   ];
 };
@@ -760,18 +762,18 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   // Si il n'y a qu'un seul element, pas de next
   return index >= 0 && effectifs.length > 1
     ? {
-        total: effectifs.length,
-        next: effectifs[modulo(index + 1, effectifs.length)],
-        previous: effectifs[modulo(index - 1, effectifs.length)],
-        currentIndex: index,
-        nomListe: nom_liste,
-      }
+      total: effectifs.length,
+      next: effectifs[modulo(index + 1, effectifs.length)],
+      previous: effectifs[modulo(index - 1, effectifs.length)],
+      currentIndex: index,
+      nomListe: nom_liste,
+    }
     : {
-        total: 1,
-        next: null,
-        previous: null,
-        currentIndex: null,
-      };
+      total: 1,
+      next: null,
+      previous: null,
+      currentIndex: null,
+    };
 };
 
 export const getEffectifsParMoisByMissionLocaleId = async (
@@ -868,6 +870,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
                 a_traiter: "$$ROOT.a_traiter",
                 injoignable: "$$ROOT.injoignable",
+                nouveau_contrat: "$nouveau_contrat",
               },
               null,
             ],
@@ -875,12 +878,12 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         },
         ...(aTraiter
           ? {
-              treated_count: {
-                $sum: {
-                  $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
-                },
+            treated_count: {
+              $sum: {
+                $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
               },
-            }
+            },
+          }
           : {}),
       },
     },
@@ -910,15 +913,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
   const formattedData = aTraiter
     ? getFirstDayOfMonthListFromDate(oldestMonth).map((date) => {
-        const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
-        return (
-          found ?? {
-            month: date,
-            ...(aTraiter ? { treated_count: 0 } : {}),
-            data: [],
-          }
-        );
-      })
+      const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
+      return (
+        found ?? {
+          month: date,
+          ...(aTraiter ? { treated_count: 0 } : {}),
+          data: [],
+        }
+      );
+    })
     : effectifs.sort((a, b) => b.month - a.month);
 
   return formattedData;
@@ -1166,12 +1169,12 @@ export const getEffectifARisqueByMissionLocaleId = async (
 const getEffectifMissionLocaleEligibleToBrevoAggregation = (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => [
-  ...generateOrganisationMatchStage(organisation),
-  ...EFF_MISSION_LOCALE_FILTER,
-  ...filterByDernierStatutPipelineMl(),
-  ...addFieldFromActivationDate(),
-  ...filterByActivationDatePipelineMl(),
-];
+    ...generateOrganisationMatchStage(organisation),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(),
+    ...addFieldFromActivationDate(),
+    ...filterByActivationDatePipelineMl(),
+  ];
 
 export const getEffectifMissionLocaleEligibleToBrevoCount = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
@@ -1352,7 +1355,7 @@ export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<stri
   ).map(({ email }) => email) as Array<string>;
 };
 
-export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum; }>) => {
   if (!rupturants || rupturants.length === 0) {
     return;
   }
