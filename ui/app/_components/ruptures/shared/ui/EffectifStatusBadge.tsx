@@ -4,12 +4,24 @@ import { IEffecifMissionLocale } from "shared";
 interface EffectifStatusBadgeProps {
   effectif: Pick<
     IEffecifMissionLocale["effectif"],
-    "a_traiter" | "prioritaire" | "injoignable" | "presque_6_mois" | "a_contacter" | "mineur" | "rqth" | "acc_conjoint"
+    | "a_traiter"
+    | "prioritaire"
+    | "injoignable"
+    | "presque_6_mois"
+    | "a_contacter"
+    | "mineur"
+    | "rqth"
+    | "acc_conjoint"
+    | "nouveau_contrat"
   >;
   isHeader?: boolean;
 }
 
 export function EffectifStatusBadge({ effectif }: EffectifStatusBadgeProps) {
+  if (effectif.nouveau_contrat && effectif.a_traiter && !effectif.injoignable) {
+    return <Badge severity="info">Nouveau contrat</Badge>;
+  }
+
   // Effectif traité
   if (!effectif.a_traiter && !effectif.injoignable) {
     return <Badge severity="success">traité</Badge>;
