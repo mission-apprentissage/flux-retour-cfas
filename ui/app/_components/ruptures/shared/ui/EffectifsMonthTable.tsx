@@ -42,7 +42,11 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
       id: effectif.id,
       name: (
         <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
-          {effectif.prioritaire || effectif.a_contacter ? (
+          {effectif.nouveau_contrat ? (
+            <Badge severity="info" small className={styles.noWrapBadge}>
+              Nouveau contrat
+            </Badge>
+          ) : effectif.prioritaire || effectif.a_contacter ? (
             <PriorityBadge />
           ) : (
             <Badge severity="new" small className={styles.noWrapBadge}>

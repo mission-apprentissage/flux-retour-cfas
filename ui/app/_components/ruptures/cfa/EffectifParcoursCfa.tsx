@@ -17,6 +17,7 @@ const TIMELINE_EVENTS = {
   CONTACTE_SANS_REPONSE: "CONTACTE_SANS_REPONSE",
   TRAITE_ML_NOUVELLE_SITUATION: "TRAITE_ML_NOUVELLE_SITUATION",
   TRAITE_ML: "TRAITE_ML",
+  NOUVEAU_CONTRAT: "NOUVEAU_CONTRAT",
 } as const;
 
 const EVENT_LABELS = {
@@ -28,6 +29,7 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.CONTACTE_SANS_REPONSE]: "Contacté sans réponse par la Mission Locale",
   [TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION]: "Dossier traité - Nouvelle situation",
   [TIMELINE_EVENTS.TRAITE_ML]: "Dossier traité par la Mission Locale",
+  [TIMELINE_EVENTS.NOUVEAU_CONTRAT]: "Le CFA a signalé que le jeune avait retrouvé un contrat",
 } as const;
 
 type TimelineEventType = (typeof TIMELINE_EVENTS)[keyof typeof TIMELINE_EVENTS];
@@ -114,6 +116,18 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     });
   }
 
+  if (effectif.nouveau_contrat && effectif.current_status?.date) {
+    const date =
+      effectif.current_status.date instanceof Date
+        ? effectif.current_status.date
+        : new Date(effectif.current_status.date);
+    events.push({
+      date,
+      type: TIMELINE_EVENTS.NOUVEAU_CONTRAT,
+      label: EVENT_LABELS[TIMELINE_EVENTS.NOUVEAU_CONTRAT],
+    });
+  }
+
   return events.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
@@ -127,6 +141,7 @@ const getIcon = (type: TimelineEventType) => {
       TIMELINE_EVENTS.TRAITE_CFA_SUIVI,
       TIMELINE_EVENTS.TRAITE_ML,
       TIMELINE_EVENTS.TRAITE_ML_NOUVELLE_SITUATION,
+      TIMELINE_EVENTS.NOUVEAU_CONTRAT,
     ].includes(type as any)
   ) {
     return <Image src="/images/parcours-dossier-traite.svg" alt="Dossier traité" width={18} height={18} />;
