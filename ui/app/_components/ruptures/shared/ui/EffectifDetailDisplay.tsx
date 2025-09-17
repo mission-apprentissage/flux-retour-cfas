@@ -133,7 +133,6 @@ export function EffectifDetailDisplay({
         total={total}
         currentIndex={currentIndex}
         isLoading={!effectifPayload}
-        isATraiter={a_traiter}
       />
 
       <EffectifInfo

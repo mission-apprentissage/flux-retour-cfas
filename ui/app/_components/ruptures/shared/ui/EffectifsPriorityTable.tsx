@@ -58,7 +58,7 @@ export function EffectifsPriorityTable({
   const params = useParams();
   const mlId = params?.id as string | undefined;
   const [infoOpen, setInfoOpen] = useState(false);
-
+  const PRIORITY_LIST_NAME = `${listType}_${API_EFFECTIF_LISTE.PRIORITAIRE}`;
   const columns = useMemo(() => {
     return [
       { label: "", dataKey: "monthBadge", width: 150 },
@@ -186,8 +186,8 @@ export function EffectifsPriorityTable({
             searchableColumns={["nom", "prenom"]}
             getRowLink={(rowData) => {
               return user.organisation.type === "ADMINISTRATEUR" && mlId
-                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`
-                : `/mission-locale/${rowData.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`;
+                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}`
+                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}`;
             }}
           />
         </>
