@@ -14,7 +14,6 @@ export function PageHeader({
   total,
   currentIndex,
   isLoading,
-  isATraiter,
 }: {
   previous?: { id: string };
   next?: { id: string };
@@ -41,6 +40,27 @@ export function PageHeader({
 
   const getHref = (id: string) => `${basePath}/${id}${listQuery}`;
 
+  const getListeHeader = (list: API_EFFECTIF_LISTE) => {
+    switch (list) {
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+        return "à traiter en priorité";
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return "à recontacter";
+      case API_EFFECTIF_LISTE.TRAITE:
+        return "traité";
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return "à traiter";
+      case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+        return "à recontacter en priorité";
+      case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+        return "traité en priorité";
+      case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+        return "à traiter en priorité";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className={styles.pageHeaderContainer}>
       {previous ? (
@@ -55,19 +75,9 @@ export function PageHeader({
         {!isLoading && total !== undefined ? (
           <>
             <div className={styles.pageHeaderDesktopText}>
-              {nomListe === API_EFFECTIF_LISTE.PRIORITAIRE ? (
-                <p className={styles.pageHeaderText}>
-                  Dossier n°{currentIndex + 1} sur {total} à traiter en priorité
-                </p>
-              ) : nomListe === API_EFFECTIF_LISTE.INJOIGNABLE ? (
-                <p className={styles.pageHeaderText}>
-                  Dossier n°{currentIndex + 1} sur {total} à recontacter
-                </p>
-              ) : (
-                <p className={styles.pageHeaderText}>
-                  Dossier n°{currentIndex + 1} sur {total} {isATraiter ? "encore à traiter" : "traité"}
-                </p>
-              )}
+              <p className={styles.pageHeaderText}>
+                Dossier n°{currentIndex + 1} sur {total} {getListeHeader(nomListe)}
+              </p>
               <span className={styles.pageHeaderSubtext}>(tous mois confondus)</span>
             </div>
 

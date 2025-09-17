@@ -108,17 +108,6 @@ const EFF_MISSION_LOCALE_FILTER = [
 
 const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
   switch (nom_liste) {
-    case API_EFFECTIF_LISTE.PRIORITAIRE:
-      return [
-        {
-          $match: {
-            $and: [
-              { a_traiter: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
-          },
-        },
-      ];
     case API_EFFECTIF_LISTE.INJOIGNABLE:
       return [
         {
@@ -142,6 +131,42 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
           $match: {
             a_traiter: false,
             injoignable: false,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: false },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
           },
         },
       ];
