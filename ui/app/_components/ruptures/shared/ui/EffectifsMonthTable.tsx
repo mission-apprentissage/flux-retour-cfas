@@ -29,7 +29,11 @@ type ColumnData = {
 function buildRowData(effectif: EffectifData) {
   return {
     id: effectif.id,
-    badge: <EffectifStatusBadge effectif={effectif} />,
+    badge: (
+      <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
+        <EffectifStatusBadge effectif={effectif} />
+      </div>
+    ),
     name: (
       <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
     ),
