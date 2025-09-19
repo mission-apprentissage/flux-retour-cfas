@@ -14,6 +14,7 @@ import {
   getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
+  get180DaysAgo,
 } from "@/app/_utils/ruptures.utils";
 import { _get } from "@/common/httpClient";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
@@ -25,20 +26,38 @@ import { DownloadSection } from "./DownloadSection";
 interface EffectifsListViewProps {
   data: MonthsData;
   initialStatut?: string | null;
+  initialRuptureDate?: string | null;
 }
 
-export function EffectifsListView({ data, initialStatut }: EffectifsListViewProps) {
+export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const getInitialSection = (statut: string | null): SelectedSection => {
     switch (statut) {
-      case "a-traiter":
+      case "a_traiter":
+      case "a_traiter_prioritaire":
         return "a-traiter";
-      case "a-recontacter":
+      case "injoignable":
+      case "injoignable_prioritaire":
         return "injoignable";
+      case "traite":
+      case "traite_prioritaire":
+        return "deja-traite";
       default:
         return "a-traiter";
     }
+  };
+
+  const getInitialRuptureDate = (date: string | null): string => {
+    if (!date || initialStatut?.endsWith("prioritaire")) return "";
+    const parsedDate = new Date(date);
+    const cutoff180Days = get180DaysAgo();
+
+    if (parsedDate < cutoff180Days) {
+      return "+-de-180j";
+    }
+
+    return anchorFromLabel(formatMonthAndYear(date));
   };
 
   const [selectedSection, setSelectedSection] = useState<SelectedSection>(getInitialSection(initialStatut || null));
@@ -73,6 +92,12 @@ export function EffectifsListView({ data, initialStatut }: EffectifsListViewProp
   }, [groupedInjoignable, data.prioritaire?.effectifs]);
 
   const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
+
+  useEffect(() => {
+    setTimeout(() => {
+      handleAnchorClick(getInitialRuptureDate(initialRuptureDate || null));
+    }, 0);
+  }, [initialRuptureDate]);
 
   useEffect(() => {
     if (!activeAnchor) {

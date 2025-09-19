@@ -13,6 +13,7 @@ import { MonthsData } from "@/common/types/ruptures";
 export default function MissionLocaleClient() {
   const searchParams = useSearchParams();
   const statutParam = searchParams?.get("statut") || null;
+  const dateRupture = searchParams?.get("rupture") || null;
 
   const { data } = useQuery<MonthsData>(
     ["effectifs-per-month-user"],
@@ -27,7 +28,7 @@ export default function MissionLocaleClient() {
     <div className="fr-container">
       <MLHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <EffectifsListView data={data} initialStatut={statutParam} />}
+        {data && <EffectifsListView data={data} initialStatut={statutParam} initialRuptureDate={dateRupture} />}
       </SuspenseWrapper>
     </div>
   );
