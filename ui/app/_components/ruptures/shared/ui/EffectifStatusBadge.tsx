@@ -6,7 +6,6 @@ interface EffectifStatusBadgeProps {
     IEffecifMissionLocale["effectif"],
     "a_traiter" | "prioritaire" | "injoignable" | "presque_6_mois" | "a_contacter" | "mineur" | "rqth" | "acc_conjoint"
   >;
-  //priorityLabel: string;
 }
 
 export function EffectifStatusBadge({ effectif }: EffectifStatusBadgeProps) {
