@@ -60,15 +60,15 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
       case API_EFFECTIF_LISTE.A_TRAITER:
         return [
           { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 350 },
-          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "Formation", dataKey: "formation", width: 300 },
+          { label: "Statut", dataKey: "badge", width: 320 },
           { label: "", dataKey: "icon", width: 10 },
         ];
 
       case API_EFFECTIF_LISTE.TRAITE:
         return [
           { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "Formation", dataKey: "formation", width: 300 },
           { label: "Statut", dataKey: "badge", width: 200 },
           { label: "", dataKey: "icon", width: 10 },
         ];

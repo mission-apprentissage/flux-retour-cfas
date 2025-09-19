@@ -55,7 +55,7 @@ export function EffectifsPriorityTable({
     return [
       { label: "", dataKey: "name", width: 200 },
       { label: "", dataKey: "formation", width: "auto" },
-      { label: "", dataKey: "badge", width: 150 },
+      { label: "", dataKey: "badge", width: 250 },
       { label: "", dataKey: "arrow", width: 40 },
     ];
   }, []);
