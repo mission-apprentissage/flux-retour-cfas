@@ -383,59 +383,62 @@ const addOrganismeFieldTraitementStatus = () => {
 const addMissionLocaleFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
   const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] };
+
+  const RQTH_CONDITION = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
+  const MINEUR_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$effectif_snapshot.apprenant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+        ],
+      },
+      {
+        $lte: [
+          "$effectif_snapshot.apprenant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+        ],
+      },
+    ],
+  };
+
+  const PRESQUE_6_MOIS_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 180,
+            },
+          },
+        ],
+      },
+      {
+        $lte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 150,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const ACCOMPAGNEMENT_CONJOINT_CONDITION = {
+    $eq: ["$organisme_data.acc_conjoint", true],
+  };
+
   const A_RISQUE_CONDITION = {
     $and: [
       {
-        $or: [
-          { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
-          {
-            $and: [
-              {
-                $gte: [
-                  "$date_rupture",
-                  {
-                    $dateSubtract: {
-                      startDate: new Date(),
-                      unit: "day",
-                      amount: 180,
-                    },
-                  },
-                ],
-              },
-              {
-                $lte: [
-                  "$date_rupture",
-                  {
-                    $dateSubtract: {
-                      startDate: new Date(),
-                      unit: "day",
-                      amount: 150,
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            $and: [
-              {
-                $gte: [
-                  "$effectif_snapshot.apprenant.date_de_naissance",
-                  new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-                ],
-              },
-              {
-                $lte: [
-                  "$effectif_snapshot.apprenant.date_de_naissance",
-                  new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
-                ],
-              },
-            ],
-          },
-          {
-            $eq: ["$organisme_data.acc_conjoint", true],
-          },
-        ],
+        $or: [RQTH_CONDITION, PRESQUE_6_MOIS_CONDITION, MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
       },
       {
         $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
@@ -448,6 +451,22 @@ const addMissionLocaleFieldTraitementStatus = () => {
   };
 
   return [
+    {
+      $addFields: {
+        a_risque_rqth: {
+          $cond: [RQTH_CONDITION, true, false],
+        },
+        a_risque_mineur: {
+          $cond: [MINEUR_CONDITION, true, false],
+        },
+        a_risque_presque_6_mois: {
+          $cond: [PRESQUE_6_MOIS_CONDITION, true, false],
+        },
+        a_risque_accompagnement_conjoint: {
+          $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
+        },
+      },
+    },
     {
       $addFields: {
         a_traiter: {
@@ -498,6 +517,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             contacts_tdb: "$tdb_users",
             prioritaire: "$a_risque",
             a_contacter: "$a_contacter",
+            mineur: "$a_risque_mineur",
+            presque_6_mois: "$a_risque_presque_6_mois",
+            acc_conjoint: "$a_risque_accompagnement_conjoint",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
@@ -840,6 +862,12 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
                 prioritaire: "$a_risque",
                 a_contacter: "$a_contacter",
+                mineur: "$a_risque_mineur",
+                presque_6_mois: "$a_risque_presque_6_mois",
+                acc_conjoint: "$a_risque_accompagnement_conjoint",
+                rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
+                a_traiter: "$$ROOT.a_traiter",
+                injoignable: "$$ROOT.injoignable",
               },
               null,
             ],

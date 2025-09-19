@@ -4,12 +4,11 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { useRouter, usePathname } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
-import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
 import { CfaFeedback } from "../../cfa";
 import { ContactForm, MissionLocaleFeedback } from "../../mission-locale";
@@ -57,8 +56,6 @@ export function EffectifInfo({
   const [infosOpen, setInfosOpen] = useState(false);
   const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
 
-  const priorityLabel = useMemo(() => getPriorityLabel(nomListe), [nomListe]);
-
   const computeTransmissionDate = (date: Date | null | undefined) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
   };
@@ -93,7 +90,7 @@ export function EffectifInfo({
         <div className={styles.effectifInfoInner}>
           <div className={styles.effectifHeader}>
             <div className={styles.flexCenterGap8}>
-              <EffectifStatusBadge effectif={effectif} priorityLabel={priorityLabel} />
+              <EffectifStatusBadge effectif={effectif} />
               <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
