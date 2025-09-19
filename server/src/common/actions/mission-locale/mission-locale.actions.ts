@@ -392,6 +392,34 @@ const addMissionLocaleFieldTraitementStatus = () => {
             $and: [
               {
                 $gte: [
+                  "$date_rupture",
+                  {
+                    $dateSubtract: {
+                      startDate: new Date(),
+                      unit: "day",
+                      amount: 180,
+                    },
+                  },
+                ],
+              },
+              {
+                $lte: [
+                  "$date_rupture",
+                  {
+                    $dateSubtract: {
+                      startDate: new Date(),
+                      unit: "day",
+                      amount: 150,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            $and: [
+              {
+                $gte: [
                   "$effectif_snapshot.apprenant.date_de_naissance",
                   new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
                 ],
