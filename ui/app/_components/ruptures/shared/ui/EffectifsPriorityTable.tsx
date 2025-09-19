@@ -41,7 +41,7 @@ function PriorityBadge({
   const label = listType ? getPriorityLabel(listType) : "À TRAITER EN PRIORITÉ";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-      <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
+      <p className="fr-badge fr-badge--red" style={{ gap: "0.5rem" }}>
         <i className="fr-icon-fire-fill fr-icon--sm" /> {label} ({priorityData.length})
       </p>
     </div>

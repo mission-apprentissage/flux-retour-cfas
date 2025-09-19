@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { useParams, usePathname } from "next/navigation";
 import { memo } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
@@ -11,17 +10,8 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatMonthAndYear, anchorFromLabel } from "@/app/_utils/ruptures.utils";
 import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
+import { EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
-
-const PriorityBadge = () => (
-  <p
-    className={`fr-badge fr-badge--orange-terre-battue fr-badge--sm ${styles.prioritaireBadge}`}
-    aria-label="Effectif prioritaire"
-  >
-    <i className="fr-icon-fire-fill fr-icon--xs" />
-    Prioritaire
-  </p>
-);
 
 type EffectifsMonthTableProps = {
   monthItem: MonthItem;
@@ -36,69 +26,15 @@ type ColumnData = {
   width?: number | string;
 };
 
-function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifList) {
-  if (listType === API_EFFECTIF_LISTE.A_TRAITER) {
-    return {
-      id: effectif.id,
-      name: (
-        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
-          {effectif.prioritaire || effectif.a_contacter ? (
-            <PriorityBadge />
-          ) : (
-            <Badge severity="new" small className={styles.noWrapBadge}>
-              à traiter
-            </Badge>
-          )}
-          {`${effectif.nom} ${effectif.prenom}`}
-        </div>
-      ),
-      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-      icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
-    };
-  }
-
-  if (listType === API_EFFECTIF_LISTE.TRAITE) {
-    return {
-      id: effectif.id,
-      badge: (
-        <Badge severity="success" small>
-          traité
-        </Badge>
-      ),
-      name: (
-        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
-      ),
-      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-      icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
-    };
-  }
-
-  if (listType === API_EFFECTIF_LISTE.INJOIGNABLE) {
-    return {
-      id: effectif.id,
-      badge: (
-        <p className="fr-badge fr-badge--purple-glycine fr-badge--sm" aria-label="Effectif à recontacter">
-          <i className="fr-icon-phone-fill fr-icon--xs" />
-          <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
-        </p>
-      ),
-      name: (
-        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
-          {effectif.prioritaire && <PriorityBadge />}
-          {`${effectif.nom} ${effectif.prenom}`}
-        </div>
-      ),
-      formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-      icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
-    };
-  }
-
-  // Fallback (in case listType is an unexpected value)
+function buildRowData(effectif: EffectifData) {
   return {
     id: effectif.id,
-    name: `${effectif.nom} ${effectif.prenom}`,
-    formation: effectif.libelle_formation,
-    icon: null,
+    badge: <EffectifStatusBadge effectif={effectif} />,
+    name: (
+      <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
+    ),
+    formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
+    icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
   };
 }
 
@@ -119,8 +55,9 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
     switch (listType) {
       case API_EFFECTIF_LISTE.A_TRAITER:
         return [
-          { label: "Apprenant", dataKey: "name", width: 400 },
+          { label: "Apprenant", dataKey: "name", width: 200 },
           { label: "Formation", dataKey: "formation", width: 350 },
+          { label: "Statut", dataKey: "badge", width: 200 },
           { label: "", dataKey: "icon", width: 10 },
         ];
 
@@ -149,7 +86,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   const dataRows = monthItem.data.map((effectif) => ({
     rawData: effectif,
-    element: buildRowData(effectif, listType),
+    element: buildRowData(effectif),
   }));
 
   const getRowLink = (rowData) => {
