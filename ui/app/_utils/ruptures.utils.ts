@@ -22,9 +22,14 @@ export const getTotalEffectifs = (data: MonthItem[]): number => {
   return data.reduce((acc, item) => acc + item.data.length, 0);
 };
 
+export const get180DaysAgo = () => {
+  const now = new Date();
+  return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+};
+
 export function groupMonthsOlderThan180Days(items: MonthItem[]): MonthItem[] {
   const now = new Date();
-  const cutoff180Days = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+  const cutoff180Days = get180DaysAgo();
 
   const sevenMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
