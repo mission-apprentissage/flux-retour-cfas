@@ -363,7 +363,14 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
 
 const addOrganismeFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = {
-    $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
+    $and: [
+      {
+        $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
+      },
+      {
+        $ne: ["$nouveau_contrat", true],
+      },
+    ],
   };
 
   return [
