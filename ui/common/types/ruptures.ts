@@ -13,6 +13,7 @@ export type EffectifData = {
   acc_conjoint: boolean;
   rqth: boolean;
   a_traiter: boolean;
+  nouveau_contrat: boolean;
 };
 
 export type EffectifPriorityData = EffectifData & {
