@@ -13,7 +13,7 @@ import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
 
-import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
 
 type EffectifsPriorityTableProps = {
@@ -68,7 +68,7 @@ export function EffectifsPriorityTable({
           id: effectif.id,
           badge: (
             <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
-              <EffectifStatusBadge effectif={effectif} />
+              <EffectifPriorityBadge effectif={effectif} />
             </div>
           ),
           name: <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>,
