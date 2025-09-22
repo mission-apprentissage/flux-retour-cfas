@@ -10,7 +10,7 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatMonthAndYear, anchorFromLabel } from "@/app/_utils/ruptures.utils";
 import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
-import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadge, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 
 type EffectifsMonthTableProps = {
@@ -26,7 +26,7 @@ type ColumnData = {
   width?: number | string;
 };
 
-function buildRowData(effectif: EffectifData) {
+function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifList) {
   return {
     id: effectif.id,
     badge: (
@@ -35,7 +35,10 @@ function buildRowData(effectif: EffectifData) {
       </div>
     ),
     name: (
-      <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadge effectif={effectif} isHeader />}
+        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
+      </div>
     ),
     formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
     icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -90,7 +93,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   const dataRows = monthItem.data.map((effectif) => ({
     rawData: effectif,
-    element: buildRowData(effectif),
+    element: buildRowData(effectif, listType),
   }));
 
   const getRowLink = (rowData) => {
