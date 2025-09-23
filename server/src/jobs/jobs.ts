@@ -125,9 +125,9 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "hydrate:transmission-daily", queued });
 
-  await addJob({ name: "hydrate:mission-locale-stats", queued });
-
   await addJob({ name: "hydrate:mission-locale-not-activated-effectif", queued });
+
+  await addJob({ name: "hydrate:mission-locale-stats", queued });
 
   return 0;
 };
