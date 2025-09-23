@@ -24,8 +24,24 @@ export const calculateDaysSince = (date: Date | string): number => {
 
 export const shouldShowContactForm = (
   userType: string,
-  effectif: { injoignable?: boolean | null | undefined },
+  effectif: {
+    injoignable?: boolean | null | undefined;
+    nouveau_contrat?: boolean | null | undefined;
+    a_traiter?: boolean | null | undefined;
+  },
   effectifUpdated: boolean
 ): boolean => {
-  return userType === "MISSION_LOCALE" && !!effectif.injoignable && !effectifUpdated;
+  if (userType !== "MISSION_LOCALE" || effectifUpdated) {
+    return false;
+  }
+
+  if (effectif.injoignable) {
+    return true;
+  }
+
+  if (effectif.nouveau_contrat && effectif.a_traiter) {
+    return true;
+  }
+
+  return false;
 };

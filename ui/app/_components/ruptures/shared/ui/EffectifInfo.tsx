@@ -175,6 +175,7 @@ export function EffectifInfo({
           situation={effectif.situation}
           visibility={user.organisation.type}
           logs={effectif.mission_locale_logs}
+          isNouveauContrat={effectif.nouveau_contrat ?? undefined}
         />
       )}
 

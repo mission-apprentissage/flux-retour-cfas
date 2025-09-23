@@ -143,7 +143,7 @@ export function EffectifDetailDisplay({
         nextEffectifId={next?.id || undefined}
       />
 
-      {(a_traiter || isEditable) && !isCfaPage && (
+      {(a_traiter || isEditable) && !isCfaPage && !effectif.nouveau_contrat && (
         <FeedbackForm
           formData={formData}
           setFormData={setFormData}
