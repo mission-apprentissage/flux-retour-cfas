@@ -121,7 +121,6 @@ export default function MissionLocaleEffectifClient() {
           {data && (
             <EffectifDetailDisplay
               effectifPayload={data}
-              nomListe={nomListe}
               saveStatus={saveStatus}
               onSave={(_goNext, formData) => handleSave(formData, data.effectif.id.toString())}
               isAdmin

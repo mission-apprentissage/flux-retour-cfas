@@ -50,6 +50,28 @@ export function EffectifStatusBadge({ effectif }: EffectifStatusBadgeProps) {
   return null;
 }
 
+export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps) {
+  if (effectif.prioritaire && effectif.a_traiter) {
+    return (
+      <p className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
+        <i className="fr-icon-fire-fill fr-icon--sm" />
+        <span style={{ marginLeft: "5px", fontWeight: "400" }}>À TRAITER EN PRIORITÉ</span>
+      </p>
+    );
+  }
+
+  if (effectif.prioritaire && !effectif.a_traiter && effectif.injoignable) {
+    return (
+      <p className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
+        <i className="fr-icon-fire-fill fr-icon--sm" />
+        <span style={{ marginLeft: "5px", fontWeight: "400" }}>À RECONTACTER EN PRIORITÉ</span>
+      </p>
+    );
+  }
+
+  return <EffectifStatusBadge effectif={effectif} />;
+}
+
 export function EffectifPriorityBadge({ effectif, isHeader = false }: EffectifStatusBadgeProps) {
   // PRIORITAIRE
 
@@ -57,49 +79,99 @@ export function EffectifPriorityBadge({ effectif, isHeader = false }: EffectifSt
   const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
 
   if (effectif.presque_6_mois) {
-    return (
-      <p className="fr-badge fr-badge--red" aria-label="Effectif à moins d'un mois de l'abandon">
-        <i className={`fr-icon-time-fill ${iconSize}`} />
-        <span style={{ marginLeft: "5px", fontSize }}>{"<1 MOIS ABANDON"}</span>
-      </p>
-    );
+    return <Presque6MoisBadge iconSize={iconSize} fontSize={fontSize} />;
   }
 
   if (effectif.mineur) {
-    return (
-      <p className="fr-badge fr-badge--red" aria-label="Effectif mineur">
-        <i className={`fr-icon-fire-fill ${iconSize}`} />
-        <span style={{ marginLeft: "5px", fontSize }}>{"16-18 ANS"}</span>
-      </p>
-    );
+    return <MineurBadge iconSize={iconSize} fontSize={fontSize} />;
   }
 
   if (effectif.rqth) {
-    return (
-      <p className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
-        <i className={`fr-icon-fire-fill ${iconSize}`} />
-        <span style={{ marginLeft: "5px", fontSize }}>{"RQTH"}</span>
-      </p>
-    );
+    return <RQTHBadge iconSize={iconSize} fontSize={fontSize} />;
   }
 
   if (effectif.acc_conjoint) {
-    return (
-      <p className="fr-badge fr-badge--red" aria-label="Effectif en collaboration avec un CFA">
-        <i className={`fr-icon-time-fill ${iconSize}`} />
-        <span style={{ marginLeft: "5px", fontSize }}>{"COLLAB CFA"}</span>
-      </p>
-    );
+    return <AccConjointBadge iconSize={iconSize} fontSize={fontSize} />;
   }
 
   if (effectif.a_contacter) {
-    return (
-      <p className="fr-badge fr-badge--red" aria-label="Effectif ayant répondu à la campagne mail">
-        <i className={`fr-icon-time-fill ${iconSize}`} />
-        <span style={{ marginLeft: "5px", fontSize }}>{"CAMPAGNE MAIL"}</span>
-      </p>
-    );
+    return <AContacterBadge iconSize={iconSize} fontSize={fontSize} />;
   }
 
   return null;
+}
+
+export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffecifMissionLocale["effectif"] }) {
+  if (!(effectif.prioritaire && (effectif.a_traiter || effectif.injoignable))) {
+    return null;
+  }
+  const badgeArray: Array<JSX.Element> = [];
+
+  if (effectif.presque_6_mois) {
+    badgeArray.push(<Presque6MoisBadge key="presque_6_mois" iconSize="fr-icon--xs" fontSize="12px" />);
+  }
+
+  if (effectif.mineur) {
+    badgeArray.push(<MineurBadge key="mineur" iconSize="fr-icon--xs" fontSize="12px" />);
+  }
+
+  if (effectif.rqth) {
+    badgeArray.push(<RQTHBadge key="rqth" iconSize="fr-icon--xs" fontSize="12px" />);
+  }
+
+  if (effectif.acc_conjoint) {
+    badgeArray.push(<AccConjointBadge key="acc_conjoint" iconSize="fr-icon--xs" fontSize="12px" />);
+  }
+
+  if (effectif.a_contacter) {
+    badgeArray.push(<AContacterBadge key="a_contacter" iconSize="fr-icon--xs" fontSize="12px" />);
+  }
+  return badgeArray.length > 0 ? (
+    <div style={{ display: "flex", gap: "8px", marginBottom: "1.5rem" }}>{badgeArray}</div>
+  ) : null;
+}
+
+function Presque6MoisBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+  return (
+    <p className="fr-badge fr-badge--red" aria-label="Effectif à moins d'un mois de l'abandon">
+      <i className={`fr-icon-time-fill ${iconSize}`} />
+      <span style={{ marginLeft: "5px", fontSize }}>{"<1 MOIS ABANDON"}</span>
+    </p>
+  );
+}
+
+function MineurBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+  return (
+    <p className="fr-badge fr-badge--red" aria-label="Effectif mineur">
+      <i className={`fr-icon-fire-fill ${iconSize}`} />
+      <span style={{ marginLeft: "5px", fontSize }}>{"16-18 ANS"}</span>
+    </p>
+  );
+}
+
+function RQTHBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+  return (
+    <p className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
+      <i className={`fr-icon-fire-fill ${iconSize}`} />
+      <span style={{ marginLeft: "5px", fontSize }}>{"RQTH"}</span>
+    </p>
+  );
+}
+
+function AccConjointBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+  return (
+    <p className="fr-badge fr-badge--red" aria-label="Effectif en collaboration avec un CFA">
+      <i className={`fr-icon-time-fill ${iconSize}`} />
+      <span style={{ marginLeft: "5px", fontSize }}>{"COLLAB CFA"}</span>
+    </p>
+  );
+}
+
+function AContacterBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+  return (
+    <p className="fr-badge fr-badge--red" aria-label="Effectif ayant répondu à la campagne mail">
+      <i className={`fr-icon-time-fill ${iconSize}`} />
+      <span style={{ marginLeft: "5px", fontSize }}>{"CAMPAGNE MAIL"}</span>
+    </p>
+  );
 }

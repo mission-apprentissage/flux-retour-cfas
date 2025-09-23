@@ -6,7 +6,7 @@ import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import React, { useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
+import { IEffecifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
@@ -18,7 +18,7 @@ import { shouldShowContactForm } from "../utils";
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
-import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifDetailStatusBadge, EffectifPriorityBadgeList } from "./EffectifStatusBadge";
 import { ProblematiquesJeune } from "./ProblematiquesJeune";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
@@ -51,13 +51,11 @@ const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
 
 export function EffectifInfo({
   effectif,
-  nomListe,
   isAdmin = false,
   setIsEditable,
   nextEffectifId,
 }: {
   effectif: IEffecifMissionLocale["effectif"];
-  nomListe: IMissionLocaleEffectifList;
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
   nextEffectifId?: string;
@@ -67,7 +65,7 @@ export function EffectifInfo({
   const pathname = usePathname();
   const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
-  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
+  const isPrioritaire = effectif.prioritaire && (effectif.a_traiter || effectif.injoignable);
 
   const computeTransmissionDate = (date: Date | null | undefined) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
@@ -96,14 +94,14 @@ export function EffectifInfo({
     <div className={styles.effectifInfoResponsive}>
       <div
         style={{
-          background: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
+          background: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
         }}
         className={styles.effectifInfoContainer}
       >
-        <div className={isListePrioritaire ? styles.effectifInfoInner : ""}>
-          <div className={styles.effectifHeader}>
+        <div className={isPrioritaire ? styles.effectifInfoInner : ""}>
+          <div className={styles.effectifHeader} style={{}}>
             <div className={styles.flexCenterGap8}>
-              <EffectifStatusBadge effectif={effectif} />
+              <EffectifDetailStatusBadge effectif={effectif} />
               <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
@@ -119,7 +117,9 @@ export function EffectifInfo({
               </div>
             )}
           </div>
-
+          <div>
+            <EffectifPriorityBadgeList effectif={effectif} />
+          </div>
           <div className={styles.effectifContent}>
             {effectif.nouveau_contrat && <StatusChangeInformation date={effectif?.current_status?.date} />}
             <h3 className={`fr-text--blue-france ${styles.effectifTitle}`}>
@@ -130,7 +130,7 @@ export function EffectifInfo({
                 <Notice
                   className={styles.noticeContainer}
                   style={{
-                    backgroundColor: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
+                    backgroundColor: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
                   }}
                   title="Date de la rupture du contrat d'apprentissage :"
                   description={

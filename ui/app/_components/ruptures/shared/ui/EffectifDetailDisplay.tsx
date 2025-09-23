@@ -8,7 +8,6 @@ import {
   IUpdateMissionLocaleEffectif,
   IUpdateOrganismeFormationEffectif,
   SITUATION_ENUM,
-  IMissionLocaleEffectifList,
 } from "shared";
 
 import { CfaFeedbackForm } from "@/app/_components/cfa/FeedbackForm";
@@ -45,7 +44,6 @@ function validateCfaForm(cfaFormData: IUpdateOrganismeFormationEffectif): boolea
 
 interface EffectifDetailDisplayProps {
   effectifPayload: IEffecifMissionLocale | IEffectifOrganismeFormation;
-  nomListe: IMissionLocaleEffectifList;
   saveStatus: "idle" | "loading" | "success" | "error";
   onSave: (goNext: boolean, formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif) => void;
   isAdmin?: boolean;
@@ -53,7 +51,6 @@ interface EffectifDetailDisplayProps {
 
 export function EffectifDetailDisplay({
   effectifPayload,
-  nomListe,
   saveStatus,
   onSave,
   isAdmin = false,
@@ -137,7 +134,6 @@ export function EffectifDetailDisplay({
 
       <EffectifInfo
         effectif={effectif}
-        nomListe={nomListe}
         isAdmin={isAdmin}
         setIsEditable={setIsEditable}
         nextEffectifId={next?.id || undefined}
