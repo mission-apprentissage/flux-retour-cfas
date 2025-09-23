@@ -14,9 +14,10 @@ interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
   logs?: Array<IMissionLocaleEffectifLog> | null;
+  isNouveauContrat?: boolean;
 }
 
-export function MissionLocaleFeedback({ visibility, logs, situation }: MissionLocaleFeedbackProps) {
+export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauContrat }: MissionLocaleFeedbackProps) {
   let sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
 
   // pour gerer les effectifs legacy sans logs
@@ -153,14 +154,18 @@ export function MissionLocaleFeedback({ visibility, logs, situation }: MissionLo
 
               const isSecondAttempt = index === 1 && log.probleme_type;
 
-              if (isSecondAttempt) {
+              if (isSecondAttempt || isNouveauContrat) {
                 return (
                   <div className={styles.feedbackContainer}>
                     <p className="fr-mb-1v">
                       <b>Êtes-vous entré en contact avec ce jeune ?</b>
                     </p>
                     <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
-
+                    {isNouveauContrat ? (
+                      <p className="fr-mb-0">
+                        <b>Ce jeune a retrouvé un contrat d&apos;apprentissage.</b>
+                      </p>
+                    ) : null}
                     {log.probleme_type && (
                       <>
                         <p className="fr-mb-1v fr-mt-3v">
