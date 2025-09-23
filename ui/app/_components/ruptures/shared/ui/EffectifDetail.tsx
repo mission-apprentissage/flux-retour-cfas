@@ -163,7 +163,6 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
           {data && (
             <EffectifDetailDisplay
               effectifPayload={data}
-              nomListe={nomListe}
               saveStatus={saveStatus}
               onSave={(goNext, formData) => handleSave(goNext, formData, data.effectif.id.toString(), data.next?.id)}
             />
