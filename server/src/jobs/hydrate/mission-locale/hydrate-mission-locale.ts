@@ -411,3 +411,18 @@ export const updateMissionLocaleEffectifSnapshot = async (activationDate: Date) 
     await activateMissionLocale(orga._id, activationDate);
   }
 };
+
+export const updateNotActivatedMissionLocaleEffectifSnapshot = async () => {
+  const cursor = organisationsDb().find({
+    type: "MISSION_LOCALE",
+    activated_at: null,
+  });
+
+  while (await cursor.hasNext()) {
+    const orga = (await cursor.next()) as IOrganisationMissionLocale;
+    if (!orga) {
+      continue;
+    }
+    await updateEffectifMissionLocaleSnapshotAtMLActivation(orga._id);
+  }
+};
