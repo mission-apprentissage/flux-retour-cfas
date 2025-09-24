@@ -1678,7 +1678,69 @@ export const setEffectifMissionLocaleData = async (
   return updated;
 };
 
+const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
+  try {
+    // Détection des incohérences
+    const parcours = (effectif._computed as any)?.parcours || [];
+    const inconsistencies: string[] = [];
+
+    if (parcours.length > 0) {
+      const today = new Date();
+
+      // Statut actif selon les dates vs dernier du parcours
+      const currentStatusML =
+        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
+      const lastParcoursStatus = parcours[parcours.length - 1];
+
+      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
+        inconsistencies.push(
+          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
+        );
+      }
+
+      // Statut futur utilisé comme current
+      if (currentStatusML && new Date(currentStatusML.date) > today) {
+        const daysFuture = Math.floor(
+          (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
+        );
+        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
+      }
+
+      // Rupture sans RUPTURANT après la date
+      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
+      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
+        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
+      }
+
+      if (inconsistencies.length > 0) {
+        logger.warn(
+          {
+            effectifId: effectif._id,
+            apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
+            inconsistencies,
+            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
+            contrats:
+              effectif.contrats?.map((c: any) => ({
+                debut: c.date_debut,
+                fin: c.date_fin,
+                rupture: c.date_rupture,
+              })) || [],
+            currentStatusWillBe: {
+              statut: currentStatusML?.statut,
+              date: currentStatusML?.date,
+            },
+          },
+          "[INCONSISTANCES] Effectif avec incohérences détectées"
+        );
+      }
+    }
+  } catch (error) {
+    logger.error({ error }, "[INCONSISTANCES] Erreur lors de la détection des incohérences");
+  }
+};
+
 export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+  logMissionLocaleSnapshot(effectif);
   const currentStatus =
     effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
     effectif._computed?.statut?.parcours.slice(-1)[0];
