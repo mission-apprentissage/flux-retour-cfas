@@ -9,7 +9,6 @@ import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import {
-  groupMonthsOlderThan180Days,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
@@ -70,7 +69,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const injoignableList = data.injoignable || [];
   const dejaTraite = data.traite || [];
 
-  const groupedDataATraiter = useMemo(() => groupMonthsOlderThan180Days(aTraiter), [aTraiter]);
+  const groupedDataATraiter = useMemo(() => sortDataByMonthDescending(aTraiter), [aTraiter]);
   const groupedInjoignable = useMemo(() => sortDataByMonthDescending(injoignableList), [injoignableList]);
   const sortedDataTraite = useMemo(() => sortDataByMonthDescending(dejaTraite), [dejaTraite]);
 

@@ -808,24 +808,24 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 
   const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
 
-  const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
-    if (!firstDate) {
-      return [];
-    }
-    const dates: string[] = [];
-    const today: Date = new Date();
-    const targetDate = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
-    let done = false;
-    let i = 0;
-
-    while (!done) {
-      const date: Date = new Date(Date.UTC(today.getFullYear(), today.getMonth() - i, 1));
-      const formatted: string = date.toISOString();
-      done = date <= targetDate;
-      dates.push(formatted);
-      i++;
-    }
-    return dates;
+  const getSevenLastMonth = () => {
+    return [
+      ...Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setUTCMonth(date.getUTCMonth() - i, 1);
+        date.setUTCHours(0, 0, 0, 0);
+        return {
+          month: date.toISOString(),
+          ...(aTraiter ? { treated_count: 0 } : {}),
+          data: [],
+        };
+      }),
+      {
+        month: "plus-de-180-j",
+        ...(aTraiter ? { treated_count: 0 } : {}),
+        data: [],
+      },
+    ];
   };
 
   const getGroupPushCondition = () => {
@@ -864,9 +864,19 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     {
       $addFields: {
         firstDayOfMonth: {
-          $dateFromParts: {
-            year: { $year: "$date_rupture" },
-            month: { $month: "$date_rupture" },
+          $cond: {
+            if: { $lt: ["$$ROOT.dernierStatutDureeInDay", 180] },
+            then: {
+              $dateToString: {
+                date: {
+                  $dateFromParts: {
+                    year: { $year: "$date_rupture" },
+                    month: { $month: "$date_rupture" },
+                  },
+                },
+              },
+            },
+            else: "plus-de-180-j",
           },
         },
       },
@@ -928,27 +938,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   );
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const sevenLastMonth = getSevenLastMonth();
+  const mapped = sevenLastMonth.map((data) => {
+    const found = result.find(({ month }) => {
+      return month.toString() === data.month;
+    });
+    return found ? found : data;
+  });
 
-  const oldestRealDataIndex = result.findLastIndex(
-    ({ treated_count, data }) => (treated_count ?? 0) > 0 || data.length > 0
-  );
-  const effectifs = oldestRealDataIndex >= 0 ? result.slice(0, oldestRealDataIndex + 1) : [...result];
-
-  const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
-  const formattedData = aTraiter
-    ? getFirstDayOfMonthListFromDate(oldestMonth).map((date) => {
-        const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
-        return (
-          found ?? {
-            month: date,
-            ...(aTraiter ? { treated_count: 0 } : {}),
-            data: [],
-          }
-        );
-      })
-    : effectifs.sort((a, b) => b.month - a.month);
-
-  return formattedData;
+  return mapped;
 };
 
 export const getEffectifFromMissionLocaleId = async (
