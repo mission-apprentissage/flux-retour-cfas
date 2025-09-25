@@ -946,7 +946,16 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     return found ? found : data;
   });
 
-  return mapped;
+  let trimmed = [...mapped];
+  while (
+    trimmed.length > 0 &&
+    (trimmed[trimmed.length - 1].treated_count === 0 || trimmed[trimmed.length - 1].treated_count === undefined) &&
+    Array.isArray(trimmed[trimmed.length - 1].data) &&
+    trimmed[trimmed.length - 1].data.length === 0
+  ) {
+    trimmed.pop();
+  }
+  return trimmed;
 };
 
 export const getEffectifFromMissionLocaleId = async (
