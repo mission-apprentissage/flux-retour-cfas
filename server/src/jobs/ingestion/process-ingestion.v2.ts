@@ -10,7 +10,7 @@ import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { buildAdresse, type IIngestAdresseUsedFields } from "./adresse/adresse.builder";
 import { ingestEffectifV2, type IIngestEffectifUsedFields } from "./effectif/effectif.ingestion";
 import { ingestFormationV2, type IIngestFormationUsedFields } from "./formationV2/formationV2.ingestion";
-import { ingestPersonV2, type IIngestPersonUsedFields } from "./person/person.ingestion";
+import { ingestPersonV2, updateParcoursPersonV2, type IIngestPersonUsedFields } from "./person/person.ingestion";
 
 const logger = parentLogger.child({
   module: "process-ingestion.v2",
@@ -23,26 +23,30 @@ async function ingestDossier(
   >,
   adresse: IEffectifV2["adresse"],
   date_transmission: Date
-) {
+): Promise<IEffectifV2> {
   const [formation, person] = await Promise.all([ingestFormationV2(dossier), ingestPersonV2(dossier)]);
 
-  await ingestEffectifV2({
+  const effectifV2 = await ingestEffectifV2({
     dossier,
     adresse,
     person_id: person._id,
     formation_id: formation._id,
     date_transmission,
   });
+
+  await updateParcoursPersonV2(person._id, effectifV2);
+
+  return effectifV2;
 }
 
 export async function handleEffectifTransmission(
   effectifQueue: WithId<IEffectifQueue>,
   date_transmission: Date
-): Promise<void> {
+): Promise<IEffectifV2 | void> {
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
     const adresse = await buildAdresse(dossier);
-    await ingestDossier(dossier, adresse, date_transmission);
+    return ingestDossier(dossier, adresse, date_transmission);
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);
@@ -135,22 +139,22 @@ async function migrateEffectif(effectif: IEffectif, organismeLookup: Map<string 
 
   const adresse: IEffectifV2["adresse"] =
     dossier.code_postal_apprenant &&
-    dossier.code_commune_insee_apprenant &&
-    effectif.apprenant?.adresse?.region &&
-    effectif.apprenant.adresse.departement &&
-    effectif.apprenant.adresse.departement &&
-    effectif.apprenant.adresse.academie &&
-    effectif.apprenant.adresse.commune
+      dossier.code_commune_insee_apprenant &&
+      effectif.apprenant?.adresse?.region &&
+      effectif.apprenant.adresse.departement &&
+      effectif.apprenant.adresse.departement &&
+      effectif.apprenant.adresse.academie &&
+      effectif.apprenant.adresse.commune
       ? {
-          label: dossier.adresse_apprenant ?? null,
-          code_postal: dossier.code_postal_apprenant,
-          code_commune_insee: dossier.code_commune_insee_apprenant,
-          commune: effectif.apprenant.adresse.commune,
-          code_region: effectif.apprenant.adresse.region,
-          code_departement: effectif.apprenant.adresse.departement,
-          code_academie: effectif.apprenant.adresse.academie,
-          mission_locale_id: effectif.apprenant.adresse.mission_locale_id ?? null,
-        }
+        label: dossier.adresse_apprenant ?? null,
+        code_postal: dossier.code_postal_apprenant,
+        code_commune_insee: dossier.code_commune_insee_apprenant,
+        commune: effectif.apprenant.adresse.commune,
+        code_region: effectif.apprenant.adresse.region,
+        code_departement: effectif.apprenant.adresse.departement,
+        code_academie: effectif.apprenant.adresse.academie,
+        mission_locale_id: effectif.apprenant.adresse.mission_locale_id ?? null,
+      }
       : await buildAdresse(dossier);
 
   return ingestDossier(dossier, adresse, effectif.transmitted_at ?? effectif.updated_at!);

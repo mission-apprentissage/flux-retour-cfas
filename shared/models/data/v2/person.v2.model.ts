@@ -15,6 +15,18 @@ const zPersonV2 = z.object({
     prenom: z.string(),
     date_de_naissance: z.date(),
   }),
+  parcours: z.object({
+    en_cours: z.object({
+      eV2_id: zObjectId,
+      date_inscription: z.date(),
+    }).nullable(),
+    chronologie: z.array(
+      z.object({
+        eV2_id: zObjectId,
+        date_inscription: z.date(),
+      })
+    ),
+  }),
 });
 
 export type IPersonV2 = z.output<typeof zPersonV2>;
