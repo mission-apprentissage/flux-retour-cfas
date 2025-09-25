@@ -470,61 +470,6 @@ const createOrUpdateEffectif = async (
       effectifDb = await lockEffectif(effectifDb);
     }
 
-    // Détection des incohérences
-    const parcours = (effectifDb._computed as any)?.parcours || [];
-    const inconsistencies: string[] = [];
-
-    if (parcours.length > 0) {
-      const today = new Date();
-
-      // Statut actif selon les dates vs dernier du parcours
-      const currentStatusML =
-        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
-      const lastParcoursStatus = parcours[parcours.length - 1];
-
-      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
-        inconsistencies.push(
-          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
-        );
-      }
-
-      // Statut futur utilisé comme current
-      if (currentStatusML && new Date(currentStatusML.date) > today) {
-        const daysFuture = Math.floor(
-          (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
-        );
-        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
-      }
-
-      // Rupture sans RUPTURANT après la date
-      const hasRuptureDate = effectifDb.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
-      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
-        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
-      }
-
-      if (inconsistencies.length > 0) {
-        logger.warn(
-          {
-            effectifId: effectifDb._id,
-            apprenant: `${effectifDb.apprenant?.prenom} ${effectifDb.apprenant?.nom}`,
-            inconsistencies,
-            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
-            contrats:
-              effectifDb.contrats?.map((c: any) => ({
-                debut: c.date_debut,
-                fin: c.date_fin,
-                rupture: c.date_rupture,
-              })) || [],
-            currentStatusWillBe: {
-              statut: currentStatusML?.statut,
-              date: currentStatusML?.date,
-            },
-          },
-          "[INCONSISTANCES] Effectif avec incohérences détectées"
-        );
-      }
-    }
-
     await createMissionLocaleSnapshot(effectifDb);
     return { effectifId: effectifDb._id, itemProcessingInfos };
   } catch (err) {
