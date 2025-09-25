@@ -574,6 +574,25 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
   }
 };
 
+const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER:
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+    case API_EFFECTIF_LISTE.TRAITE:
+      return { date_rupture: -1 };
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return {
+        a_risque_presque_6_mois: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_contacter: -1,
+      };
+  }
+};
+
 const lookUpOrganisme = (withContacts: boolean = false) => {
   return [
     {
@@ -746,9 +765,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(nom_liste),
     {
-      $sort: {
-        date_rupture: -1,
-      },
+      $sort: getSortedRulesByListeType(nom_liste),
     },
     {
       $project: {
@@ -1127,13 +1144,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
             },
           },
           {
-            $sort: {
-              a_risque_presque_6_mois: -1,
-              a_risque_mineur: -1,
-              rqth: -1,
-              a_risque_accompagnement_conjoint: -1,
-              a_contacter: -1,
-            },
+            $sort: getSortedRulesByListeType(API_EFFECTIF_LISTE.PRIORITAIRE),
           },
           ...lookUpOrganisme(),
           {
