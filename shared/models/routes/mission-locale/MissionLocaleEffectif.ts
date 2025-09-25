@@ -44,6 +44,7 @@ const zEffectifMissionLocale = z
     transmitted_at: z.date().nullish(),
     prioritaire: z.boolean().nullish(),
     injoignable: z.boolean().nullish(),
+    nouveau_contrat: z.boolean().describe("Indique si le jeune a retrouvé un contrat après rupture/abandon").nullish(),
     autorisation_contact: z.boolean().nullish(),
     date_rupture: z
       .object({
@@ -54,6 +55,10 @@ const zEffectifMissionLocale = z
     situation: z.object(updateMissionLocaleEffectifApi).nullish(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),
+    mineur: z.boolean().nullish(),
+    presque_6_mois: z.boolean().nullish(),
+    acc_conjoint: z.boolean().nullish(),
+    rqth: z.boolean().nullish(),
     mission_locale_logs: z.array(zMissionLocaleEffectifLog).nullish(),
   })
   .merge(zApprenantPick);

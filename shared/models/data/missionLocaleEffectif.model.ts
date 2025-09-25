@@ -18,6 +18,7 @@ export enum SITUATION_ENUM {
   CONTACTE_SANS_RETOUR = "CONTACTE_SANS_RETOUR",
   COORDONNEES_INCORRECT = "COORDONNEES_INCORRECT",
   INJOIGNABLE_APRES_RELANCES = "INJOIGNABLE_APRES_RELANCES",
+  NOUVEAU_CONTRAT = "NOUVEAU_CONTRAT",
   AUTRE = "AUTRE",
 }
 
@@ -32,6 +33,7 @@ export enum SITUATION_LABEL_ENUM {
   CONTACTE_SANS_RETOUR = "Contacté mais sans réponse",
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
   INJOIGNABLE_APRES_RELANCES = "Injoignable après plusieurs tentatives",
+  NOUVEAU_CONTRAT = "Ce jeune a retrouvé un contrat d'apprentissage",
   AUTRE = "Autre situation / retour",
 }
 
@@ -57,6 +59,9 @@ export enum API_EFFECTIF_LISTE {
   INJOIGNABLE = "injoignable",
   TRAITE = "traite",
   A_TRAITER = "a_traiter",
+  INJOIGNABLE_PRIORITAIRE = "injoignable_prioritaire",
+  A_TRAITER_PRIORITAIRE = "a_traiter_prioritaire",
+  TRAITE_PRIORITAIRE = "traite_prioritaire",
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);

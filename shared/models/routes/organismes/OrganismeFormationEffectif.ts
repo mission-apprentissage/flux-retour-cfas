@@ -38,6 +38,7 @@ const zEffectifOrganismeFormation = z
     transmitted_at: z.date().nullish(),
     prioritaire: z.boolean().nullish(),
     injoignable: z.boolean().nullish(),
+    nouveau_contrat: z.boolean().describe("Indique si le jeune a retrouvé un contrat après rupture/abandon").nullish(),
     autorisation_contact: z.boolean().nullish(),
     date_rupture: z
       .object({

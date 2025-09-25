@@ -1,7 +1,5 @@
 "use client";
 
-import { format } from "date-fns/index";
-import { fr } from "date-fns/locale";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useMemo, useState } from "react";
@@ -15,6 +13,7 @@ import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
 
+import { EffectifPriorityBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
 
 type EffectifsPriorityTableProps = {
@@ -23,13 +22,6 @@ type EffectifsPriorityTableProps = {
   hadEffectifsPrioritaires?: boolean;
   listType?: IMissionLocaleEffectifList;
 };
-
-function formatMonthAndYear(dateStr: string | undefined): string {
-  if (!dateStr) return "Date inconnue";
-  const d = new Date(dateStr);
-  const raw = format(d, "MMMM yyyy", { locale: fr });
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
-}
 
 function PriorityBadge({
   priorityData,
@@ -41,7 +33,7 @@ function PriorityBadge({
   const label = listType ? getPriorityLabel(listType) : "À TRAITER EN PRIORITÉ";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-      <p className="fr-badge fr-badge--orange-terre-battue" style={{ gap: "0.5rem" }}>
+      <p className="fr-badge fr-badge--red" style={{ gap: "0.5rem" }}>
         <i className="fr-icon-fire-fill fr-icon--sm" /> {label} ({priorityData.length})
       </p>
     </div>
@@ -58,24 +50,27 @@ export function EffectifsPriorityTable({
   const params = useParams();
   const mlId = params?.id as string | undefined;
   const [infoOpen, setInfoOpen] = useState(false);
-
+  const PRIORITY_LIST_NAME = `${listType}_${API_EFFECTIF_LISTE.PRIORITAIRE}`;
   const columns = useMemo(() => {
     return [
-      { label: "", dataKey: "monthBadge", width: 150 },
       { label: "", dataKey: "name", width: 200 },
       { label: "", dataKey: "formation", width: "auto" },
+      { label: "", dataKey: "badge", width: 250 },
       { label: "", dataKey: "arrow", width: 40 },
     ];
   }, []);
 
   const tableData = useMemo(() => {
     return priorityData.map((effectif) => {
-      const labelMonth = formatMonthAndYear(effectif.date_rupture || "");
       return {
         rawData: effectif,
         element: {
           id: effectif.id,
-          monthBadge: <p className="fr-badge fr-badge--beige-gris-galet fr-badge--sm">{labelMonth}</p>,
+          badge: (
+            <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
+              <EffectifPriorityBadge effectif={effectif} />
+            </div>
+          ),
           name: <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>,
           formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
           arrow: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
@@ -186,8 +181,8 @@ export function EffectifsPriorityTable({
             searchableColumns={["nom", "prenom"]}
             getRowLink={(rowData) => {
               return user.organisation.type === "ADMINISTRATEUR" && mlId
-                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`
-                : `/mission-locale/${rowData.id}?nom_liste=${API_EFFECTIF_LISTE.PRIORITAIRE}`;
+                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}`
+                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}`;
             }}
           />
         </>

@@ -188,6 +188,28 @@ describe("Mission Locale Routes", () => {
       expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
     });
 
+    it("Le CFA ne voit pas l'effectif qui a retrouvé un nouveau contrat", async () => {
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: EFFECTIF_ID },
+        {
+          $set: {
+            current_status: {
+              value: "APPRENTI",
+              date: new Date(),
+            },
+          },
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "get",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
+      );
+
+      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+    });
+
     describe("Le CFA traite un jeune", () => {
       it("CFA refuse l'acc conjoint => Le jeune n'est pas visible par la ML", async () => {
         const res = await requestAsOrganisation(

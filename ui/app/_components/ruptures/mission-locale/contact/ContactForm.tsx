@@ -46,11 +46,11 @@ const initialValues: FormValues = {
   action: null,
 };
 
-const validate = (values: FormValues) => {
+const validate = (values: FormValues, isNouveauContrat: boolean) => {
   const errors: any = {};
 
   if (values.contactSuccess === null) {
-    errors.contactSuccess = "Veuillez indiquer si vous avez pu rentrer en contact avec le jeune";
+    errors.contactSuccess = "Veuillez indiquer si vous êtes entré en contact avec ce jeune";
     return errors;
   }
 
@@ -62,14 +62,20 @@ const validate = (values: FormValues) => {
       errors.situationAutre = "Veuillez préciser la situation";
     }
   } else {
-    if (!values.probleme) {
-      errors.probleme = "Veuillez sélectionner un problème";
-    }
-    if (values.probleme === PROBLEME_TYPE_ENUM.AUTRE && !values.problemeAutre.trim()) {
-      errors.problemeAutre = "Veuillez préciser le problème";
-    }
-    if (!values.action) {
-      errors.action = "Veuillez choisir une action";
+    if (isNouveauContrat) {
+      if (!values.action) {
+        errors.action = "Veuillez choisir une action";
+      }
+    } else {
+      if (!values.probleme) {
+        errors.probleme = "Veuillez sélectionner un problème";
+      }
+      if (values.probleme === PROBLEME_TYPE_ENUM.AUTRE && !values.problemeAutre.trim()) {
+        errors.problemeAutre = "Veuillez préciser le problème";
+      }
+      if (!values.action) {
+        errors.action = "Veuillez choisir une action";
+      }
     }
   }
 
@@ -92,6 +98,8 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitAction, setSubmitAction] = useState<"quit" | "continue" | null>(null);
 
+  const isNouveauContrat = effectif?.nouveau_contrat === true;
+
   const invalidateEffectifQueries = (effectifId: string) => {
     queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(effectifId) });
     queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
@@ -100,9 +108,19 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
   const handleSubmit = async (values: FormValues) => {
     try {
       setErrorMessage(null);
-      const payload = values.contactSuccess
-        ? createContactSuccessPayload(values.situation!, values.situationAutre, values.commentaires)
-        : createContactFailurePayload(values.probleme, values.problemeAutre, values.action!);
+
+      let payload;
+      if (values.contactSuccess) {
+        payload = createContactSuccessPayload(values.situation!, values.situationAutre, values.commentaires);
+      } else if (isNouveauContrat) {
+        if (values.action === "traiter") {
+          payload = createContactSuccessPayload(SITUATION_ENUM.NOUVEAU_CONTRAT);
+        } else {
+          payload = createContactSuccessPayload(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+        }
+      } else {
+        payload = createContactFailurePayload(values.probleme, values.problemeAutre, values.action!);
+      }
 
       await recordContactMutation.mutateAsync({ effectifId, payload });
       invalidateEffectifQueries(effectifId);
@@ -134,17 +152,25 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
 
   return (
     <div className={styles.container}>
-      <h3 className={`fr-mb-1w ${styles.title}`}>Que se passe-t-il aujourd&apos;hui ?</h3>
+      <h3 className={`fr-mb-1w ${styles.title}`}>
+        {isNouveauContrat ? "Avez-vous pu rentrer en contact avec le jeune ?" : "Que se passe-t-il aujourd'hui ?"}
+      </h3>
 
-      <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
+      <Formik
+        initialValues={initialValues}
+        validate={(values) => validate(values, isNouveauContrat)}
+        onSubmit={handleSubmit}
+      >
         {({ values, setFieldValue, isSubmitting }) => {
           const isFormComplete =
             values.contactSuccess !== null &&
             (values.contactSuccess === true
               ? values.situation !== null && (values.situation !== SITUATION_ENUM.AUTRE || values.situationAutre.trim())
-              : values.probleme !== "" &&
-                (values.probleme !== PROBLEME_TYPE_ENUM.AUTRE || values.problemeAutre.trim()) &&
-                values.action !== null);
+              : isNouveauContrat
+                ? values.action !== null
+                : values.probleme !== "" &&
+                  (values.probleme !== PROBLEME_TYPE_ENUM.AUTRE || values.problemeAutre.trim()) &&
+                  values.action !== null);
 
           return (
             <Form>
@@ -161,7 +187,7 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
                 )}
 
                 <RadioButtons
-                  legend="Avez-vous pu rentrer en contact le jeune ?"
+                  legend="Êtes-vous entré en contact avec ce jeune ?"
                   name="contact-success"
                   options={[
                     {
@@ -264,6 +290,47 @@ export function ContactForm({ effectifId, effectif, onSuccess }: ContactFormProp
                 {values.contactSuccess === false &&
                   (shouldShowGuidance ? (
                     <SecondAttemptGuidance onReset={() => handleReset(setFieldValue)} onTraiter={handleTraiter} />
+                  ) : isNouveauContrat ? (
+                    <div>
+                      <RadioButtons
+                        legend="Que souhaitez-vous faire ?"
+                        name="action"
+                        options={[
+                          {
+                            label: (
+                              <div className={styles.actionLabelContainer}>
+                                Garder le jeune dans ma liste
+                                <span className={`fr-badge fr-badge--purple-glycine ${styles.recontacterBadge}`}>
+                                  <i className="fr-icon-phone-fill fr-icon--sm" />
+                                  <span className={styles.recontacterIcon}>À RECONTACTER</span>
+                                </span>
+                              </div>
+                            ),
+                            nativeInputProps: {
+                              value: "garder",
+                              checked: values.action === "garder",
+                              onChange: () => setFieldValue("action", "garder"),
+                            },
+                            hintText: "Ce jeune restera à recontacter",
+                          },
+                          {
+                            label: (
+                              <div className={styles.actionLabelContainer}>
+                                Marquer le dossier du jeune comme
+                                <Badge severity="success">traité</Badge>
+                              </div>
+                            ),
+                            nativeInputProps: {
+                              value: "traiter",
+                              checked: values.action === "traiter",
+                              onChange: () => setFieldValue("action", "traiter"),
+                            },
+                            hintText: "Ce jeune a retrouvé un contrat d'apprentissage",
+                          },
+                        ]}
+                        state="default"
+                      />
+                    </div>
                   ) : (
                     <>
                       <RadioButtons

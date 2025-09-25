@@ -53,7 +53,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
         : `/${orgType}/validation`;
     }
 
-    return `/${orgType}`;
+    return `/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`;
   }
 
   const updateEffectifMutation = useMutation({
@@ -100,7 +100,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
       } else {
         setTimeout(() => {
           queryClient.invalidateQueries(["effectif"]);
-          router.push(`/${orgType}`);
+          router.push(`/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`);
         }, REDIRECTION_DELAY);
       }
     },
@@ -123,7 +123,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     });
   }
 
-  const backUrl = pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale";
+  const backUrl = `${pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale"}?statut=${nomListe}&rupture=${data?.effectif.date_rupture}`;
   const isMissionLocaleView = pathname?.startsWith("/mission-locale");
 
   return (
@@ -163,7 +163,6 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
           {data && (
             <EffectifDetailDisplay
               effectifPayload={data}
-              nomListe={nomListe}
               saveStatus={saveStatus}
               onSave={(goNext, formData) => handleSave(goNext, formData, data.effectif.id.toString(), data.next?.id)}
             />

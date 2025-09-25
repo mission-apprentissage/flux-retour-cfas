@@ -14,7 +14,7 @@ import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
-// import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
+import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
@@ -48,7 +48,9 @@ import {
   softDeleteDoublonEffectifML,
   updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
+  updateMissionLocaleEffectifSnapshot,
   updateMissionLocaleSnapshotFromLastStatus,
+  updateNotActivatedMissionLocaleEffectifSnapshot,
 } from "./hydrate/mission-locale/hydrate-mission-locale";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
@@ -123,9 +125,9 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "hydrate:transmission-daily", queued });
 
-  await addJob({ name: "hydrate:mission-locale-stats", queued });
+  await addJob({ name: "hydrate:mission-locale-not-activated-effectif", queued });
 
-  // await addJob({ name: "hydrate:bal-mails", queued });
+  await addJob({ name: "hydrate:mission-locale-stats", queued });
 
   return 0;
 };
@@ -352,8 +354,7 @@ export async function setupJobProcessor() {
       },
       "send-mission-locale-weekly-recap": {
         handler: async () => {
-          return null;
-          //return sendMissionLocaleWeeklyRecap();
+          return sendMissionLocaleWeeklyRecap();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
@@ -449,9 +450,20 @@ export async function setupJobProcessor() {
           await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate);
         },
       },
+      "hydrate:mission-locale-not-activated-effectif": {
+        handler: async () => {
+          await updateNotActivatedMissionLocaleEffectifSnapshot();
+        },
+      },
       "tmp:migrate:mission-locale-current-status": {
         handler: async () => {
           return updateMissionLocaleEffectifCurrentStatus();
+        },
+      },
+      "tmp:migrate:mission-locale-effectif-snapshot": {
+        handler: async (job) => {
+          const jobDate = (job.payload as any)?.date;
+          return updateMissionLocaleEffectifSnapshot(jobDate);
         },
       },
       "tmp:force-hydrate-transmissions": {

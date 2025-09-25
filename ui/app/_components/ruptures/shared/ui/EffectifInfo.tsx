@@ -3,13 +3,13 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import React, { useMemo, useState } from "react";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale, IMissionLocaleEffectifList } from "shared";
+import React, { useState } from "react";
+import { IEffecifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
-import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
 
 import { CfaFeedback } from "../../cfa";
 import { ContactForm, MissionLocaleFeedback } from "../../mission-locale";
@@ -18,34 +18,44 @@ import { shouldShowContactForm } from "../utils";
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
-import { EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifDetailStatusBadge, EffectifPriorityBadgeList } from "./EffectifStatusBadge";
 import { ProblematiquesJeune } from "./ProblematiquesJeune";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
   const now = new Date();
-  const defaultText = "Il a été indiqué que ce jeune a retrouvé un nouveau contrat";
-  if (!date) return defaultText;
+  let text: string;
+  if (!date) {
+    text = "Ce jeune est à nouveau en contrat (date inconnue)";
+  } else {
+    text =
+      new Date(date) < now
+        ? `Ce jeune est à nouveau en contrat depuis le ${formatDate(date)}`
+        : `Ce jeune sera à nouveau en contrat le ${formatDate(date)}`;
+  }
 
-  const text =
-    new Date(date) < now
-      ? `${defaultText}, qui a débuté le ${formatDate(date)}`
-      : `${defaultText}, qui va débuter le ${formatDate(date)}`;
   return (
     <div className={styles.statusChangeInfo}>
-      <p className={`fr-text--sm ${styles.statusChangeText}`}>{text}</p>
+      <p className={`fr-text--sm ${styles.statusChangeText}`}>
+        <Image
+          src="/images/info-nouveau-contrat.svg"
+          alt="Information nouveau contrat"
+          width={16}
+          height={16}
+          style={{ marginRight: "8px", verticalAlign: "middle" }}
+        />
+        {text}
+      </p>
     </div>
   );
 };
 
 export function EffectifInfo({
   effectif,
-  nomListe,
   isAdmin = false,
   setIsEditable,
   nextEffectifId,
 }: {
   effectif: IEffecifMissionLocale["effectif"];
-  nomListe: IMissionLocaleEffectifList;
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
   nextEffectifId?: string;
@@ -55,9 +65,7 @@ export function EffectifInfo({
   const pathname = usePathname();
   const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
-  const isListePrioritaire = nomListe === API_EFFECTIF_LISTE.PRIORITAIRE;
-
-  const priorityLabel = useMemo(() => getPriorityLabel(nomListe), [nomListe]);
+  const isPrioritaire = effectif.prioritaire && (effectif.a_traiter || effectif.injoignable);
 
   const computeTransmissionDate = (date: Date | null | undefined) => {
     return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
@@ -86,14 +94,14 @@ export function EffectifInfo({
     <div className={styles.effectifInfoResponsive}>
       <div
         style={{
-          background: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
+          background: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
         }}
         className={styles.effectifInfoContainer}
       >
-        <div className={styles.effectifInfoInner}>
-          <div className={styles.effectifHeader}>
+        <div className={isPrioritaire ? styles.effectifInfoInner : ""}>
+          <div className={styles.effectifHeader} style={{}}>
             <div className={styles.flexCenterGap8}>
-              <EffectifStatusBadge effectif={effectif} priorityLabel={priorityLabel} />
+              <EffectifDetailStatusBadge effectif={effectif} />
               <p className="fr-badge fr-badge--beige-gris-galet">{getMonthYearFromDate(effectif.date_rupture)}</p>
             </div>
 
@@ -109,28 +117,37 @@ export function EffectifInfo({
               </div>
             )}
           </div>
-
+          <div>
+            <EffectifPriorityBadgeList effectif={effectif} />
+          </div>
           <div className={styles.effectifContent}>
+            {effectif.nouveau_contrat && <StatusChangeInformation date={effectif?.current_status?.date} />}
             <h3 className={`fr-text--blue-france ${styles.effectifTitle}`}>
               {effectif.nom} {effectif.prenom}
             </h3>
-            <Notice
-              className={styles.noticeContainer}
-              style={{
-                backgroundColor: isListePrioritaire ? "var(--background-alt-blue-france)" : "white",
-              }}
-              title="Date de la rupture du contrat d'apprentissage :"
-              description={
-                formatDate(effectif.date_rupture) ? `le ${formatDate(effectif.date_rupture)}` : "non renseignée"
-              }
-            />
-            <p className={styles.transmissionInfo}>
-              {effectif.source === "DECA" ? (
-                <span>Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}</span>
-              ) : (
-                <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
-              )}
-            </p>
+            {!effectif.nouveau_contrat && (
+              <>
+                <Notice
+                  className={styles.noticeContainer}
+                  style={{
+                    backgroundColor: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
+                  }}
+                  title="Date de la rupture du contrat d'apprentissage :"
+                  description={
+                    formatDate(effectif.date_rupture) ? `le ${formatDate(effectif.date_rupture)}` : "non renseignée"
+                  }
+                />
+                <p className={styles.transmissionInfo}>
+                  {effectif.source === "DECA" ? (
+                    <span>
+                      Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}
+                    </span>
+                  ) : (
+                    <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
+                  )}
+                </p>
+              </>
+            )}
           </div>
           {typeof effectif?.autorisation_contact === "boolean" && (
             <Highlight className={styles.highlightMargin} size="sm">
@@ -140,9 +157,6 @@ export function EffectifInfo({
                 : " a indiqué ne pas avoir besoin d'être accompagné par vos services "}
               (campagne emailing).
             </Highlight>
-          )}
-          {effectif?.current_status?.value === "APPRENTI" && (
-            <StatusChangeInformation date={effectif?.current_status?.date} />
           )}
         </div>
       </div>
@@ -156,6 +170,15 @@ export function EffectifInfo({
         <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} effectif={effectif} />
       )}
 
+      {effectif.situation && (
+        <MissionLocaleFeedback
+          situation={effectif.situation}
+          visibility={user.organisation.type}
+          logs={effectif.mission_locale_logs}
+          isNouveauContrat={effectif.nouveau_contrat ?? undefined}
+        />
+      )}
+
       {user.organisation.type !== "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
         <CfaFeedback
           organismeData={effectif.organisme_data}
@@ -164,14 +187,6 @@ export function EffectifInfo({
           effectif={effectif}
         />
       ) : null}
-
-      {effectif.situation && (
-        <MissionLocaleFeedback
-          situation={effectif.situation}
-          visibility={user.organisation.type}
-          logs={effectif.mission_locale_logs}
-        />
-      )}
     </div>
   );
 }

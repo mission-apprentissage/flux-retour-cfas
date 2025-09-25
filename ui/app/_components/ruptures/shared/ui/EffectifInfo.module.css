@@ -30,14 +30,17 @@
 }
 
 .statusChangeInfo {
-  padding-left: 256px;
-  margin-top: 16px;
+  margin: 8px 0;
+  background-color: var(--background-alt-blue-cumulus);
+  padding: 16px;
 }
 
 .statusChangeText {
-  color: var(--background-flat-red-marianne);
+  color: var(--text-action-high-grey);
   margin: 0;
-  font-weight: bold;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
 }
 
 .effectifHeader {

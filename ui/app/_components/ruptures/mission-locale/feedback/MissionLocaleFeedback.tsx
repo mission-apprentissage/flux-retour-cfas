@@ -14,13 +14,25 @@ interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
   logs?: Array<IMissionLocaleEffectifLog> | null;
+  isNouveauContrat?: boolean;
 }
 
-export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbackProps) {
-  if (!logs?.length) {
-    return null;
+export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauContrat }: MissionLocaleFeedbackProps) {
+  let sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
+
+  // pour gerer les effectifs legacy sans logs
+  if (!sortedLogs.length && situation?.situation) {
+    const virtualLog = {
+      _id: { toString: () => "virtual-log" } as any,
+      created_at: new Date(),
+      mission_locale_effectif_id: "virtual" as any,
+      situation: situation.situation,
+      situation_autre: situation.situation_autre,
+      commentaires: situation.commentaires,
+      deja_connu: situation.deja_connu,
+    };
+    sortedLogs = [virtualLog];
   }
-  const sortedLogs = logs?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
 
   const organismeFormationLayout = () => {
     return (
@@ -52,7 +64,7 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
                   return (
                     <div className={styles.feedbackContainer}>
                       <p className="fr-mb-1v fr-mt-3v">
-                        <b>La Mission Locale a t-elle pu rentrer en contact avec le jeune ?</b>
+                        <b>La Mission Locale a-t-elle pu entrer en contact avec ce jeune ?</b>
                       </p>
                       <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
 
@@ -123,10 +135,11 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
     return (
       <>
         {sortedLogs.map((log, index) => (
-          <div key={index}>
+          <div key={log._id?.toString() || index}>
             <h6 className="fr-mb-2v">
-              Le {formatDate(log.created_at)}
-              {formatContactTimeText(calculateDaysSince(log.created_at))}
+              {log._id?.toString() === "virtual-log"
+                ? "Situation actuelle"
+                : `Le ${formatDate(log.created_at)}${formatContactTimeText(calculateDaysSince(log.created_at))}`}
             </h6>
             {(() => {
               if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
@@ -141,14 +154,18 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
 
               const isSecondAttempt = index === 1 && log.probleme_type;
 
-              if (isSecondAttempt) {
+              if (isSecondAttempt || isNouveauContrat) {
                 return (
                   <div className={styles.feedbackContainer}>
                     <p className="fr-mb-1v">
-                      <b>Avez-vous pu rentrer en contact avec le jeune ?</b>
+                      <b>Êtes-vous entré en contact avec ce jeune ?</b>
                     </p>
                     <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
-
+                    {isNouveauContrat ? (
+                      <p className="fr-mb-0">
+                        <b>Ce jeune a retrouvé un contrat d&apos;apprentissage.</b>
+                      </p>
+                    ) : null}
                     {log.probleme_type && (
                       <>
                         <p className="fr-mb-1v fr-mt-3v">
@@ -224,6 +241,10 @@ export function MissionLocaleFeedback({ visibility, logs }: MissionLocaleFeedbac
       </>
     );
   };
+
+  if (!sortedLogs.length && !situation?.situation) {
+    return null;
+  }
 
   switch (visibility) {
     case "ADMINISTRATEUR":

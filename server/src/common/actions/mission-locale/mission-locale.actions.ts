@@ -108,17 +108,6 @@ const EFF_MISSION_LOCALE_FILTER = [
 
 const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
   switch (nom_liste) {
-    case API_EFFECTIF_LISTE.PRIORITAIRE:
-      return [
-        {
-          $match: {
-            $and: [
-              { a_traiter: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
-          },
-        },
-      ];
     case API_EFFECTIF_LISTE.INJOIGNABLE:
       return [
         {
@@ -142,6 +131,42 @@ const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
           $match: {
             a_traiter: false,
             injoignable: false,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: false },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
           },
         },
       ];
@@ -244,6 +269,9 @@ const addFieldFromActivationDate = () => {
   const IN_ACTIVATION_RANGE_CONDITION = {
     $or: [
       {
+        $ne: [{ $ifNull: ["$situation", null] }, null],
+      },
+      {
         $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null],
       },
       {
@@ -335,7 +363,14 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
 
 const addOrganismeFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = {
-    $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
+    $and: [
+      {
+        $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
+      },
+      {
+        $ne: ["$nouveau_contrat", true],
+      },
+    ],
   };
 
   return [
@@ -355,31 +390,62 @@ const addOrganismeFieldTraitementStatus = () => {
 const addMissionLocaleFieldTraitementStatus = () => {
   const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
   const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] };
+
+  const RQTH_CONDITION = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
+  const MINEUR_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$effectif_snapshot.apprenant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+        ],
+      },
+      {
+        $lte: [
+          "$effectif_snapshot.apprenant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+        ],
+      },
+    ],
+  };
+
+  const PRESQUE_6_MOIS_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 180,
+            },
+          },
+        ],
+      },
+      {
+        $lte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 150,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const ACCOMPAGNEMENT_CONJOINT_CONDITION = {
+    $eq: ["$organisme_data.acc_conjoint", true],
+  };
+
   const A_RISQUE_CONDITION = {
     $and: [
       {
-        $or: [
-          { $eq: ["$effectif_snapshot.apprenant.rqth", true] },
-          {
-            $and: [
-              {
-                $gte: [
-                  "$effectif_snapshot.apprenant.date_de_naissance",
-                  new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-                ],
-              },
-              {
-                $lte: [
-                  "$effectif_snapshot.apprenant.date_de_naissance",
-                  new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
-                ],
-              },
-            ],
-          },
-          {
-            $eq: ["$organisme_data.acc_conjoint", true],
-          },
-        ],
+        $or: [RQTH_CONDITION, PRESQUE_6_MOIS_CONDITION, MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
       },
       {
         $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
@@ -392,6 +458,22 @@ const addMissionLocaleFieldTraitementStatus = () => {
   };
 
   return [
+    {
+      $addFields: {
+        a_risque_rqth: {
+          $cond: [RQTH_CONDITION, true, false],
+        },
+        a_risque_mineur: {
+          $cond: [MINEUR_CONDITION, true, false],
+        },
+        a_risque_presque_6_mois: {
+          $cond: [PRESQUE_6_MOIS_CONDITION, true, false],
+        },
+        a_risque_accompagnement_conjoint: {
+          $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
+        },
+      },
+    },
     {
       $addFields: {
         a_traiter: {
@@ -442,6 +524,10 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             contacts_tdb: "$tdb_users",
             prioritaire: "$a_risque",
             a_contacter: "$a_contacter",
+            mineur: "$a_risque_mineur",
+            presque_6_mois: "$a_risque_presque_6_mois",
+            acc_conjoint: "$a_risque_accompagnement_conjoint",
+            nouveau_contrat: "$nouveau_contrat",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
@@ -476,6 +562,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$deja_connu",
             "situation.commentaires": "$commentaires",
             contacts_tdb: "$tdb_users",
+            nouveau_contrat: "$nouveau_contrat",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
             date_rupture: "$date_rupture",
@@ -484,6 +571,25 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           },
         },
       ];
+  }
+};
+
+const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER:
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+    case API_EFFECTIF_LISTE.TRAITE:
+      return { date_rupture: -1 };
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return {
+        a_risque_presque_6_mois: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_contacter: -1,
+      };
   }
 };
 
@@ -637,23 +743,29 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
   return contacts;
 }
 
-const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  effectifId: ObjectId,
-  nom_liste: API_EFFECTIF_LISTE
+export const missionLocaleBaseAggregation = (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
-  const aggregation = [
+  return [
     ...generateOrganisationMatchStage(organisation),
     ...EFF_MISSION_LOCALE_FILTER,
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
+  ];
+};
+
+const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifId: ObjectId,
+  nom_liste: API_EFFECTIF_LISTE
+) => {
+  const aggregation = [
+    ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(nom_liste),
     {
-      $sort: {
-        date_rupture: -1,
-      },
+      $sort: getSortedRulesByListeType(nom_liste),
     },
     {
       $project: {
@@ -664,7 +776,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
       },
     },
   ];
-  console.log(JSON.stringify(aggregation, null, 2));
+
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
@@ -695,27 +807,43 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
-  const traite = type === API_EFFECTIF_LISTE.TRAITE;
-  const injoignable = type === API_EFFECTIF_LISTE.INJOIGNABLE;
 
-  const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
-    if (!firstDate) {
-      return [];
-    }
-    const dates: string[] = [];
-    const today: Date = new Date();
-    const targetDate = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
-    let done = false;
-    let i = 0;
+  const getSevenLastMonth = () => {
+    return [
+      ...Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setUTCMonth(date.getUTCMonth() - i, 1);
+        date.setUTCHours(0, 0, 0, 0);
+        return {
+          month: date.toISOString(),
+          ...(aTraiter ? { treated_count: 0 } : {}),
+          data: [],
+        };
+      }),
+      {
+        month: "plus-de-180-j",
+        ...(aTraiter ? { treated_count: 0 } : {}),
+        data: [],
+      },
+    ];
+  };
 
-    while (!done) {
-      const date: Date = new Date(Date.UTC(today.getFullYear(), today.getMonth() - i, 1));
-      const formatted: string = date.toISOString();
-      done = date <= targetDate;
-      dates.push(formatted);
-      i++;
+  const getGroupPushCondition = () => {
+    switch (type) {
+      case API_EFFECTIF_LISTE.TRAITE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }],
+        };
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", true] }],
+        };
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
     }
-    return dates;
   };
 
   const organismeMissionLocaleAggregation: any[] = [
@@ -725,21 +853,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
   ];
-
-  if (traite) {
-    organismeMissionLocaleAggregation.push({
-      $match: {
-        a_traiter: false,
-        injoignable: false,
-      },
-    });
-  } else if (injoignable) {
-    organismeMissionLocaleAggregation.push({
-      $match: {
-        injoignable: true,
-      },
-    });
-  }
 
   organismeMissionLocaleAggregation.push(
     {
@@ -751,9 +864,19 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     {
       $addFields: {
         firstDayOfMonth: {
-          $dateFromParts: {
-            year: { $year: "$date_rupture" },
-            month: { $month: "$date_rupture" },
+          $cond: {
+            if: { $lt: ["$$ROOT.dernierStatutDureeInDay", 180] },
+            then: {
+              $dateToString: {
+                date: {
+                  $dateFromParts: {
+                    year: { $year: "$date_rupture" },
+                    month: { $month: "$date_rupture" },
+                  },
+                },
+              },
+            },
+            else: "plus-de-180-j",
           },
         },
       },
@@ -764,9 +887,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         data: {
           $push: {
             $cond: [
-              {
-                $and: [{ $eq: ["$$ROOT.a_traiter", aTraiter] }, { $eq: ["$$ROOT.in_activation_range", true] }],
-              },
+              getGroupPushCondition(),
               {
                 id: "$$ROOT.effectif_snapshot._id",
                 nom: "$$ROOT.effectif_snapshot.apprenant.nom",
@@ -777,6 +898,13 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
                 prioritaire: "$a_risque",
                 a_contacter: "$a_contacter",
+                mineur: "$a_risque_mineur",
+                presque_6_mois: "$a_risque_presque_6_mois",
+                acc_conjoint: "$a_risque_accompagnement_conjoint",
+                rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
+                a_traiter: "$$ROOT.a_traiter",
+                injoignable: "$$ROOT.injoignable",
+                nouveau_contrat: "$nouveau_contrat",
               },
               null,
             ],
@@ -810,27 +938,24 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   );
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const sevenLastMonth = getSevenLastMonth();
+  const mapped = sevenLastMonth.map((data) => {
+    const found = result.find(({ month }) => {
+      return month.toString() === data.month;
+    });
+    return found ? found : data;
+  });
 
-  const oldestRealDataIndex = result.findLastIndex(
-    ({ treated_count, data }) => (treated_count ?? 0) > 0 || data.length > 0
-  );
-  const effectifs = oldestRealDataIndex >= 0 ? result.slice(0, oldestRealDataIndex + 1) : [...result];
-
-  const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
-  const formattedData = aTraiter
-    ? getFirstDayOfMonthListFromDate(oldestMonth).map((date) => {
-        const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
-        return (
-          found ?? {
-            month: date,
-            ...(aTraiter ? { treated_count: 0 } : {}),
-            data: [],
-          }
-        );
-      })
-    : effectifs.sort((a, b) => b.month - a.month);
-
-  return formattedData;
+  let trimmed = [...mapped];
+  while (
+    trimmed.length > 0 &&
+    (trimmed[trimmed.length - 1].treated_count === 0 || trimmed[trimmed.length - 1].treated_count === undefined) &&
+    Array.isArray(trimmed[trimmed.length - 1].data) &&
+    trimmed[trimmed.length - 1].data.length === 0
+  ) {
+    trimmed.pop();
+  }
+  return trimmed;
 };
 
 export const getEffectifFromMissionLocaleId = async (
@@ -911,12 +1036,7 @@ export const getEffectifsListByMisisonLocaleId = (
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(type),
     ...lookUpOrganisme(true),
     {
@@ -1002,7 +1122,6 @@ export const getEffectifsListByMisisonLocaleId = (
     },
   ];
 
-  console.log(JSON.stringify(effectifsMissionLocaleAggregation, null, 2));
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
@@ -1010,10 +1129,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const pipeline = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $facet: {
         hadEffectifs: [
@@ -1035,9 +1151,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
             },
           },
           {
-            $sort: {
-              date_rupture: -1,
-            },
+            $sort: getSortedRulesByListeType(API_EFFECTIF_LISTE.PRIORITAIRE),
           },
           ...lookUpOrganisme(),
           {
@@ -1052,6 +1166,13 @@ export const getEffectifARisqueByMissionLocaleId = async (
               organisme_enseigne: "$organisme.enseigne",
               prioritaire: "$a_risque",
               date_rupture: "$date_rupture",
+              a_traiter: "$a_traiter",
+              injoignable: "$injoignable",
+              a_contacter: "$a_contacter",
+              mineur: "$a_risque_mineur",
+              presque_6_mois: "$a_risque_presque_6_mois",
+              acc_conjoint: "$a_risque_accompagnement_conjoint",
+              rqth: "$effectif_snapshot.apprenant.rqth",
             },
           },
         ],
@@ -1299,7 +1420,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export const computeMissionLocaleStats = async (
-  missionLocale: IOrganisationMissionLocale
+  organisation: IOrganisationMissionLocale
 ): Promise<IMissionLocaleStats["stats"]> => {
   const mineurCondition = {
     $gte: [
@@ -1310,12 +1431,7 @@ export const computeMissionLocaleStats = async (
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(missionLocale),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(missionLocale.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $group: {
         _id: null,
@@ -1580,7 +1696,69 @@ export const setEffectifMissionLocaleData = async (
   return updated;
 };
 
+const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
+  try {
+    // Détection des incohérences
+    const parcours = (effectif._computed as any)?.parcours || [];
+    const inconsistencies: string[] = [];
+
+    if (parcours.length > 0) {
+      const today = new Date();
+
+      // Statut actif selon les dates vs dernier du parcours
+      const currentStatusML =
+        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
+      const lastParcoursStatus = parcours[parcours.length - 1];
+
+      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
+        inconsistencies.push(
+          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
+        );
+      }
+
+      // Statut futur utilisé comme current
+      if (currentStatusML && new Date(currentStatusML.date) > today) {
+        const daysFuture = Math.floor(
+          (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
+        );
+        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
+      }
+
+      // Rupture sans RUPTURANT après la date
+      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
+      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
+        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
+      }
+
+      if (inconsistencies.length > 0) {
+        logger.warn(
+          {
+            effectifId: effectif._id,
+            apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
+            inconsistencies,
+            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
+            contrats:
+              effectif.contrats?.map((c: any) => ({
+                debut: c.date_debut,
+                fin: c.date_fin,
+                rupture: c.date_rupture,
+              })) || [],
+            currentStatusWillBe: {
+              statut: currentStatusML?.statut,
+              date: currentStatusML?.date,
+            },
+          },
+          "[INCONSISTANCES] Effectif avec incohérences détectées"
+        );
+      }
+    }
+  } catch (error) {
+    logger.error({ error }, "[INCONSISTANCES] Erreur lors de la détection des incohérences");
+  }
+};
+
 export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+  logMissionLocaleSnapshot(effectif);
   const currentStatus =
     effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
     effectif._computed?.statut?.parcours.slice(-1)[0];
@@ -1672,12 +1850,7 @@ export const getMissionLocaleStat = async (
   };
 
   const effectifsMissionLocaleAggregation = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
-    ...filterByDernierStatutPipelineMl(),
-    ...addFieldFromActivationDate(),
-    ...filterByActivationDatePipelineMl(),
-    ...addFieldTraitementStatus(organisation.type),
+    ...missionLocaleBaseAggregation(organisation),
     {
       $group: {
         _id: null,

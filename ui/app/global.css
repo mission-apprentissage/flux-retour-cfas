@@ -16,3 +16,19 @@
 .fr-fieldset__legend {
   font-weight: bold !important;
 }
+
+.fr-badge--red {
+  color: var(--text-default-error);
+  background-color: var(--background-contrast-error);
+  --idle: transparent;
+  --hover: var(--background-contrast-error-hover);
+  --active: var(--background-contrast-error-active);
+}
+
+.fr-badge--red-inverted {
+  color: #ffffff;
+  background-color: var(--text-default-error);
+  --idle: transparent;
+  --hover: var(--background-contrast-error-hover);
+  --active: var(--background-contrast-error-active);
+}
