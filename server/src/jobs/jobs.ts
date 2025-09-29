@@ -14,6 +14,7 @@ import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
+import { sendCfaDailyRecap } from "./emails/cfa-daily-recap";
 import { sendMissionLocaleDailyRecap } from "./emails/mission-locale-daily-recap";
 import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
 import { sendReminderEmails } from "./emails/reminder";
@@ -176,6 +177,14 @@ export async function setupJobProcessor() {
               cron_string: "30 13 * * *",
               handler: async () => {
                 await addJob({ name: "send-mission-locale-daily-recap", queued: true });
+                return 0;
+              },
+            },
+
+            "Send CFA daily recap at 10h30": {
+              cron_string: "30 10 * * *",
+              handler: async () => {
+                await addJob({ name: "send-cfa-daily-recap", queued: true });
                 return 0;
               },
             },
@@ -369,6 +378,11 @@ export async function setupJobProcessor() {
       "send-mission-locale-daily-recap": {
         handler: async () => {
           return sendMissionLocaleDailyRecap();
+        },
+      },
+      "send-cfa-daily-recap": {
+        handler: async () => {
+          return sendCfaDailyRecap();
         },
       },
       "process:effectifs-queue:remove-duplicates": {
