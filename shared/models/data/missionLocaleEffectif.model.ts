@@ -98,6 +98,7 @@ const zMissionLocaleEffectif = z.object({
       motif: z.array(zAccConjointMotifEnum).nullish(),
       commentaires: z.string().nullish(),
       reponse_at: z.date({ description: "Date de réponse au formulaire par le CFA" }).nullish(),
+      acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
     })
     .nullish(),
   effectif_choice: z
