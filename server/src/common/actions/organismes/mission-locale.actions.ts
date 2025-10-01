@@ -11,7 +11,8 @@ import { getEffectifsParMoisByMissionLocaleId } from "../mission-locale/mission-
 export const setEffectifMissionLocaleDataFromOrganisme = async (
   organismeId: ObjectId,
   effectifId: ObjectId,
-  data: IUpdateMissionLocaleEffectifOrganisme
+  data: IUpdateMissionLocaleEffectifOrganisme,
+  userId?: ObjectId
 ) => {
   const { rupture, acc_conjoint, motif, commentaires } = data;
 
@@ -19,7 +20,8 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     rupture,
     acc_conjoint,
     reponse_at: new Date(),
-    ...(motif !== undefined ? { motif } : []),
+    ...(userId ? { acc_conjoint_by: userId } : {}),
+    ...(motif !== undefined ? { motif } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
   };
 

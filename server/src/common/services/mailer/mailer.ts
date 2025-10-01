@@ -76,6 +76,10 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
   register_unknown_network: () => `[ADMIN] Demande d'accès au tableau de bord : nouveau réseau signalé`,
   mission_locale_weekly_recap: (payload) =>
     `${payload.total} jeune${payload.total > 1 ? "s" : ""} en rupture de contrat ${payload.total > 1 ? "attendent" : "attend"} votre aide cette semaine`,
+  mission_locale_daily_recap: (payload) =>
+    `${payload.effectifs_count} nouveau${payload.effectifs_count > 1 ? "x" : ""} jeune${payload.effectifs_count > 1 ? "s" : ""} à traiter de ${payload.cfa.nom}`,
+  cfa_daily_recap: (payload) =>
+    `La Mission Locale ${payload.mission_locale.nom} a du nouveau sur l'accompagnement de vos jeunes en rupture`,
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -206,6 +210,35 @@ export type TemplatePayloads = {
       id: number;
       nom: string;
     };
+  };
+  mission_locale_daily_recap: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    cfa: {
+      nom: string;
+      siret?: string;
+    };
+    effectifs_count: number;
+    mission_locale: {
+      id: number;
+      nom: string;
+    };
+  };
+  cfa_daily_recap: {
+    cfa: {
+      nom: string;
+      prenom: string;
+    };
+    mission_locale: {
+      nom: string;
+    };
+    effectifs_count: number;
+    jeunes?: Array<{
+      nom: string;
+      prenom: string;
+    }>;
   };
 };
 
