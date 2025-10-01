@@ -262,13 +262,6 @@ const createDernierStatutFieldPipelineML = () => [
       },
     },
   },
-  {
-    $addFields: {
-      nouveau_contrat: {
-        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
-      },
-    },
-  },
 ];
 
 /**
@@ -434,28 +427,34 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
 };
 
 const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  const commonFields = {
+    $addFields: {
+      nouveau_contrat: {
+        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
+      },
+    },
+  };
+  let fields: Record<string, object>[] = [];
   switch (visibility) {
     case "MISSION_LOCALE":
-      return addMissionLocaleFieldTraitementStatus();
+      fields = addMissionLocaleFieldTraitementStatus();
+      break;
     case "ORGANISME_FORMATION":
-      return addOrganismeFieldTraitementStatus();
+      fields = addOrganismeFieldTraitementStatus();
+      break;
   }
+
+  return [commonFields, ...fields];
 };
 
 const addOrganismeFieldTraitementStatus = () => {
-  const A_TRAITER_CONDIITON = {
-    $and: [
-      {
-        $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
-      },
-    ],
-  };
+  const A_TRAITER_CONDITION = { $eq: [{ $ifNull: ["$organisme_data", null] }, null] };
 
   return [
     {
       $addFields: {
         a_traiter: {
-          $cond: [A_TRAITER_CONDIITON, true, false],
+          $cond: [A_TRAITER_CONDITION, true, false],
         },
         a_risque: false,
         injoignable: false,
@@ -466,7 +465,8 @@ const addOrganismeFieldTraitementStatus = () => {
 };
 
 const addMissionLocaleFieldTraitementStatus = () => {
-  const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] };
+  const A_TRAITER_CONDITION = { $eq: [{ $ifNull: ["$situation", null] }, null] };
+
   const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] };
 
   const RQTH_CONDITION = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
@@ -555,7 +555,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
     {
       $addFields: {
         a_traiter: {
-          $cond: [A_TRAITER_CONDIITON, true, false],
+          $cond: [A_TRAITER_CONDITION, true, false],
         },
         a_risque: {
           $cond: [A_RISQUE_CONDITION, true, false],
@@ -905,8 +905,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       },
     ];
   };
-
-  const getGroupPushCondition = () => {
+  const getMissionLocaleGroupPushCondition = () => {
     switch (type) {
       case API_EFFECTIF_LISTE.TRAITE:
         return {
@@ -921,6 +920,36 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         return {
           $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
         };
+    }
+  };
+
+  const getOrganismeGroupPushCondition = () => {
+    switch (type) {
+      case API_EFFECTIF_LISTE.TRAITE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }],
+        };
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", true] }],
+        };
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return {
+          $and: [
+            { $eq: ["$$ROOT.a_traiter", true] },
+            { $eq: ["$$ROOT.in_activation_range", true] },
+            { $eq: ["$$ROOT.nouveau_contrat", false] },
+          ],
+        };
+    }
+  };
+  const getGroupPushCondition = () => {
+    switch (organisation.type) {
+      case "MISSION_LOCALE":
+        return getMissionLocaleGroupPushCondition();
+      case "ORGANISME_FORMATION":
+        return getOrganismeGroupPushCondition();
     }
   };
 
