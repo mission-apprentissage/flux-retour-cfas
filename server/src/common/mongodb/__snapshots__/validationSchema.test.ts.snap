@@ -14415,6 +14415,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif",
             },
+            "acc_conjoint_by": {
+              "anyOf": [
+                {
+                  "bsonType": "objectId",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "ID de l'utilisateur CFA qui a effectué la demande",
+            },
             "commentaires": {
               "bsonType": [
                 "string",
