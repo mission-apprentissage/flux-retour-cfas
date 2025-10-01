@@ -106,70 +106,151 @@ const EFF_MISSION_LOCALE_FILTER = [
   },
 ];
 
-const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
-  switch (nom_liste) {
-    case API_EFFECTIF_LISTE.INJOIGNABLE:
-      return [
-        {
-          $match: {
-            a_traiter: false,
-            injoignable: true,
+const matchTraitementEffectifPipelineMl = (
+  nom_liste: API_EFFECTIF_LISTE,
+  type: "MISSION_LOCALE" | "ORGANISME_FORMATION"
+) => {
+  const missionLocaleCondition = () => {
+    switch (nom_liste) {
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return [
+          {
+            $match: {
+              a_traiter: false,
+              injoignable: true,
+            },
           },
-        },
-      ];
-    case API_EFFECTIF_LISTE.A_TRAITER:
-      return [
-        {
-          $match: {
-            a_traiter: true,
+        ];
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return [
+          {
+            $match: {
+              a_traiter: true,
+            },
           },
-        },
-      ];
-    case API_EFFECTIF_LISTE.TRAITE:
-      return [
-        {
-          $match: {
-            a_traiter: false,
-            injoignable: false,
+        ];
+      case API_EFFECTIF_LISTE.TRAITE:
+        return [
+          {
+            $match: {
+              a_traiter: false,
+              injoignable: false,
+            },
           },
-        },
-      ];
-    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
-      return [
-        {
-          $match: {
-            $and: [
-              { a_traiter: false },
-              { injoignable: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
+        ];
+      case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: false },
+                { injoignable: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
           },
-        },
-      ];
-    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
-    case API_EFFECTIF_LISTE.PRIORITAIRE:
-      return [
-        {
-          $match: {
-            $and: [
-              { a_traiter: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
+        ];
+      case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
           },
-        },
-      ];
-    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
-      return [
-        {
-          $match: {
-            $and: [
-              { a_traiter: false },
-              { injoignable: false },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
+        ];
+      case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: false },
+                { injoignable: false },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
           },
-        },
-      ];
+        ];
+    }
+  };
+
+  const organismeCondition = () => {
+    switch (nom_liste) {
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return [
+          {
+            $match: {
+              a_traiter: false,
+              injoignable: true,
+            },
+          },
+        ];
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return [
+          {
+            $match: {
+              a_traiter: true,
+              nouveau_contrat: false,
+            },
+          },
+        ];
+      case API_EFFECTIF_LISTE.TRAITE:
+        return [
+          {
+            $match: {
+              a_traiter: false,
+              injoignable: false,
+            },
+          },
+        ];
+      case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: false },
+                { injoignable: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
+          },
+        ];
+      case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: true },
+                { nouveau_contrat: false },
+                { $or: [{ a_contacter: true }, { a_risque: true }] },
+              ],
+            },
+          },
+        ];
+      case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+        return [
+          {
+            $match: {
+              $and: [
+                { a_traiter: false },
+                { injoignable: false },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
+          },
+        ];
+    }
+  };
+
+  switch (type) {
+    case "MISSION_LOCALE":
+      return missionLocaleCondition();
+    case "ORGANISME_FORMATION":
+      return organismeCondition();
   }
 };
 
@@ -366,9 +447,6 @@ const addOrganismeFieldTraitementStatus = () => {
     $and: [
       {
         $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }],
-      },
-      {
-        $ne: ["$nouveau_contrat", true],
       },
     ],
   };
@@ -763,7 +841,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 ) => {
   const aggregation = [
     ...missionLocaleBaseAggregation(organisation),
-    ...matchTraitementEffectifPipelineMl(nom_liste),
+    ...matchTraitementEffectifPipelineMl(nom_liste, organisation.type),
     {
       $sort: getSortedRulesByListeType(nom_liste),
     },
@@ -1037,7 +1115,7 @@ export const getEffectifsListByMisisonLocaleId = (
 
   const effectifsMissionLocaleAggregation = [
     ...missionLocaleBaseAggregation(organisation),
-    ...matchTraitementEffectifPipelineMl(type),
+    ...matchTraitementEffectifPipelineMl(type, organisation.type),
     ...lookUpOrganisme(true),
     {
       $addFields: {
