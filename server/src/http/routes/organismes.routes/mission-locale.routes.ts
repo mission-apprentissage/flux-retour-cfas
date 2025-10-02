@@ -35,15 +35,15 @@ const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
   return await getAllEffectifsParMois(organisme);
 };
 
-const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => {
-  const effectifId = params.id;
+const updateEffectifMissionLocaleData = async (req, { locals }) => {
+  const effectifId = req.params.id;
   const organisme = await getOrganismeById(locals.organismeId);
 
   if (!organisme) {
     throw Boom.forbidden("No organisme found for the provided ID");
   }
 
-  const data = await validateFullZodObjectSchema(body, updateMissionLocaleEffectifOrganismeApi);
+  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifOrganismeApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
@@ -53,7 +53,9 @@ const updateEffectifMissionLocaleData = async ({ body, params }, { locals }) => 
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
   }
-  return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, effectifId, data);
+
+  const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+  return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, effectifId, data, userId);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
