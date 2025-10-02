@@ -24,5 +24,7 @@ export const up = async () => {
       },
     });
   }
-  await missionLocaleEffectifsLogDb().bulkWrite(bulkOperations);
+  if (bulkOperations.length > 0) {
+    await missionLocaleEffectifsLogDb().bulkWrite(bulkOperations);
+  }
 };
