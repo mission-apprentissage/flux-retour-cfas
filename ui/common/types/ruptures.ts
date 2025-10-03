@@ -14,6 +14,7 @@ export type EffectifData = {
   rqth: boolean;
   a_traiter: boolean;
   nouveau_contrat: boolean;
+  unread_by_current_user?: boolean;
 };
 
 export type EffectifPriorityData = EffectifData & {

@@ -174,7 +174,7 @@ export function EffectifInfo({
         <MissionLocaleFeedback
           situation={effectif.situation}
           visibility={user.organisation.type}
-          logs={effectif.mission_locale_logs}
+          logs={effectif.mission_locale_logs as any}
           isNouveauContrat={effectif.nouveau_contrat ?? undefined}
         />
       )}

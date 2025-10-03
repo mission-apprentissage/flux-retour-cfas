@@ -18,6 +18,7 @@ export const createEffectifMissionLocaleLog = (
     mission_locale_effectif_id: missionLocaleEffectifId,
     created_at: new Date(),
     created_by: user._id,
+    read_by: [],
     ...data,
   });
 };

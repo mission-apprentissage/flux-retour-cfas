@@ -1,12 +1,9 @@
 import { ObjectId } from "bson";
-import { API_EFFECTIF_LISTE, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
-import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
 import { createOrUpdateMissionLocaleStats } from "../mission-locale/mission-locale-stats.actions";
-import { getEffectifsParMoisByMissionLocaleId } from "../mission-locale/mission-locale.actions";
 
 export const setEffectifMissionLocaleDataFromOrganisme = async (
   organismeId: ObjectId,
@@ -20,6 +17,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     rupture,
     acc_conjoint,
     reponse_at: new Date(),
+    has_unread_notification: false,
     ...(userId ? { acc_conjoint_by: userId } : {}),
     ...(motif !== undefined ? { motif } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
@@ -45,16 +43,39 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
   return updated;
 };
 
-export async function getAllEffectifsParMois(
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) {
-  const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema);
+export const markEffectifNotificationAsRead = async (organismeId: ObjectId, effectifId: ObjectId, userId: ObjectId) => {
+  const missionLocaleEffectif = await missionLocaleEffectifsDb().findOne({
+    "effectif_snapshot.organisme_id": organismeId,
+    effectif_id: new ObjectId(effectifId),
+    "organisme_data.acc_conjoint_by": userId,
+  });
 
-  const [a_traiter, traite] = await Promise.all([
-    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-    fetchByType(API_EFFECTIF_LISTE.TRAITE),
-  ]);
+  if (!missionLocaleEffectif) {
+    return null;
+  }
 
-  return { a_traiter, traite };
-}
+  await missionLocaleEffectifsLogDb().updateMany(
+    {
+      mission_locale_effectif_id: missionLocaleEffectif._id,
+      read_by: { $ne: userId },
+    },
+    {
+      $addToSet: { read_by: userId },
+    }
+  );
+
+  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+    {
+      _id: missionLocaleEffectif._id,
+    },
+    {
+      $set: {
+        "organisme_data.has_unread_notification": false,
+        updated_at: new Date(),
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated;
+};

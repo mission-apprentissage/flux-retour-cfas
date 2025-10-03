@@ -14432,6 +14432,18 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "null",
               ],
             },
+            "has_unread_notification": {
+              "anyOf": [
+                {
+                  "bsonType": "bool",
+                  "description": "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML",
+            },
             "motif": {
               "anyOf": [
                 {
@@ -14607,6 +14619,13 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "bsonType": "null",
         },
       ],
+    },
+    "read_by": {
+      "bsonType": "array",
+      "description": "Liste des IDs des utilisateurs CFA qui ont lu ce log",
+      "items": {
+        "bsonType": "objectId",
+      },
     },
     "situation": {
       "anyOf": [

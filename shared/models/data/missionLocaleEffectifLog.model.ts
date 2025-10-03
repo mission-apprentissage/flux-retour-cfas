@@ -18,6 +18,7 @@ export const zMissionLocaleEffectifLog = z.object({
   probleme_detail: z.string().nullish(),
   created_at: z.date(),
   created_by: zObjectId.nullish(),
+  read_by: z.array(zObjectId).default([]).describe("Liste des IDs des utilisateurs CFA qui ont lu ce log"),
 });
 
 export type IMissionLocaleEffectifLog = z.output<typeof zMissionLocaleEffectifLog>;

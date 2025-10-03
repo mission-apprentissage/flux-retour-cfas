@@ -12,6 +12,7 @@ import { EffectifData, MonthItem, SelectedSection } from "@/common/types/rupture
 
 import { EffectifPriorityBadge, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
+import notificationStyles from "./NotificationBadge.module.css";
 
 type EffectifsMonthTableProps = {
   monthItem: MonthItem;
@@ -26,7 +27,7 @@ type ColumnData = {
   width?: number | string;
 };
 
-function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifList) {
+function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifList, isCfaPage: boolean) {
   return {
     id: effectif.id,
     badge: (
@@ -37,7 +38,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     name: (
       <div style={{ display: "flex", flexDirection: "column" }}>
         {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadge effectif={effectif} isHeader />}
-        <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>{`${effectif.nom} ${effectif.prenom}`}</div>
+        <div className={notificationStyles.badgeContainer}>
+          {isCfaPage && effectif.unread_by_current_user && (
+            <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
+          )}
+          <div
+            className={`fr-text--bold ${styles.monthTableNameContainer}`}
+          >{`${effectif.nom} ${effectif.prenom}`}</div>
+        </div>
       </div>
     ),
     formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
@@ -93,7 +101,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   const dataRows = monthItem.data.map((effectif) => ({
     rawData: effectif,
-    element: buildRowData(effectif, listType),
+    element: buildRowData(effectif, listType, pathname?.startsWith("/cfa") || false),
   }));
 
   const getRowLink = (rowData) => {
