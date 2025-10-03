@@ -70,7 +70,7 @@ import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/pro
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
 import { updateOrganismeIdInOrganisations } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
-import { hydrateMissionLocaleEffectifWithPersonV2, hydratePersonV2Parcours } from "./hydrate/effectifsV2/hydrate-effectif-v2";
+import { deduplicateMissionLocaleEffectif, hydrateMissionLocaleEffectifWithEffectifV2, hydrateMissionLocaleEffectifWithPersonV2, hydrateOrganismeFormationV2, hydratePersonV2Parcours, updateMLLogWithType } from "./hydrate/effectifsV2/hydrate-effectif-v2";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
@@ -502,6 +502,26 @@ export async function setupJobProcessor() {
           return hydrateMissionLocaleEffectifWithPersonV2();
         },
       },
+      "tmp:deduplicate:mission-locale-effectif": {
+        handler: async () => {
+          return deduplicateMissionLocaleEffectif();
+        }
+      },
+      "tmp:hydrate:ml-v2": {
+        handler: async () => {
+          return hydrateMissionLocaleEffectifWithEffectifV2();
+        }
+      },
+      "tmp:hydrate:formation-organisme-v2": {
+        handler: async () => {
+          return hydrateOrganismeFormationV2();
+        }
+      },
+      "tmp:migrate:update-ml-log-with-type": {
+        handler: async () => {
+          return updateMLLogWithType();
+        }
+      }
     },
   });
 }

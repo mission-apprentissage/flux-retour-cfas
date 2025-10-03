@@ -8,7 +8,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 const collectionName = "personV2";
 
-const zPersonV2 = z.object({
+export const zPersonV2 = z.object({
   _id: zObjectId,
   identifiant: z.object({
     nom: z.string(),
@@ -17,16 +17,16 @@ const zPersonV2 = z.object({
   }),
   parcours: z.object({
     en_cours: z.object({
-      eV2_id: zObjectId,
-      date_inscription: z.date(),
+      id: zObjectId,
+      date: z.date(),
     }).nullable(),
     chronologie: z.array(
       z.object({
-        eV2_id: zObjectId,
-        date_inscription: z.date(),
+        id: zObjectId,
+        date: z.date(),
       })
     ),
-  }),
+  }).nullish(),
 });
 
 export type IPersonV2 = z.output<typeof zPersonV2>;

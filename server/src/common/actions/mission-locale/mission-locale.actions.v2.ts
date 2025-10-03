@@ -1,0 +1,1910 @@
+import type { IMissionLocale } from "api-alternance-sdk";
+import Boom from "boom";
+import { ObjectId } from "bson";
+import { AggregationCursor } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
+import {
+  IEffectif,
+  IEffectifV2,
+  IOrganisationMissionLocale,
+  IOrganisationOrganismeFormation,
+  IUpdateMissionLocaleEffectif,
+} from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import {
+  IEmailStatusEnum,
+  API_EFFECTIF_LISTE,
+  SITUATION_ENUM,
+  zEmailStatusEnum,
+} from "shared/models/data/missionLocaleEffectif.model";
+import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
+import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
+import { getAnneeScolaireListFromDateRange } from "shared/utils";
+import { v4 as uuidv4 } from "uuid";
+
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import logger from "@/common/logger";
+import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import config from "@/config";
+
+import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
+import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
+
+import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
+import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+
+const DATE_START = new Date("2025-01-01");
+/**
+ *    EffectifsDb
+ */
+
+const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
+  {
+    $unionWith: {
+      coll: "effectifsDECA",
+      pipeline: [{ $match: { is_deca_compatible: true } }],
+    },
+  },
+  {
+    $match: {
+      $or: [
+        {
+          "computed.person.identifiant.date_de_naissance": {
+            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
+          },
+        },
+        { "computed.effectif.informations_personelles.rqth": true },
+      ],
+    },
+  },
+  {
+    $match: {
+      "computed.adresse.mission_locale_id": missionLocaleId,
+      // annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) }, TODO
+    },
+  },
+];
+
+export const getAllEffectifForMissionLocaleCursor = (
+  mission_locale_id: number
+): AggregationCursor<IEffectif | IEffectifDECA> => {
+  const effectifsMissionLocaleAggregation = [
+    ...unionWithDecaForMissionLocale(mission_locale_id),
+    ...createDernierStatutFieldPipeline(new Date()),
+    matchDernierStatutPipelineMl(),
+    {
+      $unset: ["dernierStatutDureeInDay"],
+    },
+  ];
+
+  return effectifsDb().aggregate(effectifsMissionLocaleAggregation);
+};
+
+/**
+ *    MissionLocaleEffectifDb
+ */
+
+/**
+ * Filtre constant pour les missions locales
+ */
+const EFF_MISSION_LOCALE_FILTER = [
+  {
+    $match: {
+      $or: [
+        {
+          "computed.person.identifiant.date_de_naissance": {
+            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
+          },
+        },
+        { "computed.effectif.informations_personelles.rqth": true },
+      ],
+      soft_deleted: { $ne: true },
+      "computed.person.identifiant.date_de_naissance": {
+        $lte: new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+      },
+    },
+  },
+];
+
+const matchTraitementEffectifPipelineMl = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+      return [
+        {
+          $match: {
+            a_traiter: false,
+            injoignable: true,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.A_TRAITER:
+      return [
+        {
+          $match: {
+            a_traiter: true,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE:
+      return [
+        {
+          $match: {
+            a_traiter: false,
+            injoignable: false,
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: false },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+  }
+};
+
+const createDernierStatutFieldPipelineML = () => [
+  {
+    $addFields: {
+      dernierStatutDureeInDay: {
+        $dateDiff: { startDate: "$date_rupture", endDate: new Date(), unit: "day" },
+      },
+    },
+  },
+  // {
+  //   $addFields: {
+  //     nouveau_contrat: {
+  //       $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false], TODO
+  //     },
+  //   },
+  // },
+];
+
+/**
+ * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
+ * @param statut Liste des status a filtrer
+ * @param date Date de calcul du filtre
+ * @returns Une liste de addFields et de match
+ */
+const filterByDernierStatutPipelineMl = () => {
+  return [...createDernierStatutFieldPipelineML(), matchDernierStatutPipelineMl()];
+};
+
+const filterByActivationDatePipelineMl = () => {
+  return [
+    {
+      $match: {
+        in_activation_range: true,
+      },
+    },
+  ];
+};
+
+/**
+ * Création du match sur les dernier statuts
+ * @param statut Liste de statuts à matcher
+ * @returns Un obet match
+ */
+const matchDernierStatutPipelineMl = (): any => {
+  const match = {
+    $match: {
+      // "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT, TODO
+      date_rupture: { $lte: new Date() },
+    },
+  };
+  return match;
+};
+
+/**
+ * Création du filtre sur la mission locale concerné
+ * @param missionLocaleId Id de la mission locale
+ * @returns Objet match
+ */
+const generateOrganisationMatchStage = (organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation) => {
+  const matchStage = [
+    // {
+    //   $match: {
+    //     "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) }, TODO
+    //   },
+    // },
+    ...matchFromJointOrganisme(organisation.type),
+  ];
+  switch (organisation.type) {
+    case "MISSION_LOCALE":
+      return [
+        {
+          $match: {
+            mission_locale_id: (organisation as IOrganisationMissionLocale)._id,
+          },
+        },
+        ...matchStage,
+      ];
+    case "ORGANISME_FORMATION":
+      return [
+        {
+          $match: {
+            "computed.formation.organisme_formateur_id": new ObjectId(
+              (organisation as IOrganisationOrganismeFormation).organisme_id as string
+            ),
+          },
+        },
+        ...matchStage,
+      ];
+    default:
+      throw new Error(`Unknown organisation type: ${organisation}`);
+  }
+};
+
+const addFieldFromActivationDate = () => {
+  const IN_ACTIVATION_RANGE_CONDITION = {
+    $or: [
+      {
+        $ne: [{ $ifNull: ["$situation", null] }, null], // TODO avec les logs
+      },
+      {
+        $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null], // TODO mise a jour avec l'activation
+      },
+      {
+        $gte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: "$computed.mission_locale.activated_at", // TODO mise a jour avec l'activation
+              unit: "day",
+              amount: 180,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  return [
+    {
+      $addFields: {
+        in_activation_range: {
+          $cond: [IN_ACTIVATION_RANGE_CONDITION, true, false],
+        },
+      },
+    },
+  ];
+};
+
+const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  const MISSION_LOCALE_CONDITION = {
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null], // TODO mise a jour avec l'activation
+      },
+      {
+        $ne: [{ $ifNull: ["$situation", null] }, null], // TODO avec les logs
+      },
+      {
+        $eq: ["$organisme_data.acc_conjoint", true], // TODO avec les logs
+      },
+    ],
+  };
+
+  const ORGANISME_CONDITION = {
+    $or: [
+      {
+        $eq: [{ $ifNull: ["$situation", null] }, null], // TODO avec les logs
+      },
+      {
+        $eq: ["$organisme_data.acc_conjoint", true], // TODO avec les logs
+      },
+    ],
+  };
+
+  const condition = () => {
+    switch (visibility) {
+      case "MISSION_LOCALE":
+        return { $cond: [MISSION_LOCALE_CONDITION, true, false] };
+      case "ORGANISME_FORMATION":
+        return { $cond: [ORGANISME_CONDITION, true, false] };
+    }
+  };
+
+  // TODO ajout ici des conditions pour afficher les effectifs qui ont été créés après l'activation de la mission locale
+  return [
+    {
+      $addFields: {
+        in_joint_organisme_range: {
+          ...condition(),
+        },
+      },
+    },
+    {
+      $match: {
+        in_joint_organisme_range: true,
+      },
+    },
+  ];
+};
+
+const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  switch (visibility) {
+    case "MISSION_LOCALE":
+      return addMissionLocaleFieldTraitementStatus();
+    case "ORGANISME_FORMATION":
+      return addOrganismeFieldTraitementStatus();
+  }
+};
+
+const addOrganismeFieldTraitementStatus = () => {
+  const A_TRAITER_CONDIITON = {
+    $and: [
+      {
+        $or: [{ $eq: ["$organisme_data", null] }, { $eq: [{ $type: "$organisme_data" }, "missing"] }], // TODO avec les logs
+      },
+      {
+        $ne: ["$nouveau_contrat", true], // TODO gestion contrat
+      },
+    ],
+  };
+
+  return [
+    {
+      $addFields: {
+        a_traiter: {
+          $cond: [A_TRAITER_CONDIITON, true, false],
+        },
+        a_risque: false,
+        injoignable: false,
+        a_contacter: false,
+      },
+    },
+  ];
+};
+
+const addMissionLocaleFieldTraitementStatus = () => {
+  const A_TRAITER_CONDIITON = { $eq: ["$situation", "$$REMOVE"] }; // TODO avec les logs
+  const A_CONTACTER_CONDITION = { $eq: ["$effectif_choice.confirmation", true] }; // TODO effectif_choice
+
+  const RQTH_CONDITION = { $eq: ["$computed.effectif.informations_personelles.rqth", true] };
+  const MINEUR_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$computed.person.identifiant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+        ],
+      },
+      {
+        $lte: [
+          "$computed.person.identifiant.date_de_naissance",
+          new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
+        ],
+      },
+    ],
+  };
+
+  const PRESQUE_6_MOIS_CONDITION = {
+    $and: [
+      {
+        $gte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 180,
+            },
+          },
+        ],
+      },
+      {
+        $lte: [
+          "$date_rupture",
+          {
+            $dateSubtract: {
+              startDate: new Date(),
+              unit: "day",
+              amount: 150,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const ACCOMPAGNEMENT_CONJOINT_CONDITION = {
+    $eq: ["$organisme_data.acc_conjoint", true], // TODO avec les logs
+  };
+
+  const A_RISQUE_CONDITION = {
+    $and: [
+      {
+        $or: [RQTH_CONDITION, PRESQUE_6_MOIS_CONDITION, MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+      },
+      {
+        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI], // TODO nouveau contrat
+      },
+    ],
+  };
+
+  const INJOIGNABLE_CONDITION = {
+    $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR], // TODO avec les logs
+  };
+
+  return [
+    {
+      $addFields: {
+        a_risque_rqth: {
+          $cond: [RQTH_CONDITION, true, false],
+        },
+        a_risque_mineur: {
+          $cond: [MINEUR_CONDITION, true, false],
+        },
+        a_risque_presque_6_mois: {
+          $cond: [PRESQUE_6_MOIS_CONDITION, true, false],
+        },
+        a_risque_accompagnement_conjoint: {
+          $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
+        },
+      },
+    },
+    {
+      $addFields: {
+        a_traiter: {
+          $cond: [A_TRAITER_CONDIITON, true, false],
+        },
+        a_risque: {
+          $cond: [A_RISQUE_CONDITION, true, false],
+        },
+        injoignable: {
+          $cond: [INJOIGNABLE_CONDITION, true, false],
+        },
+        a_contacter: {
+          $cond: [A_CONTACTER_CONDITION, true, false],
+        },
+      },
+    },
+  ];
+};
+
+const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  switch (visibility) {
+    case "MISSION_LOCALE":
+      return [
+        {
+          $project: {
+            id: "$computed.effectif._id", // ✅
+            nom: "$computed.person.identifiant.nom", // ✅
+            prenom: "$computed.person.identifiant.prenom", // ✅
+            date_de_naissance: "$computed.person.identifiant.date_de_naissance", // ✅
+            adresse: "$computed.effectif.adresse", // ✅
+            formation: "$effectif_snapshot.formation", //TODO formation v2
+            courriel: "$effectif_snapshot.apprenant.courriel", //TODO courriel
+            telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+            telephone_corrected: "$effectif_choice.telephone", // TODO choice
+            autorisation_contact: "$effectif_choice.confirmation", // TODO choice
+            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1", // TODO responsable mail
+            rqth: "$computed.effectif.informations_personelles.rqth", // ✅
+            a_traiter: "$a_traiter",
+            transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+            source: "$effectif_snapshot.source", // TODO source
+            organisme: "$organisme", // ✅
+            contrats: "$computed.effectif.contrats", // ✅
+            "situation.situation": "$situation", // TODO log
+            "situation.situation_autre": "$situation_autre", // TODO log
+            "situation.deja_connu": "$deja_connu", // TODO log
+            "situation.commentaires": "$commentaires", // TODO log
+            contacts_tdb: "$tdb_users", // ✅
+            nouveau_contrat: "$nouveau_contrat", // TODO nouveau contrat
+            current_status: "$current_status", // TODO
+            organisme_data: "$organisme_data", // TODO log
+            date_rupture: "$date_rupture", // ✅
+            mission_locale_organisation: "$mission_locale_organisation",
+            mission_locale_logs: "$ml_logs",
+            prioritaire: "$a_risque",
+            a_contacter: "$a_contacter",
+            mineur: "$a_risque_mineur",
+            presque_6_mois: "$a_risque_presque_6_mois",
+            acc_conjoint: "$a_risque_accompagnement_conjoint",
+            injoignable: "$injoignable",
+          },
+        },
+      ];
+    case "ORGANISME_FORMATION":
+      return [
+        {
+          $project: {
+            id: "$computed.effectif._id", // ✅
+            nom: "$computed.person.identifiant.nom", // ✅
+            prenom: "$computed.person.identifiant.prenom", // ✅
+            date_de_naissance: "$computed.person.identifiant.date_de_naissance", // ✅
+            adresse: "$computed.effectif.adresse", // ✅
+            formation: "$effectif_snapshot.formation", //TODO formation v2
+            courriel: "$effectif_snapshot.apprenant.courriel", //TODO courriel
+            telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+            telephone_corrected: "$effectif_choice.telephone", // TODO choice
+            autorisation_contact: "$effectif_choice.confirmation", // TODO choice
+            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1", // TODO responsable mail
+            rqth: "$computed.effectif.informations_personelles.rqth", // ✅
+            a_traiter: "$a_traiter",
+            transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+            source: "$effectif_snapshot.source", // TODO source
+            organisme: "$organisme", // ✅
+            contrats: "$computed.effectif.contrats", // ✅
+            "situation.situation": "$situation", // TODO log
+            "situation.situation_autre": "$situation_autre", // TODO log
+            "situation.deja_connu": "$deja_connu", // TODO log
+            "situation.commentaires": "$commentaires", // TODO log
+            contacts_tdb: "$tdb_users", // ✅
+            nouveau_contrat: "$nouveau_contrat", // TODO nouveau contrat
+            current_status: "$current_status", // TODO
+            organisme_data: "$organisme_data", // TODO log
+            date_rupture: "$date_rupture", // ✅
+            mission_locale_organisation: "$mission_locale_organisation",
+            mission_locale_logs: "$ml_logs",
+          },
+        },
+      ];
+  }
+};
+
+const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER:
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+    case API_EFFECTIF_LISTE.TRAITE:
+      return { date_rupture: -1 };
+    case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+    case API_EFFECTIF_LISTE.PRIORITAIRE:
+      return {
+        a_risque_presque_6_mois: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_contacter: -1,
+      };
+  }
+};
+
+const lookUpOrganisme = (withContacts: boolean = false) => {
+  return [
+    {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$computed.formation.organisme_formateur_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: withContacts ? 1 : 0,
+              contacts_from_referentiel: 1,
+              nom: 1,
+              raison_sociale: 1,
+              adresse: 1,
+              siret: 1,
+              enseigne: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    ...(withContacts
+      ? [
+        {
+          $lookup: {
+            from: "organisations",
+            let: { id: { $toString: "$organisme._id" } },
+            pipeline: [
+              { $match: { type: "ORGANISME_FORMATION" } },
+              { $match: { $expr: { $eq: ["$organisme_id", "$$id"] } } },
+              {
+                $project: {
+                  _id: 1,
+                },
+              },
+            ],
+            as: "organisation",
+          },
+        },
+        {
+          $unwind: {
+            path: "$organisation",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "usersMigration",
+            let: { id: "$organisation._id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$organisation_id", "$$id"] } } },
+              {
+                $project: {
+                  _id: 0,
+                  email: 1,
+                  telephone: 1,
+                  nom: 1,
+                  prenom: 1,
+                  fonction: 1,
+                },
+              },
+            ],
+            as: "tdb_users",
+          },
+        },
+      ]
+      : []),
+  ];
+};
+
+export const getOrCreateMissionLocaleById = async (id: number) => {
+  const mlDb = await organisationsDb().findOne({ ml_id: id });
+
+  if (mlDb) {
+    return mlDb;
+  }
+  const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
+  const ml: IMissionLocale | undefined = allMl.find((ml) => ml.id === id);
+  if (!ml) {
+    Boom.notFound(`Mission locale with id ${id} not found`);
+    return;
+  }
+
+  const orga = await organisationsDb().insertOne({
+    _id: new ObjectId(),
+    type: "MISSION_LOCALE",
+    created_at: new Date(),
+    ml_id: ml.id,
+    nom: ml.nom,
+    siret: ml.siret,
+    email: (ml.contact.email ?? "").toLowerCase(),
+    telephone: ml.contact.telephone ?? "",
+    site_web: (ml.contact.siteWeb ?? "").toLowerCase(),
+  });
+
+  return organisationsDb().findOne({ _id: orga.insertedId });
+};
+
+/**
+ * Liste les contacts (utilisateurs) liés à une Mission Locale
+ * à partir de son identifiant `ml_id`.
+ *
+ * @param missionLocaleID Identifiant numérique de la Mission Locale (ml_id)
+ * @returns La liste des utilisateurs confirmés rattachés à cette organisation
+ */
+export async function listContactsMlOrganisme(missionLocaleID: number) {
+  const organisation = await organisationsDb().findOne({
+    ml_id: missionLocaleID,
+    type: "MISSION_LOCALE",
+  });
+
+  if (!organisation) {
+    logger.warn(
+      { module: "listContactsMlOrganisme", missionLocaleID },
+      `Aucune organisation de type MISSION_LOCALE trouvée pour ml_id=${missionLocaleID}.`
+    );
+    return [];
+  }
+
+  const contacts = await usersMigrationDb()
+    .find(
+      {
+        organisation_id: new ObjectId(organisation._id),
+        account_status: "CONFIRMED",
+      },
+      {
+        projection: {
+          _id: 1,
+          email: 1,
+          nom: 1,
+          prenom: 1,
+          fonction: 1,
+          telephone: 1,
+          created_at: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return contacts;
+}
+
+export const missionLocaleBaseAggregation = (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
+  return [
+    ...generateOrganisationMatchStage(organisation),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(),
+    ...addFieldFromActivationDate(),
+    ...filterByActivationDatePipelineMl(),
+    ...addFieldTraitementStatus(organisation.type),
+  ];
+};
+
+const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifId: ObjectId,
+  nom_liste: API_EFFECTIF_LISTE
+) => {
+  const aggregation = [
+    ...missionLocaleBaseAggregation(organisation),
+    ...matchTraitementEffectifPipelineMl(nom_liste),
+    {
+      $sort: getSortedRulesByListeType(nom_liste),
+    },
+    {
+      $project: {
+        _id: 0,
+        id: "$computed.effectif._id",
+        nom: "$computed.person.identifiant.nom",
+        prenom: "$computed.person.identifiant.prenom",
+      },
+    },
+  ];
+
+  const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
+  const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
+
+  // modulo qui gère les valeurs négatives
+  const modulo = (a, b) => ((a % b) + b) % b;
+
+  // Si il n'y a qu'un seul element, pas de next
+  return index >= 0 && effectifs.length > 1
+    ? {
+      total: effectifs.length,
+      next: effectifs[modulo(index + 1, effectifs.length)],
+      previous: effectifs[modulo(index - 1, effectifs.length)],
+      currentIndex: index,
+      nomListe: nom_liste,
+    }
+    : {
+      total: 1,
+      next: null,
+      previous: null,
+      currentIndex: null,
+    };
+};
+
+export const getEffectifsParMoisByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
+  const { type } = effectifsParMoisFiltersMissionLocale;
+
+  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
+
+  const getFirstDayOfMonthListFromDate = (firstDate: Date | null) => {
+    if (!firstDate) {
+      return [];
+    }
+    const dates: string[] = [];
+    const today: Date = new Date();
+    const targetDate = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
+    let done = false;
+    let i = 0;
+
+    while (!done) {
+      const date: Date = new Date(Date.UTC(today.getFullYear(), today.getMonth() - i, 1));
+      const formatted: string = date.toISOString();
+      done = date <= targetDate;
+      dates.push(formatted);
+      i++;
+    }
+    return dates;
+  };
+
+  const getGroupPushCondition = () => {
+    switch (type) {
+      case API_EFFECTIF_LISTE.TRAITE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }],
+        };
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", true] }],
+        };
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        return {
+          $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
+    }
+  };
+
+  const organismeMissionLocaleAggregation: any[] = [
+    ...generateOrganisationMatchStage(organisation),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(),
+    ...addFieldFromActivationDate(),
+    ...addFieldTraitementStatus(organisation.type),
+  ];
+
+  organismeMissionLocaleAggregation.push(
+    {
+      $sort: {
+        date_rupture: -1,
+      },
+    },
+    ...lookUpOrganisme(),
+    {
+      $addFields: {
+        firstDayOfMonth: {
+          $dateFromParts: {
+            year: { $year: "$date_rupture" },
+            month: { $month: "$date_rupture" },
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$firstDayOfMonth",
+        data: {
+          $push: {
+            $cond: [
+              getGroupPushCondition(),
+              {
+                id: "$$ROOT.computed.effectif._id",
+                nom: "$$ROOT.computed.person.identifiant.nom",
+                prenom: "$$ROOT.computed.person.identifiant.prenom",
+                libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long", // TODO formation
+                organisme_nom: "$$ROOT.organisme.nom",
+                organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
+                organisme_enseigne: "$$ROOT.organisme.enseigne",
+                prioritaire: "$a_risque",
+                a_contacter: "$a_contacter",
+                mineur: "$a_risque_mineur",
+                presque_6_mois: "$a_risque_presque_6_mois",
+                acc_conjoint: "$a_risque_accompagnement_conjoint",
+                rqth: "$$ROOT.computed.effectif.informations_personelles.rqth",
+                a_traiter: "$$ROOT.a_traiter",
+                injoignable: "$$ROOT.injoignable",
+                nouveau_contrat: "$nouveau_contrat",
+              },
+              null,
+            ],
+          },
+        },
+        ...(aTraiter
+          ? {
+            treated_count: {
+              $sum: {
+                $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
+              },
+            },
+          }
+          : {}),
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id",
+        treated_count: 1,
+        data: {
+          $setDifference: ["$data", [null]],
+        },
+      },
+    },
+    {
+      $sort: {
+        month: -1,
+      },
+    }
+  );
+  const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+
+  const oldestRealDataIndex = result.findLastIndex(
+    ({ treated_count, data }) => (treated_count ?? 0) > 0 || data.length > 0
+  );
+  const effectifs = oldestRealDataIndex >= 0 ? result.slice(0, oldestRealDataIndex + 1) : [...result];
+
+  const oldestMonth = effectifs && effectifs.length ? effectifs.slice(-1)[0].month : null;
+  const formattedData = aTraiter
+    ? getFirstDayOfMonthListFromDate(oldestMonth).map((date) => {
+      const found = effectifs.find(({ month }) => new Date(month).getTime() === new Date(date).getTime());
+      return (
+        found ?? {
+          month: date,
+          ...(aTraiter ? { treated_count: 0 } : {}),
+          data: [],
+        }
+      );
+    })
+    : effectifs.sort((a, b) => b.month - a.month);
+
+  return formattedData;
+};
+
+export const getEffectifFromMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifId: string,
+  nom_liste: API_EFFECTIF_LISTE
+) => {
+  const aggregation = [
+    ...generateOrganisationMatchStage(organisation),
+    {
+      $match: {
+        "computed.effectif._id": new ObjectId(effectifId),
+        soft_deleted: { $ne: true }, // TODO ajouter soft deleted
+      },
+    },
+    ...addFieldTraitementStatus(organisation.type),
+    ...createDernierStatutFieldPipelineML(),
+    ...lookUpOrganisme(true),
+    {
+      $lookup: {
+        from: "organisations",
+        let: { mission_locale_id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$mission_locale_id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+              email: 1,
+              telephone: 1,
+              activated_at: 1,
+            },
+          },
+        ],
+        as: "mission_locale_organisation",
+      },
+    },
+    {
+      $lookup: {
+        from: "missionLocaleEffectifLog",
+        let: { mission_locale_effectif_id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$mission_locale_effectif_2_id", "$$mission_locale_effectif_id"] } } },
+          {
+            $sort: { created_at: 1 },
+          },
+        ],
+        as: "ml_logs",
+      },
+    },
+    {
+      $unwind: {
+        path: "$mission_locale_organisation",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    ...getEffectifProjectionStage(organisation.type),
+  ];
+
+  const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
+
+  if (!effectif) {
+    throw Boom.notFound();
+  }
+
+  const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
+    organisation,
+    new ObjectId(effectifId),
+    nom_liste
+  );
+  return { effectif, ...next };
+};
+
+export const getEffectifsListByMisisonLocaleId = (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+) => {
+  const { type } = effectifsParMoisFiltersMissionLocale;
+
+  const effectifsMissionLocaleAggregation = [
+    ...missionLocaleBaseAggregation(organisation),
+    ...matchTraitementEffectifPipelineMl(type),
+    ...lookUpOrganisme(true),
+    {
+      $addFields: {
+        _effectif_choice_label: {
+          $switch: {
+            branches: [
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $eq: ["$brevo", null] }], // TODO effectif choice
+                },
+                then: "Non inclus dans la campagne",
+              },
+              {
+                case: {
+                  $and: [{ $eq: ["$effectif_choice", null] }, { $ne: ["$brevo", null] }], // TODO effectif choice
+                },
+                then: "Pas de clic",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", true] }, // TODO effectif choice
+                then: "Clic + souhaite un accompagnement",
+              },
+              {
+                case: { $eq: ["$effectif_choice.confirmation", false] }, // TODO effectif choice
+                then: "Clic + ne souhaite pas d'accompagnement",
+              },
+            ],
+            default: "Non inclus dans la campagne",
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        nom: "$computed.person.identifiant.nom",
+        prenom: "$computed.person.identifiant.prenom",
+        transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+        source: "$effectif_snapshot.source", // TODO source
+        contrat_date_debut: {
+          $getField: {
+            field: "date_debut",
+            input: {
+              $last: "$computed.effectif.contrats", // TODO contrat qui n'est pas une liste
+            },
+          },
+        },
+        contrat_date_rupture: {
+          $getField: {
+            field: "date_rupture",
+            input: {
+              $last: "$computed.effectif.contrats", // TODO contrat qui n'est pas une liste
+            },
+          },
+        },
+        contrat_date_fin: {
+          $getField: {
+            field: "date_fin",
+            input: {
+              $last: "$computed.effectif.contrats", // TODO contrat qui n'est pas une liste
+            },
+          },
+        },
+        date_de_naissance: "$computed.person.identifiant.date_de_naissance",
+        rqth: "$computed.effectif.informations_personelles.rqth",
+        commune: "$computed.effectif.adresse.commune",
+        code_postal: "$computed.effectif.adresse.code_postal",
+        telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+        email: "$effectif_snapshot.apprenant.courriel", // TODO email
+        email_responsable_1: "$effectif_snapshot.apprenant.responsable_mail1", // TODO email responsable
+        email_responsable_2: "$effectif_snapshot.apprenant.responsable_mail2", // TODO email responsable
+        libelle_formation: "$effectif_snapshot.formation.libelle_long", // TODO formation
+        organisme_nom: "$organisme.nom",
+        organisme_code_postal: "$organisme.adresse.code_postal",
+        organisme_contacts: "$organisme.contacts_from_referentiel",
+        tdb_organisme_contacts: "$tdb_users",
+        effectif_choice: "$_effectif_choice_label",
+        ml_situation: "$situation", // TODO log
+        ml_deja_connu: "$deja_connu", // TODO log
+        ml_commentaires: "$commentaires", // TODO log
+        ml_situation_autre: "$situation_autre", // TODO log
+      },
+    },
+  ];
+
+  return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+};
+
+export const getEffectifARisqueByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
+  const pipeline = [
+    ...missionLocaleBaseAggregation(organisation),
+    {
+      $facet: {
+        hadEffectifs: [
+          {
+            $match: {
+              a_traiter: false,
+              a_risque: true,
+            },
+          },
+          { $limit: 1 },
+        ],
+        prioritaire: [
+          {
+            $match: {
+              $and: [
+                { a_traiter: true },
+                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+              ],
+            },
+          },
+          {
+            $sort: getSortedRulesByListeType(API_EFFECTIF_LISTE.PRIORITAIRE),
+          },
+          ...lookUpOrganisme(),
+          {
+            $project: {
+              _id: 0,
+              id: "$computed.effectif._id",
+              nom: "$computed.person.identifiant.nom",
+              prenom: "$computed.person.identifiant.prenom",
+              libelle_formation: "$effectif_snapshot.formation.libelle_long", // TODO formation
+              organisme_nom: "$organisme.nom",
+              organisme_raison_sociale: "$organisme.raison_sociale",
+              organisme_enseigne: "$organisme.enseigne",
+              prioritaire: "$a_risque",
+              date_rupture: "$date_rupture",
+              a_traiter: "$a_traiter",
+              injoignable: "$injoignable",
+              a_contacter: "$a_contacter",
+              mineur: "$a_risque_mineur",
+              presque_6_mois: "$a_risque_presque_6_mois",
+              acc_conjoint: "$a_risque_accompagnement_conjoint",
+              rqth: "$computed.effectif.informations_personelles.rqth",
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        hadEffectifsPrioritaires: { $gt: [{ $size: "$hadEffectifs" }, 0] },
+        effectifs: "$prioritaire",
+      },
+    },
+  ];
+
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+
+  return result;
+};
+
+const getEffectifMissionLocaleEligibleToBrevoAggregation = (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => [
+    ...generateOrganisationMatchStage(organisation),
+    ...EFF_MISSION_LOCALE_FILTER,
+    ...filterByDernierStatutPipelineMl(),
+    ...addFieldFromActivationDate(),
+    ...filterByActivationDatePipelineMl(),
+  ];
+
+export const getEffectifMissionLocaleEligibleToBrevoCount = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
+  const effectifsMissionLocaleAggregation = [
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
+
+    {
+      $facet: {
+        total: [{ $count: "total" }],
+        eligible: [
+          { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
+          { $count: "total" },
+        ],
+        details: [
+          {
+            $group: {
+              _id: { $ifNull: ["$email_status", "not_processed"] }, // TODO brevo
+              count: { $sum: 1 },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        total: { $arrayElemAt: ["$total.total", 0] },
+        eligible: { $arrayElemAt: ["$eligible.total", 0] },
+        details: 1,
+      },
+    },
+  ];
+  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
+  return data;
+};
+
+export async function getAllEffectifsParMois(
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) {
+  const fetchByType = (type: API_EFFECTIF_LISTE) =>
+    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema);
+
+  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+    fetchByType(API_EFFECTIF_LISTE.TRAITE),
+    getEffectifARisqueByMissionLocaleId(organisation),
+    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+  ]);
+
+  return { a_traiter, traite, prioritaire, injoignable };
+}
+
+// BAL
+
+export const getEffectifMissionLocaleEligibleToBrevo = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
+  const effectifsMissionLocaleAggregation = [
+    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
+    {
+      $match: {
+        soft_deleted: { $ne: true }, // TODO soft deleted
+        "brevo.token": { $ne: null }, // TODO brevo
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        let: { id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+              site_web: 1,
+            },
+          },
+        ],
+        as: "mission_locale",
+      },
+    },
+    {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$computed.formation.organisme_formateur_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+            },
+          },
+        ],
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$mission_locale",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        email: "$effectif_snapshot.apprenant.courriel", // TODO courriel
+        nom: "$computed.person.identifiant.nom", // 
+        prenom: "$computed.person.identifiant.prenom",
+        "urls.TDB_AB_TEST_A": {
+          $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"], // TODO brevo
+        },
+        "urls.TDB_AB_TEST_B_TRUE": {
+          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"], // TODO brevo
+        },
+        "urls.TDB_AB_TEST_B_FALSE": {
+          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"], // TODO brevo
+        },
+        "urls.TDB_LBA_LINK": {
+          $concat: [
+            config.publicUrl,
+            "/api/v1/mission-locale/lba?",
+            "rncp=",
+            "$effectif_snapshot.formation.rncp",
+            "&cfd=",
+            "$effectif_snapshot.formation.cfd",
+          ],
+        },
+        "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
+        telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+        nom_organisme: "$organisme.nom",
+        nom_mission_locale: "$mission_locale.nom",
+        mission_locale_id: { $toString: "$computed.effectif.adresse.mission_locale_id" },
+        date_de_naissance: "$computed.person.identifiant.date_de_naissance",
+        date_derniere_rupture: "$date_rupture",
+      },
+    },
+  ];
+  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+  return data as Array<{
+    email: string;
+    prenom: string;
+    nom: string;
+    urls?: Record<string, string> | null;
+    telephone?: string | null;
+    nom_organisme?: string | null;
+    mission_locale_id: string;
+    nom_mission_locale: string;
+    date_de_naissance?: Date | null;
+    date_derniere_rupture?: Date | null;
+  }>;
+};
+
+export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
+  return (
+    await missionLocaleEffectifsDb()
+      .aggregate([
+        {
+          $match: {
+            email_status: { $exists: false },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            email: "$effectif_snapshot.apprenant.courriel", // TODO courriel
+          },
+        },
+      ])
+      .toArray()
+  ).map(({ email }) => email) as Array<string>;
+};
+
+export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: string; status: IEmailStatusEnum }>) => {
+  if (!rupturants || rupturants.length === 0) {
+    return;
+  }
+
+  const bulkOps = rupturants.map(({ email, status }) => ({
+    updateOne: {
+      filter: { "effectif_snapshot.apprenant.courriel": email }, // TODO courriel
+      update: { $set: { email_status: status } },
+    },
+  }));
+
+  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
+  return result;
+};
+
+export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+  const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
+  const currentStatus =
+    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+
+  if (eff) {
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: effectif._id },
+      {
+        $set: {
+          ...(rupturantFilter ? {} : { soft_deleted: true }),
+          effectif_snapshot: { ...effectif, _id: effectif._id }, // TODO mise a jour de la creation du snapshot
+          effectif_snapshot_date: new Date(),
+          updated_at: new Date(),
+          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
+        },
+      }
+    );
+  }
+};
+
+export const computeMissionLocaleStats = async (
+  organisation: IOrganisationMissionLocale
+): Promise<IMissionLocaleStats["stats"]> => {
+  const mineurCondition = {
+    $gte: [
+      "$computed.person.identifiant.date_de_naissance",
+      new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+    ],
+  };
+  const rqthCondition = { $eq: ["$computed.effectif.informations_personelles.rqth", true] };
+
+  const effectifsMissionLocaleAggregation = [
+    ...missionLocaleBaseAggregation(organisation),
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+        a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
+        traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
+        rdv_pris: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } }, // TODO log
+        nouveau_projet: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }, 1, 0] } }, // TODO log
+        deja_accompagne: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }, 1, 0] } }, // TODO log
+        contacte_sans_retour: {
+          $sum: {
+            $cond: [
+              {
+                $or: [
+                  { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, // TODO log
+                  { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }, // TODO log
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        coordonnees_incorrectes: {
+          $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] }, // TODO log
+        },
+        autre: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.AUTRE] }, 1, 0] } }, // TODO log
+        deja_connu: { $sum: { $cond: ["$deja_connu", 1, 0] } },// TODO log
+        mineur: {
+          $sum: {
+            $cond: [mineurCondition, 1, 0],
+          },
+        },
+        mineur_a_traiter: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$a_traiter", true] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_traite: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$a_traiter", false] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_rdv_pris: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_nouveau_projet: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_deja_accompagne: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_contacte_sans_retour: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  mineurCondition,
+                  {
+                    $or: [
+                      { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, // TODO log
+                      { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }, // TODO log
+                    ],
+                  },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        mineur_coordonnees_incorrectes: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] }, 1, 0], // TODO log
+          },
+        },
+        mineur_autre: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.AUTRE] }] }, 1, 0], // TODO log
+          },
+        },
+        rqth: {
+          $sum: {
+            $cond: [rqthCondition, 1, 0],
+          },
+        },
+        rqth_a_traiter: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$a_traiter", true] }] }, 1, 0],
+          },
+        },
+        rqth_traite: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$a_traiter", false] }] }, 1, 0],
+          },
+        },
+        rqth_rdv_pris: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0], // TODO log
+          },
+        },
+        rqth_nouveau_projet: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0], // TODO log
+          },
+        },
+        rqth_deja_accompagne: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] }, 1, 0], // TODO log
+          },
+        },
+        rqth_contacte_sans_retour: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  rqthCondition,
+                  {
+                    $or: [
+                      { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, // TODO log
+                      { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }, // TODO log
+                    ],
+                  },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        rqth_coordonnees_incorrectes: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] }, 1, 0], // TODO log
+          },
+        },
+        rqth_autre: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.AUTRE] }] }, 1, 0], // TODO log
+          },
+        },
+        abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } }, // TODO statut
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        total: 1,
+        a_traiter: 1,
+        traite: 1,
+        rdv_pris: 1,
+        nouveau_projet: 1,
+        deja_accompagne: 1,
+        contacte_sans_retour: 1,
+        coordonnees_incorrectes: 1,
+        autre: 1,
+        deja_connu: 1,
+        mineur: 1,
+        mineur_a_traiter: 1,
+        mineur_traite: 1,
+        mineur_rdv_pris: 1,
+        mineur_nouveau_projet: 1,
+        mineur_deja_accompagne: 1,
+        mineur_contacte_sans_retour: 1,
+        mineur_coordonnees_incorrectes: 1,
+        mineur_autre: 1,
+        rqth: 1,
+        rqth_a_traiter: 1,
+        rqth_traite: 1,
+        rqth_rdv_pris: 1,
+        rqth_nouveau_projet: 1,
+        rqth_deja_accompagne: 1,
+        rqth_contacte_sans_retour: 1,
+        rqth_coordonnees_incorrectes: 1,
+        rqth_autre: 1,
+        abandon: 1,
+      },
+    },
+  ];
+
+  const data = (await missionLocaleEffectifsDb()
+    .aggregate(effectifsMissionLocaleAggregation)
+    .next()) as IMissionLocaleStats["stats"];
+  if (!data) {
+    return {
+      total: 0,
+      a_traiter: 0,
+      traite: 0,
+      rdv_pris: 0,
+      nouveau_projet: 0,
+      deja_accompagne: 0,
+      contacte_sans_retour: 0,
+      coordonnees_incorrectes: 0,
+      autre: 0,
+      deja_connu: 0,
+      mineur: 0,
+      mineur_a_traiter: 0,
+      mineur_traite: 0,
+      mineur_rdv_pris: 0,
+      mineur_nouveau_projet: 0,
+      mineur_deja_accompagne: 0,
+      mineur_contacte_sans_retour: 0,
+      mineur_coordonnees_incorrectes: 0,
+      mineur_autre: 0,
+      rqth: 0,
+      rqth_a_traiter: 0,
+      rqth_traite: 0,
+      rqth_rdv_pris: 0,
+      rqth_nouveau_projet: 0,
+      rqth_deja_accompagne: 0,
+      rqth_contacte_sans_retour: 0,
+      rqth_coordonnees_incorrectes: 0,
+      rqth_autre: 0,
+      abandon: 0,
+    };
+  }
+  return data;
+};
+
+/**
+ *
+ * Mise a jour des données de la mission locale
+ */
+
+export const setEffectifMissionLocaleData = async (
+  missionLocaleId: ObjectId,
+  effectifId: ObjectId,
+  data: IUpdateMissionLocaleEffectif,
+  user: AuthContext
+) => {
+  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
+
+  const setObject = {
+    situation,
+    deja_connu,
+    ...(situation_autre !== undefined ? { situation_autre } : {}),
+    ...(commentaires !== undefined ? { commentaires } : {}),
+    ...(probleme_type !== undefined ? { probleme_type } : {}),
+    ...(probleme_detail !== undefined ? { probleme_detail } : {}),
+  };
+
+  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+    {
+      mission_locale_id: missionLocaleId,
+      effectif_id: new ObjectId(effectifId),
+    },
+    {
+      $set: {
+        ...setObject, // TODO mise a jour situation
+        updated_at: new Date(),
+      },
+    },
+    { upsert: true, returnDocument: "after" }
+  );
+  await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
+  await createOrUpdateMissionLocaleStats(missionLocaleId);
+  return updated;
+};
+
+const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
+  try {
+    // Détection des incohérences
+    const parcours = (effectif._computed as any)?.parcours || [];
+    const inconsistencies: string[] = [];
+
+    if (parcours.length > 0) {
+      const today = new Date();
+
+      // Statut actif selon les dates vs dernier du parcours
+      const currentStatusML =
+        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
+      const lastParcoursStatus = parcours[parcours.length - 1];
+
+      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
+        inconsistencies.push(
+          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
+        );
+      }
+
+      // Statut futur utilisé comme current
+      if (currentStatusML && new Date(currentStatusML.date) > today) {
+        const daysFuture = Math.floor(
+          (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
+        );
+        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
+      }
+
+      // Rupture sans RUPTURANT après la date
+      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
+      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
+        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
+      }
+
+      if (inconsistencies.length > 0) {
+        logger.warn(
+          {
+            effectifId: effectif._id,
+            apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
+            inconsistencies,
+            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
+            contrats:
+              effectif.contrats?.map((c: any) => ({
+                debut: c.date_debut,
+                fin: c.date_fin,
+                rupture: c.date_rupture,
+              })) || [],
+            currentStatusWillBe: {
+              statut: currentStatusML?.statut,
+              date: currentStatusML?.date,
+            },
+          },
+          "[INCONSISTANCES] Effectif avec incohérences détectées"
+        );
+      }
+    }
+  } catch (error) {
+    logger.error({ error }, "[INCONSISTANCES] Erreur lors de la détection des incohérences");
+  }
+};
+
+// TODO mise a jour de la creation des snapshot
+
+export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+  logMissionLocaleSnapshot(effectif);
+  const currentStatus =
+    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+    effectif._computed?.statut?.parcours.slice(-1)[0];
+
+  const ageFilter = effectif?.apprenant?.date_de_naissance
+    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
+    : false;
+  const rqthFilter = effectif.apprenant.rqth;
+  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
+
+  const mlData = (await organisationsDb().findOne({
+    type: "MISSION_LOCALE",
+    ml_id: effectif.apprenant.adresse?.mission_locale_id,
+  })) as IOrganisationMissionLocale;
+
+  const date = new Date();
+
+  if (mlData) {
+    const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
+    const mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        mission_locale_id: mlData?._id,
+        effectif_id: effectif._id,
+      },
+      {
+        $set: {
+          current_status: {
+            value: currentStatus?.valeur,
+            date: currentStatus?.date,
+          },
+        },
+        $setOnInsert: {
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: date,
+          date_rupture: currentStatus?.date, // Can only be set if rupturantFilter is RUPTURANT, so current status is rupturant ( check upsert condition )
+          created_at: date,
+          brevo: {
+            token: uuidv4(),
+            token_created_at: date,
+          },
+          computed: {
+            organisme: {
+              ml_beta_activated_at: organisation?.ml_beta_activated_at,
+            },
+            ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
+          },
+        },
+      },
+      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
+    );
+
+    if (mongoInfo.lastErrorObject?.n > 0) {
+      createOrUpdateMissionLocaleStats(mlData._id);
+      mongoInfo.lastErrorObject?.upserted &&
+        (await checkMissionLocaleEffectifDoublon(new ObjectId(mongoInfo.lastErrorObject.upserted), effectif._id));
+    }
+  }
+};
+
+// export const createMissionLocaleSnapshotFromV2 = (effectif: IEffectifV2) => {
+//   const currentStatus = 
+// }
+
+export const getMissionLocaleStat = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  mineur?: boolean,
+  rqth?: boolean
+) => {
+  const mineurCondition = {
+    $gte: [
+      "$computed.person.identifiant.date_de_naissance",
+      new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+    ],
+  };
+  const rqthCondition = { $eq: ["$computed.effectif.informations_personelles.rqth", true] };
+
+  const withCondition = (cond?: any) => {
+    if (!mineur && !rqth) {
+      return { $sum: cond ? { $cond: [cond, 1, 0] } : 1 };
+    }
+
+    const c = {
+      $sum: {
+        $cond: [
+          { $and: [...(cond ? [cond] : []), ...(mineur ? [mineurCondition] : []), ...(rqth ? [rqthCondition] : [])] },
+          1,
+          0,
+        ],
+      },
+    };
+    return c;
+  };
+
+  const effectifsMissionLocaleAggregation = [
+    ...missionLocaleBaseAggregation(organisation),
+    {
+      $group: {
+        _id: null,
+        total: withCondition(),
+        a_traiter: withCondition({ $eq: ["$a_traiter", true] }),
+        traite: withCondition({ $eq: ["$a_traiter", false] }),
+        rdv_pris: withCondition({ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }), // TODO log
+        nouveau_projet: withCondition({ $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }), // TODO log
+        deja_accompagne: withCondition({ $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }), // TODO log
+        contacte_sans_retour: withCondition({
+          $or: [
+            { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, // TODO log
+            { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }, // TODO log
+          ],
+        }),
+        coordonnees_incorrectes: withCondition({ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }), // TODO log
+        autre: withCondition({ $eq: ["$situation", SITUATION_ENUM.AUTRE] }), // TODO log
+        deja_connu: withCondition({ $eq: ["$deja_connu", true] }), // TODO log
+      },
+    },
+  ];
+
+  const data = (await missionLocaleEffectifsDb()
+    .aggregate(effectifsMissionLocaleAggregation)
+    .next()) as IMissionLocaleStats["stats"];
+  if (!data) {
+    return {
+      total: 0,
+      a_traiter: 0,
+      traite: 0,
+      rdv_pris: 0,
+      nouveau_projet: 0,
+      deja_accompagne: 0,
+      contacte_sans_retour: 0,
+      coordonnees_incorrectes: 0,
+      autre: 0,
+      deja_connu: 0,
+    };
+  }
+  return data;
+};
+
+export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, effectifId: ObjectId) => {
+  const results = await missionLocaleEffectifsDb().updateMany(
+    {
+      _id: { $ne: mlEffectifId },
+      effectif_id: effectifId,
+    },
+    {
+      $set: {
+        soft_deleted: true,
+      },
+    }
+  );
+
+  logger.info(`Soft deleted ${results.modifiedCount} duplicates for effectif ${effectifId}`);
+};

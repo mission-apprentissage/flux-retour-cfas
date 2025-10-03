@@ -18,6 +18,9 @@ import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
+import missionLocaleEffectif2Descriptor, {
+  IMissionLocale2Effectif,
+} from "shared/models/data/missionLocaleEffectif2.model";
 import missionLocaleEffectifLogDescriptor, {
   IMissionLocaleEffectifLog,
 } from "shared/models/data/missionLocaleEffectifLog.model";
@@ -71,6 +74,7 @@ export const modelDescriptors = [
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
+  missionLocaleEffectif2Descriptor,
   regionsModelDescriptor,
   brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
@@ -107,6 +111,9 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+
+export const missionLocaleEffectifs2Db = () =>
+  getDbCollection<IMissionLocale2Effectif>(missionLocaleEffectif2Descriptor.collectionName);
 export const missionLocaleStatsDb = () =>
   getDbCollection<IMissionLocaleStats>(missionLocaleStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>
