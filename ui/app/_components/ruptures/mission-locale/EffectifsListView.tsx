@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
@@ -21,6 +22,7 @@ import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
 
 import { DownloadSection } from "./DownloadSection";
+import { useMonthDownload } from "./useMonthDownload";
 
 interface EffectifsListViewProps {
   data: MonthsData;
@@ -30,6 +32,7 @@ interface EffectifsListViewProps {
 
 export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
 
   const getInitialSection = (statut: string | null): SelectedSection => {
     switch (statut) {
@@ -277,6 +280,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À traiter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -288,6 +301,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.A_TRAITER}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -299,6 +313,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               Déjà traité
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -307,6 +331,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 listType={API_EFFECTIF_LISTE.TRAITE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -318,6 +343,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À recontacter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -329,6 +364,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.INJOIGNABLE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
