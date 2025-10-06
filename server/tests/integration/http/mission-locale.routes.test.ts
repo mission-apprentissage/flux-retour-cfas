@@ -122,8 +122,6 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
-      console.log(JSON.stringify(await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID }), null, 2));
-
       expect(res.data.traite.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
     });
   });
@@ -206,7 +204,6 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
-
       expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
     });
 
