@@ -4,6 +4,8 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { MonthItem } from "../../common/types/ruptures";
 
+export const DEFAULT_ITEMS_TO_SHOW = 10;
+
 export const formatMonthAndYear = (dateString: string): string => {
   const date = new Date(dateString);
   const raw = format(date, "MMMM yyyy", { locale: fr });

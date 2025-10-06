@@ -89,6 +89,7 @@ export const plausibleGoals = [
 
   // Mission locale
   "telechargement_mission_locale_liste",
+  "telechargement_mission_locale_liste_mois",
   "reporting_mission_locale_effectif",
 
   // cfa
