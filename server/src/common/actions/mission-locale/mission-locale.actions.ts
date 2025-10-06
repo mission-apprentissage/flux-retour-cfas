@@ -1283,7 +1283,8 @@ export const getEffectifsListByMisisonLocaleId = (
 };
 
 export const getEffectifARisqueByMissionLocaleId = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  nom_liste: API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE | API_EFFECTIF_LISTE.PRIORITAIRE
 ) => {
   const pipeline = [
     ...missionLocaleBaseAggregation(organisation),
@@ -1299,14 +1300,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
           { $limit: 1 },
         ],
         prioritaire: [
-          {
-            $match: {
-              $and: [
-                { a_traiter: true },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
-            },
-          },
+          ...matchTraitementEffectifPipelineMl(nom_liste, organisation.type),
           {
             $sort: getSortedRulesByListeType(API_EFFECTIF_LISTE.PRIORITAIRE),
           },
@@ -1400,14 +1394,15 @@ export async function getAllEffectifsParMois(
   const fetchByType = (type: API_EFFECTIF_LISTE) =>
     getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema, userId);
 
-  const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
+  const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
     fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(organisation),
+    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
+    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
     fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
   ]);
 
-  return { a_traiter, traite, prioritaire, injoignable };
+  return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable };
 }
 
 // BAL
