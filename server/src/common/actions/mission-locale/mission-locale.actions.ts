@@ -1014,6 +1014,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 a_traiter: "$$ROOT.a_traiter",
                 injoignable: "$$ROOT.injoignable",
                 nouveau_contrat: "$nouveau_contrat",
+                situation: "$$ROOT.situation",
                 unread_by_current_user: {
                   $cond: [
                     {
