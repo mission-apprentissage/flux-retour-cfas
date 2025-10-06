@@ -241,6 +241,10 @@ export async function setupJobProcessor() {
       },
       "hydrate:contrats-deca-raw": {
         handler: async () => {
+          if (config.env !== "production") {
+            logger.warn("hydrate:contrats-deca-raw job can only be run in production environment");
+            return 0;
+          }
           return hydrateDecaRaw();
         },
       },
