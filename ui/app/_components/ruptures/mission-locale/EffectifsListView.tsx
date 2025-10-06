@@ -19,6 +19,7 @@ import { _get } from "@/common/httpClient";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
+import notificationStyles from "../shared/ui/NotificationBadge.module.css";
 
 import { DownloadSection } from "./DownloadSection";
 
@@ -63,7 +64,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const [activeAnchor, setActiveAnchor] = useState("");
 
   const pathname = usePathname();
-  const isCfaPage = pathname === "/cfa";
+  const isCfaPage = pathname?.startsWith("/cfa");
 
   const aTraiter = data.a_traiter || [];
   const injoignableList = data.injoignable || [];
@@ -76,6 +77,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const totalToTreat = useMemo(() => getTotalEffectifs(groupedDataATraiter), [groupedDataATraiter]);
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
+
+  const countUnreadNotifications = (items: MonthItem[]): number => {
+    return items.reduce((total, month) => {
+      return total + month.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+    }, 0);
+  };
+
+  const unreadNotificationsTraite = useMemo(() => {
+    return countUnreadNotifications(sortedDataTraite);
+  }, [sortedDataTraite]);
 
   const priorityDataInjoignable = useMemo(() => {
     if (!data.prioritaire?.effectifs) return [];
@@ -169,7 +180,18 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         items: getItems(groupedDataATraiter, "a-traiter"),
       },
       {
-        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
+        text: (
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <span>
+              {totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`}
+            </span>
+            {isCfaPage && unreadNotificationsTraite > 0 && (
+              <span className={notificationStyles.notificationBadge}>
+                {unreadNotificationsTraite > 99 ? "99+" : unreadNotificationsTraite}
+              </span>
+            )}
+          </span>
+        ),
         linkProps: {
           href: "#",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {

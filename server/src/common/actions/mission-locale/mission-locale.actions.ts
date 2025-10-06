@@ -646,6 +646,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             date_rupture: "$date_rupture",
             mission_locale_organisation: "$mission_locale_organisation",
             mission_locale_logs: "$ml_logs",
+            unread_by_current_user: "$unread_by_current_user",
           },
         },
       ];
@@ -880,7 +881,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 
 export const getEffectifsParMoisByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
-  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
+  effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
+  userId?: ObjectId
 ) => {
   const { type } = effectifsParMoisFiltersMissionLocale;
 
@@ -1012,6 +1014,20 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 a_traiter: "$$ROOT.a_traiter",
                 injoignable: "$$ROOT.injoignable",
                 nouveau_contrat: "$nouveau_contrat",
+                unread_by_current_user: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ["$$ROOT.organisme_data.acc_conjoint_by", userId] },
+                        { $eq: ["$$ROOT.organisme_data.has_unread_notification", true] },
+                        { $eq: ["$$ROOT.a_traiter", false] },
+                        { $eq: ["$$ROOT.injoignable", false] },
+                      ],
+                    },
+                    true,
+                    false,
+                  ],
+                },
               },
               null,
             ],
@@ -1068,7 +1084,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 export const getEffectifFromMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: string,
-  nom_liste: API_EFFECTIF_LISTE
+  nom_liste: API_EFFECTIF_LISTE,
+  userId?: ObjectId
 ) => {
   const aggregation = [
     ...generateOrganisationMatchStage(organisation),
@@ -1109,6 +1126,17 @@ export const getEffectifFromMissionLocaleId = async (
           {
             $sort: { created_at: 1 },
           },
+          ...(userId
+            ? [
+                {
+                  $addFields: {
+                    unread_by_current_user: {
+                      $cond: [{ $not: [{ $in: [userId, { $ifNull: ["$read_by", []] }] }] }, true, false],
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
         as: "ml_logs",
       },
@@ -1119,6 +1147,28 @@ export const getEffectifFromMissionLocaleId = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    ...(userId
+      ? [
+          {
+            $addFields: {
+              unread_by_current_user: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ["$organisme_data.acc_conjoint_by", userId] },
+                      { $eq: ["$organisme_data.has_unread_notification", true] },
+                      { $eq: ["$a_traiter", false] },
+                      { $eq: ["$injoignable", false] },
+                    ],
+                  },
+                  true,
+                  false,
+                ],
+              },
+            },
+          },
+        ]
+      : []),
     ...getEffectifProjectionStage(organisation.type),
   ];
 
@@ -1344,10 +1394,11 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
 };
 
 export async function getAllEffectifsParMois(
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
+  userId?: ObjectId
 ) {
   const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema);
+    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema, userId);
 
   const [a_traiter, traite, prioritaire, injoignable] = await Promise.all([
     fetchByType(API_EFFECTIF_LISTE.A_TRAITER),

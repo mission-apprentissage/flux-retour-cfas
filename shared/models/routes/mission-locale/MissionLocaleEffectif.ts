@@ -13,6 +13,10 @@ import { zContrat } from "../../data/effectifs/contrat.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
 import { zMissionLocaleEffectifLog } from "../../data/missionLocaleEffectifLog.model";
 
+const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifLog.extend({
+  unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
+});
+
 const zApprenantPick = zApprenant.pick({
   nom: true,
   prenom: true,
@@ -59,7 +63,11 @@ const zEffectifMissionLocale = z
     presque_6_mois: z.boolean().nullish(),
     acc_conjoint: z.boolean().nullish(),
     rqth: z.boolean().nullish(),
-    mission_locale_logs: z.array(zMissionLocaleEffectifLog).nullish(),
+    mission_locale_logs: z.array(zMissionLocaleEffectifLogWithUnread).nullish(),
+    unread_by_current_user: z
+      .boolean()
+      .describe("Indique si l'utilisateur connecté a une notification non lue pour cet effectif")
+      .nullish(),
   })
   .merge(zApprenantPick);
 
