@@ -54,8 +54,9 @@ export const hydrateOrganismesOPCOs = async () => {
           },
           {
             $group: {
-              siret: "$identifiant.responsable_siret",
-              rncp: "$identifiant.rncp",
+              _id: {
+                rncp: "$identifiant.rncp",
+              },
             },
           },
         ])
@@ -72,8 +73,9 @@ export const hydrateOrganismesOPCOs = async () => {
           },
           {
             $group: {
-              siret: "$identifiant.formateur_siret",
-              rncp: "$identifiant.rncp",
+              _id: {
+                rncp: "$identifiant.rncp",
+              },
             },
           },
         ])
