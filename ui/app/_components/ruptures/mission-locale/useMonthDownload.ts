@@ -17,8 +17,10 @@ export function useMonthDownload() {
     setIsFetching(true);
     setDownloadError(null);
     try {
+      const formattedMonth = month === "plus-de-180-j" ? month : month.substring(0, 7);
+
       const { data } = await _getBlob(`/api/v1/organisation/mission-locale/export/effectifs`, {
-        params: { type: [listType], month },
+        params: { type: [listType], month: formattedMonth },
         paramsSerializer: (params) => {
           return qs.stringify(params, { arrayFormat: "brackets" });
         },
