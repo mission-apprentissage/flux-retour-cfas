@@ -91,21 +91,6 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     return countUnreadNotifications(sortedDataTraite);
   }, [sortedDataTraite]);
 
-  const priorityDataInjoignable = useMemo(() => {
-    if (!data.prioritaire?.effectifs) return [];
-
-    return groupedInjoignable.flatMap((month) =>
-      month.data
-        .filter((effectif) => effectif.prioritaire === true)
-        .map((effectif) => ({
-          ...effectif,
-          date_rupture: month.month === "plus-de-180-j" ? "+ de 180j" : month.month,
-        }))
-    );
-  }, [groupedInjoignable, data.prioritaire?.effectifs]);
-
-  const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
-
   useEffect(() => {
     setTimeout(() => {
       handleAnchorClick(getInitialRuptureDate(initialRuptureDate || null));
@@ -379,8 +364,8 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
                 data={groupedInjoignable}
-                priorityData={priorityDataInjoignable}
-                hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
+                priorityData={data.injoignable_prioritaire.effectifs as EffectifPriorityData[]}
+                hadEffectifsPrioritaires={data.injoignable_prioritaire.hadEffectifsPrioritaires}
                 isTraite={false}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
