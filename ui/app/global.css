@@ -32,3 +32,11 @@
   --hover: var(--background-contrast-error-hover);
   --active: var(--background-contrast-error-active);
 }
+
+.fr-badge--success-inverted {
+  color: var(--background-contrast-success);
+  background-color: var(--text-default-success);
+  --idle: transparent;
+  --hover: var(--text-default-success);
+  --active: var(--text-default-success);
+}
