@@ -17,16 +17,20 @@ const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifLog.extend({
   unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
 });
 
-const zApprenantPick = zApprenant.pick({
-  nom: true,
-  prenom: true,
-  date_de_naissance: true,
-  adresse: true,
-  telephone: true,
-  courriel: true,
-  rqth: true,
-  responsable_mail1: true,
-});
+const zApprenantPick = zApprenant
+  .pick({
+    nom: true,
+    prenom: true,
+    date_de_naissance: true,
+    adresse: true,
+    telephone: true,
+    courriel: true,
+    rqth: true,
+    responsable_mail1: true,
+  })
+  .extend({
+    telephone_corrected: z.string().nullish(),
+  });
 
 export const updateMissionLocaleEffectifApi = {
   situation: zSituationEnum.optional(),
@@ -42,7 +46,17 @@ const zEffectifMissionLocale = z
     id: zObjectId,
     formation: zFormationEffectif,
     contrats: z.array(zContrat).nullish(),
-    organisme: zEffectifComputedOrganisme,
+    organisme: zEffectifComputedOrganisme.extend({
+      nom: z.string().nullish(),
+      raison_sociale: z.string().nullish(),
+      adresse: z
+        .object({
+          departement: z.string().nullish(),
+          code_postal: z.string().nullish(),
+          commune: z.string().nullish(),
+        })
+        .nullish(),
+    }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
     transmitted_at: z.date().nullish(),
@@ -67,6 +81,24 @@ const zEffectifMissionLocale = z
     unread_by_current_user: z
       .boolean()
       .describe("Indique si l'utilisateur connecté a une notification non lue pour cet effectif")
+      .nullish(),
+    contact_cfa: z
+      .object({
+        nom: z.string(),
+        prenom: z.string(),
+        email: z.string(),
+        telephone: z.string().nullish(),
+      })
+      .describe("Coordonnées de l'accompagnant CFA (uniquement si CFA actif avec ml_beta_activated_at)")
+      .nullish(),
+    mission_locale_organisation: z
+      .object({
+        _id: zObjectId,
+        nom: z.string(),
+        email: z.string().nullish(),
+        telephone: z.string().nullish(),
+        activated_at: z.date().nullish(),
+      })
       .nullish(),
   })
   .merge(zApprenantPick);
