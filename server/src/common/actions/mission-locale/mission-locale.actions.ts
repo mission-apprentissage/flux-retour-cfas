@@ -600,6 +600,18 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$deja_connu",
             "situation.commentaires": "$commentaires",
             contacts_tdb: "$tdb_users",
+            contact_cfa: {
+              $cond: [
+                {
+                  $and: [
+                    { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+                    { $ne: [{ $ifNull: ["$contact_cfa_user", null] }, null] },
+                  ],
+                },
+                "$contact_cfa_user",
+                null,
+              ],
+            },
             prioritaire: "$a_risque",
             a_contacter: "$a_contacter",
             mineur: "$a_risque_mineur",
@@ -640,6 +652,18 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$deja_connu",
             "situation.commentaires": "$commentaires",
             contacts_tdb: "$tdb_users",
+            contact_cfa: {
+              $cond: [
+                {
+                  $and: [
+                    { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+                    { $ne: [{ $ifNull: ["$contact_cfa_user", null] }, null] },
+                  ],
+                },
+                "$contact_cfa_user",
+                null,
+              ],
+            },
             nouveau_contrat: "$nouveau_contrat",
             current_status: "$current_status",
             organisme_data: "$organisme_data",
@@ -673,7 +697,7 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
 };
 
 const lookUpOrganisme = (withContacts: boolean = false) => {
-  return [
+  const baseOrganismeLookup = [
     {
       $lookup: {
         from: "organismes",
@@ -701,36 +725,77 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
         preserveNullAndEmptyArrays: true,
       },
     },
-    ...(withContacts
-      ? [
+  ];
+
+  if (!withContacts) {
+    return baseOrganismeLookup;
+  }
+
+  return [
+    ...baseOrganismeLookup,
+    {
+      $lookup: {
+        from: "organisations",
+        let: {
+          organisme_id: { $toString: "$organisme._id" },
+        },
+        pipeline: [
           {
-            $lookup: {
-              from: "organisations",
-              let: { id: { $toString: "$organisme._id" } },
-              pipeline: [
-                { $match: { type: "ORGANISME_FORMATION" } },
-                { $match: { $expr: { $eq: ["$organisme_id", "$$id"] } } },
+            $facet: {
+              main_organisation: [
                 {
-                  $project: {
-                    _id: 1,
+                  $match: {
+                    type: "ORGANISME_FORMATION",
+                    $expr: { $eq: ["$organisme_id", "$$organisme_id"] },
                   },
                 },
+                { $project: { _id: 1 } },
+                { $limit: 1 },
               ],
-              as: "organisation",
+              ml_beta_organisation: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$organisme_id", "$$organisme_id"] },
+                        { $ne: [{ $ifNull: ["$ml_beta_activated_at", null] }, null] },
+                      ],
+                    },
+                  },
+                },
+                { $project: { _id: 1, ml_beta_activated_at: 1 } },
+                { $limit: 1 },
+              ],
             },
           },
           {
-            $unwind: {
-              path: "$organisation",
-              preserveNullAndEmptyArrays: true,
+            $project: {
+              main_org_id: { $arrayElemAt: ["$main_organisation._id", 0] },
+              ml_beta_org: { $arrayElemAt: ["$ml_beta_organisation", 0] },
             },
           },
+        ],
+        as: "org_data",
+      },
+    },
+    {
+      $unwind: {
+        path: "$org_data",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "usersMigration",
+        let: {
+          main_org_id: "$org_data.main_org_id",
+          acc_conjoint_user_id: "$organisme_data.acc_conjoint_by",
+        },
+        pipeline: [
           {
-            $lookup: {
-              from: "usersMigration",
-              let: { id: "$organisation._id" },
-              pipeline: [
-                { $match: { $expr: { $eq: ["$organisation_id", "$$id"] } } },
+            $facet: {
+              tdb_users: [
+                { $match: { $expr: { $eq: ["$organisation_id", "$$main_org_id"] } } },
                 {
                   $project: {
                     _id: 0,
@@ -742,11 +807,42 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
                   },
                 },
               ],
-              as: "tdb_users",
+              contact_cfa_user: [
+                { $match: { $expr: { $eq: ["$_id", "$$acc_conjoint_user_id"] } } },
+                {
+                  $project: {
+                    _id: 0,
+                    email: 1,
+                    telephone: 1,
+                    nom: 1,
+                    prenom: 1,
+                  },
+                },
+                { $limit: 1 },
+              ],
             },
           },
-        ]
-      : []),
+        ],
+        as: "users_data",
+      },
+    },
+    {
+      $unwind: {
+        path: "$users_data",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        organisation: "$org_data.main_org_id",
+        organisme_organisation: "$org_data.ml_beta_org",
+        tdb_users: "$users_data.tdb_users",
+        contact_cfa_user: { $arrayElemAt: ["$users_data.contact_cfa_user", 0] },
+      },
+    },
+    {
+      $unset: ["org_data", "users_data"],
+    },
   ];
 };
 
@@ -859,8 +955,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
-  // modulo qui gère les valeurs négatives
-  const modulo = (a, b) => ((a % b) + b) % b;
+  const modulo = (a: number, b: number) => ((a % b) + b) % b;
 
   // Si il n'y a qu'un seul element, pas de next
   return index >= 0 && effectifs.length > 1
