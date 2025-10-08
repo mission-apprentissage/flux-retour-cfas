@@ -1190,12 +1190,46 @@ export const getEffectifsListByMisisonLocaleId = (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
-  const { type } = effectifsParMoisFiltersMissionLocale;
+  const { type, month } = effectifsParMoisFiltersMissionLocale;
+
+  const computeMonthParams = () => {
+    if (!month) return [];
+
+    return [
+      {
+        $addFields: {
+          firstDayOfMonth: {
+            $cond: {
+              if: { $lt: ["$dernierStatutDureeInDay", 180] },
+              then: {
+                $dateToString: {
+                  date: {
+                    $dateFromParts: {
+                      year: { $year: "$date_rupture" },
+                      month: { $month: "$date_rupture" },
+                    },
+                  },
+                  format: "$Y-%m",
+                },
+              },
+              else: "plus-de-180-j",
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          firstDayOfMonth: month,
+        },
+      },
+    ];
+  };
 
   const effectifsMissionLocaleAggregation = [
     ...missionLocaleBaseAggregation(organisation),
     ...matchTraitementEffectifPipelineMl(type, organisation.type),
     ...lookUpOrganisme(true),
+    ...computeMonthParams(),
     {
       $addFields: {
         _effectif_choice_label: {
