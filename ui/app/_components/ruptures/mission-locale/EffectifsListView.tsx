@@ -51,6 +51,23 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }
   };
 
+  const buildMonthLabel = (month: string) => {
+    if (month === "plus-de-180-j") {
+      return {
+        labelElement: (
+          <>
+            <span>
+              + de 180j | <i> En abandon</i>
+            </span>
+          </>
+        ),
+        labelString: month,
+      };
+    }
+
+    return { labelElement: formatMonthAndYear(month), labelString: month };
+  };
+
   const getInitialRuptureDate = (date: string | null): string => {
     if (!date || initialStatut?.endsWith("prioritaire")) return "";
     const parsedDate = new Date(date);
@@ -100,20 +117,14 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   useEffect(() => {
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
-        const firstLabel =
-          groupedDataATraiter[0].month === "plus-de-180-j"
-            ? "+ de 180j"
-            : formatMonthAndYear(groupedDataATraiter[0].month);
-        setActiveAnchor(anchorFromLabel(firstLabel));
+        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month);
+        setActiveAnchor(anchorFromLabel(firstLabel.labelString));
       } else if (selectedSection === "deja-traite" && sortedDataTraite.length > 0) {
-        const label = formatMonthAndYear(sortedDataTraite[0].month);
-        setActiveAnchor(anchorFromLabel(label));
+        const label = buildMonthLabel(sortedDataTraite[0].month);
+        setActiveAnchor(anchorFromLabel(label.labelString));
       } else if (selectedSection === "injoignable" && groupedInjoignable.length > 0) {
-        const label =
-          groupedInjoignable[0].month === "plus-de-180-j"
-            ? "+ de 180j"
-            : formatMonthAndYear(groupedInjoignable[0].month);
-        setActiveAnchor(anchorFromLabel(label));
+        const label = buildMonthLabel(groupedInjoignable[0].month);
+        setActiveAnchor(anchorFromLabel(label.labelString));
       }
     }
   }, [activeAnchor, selectedSection, groupedDataATraiter, sortedDataTraite, groupedInjoignable]);
@@ -135,10 +146,17 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = monthItem.month === "plus-de-180-j" ? "+ de 180j" : formatMonthAndYear(monthItem.month);
-        const anchorId = anchorFromLabel(label);
+        const label = buildMonthLabel(monthItem.month);
+        const anchorId = anchorFromLabel(label.labelString);
         const displayText =
-          monthItem.data.length > 0 ? <strong>{`${label} (${monthItem.data.length})`}</strong> : label;
+          monthItem.data.length > 0 ? (
+            <strong>
+              {label.labelElement}
+              {` (${monthItem.data.length})`}
+            </strong>
+          ) : (
+            label.labelElement
+          );
         return {
           text: displayText,
           linkProps: {
