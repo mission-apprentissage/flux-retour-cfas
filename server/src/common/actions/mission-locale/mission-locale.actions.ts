@@ -1304,7 +1304,7 @@ export const getEffectifsListByMisisonLocaleId = (
                       month: { $month: "$date_rupture" },
                     },
                   },
-                  format: "$Y-%m",
+                  format: "%Y-%m",
                 },
               },
               else: "plus-de-180-j",
