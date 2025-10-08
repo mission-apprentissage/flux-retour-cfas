@@ -1831,6 +1831,11 @@ export const setEffectifMissionLocaleData = async (
     ...(probleme_detail !== undefined ? { probleme_detail } : {}),
   };
 
+  const effectif = await missionLocaleEffectifsDb().findOne({
+    mission_locale_id: missionLocaleId,
+    effectif_id: new ObjectId(effectifId),
+  });
+
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
@@ -1840,6 +1845,11 @@ export const setEffectifMissionLocaleData = async (
       $set: {
         ...setObject,
         updated_at: new Date(),
+        ...(effectif?.organisme_data?.acc_conjoint
+          ? {
+              "organisme_data.has_unread_notification": true,
+            }
+          : {}),
       },
     },
     { upsert: true, returnDocument: "after" }
