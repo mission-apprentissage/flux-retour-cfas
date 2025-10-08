@@ -1241,14 +1241,7 @@ export const getEffectifsListByMisisonLocaleId = (
             },
           },
         },
-        contrat_date_rupture: {
-          $getField: {
-            field: "date_rupture",
-            input: {
-              $last: "$effectif_snapshot.contrats",
-            },
-          },
-        },
+        contrat_date_rupture: "$date_rupture",
         contrat_date_fin: {
           $getField: {
             field: "date_fin",
