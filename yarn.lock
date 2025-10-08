@@ -12496,6 +12496,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.12.23":
+  version: 1.12.23
+  resolution: "libphonenumber-js@npm:1.12.23"
+  checksum: aad6c9ddc4e554af8f71238a69559ba4268ad4e9e2a84fbd8dfdedc13ce23d95a9a66ef4a1d7d39031f6ac2c915e338be2bc5d6ed4ec328a95bf7eef55c7eb3a
+  languageName: node
+  linkType: hard
+
 "lie@npm:3.1.1":
   version: 3.1.1
   resolution: "lie@npm:3.1.1"
@@ -19609,6 +19616,7 @@ __metadata:
     formik: ^2.4.6
     framer-motion: ^7.10.3
     jsonwebtoken: ^9.0.2
+    libphonenumber-js: ^1.12.23
     lodash.debounce: 4.0.8
     lodash.get: 4.4.2
     lodash.range: 3.2.0
