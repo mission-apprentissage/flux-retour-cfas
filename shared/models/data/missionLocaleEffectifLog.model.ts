@@ -11,7 +11,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ mission_locale
 const zBase = z.object({
   _id: zObjectId,
   created_at: z.date(),
-})
+});
 
 const zMissionLocaleEffectifMLLogCreate = z.object({
   type: z.literal("MISSION_LOCALE"),
@@ -22,9 +22,10 @@ const zMissionLocaleEffectifMLLogCreate = z.object({
   probleme_type: zProblemeTypeEnum.nullish(),
   probleme_detail: z.string().nullish(),
   created_by: zObjectId.nullish(),
+  read_by: z.array(zObjectId).default([]).describe("Liste des IDs des utilisateurs CFA qui ont lu ce log"),
   mission_locale_effectif_id: zObjectId,
   mission_locale_effectif_2_id: zObjectId.nullish(),
-})
+});
 
 const zMissionLocaleEffectifOrganismeLogCreate = z.object({
   type: z.literal("ORGANISME_FORMATION"),
@@ -38,15 +39,15 @@ const zMissionLocaleEffectifOrganismeLogCreate = z.object({
   created_by: zObjectId.nullish(),
   mission_locale_effectif_id: zObjectId,
   mission_locale_effectif_2_id: zObjectId.nullish(),
-})
+});
 
 const zMissionLocaleEffectifMLLog = zBase.merge(zMissionLocaleEffectifMLLogCreate);
 const zMissionLocaleEffectifOrganismeLog = zBase.merge(zMissionLocaleEffectifOrganismeLogCreate);
 
 export const zMissionLocaleEffectifLog = z.discriminatedUnion("type", [
   zMissionLocaleEffectifMLLog,
-  zMissionLocaleEffectifOrganismeLog
-])
+  zMissionLocaleEffectifOrganismeLog,
+]);
 
 export type IMissionLocaleEffectifLog = z.output<typeof zMissionLocaleEffectifLog>;
 export default { zod: zMissionLocaleEffectifLog, indexes, collectionName };

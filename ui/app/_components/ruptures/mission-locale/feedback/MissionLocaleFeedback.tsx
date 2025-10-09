@@ -9,11 +9,12 @@ import { formatDate } from "@/app/_utils/date.utils";
 
 import { calculateDaysSince, formatContactTimeText } from "../../shared";
 import styles from "../../shared/ui/Feedback.module.css";
+import notificationStyles from "../../shared/ui/NotificationBadge.module.css";
 
 interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
-  logs?: Array<IMissionLocaleEffectifLog> | null;
+  logs?: Array<IMissionLocaleEffectifLog & { unread_by_current_user?: boolean }> | null;
   isNouveauContrat?: boolean;
 }
 
@@ -26,10 +27,12 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
       _id: { toString: () => "virtual-log" } as any,
       created_at: new Date(),
       mission_locale_effectif_id: "virtual" as any,
+      read_by: [],
       situation: situation.situation,
       situation_autre: situation.situation_autre,
       commentaires: situation.commentaires,
       deja_connu: situation.deja_connu,
+      unread_by_current_user: false,
     };
     sortedLogs = [virtualLog];
   }
@@ -41,9 +44,20 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
           <div key={log._id.toString()}>
             <>
               {log.created_at && log.situation && (
-                <h3 className="fr-mb-2v" style={{ fontSize: "20px" }}>
-                  Retour / Action de la Mission Locale le {formatDate(log.created_at)}
-                  {formatContactTimeText(calculateDaysSince(log.created_at))}
+                <h3
+                  className="fr-mb-2v"
+                  style={{ fontSize: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                >
+                  <span>
+                    Retour / Action de la Mission Locale le {formatDate(log.created_at)}
+                    {formatContactTimeText(calculateDaysSince(log.created_at))}
+                  </span>
+                  {log.unread_by_current_user && (
+                    <span
+                      className={notificationStyles.notificationDot}
+                      title="Nouvelle information de la Mission Locale"
+                    />
+                  )}
                 </h3>
               )}
 

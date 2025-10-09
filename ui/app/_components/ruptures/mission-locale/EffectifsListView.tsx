@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
@@ -9,7 +10,6 @@ import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import {
-  groupMonthsOlderThan180Days,
   sortDataByMonthDescending,
   getTotalEffectifs,
   formatMonthAndYear,
@@ -20,8 +20,10 @@ import { _get } from "@/common/httpClient";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
+import notificationStyles from "../shared/ui/NotificationBadge.module.css";
 
 import { DownloadSection } from "./DownloadSection";
+import { useMonthDownload } from "./useMonthDownload";
 
 interface EffectifsListViewProps {
   data: MonthsData;
@@ -31,6 +33,7 @@ interface EffectifsListViewProps {
 
 export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
 
   const getInitialSection = (statut: string | null): SelectedSection => {
     switch (statut) {
@@ -64,13 +67,13 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const [activeAnchor, setActiveAnchor] = useState("");
 
   const pathname = usePathname();
-  const isCfaPage = pathname === "/cfa";
+  const isCfaPage = pathname?.startsWith("/cfa");
 
   const aTraiter = data.a_traiter || [];
   const injoignableList = data.injoignable || [];
   const dejaTraite = data.traite || [];
 
-  const groupedDataATraiter = useMemo(() => groupMonthsOlderThan180Days(aTraiter), [aTraiter]);
+  const groupedDataATraiter = useMemo(() => sortDataByMonthDescending(aTraiter), [aTraiter]);
   const groupedInjoignable = useMemo(() => sortDataByMonthDescending(injoignableList), [injoignableList]);
   const sortedDataTraite = useMemo(() => sortDataByMonthDescending(dejaTraite), [dejaTraite]);
 
@@ -78,20 +81,15 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
 
-  const priorityDataInjoignable = useMemo(() => {
-    if (!data.prioritaire?.effectifs) return [];
+  const countUnreadNotifications = (items: MonthItem[]): number => {
+    return items.reduce((total, month) => {
+      return total + month.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+    }, 0);
+  };
 
-    return groupedInjoignable.flatMap((month) =>
-      month.data
-        .filter((effectif) => effectif.prioritaire === true)
-        .map((effectif) => ({
-          ...effectif,
-          date_rupture: month.month === "plus-de-180-j" ? "+ de 180j" : month.month,
-        }))
-    );
-  }, [groupedInjoignable, data.prioritaire?.effectifs]);
-
-  const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
+  const unreadNotificationsTraite = useMemo(() => {
+    return countUnreadNotifications(sortedDataTraite);
+  }, [sortedDataTraite]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -170,7 +168,18 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         items: getItems(groupedDataATraiter, "a-traiter"),
       },
       {
-        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
+        text: (
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <span>
+              {totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`}
+            </span>
+            {isCfaPage && unreadNotificationsTraite > 0 && (
+              <span className={notificationStyles.notificationBadge}>
+                {unreadNotificationsTraite > 99 ? "99+" : unreadNotificationsTraite}
+              </span>
+            )}
+          </span>
+        ),
         linkProps: {
           href: "#",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -278,6 +287,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À traiter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -289,6 +308,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.A_TRAITER}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -300,6 +320,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               Déjà traité
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -308,6 +338,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 listType={API_EFFECTIF_LISTE.TRAITE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -319,17 +350,28 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À recontacter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
                 data={groupedInjoignable}
-                priorityData={priorityDataInjoignable}
-                hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
+                priorityData={data.injoignable_prioritaire.effectifs as EffectifPriorityData[]}
+                hadEffectifsPrioritaires={data.injoignable_prioritaire.hadEffectifsPrioritaires}
                 isTraite={false}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.INJOIGNABLE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>

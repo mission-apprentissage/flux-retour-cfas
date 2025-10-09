@@ -1,14 +1,15 @@
 "use client";
 
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { LightTable } from "@/app/_components/table/LightTable";
+import { SimpleTable } from "@/app/_components/table/SimpleTable";
 import { useAuth } from "@/app/_context/UserContext";
-import { getPriorityLabel } from "@/app/_utils/ruptures.utils";
+import { getPriorityLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.utils";
 import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
@@ -50,7 +51,12 @@ export function EffectifsPriorityTable({
   const params = useParams();
   const mlId = params?.id as string | undefined;
   const [infoOpen, setInfoOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const PRIORITY_LIST_NAME = `${listType}_${API_EFFECTIF_LISTE.PRIORITAIRE}`;
+
+  const hasMoreItems = priorityData.length > DEFAULT_ITEMS_TO_SHOW;
+  const remainingItems = priorityData.length - DEFAULT_ITEMS_TO_SHOW;
+
   const columns = useMemo(() => {
     return [
       { label: "", dataKey: "name", width: 200 },
@@ -60,8 +66,23 @@ export function EffectifsPriorityTable({
     ];
   }, []);
 
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return priorityData;
+    return priorityData.filter(
+      (effectif) =>
+        effectif.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        effectif.prenom.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [priorityData, searchTerm]);
+
+  const dataToShow = searchTerm
+    ? filteredData
+    : isExpanded
+      ? filteredData
+      : filteredData.slice(0, DEFAULT_ITEMS_TO_SHOW);
+
   const tableData = useMemo(() => {
-    return priorityData.map((effectif) => {
+    return dataToShow.map((effectif) => {
       return {
         rawData: effectif,
         element: {
@@ -77,7 +98,7 @@ export function EffectifsPriorityTable({
         },
       };
     });
-  }, [priorityData]);
+  }, [dataToShow]);
 
   if (priorityData.length === 0 && !hadEffectifsPrioritaires) {
     return;
@@ -171,20 +192,29 @@ export function EffectifsPriorityTable({
               mailing)..
             </p>
           )}
-          <LightTable
-            caption=""
+          <SimpleTable
             data={tableData}
             columns={columns}
-            itemsPerPage={7}
             emptyMessage="Aucun élément prioritaire"
-            searchTerm={searchTerm}
-            searchableColumns={["nom", "prenom"]}
             getRowLink={(rowData) => {
               return user.organisation.type === "ADMINISTRATEUR" && mlId
                 ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}`
                 : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}`;
             }}
           />
+          {hasMoreItems && !searchTerm && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
+              <Button
+                iconId={isExpanded ? "ri-subtract-line" : "ri-add-line"}
+                iconPosition="right"
+                priority="secondary"
+                size="small"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded ? "Réduire la liste" : `Afficher tous (${remainingItems} de plus)`}
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

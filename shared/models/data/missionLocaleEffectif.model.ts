@@ -9,6 +9,8 @@ const collectionName = "missionLocaleEffectif";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ mission_locale_id: 1, effectif_id: 1 }, { unique: true }],
+  [{ "organisme_data.acc_conjoint_by": 1, "organisme_data.has_unread_notification": 1 }, {}],
+  [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint_by": 1 }, {}],
 ];
 
 export enum SITUATION_ENUM {
@@ -99,6 +101,14 @@ const zMissionLocaleEffectif = z.object({
       motif: z.array(zAccConjointMotifEnum).nullish(),
       commentaires: z.string().nullish(),
       reponse_at: z.date({ description: "Date de réponse au formulaire par le CFA" }).nullish(),
+      has_unread_notification: z
+        .boolean()
+        .default(false)
+        .describe(
+          "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
+        )
+        .nullish(),
+      acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
     })
     .nullish(),
   effectif_choice: z

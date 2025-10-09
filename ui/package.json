@@ -48,6 +48,7 @@
     "formik": "^2.4.6",
     "framer-motion": "^7.10.3",
     "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.23",
     "lodash.debounce": "4.0.8",
     "lodash.get": "4.4.2",
     "lodash.range": "3.2.0",
