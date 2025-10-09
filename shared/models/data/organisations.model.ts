@@ -23,6 +23,13 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1 }, {}],
   [{ ml_id: 1 }, { unique: true, partialFilterExpression: { ml_id: { $exists: true } } }],
   [{ type: 1, code_departement: 1, code_region: 1 }, { name: "type_code_departement_code_region" }],
+  [
+    { organisme_id: 1, type: 1, ml_beta_activated_at: 1 },
+    {
+      name: "idx_organisme_type_mlbeta",
+      partialFilterExpression: { type: "ORGANISME_FORMATION" },
+    },
+  ],
   [{ siret: 1, uai: 1 }, { name: "siret_uai" }],
 ];
 

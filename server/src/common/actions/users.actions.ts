@@ -400,7 +400,6 @@ export const getAllUsers = async (
     return users;
   }
 
-  // Mode affichage : pagination
   const globalTotalResult = await usersMigrationDb().estimatedDocumentCount();
 
   const result = await usersMigrationDb()
@@ -430,11 +429,6 @@ export const getAllUsers = async (
   return result;
 };
 
-/**
- * Méthode de récupération de tous les utilisateurs pour export (sans pagination)
- * Limite à 10 000 utilisateurs maximum pour éviter les timeouts
- * @deprecated Utiliser getAllUsers({ forExport: true }) à la place
- */
 export const getAllUsersForExport = async (
   query: { [key: string]: any } = {},
   { sort = { created_at: -1 } }: { sort?: { [key: string]: number } } = {}

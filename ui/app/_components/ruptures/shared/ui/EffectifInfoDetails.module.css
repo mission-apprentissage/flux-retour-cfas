@@ -1,10 +1,30 @@
 .effectifInfoDetailsContainer {
   background-color: var(--background-default-grey-active);
   padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.effectifInfoDetailsContainer:last-child {
+  margin-bottom: 0;
 }
 
 .effectifInfoDetailsContainer p {
   margin: 0.25rem 0;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.rqthBadge {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.coordonneesGrid {
+  margin-top: 1rem;
 }
 
 .detailsSection {
@@ -25,11 +45,42 @@
   flex-direction: column;
 }
 
-.effectifInfoDetailsContainer .fr-col-md-4 p:first-child {
-  font-weight: bold;
-}
-
 .noDataSpan {
   color: #666666;
   font-style: italic;
+}
+
+/* Sections */
+.formationSection {
+  margin-bottom: 1rem;
+}
+
+.contactCfaSection {
+  margin-top: 1rem;
+}
+
+.additionalInfoToggle {
+  margin-top: 1rem;
+}
+
+.contractDetails {
+  margin-top: 0.5rem;
+}
+
+.contractLabel {
+  font-weight: bold;
+  margin-bottom: 0.5rem !important;
+}
+
+.sectionTitle {
+  font-weight: bold;
+  margin-bottom: 0.5rem !important;
+}
+
+.icon {
+  margin-right: 8px;
+}
+
+.iconSmall {
+  margin-right: 4px;
 }

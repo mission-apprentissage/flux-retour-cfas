@@ -82,36 +82,9 @@ const exportEffectifMissionLocale = async (req, res) => {
       data: Array<Record<string, string>>;
     }> = [];
     for (const type of types) {
-      let effectifsList = (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<
+      let effectifsList = (await getEffectifsListByMisisonLocaleId(missionLocale, { type, month })) as Array<
         Record<string, string>
       >;
-
-      if (month) {
-        const cutoff180Days =
-          month === "plus-de-180-j"
-            ? (() => {
-                const date = new Date();
-                date.setDate(date.getDate() - 180);
-                return date;
-              })()
-            : null;
-
-        const monthParam = month.substring(0, 7);
-
-        effectifsList = effectifsList.filter((effectif) => {
-          const ruptureDate = effectif.contrat_date_rupture;
-          if (!ruptureDate) return false;
-
-          const date = new Date(ruptureDate);
-
-          if (month === "plus-de-180-j") {
-            return date < cutoff180Days!;
-          }
-
-          const effectifMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-          return effectifMonth === monthParam;
-        });
-      }
 
       switch (type) {
         case API_EFFECTIF_LISTE.A_TRAITER:

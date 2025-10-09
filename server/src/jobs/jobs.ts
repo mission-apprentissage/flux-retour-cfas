@@ -70,7 +70,11 @@ import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
-import { updateOrganismeIdInOrganisations } from "./organisations/organisation.job";
+import {
+  createAllMissingOrganismeOrganisation,
+  deleteOrganisationWithoutUser,
+  updateOrganismeIdInOrganisations,
+} from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 
 const dailyJobs = async (queued: boolean) => {
@@ -83,6 +87,8 @@ const dailyJobs = async (queued: boolean) => {
 
   // # Remplissage des organismes depuis le référentiel
   await addJob({ name: "hydrate:organismes", queued });
+
+  await addJob({ name: "hydrate:organismes-organisations", queued });
 
   // # Mise à jour des relations
   await addJob({ name: "hydrate:organismes-relations", queued });
@@ -286,6 +292,11 @@ export async function setupJobProcessor() {
       "hydrate:organismes": {
         handler: async (job) => {
           return hydrateOrganismesFromApiAlternance(job.started_at ?? new Date());
+        },
+      },
+      "hydrate:organismes-organisations": {
+        handler: async () => {
+          return createAllMissingOrganismeOrganisation();
         },
       },
       "hydrate:organismes-effectifs-count": {
@@ -521,6 +532,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-duplication": {
         handler: async () => {
           return softDeleteDoublonEffectifML();
+        },
+      },
+      "tmp:migration:dedoublon-organisation": {
+        handler: async () => {
+          return deleteOrganisationWithoutUser();
         },
       },
     },

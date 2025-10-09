@@ -27,6 +27,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     {
       "effectif_snapshot.organisme_id": organismeId,
       effectif_id: new ObjectId(effectifId),
+      soft_deleted: { $ne: true },
     },
     {
       $set: {
