@@ -3,12 +3,13 @@ import { ObjectId, WithId } from "mongodb";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
-import { usersMigrationDb } from "@/common/model/collections";
+import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
 import { hash, compare, isTooWeak } from "@/common/utils/passwordUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
+import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 import config from "@/config";
 
 interface UserRegistration {
@@ -64,9 +65,6 @@ export const authenticate = async (email: string, password: string) => {
   return null;
 };
 
-/**
- * Méthode de récupération d'un user depuis son email
- */
 export const getUserByEmail = async (email: string) => {
   const user = await usersMigrationDb().findOne(
     { email },
@@ -81,9 +79,6 @@ export const getUserByEmail = async (email: string) => {
   return user;
 };
 
-/**
- * Méthode de récupération d'un utilisateur et de ses détails depuis son id
- */
 export const getDetailedUserById = async (_id: string | ObjectId) => {
   const user = await usersMigrationDb()
     .aggregate([
@@ -156,88 +151,261 @@ export const getDetailedUserById = async (_id: string | ObjectId) => {
   return user;
 };
 
-/**
- * Méthode de récupération de la liste des utilisateurs en base
- */
+async function findMatchingOrganisationIds(searchTerm: string): Promise<ObjectId[]> {
+  const escapedTerm = escapeRegex(searchTerm.trim());
+
+  const matchingOrganisations = await organisationsDb()
+    .aggregate([
+      {
+        $lookup: {
+          from: "organismes",
+          let: { siret: "$siret", uai: "$uai" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                },
+              },
+            },
+          ],
+          as: "organisme",
+        },
+      },
+      { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+      {
+        $match: {
+          $or: [
+            { nom: { $regex: escapedTerm, $options: "i" } },
+            { siret: { $regex: escapedTerm, $options: "i" } },
+            { uai: { $regex: escapedTerm, $options: "i" } },
+            { "organisme.nom": { $regex: escapedTerm, $options: "i" } },
+            { "organisme.raison_sociale": { $regex: escapedTerm, $options: "i" } },
+            { "organisme.enseigne": { $regex: escapedTerm, $options: "i" } },
+            { "organisme.siret": { $regex: escapedTerm, $options: "i" } },
+            { "organisme.uai": { $regex: escapedTerm, $options: "i" } },
+          ],
+        },
+      },
+      { $project: { _id: 1 } },
+    ])
+    .toArray();
+
+  return matchingOrganisations.map((o) => o._id);
+}
+
+function buildUsersAggregationPipeline(
+  userQuery: { [key: string]: any },
+  organizationFilters: { [key: string]: any },
+  sort: { [key: string]: number },
+  searchMode: "user" | "org" | "email-exact" | "standard" = "standard"
+) {
+  const pipeline: any[] = [];
+
+  const hasTextSearch = userQuery._hasTextSearch;
+  const searchTerm = userQuery._searchTerm;
+
+  const cleanQuery = { ...userQuery };
+  delete cleanQuery._hasTextSearch;
+  delete cleanQuery._searchTerm;
+  delete cleanQuery._preFilteredOrgIds;
+
+  if (searchMode === "email-exact" && hasTextSearch && searchTerm) {
+    const trimmedTerm = searchTerm.trim().toLowerCase();
+    cleanQuery.email = { $regex: `^${escapeRegex(trimmedTerm)}$`, $options: "i" };
+  } else if (searchMode === "user" && hasTextSearch && searchTerm) {
+    const trimmedTerm = searchTerm.trim();
+    if (trimmedTerm.length >= 2 && trimmedTerm.length <= 100) {
+      pipeline.push({ $match: { $text: { $search: trimmedTerm } } });
+    }
+  }
+
+  if (Object.keys(cleanQuery).length > 0) {
+    pipeline.push({ $match: cleanQuery });
+  }
+
+  pipeline.push(
+    {
+      $project: {
+        _id: 1,
+        email: 1,
+        nom: 1,
+        prenom: 1,
+        civility: 1,
+        fonction: 1,
+        telephone: 1,
+        account_status: 1,
+        organisation_id: 1,
+        created_at: 1,
+        has_accept_cgu_version: 1,
+        password_updated_at: 1,
+        last_connection: 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "organisation_id",
+        foreignField: "_id",
+        as: "organisation",
+        pipeline: [
+          {
+            $lookup: {
+              from: "organismes",
+              as: "organisme",
+              let: {
+                uai: "$uai",
+                siret: "$siret",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    type: 1,
+                    nom: 1,
+                    raison_sociale: 1,
+                    enseigne: 1,
+                    reseaux: 1,
+                    nature: 1,
+                    siret: 1,
+                    uai: 1,
+                    "adresse.departement": 1,
+                    "adresse.region": 1,
+                  },
+                },
+              ],
+            },
+          },
+          { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+        ],
+      },
+    },
+    { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } }
+  );
+
+  const postLookupFilters: any[] = [];
+
+  if (hasTextSearch && searchTerm && searchMode === "standard") {
+    const trimmedTerm = searchTerm.trim();
+
+    if (trimmedTerm.length >= 2 && trimmedTerm.length <= 100) {
+      const escapedTerm = escapeRegex(trimmedTerm);
+
+      const searchConditions: any[] = [
+        { nom: { $regex: escapedTerm, $options: "i" } },
+        { prenom: { $regex: escapedTerm, $options: "i" } },
+        { email: { $regex: escapedTerm, $options: "i" } },
+        { "organisation.nom": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.siret": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.uai": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.organisme.nom": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.organisme.raison_sociale": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.organisme.enseigne": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.organisme.siret": { $regex: escapedTerm, $options: "i" } },
+        { "organisation.organisme.uai": { $regex: escapedTerm, $options: "i" } },
+      ];
+
+      postLookupFilters.push({ $or: searchConditions });
+    }
+  }
+
+  if (Object.keys(organizationFilters).length > 0) {
+    postLookupFilters.push(organizationFilters);
+  }
+
+  if (postLookupFilters.length > 0) {
+    if (postLookupFilters.length === 1) {
+      pipeline.push({ $match: postLookupFilters[0] });
+    } else {
+      pipeline.push({ $match: { $and: postLookupFilters } });
+    }
+  }
+
+  pipeline.push({ $sort: sort });
+
+  return pipeline;
+}
+
 export const getAllUsers = async (
   query: { [key: string]: any } = {},
-  { page, limit, sort } = { page: 1, limit: 10, sort: { created_at: -1 } as { [key: string]: number } }
+  {
+    page = 1,
+    limit = 10,
+    sort = { created_at: -1 } as { [key: string]: number },
+    forExport = false,
+  }: {
+    page?: number;
+    limit?: number;
+    sort?: { [key: string]: number };
+    forExport?: boolean;
+  } = {}
 ) => {
+  const MAX_EXPORT_LIMIT = 10000;
   const organizationFilters = query._organizationFilters || {};
 
   const userQuery = { ...query };
   delete userQuery._organizationFilters;
 
-  const globalTotalResult = await usersMigrationDb().countDocuments({});
+  let searchMode: "user" | "org" | "email-exact" | "standard" = "standard";
+  const hasTextSearch = userQuery._hasTextSearch;
+  const searchTerm = userQuery._searchTerm;
+
+  if (hasTextSearch && searchTerm) {
+    const { analyzeSearchTerm } = await import("@/common/utils/usersFiltersUtils");
+    const searchType = analyzeSearchTerm(searchTerm);
+
+    if (searchType === "email-exact") {
+      searchMode = "email-exact";
+    } else if (searchType === "user") {
+      searchMode = "user";
+    } else if (searchType === "org") {
+      const matchingOrgIds = await findMatchingOrganisationIds(searchTerm);
+
+      if (matchingOrgIds.length === 0) {
+        return forExport
+          ? []
+          : {
+              users: [],
+              pagination: { total: 0, page, limit, lastPage: 0 },
+              globalTotal: await usersMigrationDb().estimatedDocumentCount(),
+            };
+      }
+
+      userQuery.organisation_id = { $in: matchingOrgIds };
+      searchMode = "org";
+      delete userQuery._hasTextSearch;
+      delete userQuery._searchTerm;
+    }
+  }
+
+  const pipeline = buildUsersAggregationPipeline(userQuery, organizationFilters, sort, searchMode);
+
+  if (forExport) {
+    const users = await usersMigrationDb()
+      .aggregate([...pipeline, { $limit: MAX_EXPORT_LIMIT }])
+      .toArray();
+
+    users?.forEach((user) => {
+      if (user?.organisation) {
+        user.organisation.label = getOrganisationLabel(user.organisation);
+      }
+    });
+
+    return users;
+  }
+
+  // Mode affichage : pagination
+  const globalTotalResult = await usersMigrationDb().estimatedDocumentCount();
 
   const result = await usersMigrationDb()
     .aggregate([
-      { $match: userQuery },
-      {
-        $project: {
-          _id: 1,
-          email: 1,
-          nom: 1,
-          prenom: 1,
-          civility: 1,
-          fonction: 1,
-          telephone: 1,
-          account_status: 1,
-          organisation_id: 1,
-          created_at: 1,
-          has_accept_cgu_version: 1,
-        },
-      },
-      {
-        $lookup: {
-          from: "organisations",
-          localField: "organisation_id",
-          foreignField: "_id",
-          as: "organisation",
-          pipeline: [
-            {
-              $lookup: {
-                from: "organismes",
-                as: "organisme",
-                let: {
-                  uai: "$uai",
-                  siret: "$siret",
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
-                      },
-                    },
-                  },
-                  {
-                    $project: {
-                      type: 1,
-                      nom: 1,
-                      raison_sociale: 1,
-                      reseaux: 1,
-                      nature: 1,
-                      "adresse.departement": 1,
-                      "adresse.region": 1,
-                    },
-                  },
-                ],
-              },
-            },
-            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
-          ],
-        },
-      },
-      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
-      ...(Object.keys(organizationFilters).length > 0
-        ? [
-            {
-              $match: organizationFilters,
-            },
-          ]
-        : []),
-      { $sort: sort },
+      ...pipeline,
       {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
@@ -260,6 +428,18 @@ export const getAllUsers = async (
   }
 
   return result;
+};
+
+/**
+ * Méthode de récupération de tous les utilisateurs pour export (sans pagination)
+ * Limite à 10 000 utilisateurs maximum pour éviter les timeouts
+ * @deprecated Utiliser getAllUsers({ forExport: true }) à la place
+ */
+export const getAllUsersForExport = async (
+  query: { [key: string]: any } = {},
+  { sort = { created_at: -1 } }: { sort?: { [key: string]: number } } = {}
+) => {
+  return getAllUsers(query, { sort, forExport: true });
 };
 
 /**
