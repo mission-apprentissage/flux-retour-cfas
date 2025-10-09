@@ -4,9 +4,9 @@ import { zObjectId } from "zod-mongodb-schema";
 
 import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 import { zEffectifDECA } from "./effectifsDECA.model";
+import { zFormationV2 } from "./v2";
 import { zEffectifV2 } from "./v2/effectif.v2.model";
 import { zPersonV2 } from "./v2/person.v2.model";
-import { zFormationV2 } from "./v2";
 
 const collectionName = "missionLocaleEffectif2";
 
@@ -87,14 +87,16 @@ const zMissionLocaleEffectif2 = z.object({
   effectif_snapshot_date: z.date().optional(),
   email_status: zEmailStatusEnum.nullish(),
   mle_ids: z.array(zObjectId).nullish(),
-  mission_locale_data: z.object({
-    situation: zSituationEnum.nullish(),
-    situation_autre: z.string().nullish(),
-    deja_connu: z.boolean().nullish(),
-    commentaires: z.string().optional(),
-    probleme_type: zProblemeTypeEnum.nullish(),
-    probleme_detail: z.string().nullish(),
-  })
+  mission_locale_data: z
+    .object({
+      situation: zSituationEnum.nullish(),
+      situation_autre: z.string().nullish(),
+      deja_connu: z.boolean().nullish(),
+      commentaires: z.string().nullish(),
+      probleme_type: zProblemeTypeEnum.nullish(),
+      probleme_detail: z.string().nullish(),
+      created_at: z.date().nullish(),
+    })
     .nullish(),
   organisme_data: z
     .object({
@@ -115,25 +117,29 @@ const zMissionLocaleEffectif2 = z.object({
       telephone: z.string().nullish(),
     })
     .nullish(),
-  brevo: z.object({
-    token: z.string().uuid().nullish(),
-    token_created_at: z.date().nullish(),
-    token_expired_at: z.date().nullish(),
-    history: z
-      .array(
-        z.object({
-          token: z.string().uuid(),
-          token_created_at: z.date().optional(),
-          token_expired_at: z.date().optional(),
-        })
-      )
-      .nullish(),
-  }).nullish(),
+  brevo: z
+    .object({
+      token: z.string().uuid().nullish(),
+      token_created_at: z.date().nullish(),
+      token_expired_at: z.date().nullish(),
+      history: z
+        .array(
+          z.object({
+            token: z.string().uuid(),
+            token_created_at: z.date().optional(),
+            token_expired_at: z.date().optional(),
+          })
+        )
+        .nullish(),
+    })
+    .nullish(),
   soft_deleted: z.boolean().nullish(),
-  current_status: z.object({
-    value: zStatutApprenantEnum.nullish(),
-    date: z.date().nullish(),
-  }).nullish(),
+  current_status: z
+    .object({
+      value: zStatutApprenantEnum.nullish(),
+      date: z.date().nullish(),
+    })
+    .nullish(),
   computed: z
     .object({
       organisme: z

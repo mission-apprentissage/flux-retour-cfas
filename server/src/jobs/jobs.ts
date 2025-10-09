@@ -43,6 +43,7 @@ import {
   hydrateMissionLocaleEffectifWithPersonV2,
   hydrateOrganismeFormationV2,
   hydratePersonV2Parcours,
+  setMLDataFromLog,
   updateMLLogWithType,
 } from "./hydrate/effectifsV2/hydrate-effectif-v2";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
@@ -575,6 +576,11 @@ export async function setupJobProcessor() {
       "tmp:migration:dedoublon-organisation": {
         handler: async () => {
           return deleteOrganisationWithoutUser();
+        },
+      },
+      "tmp:migration:set-ml-data-from-log": {
+        handler: async () => {
+          return setMLDataFromLog();
         },
       },
     },

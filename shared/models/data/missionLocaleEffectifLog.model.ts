@@ -41,8 +41,8 @@ const zMissionLocaleEffectifOrganismeLogCreate = z.object({
   mission_locale_effectif_2_id: zObjectId.nullish(),
 });
 
-const zMissionLocaleEffectifMLLog = zBase.merge(zMissionLocaleEffectifMLLogCreate);
-const zMissionLocaleEffectifOrganismeLog = zBase.merge(zMissionLocaleEffectifOrganismeLogCreate);
+export const zMissionLocaleEffectifMLLog = zBase.merge(zMissionLocaleEffectifMLLogCreate);
+export const zMissionLocaleEffectifOrganismeLog = zBase.merge(zMissionLocaleEffectifOrganismeLogCreate);
 
 export const zMissionLocaleEffectifLog = z.discriminatedUnion("type", [
   zMissionLocaleEffectifMLLog,
@@ -50,4 +50,7 @@ export const zMissionLocaleEffectifLog = z.discriminatedUnion("type", [
 ]);
 
 export type IMissionLocaleEffectifLog = z.output<typeof zMissionLocaleEffectifLog>;
+export type IMissionLocaleEffectifMLLog = z.output<typeof zMissionLocaleEffectifMLLog>;
+export type IMissionLocaleEffectifOrganismeLog = z.output<typeof zMissionLocaleEffectifOrganismeLog>;
+
 export default { zod: zMissionLocaleEffectifLog, indexes, collectionName };
