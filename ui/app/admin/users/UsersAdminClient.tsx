@@ -2,6 +2,7 @@
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
@@ -20,6 +21,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { useAllUsers } from "@/app/_hooks/useAllUsers";
 import { usersExportColumns } from "@/common/exports";
+import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { UsersFiltersQuery, parseUsersFiltersFromQuery } from "@/modules/admin/users/models/users-filters";
 
@@ -78,13 +80,25 @@ function transformUserToTableData(user: any) {
 export default function UsersAdminClient() {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }]);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = "Utilisateurs | Tableau de bord de l'apprentissage";
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const usersFilters = useMemo(() => {
     if (!searchParams) return {};
@@ -96,10 +110,9 @@ export default function UsersAdminClient() {
     users: allUsers,
     pagination,
     isLoading,
-    isFetching,
-  } = useAllUsers(currentPage, itemsPerPage, sorting, searchTerm, usersFilters);
+  } = useAllUsers(currentPage, itemsPerPage, sorting, debouncedSearchTerm, usersFilters);
 
-  const showSkeleton = isLoading || isFetching;
+  const showSkeleton = isLoading;
 
   const handleSortingChange = useCallback((newSorting: SortingState) => {
     setSorting(newSorting);
@@ -136,32 +149,65 @@ export default function UsersAdminClient() {
     return allUsers.map(transformUserToTableData);
   }, [allUsers]);
 
-  const handleExport = useCallback(() => {
-    const exportData = allUsers.map((user) => ({
-      account_status: user.account_status,
-      civility: user.civility,
-      created_at: user.created_at,
-      nom: user.nom,
-      prenom: user.prenom,
-      email: user.email,
-      telephone: user.telephone,
-      fonction: user.fonction,
-      "organisation.type": user.organisation?.type,
-      "organisation.siret": user.organisation?.siret,
-      "organisation.uai": user.organisation?.uai,
-      "organisation.label": user.organisation?.label,
-      "organisation.organisme.nature": user.organisation?.organisme?.nature,
-      "organisation.organisme.nom": user.organisation?.organisme?.nom,
-      "organisation.organisme.raison_sociale": user.organisation?.organisme?.raison_sociale,
-      "organisation.organisme.reseaux": user.organisation?.organisme?.reseaux?.join(", "),
-      password_updated_at: user.password_updated_at,
-      has_accept_cgu_version: user.has_accept_cgu_version,
-      last_connection: user.last_connection,
-      _id: user._id,
-    }));
+  const handleExport = useCallback(async () => {
+    if (isExporting) return;
 
-    exportDataAsXlsx("users.xlsx", exportData, usersExportColumns);
-  }, [allUsers]);
+    try {
+      setIsExporting(true);
+      setExportError(null);
+
+      const params: Record<string, any> = {
+        sort: sorting.length > 0 ? `${sorting[0].id}:${sorting[0].desc ? "-1" : "1"}` : "created_at:-1",
+      };
+
+      if (searchTerm.trim()) params.q = searchTerm.trim();
+
+      Object.entries(usersFilters).forEach(([key, value]) => {
+        if (Array.isArray(value) && value.length > 0) {
+          params[key] = value.join(",");
+        }
+      });
+
+      const allUsersData = await _get("/api/v1/admin/users/export", { params });
+
+      if (!allUsersData || allUsersData.length === 0) {
+        setExportError("Aucun utilisateur ne correspond aux critères de recherche.");
+        return;
+      }
+
+      const exportData = allUsersData.map((user: any) => ({
+        account_status: user.account_status,
+        civility: user.civility,
+        created_at: user.created_at,
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+        telephone: user.telephone,
+        fonction: user.fonction,
+        "organisation.type": user.organisation?.type,
+        "organisation.siret": user.organisation?.siret,
+        "organisation.uai": user.organisation?.uai,
+        "organisation.label": user.organisation?.label,
+        "organisation.organisme.nature": user.organisation?.organisme?.nature,
+        "organisation.organisme.nom": user.organisation?.organisme?.nom,
+        "organisation.organisme.raison_sociale": user.organisation?.organisme?.raison_sociale,
+        "organisation.organisme.reseaux": user.organisation?.organisme?.reseaux?.join(", "),
+        password_updated_at: user.password_updated_at,
+        has_accept_cgu_version: user.has_accept_cgu_version,
+        last_connection: user.last_connection,
+        _id: user._id,
+      }));
+
+      exportDataAsXlsx("users.xlsx", exportData, usersExportColumns);
+    } catch (error) {
+      console.error("Erreur lors de l'export des utilisateurs:", error);
+      setExportError(
+        "Une erreur est survenue lors de l'export. Veuillez réessayer ou contacter le support si le problème persiste."
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }, [sorting, searchTerm, usersFilters, isExporting]);
 
   return (
     <Stack spacing={3} sx={{ p: 3 }}>
@@ -179,11 +225,27 @@ export default function UsersAdminClient() {
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h1">Gestion des utilisateurs</Typography>
         <Stack direction="row" spacing={2}>
-          <Button onClick={handleExport} iconId="ri-download-line" iconPosition="left" priority="secondary">
-            Télécharger la liste
+          <Button
+            onClick={handleExport}
+            iconId="ri-download-line"
+            iconPosition="left"
+            priority="secondary"
+            disabled={isExporting}
+          >
+            {isExporting ? "Export en cours..." : "Télécharger la liste"}
           </Button>
         </Stack>
       </Box>
+
+      {exportError && (
+        <Notice
+          title="Erreur lors de l'export"
+          description={exportError}
+          isClosable
+          onClose={() => setExportError(null)}
+        />
+      )}
+
       <Stack spacing={3}>
         <UsersFiltersPanel />
         <Stack spacing={3}>
@@ -194,7 +256,7 @@ export default function UsersAdminClient() {
               <input
                 className={className}
                 id={id}
-                placeholder="Nom, prénom, email"
+                placeholder="Nom, prénom, email, organisation..."
                 type={type}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
