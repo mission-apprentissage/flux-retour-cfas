@@ -2,15 +2,15 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
-import { zEffectifDECA } from "./effectifsDECA.model";
+import { zStatutApprenantEnum } from "./effectifs.model";
+import { zFormationV2 } from "./v2";
+import { zEffectifV2 } from "./v2/effectif.v2.model";
+import { zPersonV2 } from "./v2/person.v2.model";
 
-const collectionName = "missionLocaleEffectif";
+const collectionName = "missionLocaleEffectif2";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ mission_locale_id: 1, effectif_id: 1 }, { unique: true }],
-  [{ "organisme_data.acc_conjoint_by": 1, "organisme_data.has_unread_notification": 1 }, {}],
-  [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint_by": 1 }, {}],
 ];
 
 export enum SITUATION_ENUM {
@@ -75,23 +75,26 @@ export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "er
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 
-const zMissionLocaleEffectif = z.object({
+const zMissionLocaleEffectif2 = z.object({
   _id: zObjectId,
   mission_locale_id: zObjectId,
-  effectif_id: zObjectId,
-  person_id: zObjectId.optional(),
+  effectifV2_id: zObjectId,
   date_rupture: z.date().nullish(),
-  situation: zSituationEnum.nullish(),
-  situation_autre: z.string().nullish(),
   created_at: z.date(),
   updated_at: z.date().optional(),
-  deja_connu: z.boolean().nullish(),
-  commentaires: z.string().optional(),
-  probleme_type: zProblemeTypeEnum.nullish(),
-  probleme_detail: z.string().nullish(),
-  effectif_snapshot: zEffectif.or(zEffectifDECA),
-  effectif_snapshot_date: z.date().optional(),
   email_status: zEmailStatusEnum.nullish(),
+  mle_ids: z.array(zObjectId).nullish(),
+  mission_locale_data: z
+    .object({
+      situation: zSituationEnum.nullish(),
+      situation_autre: z.string().nullish(),
+      deja_connu: z.boolean().nullish(),
+      commentaires: z.string().nullish(),
+      probleme_type: zProblemeTypeEnum.nullish(),
+      probleme_detail: z.string().nullish(),
+      created_at: z.date().nullish(),
+    })
+    .nullish(),
   organisme_data: z
     .object({
       rupture: z.boolean({ description: "Indique si l'effectif est signalé en rupture par le CFA" }).nullish(),
@@ -101,14 +104,6 @@ const zMissionLocaleEffectif = z.object({
       motif: z.array(zAccConjointMotifEnum).nullish(),
       commentaires: z.string().nullish(),
       reponse_at: z.date({ description: "Date de réponse au formulaire par le CFA" }).nullish(),
-      has_unread_notification: z
-        .boolean()
-        .default(false)
-        .describe(
-          "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
-        )
-        .nullish(),
-      acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
     })
     .nullish(),
   effectif_choice: z
@@ -119,25 +114,29 @@ const zMissionLocaleEffectif = z.object({
       telephone: z.string().nullish(),
     })
     .nullish(),
-  brevo: z.object({
-    token: z.string().uuid().nullish(),
-    token_created_at: z.date().nullish(),
-    token_expired_at: z.date().nullish(),
-    history: z
-      .array(
-        z.object({
-          token: z.string().uuid(),
-          token_created_at: z.date().optional(),
-          token_expired_at: z.date().optional(),
-        })
-      )
-      .nullish(),
-  }),
+  brevo: z
+    .object({
+      token: z.string().uuid().nullish(),
+      token_created_at: z.date().nullish(),
+      token_expired_at: z.date().nullish(),
+      history: z
+        .array(
+          z.object({
+            token: z.string().uuid(),
+            token_created_at: z.date().optional(),
+            token_expired_at: z.date().optional(),
+          })
+        )
+        .nullish(),
+    })
+    .nullish(),
   soft_deleted: z.boolean().nullish(),
-  current_status: z.object({
-    value: zStatutApprenantEnum.nullish(),
-    date: z.date().nullish(),
-  }),
+  current_status: z
+    .object({
+      value: zStatutApprenantEnum.nullish(),
+      date: z.date().nullish(),
+    })
+    .nullish(),
   computed: z
     .object({
       organisme: z
@@ -150,10 +149,13 @@ const zMissionLocaleEffectif = z.object({
           activated_at: z.date().nullish(),
         })
         .nullish(),
+      effectif: zEffectifV2.nullish(),
+      person: zPersonV2.nullish(),
+      formation: zFormationV2.nullish(),
     })
     .nullish(),
 });
 
-export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
-export type IMissionLocaleEffectifList = z.infer<typeof zApiEffectifListeEnum>;
-export default { zod: zMissionLocaleEffectif, indexes, collectionName };
+export type IMissionLocale2Effectif = z.output<typeof zMissionLocaleEffectif2>;
+export type IMissionLocale2EffectifList = z.infer<typeof zApiEffectifListeEnum>;
+export default { zod: zMissionLocaleEffectif2, indexes, collectionName };

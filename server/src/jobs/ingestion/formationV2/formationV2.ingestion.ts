@@ -3,6 +3,7 @@ import type { IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { formationV2Db } from "@/common/model/collections";
+import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 
 export type IIngestFormationUsedFields =
   | "formation_cfd"
@@ -28,6 +29,17 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
     draft: true,
   };
 
+
+
+  const organismeFormateur = await getOrganismeByUAIAndSIRET(
+    dossier.etablissement_formateur_uai,
+    dossier.etablissement_formateur_siret
+  );
+  const organismeResponsable = await getOrganismeByUAIAndSIRET(
+    dossier.etablissement_responsable_uai,
+    dossier.etablissement_responsable_siret
+  );
+
   const result = await formationV2Db().findOneAndUpdate(
     {
       "identifiant.cfd": data.identifiant.cfd,
@@ -36,6 +48,8 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
       "identifiant.responsable_uai": data.identifiant.responsable_uai,
       "identifiant.formateur_siret": data.identifiant.formateur_siret,
       "identifiant.formateur_uai": data.identifiant.formateur_uai,
+      organisme_formateur_id: organismeFormateur?._id,
+      organisme_responsable_id: organismeResponsable?._id,
     },
     {
       $setOnInsert: {

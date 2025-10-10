@@ -18,7 +18,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 const collectionName = "formationV2";
 
-const zFormationV2 = z.object({
+export const zFormationV2 = z.object({
   _id: zObjectId,
   identifiant: z.object({
     cfd: z.string().nullable(),
@@ -28,6 +28,8 @@ const zFormationV2 = z.object({
     formateur_siret: z.string().nullable(),
     formateur_uai: z.string().nullable(),
   }),
+  organisme_formateur_id: zObjectId.nullish(),
+  organisme_responsable_id: zObjectId.nullish(),
   draft: z.boolean(),
 });
 
