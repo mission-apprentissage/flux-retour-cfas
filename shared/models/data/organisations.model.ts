@@ -110,6 +110,12 @@ const zOrganisationAdminCreate = z.object({
   type: z.literal("ADMINISTRATEUR"),
 });
 
+const zOrganisationFranceTravailCreate = z.object({
+  type: z.literal("FRANCE_TRAVAIL"),
+  nom: z.string({ description: "Nom de l'entité France Travail" }),
+  code_region: zodEnumFromObjKeys(REGIONS_BY_CODE).describe("Code région").optional(),
+});
+
 export const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
 const zOrganisationARML = zOrganisationBase.merge(zOrganisationARMLCreate);
 
@@ -121,6 +127,7 @@ const zOrganisationAcademie = zOrganisationBase.merge(zOrganisationAcademieCreat
 const zOrganisationNational = zOrganisationBase.merge(zOrganisationNationalCreate);
 const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCreate);
 const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
+const zOrganisationFranceTravail = zOrganisationBase.merge(zOrganisationFranceTravailCreate);
 
 export const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationMissionLocale,
@@ -133,6 +140,7 @@ export const zOrganisation = z.discriminatedUnion("type", [
   zOrganisationNational,
   zOrganisationCarifOref,
   zOrganisationAdmin,
+  zOrganisationFranceTravail,
 ]);
 
 export const zOrganisationCreate = z.discriminatedUnion("type", [
@@ -146,6 +154,7 @@ export const zOrganisationCreate = z.discriminatedUnion("type", [
   zOrganisationNationalCreate,
   zOrganisationCarifOrefCreate,
   zOrganisationAdminCreate,
+  zOrganisationFranceTravailCreate,
 ]);
 export type IOrganisationMissionLocale = z.output<typeof zOrganisationMissionLocale>;
 
@@ -184,6 +193,7 @@ export const TYPES_ORGANISATION = [
   { key: "OPERATEUR_PUBLIC_NATIONAL", nom: "Opérateur public national" },
   { key: "ORGANISME_FORMATION", nom: "Organisme de formation" },
   { key: "TETE_DE_RESEAU", nom: "Tête de réseau" },
+  { key: "FRANCE_TRAVAIL", nom: "France Travail" },
 ] as const satisfies Array<{ key: IOrganisationType; nom: string }>;
 
 export function getOrganisationLabel(organisation: IOrganisationCreate): string {
@@ -227,6 +237,10 @@ export function getOrganisationLabel(organisation: IOrganisationCreate): string 
       return "CARIF OREF national";
     case "ADMINISTRATEUR":
       return "Administrateur";
+    case "FRANCE_TRAVAIL":
+      return organisation.code_region
+        ? `France Travail ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region}`
+        : `France Travail`;
   }
 }
 
