@@ -22,7 +22,6 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
-import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -166,7 +165,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
   try {
     //Process du nouveau schéma de données
-    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate);
+    await handleEffectifTransmission(effectifQueue, currentDate);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -207,7 +206,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           },
         }
       );
-      await createMissionLocaleSnapshot(upsertedEffectif);
+      // await createMissionLocaleSnapshot(upsertedEffectif);
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {

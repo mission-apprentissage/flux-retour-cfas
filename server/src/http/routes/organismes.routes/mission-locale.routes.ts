@@ -8,7 +8,7 @@ import { z } from "zod";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
-} from "@/common/actions/mission-locale/mission-locale.actions";
+} from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import {
   setEffectifMissionLocaleDataFromOrganisme,

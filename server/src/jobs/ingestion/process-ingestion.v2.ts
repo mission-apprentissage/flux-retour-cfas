@@ -4,6 +4,7 @@ import type { IEffectif, IEffectifV2, IOrganisme } from "shared/models";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
+import { createMissionLocaleSnapshotV2 } from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import parentLogger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
@@ -33,9 +34,8 @@ async function ingestDossier(
     formation_id: formation._id,
     date_transmission,
   });
-
   await updateParcoursPersonV2(person._id, effectifV2);
-
+  await createMissionLocaleSnapshotV2(effectifV2, person, formation);
   return effectifV2;
 }
 
@@ -139,22 +139,22 @@ async function migrateEffectif(effectif: IEffectif, organismeLookup: Map<string 
 
   const adresse: IEffectifV2["adresse"] =
     dossier.code_postal_apprenant &&
-      dossier.code_commune_insee_apprenant &&
-      effectif.apprenant?.adresse?.region &&
-      effectif.apprenant.adresse.departement &&
-      effectif.apprenant.adresse.departement &&
-      effectif.apprenant.adresse.academie &&
-      effectif.apprenant.adresse.commune
+    dossier.code_commune_insee_apprenant &&
+    effectif.apprenant?.adresse?.region &&
+    effectif.apprenant.adresse.departement &&
+    effectif.apprenant.adresse.departement &&
+    effectif.apprenant.adresse.academie &&
+    effectif.apprenant.adresse.commune
       ? {
-        label: dossier.adresse_apprenant ?? null,
-        code_postal: dossier.code_postal_apprenant,
-        code_commune_insee: dossier.code_commune_insee_apprenant,
-        commune: effectif.apprenant.adresse.commune,
-        code_region: effectif.apprenant.adresse.region,
-        code_departement: effectif.apprenant.adresse.departement,
-        code_academie: effectif.apprenant.adresse.academie,
-        mission_locale_id: effectif.apprenant.adresse.mission_locale_id ?? null,
-      }
+          label: dossier.adresse_apprenant ?? null,
+          code_postal: dossier.code_postal_apprenant,
+          code_commune_insee: dossier.code_commune_insee_apprenant,
+          commune: effectif.apprenant.adresse.commune,
+          code_region: effectif.apprenant.adresse.region,
+          code_departement: effectif.apprenant.adresse.departement,
+          code_academie: effectif.apprenant.adresse.academie,
+          mission_locale_id: effectif.apprenant.adresse.mission_locale_id ?? null,
+        }
       : await buildAdresse(dossier);
 
   return ingestDossier(dossier, adresse, effectif.transmitted_at ?? effectif.updated_at!);

@@ -5,8 +5,11 @@ import { AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import {
   IEffectif,
+  IEffectifV2,
+  IFormationV2,
   IOrganisationMissionLocale,
   IOrganisationOrganismeFormation,
+  IPersonV2,
   IUpdateMissionLocaleEffectif,
 } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -18,19 +21,18 @@ import {
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
-import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
-import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, missionLocaleEffectifs2Db, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
-import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
+import { getMissionLocaleByMLId, getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
-import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+import { createOrUpdateMissionLocaleStats, createOrUpdateMissionLocaleStatsV2 } from "./mission-locale-stats.actions";
 
 // const DATE_START = new Date("2025-01-01");
 /**
@@ -913,7 +915,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     },
   ];
 
-  const effectifs = await missionLocaleEffectifsDb().aggregate(aggregation).toArray();
+  const effectifs = await missionLocaleEffectifs2Db().aggregate(aggregation).toArray();
   const index = effectifs.findIndex(({ id }) => id.toString() === effectifId.toString());
 
   // modulo qui gère les valeurs négatives
@@ -1117,7 +1119,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       },
     }
   );
-  const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+  const result = await missionLocaleEffectifs2Db().aggregate(organismeMissionLocaleAggregation).toArray();
   const sevenLastMonth = getSevenLastMonth();
   const mapped = sevenLastMonth.map((data) => {
     const found = result.find(({ month }) => {
@@ -1229,7 +1231,7 @@ export const getEffectifFromMissionLocaleId = async (
     ...getEffectifProjectionStage(organisation.type),
   ];
 
-  const effectif = await missionLocaleEffectifsDb().aggregate(aggregation).next();
+  const effectif = await missionLocaleEffectifs2Db().aggregate(aggregation).next();
 
   if (!effectif) {
     throw Boom.notFound();
@@ -1370,7 +1372,7 @@ export const getEffectifsListByMisisonLocaleId = (
     },
   ];
 
-  return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+  return missionLocaleEffectifs2Db().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
 export const getEffectifARisqueByMissionLocaleId = async (
@@ -1428,7 +1430,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
     },
   ];
 
-  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+  const [result] = await missionLocaleEffectifs2Db().aggregate(pipeline).toArray();
 
   return result;
 };
@@ -1474,7 +1476,7 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
       },
     },
   ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
+  const data = await missionLocaleEffectifs2Db().aggregate(effectifsMissionLocaleAggregation).next();
   return data;
 };
 
@@ -1589,7 +1591,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
       },
     },
   ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
+  const data = await missionLocaleEffectifs2Db().aggregate(effectifsMissionLocaleAggregation).toArray();
   return data as Array<{
     email: string;
     prenom: string;
@@ -1606,7 +1608,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
 
 export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
   return (
-    await missionLocaleEffectifsDb()
+    await missionLocaleEffectifs2Db()
       .aggregate([
         {
           $match: {
@@ -1636,19 +1638,19 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
     },
   }));
 
-  const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
+  const result = await missionLocaleEffectifs2Db().bulkWrite(bulkOps);
   return result;
 };
 
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
-  const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
+  const eff = await missionLocaleEffectifs2Db().findOne({ effectif_id: effectif._id });
   const currentStatus =
     effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
     effectif._computed?.statut?.parcours.slice(-1)[0];
   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
   if (eff) {
-    await missionLocaleEffectifsDb().updateOne(
+    await missionLocaleEffectifs2Db().updateOne(
       { effectif_id: effectif._id },
       {
         $set: {
@@ -1663,7 +1665,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   }
 };
 
-export const computeMissionLocaleStats = async (
+export const computeMissionLocaleStatsV2 = async (
   organisation: IOrganisationMissionLocale
 ): Promise<IMissionLocaleStats["stats"]> => {
   const mineurCondition = {
@@ -1911,7 +1913,7 @@ export const computeMissionLocaleStats = async (
     },
   ];
 
-  const data = (await missionLocaleEffectifsDb()
+  const data = (await missionLocaleEffectifs2Db()
     .aggregate(effectifsMissionLocaleAggregation)
     .next()) as IMissionLocaleStats["stats"];
   if (!data) {
@@ -1972,12 +1974,12 @@ export const setEffectifMissionLocaleData = async (
     ...(probleme_detail !== undefined ? { probleme_detail } : {}),
   };
 
-  const effectif = await missionLocaleEffectifsDb().findOne({
+  const effectif = await missionLocaleEffectifs2Db().findOne({
     mission_locale_id: missionLocaleId,
     effectif_id: new ObjectId(effectifId),
   });
 
-  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+  const updated = await missionLocaleEffectifs2Db().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
       effectif_id: new ObjectId(effectifId),
@@ -2000,127 +2002,22 @@ export const setEffectifMissionLocaleData = async (
   return updated;
 };
 
-const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
-  try {
-    // Détection des incohérences
-    const parcours = (effectif._computed as any)?.parcours || [];
-    const inconsistencies: string[] = [];
-
-    if (parcours.length > 0) {
-      const today = new Date();
-
-      // Statut actif selon les dates vs dernier du parcours
-      const currentStatusML =
-        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
-      const lastParcoursStatus = parcours[parcours.length - 1];
-
-      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
-        inconsistencies.push(
-          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
-        );
-      }
-
-      // Statut futur utilisé comme current
-      if (currentStatusML && new Date(currentStatusML.date) > today) {
-        const daysFuture = Math.floor(
-          (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
-        );
-        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
-      }
-
-      // Rupture sans RUPTURANT après la date
-      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
-      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
-        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
-      }
-
-      if (inconsistencies.length > 0) {
-        logger.warn(
-          {
-            effectifId: effectif._id,
-            apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
-            inconsistencies,
-            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
-            contrats:
-              effectif.contrats?.map((c: any) => ({
-                debut: c.date_debut,
-                fin: c.date_fin,
-                rupture: c.date_rupture,
-              })) || [],
-            currentStatusWillBe: {
-              statut: currentStatusML?.statut,
-              date: currentStatusML?.date,
-            },
-          },
-          "[INCONSISTANCES] Effectif avec incohérences détectées"
-        );
-      }
-    }
-  } catch (error) {
-    logger.error({ error }, "[INCONSISTANCES] Erreur lors de la détection des incohérences");
-  }
-};
-
 // TODO mise a jour de la creation des snapshot
 
-export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
-  logMissionLocaleSnapshot(effectif);
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
+export const createMissionLocaleSnapshotV2 = async (
+  effectif: IEffectifV2,
+  person: IPersonV2,
+  formation: IFormationV2
+) => {
+  const existing = await missionLocaleEffectifs2Db().findOne({
+    effectifV2_id: effectif._id,
+  });
 
-  const ageFilter = effectif?.apprenant?.date_de_naissance
-    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
-    : false;
-  const rqthFilter = effectif.apprenant.rqth;
-  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
-  const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
-
-  const mlData = (await organisationsDb().findOne({
-    type: "MISSION_LOCALE",
-    ml_id: effectif.apprenant.adresse?.mission_locale_id,
-  })) as IOrganisationMissionLocale;
-
-  const date = new Date();
-
-  if (mlData) {
-    const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
-    const mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
-      {
-        mission_locale_id: mlData?._id,
-        effectif_id: effectif._id,
-      },
-      {
-        $set: {
-          current_status: {
-            value: currentStatus?.valeur,
-            date: currentStatus?.date,
-          },
-        },
-        $setOnInsert: {
-          effectif_snapshot: { ...effectif, _id: effectif._id },
-          effectif_snapshot_date: date,
-          date_rupture: currentStatus?.date, // Can only be set if rupturantFilter is RUPTURANT, so current status is rupturant ( check upsert condition )
-          created_at: date,
-          brevo: {
-            token: uuidv4(),
-            token_created_at: date,
-          },
-          computed: {
-            organisme: {
-              ml_beta_activated_at: organisation?.ml_beta_activated_at,
-            },
-            ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
-          },
-        },
-      },
-      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
-    );
-
-    if (mongoInfo.lastErrorObject?.n > 0) {
-      createOrUpdateMissionLocaleStats(mlData._id);
-      mongoInfo.lastErrorObject?.upserted &&
-        (await checkMissionLocaleEffectifDoublon(new ObjectId(mongoInfo.lastErrorObject.upserted), effectif._id));
+  if (!existing) {
+    try {
+      await createMissionLocaleEffectifV2(effectif, person, formation);
+    } catch (error) {
+      logger.error({ error, effectifId: effectif._id }, "Erreur lors de la création du snapshot mission locale V2");
     }
   }
 };
@@ -2181,7 +2078,7 @@ export const getMissionLocaleStat = async (
     },
   ];
 
-  const data = (await missionLocaleEffectifsDb()
+  const data = (await missionLocaleEffectifs2Db()
     .aggregate(effectifsMissionLocaleAggregation)
     .next()) as IMissionLocaleStats["stats"];
   if (!data) {
@@ -2202,7 +2099,7 @@ export const getMissionLocaleStat = async (
 };
 
 export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, effectifId: ObjectId) => {
-  const results = await missionLocaleEffectifsDb().updateMany(
+  const results = await missionLocaleEffectifs2Db().updateMany(
     {
       _id: { $ne: mlEffectifId },
       effectif_id: effectifId,
@@ -2215,4 +2112,66 @@ export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, 
   );
 
   logger.info(`Soft deleted ${results.modifiedCount} duplicates for effectif ${effectifId}`);
+};
+
+export const createMissionLocaleEffectifV2 = async (
+  effectif: IEffectifV2,
+  person: IPersonV2,
+  formation: IFormationV2
+) => {
+  const mlId = effectif.adresse?.mission_locale_id;
+  const currentStatus =
+    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+  const ageFilter = person.identifiant?.date_de_naissance
+    ? person.identifiant.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
+    : false;
+  const rqthFilter = effectif.informations_personnelles?.rqth === true;
+  const mlFilter = !!effectif.adresse?.mission_locale_id;
+
+  const mlOrga = await getMissionLocaleByMLId(mlId);
+  const organismeFormateurId = formation.organisme_formateur_id;
+  if (!mlOrga || !organismeFormateurId) {
+    return;
+  }
+
+  const organisation = await getOrganisationOrganismeByOrganismeId(organismeFormateurId);
+
+  const mongoInfo = await missionLocaleEffectifs2Db().findOneAndUpdate(
+    {
+      effectifV2_id: effectif._id,
+    },
+    {
+      $set: {
+        current_status: {
+          value: currentStatus?.valeur,
+          date: currentStatus?.date,
+        },
+      },
+      $setOnInsert: {
+        created_at: new Date(),
+        effectifV2_id: effectif._id,
+        mission_locale_id: mlOrga._id,
+        computed: {
+          effectif: effectif,
+          person: person,
+          formation: formation,
+          organisme: {
+            ml_beta_activated_at: organisation?.ml_beta_activated_at,
+          },
+          mission_locale: {
+            activated_at: mlOrga.activated_at,
+          },
+        },
+      },
+    },
+    {
+      upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)),
+    }
+  );
+
+  if (mongoInfo.lastErrorObject?.n > 0) {
+    createOrUpdateMissionLocaleStatsV2(mlOrga._id);
+  }
 };

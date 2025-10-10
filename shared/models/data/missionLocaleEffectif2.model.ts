@@ -2,8 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
-import { zEffectifDECA } from "./effectifsDECA.model";
+import { zStatutApprenantEnum } from "./effectifs.model";
 import { zFormationV2 } from "./v2";
 import { zEffectifV2 } from "./v2/effectif.v2.model";
 import { zPersonV2 } from "./v2/person.v2.model";
@@ -83,8 +82,6 @@ const zMissionLocaleEffectif2 = z.object({
   date_rupture: z.date().nullish(),
   created_at: z.date(),
   updated_at: z.date().optional(),
-  effectif_snapshot: zEffectif.or(zEffectifDECA).nullish(),
-  effectif_snapshot_date: z.date().optional(),
   email_status: zEmailStatusEnum.nullish(),
   mle_ids: z.array(zObjectId).nullish(),
   mission_locale_data: z
