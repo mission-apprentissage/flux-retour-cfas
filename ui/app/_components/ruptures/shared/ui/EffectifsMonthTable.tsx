@@ -55,6 +55,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
   };
 }
 
+function buildMonthLabel(month: string) {
+  if (month === "plus-de-180-j") {
+    return { labelElement: "+ de 180j | En abandon", labelString: month };
+  }
+
+  return { labelElement: formatMonthAndYear(month), labelString: month };
+}
+
 export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   monthItem,
   searchTerm,
@@ -67,8 +75,8 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const pathname = usePathname();
   const mlId = params?.id as string | undefined;
   const isCfaPage = pathname && pathname.startsWith("/cfa");
-  const label = monthItem.month === "plus-de-180-j" ? "+ de 180j" : formatMonthAndYear(monthItem.month);
-  const anchorId = anchorFromLabel(label);
+  const { labelElement, labelString } = buildMonthLabel(monthItem.month);
+  const anchorId = anchorFromLabel(labelString);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasMoreItems = monthItem.data.length > DEFAULT_ITEMS_TO_SHOW;
@@ -141,7 +149,10 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
       {monthItem.data.length === 0 ? (
         <>
           <div className={monthHeaderClassName}>
-            <h4 className={styles.monthTitle}>{`${label} (${monthItem.data.length})`}</h4>
+            <h4 className={styles.monthTitle}>
+              {labelElement}
+              {` (${monthItem.data.length})`}
+            </h4>
           </div>
           <div style={{ marginTop: "1rem" }}>
             {monthItem.treated_count && monthItem.treated_count > 0 ? (
@@ -155,7 +166,10 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
         <>
           <div className={monthHeaderClassName}>
             <div className={styles.monthHeader}>
-              <h4 className={styles.monthTitle}>{`${label} (${filteredData.length})`}</h4>
+              <h4 className={styles.monthTitle}>
+                {labelElement}
+                {` (${filteredData.length})`}
+              </h4>
               {!isCfaPage && onDownloadMonth && (
                 <Button
                   priority="secondary"
@@ -164,7 +178,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
                   iconPosition="right"
                   onClick={() => onDownloadMonth(monthItem.month, listType)}
                 >
-                  Ruptures en {label}
+                  Ruptures en {labelString}
                 </Button>
               )}
             </div>
