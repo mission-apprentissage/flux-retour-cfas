@@ -8,6 +8,7 @@ import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mi
 import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
   getAllUsers,
+  getAllUsersForExport,
   getDetailedUserById,
   removeUser,
   resendConfirmationEmail,
@@ -34,6 +35,19 @@ export default () => {
       const query = buildFiltersFromQuery(req.query as UsersFiltersParams);
       const result = await getAllUsers(query, { page, limit, sort });
       return res.json(result);
+    }
+  );
+
+  router.get(
+    "/export",
+    validateRequestMiddleware({
+      query: usersFiltersSchema(),
+    }),
+    async (req, res) => {
+      const { sort } = req.query as unknown as UsersFiltersParams;
+      const query = buildFiltersFromQuery(req.query as unknown as UsersFiltersParams);
+      const users = await getAllUsersForExport(query, { sort });
+      return res.json(users);
     }
   );
 
