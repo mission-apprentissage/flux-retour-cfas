@@ -13,18 +13,35 @@ interface EffectifStatusBadgeProps {
     | "rqth"
     | "acc_conjoint"
     | "nouveau_contrat"
+    | "situation"
   >;
   isHeader?: boolean;
+  organisation?: "MISSION_LOCALE" | "ORGANISME_FORMATION";
 }
 
-export function EffectifStatusBadge({ effectif }: EffectifStatusBadgeProps) {
+export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBadgeProps) {
   if (effectif.nouveau_contrat && effectif.a_traiter && !effectif.injoignable) {
     return <Badge severity="info">Nouveau contrat</Badge>;
   }
 
   // Effectif traité
   if (!effectif.a_traiter && !effectif.injoignable) {
-    return <Badge severity="success">traité</Badge>;
+    const badge = <Badge severity="success">traité</Badge>;
+    return (
+      <>
+        {badge}
+        {organisation === "ORGANISME_FORMATION" && effectif.situation && (
+          <p
+            style={{ marginLeft: "5px" }}
+            className="fr-badge fr-badge--success-inverted"
+            aria-label="Effectif traité par la ML"
+          >
+            <i className="fr-icon-success-fill fr-icon--sm" />
+            <span style={{ marginLeft: "5px" }}>ML</span>
+          </p>
+        )}
+      </>
+    );
   }
 
   // INJOIGNABLE / A TRAITER
