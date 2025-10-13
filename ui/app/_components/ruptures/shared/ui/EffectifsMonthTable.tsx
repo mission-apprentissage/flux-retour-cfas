@@ -34,7 +34,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     id: effectif.id,
     badge: (
       <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
-        <EffectifStatusBadge effectif={effectif} />
+        <EffectifStatusBadge effectif={effectif} organisation={isCfaPage ? "ORGANISME_FORMATION" : "MISSION_LOCALE"} />
       </div>
     ),
     name: (
