@@ -113,7 +113,7 @@ const zOrganisationAdminCreate = z.object({
 const zOrganisationFranceTravailCreate = z.object({
   type: z.literal("FRANCE_TRAVAIL"),
   nom: z.string({ description: "Nom de l'entité France Travail" }),
-  code_region: zodEnumFromObjKeys(REGIONS_BY_CODE).describe("Code région").optional(),
+  code_region: zodEnumFromObjKeys(REGIONS_BY_CODE).describe("Code région"),
 });
 
 export const zOrganisationMissionLocale = zOrganisationBase.merge(zOrganisationMissionLocaleCreate);
