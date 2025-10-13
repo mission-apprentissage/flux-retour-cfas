@@ -85,7 +85,24 @@ export const zEffectifV2 = z.object({
 
   informations_personnelles: z.object({
     rqth: z.boolean(),
+    email: z.string().email().nullable(),
+    telephone: z.string().nullable(),
   }),
+
+  responsable_apprenant: z
+    .object({
+      email1: z.string().email().nullable(),
+      email2: z.string().email().nullable(),
+    })
+    .nullable(),
+
+  referent_handicap: z
+    .object({
+      nom: z.string().nullable(),
+      prenom: z.string().nullable(),
+      email: z.string().nullable(),
+    })
+    .nullable(),
 
   _computed: z.object({
     statut: zEffectifComputedStatut,

@@ -344,17 +344,17 @@ const addFieldFromActivationDate = () => {
   const IN_ACTIVATION_RANGE_CONDITION = {
     $or: [
       {
-        $ne: [{ $ifNull: ["$mission_locale_data.situation", null] }, null], // TODO avec les logs
+        $ne: [{ $ifNull: ["$mission_locale_data.situation", null] }, null],
       },
       {
-        $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null], // TODO mise a jour avec l'activation
+        $eq: [{ $ifNull: ["$computed.mission_locale.activated_at", null] }, null],
       },
       {
         $gte: [
           "$date_rupture",
           {
             $dateSubtract: {
-              startDate: "$computed.mission_locale.activated_at", // TODO mise a jour avec l'activation
+              startDate: "$computed.mission_locale.activated_at",
               unit: "day",
               amount: 180,
             },
@@ -379,7 +379,7 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
   const MISSION_LOCALE_CONDITION = {
     $or: [
       {
-        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null], // TODO mise a jour avec l'activation
+        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
       },
       {
         $ne: [{ $ifNull: ["$mission_locale_data.situation", null] }, null],
@@ -428,12 +428,22 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
 };
 
 const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+  const commonFields = {
+    $addFields: {
+      nouveau_contrat: {
+        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
+      },
+    },
+  };
+  let fields: Record<string, object>[] = [];
   switch (visibility) {
     case "MISSION_LOCALE":
       return addMissionLocaleFieldTraitementStatus();
     case "ORGANISME_FORMATION":
       return addOrganismeFieldTraitementStatus();
   }
+
+  return [commonFields, ...fields];
 };
 
 const addOrganismeFieldTraitementStatus = () => {
@@ -514,7 +524,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
         $or: [RQTH_CONDITION, PRESQUE_6_MOIS_CONDITION, MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
       },
       {
-        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI], // TODO nouveau contrat
+        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
       },
     ],
   };
@@ -559,6 +569,26 @@ const addMissionLocaleFieldTraitementStatus = () => {
   ];
 };
 
+const getFormationProjection = () => {
+  return {
+    "formation.cfd": "$computed.formation.identifiant.cfd",
+    "formation.rncp": "$computed.formation.identifiant.rncp",
+    "formation.libelle_long": "$computed.formation.computed.certification.intitule.cfd.long",
+    "formation.periode": "", // TODO periode
+    "formation.annee": "", // TODO annee
+    "formation.obtention_diplome": "$computed.effectif.diplome.obtention",
+    "formation.date_obtention_diplome": "$computed.effectif.diplome.date",
+    "formation.date_exclusion": "$computed.effectif.exclusion.date",
+    "formation.cause_exclusion": "$computed.effectif.exclusion.cause",
+    "formation.referent_handicap": "$computed.effectif.referent_handicap",
+    "formation.date_inscription": "$computed.effectif.date_inscription",
+    "formation.duree_theorique_mois": "", // TODO duree theorique
+    "formation.formation_presentielle": "", // TODO formation presentielle
+    "formation.date_fin": "$computed.effectif.session.fin",
+    "formation.date_entree": "$computed.effectif.session.debut",
+  };
+};
+
 const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   switch (visibility) {
     case "MISSION_LOCALE":
@@ -570,15 +600,16 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             prenom: "$computed.person.identifiant.prenom", // ✅
             date_de_naissance: "$computed.person.identifiant.date_de_naissance", // ✅
             adresse: "$computed.effectif.adresse", // ✅
-            formation: "$effectif_snapshot.formation", //TODO formation v2
-            courriel: "$effectif_snapshot.apprenant.courriel", //TODO courriel
-            telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+            ...getFormationProjection(),
+            courriel: "$computed.effectif.informations_personnelles.email", // ✅
+            telephone: "$computed.effectif.informations_personnelles.telephone", // ✅
             telephone_corrected: "$effectif_choice.telephone", // TODO choice
             autorisation_contact: "$effectif_choice.confirmation", // TODO choice
-            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1", // TODO responsable mail
-            rqth: "$computed.effectif.informations_personelles.rqth", // ✅
+            responsable_mail_1: "$computed.effectif.responsable_apprenant.email1", // ✅
+            responsable_mail_2: "$computed.effectif.responsable_apprenant.email2", // ✅
+            rqth: "$computed.effectif.informations_personnelles.rqth", // ✅
             a_traiter: "$a_traiter",
-            transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+            transmitted_at: "$computed.effectif.derniere_transmission", // ✅
             source: "$effectif_snapshot.source", // TODO source
             organisme: "$organisme", // ✅
             contrats: "$computed.effectif.contrats", // ✅
@@ -587,8 +618,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$mission_locale_data.deja_connu", // ✅
             "situation.commentaires": "$mission_locale_data.commentaires", // ✅
             contacts_tdb: "$tdb_users", // ✅
-            nouveau_contrat: "$nouveau_contrat", // TODO nouveau contrat
-            current_status: "$current_status", // TODO
+            nouveau_contrat: "$nouveau_contrat", // ✅
+            current_status: "$current_status", // ✅
             organisme_data: "$organisme_data", // ✅
             date_rupture: "$date_rupture", // ✅
             mission_locale_organisation: "$mission_locale_organisation",
@@ -611,15 +642,16 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             prenom: "$computed.person.identifiant.prenom", // ✅
             date_de_naissance: "$computed.person.identifiant.date_de_naissance", // ✅
             adresse: "$computed.effectif.adresse", // ✅
-            formation: "$effectif_snapshot.formation", //TODO formation v2
-            courriel: "$effectif_snapshot.apprenant.courriel", //TODO courriel
-            telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+            ...getFormationProjection(),
+            courriel: "$computed.effectif.informations_personelles.email", // ✅
+            telephone: "$computed.effectif.informations_personelles.telephone", // ✅
             telephone_corrected: "$effectif_choice.telephone", // TODO choice
             autorisation_contact: "$effectif_choice.confirmation", // TODO choice
-            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1", // TODO responsable mail
+            responsable_mail_1: "$computed.effectif.responsable_apprenant.email1", // ✅
+            responsable_mail_2: "$computed.effectif.responsable_apprenant.email2",
             rqth: "$computed.effectif.informations_personelles.rqth", // ✅
             a_traiter: "$a_traiter",
-            transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+            transmitted_at: "$computed.effectif.derniere_transmission", // ✅
             source: "$effectif_snapshot.source", // TODO source
             organisme: "$organisme", // ✅
             contrats: "$computed.effectif.contrats", // ✅
@@ -628,8 +660,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             "situation.deja_connu": "$mission_locale_data.deja_connu", // ✅
             "situation.commentaires": "$mission_locale_data.commentaires", // ✅
             contacts_tdb: "$tdb_users", // ✅
-            nouveau_contrat: "$nouveau_contrat", // TODO nouveau contrat
-            current_status: "$current_status", // TODO
+            nouveau_contrat: "$nouveau_contrat", // ✅
+            current_status: "$current_status", // ✅
             organisme_data: "$organisme_data", // ✅
             date_rupture: "$date_rupture", // ✅
             mission_locale_organisation: "$mission_locale_organisation",
@@ -1060,7 +1092,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 id: "$$ROOT.computed.effectif._id",
                 nom: "$$ROOT.computed.person.identifiant.nom",
                 prenom: "$$ROOT.computed.person.identifiant.prenom",
-                libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long", // TODO formation
+                libelle_formation: "$$ROOT.computed.formation.computed.certification.intitule.cfd.long",
                 organisme_nom: "$$ROOT.organisme.nom",
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
@@ -1324,7 +1356,7 @@ export const getEffectifsListByMisisonLocaleId = (
       $project: {
         nom: "$computed.person.identifiant.nom",
         prenom: "$computed.person.identifiant.prenom",
-        transmitted_at: "$effectif_snapshot.transmitted_at", // TODO transmitted at
+        transmitted_at: "$computed.effectif.derniere_transmission", // ✅
         source: "$effectif_snapshot.source", // TODO source
         contrat_date_debut: {
           $getField: {
@@ -1354,11 +1386,11 @@ export const getEffectifsListByMisisonLocaleId = (
         rqth: "$computed.effectif.informations_personelles.rqth",
         commune: "$computed.effectif.adresse.commune",
         code_postal: "$computed.effectif.adresse.code_postal",
-        telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
-        email: "$effectif_snapshot.apprenant.courriel", // TODO email
-        email_responsable_1: "$effectif_snapshot.apprenant.responsable_mail1", // TODO email responsable
-        email_responsable_2: "$effectif_snapshot.apprenant.responsable_mail2", // TODO email responsable
-        libelle_formation: "$effectif_snapshot.formation.libelle_long", // TODO formation
+        telephone: "$computed.effectif.informations_personelles.telephone", // ✅
+        email: "$computed.effectif.informations_personelles.email", // ✅
+        responsable_mail_1: "$computed.effectif.responsable_apprenant.email1", // ✅
+        responsable_mail_2: "$computed.effectif.responsable_apprenant.email2", // ✅
+        libelle_formation: "$computed.formation.computed.certification.intitule.cfd.long",
         organisme_nom: "$organisme.nom",
         organisme_code_postal: "$organisme.adresse.code_postal",
         organisme_contacts: "$organisme.contacts_from_referentiel",
@@ -1404,7 +1436,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
               id: "$computed.effectif._id",
               nom: "$computed.person.identifiant.nom",
               prenom: "$computed.person.identifiant.prenom",
-              libelle_formation: "$effectif_snapshot.formation.libelle_long", // TODO formation
+              libelle_formation: "$computed.formation.computed.certification.intitule.cfd.long",
               organisme_nom: "$organisme.nom",
               organisme_raison_sociale: "$organisme.raison_sociale",
               organisme_enseigne: "$organisme.enseigne",
@@ -1559,7 +1591,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
     {
       $project: {
         _id: 0,
-        email: "$effectif_snapshot.apprenant.courriel", // TODO courriel
+        email: "$computed.effectif.informations_personelles.email",
         nom: "$computed.person.identifiant.nom", //
         prenom: "$computed.person.identifiant.prenom",
         "urls.TDB_AB_TEST_A": {
@@ -1582,7 +1614,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
           ],
         },
         "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
-        telephone: "$effectif_snapshot.apprenant.telephone", // TODO telephone
+        telephone: "$computed.effectif.informations_personelles.telephone",
         nom_organisme: "$organisme.nom",
         nom_mission_locale: "$mission_locale.nom",
         mission_locale_id: { $toString: "$computed.effectif.adresse.mission_locale_id" },
@@ -1618,7 +1650,7 @@ export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<stri
         {
           $project: {
             _id: 0,
-            email: "$effectif_snapshot.apprenant.courriel", // TODO courriel
+            email: "$computed.effectif.informations_personelles.email",
           },
         },
       ])
@@ -1633,7 +1665,7 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
 
   const bulkOps = rupturants.map(({ email, status }) => ({
     updateOne: {
-      filter: { "effectif_snapshot.apprenant.courriel": email }, // TODO courriel
+      filter: { "computed.effectif.informations_personelles.telephone": email },
       update: { $set: { email_status: status } },
     },
   }));
@@ -1642,28 +1674,28 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
   return result;
 };
 
-export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
-  const eff = await missionLocaleEffectifs2Db().findOne({ effectif_id: effectif._id });
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
-  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+// export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
+//   const eff = await missionLocaleEffectifs2Db().findOne({ effectif_id: effectif._id });
+//   const currentStatus =
+//     effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
+//     effectif._computed?.statut?.parcours.slice(-1)[0];
+//   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
-  if (eff) {
-    await missionLocaleEffectifs2Db().updateOne(
-      { effectif_id: effectif._id },
-      {
-        $set: {
-          ...(rupturantFilter ? {} : { soft_deleted: true }),
-          effectif_snapshot: { ...effectif, _id: effectif._id }, // TODO mise a jour de la creation du snapshot
-          effectif_snapshot_date: new Date(),
-          updated_at: new Date(),
-          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
-        },
-      }
-    );
-  }
-};
+//   if (eff) {
+//     await missionLocaleEffectifs2Db().updateOne(
+//       { effectif_id: effectif._id },
+//       {
+//         $set: {
+//           ...(rupturantFilter ? {} : { soft_deleted: true }),
+//           effectif_snapshot: { ...effectif, _id: effectif._id }, // TODO mise a jour de la creation du snapshot
+//           effectif_snapshot_date: new Date(),
+//           updated_at: new Date(),
+//           ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
+//         },
+//       }
+//     );
+//   }
+// };
 
 export const computeMissionLocaleStatsV2 = async (
   organisation: IOrganisationMissionLocale
@@ -1874,7 +1906,7 @@ export const computeMissionLocaleStatsV2 = async (
             $cond: [{ $and: [rqthCondition, { $eq: ["$mission_locale_data.situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
-        abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } }, // TODO statut
+        abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },
       },
     },
     {
@@ -2153,6 +2185,7 @@ export const createMissionLocaleEffectifV2 = async (
         created_at: new Date(),
         effectifV2_id: effectif._id,
         mission_locale_id: mlOrga._id,
+        date_rupture: rupturantFilter ? currentStatus?.date : null,
         computed: {
           effectif: effectif,
           person: person,

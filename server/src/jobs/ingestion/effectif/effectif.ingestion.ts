@@ -39,7 +39,14 @@ export type IIngestEffectifUsedFields =
   | "contrat_date_rupture_4"
   | "cause_rupture_contrat_4"
   | "siret_employeur_4"
-  | "rqth_apprenant";
+  | "rqth_apprenant"
+  | "nom_referent_handicap_formation"
+  | "prenom_referent_handicap_formation"
+  | "email_referent_handicap_formation"
+  | "email_contact"
+  | "tel_apprenant"
+  | "responsable_apprenant_mail1"
+  | "responsable_apprenant_mail2";
 
 export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
@@ -168,6 +175,18 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
 
     informations_personnelles: {
       rqth: input.dossier.rqth_apprenant ?? false,
+      email: input.dossier.email_contact ?? null,
+      telephone: input.dossier.tel_apprenant ?? null,
+    },
+    referent_handicap: {
+      nom: input.dossier.nom_referent_handicap_formation ?? null,
+      prenom: input.dossier.prenom_referent_handicap_formation ?? null,
+      email: input.dossier.email_referent_handicap_formation ?? null,
+    },
+
+    responsable_apprenant: {
+      email1: input.dossier.responsable_apprenant_mail1 ?? null,
+      email2: input.dossier.responsable_apprenant_mail2 ?? null,
     },
   };
 

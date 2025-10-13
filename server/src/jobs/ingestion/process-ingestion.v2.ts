@@ -24,7 +24,7 @@ async function ingestDossier(
   >,
   adresse: IEffectifV2["adresse"],
   date_transmission: Date
-): Promise<IEffectifV2> {
+) {
   const [formation, person] = await Promise.all([ingestFormationV2(dossier), ingestPersonV2(dossier)]);
 
   const effectifV2 = await ingestEffectifV2({
@@ -42,11 +42,11 @@ async function ingestDossier(
 export async function handleEffectifTransmission(
   effectifQueue: WithId<IEffectifQueue>,
   date_transmission: Date
-): Promise<IEffectifV2 | void> {
+): Promise<void> {
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
     const adresse = await buildAdresse(dossier);
-    return ingestDossier(dossier, adresse, date_transmission);
+    await ingestDossier(dossier, adresse, date_transmission);
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);
