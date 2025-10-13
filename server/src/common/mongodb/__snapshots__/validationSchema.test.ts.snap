@@ -15732,6 +15732,7 @@ exports[`validation-schema > should create validation schema for organisations >
         "created_at",
         "type",
         "nom",
+        "code_region",
       ],
     },
   ],
