@@ -30,6 +30,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       partialFilterExpression: { type: "ORGANISME_FORMATION" },
     },
   ],
+  [{ siret: 1, uai: 1 }, { name: "siret_uai" }],
 ];
 
 const zOrganisationBase = z.object({
