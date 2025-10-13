@@ -36,6 +36,8 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
   }
 
   switch (organisation.type) {
+    case "FRANCE_TRAVAIL":
+      return `Votre périmètre correspond au périmètre ${organisation.nom} de France Travail`;
     case "MISSION_LOCALE":
       return `Votre périmètre correspond à la mission locale ${organisation.nom}`;
     case "ARML":
