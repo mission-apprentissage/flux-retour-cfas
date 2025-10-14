@@ -2,12 +2,13 @@ import fs from "fs";
 
 import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
-import { IEffectifV2 } from "shared/models";
+import { IEffectifV2, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import {
   IMissionLocaleEffectifMLLog,
   IMissionLocaleEffectifOrganismeLog,
 } from "shared/models/data/missionLocaleEffectifLog.model";
 
+import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import {
@@ -19,6 +20,7 @@ import {
   organisationsDb,
   personV2Db,
 } from "@/common/model/collections";
+import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 import { normalisePersonIdentifiant, updateParcoursPersonV2 } from "@/jobs/ingestion/person/person.ingestion";
 
 export const hydratePersonV2Parcours = async () => {
@@ -26,7 +28,6 @@ export const hydratePersonV2Parcours = async () => {
   let bulkEffectifs: Array<IEffectifV2> = [];
 
   const processEffectif = async (eff: IEffectifV2) => {
-    //console.log(`Mise à jour du parcours de la personne pour l'effectifV2 ${eff._id}`);
     if (eff) {
       await updateParcoursPersonV2(eff.identifiant.person_id, eff);
     }
@@ -56,40 +57,6 @@ export const hydratePersonV2Parcours = async () => {
   }
 };
 
-export const migrateMissionLocaleEffectifV2 = async () => {
-  const BULK_SIZE = 1000;
-
-  let bulkEffectifs: Array<any> = [];
-
-  const processEffectif = async ({ _id }: any) => {};
-
-  const cursor = missionLocaleEffectifsDb().aggregate([
-    {
-      $match: {
-        person_id: { $exists: true },
-      },
-    },
-    {
-      $group: {
-        _id: "$person_id",
-      },
-    },
-  ]);
-
-  while (await cursor.hasNext()) {
-    const personAggregate = await cursor.next();
-    bulkEffectifs.push(personAggregate);
-    if (bulkEffectifs.length > BULK_SIZE) {
-      await Promise.allSettled(bulkEffectifs.map(processEffectif));
-      bulkEffectifs = [];
-    }
-
-    if (bulkEffectifs.length > 0) {
-      await Promise.allSettled(bulkEffectifs.map(processEffectif));
-    }
-  }
-};
-
 export const hydrateMissionLocaleEffectifWithPersonV2 = async () => {
   const BULK_SIZE = 1000;
   let bulkEffectifs: Array<any> = [];
@@ -106,10 +73,6 @@ export const hydrateMissionLocaleEffectifWithPersonV2 = async () => {
       "identifiant.prenom": identifiant.prenom,
       "identifiant.date_de_naissance": identifiant.date_de_naissance,
     });
-
-    // const effectifv2 = await effectifV2Db().findOne({
-    //     "identifiant.person_id": person?._id,
-    // });
 
     if (person) {
       await missionLocaleEffectifsDb().updateOne(
@@ -350,6 +313,8 @@ export const hydrateMissionLocaleEffectifWithEffectifV2 = async () => {
   let bulkEffectifs: Array<any> = [];
 
   const processEffectif = async ({ _id, ids }: any) => {
+    let orga: IOrganisationOrganismeFormation | null = null;
+    let soft_deleted = false;
     const person = await personV2Db().findOne({ _id: new ObjectId(_id) });
     const effv2Id = person?.parcours?.en_cours?.id;
 
@@ -369,14 +334,20 @@ export const hydrateMissionLocaleEffectifWithEffectifV2 = async () => {
       effectifv2._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
       effectifv2._computed?.statut?.parcours.slice(-1)[0];
 
-    // if (currentStatus.valeur === "RUPTURANT") {
-    //     return;
-    // }
+    if (currentStatus.valeur !== "RUPTURANT") {
+      soft_deleted = true;
+    }
 
-    const mlOrga = await organisationsDb().findOne({
+    const organismeId = formationv2?.organisme_formateur_id;
+
+    if (organismeId) {
+      orga = await getOrganisationOrganismeByOrganismeId(organismeId);
+    }
+
+    const mlOrga: IOrganisationMissionLocale = (await organisationsDb().findOne({
       type: "MISSION_LOCALE",
       ml_id: effectifv2.adresse.mission_locale_id,
-    });
+    })) as IOrganisationMissionLocale;
 
     if (!mlOrga) {
       console.log(
@@ -394,10 +365,17 @@ export const hydrateMissionLocaleEffectifWithEffectifV2 = async () => {
         created_at: new Date(),
         mission_locale_id: mlOrga?._id,
         date_rupture: currentStatus.date,
+        ...(soft_deleted ? { soft_deleted: true } : {}),
         computed: {
           effectif: effectifv2,
           person: person,
           formation: formationv2,
+          organisme: {
+            ml_beta_activated_at: orga?.ml_beta_activated_at,
+          },
+          mission_locale: {
+            activated_at: mlOrga.activated_at,
+          },
         },
       });
 
@@ -616,5 +594,76 @@ export const setMLDataFromLog = async () => {
 
   if (data.length > 0) {
     await Promise.allSettled(data.map(processEffectif));
+  }
+};
+
+export const updateEffectifV2 = async () => {
+  const cursor = effectifV2Db().find();
+  let data: Array<any> = [];
+
+  const processEffectif = async ({
+    formation_id,
+    person_id,
+    effectif,
+  }: {
+    formation_id: ObjectId;
+    person_id: ObjectId;
+    effectif: IEffectifV2;
+  }) => {
+    const formation = await formationV2Db().findOne({ _id: formation_id });
+    if (!formation) {
+      return;
+    }
+
+    const person = await personV2Db().findOne({ _id: person_id });
+    if (!person) {
+      return;
+    }
+
+    const certif = await getEffectifCertification({
+      cfd: formation.identifiant.cfd ?? null,
+      rncp: formation.identifiant.rncp ?? null,
+      date_entree: effectif.session.debut ?? null,
+      date_fin: effectif.session.fin ?? null,
+    });
+
+    await effectifV2Db().updateOne(
+      { _id: effectif._id },
+      {
+        $set: {
+          "_computed.session": certif,
+          "informations_personnelles.email": "dummy@dummy.com", // TODO enlever
+          "informations_personnelles.telephone": "0123456789", // TODO enlever
+          "responsable_apprenant.email1": "dummy1@dummy.com", // TODO enlever
+          "responsable_apprenant.email2": "dummy2@dummy.com", // TODO enlever
+          "referent_handicap.nom": "Dummy", // TODO enlever
+          "referent_handicap.prenom": "Dumms", // TODO enlever
+          "referent_handicap.email": "dummy3@dummy.com", // TODO enlever
+        },
+      }
+    );
+  };
+
+  while (await cursor.hasNext()) {
+    const effectif = await cursor.next();
+    if (!effectif) {
+      continue;
+    }
+
+    data.push({
+      formation_id: effectif.identifiant.formation_id,
+      person_id: effectif.identifiant.person_id,
+      effectif,
+    });
+
+    if (data.length >= 500) {
+      await Promise.allSettled(data.map(processEffectif));
+      data = [];
+    }
+  }
+
+  if (data.length > 0) {
+    await Promise.allSettled(data.map(processEffectif));
+    data = [];
   }
 };

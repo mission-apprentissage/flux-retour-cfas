@@ -1,4 +1,3 @@
-import { zCertification } from "api-alternance-sdk";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
@@ -32,9 +31,6 @@ export const zFormationV2 = z.object({
   organisme_formateur_id: zObjectId.nullish(),
   organisme_responsable_id: zObjectId.nullish(),
   draft: z.boolean(),
-  computed: z.object({
-    certification: zCertification.nullish(),
-  }),
 });
 
 export type IFormationV2 = z.output<typeof zFormationV2>;

@@ -1,3 +1,4 @@
+import { zCertification } from "api-alternance-sdk";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
@@ -85,27 +86,28 @@ export const zEffectifV2 = z.object({
 
   informations_personnelles: z.object({
     rqth: z.boolean(),
-    email: z.string().email().nullable(),
-    telephone: z.string().nullable(),
+    email: z.string().email().nullish(),
+    telephone: z.string().nullish(),
   }),
 
   responsable_apprenant: z
     .object({
-      email1: z.string().email().nullable(),
-      email2: z.string().email().nullable(),
+      email1: z.string().email().nullish(),
+      email2: z.string().email().nullish(),
     })
-    .nullable(),
+    .nullish(),
 
   referent_handicap: z
     .object({
-      nom: z.string().nullable(),
-      prenom: z.string().nullable(),
-      email: z.string().nullable(),
+      nom: z.string().nullish(),
+      prenom: z.string().nullish(),
+      email: z.string().nullish(),
     })
-    .nullable(),
+    .nullish(),
 
   _computed: z.object({
     statut: zEffectifComputedStatut,
+    session: zCertification.nullish(),
   }),
 });
 

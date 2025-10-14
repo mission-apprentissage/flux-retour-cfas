@@ -44,6 +44,7 @@ import {
   hydrateOrganismeFormationV2,
   hydratePersonV2Parcours,
   setMLDataFromLog,
+  updateEffectifV2,
   updateMLLogWithType,
 } from "./hydrate/effectifsV2/hydrate-effectif-v2";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
@@ -556,6 +557,11 @@ export async function setupJobProcessor() {
       "tmp:deduplicate:mission-locale-effectif": {
         handler: async () => {
           return deduplicateMissionLocaleEffectif();
+        },
+      },
+      "tmp:hydrate:update-effectif-v2": {
+        handler: async () => {
+          return updateEffectifV2();
         },
       },
       "tmp:hydrate:ml-v2": {

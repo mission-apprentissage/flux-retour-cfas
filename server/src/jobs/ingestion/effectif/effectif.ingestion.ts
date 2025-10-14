@@ -6,6 +6,7 @@ import type { IEffectifV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { effectifV2Db } from "@/common/model/collections";
+import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 import { buildEffectifStatus } from "../status/effectif_status.builder";
 
@@ -46,7 +47,9 @@ export type IIngestEffectifUsedFields =
   | "email_contact"
   | "tel_apprenant"
   | "responsable_apprenant_mail1"
-  | "responsable_apprenant_mail2";
+  | "responsable_apprenant_mail2"
+  | "formation_cfd"
+  | "formation_rncp";
 
 export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
@@ -191,6 +194,12 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
   };
 
   const contrats = getContrats(input);
+  const formation = await getEffectifCertification({
+    cfd: input.dossier.formation_cfd ?? null,
+    rncp: input.dossier.formation_rncp ?? null,
+    date_entree: input.dossier.date_entree_formation ?? null,
+    date_fin: input.dossier.date_fin_formation ?? null,
+  });
 
   const computed: IEffectifV2["_computed"] = {
     statut: buildEffectifStatus(
@@ -204,6 +213,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
       },
       new Date()
     ),
+    session: formation ?? null,
   };
 
   const result = await effectifV2Db().findOneAndUpdate(

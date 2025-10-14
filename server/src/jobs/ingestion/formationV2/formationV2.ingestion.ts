@@ -4,7 +4,6 @@ import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierAppre
 
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import { formationV2Db } from "@/common/model/collections";
-import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 
 export type IIngestFormationUsedFields =
   | "formation_cfd"
@@ -28,13 +27,6 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
     dossier.etablissement_responsable_siret
   );
 
-  const formation = await getEffectifCertification({
-    cfd: dossier.formation_cfd ?? null,
-    rncp: dossier.formation_rncp ?? null,
-    date_entree: dossier.date_entree_formation ?? null,
-    date_fin: dossier.date_fin_formation ?? null,
-  });
-
   const data: IFormationV2 = {
     _id: new ObjectId(),
     identifiant: {
@@ -46,9 +38,6 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
       formateur_uai: dossier.etablissement_formateur_uai,
     },
     draft: true,
-    computed: {
-      certification: formation ?? null,
-    },
   };
 
   const result = await formationV2Db().findOneAndUpdate(
