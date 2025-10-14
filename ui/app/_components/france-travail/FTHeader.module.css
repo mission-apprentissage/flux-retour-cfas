@@ -1,0 +1,13 @@
+.headerContainer {
+  margin-bottom: 2rem;
+}
+
+.title {
+  color: var(--text-title-blue-france);
+  margin-bottom: 16px;
+}
+
+.description {
+  font-size: 14px;
+  line-height: 24px;
+}
