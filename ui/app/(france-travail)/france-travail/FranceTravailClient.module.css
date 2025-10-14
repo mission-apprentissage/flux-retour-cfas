@@ -1,0 +1,14 @@
+.emptyStateContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.emptyStateImageWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 650 / 288;
+}
