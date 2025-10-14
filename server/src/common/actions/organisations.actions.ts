@@ -405,6 +405,8 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {
   const organisation = await getOrganisationById(organisationId);
   switch (organisation.type) {
+    case "FRANCE_TRAVAIL":
+      return "France Travail";
     case "MISSION_LOCALE":
       return `Mission locale ${organisation.nom}`;
     case "ARML":
