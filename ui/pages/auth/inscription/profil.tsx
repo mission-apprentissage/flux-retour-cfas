@@ -179,6 +179,12 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   ARML {organisation.nom}
                 </Text>
               );
+            case "FRANCE_TRAVAIL":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  France Travail {organisation.nom}
+                </Text>
+              );
           }
         })()}
       </Box>
@@ -265,8 +271,8 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
           return value === context.parent.password
             ? true
             : context.createError({
-                message: "Les mots de passe doivent correspondre.",
-              });
+              message: "Les mots de passe doivent correspondre.",
+            });
         }),
         consent_of: isOrganismeFormation ? Yup.boolean().required("Vous devez cocher cette case") : (null as any),
         has_accepted_cgu: Yup.boolean().required("Vous devez cocher cette case"),
@@ -474,7 +480,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
               variant="primary"
               px={6}
               isLoading={form.isSubmitting}
-              // isDisabled={form.touched && (!form.isValid || form.isSubmitting)}
+            // isDisabled={form.touched && (!form.isValid || form.isSubmitting)}
             >
               S&rsquo;inscrire
             </Button>

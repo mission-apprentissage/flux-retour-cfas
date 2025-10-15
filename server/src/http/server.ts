@@ -130,6 +130,7 @@ import {
   requireARML,
   requireOrganismePermission,
   returnResult,
+  requireFranceTravail,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -159,6 +160,7 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
+import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -897,6 +899,7 @@ function setupRoutes(app: Application) {
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
       .use("/arml", requireARML, armlAuthentRoutes())
+      .use("/france-travail", requireFranceTravail, franceTravailAuthentRoutes())
   );
 
   /********************************

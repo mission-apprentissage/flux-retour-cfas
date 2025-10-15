@@ -44,6 +44,7 @@ import {
 import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
+import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 
 const logger = parentLogger.child({
   module: "processor",
@@ -471,6 +472,7 @@ const createOrUpdateEffectif = async (
     }
 
     await createMissionLocaleSnapshot(effectifDb);
+    await createFranceTravailEffectifSnapshot(effectifDb);
     return { effectifId: effectifDb._id, itemProcessingInfos };
   } catch (err) {
     // Le code d'erreur 11000 correspond à une duplication d'index unique

@@ -35,6 +35,7 @@ import telechargementListesNominativesLogsDescriptor, {
 import transmissionDailyReportDescriptor, {
   ITransmissionDailyReport,
 } from "shared/models/data/transmissionDailyReport.model";
+import franceTravailEffectifDescriptor, { IFranceTravailEffectif } from "shared/models/data/franceTravailEffectif.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
@@ -42,6 +43,7 @@ import organismesV2ModelDescriptor, { IOrganismeV2 } from "shared/models/data/v2
 import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
 import transmissionV2Descriptor, { ITransmissionV2 } from "shared/models/data/v2/transmission.v2.model";
 import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
+import romeSecteurActivitesDescriptor, { IRomeSecteurActivites } from "shared/models/data/romeSecteurActivites.model";
 
 import { getDbCollection } from "@/common/mongodb";
 
@@ -77,6 +79,8 @@ export const modelDescriptors = [
   brevoMissionLocaleListModelDescriptor,
   transmissionDailyReportDescriptor,
   missionLocaleStatsDescriptor,
+  franceTravailEffectifDescriptor,
+  romeSecteurActivitesDescriptor
 ];
 
 export const formationsCatalogueDb = () =>
@@ -118,6 +122,11 @@ export const brevoMissionLocaleListDb = () =>
   getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
 export const transmissionDailyReportDb = () =>
   getDbCollection<ITransmissionDailyReport>(transmissionDailyReportDescriptor.collectionName);
+
+export const franceTravailEffectifsDb = () =>
+  getDbCollection<IFranceTravailEffectif>(franceTravailEffectifDescriptor.collectionName);
+export const romeSecteurActivitesDb = () =>
+  getDbCollection<IRomeSecteurActivites>(romeSecteurActivitesDescriptor.collectionName);
 
 // v2
 

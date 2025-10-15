@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import {
   getAcademieListByRegion,
   IEffectif,
+  IOrganisationFranceTravail,
   IOrganisationOperateurPublicAcademie,
   IOrganisationOperateurPublicRegion,
   ORGANISATION_TYPE,
@@ -75,6 +76,21 @@ export async function requireARML(req: Request, res: Response, next: NextFunctio
   });
 
   res.locals.arml = orga;
+  next();
+}
+
+export async function requireFranceTravail(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+  if (user.organisation.type !== "FRANCE_TRAVAIL") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = await organisationsDb().findOne({
+    _id: new ObjectId(user.organisation._id),
+  }) as IOrganisationFranceTravail;
+
+  res.locals.franceTravail = orga;
   next();
 }
 

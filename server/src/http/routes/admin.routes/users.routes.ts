@@ -1,7 +1,7 @@
 import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
-import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
+import { zPostAdminAddMembreToFranceTravail, zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
 
 import { activateMissionLocaleAtAdminValidation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -21,6 +21,7 @@ import userSchema from "@/common/validation/userSchema";
 import usersFiltersSchema, { UsersFiltersParams } from "@/common/validation/usersFiltersSchema";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 
 export default () => {
   const router = express.Router();
@@ -137,6 +138,19 @@ export default () => {
       }
       await inviteUserToOrganisation(req.user, email, organisation._id);
       await activateMissionLocaleAtAdminValidation(organisation._id, new Date());
+    })
+  );
+
+  router.post(
+    "/france-travail/membre",
+    returnResult(async (req) => {
+      const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToFranceTravail);
+      const { email, code_region } = body;
+      const organisation = await getFranceTravailOrganisationByCodeRegion(code_region);
+      if (!organisation) {
+        throw Boom.notFound("France Travail organisation not found");
+      }
+      await inviteUserToOrganisation(req.user, email, organisation._id);
     })
   );
 
