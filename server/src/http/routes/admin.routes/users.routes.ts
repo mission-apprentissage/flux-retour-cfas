@@ -149,7 +149,12 @@ export default () => {
     returnResult(async (req) => {
       const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToFranceTravail);
       const { email, code_region } = body;
-      const organisation = await getFranceTravailOrganisationByCodeRegion(code_region);
+
+      if (!code_region) {
+        throw Boom.badRequest("code_region is required");
+      }
+
+      const organisation = await getFranceTravailOrganisationByCodeRegion(code_region as string);
       if (!organisation) {
         throw Boom.notFound("France Travail organisation not found");
       }
