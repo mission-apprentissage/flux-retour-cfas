@@ -1,9 +1,13 @@
 import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
-import { zPostAdminAddMembreToFranceTravail, zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
+import {
+  zPostAdminAddMembreToFranceTravail,
+  zPostAdminAddMembreToMissionLocale,
+} from "shared/models/routes/admin/users.api";
 
 import { activateMissionLocaleAtAdminValidation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
 import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
@@ -21,7 +25,6 @@ import userSchema from "@/common/validation/userSchema";
 import usersFiltersSchema, { UsersFiltersParams } from "@/common/validation/usersFiltersSchema";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
-import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 
 export default () => {
   const router = express.Router();

@@ -22,6 +22,7 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
@@ -44,7 +45,6 @@ import {
 import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
-import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 
 const logger = parentLogger.child({
   module: "processor",

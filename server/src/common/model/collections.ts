@@ -11,6 +11,9 @@ import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import franceTravailEffectifDescriptor, {
+  IFranceTravailEffectif,
+} from "shared/models/data/franceTravailEffectif.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
@@ -29,13 +32,13 @@ import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organi
 import regionsModelDescriptor, { IRegion } from "shared/models/data/regions.model";
 import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
+import romeSecteurActivitesDescriptor, { IRomeSecteurActivites } from "shared/models/data/romeSecteurActivites.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
 } from "shared/models/data/telechargementListesNomLogs.model";
 import transmissionDailyReportDescriptor, {
   ITransmissionDailyReport,
 } from "shared/models/data/transmissionDailyReport.model";
-import franceTravailEffectifDescriptor, { IFranceTravailEffectif } from "shared/models/data/franceTravailEffectif.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
@@ -43,7 +46,6 @@ import organismesV2ModelDescriptor, { IOrganismeV2 } from "shared/models/data/v2
 import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
 import transmissionV2Descriptor, { ITransmissionV2 } from "shared/models/data/v2/transmission.v2.model";
 import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
-import romeSecteurActivitesDescriptor, { IRomeSecteurActivites } from "shared/models/data/romeSecteurActivites.model";
 
 import { getDbCollection } from "@/common/mongodb";
 
@@ -80,7 +82,7 @@ export const modelDescriptors = [
   transmissionDailyReportDescriptor,
   missionLocaleStatsDescriptor,
   franceTravailEffectifDescriptor,
-  romeSecteurActivitesDescriptor
+  romeSecteurActivitesDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>

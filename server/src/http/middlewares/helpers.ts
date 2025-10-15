@@ -86,9 +86,9 @@ export async function requireFranceTravail(req: Request, res: Response, next: Ne
     throw Boom.forbidden("Accès non autorisé");
   }
 
-  const orga = await organisationsDb().findOne({
+  const orga = (await organisationsDb().findOne({
     _id: new ObjectId(user.organisation._id),
-  }) as IOrganisationFranceTravail;
+  })) as IOrganisationFranceTravail;
 
   res.locals.franceTravail = orga;
   next();

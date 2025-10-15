@@ -61,6 +61,7 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { hydrateRomeSecteurActivites } from "./hydrate/rome/hydrate-rome";
 import {
   computeDailyTransmissions,
   forceHydrateAllTransmissions,
@@ -76,7 +77,6 @@ import {
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
-import { hydrateRomeSecteurActivites } from "./hydrate/rome/hydrate-rome";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
@@ -149,75 +149,75 @@ export async function setupJobProcessor() {
       config.env === "preview" || config.env === "local"
         ? {}
         : {
-          "Run daily jobs each day at 02h30": {
-            cron_string: "30 2 * * *",
-            handler: async () => dailyJobs(true),
-          },
-
-          "Cleanup organismes": {
-            cron_string: "0 3 * * *",
-            handler: cleanupOrganismes,
-          },
-
-          "Import formations": {
-            cron_string: "0 3 * * *",
-            handler: hydrateFormationV2,
-          },
-
-          "Send reminder emails at 7h": {
-            cron_string: "0 7 * * *",
-            handler: async () => {
-              await addJob({ name: "send-reminder-emails", queued: true });
-              return 0;
+            "Run daily jobs each day at 02h30": {
+              cron_string: "30 2 * * *",
+              handler: async () => dailyJobs(true),
             },
-          },
 
-          "Send ML weekly recap at 14h30 on Mondays": {
-            cron_string: "30 14 * * 1",
-            handler: async () => {
-              await addJob({ name: "send-mission-locale-weekly-recap", queued: true });
-              return 0;
+            "Cleanup organismes": {
+              cron_string: "0 3 * * *",
+              handler: cleanupOrganismes,
             },
-          },
 
-          "Send ML daily recap at 13h30": {
-            cron_string: "30 13 * * *",
-            handler: async () => {
-              await addJob({ name: "send-mission-locale-daily-recap", queued: true });
-              return 0;
+            "Import formations": {
+              cron_string: "0 3 * * *",
+              handler: hydrateFormationV2,
             },
-          },
 
-          "Send CFA daily recap at 10h30": {
-            cron_string: "30 10 * * *",
-            handler: async () => {
-              await addJob({ name: "send-cfa-daily-recap", queued: true });
-              return 0;
+            "Send reminder emails at 7h": {
+              cron_string: "0 7 * * *",
+              handler: async () => {
+                await addJob({ name: "send-reminder-emails", queued: true });
+                return 0;
+              },
             },
-          },
 
-          "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
-            cron_string: "0 5 * * 6",
-            handler: async (signal) => {
-              const evaluationDate = new Date();
-              await hydrateWeeklyEffectifStatut(signal, evaluationDate);
-              await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
+            "Send ML weekly recap at 14h30 on Mondays": {
+              cron_string: "30 14 * * 1",
+              handler: async () => {
+                await addJob({ name: "send-mission-locale-weekly-recap", queued: true });
+                return 0;
+              },
             },
-            resumable: true,
+
+            "Send ML daily recap at 13h30": {
+              cron_string: "30 13 * * *",
+              handler: async () => {
+                await addJob({ name: "send-mission-locale-daily-recap", queued: true });
+                return 0;
+              },
+            },
+
+            "Send CFA daily recap at 10h30": {
+              cron_string: "30 10 * * *",
+              handler: async () => {
+                await addJob({ name: "send-cfa-daily-recap", queued: true });
+                return 0;
+              },
+            },
+
+            "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
+              cron_string: "0 5 * * 6",
+              handler: async (signal) => {
+                const evaluationDate = new Date();
+                await hydrateWeeklyEffectifStatut(signal, evaluationDate);
+                await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
+              },
+              resumable: true,
+            },
+            "Validation des constantes de territoires": {
+              cron_string: "5 4 1 * *",
+              handler: validationTerritoires,
+            },
+            // TODO : Checker si coté métier l'archivage est toujours prévu ?
+            // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
+            //   cron_string: "45 12 1 * *",
+            //   handler: async () => {
+            //     // run-archive-job.sh yarn cli archive:dossiersApprenantsEffectifs
+            //     return 0;
+            //   },
+            // },
           },
-          "Validation des constantes de territoires": {
-            cron_string: "5 4 1 * *",
-            handler: validationTerritoires,
-          },
-          // TODO : Checker si coté métier l'archivage est toujours prévu ?
-          // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
-          //   cron_string: "45 12 1 * *",
-          //   handler: async () => {
-          //     // run-archive-job.sh yarn cli archive:dossiersApprenantsEffectifs
-          //     return 0;
-          //   },
-          // },
-        },
     jobs: {
       "init:dev": {
         handler: async () => dailyJobs(false),
@@ -544,7 +544,7 @@ export async function setupJobProcessor() {
         handler: async () => {
           return hydrateRomeSecteurActivites();
         },
-      }
+      },
     },
   });
 }

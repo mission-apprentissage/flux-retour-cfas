@@ -150,6 +150,7 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import armlAuthentRoutes from "./routes/organisations.routes/arml/arml.routes";
+import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
@@ -160,7 +161,6 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
-import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
