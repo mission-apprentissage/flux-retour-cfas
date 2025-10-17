@@ -8,7 +8,12 @@ import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 
 const collectionName = "franceTravailEffectif";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ code_region: 1 }, { name: "code_region" }],
+  [{ code_region: 1, effectif_id: 1 }, { name: "code_region_effectif_id" }],
+  [{ effectif_id: 1 }, { name: "effectif_id" }],
+  [{ "current_status.value": 1, "current_status.date": 1 }, { name: "current_status" }],
+];
 
 export enum FRANCE_TRAVAIL_SITUATION_ENUM {
   REORIENTATION = "REORIENTATION",
