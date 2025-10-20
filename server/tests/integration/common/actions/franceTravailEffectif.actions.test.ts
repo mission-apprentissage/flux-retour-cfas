@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { API_EFFECTIF_LISTE } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -92,14 +93,20 @@ describe("Tests des actions France Travail Effectif", () => {
   describe("getFranceTravailEffectifsByCodeSecteur", () => {
     describe("Code ROME", () => {
       it("devrait retourner un résultat vide pour un code ROME inexistant", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(3, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 3, {
+          page: 1,
+          limit: 20,
+        });
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination.total).toBe(0);
       });
 
       it("devrait accepter un code ROME valide", async () => {
         await insertTestData();
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
         expect(result).toBeDefined();
         expect(result?.effectifs).toBeDefined();
         expect(result?.pagination).toBeDefined();
@@ -112,7 +119,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats avec les métadonnées de pagination par défaut", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84");
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1);
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination).toEqual({
@@ -124,7 +131,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait paginer correctement avec une limite custom", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 2,
+        });
 
         expect(result?.effectifs).toHaveLength(2);
         expect(result?.pagination).toEqual({
@@ -136,7 +146,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner la deuxième page correctement", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 2, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 2,
+          limit: 2,
+        });
 
         expect(result?.effectifs).toHaveLength(1);
         expect(result?.pagination).toEqual({
@@ -148,7 +161,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait calculer correctement totalPages avec un reste", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 3 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 3,
+        });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination).toEqual({
@@ -160,7 +176,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner une page vide si la page dépasse le total", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 10, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 10,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
@@ -178,7 +197,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par code région", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
@@ -189,14 +211,20 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats si aucune région spécifiée", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
       });
 
       it("devrait retourner un résultat vide pour une région sans effectifs", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "99", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("99", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
@@ -214,7 +242,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par code ROME existant", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
@@ -225,7 +256,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner des résultats vides pour un code ROME inexistant", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(3, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 3, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
@@ -237,8 +271,14 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait distinguer les différents codes ROME", async () => {
-        const resultA = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
-        const resultB = await getFranceTravailEffectifsByCodeSecteur(2, "84", { page: 1, limit: 20 });
+        const resultA = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
+        const resultB = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 2, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(resultA?.pagination.total).toBe(3);
         expect(resultB?.pagination.total).toBe(1);
@@ -253,7 +293,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait combiner filtrage par code ROME et région avec pagination", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 2,
+        });
 
         expect(result?.effectifs).toHaveLength(2);
         expect(result?.pagination).toEqual({
@@ -270,7 +313,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner la deuxième page avec les bons filtres", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 2, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 2,
+          limit: 2,
+        });
 
         expect(result?.effectifs).toHaveLength(1);
         expect(result?.pagination).toEqual({
@@ -288,7 +334,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner les champs requis dans la réponse", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 1 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 1,
+        });
 
         expect(result).toHaveProperty("effectifs");
         expect(result).toHaveProperty("pagination");
@@ -296,7 +345,10 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner les effectifs avec toutes les propriétés", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 1 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 1,
+        });
 
         const effectif = result?.effectifs[0];
         expect(effectif).toHaveProperty("_id");
@@ -374,7 +426,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par nom", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           search: "Dupont",
@@ -385,7 +437,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par prénom", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           search: "Marie",
@@ -396,7 +448,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait être insensible à la casse", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           search: "dupont",
@@ -407,7 +459,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait rechercher par partie du nom", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           search: "Du",
@@ -417,13 +469,16 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats sans search", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+          page: 1,
+          limit: 20,
+        });
 
         expect(result?.effectifs).toHaveLength(3);
       });
 
       it("devrait échapper les caractères spéciaux regex", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           search: "Du.*",
@@ -485,7 +540,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par jours sans contrat (défaut desc, plus haut en premier)", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "jours_sans_contrat",
@@ -498,7 +553,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par jours sans contrat asc (plus bas en premier)", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "jours_sans_contrat",
@@ -511,7 +566,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par nom asc (A-Z)", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "nom",
@@ -524,7 +579,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par nom desc (Z-A)", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "nom",
@@ -537,7 +592,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par organisme asc", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "organisme",
@@ -550,7 +605,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par organisme desc", async () => {
-        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+        const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
           page: 1,
           limit: 20,
           sort: "organisme",
@@ -629,28 +684,37 @@ describe("Tests des actions France Travail Effectif", () => {
     });
 
     it("devrait récupérer les effectifs de tous les codes ROME du secteur", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result?.effectifs).toHaveLength(2);
       expect(result?.pagination.total).toBe(2);
     });
 
     it("devrait retourner un résultat vide pour un code secteur inexistant", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(999, "84", { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 999, {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result?.effectifs).toHaveLength(0);
       expect(result?.pagination.total).toBe(0);
     });
 
     it("devrait filtrer par région", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result?.effectifs).toHaveLength(2);
       expect(result?.effectifs.every((e) => e.code_region === "84")).toBe(true);
     });
 
     it("devrait supporter la recherche", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+      const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
         page: 1,
         limit: 20,
         search: "nom",
@@ -661,7 +725,7 @@ describe("Tests des actions France Travail Effectif", () => {
     });
 
     it("devrait supporter le tri", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
+      const result = await getFranceTravailEffectifsByCodeSecteur("84", API_EFFECTIF_LISTE.A_TRAITER, 1, {
         page: 1,
         limit: 20,
         sort: "nom",
