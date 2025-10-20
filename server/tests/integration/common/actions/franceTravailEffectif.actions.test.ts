@@ -2,10 +2,7 @@ import { ObjectId } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { describe, it, expect, beforeEach } from "vitest";
 
-import {
-  getFranceTravailEffectifsByCodeRome,
-  getFranceTravailEffectifsByCodeSecteur,
-} from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { getFranceTravailEffectifsByCodeSecteur } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { franceTravailEffectifsDb, romeSecteurActivitesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -27,7 +24,11 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
-      ft_data: { A1234: null },
+      ft_data: { 1: null },
+      romes: {
+        code: ["A1234"],
+        secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+      },
     },
     {
       _id: new ObjectId(),
@@ -36,7 +37,11 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
-      ft_data: { A1234: null },
+      ft_data: { 1: null },
+      romes: {
+        code: ["A1234"],
+        secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+      },
     },
     {
       _id: new ObjectId(),
@@ -45,7 +50,11 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
-      ft_data: { A1234: null },
+      ft_data: { 1: null },
+      romes: {
+        code: ["A1234"],
+        secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+      },
     },
     {
       _id: new ObjectId(),
@@ -54,7 +63,11 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "11",
       current_status: { value: "INSCRIT" as const, date: new Date() },
-      ft_data: { A1234: null },
+      ft_data: { 1: null },
+      romes: {
+        code: ["A1234"],
+        secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+      },
     },
     {
       _id: new ObjectId(),
@@ -63,7 +76,11 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
-      ft_data: { B5678: null },
+      ft_data: { 2: null },
+      romes: {
+        code: ["B5678"],
+        secteur_activites: [{ code_secteur: 2, libelle_secteur: "Astrophysique" }],
+      },
     },
   ];
 
@@ -72,17 +89,17 @@ const insertTestData = async () => {
 };
 
 describe("Tests des actions France Travail Effectif", () => {
-  describe("getFranceTravailEffectifsByCodeRome", () => {
+  describe("getFranceTravailEffectifsByCodeSecteur", () => {
     describe("Code ROME", () => {
       it("devrait retourner un résultat vide pour un code ROME inexistant", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("Z9999", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(3, "84", { page: 1, limit: 20 });
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination.total).toBe(0);
       });
 
       it("devrait accepter un code ROME valide", async () => {
         await insertTestData();
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
         expect(result).toBeDefined();
         expect(result?.effectifs).toBeDefined();
         expect(result?.pagination).toBeDefined();
@@ -95,61 +112,61 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats avec les métadonnées de pagination par défaut", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234");
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84");
 
-        expect(result?.effectifs).toHaveLength(4);
+        expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination).toEqual({
           page: 1,
           limit: 20,
-          total: 4,
+          total: 3,
           totalPages: 1,
         });
       });
 
       it("devrait paginer correctement avec une limite custom", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 2 });
 
         expect(result?.effectifs).toHaveLength(2);
         expect(result?.pagination).toEqual({
           page: 1,
           limit: 2,
-          total: 4,
+          total: 3,
           totalPages: 2,
         });
       });
 
       it("devrait retourner la deuxième page correctement", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 2, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 2, limit: 2 });
 
-        expect(result?.effectifs).toHaveLength(2);
+        expect(result?.effectifs).toHaveLength(1);
         expect(result?.pagination).toEqual({
           page: 2,
           limit: 2,
-          total: 4,
+          total: 3,
           totalPages: 2,
         });
       });
 
       it("devrait calculer correctement totalPages avec un reste", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 3 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 3 });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination).toEqual({
           page: 1,
           limit: 3,
-          total: 4,
-          totalPages: 2,
+          total: 3,
+          totalPages: 1,
         });
       });
 
       it("devrait retourner une page vide si la page dépasse le total", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 10, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 10, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
           page: 10,
           limit: 20,
-          total: 4,
+          total: 3,
           totalPages: 1,
         });
       });
@@ -161,7 +178,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par code région", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", "84", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
@@ -172,14 +189,14 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats si aucune région spécifiée", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
-        expect(result?.effectifs).toHaveLength(4);
-        expect(result?.pagination.total).toBe(4);
+        expect(result?.effectifs).toHaveLength(3);
+        expect(result?.pagination.total).toBe(3);
       });
 
       it("devrait retourner un résultat vide pour une région sans effectifs", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", "99", { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "99", { page: 1, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
@@ -197,18 +214,18 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par code ROME existant", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
-        expect(result?.effectifs).toHaveLength(4);
-        expect(result?.pagination.total).toBe(4);
+        expect(result?.effectifs).toHaveLength(3);
+        expect(result?.pagination.total).toBe(3);
 
         result?.effectifs.forEach((effectif) => {
-          expect(effectif.ft_data).toHaveProperty("A1234");
+          expect(effectif.ft_data).toHaveProperty("1");
         });
       });
 
       it("devrait retourner des résultats vides pour un code ROME inexistant", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("Z9999", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(3, "84", { page: 1, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(0);
         expect(result?.pagination).toEqual({
@@ -220,13 +237,13 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait distinguer les différents codes ROME", async () => {
-        const resultA = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
-        const resultB = await getFranceTravailEffectifsByCodeRome("B5678", undefined, { page: 1, limit: 20 });
+        const resultA = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
+        const resultB = await getFranceTravailEffectifsByCodeSecteur(2, "84", { page: 1, limit: 20 });
 
-        expect(resultA?.pagination.total).toBe(4);
+        expect(resultA?.pagination.total).toBe(3);
         expect(resultB?.pagination.total).toBe(1);
-        expect(resultA?.effectifs[0].ft_data).toHaveProperty("A1234");
-        expect(resultB?.effectifs[0].ft_data).toHaveProperty("B5678");
+        expect(resultA?.effectifs[0].ft_data).toHaveProperty("1");
+        expect(resultB?.effectifs[0].ft_data).toHaveProperty("2");
       });
     });
 
@@ -236,7 +253,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait combiner filtrage par code ROME et région avec pagination", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", "84", { page: 1, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 2 });
 
         expect(result?.effectifs).toHaveLength(2);
         expect(result?.pagination).toEqual({
@@ -248,12 +265,12 @@ describe("Tests des actions France Travail Effectif", () => {
 
         result?.effectifs.forEach((effectif) => {
           expect(effectif.code_region).toBe("84");
-          expect(effectif.ft_data).toHaveProperty("A1234");
+          expect(effectif.ft_data).toHaveProperty("1");
         });
       });
 
       it("devrait retourner la deuxième page avec les bons filtres", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", "84", { page: 2, limit: 2 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 2, limit: 2 });
 
         expect(result?.effectifs).toHaveLength(1);
         expect(result?.pagination).toEqual({
@@ -271,7 +288,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner les champs requis dans la réponse", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 1 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 1 });
 
         expect(result).toHaveProperty("effectifs");
         expect(result).toHaveProperty("pagination");
@@ -279,7 +296,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner les effectifs avec toutes les propriétés", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 1 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 1 });
 
         const effectif = result?.effectifs[0];
         expect(effectif).toHaveProperty("_id");
@@ -313,7 +330,11 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
-            ft_data: { A1234: null },
+            ft_data: { 1: null },
+            romes: {
+              code: ["A1234"],
+              secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+            },
           },
           {
             _id: new ObjectId(),
@@ -325,7 +346,11 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
-            ft_data: { A1234: null },
+            ft_data: { 1: null },
+            romes: {
+              code: ["A1234"],
+              secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+            },
           },
           {
             _id: new ObjectId(),
@@ -337,7 +362,11 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
-            ft_data: { A1234: null },
+            ft_data: { 1: null },
+            romes: {
+              code: ["A1234"],
+              secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+            },
           },
         ];
 
@@ -345,7 +374,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par nom", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           search: "Dupont",
@@ -356,7 +385,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait filtrer par prénom", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           search: "Marie",
@@ -367,7 +396,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait être insensible à la casse", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           search: "dupont",
@@ -378,7 +407,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait rechercher par partie du nom", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           search: "Du",
@@ -388,13 +417,13 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait retourner tous les résultats sans search", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(3);
       });
 
       it("devrait échapper les caractères spéciaux regex", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           search: "Du.*",
@@ -428,7 +457,11 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: threeDaysAgo },
-            ft_data: { A1234: null },
+            ft_data: { 1: null },
+            romes: {
+              code: ["A1234"],
+              secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+            },
           },
           {
             _id: new ObjectId(),
@@ -440,7 +473,11 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: tenDaysAgo },
-            ft_data: { A1234: null },
+            ft_data: { 1: null },
+            romes: {
+              code: ["A1234"],
+              secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+            },
           },
         ];
 
@@ -448,7 +485,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par jours sans contrat (défaut desc, plus haut en premier)", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "jours_sans_contrat",
@@ -461,7 +498,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par jours sans contrat asc (plus bas en premier)", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "jours_sans_contrat",
@@ -474,7 +511,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par nom asc (A-Z)", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "nom",
@@ -487,7 +524,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par nom desc (Z-A)", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "nom",
@@ -500,7 +537,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par organisme asc", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "organisme",
@@ -513,7 +550,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       it("devrait trier par organisme desc", async () => {
-        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+        const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
           page: 1,
           limit: 20,
           sort: "organisme",
@@ -554,7 +591,11 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
-          ft_data: { A1234: null },
+          ft_data: { 1: null },
+          romes: {
+            code: ["A1234"],
+            secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+          },
         },
         {
           _id: new ObjectId(),
@@ -563,7 +604,11 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
-          ft_data: { B5678: null },
+          ft_data: { 1: null },
+          romes: {
+            code: ["A1234"],
+            secteur_activites: [{ code_secteur: 1, libelle_secteur: "Agriculture" }],
+          },
         },
         {
           _id: new ObjectId(),
@@ -572,7 +617,11 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
-          ft_data: { C9999: null },
+          ft_data: { 99: null },
+          romes: {
+            code: ["C9999"],
+            secteur_activites: [{ code_secteur: 99, libelle_secteur: "Informatique" }],
+          },
         },
       ];
 
@@ -580,28 +629,28 @@ describe("Tests des actions France Travail Effectif", () => {
     });
 
     it("devrait récupérer les effectifs de tous les codes ROME du secteur", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
       expect(result?.effectifs).toHaveLength(2);
       expect(result?.pagination.total).toBe(2);
     });
 
     it("devrait retourner un résultat vide pour un code secteur inexistant", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(999, undefined, { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur(999, "84", { page: 1, limit: 20 });
 
       expect(result?.effectifs).toHaveLength(0);
       expect(result?.pagination.total).toBe(0);
     });
 
     it("devrait filtrer par région", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(123, "84", { page: 1, limit: 20 });
+      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", { page: 1, limit: 20 });
 
       expect(result?.effectifs).toHaveLength(2);
       expect(result?.effectifs.every((e) => e.code_region === "84")).toBe(true);
     });
 
     it("devrait supporter la recherche", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, {
+      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
         page: 1,
         limit: 20,
         search: "nom",
@@ -612,7 +661,7 @@ describe("Tests des actions France Travail Effectif", () => {
     });
 
     it("devrait supporter le tri", async () => {
-      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, {
+      const result = await getFranceTravailEffectifsByCodeSecteur(1, "84", {
         page: 1,
         limit: 20,
         sort: "nom",
