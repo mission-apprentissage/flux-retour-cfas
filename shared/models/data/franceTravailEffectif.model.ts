@@ -25,6 +25,13 @@ export enum FRANCE_TRAVAIL_SITUATION_ENUM {
 
 export const zFranceTravailSituationEnum = z.nativeEnum(FRANCE_TRAVAIL_SITUATION_ENUM);
 
+const franceTravailData = z.object({
+  situation: zFranceTravailSituationEnum,
+  created_at: z.date(),
+  commentaire: z.string().nullable(),
+  created_by: zObjectId,
+});
+
 const zFranceTravailEffectif = z.object({
   _id: zObjectId,
   created_at: z.date(),
@@ -33,21 +40,22 @@ const zFranceTravailEffectif = z.object({
   effectif_snapshot: zEffectif,
   effectif_snapshot_date: z.date().optional(),
   code_region: zAdresse.shape.region.optional(),
+  romes: z.object({
+    code: z.array(z.string()),
+    secteur_activites: z
+      .array(
+        z.object({
+          code_secteur: z.number(),
+          libelle_secteur: z.string(),
+        })
+      )
+      .optional(),
+  }),
   current_status: z.object({
     value: zStatutApprenantEnum.nullish(),
     date: z.date().nullish(),
   }),
-  ft_data: z.record(
-    z.string(),
-    z
-      .object({
-        situation: zFranceTravailSituationEnum,
-        created_at: z.date(),
-        commentaire: z.string().nullable(),
-        created_by: zObjectId,
-      })
-      .nullable()
-  ),
+  ft_data: z.record(z.string(), franceTravailData.nullable()),
 });
 
 export type IFranceTravailEffectif = z.output<typeof zFranceTravailEffectif>;

@@ -1,5 +1,6 @@
 import express from "express";
 import { IOrganisationFranceTravail } from "shared/models";
+import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
   codeSecteurSchema,
   effectifFranceTravailQuerySchema,
@@ -12,6 +13,7 @@ import { z } from "zod";
 import {
   getEffectifFromFranceTravailId,
   getFranceTravailEffectifsByCodeSecteur,
+  updateFranceTravailData,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getRomeSecteurActivitesArborescence } from "@/common/actions/rome/rome.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -54,7 +56,20 @@ export default () => {
     returnResult(getEffectifById)
   );
 
-  router.put("/effectif/:id", returnResult(updateEffectifById));
+  router.put(
+    "/effectif/:id",
+    validateRequestMiddleware({
+      params: z.object({
+        id: z.string().describe("ID de l'effectif France Travail"),
+      }),
+      body: z.object({
+        commentaire: z.string().nullable().describe("Commentaire à ajouter ou mettre à jour"),
+        situation: zFranceTravailSituationEnum.describe("Situation actuelle de l'effectif"),
+        code_secteur: z.number(),
+      }),
+    }),
+    returnResult(updateEffectifById)
+  );
 
   return router;
 };
@@ -75,7 +90,10 @@ const getEffectifById = async (req, { locals }) => {
   });
 };
 
-const updateEffectifById = async (_req, { locals }) => {
-  const _ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  // WIP
+const updateEffectifById = async (req) => {
+  const effectifId = req.params.id;
+  const user = req.user;
+  const body = req.body;
+
+  await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
 };
