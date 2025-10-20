@@ -168,6 +168,8 @@ export type IOrganisationOperateurPublicRegion = z.output<typeof zOrganisationRe
 
 export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisationAcademie>;
 
+export type IOrganisationFranceTravail = z.output<typeof zOrganisationFranceTravail>;
+
 export type IOrganisation = z.output<typeof zOrganisation>;
 
 export type IOrganisationJson = Jsonify<IOrganisation>;

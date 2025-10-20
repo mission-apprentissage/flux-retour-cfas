@@ -61,6 +61,7 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { hydrateRomeSecteurActivites } from "./hydrate/rome/hydrate-rome";
 import {
   computeDailyTransmissions,
   forceHydrateAllTransmissions,
@@ -537,6 +538,11 @@ export async function setupJobProcessor() {
       "tmp:migration:dedoublon-organisation": {
         handler: async () => {
           return deleteOrganisationWithoutUser();
+        },
+      },
+      "tmp:hydrate:rome-secteur-activites": {
+        handler: async () => {
+          return hydrateRomeSecteurActivites();
         },
       },
     },

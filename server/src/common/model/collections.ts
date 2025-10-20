@@ -11,6 +11,9 @@ import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import franceTravailEffectifDescriptor, {
+  IFranceTravailEffectif,
+} from "shared/models/data/franceTravailEffectif.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
@@ -29,6 +32,7 @@ import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organi
 import regionsModelDescriptor, { IRegion } from "shared/models/data/regions.model";
 import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
+import romeSecteurActivitesDescriptor, { IRomeSecteurActivites } from "shared/models/data/romeSecteurActivites.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
 } from "shared/models/data/telechargementListesNomLogs.model";
@@ -77,6 +81,8 @@ export const modelDescriptors = [
   brevoMissionLocaleListModelDescriptor,
   transmissionDailyReportDescriptor,
   missionLocaleStatsDescriptor,
+  franceTravailEffectifDescriptor,
+  romeSecteurActivitesDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -118,6 +124,11 @@ export const brevoMissionLocaleListDb = () =>
   getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
 export const transmissionDailyReportDb = () =>
   getDbCollection<ITransmissionDailyReport>(transmissionDailyReportDescriptor.collectionName);
+
+export const franceTravailEffectifsDb = () =>
+  getDbCollection<IFranceTravailEffectif>(franceTravailEffectifDescriptor.collectionName);
+export const romeSecteurActivitesDb = () =>
+  getDbCollection<IRomeSecteurActivites>(romeSecteurActivitesDescriptor.collectionName);
 
 // v2
 

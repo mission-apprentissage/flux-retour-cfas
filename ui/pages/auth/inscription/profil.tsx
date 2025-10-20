@@ -179,6 +179,12 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   ARML {organisation.nom}
                 </Text>
               );
+            case "FRANCE_TRAVAIL":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  France Travail {organisation.nom}
+                </Text>
+              );
           }
         })()}
       </Box>

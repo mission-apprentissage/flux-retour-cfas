@@ -9079,6 +9079,2945 @@ exports[`validation-schema > should create validation schema for formationsCatal
 }
 `;
 
+exports[`validation-schema > should create validation schema for franceTravailEffectif > franceTravailEffectif 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "code_region": {
+      "bsonType": "string",
+      "pattern": "^[0-9]{2,3}$",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "current_status": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "value": {
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "enum": [
+                "ABANDON",
+                "PRE_INSCRIT",
+                "INSCRIT",
+                "APPRENTI",
+                "RUPTURANT",
+                "FIN_DE_FORMATION",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+      },
+    },
+    "effectif_id": {
+      "bsonType": "objectId",
+    },
+    "effectif_snapshot": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_computed": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "description": "Propriétés calculées ou récupérées d'autres collections",
+              "properties": {
+                "formation": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "codes_rome": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "items": {
+                                "bsonType": "string",
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "opcos": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "items": {
+                                "bsonType": "string",
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "organisme": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "academie": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "pattern": "^[0-9]{2}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "bassinEmploi": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                        },
+                        "departement": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "pattern": "^(2A|2B|[0-9]{2,3})$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "fiable": {
+                          "bsonType": [
+                            "bool",
+                            "null",
+                          ],
+                          "description": "organismes.fiabilisation_statut == "FIABLE" && ferme != false",
+                        },
+                        "region": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "pattern": "^[0-9]{2,3}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "reseaux": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "description": "Réseaux du CFA, s'ils existent",
+                              "items": {
+                                "bsonType": "string",
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Réseaux du CFA, s'ils existent",
+                        },
+                        "siret": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "N° SIRET de l'établissement",
+                              "pattern": "^[0-9]{14}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "N° SIRET de l'établissement",
+                        },
+                        "uai": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Code UAI de l'établissement",
+                              "pattern": "^[0-9]{7}[a-zA-Z]$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Code UAI de l'établissement",
+                        },
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "statut": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "en_cours": {
+                          "bsonType": "string",
+                          "enum": [
+                            "ABANDON",
+                            "PRE_INSCRIT",
+                            "INSCRIT",
+                            "APPRENTI",
+                            "RUPTURANT",
+                            "FIN_DE_FORMATION",
+                          ],
+                        },
+                        "parcours": {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "date": {
+                                "bsonType": "date",
+                              },
+                              "valeur": {
+                                "bsonType": "string",
+                                "enum": [
+                                  "ABANDON",
+                                  "PRE_INSCRIT",
+                                  "INSCRIT",
+                                  "APPRENTI",
+                                  "RUPTURANT",
+                                  "FIN_DE_FORMATION",
+                                ],
+                              },
+                            },
+                            "required": [
+                              "date",
+                              "valeur",
+                            ],
+                          },
+                        },
+                      },
+                      "required": [
+                        "en_cours",
+                        "parcours",
+                      ],
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Propriétés calculées ou récupérées d'autres collections",
+        },
+        "_id": {
+          "bsonType": "objectId",
+          "description": "Identifiant MongoDB de l'effectif",
+        },
+        "_raw": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "formation": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "annee": {
+                          "anyOf": [
+                            {
+                              "bsonType": "int",
+                              "description": "Numéro de l'année dans la formation (promo)",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Numéro de l'année dans la formation (promo)",
+                        },
+                        "cause_exclusion": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Cause de l'exclusion",
+                        },
+                        "cfd": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Code CFD de la formation",
+                              "pattern": "^[A-Z0-9]{8}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Code CFD de la formation",
+                        },
+                        "date_entree": {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                              "description": "Date d'entrée en formation",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Date d'entrée en formation",
+                        },
+                        "date_exclusion": {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                              "description": "Date d'exclusion",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Date d'exclusion",
+                        },
+                        "date_fin": {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                              "description": "Date de fin de la formation",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Date de fin de la formation",
+                        },
+                        "date_inscription": {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                              "description": "Date d'inscription",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Date d'inscription",
+                        },
+                        "date_obtention_diplome": {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                              "description": "Date d'obtention du diplôme",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Date d'obtention du diplôme",
+                        },
+                        "duree_formation_relle": {
+                          "anyOf": [
+                            {
+                              "bsonType": "int",
+                              "description": "Durée réelle de la formation en mois",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Durée réelle de la formation en mois",
+                        },
+                        "duree_theorique": {
+                          "anyOf": [
+                            {
+                              "bsonType": "int",
+                              "description": "Durée théorique de la formation en année",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Durée théorique de la formation en année",
+                        },
+                        "duree_theorique_mois": {
+                          "anyOf": [
+                            {
+                              "bsonType": "int",
+                              "description": "Durée théorique de la formation en mois",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Durée théorique de la formation en mois",
+                        },
+                        "formation_presentielle": {
+                          "bsonType": [
+                            "bool",
+                            "null",
+                          ],
+                          "description": "Formation en présentiel",
+                        },
+                        "libelle_court": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Libellé court de la formation visée",
+                        },
+                        "libelle_long": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Libellé long de la formation visée",
+                        },
+                        "niveau": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Niveau de formation récupéré via Tables de Correspondances",
+                        },
+                        "niveau_libelle": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
+                        },
+                        "obtention_diplome": {
+                          "bsonType": [
+                            "bool",
+                            "null",
+                          ],
+                          "description": "Diplôme obtenu",
+                        },
+                        "periode": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "description": "Période de la formation, en année (peut être sur plusieurs années)",
+                              "items": {
+                                "bsonType": "int",
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Période de la formation, en année (peut être sur plusieurs années)",
+                        },
+                        "referent_handicap": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "email": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                  "description": "Email du référent handicap",
+                                },
+                                "nom": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                  "description": "Nom du référent handicap",
+                                },
+                                "prenom": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                  "description": "Prénom du référent handicap",
+                                },
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "bsonType": "string",
+                              "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+                              "pattern": "^(RNCP)?[0-9]{2,5}$",
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                          "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+                        },
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "annee_scolaire": {
+          "bsonType": "string",
+          "description": "Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")",
+          "pattern": "^[12][0-9]{3}-[12][0-9]{3}$",
+        },
+        "apprenant": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "adresse": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "academie": {
+                      "bsonType": "string",
+                      "pattern": "^[0-9]{2}$",
+                    },
+                    "bassinEmploi": {
+                      "bsonType": "string",
+                      "description": "Code Bassin d'emploi",
+                    },
+                    "code_insee": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code insee doit contenir 5 caractères",
+                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Le code insee doit contenir 5 caractères",
+                    },
+                    "code_postal": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code postal doit contenir 5 caractères",
+                          "pattern": "^[0-9]{5}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Le code postal doit contenir 5 caractères",
+                    },
+                    "commune": {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    "complement": {
+                      "bsonType": "string",
+                      "description": "Complément d'adresse",
+                    },
+                    "complete": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "Adresse complète",
+                    },
+                    "departement": {
+                      "bsonType": "string",
+                      "pattern": "^(2A|2B|[0-9]{2,3})$",
+                    },
+                    "mission_locale_id": {
+                      "bsonType": [
+                        "number",
+                        "null",
+                      ],
+                      "description": "Id de mission locale",
+                    },
+                    "numero": {
+                      "bsonType": "int",
+                      "description": "N° de la voie",
+                    },
+                    "pays": {
+                      "bsonType": "string",
+                      "description": "Pays",
+                      "enum": [
+                        "AF",
+                        "ZA",
+                        "AL",
+                        "DZ",
+                        "DE",
+                        "AD",
+                        "AO",
+                        "AG",
+                        "SA",
+                        "AR",
+                        "AM",
+                        "AU",
+                        "AT",
+                        "AZ",
+                        "BS",
+                        "BH",
+                        "BD",
+                        "BB",
+                        "BE",
+                        "BZ",
+                        "BJ",
+                        "BT",
+                        "BY",
+                        "MM",
+                        "BO",
+                        "BQ",
+                        "BA",
+                        "BW",
+                        "BR",
+                        "BN",
+                        "BG",
+                        "BF",
+                        "BI",
+                        "KH",
+                        "CM",
+                        "CA",
+                        "CV",
+                        "CF",
+                        "CL",
+                        "CN",
+                        "CY",
+                        "CO",
+                        "KM",
+                        "CG",
+                        "CD",
+                        "KR",
+                        "KP",
+                        "CR",
+                        "CI",
+                        "HR",
+                        "CU",
+                        "CW",
+                        "DK",
+                        "DJ",
+                        "DO",
+                        "DM",
+                        "EG",
+                        "SV",
+                        "AE",
+                        "EC",
+                        "ER",
+                        "ES",
+                        "EE",
+                        "SZ",
+                        "US",
+                        "ET",
+                        "MK",
+                        "FJ",
+                        "FI",
+                        "FR",
+                        "GA",
+                        "GM",
+                        "GE",
+                        "GH",
+                        "GR",
+                        "GD",
+                        "GT",
+                        "GN",
+                        "GQ",
+                        "GW",
+                        "GY",
+                        "HT",
+                        "HN",
+                        "HU",
+                        "IN",
+                        "ID",
+                        "IR",
+                        "IQ",
+                        "IE",
+                        "IS",
+                        "IL",
+                        "IT",
+                        "JM",
+                        "JP",
+                        "JO",
+                        "KZ",
+                        "KE",
+                        "KG",
+                        "KI",
+                        "XK",
+                        "KW",
+                        "LA",
+                        "LS",
+                        "LV",
+                        "LB",
+                        "LR",
+                        "LY",
+                        "LI",
+                        "LT",
+                        "LU",
+                        "MG",
+                        "MY",
+                        "MW",
+                        "MV",
+                        "ML",
+                        "MT",
+                        "MA",
+                        "MH",
+                        "MU",
+                        "MR",
+                        "MX",
+                        "FM",
+                        "MD",
+                        "MC",
+                        "MN",
+                        "ME",
+                        "MZ",
+                        "NA",
+                        "NR",
+                        "NP",
+                        "NI",
+                        "NE",
+                        "NG",
+                        "NO",
+                        "NZ",
+                        "OM",
+                        "UG",
+                        "UZ",
+                        "PK",
+                        "PW",
+                        "PS",
+                        "PA",
+                        "PG",
+                        "PY",
+                        "NL",
+                        "PE",
+                        "PH",
+                        "PL",
+                        "PT",
+                        "QA",
+                        "RO",
+                        "GB",
+                        "RU",
+                        "RW",
+                        "KN",
+                        "SM",
+                        "SX",
+                        "VC",
+                        "LC",
+                        "SB",
+                        "WS",
+                        "ST",
+                        "SN",
+                        "RS",
+                        "SC",
+                        "SL",
+                        "SG",
+                        "SK",
+                        "SI",
+                        "SO",
+                        "SD",
+                        "SS",
+                        "LK",
+                        "SE",
+                        "CH",
+                        "SR",
+                        "SY",
+                        "TJ",
+                        "TZ",
+                        "TD",
+                        "CZ",
+                        "TH",
+                        "TL",
+                        "TG",
+                        "TO",
+                        "TT",
+                        "TN",
+                        "TM",
+                        "TR",
+                        "TV",
+                        "UA",
+                        "UY",
+                        "VU",
+                        "VA",
+                        "VE",
+                        "VN",
+                        "YE",
+                        "ZM",
+                        "ZW",
+                      ],
+                    },
+                    "region": {
+                      "bsonType": "string",
+                      "pattern": "^[0-9]{2,3}$",
+                    },
+                    "repetition_voie": {
+                      "bsonType": "string",
+                      "description": "Indice de répétition du numéro de voie",
+                      "enum": [
+                        "B",
+                        "T",
+                        "Q",
+                        "C",
+                      ],
+                    },
+                    "voie": {
+                      "bsonType": "string",
+                      "description": "Nom de voie",
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "adresse_naissance": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "academie": {
+                      "bsonType": "string",
+                      "pattern": "^[0-9]{2}$",
+                    },
+                    "bassinEmploi": {
+                      "bsonType": "string",
+                      "description": "Code Bassin d'emploi",
+                    },
+                    "code_insee": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code insee doit contenir 5 caractères",
+                          "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Le code insee doit contenir 5 caractères",
+                    },
+                    "code_postal": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "description": "Le code postal doit contenir 5 caractères",
+                          "pattern": "^[0-9]{5}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Le code postal doit contenir 5 caractères",
+                    },
+                    "commune": {
+                      "bsonType": "string",
+                      "description": "Commune",
+                      "maxLength": 80,
+                    },
+                    "complement": {
+                      "bsonType": "string",
+                      "description": "Complément d'adresse",
+                    },
+                    "complete": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "Adresse complète",
+                    },
+                    "departement": {
+                      "bsonType": "string",
+                      "pattern": "^(2A|2B|[0-9]{2,3})$",
+                    },
+                    "mission_locale_id": {
+                      "bsonType": [
+                        "number",
+                        "null",
+                      ],
+                      "description": "Id de mission locale",
+                    },
+                    "numero": {
+                      "bsonType": "int",
+                      "description": "N° de la voie",
+                    },
+                    "pays": {
+                      "bsonType": "string",
+                      "description": "Pays",
+                      "enum": [
+                        "AF",
+                        "ZA",
+                        "AL",
+                        "DZ",
+                        "DE",
+                        "AD",
+                        "AO",
+                        "AG",
+                        "SA",
+                        "AR",
+                        "AM",
+                        "AU",
+                        "AT",
+                        "AZ",
+                        "BS",
+                        "BH",
+                        "BD",
+                        "BB",
+                        "BE",
+                        "BZ",
+                        "BJ",
+                        "BT",
+                        "BY",
+                        "MM",
+                        "BO",
+                        "BQ",
+                        "BA",
+                        "BW",
+                        "BR",
+                        "BN",
+                        "BG",
+                        "BF",
+                        "BI",
+                        "KH",
+                        "CM",
+                        "CA",
+                        "CV",
+                        "CF",
+                        "CL",
+                        "CN",
+                        "CY",
+                        "CO",
+                        "KM",
+                        "CG",
+                        "CD",
+                        "KR",
+                        "KP",
+                        "CR",
+                        "CI",
+                        "HR",
+                        "CU",
+                        "CW",
+                        "DK",
+                        "DJ",
+                        "DO",
+                        "DM",
+                        "EG",
+                        "SV",
+                        "AE",
+                        "EC",
+                        "ER",
+                        "ES",
+                        "EE",
+                        "SZ",
+                        "US",
+                        "ET",
+                        "MK",
+                        "FJ",
+                        "FI",
+                        "FR",
+                        "GA",
+                        "GM",
+                        "GE",
+                        "GH",
+                        "GR",
+                        "GD",
+                        "GT",
+                        "GN",
+                        "GQ",
+                        "GW",
+                        "GY",
+                        "HT",
+                        "HN",
+                        "HU",
+                        "IN",
+                        "ID",
+                        "IR",
+                        "IQ",
+                        "IE",
+                        "IS",
+                        "IL",
+                        "IT",
+                        "JM",
+                        "JP",
+                        "JO",
+                        "KZ",
+                        "KE",
+                        "KG",
+                        "KI",
+                        "XK",
+                        "KW",
+                        "LA",
+                        "LS",
+                        "LV",
+                        "LB",
+                        "LR",
+                        "LY",
+                        "LI",
+                        "LT",
+                        "LU",
+                        "MG",
+                        "MY",
+                        "MW",
+                        "MV",
+                        "ML",
+                        "MT",
+                        "MA",
+                        "MH",
+                        "MU",
+                        "MR",
+                        "MX",
+                        "FM",
+                        "MD",
+                        "MC",
+                        "MN",
+                        "ME",
+                        "MZ",
+                        "NA",
+                        "NR",
+                        "NP",
+                        "NI",
+                        "NE",
+                        "NG",
+                        "NO",
+                        "NZ",
+                        "OM",
+                        "UG",
+                        "UZ",
+                        "PK",
+                        "PW",
+                        "PS",
+                        "PA",
+                        "PG",
+                        "PY",
+                        "NL",
+                        "PE",
+                        "PH",
+                        "PL",
+                        "PT",
+                        "QA",
+                        "RO",
+                        "GB",
+                        "RU",
+                        "RW",
+                        "KN",
+                        "SM",
+                        "SX",
+                        "VC",
+                        "LC",
+                        "SB",
+                        "WS",
+                        "ST",
+                        "SN",
+                        "RS",
+                        "SC",
+                        "SL",
+                        "SG",
+                        "SK",
+                        "SI",
+                        "SO",
+                        "SD",
+                        "SS",
+                        "LK",
+                        "SE",
+                        "CH",
+                        "SR",
+                        "SY",
+                        "TJ",
+                        "TZ",
+                        "TD",
+                        "CZ",
+                        "TH",
+                        "TL",
+                        "TG",
+                        "TO",
+                        "TT",
+                        "TN",
+                        "TM",
+                        "TR",
+                        "TV",
+                        "UA",
+                        "UY",
+                        "VU",
+                        "VA",
+                        "VE",
+                        "VN",
+                        "YE",
+                        "ZM",
+                        "ZW",
+                      ],
+                    },
+                    "region": {
+                      "bsonType": "string",
+                      "pattern": "^[0-9]{2,3}$",
+                    },
+                    "repetition_voie": {
+                      "bsonType": "string",
+                      "description": "Indice de répétition du numéro de voie",
+                      "enum": [
+                        "B",
+                        "T",
+                        "Q",
+                        "C",
+                      ],
+                    },
+                    "voie": {
+                      "bsonType": "string",
+                      "description": "Nom de voie",
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "affelnet": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "description": "voeux affelnet de l'apprenant",
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "code_postal_de_naissance": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Le code postal doit contenir 5 caractères.  
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
+                  "pattern": "^[0-9]{5}$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Le code postal doit contenir 5 caractères.  
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
+            },
+            "courriel": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse mail de contact de l'apprenant",
+            },
+            "date_de_naissance": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                  "description": "Date de naissance de l'apprenant",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de naissance de l'apprenant",
+            },
+            "date_rqth": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                  "description": "Date de la reconnaissance travailleur handicapé",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de la reconnaissance travailleur handicapé",
+            },
+            "dernier_diplome": {
+              "anyOf": [
+                {
+                  "bsonType": "number",
+                  "description": "Dernier diplôme obtenu",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    99,
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Dernier diplôme obtenu",
+            },
+            "dernier_organisme_uai": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
+      ou département.   
+* Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
+         
+* Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
+                  "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
+      ou département.   
+* Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
+         
+* Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
+            },
+            "derniere_situation": {
+              "anyOf": [
+                {
+                  "bsonType": "number",
+                  "description": "Situation de l'apprenant N-1",
+                  "enum": [
+                    1003,
+                    1005,
+                    1009,
+                    1017,
+                    1019,
+                    1021,
+                    1023,
+                    2001,
+                    2003,
+                    2005,
+                    2007,
+                    3001,
+                    3101,
+                    3003,
+                    3103,
+                    3009,
+                    3109,
+                    3011,
+                    3111,
+                    3031,
+                    3131,
+                    3032,
+                    3132,
+                    3033,
+                    3133,
+                    3117,
+                    3119,
+                    3021,
+                    3121,
+                    3023,
+                    3123,
+                    4001,
+                    4101,
+                    4003,
+                    4103,
+                    4005,
+                    4105,
+                    4007,
+                    4107,
+                    4009,
+                    4011,
+                    4111,
+                    4013,
+                    4113,
+                    4015,
+                    4115,
+                    4017,
+                    4117,
+                    4019,
+                    4119,
+                    4021,
+                    4121,
+                    4023,
+                    4123,
+                    4025,
+                    4125,
+                    4027,
+                    4127,
+                    5901,
+                    5903,
+                    5905,
+                    5907,
+                    5909,
+                    9900,
+                    9999,
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Situation de l'apprenant N-1",
+            },
+            "has_nir": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Numéro de sécurité sociale de l'apprenant",
+            },
+            "historique_statut": {
+              "bsonType": "array",
+              "description": "Historique du statut de l'apprenant",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "abandon_forced": {
+                    "bsonType": [
+                      "bool",
+                      "null",
+                    ],
+                    "description": "Le statut a été forcé en abandon",
+                  },
+                  "date_reception": {
+                    "anyOf": [
+                      {
+                        "bsonType": "date",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                  },
+                  "date_statut": {
+                    "bsonType": "date",
+                  },
+                  "valeur_statut": {
+                    "bsonType": "number",
+                    "description": "Statut de l'apprenant",
+                    "enum": [
+                      2,
+                      3,
+                      0,
+                    ],
+                  },
+                },
+                "required": [
+                  "valeur_statut",
+                  "date_statut",
+                ],
+              },
+            },
+            "ine": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "N° INE de l'apprenant",
+            },
+            "inscription_sportif_haut_niveau": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Apprenant inscrit sur la liste des sportifs, entraîneurs, arbitres et juges sportifs de haut niveau",
+            },
+            "mineur": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "l'apprenant(e) sera-t-il(elle) mineur(e) ? (calc)",
+            },
+            "mineur_emancipe": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale.",
+            },
+            "nationalite": {
+              "anyOf": [
+                {
+                  "bsonType": "number",
+                  "description": "Apprenant étranger, non citoyen européen",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Apprenant étranger, non citoyen européen",
+            },
+            "nom": {
+              "bsonType": "string",
+              "description": "Nom de l'apprenant",
+              "minLength": 1,
+            },
+            "organisme_gestionnaire": {
+              "bsonType": [
+                "number",
+                "null",
+              ],
+              "description": "Relicat déprécié et non utilisé",
+            },
+            "parcoursup": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "description": "voeux parcoursup de l'apprenant",
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "prenom": {
+              "bsonType": "string",
+              "description": "Prénom de l'apprenant",
+              "minLength": 1,
+            },
+            "regime_scolaire": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Régime scolaire (I : Interne, D : Demi-pensionnaire, E : Externe, IE : Interne externé)",
+                  "enum": [
+                    "I",
+                    "D",
+                    "E",
+                    "IE",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Régime scolaire (I : Interne, D : Demi-pensionnaire, E : Externe, IE : Interne externé)",
+            },
+            "representant_legal": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "adresse": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "academie": {
+                              "bsonType": "string",
+                              "pattern": "^[0-9]{2}$",
+                            },
+                            "bassinEmploi": {
+                              "bsonType": "string",
+                              "description": "Code Bassin d'emploi",
+                            },
+                            "code_insee": {
+                              "anyOf": [
+                                {
+                                  "bsonType": "string",
+                                  "description": "Le code insee doit contenir 5 caractères",
+                                  "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                              "description": "Le code insee doit contenir 5 caractères",
+                            },
+                            "code_postal": {
+                              "anyOf": [
+                                {
+                                  "bsonType": "string",
+                                  "description": "Le code postal doit contenir 5 caractères",
+                                  "pattern": "^[0-9]{5}$",
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                              "description": "Le code postal doit contenir 5 caractères",
+                            },
+                            "commune": {
+                              "bsonType": "string",
+                              "description": "Commune",
+                              "maxLength": 80,
+                            },
+                            "complement": {
+                              "bsonType": "string",
+                              "description": "Complément d'adresse",
+                            },
+                            "complete": {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                              "description": "Adresse complète",
+                            },
+                            "departement": {
+                              "bsonType": "string",
+                              "pattern": "^(2A|2B|[0-9]{2,3})$",
+                            },
+                            "numero": {
+                              "bsonType": "int",
+                              "description": "N° de la voie",
+                            },
+                            "pays": {
+                              "bsonType": "string",
+                              "description": "Pays",
+                              "enum": [
+                                "AF",
+                                "ZA",
+                                "AL",
+                                "DZ",
+                                "DE",
+                                "AD",
+                                "AO",
+                                "AG",
+                                "SA",
+                                "AR",
+                                "AM",
+                                "AU",
+                                "AT",
+                                "AZ",
+                                "BS",
+                                "BH",
+                                "BD",
+                                "BB",
+                                "BE",
+                                "BZ",
+                                "BJ",
+                                "BT",
+                                "BY",
+                                "MM",
+                                "BO",
+                                "BQ",
+                                "BA",
+                                "BW",
+                                "BR",
+                                "BN",
+                                "BG",
+                                "BF",
+                                "BI",
+                                "KH",
+                                "CM",
+                                "CA",
+                                "CV",
+                                "CF",
+                                "CL",
+                                "CN",
+                                "CY",
+                                "CO",
+                                "KM",
+                                "CG",
+                                "CD",
+                                "KR",
+                                "KP",
+                                "CR",
+                                "CI",
+                                "HR",
+                                "CU",
+                                "CW",
+                                "DK",
+                                "DJ",
+                                "DO",
+                                "DM",
+                                "EG",
+                                "SV",
+                                "AE",
+                                "EC",
+                                "ER",
+                                "ES",
+                                "EE",
+                                "SZ",
+                                "US",
+                                "ET",
+                                "MK",
+                                "FJ",
+                                "FI",
+                                "FR",
+                                "GA",
+                                "GM",
+                                "GE",
+                                "GH",
+                                "GR",
+                                "GD",
+                                "GT",
+                                "GN",
+                                "GQ",
+                                "GW",
+                                "GY",
+                                "HT",
+                                "HN",
+                                "HU",
+                                "IN",
+                                "ID",
+                                "IR",
+                                "IQ",
+                                "IE",
+                                "IS",
+                                "IL",
+                                "IT",
+                                "JM",
+                                "JP",
+                                "JO",
+                                "KZ",
+                                "KE",
+                                "KG",
+                                "KI",
+                                "XK",
+                                "KW",
+                                "LA",
+                                "LS",
+                                "LV",
+                                "LB",
+                                "LR",
+                                "LY",
+                                "LI",
+                                "LT",
+                                "LU",
+                                "MG",
+                                "MY",
+                                "MW",
+                                "MV",
+                                "ML",
+                                "MT",
+                                "MA",
+                                "MH",
+                                "MU",
+                                "MR",
+                                "MX",
+                                "FM",
+                                "MD",
+                                "MC",
+                                "MN",
+                                "ME",
+                                "MZ",
+                                "NA",
+                                "NR",
+                                "NP",
+                                "NI",
+                                "NE",
+                                "NG",
+                                "NO",
+                                "NZ",
+                                "OM",
+                                "UG",
+                                "UZ",
+                                "PK",
+                                "PW",
+                                "PS",
+                                "PA",
+                                "PG",
+                                "PY",
+                                "NL",
+                                "PE",
+                                "PH",
+                                "PL",
+                                "PT",
+                                "QA",
+                                "RO",
+                                "GB",
+                                "RU",
+                                "RW",
+                                "KN",
+                                "SM",
+                                "SX",
+                                "VC",
+                                "LC",
+                                "SB",
+                                "WS",
+                                "ST",
+                                "SN",
+                                "RS",
+                                "SC",
+                                "SL",
+                                "SG",
+                                "SK",
+                                "SI",
+                                "SO",
+                                "SD",
+                                "SS",
+                                "LK",
+                                "SE",
+                                "CH",
+                                "SR",
+                                "SY",
+                                "TJ",
+                                "TZ",
+                                "TD",
+                                "CZ",
+                                "TH",
+                                "TL",
+                                "TG",
+                                "TO",
+                                "TT",
+                                "TN",
+                                "TM",
+                                "TR",
+                                "TV",
+                                "UA",
+                                "UY",
+                                "VU",
+                                "VA",
+                                "VE",
+                                "VN",
+                                "YE",
+                                "ZM",
+                                "ZW",
+                              ],
+                            },
+                            "region": {
+                              "bsonType": "string",
+                              "pattern": "^[0-9]{2,3}$",
+                            },
+                            "repetition_voie": {
+                              "bsonType": "string",
+                              "description": "Indice de répétition du numéro de voie",
+                              "enum": [
+                                "B",
+                                "T",
+                                "Q",
+                                "C",
+                              ],
+                            },
+                            "voie": {
+                              "bsonType": "string",
+                              "description": "Nom de voie",
+                            },
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "courriel": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "Adresse mail de contact du representant légal",
+                    },
+                    "meme_adresse": {
+                      "bsonType": [
+                        "bool",
+                        "null",
+                      ],
+                      "description": "l'apprenti(e) vit à la même adresse que son representant légal",
+                    },
+                    "nom": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "Nom du representant légal",
+                    },
+                    "pcs": {
+                      "anyOf": [
+                        {
+                          "bsonType": "number",
+                          "description": "Nomenclatures des professions et catégories socioprofessionnelles",
+                          "enum": [
+                            10,
+                            21,
+                            22,
+                            23,
+                            31,
+                            33,
+                            34,
+                            37,
+                            38,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            52,
+                            53,
+                            54,
+                            55,
+                            56,
+                            61,
+                            66,
+                            69,
+                            71,
+                            72,
+                            73,
+                            76,
+                            81,
+                            82,
+                            99,
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Nomenclatures des professions et catégories socioprofessionnelles",
+                    },
+                    "prenom": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "Prénom du representant légal",
+                    },
+                    "telephone": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "responsable_mail1": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse mail du responsable 1",
+            },
+            "responsable_mail2": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Adresse mail du responsable 2",
+            },
+            "rqth": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Apprenant en situation d'handicape (RQTH)",
+            },
+            "sexe": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Sexe de l'apprenant (M: Homme, F: Femme)",
+                  "enum": [
+                    "M",
+                    "F",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Sexe de l'apprenant (M: Homme, F: Femme)",
+            },
+            "situation_avant_contrat": {
+              "anyOf": [
+                {
+                  "bsonType": "number",
+                  "description": "Situation de l'apprenant avant le contrat",
+                  "enum": [
+                    11,
+                    12,
+                    21,
+                    31,
+                    41,
+                    51,
+                    52,
+                    53,
+                    54,
+                    90,
+                    99,
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Situation de l'apprenant avant le contrat",
+            },
+            "telephone": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "type_cfa": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Type de CFA",
+                  "enum": [
+                    "01",
+                    "02",
+                    "03",
+                    "04",
+                    "05",
+                    "06",
+                    "07",
+                    "08",
+                    "09",
+                    "10",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Type de CFA",
+            },
+          },
+          "required": [
+            "nom",
+            "prenom",
+            "historique_statut",
+          ],
+        },
+        "archive": {
+          "bsonType": [
+            "bool",
+            "null",
+          ],
+          "description": "Dossier apprenant est archivé (rétention maximum 5 ans)",
+        },
+        "contrats": {
+          "anyOf": [
+            {
+              "bsonType": "array",
+              "description": "Historique des contrats de l'apprenant",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "adresse": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "bsonType": "object",
+                        "properties": {
+                          "academie": {
+                            "bsonType": "string",
+                            "pattern": "^[0-9]{2}$",
+                          },
+                          "bassinEmploi": {
+                            "bsonType": "string",
+                            "description": "Code Bassin d'emploi",
+                          },
+                          "code_insee": {
+                            "anyOf": [
+                              {
+                                "bsonType": "string",
+                                "description": "Le code insee doit contenir 5 caractères",
+                                "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+                              },
+                              {
+                                "bsonType": "null",
+                              },
+                            ],
+                            "description": "Le code insee doit contenir 5 caractères",
+                          },
+                          "code_postal": {
+                            "anyOf": [
+                              {
+                                "bsonType": "string",
+                                "description": "Le code postal doit contenir 5 caractères",
+                                "pattern": "^[0-9]{5}$",
+                              },
+                              {
+                                "bsonType": "null",
+                              },
+                            ],
+                            "description": "Le code postal doit contenir 5 caractères",
+                          },
+                          "commune": {
+                            "bsonType": "string",
+                            "description": "Commune",
+                            "maxLength": 80,
+                          },
+                          "complement": {
+                            "bsonType": "string",
+                            "description": "Complément d'adresse",
+                          },
+                          "complete": {
+                            "bsonType": [
+                              "string",
+                              "null",
+                            ],
+                            "description": "Adresse complète",
+                          },
+                          "departement": {
+                            "bsonType": "string",
+                            "pattern": "^(2A|2B|[0-9]{2,3})$",
+                          },
+                          "numero": {
+                            "bsonType": "int",
+                            "description": "N° de la voie",
+                          },
+                          "pays": {
+                            "bsonType": "string",
+                            "description": "Pays",
+                            "enum": [
+                              "AF",
+                              "ZA",
+                              "AL",
+                              "DZ",
+                              "DE",
+                              "AD",
+                              "AO",
+                              "AG",
+                              "SA",
+                              "AR",
+                              "AM",
+                              "AU",
+                              "AT",
+                              "AZ",
+                              "BS",
+                              "BH",
+                              "BD",
+                              "BB",
+                              "BE",
+                              "BZ",
+                              "BJ",
+                              "BT",
+                              "BY",
+                              "MM",
+                              "BO",
+                              "BQ",
+                              "BA",
+                              "BW",
+                              "BR",
+                              "BN",
+                              "BG",
+                              "BF",
+                              "BI",
+                              "KH",
+                              "CM",
+                              "CA",
+                              "CV",
+                              "CF",
+                              "CL",
+                              "CN",
+                              "CY",
+                              "CO",
+                              "KM",
+                              "CG",
+                              "CD",
+                              "KR",
+                              "KP",
+                              "CR",
+                              "CI",
+                              "HR",
+                              "CU",
+                              "CW",
+                              "DK",
+                              "DJ",
+                              "DO",
+                              "DM",
+                              "EG",
+                              "SV",
+                              "AE",
+                              "EC",
+                              "ER",
+                              "ES",
+                              "EE",
+                              "SZ",
+                              "US",
+                              "ET",
+                              "MK",
+                              "FJ",
+                              "FI",
+                              "FR",
+                              "GA",
+                              "GM",
+                              "GE",
+                              "GH",
+                              "GR",
+                              "GD",
+                              "GT",
+                              "GN",
+                              "GQ",
+                              "GW",
+                              "GY",
+                              "HT",
+                              "HN",
+                              "HU",
+                              "IN",
+                              "ID",
+                              "IR",
+                              "IQ",
+                              "IE",
+                              "IS",
+                              "IL",
+                              "IT",
+                              "JM",
+                              "JP",
+                              "JO",
+                              "KZ",
+                              "KE",
+                              "KG",
+                              "KI",
+                              "XK",
+                              "KW",
+                              "LA",
+                              "LS",
+                              "LV",
+                              "LB",
+                              "LR",
+                              "LY",
+                              "LI",
+                              "LT",
+                              "LU",
+                              "MG",
+                              "MY",
+                              "MW",
+                              "MV",
+                              "ML",
+                              "MT",
+                              "MA",
+                              "MH",
+                              "MU",
+                              "MR",
+                              "MX",
+                              "FM",
+                              "MD",
+                              "MC",
+                              "MN",
+                              "ME",
+                              "MZ",
+                              "NA",
+                              "NR",
+                              "NP",
+                              "NI",
+                              "NE",
+                              "NG",
+                              "NO",
+                              "NZ",
+                              "OM",
+                              "UG",
+                              "UZ",
+                              "PK",
+                              "PW",
+                              "PS",
+                              "PA",
+                              "PG",
+                              "PY",
+                              "NL",
+                              "PE",
+                              "PH",
+                              "PL",
+                              "PT",
+                              "QA",
+                              "RO",
+                              "GB",
+                              "RU",
+                              "RW",
+                              "KN",
+                              "SM",
+                              "SX",
+                              "VC",
+                              "LC",
+                              "SB",
+                              "WS",
+                              "ST",
+                              "SN",
+                              "RS",
+                              "SC",
+                              "SL",
+                              "SG",
+                              "SK",
+                              "SI",
+                              "SO",
+                              "SD",
+                              "SS",
+                              "LK",
+                              "SE",
+                              "CH",
+                              "SR",
+                              "SY",
+                              "TJ",
+                              "TZ",
+                              "TD",
+                              "CZ",
+                              "TH",
+                              "TL",
+                              "TG",
+                              "TO",
+                              "TT",
+                              "TN",
+                              "TM",
+                              "TR",
+                              "TV",
+                              "UA",
+                              "UY",
+                              "VU",
+                              "VA",
+                              "VE",
+                              "VN",
+                              "YE",
+                              "ZM",
+                              "ZW",
+                            ],
+                          },
+                          "region": {
+                            "bsonType": "string",
+                            "pattern": "^[0-9]{2,3}$",
+                          },
+                          "repetition_voie": {
+                            "bsonType": "string",
+                            "description": "Indice de répétition du numéro de voie",
+                            "enum": [
+                              "B",
+                              "T",
+                              "Q",
+                              "C",
+                            ],
+                          },
+                          "voie": {
+                            "bsonType": "string",
+                            "description": "Nom de voie",
+                          },
+                        },
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                  },
+                  "cause_rupture": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "Cause de rupture du contrat",
+                  },
+                  "date_debut": {
+                    "anyOf": [
+                      {
+                        "bsonType": "date",
+                        "description": "Date de début du contrat",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "Date de début du contrat",
+                  },
+                  "date_fin": {
+                    "anyOf": [
+                      {
+                        "bsonType": "date",
+                        "description": "Date de fin du contrat",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "Date de fin du contrat",
+                  },
+                  "date_rupture": {
+                    "anyOf": [
+                      {
+                        "bsonType": "date",
+                        "description": "Date de rupture du contrat",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "Date de rupture du contrat",
+                  },
+                  "denomination": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.",
+                  },
+                  "naf": {
+                    "anyOf": [
+                      {
+                        "bsonType": "string",
+                        "description": "Le Code NAF est composé de 4 chiffres et 1 lettre. Il est délivré par l'INSEE.[Informations sur le Code NAF.](https://www.economie.gouv.fr/entreprises/activite-entreprise-code-ape-code-naf)",
+                        "pattern": "^[0-9]{2}\\.?[0-9]{0,2}[a-zA-Z]{0,1}$",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "Le Code NAF est composé de 4 chiffres et 1 lettre. Il est délivré par l'INSEE.[Informations sur le Code NAF.](https://www.economie.gouv.fr/entreprises/activite-entreprise-code-ape-code-naf)",
+                  },
+                  "nombre_de_salaries": {
+                    "anyOf": [
+                      {
+                        "bsonType": "int",
+                        "description": "L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).",
+                  },
+                  "siret": {
+                    "anyOf": [
+                      {
+                        "bsonType": "string",
+                        "description": "N° SIRET de l'employeur",
+                        "pattern": "^[0-9]{14}$",
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "N° SIRET de l'employeur",
+                  },
+                  "type_employeur": {
+                    "anyOf": [
+                      {
+                        "bsonType": "number",
+                        "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
+                        "enum": [
+                          11,
+                          12,
+                          13,
+                          14,
+                          15,
+                          16,
+                          21,
+                          22,
+                          23,
+                          24,
+                          25,
+                          26,
+                          27,
+                          28,
+                          29,
+                          30,
+                        ],
+                      },
+                      {
+                        "bsonType": "null",
+                      },
+                    ],
+                    "description": "Le type d'employeur doit être en adéquation avec son statut juridique.",
+                  },
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Historique des contrats de l'apprenant",
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date d'ajout en base de données",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date d'ajout en base de données",
+        },
+        "formation": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "annee": {
+                  "anyOf": [
+                    {
+                      "bsonType": "int",
+                      "description": "Numéro de l'année dans la formation (promo)",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Numéro de l'année dans la formation (promo)",
+                },
+                "cause_exclusion": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Cause de l'exclusion",
+                },
+                "cfd": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Code CFD de la formation",
+                      "pattern": "^[A-Z0-9]{8}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Code CFD de la formation",
+                },
+                "date_entree": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                      "description": "Date d'entrée en formation",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Date d'entrée en formation",
+                },
+                "date_exclusion": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                      "description": "Date d'exclusion",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Date d'exclusion",
+                },
+                "date_fin": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                      "description": "Date de fin de la formation",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Date de fin de la formation",
+                },
+                "date_inscription": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                      "description": "Date d'inscription",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Date d'inscription",
+                },
+                "date_obtention_diplome": {
+                  "anyOf": [
+                    {
+                      "bsonType": "date",
+                      "description": "Date d'obtention du diplôme",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Date d'obtention du diplôme",
+                },
+                "duree_formation_relle": {
+                  "anyOf": [
+                    {
+                      "bsonType": "int",
+                      "description": "Durée réelle de la formation en mois",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Durée réelle de la formation en mois",
+                },
+                "duree_theorique": {
+                  "anyOf": [
+                    {
+                      "bsonType": "int",
+                      "description": "Durée théorique de la formation en année",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Durée théorique de la formation en année",
+                },
+                "duree_theorique_mois": {
+                  "anyOf": [
+                    {
+                      "bsonType": "int",
+                      "description": "Durée théorique de la formation en mois",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Durée théorique de la formation en mois",
+                },
+                "formation_presentielle": {
+                  "bsonType": [
+                    "bool",
+                    "null",
+                  ],
+                  "description": "Formation en présentiel",
+                },
+                "libelle_court": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Libellé court de la formation visée",
+                },
+                "libelle_long": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Libellé long de la formation visée",
+                },
+                "niveau": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Niveau de formation récupéré via Tables de Correspondances",
+                },
+                "niveau_libelle": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
+                },
+                "obtention_diplome": {
+                  "bsonType": [
+                    "bool",
+                    "null",
+                  ],
+                  "description": "Diplôme obtenu",
+                },
+                "periode": {
+                  "anyOf": [
+                    {
+                      "bsonType": "array",
+                      "description": "Période de la formation, en année (peut être sur plusieurs années)",
+                      "items": {
+                        "bsonType": "int",
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Période de la formation, en année (peut être sur plusieurs années)",
+                },
+                "referent_handicap": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "email": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Email du référent handicap",
+                        },
+                        "nom": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Nom du référent handicap",
+                        },
+                        "prenom": {
+                          "bsonType": [
+                            "string",
+                            "null",
+                          ],
+                          "description": "Prénom du référent handicap",
+                        },
+                      },
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
+                "rncp": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+                      "pattern": "^(RNCP)?[0-9]{2,5}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "id_erp_apprenant": {
+          "bsonType": "string",
+          "description": "Identifiant de l'apprenant dans l'erp",
+        },
+        "is_lock": {},
+        "lieu_de_formation": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "adresse": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Adresse du lieu de formation",
+                },
+                "code_postal": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                  "description": "Code postal du lieu de formation",
+                },
+                "siret": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "N° SIRET du lieu de formation",
+                      "pattern": "^[0-9]{14}$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "N° SIRET du lieu de formation",
+                },
+                "uai": {
+                  "anyOf": [
+                    {
+                      "bsonType": "string",
+                      "description": "Code UAI du lieu de formation",
+                      "pattern": "^[0-9]{7}[a-zA-Z]$",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                  "description": "Code UAI du lieu de formation",
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "organisme_formateur_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+              "description": "Organisme formateur id",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Organisme formateur id",
+        },
+        "organisme_id": {
+          "bsonType": "objectId",
+          "description": "Organisme id (lieu de formation de l'apprenant pour la v3)",
+        },
+        "organisme_responsable_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+              "description": "Organisme responsable id",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Organisme responsable id",
+        },
+        "source": {
+          "bsonType": "string",
+          "enum": [
+            "FICHIER",
+            "ERP",
+            "DECA",
+          ],
+        },
+        "source_organisme_id": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Identifiant de l'organisme id source transmettant",
+        },
+        "transmitted_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date de transmission de l'effectif",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date de transmission de l'effectif",
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date de mise à jour en base de données",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date de mise à jour en base de données",
+        },
+        "validation_errors": {
+          "anyOf": [
+            {
+              "bsonType": "array",
+              "description": "Erreurs de validation de cet effectif",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "fieldName": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "Nom du champ en erreur",
+                  },
+                  "inputValue": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "Valeur fournie en entrée",
+                  },
+                  "message": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "Message de l'erreur",
+                  },
+                  "type": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "Type d'erreur",
+                  },
+                },
+              },
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Erreurs de validation de cet effectif",
+        },
+      },
+      "required": [
+        "_id",
+        "organisme_id",
+        "id_erp_apprenant",
+        "source",
+        "annee_scolaire",
+        "apprenant",
+      ],
+    },
+    "effectif_snapshot_date": {
+      "bsonType": "date",
+    },
+    "ft_data": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "commentaire": {
+                "bsonType": [
+                  "string",
+                  "null",
+                ],
+              },
+              "created_at": {
+                "bsonType": "date",
+              },
+              "created_by": {
+                "bsonType": "objectId",
+              },
+              "situation": {
+                "bsonType": "string",
+                "enum": [
+                  "REORIENTATION",
+                  "ENTREPRISE",
+                  "PAS_DE_RECONTACT",
+                  "EVENEMENT",
+                  "MISSION_LOCALE",
+                ],
+              },
+            },
+            "required": [
+              "situation",
+              "created_at",
+              "commentaire",
+              "created_by",
+            ],
+          },
+          {
+            "bsonType": "null",
+          },
+        ],
+      },
+      "bsonType": "object",
+    },
+    "romes": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "code": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+          },
+        },
+        "secteur_activites": {
+          "bsonType": "array",
+          "items": {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "code_secteur": {
+                "bsonType": "number",
+              },
+              "libelle_secteur": {
+                "bsonType": "string",
+              },
+            },
+            "required": [
+              "code_secteur",
+              "libelle_secteur",
+            ],
+          },
+        },
+      },
+      "required": [
+        "code",
+      ],
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+  },
+  "required": [
+    "_id",
+    "created_at",
+    "effectif_id",
+    "effectif_snapshot",
+    "romes",
+    "current_status",
+    "ft_data",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for invitations > invitations 1`] = `
 {
   "additionalProperties": false,
@@ -16655,6 +19594,53 @@ exports[`validation-schema > should create validation schema for rncp > rncp 1`]
     "intitule",
     "etat_fiche",
     "actif",
+    "romes",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for romeSecteurActivites > romeSecteurActivites 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "code_secteur": {
+      "bsonType": "number",
+    },
+    "libelle_secteur": {
+      "bsonType": "string",
+    },
+    "romes": {
+      "bsonType": "array",
+      "items": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "code_ogr_rome": {
+            "bsonType": "number",
+          },
+          "code_rome": {
+            "bsonType": "string",
+          },
+          "libelle_rome": {
+            "bsonType": "string",
+          },
+        },
+        "required": [
+          "code_rome",
+          "code_ogr_rome",
+          "libelle_rome",
+        ],
+      },
+    },
+  },
+  "required": [
+    "_id",
+    "code_secteur",
+    "libelle_secteur",
     "romes",
   ],
 }

@@ -1,9 +1,13 @@
 import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
-import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
+import {
+  zPostAdminAddMembreToFranceTravail,
+  zPostAdminAddMembreToMissionLocale,
+} from "shared/models/routes/admin/users.api";
 
 import { activateMissionLocaleAtAdminValidation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
 import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
@@ -137,6 +141,24 @@ export default () => {
       }
       await inviteUserToOrganisation(req.user, email, organisation._id);
       await activateMissionLocaleAtAdminValidation(organisation._id, new Date());
+    })
+  );
+
+  router.post(
+    "/france-travail/membre",
+    returnResult(async (req) => {
+      const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToFranceTravail);
+      const { email, code_region } = body;
+
+      if (!code_region) {
+        throw Boom.badRequest("code_region is required");
+      }
+
+      const organisation = await getFranceTravailOrganisationByCodeRegion(code_region as string);
+      if (!organisation) {
+        throw Boom.notFound("France Travail organisation not found");
+      }
+      await inviteUserToOrganisation(req.user, email, organisation._id);
     })
   );
 
