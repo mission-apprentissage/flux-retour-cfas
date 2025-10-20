@@ -1,8 +1,10 @@
 import { rncpDb, romeSecteurActivitesDb } from "@/common/model/collections";
 
-export const getRomeSecteurActivitesArborescence = () => {
+export const getRomeSecteurActivitesArborescence = (codeSecteurs?: number[]) => {
+  const query = codeSecteurs && codeSecteurs.length ? { code_secteur: { $in: codeSecteurs } } : {};
+
   return romeSecteurActivitesDb()
-    .find({}, { projection: { _id: 1, code_secteur: 1, libelle_secteur: 1 } })
+    .find(query, { projection: { _id: 1, code_secteur: 1, libelle_secteur: 1 } })
     .toArray();
 };
 

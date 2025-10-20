@@ -1,5 +1,5 @@
 import express from "express";
-import { IOrganisationFranceTravail } from "shared/models";
+import { API_EFFECTIF_LISTE, IOrganisationFranceTravail } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
   codeSecteurSchema,
@@ -12,10 +12,10 @@ import { z } from "zod";
 
 import {
   getEffectifFromFranceTravailId,
+  getEffectifSecteurActivitesArboresence,
   getFranceTravailEffectifsByCodeSecteur,
   updateFranceTravailData,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
-import { getRomeSecteurActivitesArborescence } from "@/common/actions/rome/rome.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -24,7 +24,15 @@ export default () => {
 
   router.get("/arborescence", returnResult(getArborescence));
   router.get(
-    "/effectifs/:code_secteur",
+    "/effectifs/traite",
+    validateRequestMiddleware({
+      query: franceTravailEffectifsQuerySchema,
+    }),
+    returnResult(getEffectifsTraites)
+  );
+
+  router.get(
+    "/effectifs/a-traiter/:code_secteur",
     validateRequestMiddleware({
       params: z.object({
         code_secteur: codeSecteurSchema,
@@ -36,7 +44,7 @@ export default () => {
       const code_secteur = Number(req.params.code_secteur);
       const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
 
-      return getFranceTravailEffectifsByCodeSecteur(code_secteur, ftOrga.code_region, {
+      return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.A_TRAITER, code_secteur, {
         page,
         limit,
         search,
@@ -75,7 +83,20 @@ export default () => {
 };
 
 const getArborescence = async (_req) => {
-  return getRomeSecteurActivitesArborescence();
+  return getEffectifSecteurActivitesArboresence();
+};
+
+const getEffectifsTraites = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
+
+  return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.TRAITE, undefined, {
+    page,
+    limit,
+    search,
+    sort,
+    order,
+  });
 };
 
 const getEffectifById = async (req, { locals }) => {
