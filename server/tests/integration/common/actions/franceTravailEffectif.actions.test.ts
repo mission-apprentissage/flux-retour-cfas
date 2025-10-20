@@ -70,29 +70,11 @@ const insertTestData = async () => {
 
 describe("Tests des actions France Travail Effectif", () => {
   describe("getFranceTravailEffectifsByCodeRome", () => {
-    describe("Validation du code ROME", () => {
-      it("devrait rejeter un code ROME invalide (trop court)", async () => {
-        await expect(getFranceTravailEffectifsByCodeRome("A123", undefined, { page: 1, limit: 20 })).rejects.toThrow(
-          /Invalid ROME code format: A123/
-        );
-      });
-
-      it("devrait rejeter un code ROME invalide (format incorrect)", async () => {
-        await expect(getFranceTravailEffectifsByCodeRome("1234A", undefined, { page: 1, limit: 20 })).rejects.toThrow(
-          /Invalid ROME code format: 1234A/
-        );
-      });
-
-      it("devrait rejeter un code ROME invalide (lettres minuscules)", async () => {
-        await expect(getFranceTravailEffectifsByCodeRome("a1234", undefined, { page: 1, limit: 20 })).rejects.toThrow(
-          /Invalid ROME code format: a1234/
-        );
-      });
-
-      it("devrait rejeter un code ROME invalide (caractères spéciaux)", async () => {
-        await expect(getFranceTravailEffectifsByCodeRome("A-234", undefined, { page: 1, limit: 20 })).rejects.toThrow(
-          /Invalid ROME code format: A-234/
-        );
+    describe("Code ROME", () => {
+      it("devrait retourner un résultat vide pour un code ROME inexistant", async () => {
+        const result = await getFranceTravailEffectifsByCodeRome("Z9999", undefined, { page: 1, limit: 20 });
+        expect(result?.effectifs).toHaveLength(0);
+        expect(result?.pagination.total).toBe(0);
       });
 
       it("devrait accepter un code ROME valide", async () => {
@@ -406,6 +388,16 @@ describe("Tests des actions France Travail Effectif", () => {
         const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, { page: 1, limit: 20 });
 
         expect(result?.effectifs).toHaveLength(3);
+      });
+
+      it("devrait échapper les caractères spéciaux regex", async () => {
+        const result = await getFranceTravailEffectifsByCodeRome("A1234", undefined, {
+          page: 1,
+          limit: 20,
+          search: "Du.*",
+        });
+
+        expect(result?.effectifs).toHaveLength(0);
       });
     });
 

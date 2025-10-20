@@ -1,9 +1,86 @@
-import { IEffectif } from "shared/models";
+import Boom from "boom";
+import { ObjectId } from "bson";
+import type { Document } from "mongodb";
+import { API_EFFECTIF_LISTE, IEffectif } from "shared/models";
 
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 import { getRomeByRncp } from "../rome/rome.actions";
+
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildEffectifsPipeline = (
+  query: Record<string, any>,
+  options?: {
+    search?: string;
+    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    order?: "asc" | "desc";
+    now?: Date;
+  }
+) => {
+  const { search, sort = "jours_sans_contrat", order = "desc", now = new Date() } = options ?? {};
+
+  const pipeline: Document[] = [
+    { $match: query },
+    {
+      $lookup: {
+        from: "organismes",
+        localField: "effectif_snapshot.organisme_id",
+        foreignField: "_id",
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        jours_sans_contrat: {
+          $dateDiff: {
+            startDate: "$current_status.date",
+            endDate: now,
+            unit: "day",
+          },
+        },
+      },
+    },
+  ];
+
+  if (search) {
+    const escapedSearch = escapeRegex(search);
+    pipeline.push({
+      $match: {
+        $or: [
+          { "effectif_snapshot.apprenant.nom": { $regex: escapedSearch, $options: "i" } },
+          { "effectif_snapshot.apprenant.prenom": { $regex: escapedSearch, $options: "i" } },
+        ],
+      },
+    });
+  }
+
+  const sortDirection = order === "asc" ? 1 : -1;
+  const sortStage: Record<string, 1 | -1> = {};
+  switch (sort) {
+    case "jours_sans_contrat":
+      sortStage.jours_sans_contrat = sortDirection;
+      break;
+    case "nom":
+      sortStage["effectif_snapshot.apprenant.nom"] = sortDirection;
+      sortStage["effectif_snapshot.apprenant.prenom"] = sortDirection;
+      break;
+    case "organisme":
+      sortStage["organisme.nom"] = sortDirection;
+      break;
+  }
+
+  pipeline.push({ $sort: sortStage });
+
+  return pipeline;
+};
 
 export const createFranceTravailEffectif = () => {};
 
@@ -24,11 +101,6 @@ export const getFranceTravailEffectifsByCodeRome = async (
   }
 ) => {
   try {
-    const isValidRomeCode = /^[A-Z]\d{4}$/.test(codeRome);
-    if (!isValidRomeCode) {
-      throw new Error(`Invalid ROME code format: ${codeRome}. Expected format: [A-Z][0-9]{4}`);
-    }
-
     const query: Record<string, any> = { [`ft_data.${codeRome}`]: { $exists: true } };
 
     if (codeRegion) {
@@ -38,66 +110,12 @@ export const getFranceTravailEffectifsByCodeRome = async (
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
-    const search = options?.search;
-    const sort = options?.sort ?? "jours_sans_contrat";
-    const order = options?.order ?? "desc";
 
-    const pipeline: any[] = [
-      { $match: query },
-      {
-        $lookup: {
-          from: "organismes",
-          localField: "effectif_snapshot.organisme_id",
-          foreignField: "_id",
-          as: "organisme",
-        },
-      },
-      {
-        $unwind: {
-          path: "$organisme",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $addFields: {
-          jours_sans_contrat: {
-            $dateDiff: {
-              startDate: "$current_status.date",
-              endDate: new Date(),
-              unit: "day",
-            },
-          },
-        },
-      },
-    ];
-
-    if (search) {
-      pipeline.push({
-        $match: {
-          $or: [
-            { "effectif_snapshot.apprenant.nom": { $regex: search, $options: "i" } },
-            { "effectif_snapshot.apprenant.prenom": { $regex: search, $options: "i" } },
-          ],
-        },
-      });
-    }
-
-    const sortDirection = order === "asc" ? 1 : -1;
-    const sortStage: Record<string, 1 | -1> = {};
-    switch (sort) {
-      case "jours_sans_contrat":
-        sortStage.jours_sans_contrat = sortDirection;
-        break;
-      case "nom":
-        sortStage["effectif_snapshot.apprenant.nom"] = sortDirection;
-        sortStage["effectif_snapshot.apprenant.prenom"] = sortDirection;
-        break;
-      case "organisme":
-        sortStage["organisme.nom"] = sortDirection;
-        break;
-    }
-
-    pipeline.push({ $sort: sortStage });
+    const pipeline = buildEffectifsPipeline(query, {
+      search: options?.search,
+      sort: options?.sort,
+      order: options?.order,
+    });
 
     pipeline.push({
       $facet: {
@@ -149,6 +167,143 @@ export const getFranceTravailEffectifsByCodeRome = async (
     };
   } catch (error) {
     logger.error("Error in getFranceTravailEffectifsByCodeRome", { codeRome, codeRegion, options, error });
+    throw error;
+  }
+};
+
+const getEffectifNavigation = async (
+  codeRegion: string,
+  codeRome: string,
+  effectifId: ObjectId,
+  nom_liste: API_EFFECTIF_LISTE,
+  options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
+) => {
+  const query: Record<string, any> = {
+    [`ft_data.${codeRome}`]: { $exists: true },
+    code_region: codeRegion,
+  };
+
+  const now = new Date();
+
+  const pipeline = buildEffectifsPipeline(query, {
+    search: options?.search,
+    sort: options?.sort,
+    order: options?.order,
+    now,
+  });
+
+  pipeline.push({
+    $group: {
+      _id: null,
+      ids: {
+        $push: {
+          id: "$effectif_snapshot._id",
+          nom: "$effectif_snapshot.apprenant.nom",
+          prenom: "$effectif_snapshot.apprenant.prenom",
+        },
+      },
+    },
+  });
+
+  pipeline.push({
+    $project: {
+      _id: 0,
+      total: { $size: "$ids" },
+      currentIndex: { $indexOfArray: ["$ids.id", effectifId] },
+      ids: 1,
+    },
+  });
+
+  const [result] = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+
+  if (!result || result.currentIndex === -1) {
+    return {
+      total: 0,
+      next: null,
+      previous: null,
+      currentIndex: null,
+      nomListe: nom_liste,
+    };
+  }
+
+  const { total, currentIndex, ids } = result;
+
+  if (total <= 1) {
+    return {
+      total,
+      next: null,
+      previous: null,
+      currentIndex: null,
+      nomListe: nom_liste,
+    };
+  }
+
+  const modulo = (a: number, b: number) => ((a % b) + b) % b;
+  const nextIndex = modulo(currentIndex + 1, total);
+  const previousIndex = modulo(currentIndex - 1, total);
+
+  return {
+    total,
+    next: ids[nextIndex],
+    previous: ids[previousIndex],
+    currentIndex,
+    nomListe: nom_liste,
+  };
+};
+
+export const getEffectifFromFranceTravailId = async (
+  codeRegion: string,
+  codeRome: string,
+  effectifId: string,
+  nom_liste: API_EFFECTIF_LISTE,
+  options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
+) => {
+  try {
+    const aggregation = [
+      {
+        $match: {
+          "effectif_snapshot._id": new ObjectId(effectifId),
+          code_region: codeRegion,
+        },
+      },
+      {
+        $project: {
+          id: "$effectif_snapshot._id",
+          nom: "$effectif_snapshot.apprenant.nom",
+          prenom: "$effectif_snapshot.apprenant.prenom",
+          date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+          adresse: "$effectif_snapshot.apprenant.adresse",
+          formation: "$effectif_snapshot.formation",
+          courriel: "$effectif_snapshot.apprenant.courriel",
+          telephone: "$effectif_snapshot.apprenant.telephone",
+          responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
+          rqth: "$effectif_snapshot.apprenant.rqth",
+          transmitted_at: "$effectif_snapshot.transmitted_at",
+          source: "$effectif_snapshot.source",
+          contrats: "$effectif_snapshot.contrats",
+          current_status: "$current_status",
+          ft_data: "$ft_data",
+        },
+      },
+    ];
+
+    const effectif = await franceTravailEffectifsDb().aggregate(aggregation).next();
+
+    if (!effectif) {
+      throw Boom.notFound();
+    }
+
+    const next = await getEffectifNavigation(codeRegion, codeRome, new ObjectId(effectifId), nom_liste, options);
+    return { effectif, ...next };
+  } catch (error) {
+    logger.error("Error in getEffectifFromFranceTravailId", {
+      codeRegion,
+      codeRome,
+      effectifId,
+      nom_liste,
+      options,
+      error,
+    });
     throw error;
   }
 };
