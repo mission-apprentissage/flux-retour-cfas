@@ -6,7 +6,7 @@ import { API_EFFECTIF_LISTE, IEffectif } from "shared/models";
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
 
-import { getRomeByRncp } from "../rome/rome.actions";
+import { getRomeByRncp, getRomesByCodeSecteur } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -171,15 +171,125 @@ export const getFranceTravailEffectifsByCodeRome = async (
   }
 };
 
+export const getFranceTravailEffectifsByCodeSecteur = async (
+  codeSecteur: number,
+  codeRegion?: string,
+  options?: {
+    page: number;
+    limit: number;
+    search?: string;
+    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    order?: "asc" | "desc";
+  }
+) => {
+  try {
+    const codeRomes = await getRomesByCodeSecteur(codeSecteur);
+
+    if (codeRomes.length === 0) {
+      return {
+        effectifs: [],
+        pagination: {
+          page: options?.page ?? 1,
+          limit: options?.limit ?? 20,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+
+    const query: Record<string, any> = {
+      $or: codeRomes.map((code) => ({ [`ft_data.${code}`]: { $exists: true } })),
+    };
+
+    if (codeRegion) {
+      query.code_region = codeRegion;
+    }
+
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const pipeline = buildEffectifsPipeline(query, {
+      search: options?.search,
+      sort: options?.sort,
+      order: options?.order,
+    });
+
+    pipeline.push({
+      $facet: {
+        results: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 1,
+              created_at: 1,
+              effectif_id: 1,
+              effectif_snapshot: 1,
+              code_region: 1,
+              current_status: 1,
+              ft_data: 1,
+              jours_sans_contrat: 1,
+              organisme: {
+                _id: "$organisme._id",
+                nom: "$organisme.nom",
+                raison_sociale: "$organisme.raison_sociale",
+                enseigne: "$organisme.enseigne",
+              },
+            },
+          },
+        ],
+        totalCount: [{ $count: "count" }],
+      },
+    });
+
+    pipeline.push({
+      $project: {
+        results: "$results",
+        total: { $arrayElemAt: ["$totalCount.count", 0] },
+      },
+    });
+
+    const [data] = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+
+    const total = data?.total || 0;
+
+    return {
+      effectifs: data?.results || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  } catch (error) {
+    logger.error("Error in getFranceTravailEffectifsByCodeSecteur", { codeSecteur, codeRegion, options, error });
+    throw error;
+  }
+};
+
 const getEffectifNavigation = async (
   codeRegion: string,
-  codeRome: string,
+  codeSecteur: number,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
 ) => {
+  const codeRomes = await getRomesByCodeSecteur(codeSecteur);
+
+  if (codeRomes.length === 0) {
+    return {
+      total: 0,
+      next: null,
+      previous: null,
+      currentIndex: null,
+      nomListe: nom_liste,
+    };
+  }
+
   const query: Record<string, any> = {
-    [`ft_data.${codeRome}`]: { $exists: true },
+    $or: codeRomes.map((code) => ({ [`ft_data.${code}`]: { $exists: true } })),
     code_region: codeRegion,
   };
 
@@ -253,7 +363,7 @@ const getEffectifNavigation = async (
 
 export const getEffectifFromFranceTravailId = async (
   codeRegion: string,
-  codeRome: string,
+  codeSecteur: number,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
@@ -293,12 +403,12 @@ export const getEffectifFromFranceTravailId = async (
       throw Boom.notFound();
     }
 
-    const next = await getEffectifNavigation(codeRegion, codeRome, new ObjectId(effectifId), nom_liste, options);
+    const next = await getEffectifNavigation(codeRegion, codeSecteur, new ObjectId(effectifId), nom_liste, options);
     return { effectif, ...next };
   } catch (error) {
     logger.error("Error in getEffectifFromFranceTravailId", {
       codeRegion,
-      codeRome,
+      codeSecteur,
       effectifId,
       nom_liste,
       options,

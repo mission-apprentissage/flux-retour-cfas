@@ -2,8 +2,11 @@ import { ObjectId } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { getFranceTravailEffectifsByCodeRome } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
-import { franceTravailEffectifsDb } from "@/common/model/collections";
+import {
+  getFranceTravailEffectifsByCodeRome,
+  getFranceTravailEffectifsByCodeSecteur,
+} from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { franceTravailEffectifsDb, romeSecteurActivitesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -521,6 +524,103 @@ describe("Tests des actions France Travail Effectif", () => {
         expect(result?.effectifs[0].organisme).toBeDefined();
         expect(result?.effectifs[1].organisme).toBeDefined();
       });
+    });
+  });
+
+  describe("getFranceTravailEffectifsByCodeSecteur", () => {
+    beforeEach(async () => {
+      await franceTravailEffectifsDb().deleteMany({});
+      await romeSecteurActivitesDb().deleteMany({});
+
+      await romeSecteurActivitesDb().insertOne({
+        _id: new ObjectId(),
+        code_secteur: 123,
+        libelle_secteur: "Test Secteur",
+        romes: [
+          { code_rome: "A1234", code_ogr_rome: 1, libelle_rome: "Test ROME 1" },
+          { code_rome: "B5678", code_ogr_rome: 2, libelle_rome: "Test ROME 2" },
+        ],
+      });
+
+      const organisme = createRandomOrganisme();
+      const formation = createRandomFormation("2024-2025", new Date("2024-09-01"), new Date("2026-06-30"));
+      const baseEffectif = await createSampleEffectif({ organisme, formation });
+
+      const effectifs = [
+        {
+          _id: new ObjectId(),
+          created_at: new Date(),
+          effectif_id: new ObjectId(),
+          effectif_snapshot: baseEffectif as IEffectif,
+          code_region: "84",
+          current_status: { value: "INSCRIT" as const, date: new Date() },
+          ft_data: { A1234: null },
+        },
+        {
+          _id: new ObjectId(),
+          created_at: new Date(),
+          effectif_id: new ObjectId(),
+          effectif_snapshot: baseEffectif as IEffectif,
+          code_region: "84",
+          current_status: { value: "INSCRIT" as const, date: new Date() },
+          ft_data: { B5678: null },
+        },
+        {
+          _id: new ObjectId(),
+          created_at: new Date(),
+          effectif_id: new ObjectId(),
+          effectif_snapshot: baseEffectif as IEffectif,
+          code_region: "84",
+          current_status: { value: "INSCRIT" as const, date: new Date() },
+          ft_data: { C9999: null },
+        },
+      ];
+
+      await franceTravailEffectifsDb().insertMany(effectifs as any, { bypassDocumentValidation: true });
+    });
+
+    it("devrait récupérer les effectifs de tous les codes ROME du secteur", async () => {
+      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, { page: 1, limit: 20 });
+
+      expect(result?.effectifs).toHaveLength(2);
+      expect(result?.pagination.total).toBe(2);
+    });
+
+    it("devrait retourner un résultat vide pour un code secteur inexistant", async () => {
+      const result = await getFranceTravailEffectifsByCodeSecteur(999, undefined, { page: 1, limit: 20 });
+
+      expect(result?.effectifs).toHaveLength(0);
+      expect(result?.pagination.total).toBe(0);
+    });
+
+    it("devrait filtrer par région", async () => {
+      const result = await getFranceTravailEffectifsByCodeSecteur(123, "84", { page: 1, limit: 20 });
+
+      expect(result?.effectifs).toHaveLength(2);
+      expect(result?.effectifs.every((e) => e.code_region === "84")).toBe(true);
+    });
+
+    it("devrait supporter la recherche", async () => {
+      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, {
+        page: 1,
+        limit: 20,
+        search: "nom",
+      });
+
+      expect(result).toBeDefined();
+      expect(result?.pagination).toBeDefined();
+    });
+
+    it("devrait supporter le tri", async () => {
+      const result = await getFranceTravailEffectifsByCodeSecteur(123, undefined, {
+        page: 1,
+        limit: 20,
+        sort: "nom",
+        order: "asc",
+      });
+
+      expect(result?.effectifs).toHaveLength(2);
+      expect(result?.effectifs[0]).toHaveProperty("jours_sans_contrat");
     });
   });
 });

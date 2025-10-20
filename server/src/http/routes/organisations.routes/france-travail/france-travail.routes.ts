@@ -1,7 +1,7 @@
 import express from "express";
 import { IOrganisationFranceTravail } from "shared/models";
 import {
-  codeRomeSchema,
+  codeSecteurSchema,
   effectifFranceTravailQuerySchema,
   franceTravailEffectifsQuerySchema,
   IEffectifFranceTravailQuery,
@@ -11,7 +11,7 @@ import { z } from "zod";
 
 import {
   getEffectifFromFranceTravailId,
-  getFranceTravailEffectifsByCodeRome,
+  getFranceTravailEffectifsByCodeSecteur,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getRomeSecteurActivitesArborescence } from "@/common/actions/rome/rome.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -25,16 +25,16 @@ export default () => {
     "/effectifs/:code_secteur",
     validateRequestMiddleware({
       params: z.object({
-        code_secteur: codeRomeSchema,
+        code_secteur: codeSecteurSchema,
       }),
       query: franceTravailEffectifsQuerySchema,
     }),
     returnResult(async (req, { locals }) => {
       const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-      const { code_secteur } = req.params;
+      const code_secteur = Number(req.params.code_secteur);
       const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
 
-      return getFranceTravailEffectifsByCodeRome(code_secteur, ftOrga.code_region, {
+      return getFranceTravailEffectifsByCodeSecteur(code_secteur, ftOrga.code_region, {
         page,
         limit,
         search,

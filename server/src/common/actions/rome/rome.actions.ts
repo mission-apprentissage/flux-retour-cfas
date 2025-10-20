@@ -6,6 +6,14 @@ export const getRomeSecteurActivitesArborescence = () => {
     .toArray();
 };
 
+export const getRomesByCodeSecteur = async (codeSecteur: number): Promise<string[]> => {
+  const secteur = await romeSecteurActivitesDb().findOne({ code_secteur: codeSecteur });
+  if (!secteur) {
+    return [];
+  }
+  return secteur.romes.map((r) => r.code_rome);
+};
+
 export const getRomeByRncp = async (rncp?: string | null) => {
   if (!rncp) {
     return [];
