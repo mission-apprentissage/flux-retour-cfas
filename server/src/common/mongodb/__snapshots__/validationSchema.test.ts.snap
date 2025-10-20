@@ -11968,6 +11968,40 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       },
       "bsonType": "object",
     },
+    "romes": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "code": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+          },
+        },
+        "secteur_activites": {
+          "bsonType": "array",
+          "items": {
+            "additionalProperties": false,
+            "bsonType": "object",
+            "properties": {
+              "code_secteur": {
+                "bsonType": "number",
+              },
+              "libelle_secteur": {
+                "bsonType": "string",
+              },
+            },
+            "required": [
+              "code_secteur",
+              "libelle_secteur",
+            ],
+          },
+        },
+      },
+      "required": [
+        "code",
+      ],
+    },
     "updated_at": {
       "bsonType": "date",
     },
@@ -11977,6 +12011,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "created_at",
     "effectif_id",
     "effectif_snapshot",
+    "romes",
     "current_status",
     "ft_data",
   ],
