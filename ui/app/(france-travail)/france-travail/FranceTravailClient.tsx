@@ -1,13 +1,16 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useMemo, useEffect } from "react";
 
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
+import { useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 
-import { SECTEURS_FIXTURES, EFFECTIFS_DEJA_TRAITES } from "./fixtures";
 import styles from "./FranceTravailClient.module.css";
 
 type SelectedSection = "a-traiter" | "deja-traite";
@@ -16,7 +19,15 @@ export default function FranceTravailClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("a-traiter");
-  const [selectedSecteur, setSelectedSecteur] = useState<string | null>(null);
+  const [selectedSecteur, setSelectedSecteur] = useState<number | null>(null);
+
+  const { data: arborescenceData, isLoading, error } = useArborescence();
+
+  const secteurs = arborescenceData?.a_traiter.secteurs ?? [];
+  const totalATraiter = arborescenceData?.a_traiter.total ?? 0;
+  const dejaTraiteCount = arborescenceData?.traite ?? 0;
+
+  const secteurCodes = useMemo(() => secteurs.map((s) => s.code_secteur), [secteurs]);
 
   useEffect(() => {
     const section = searchParams?.get("section") as SelectedSection | null;
@@ -26,16 +37,13 @@ export default function FranceTravailClient() {
       setSelectedSection(section);
     }
 
-    if (secteur && SECTEURS_FIXTURES.find((s) => s.id === secteur)) {
-      setSelectedSecteur(secteur);
+    if (secteur) {
+      const codeSecteur = Number(secteur);
+      if (secteurCodes.includes(codeSecteur)) {
+        setSelectedSecteur(codeSecteur);
+      }
     }
-  }, [searchParams]);
-
-  const totalATraiter = useMemo(() => {
-    return SECTEURS_FIXTURES.reduce((total, secteur) => total + secteur.count, 0);
-  }, []);
-
-  const dejaTraiteCount = EFFECTIFS_DEJA_TRAITES.length;
+  }, [searchParams, secteurCodes]);
 
   const handleSectionChange = (newSection: SelectedSection) => {
     setSelectedSection(newSection);
@@ -43,17 +51,12 @@ export default function FranceTravailClient() {
     router.push(`?section=${newSection}`);
   };
 
-  const handleSecteurClick = (secteurId: string) => {
-    setSelectedSecteur(secteurId);
-    router.push(`?section=a-traiter&secteur=${secteurId}`);
+  const handleSecteurClick = (codeSecteur: number) => {
+    setSelectedSecteur(codeSecteur);
+    router.push(`?section=a-traiter&secteur=${codeSecteur}`);
   };
 
-  const sideMenuItems = useMemo(
-    () => buildSideMenuItems(),
-    [selectedSection, selectedSecteur, totalATraiter, dejaTraiteCount]
-  );
-
-  function buildSideMenuItems() {
+  const sideMenuItems = useMemo(() => {
     return [
       {
         text: `À traiter (${totalATraiter})`,
@@ -68,16 +71,16 @@ export default function FranceTravailClient() {
         expandedByDefault: selectedSection === "a-traiter",
         items:
           selectedSection === "a-traiter"
-            ? SECTEURS_FIXTURES.map((secteur) => ({
-                text: `${secteur.label} (${secteur.count})`,
+            ? secteurs.map((secteur) => ({
+                text: `${secteur.libelle_secteur} (${secteur.count})`,
                 linkProps: {
-                  href: `#secteur-${secteur.id}`,
+                  href: `#secteur-${secteur.code_secteur}`,
                   onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault();
-                    handleSecteurClick(secteur.id);
+                    handleSecteurClick(secteur.code_secteur);
                   },
                 },
-                isActive: selectedSecteur === secteur.id,
+                isActive: selectedSecteur === secteur.code_secteur,
               }))
             : [],
       },
@@ -94,6 +97,22 @@ export default function FranceTravailClient() {
         expandedByDefault: false,
       },
     ];
+  }, [selectedSection, selectedSecteur, totalATraiter, dejaTraiteCount, secteurs]);
+
+  if (isLoading) {
+    return <PageWithSidebarSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="fr-container" style={{ ...fr.spacing("padding", { topBottom: "10v" }) }}>
+        <Alert
+          severity="error"
+          title="Erreur de chargement"
+          description="Impossible de charger les secteurs d'activité. Veuillez réessayer ultérieurement."
+        />
+      </div>
+    );
   }
 
   return (
@@ -128,7 +147,7 @@ export default function FranceTravailClient() {
 
           {selectedSection === "a-traiter" && selectedSecteur && (
             <>
-              <FTHeader secteurLabel={SECTEURS_FIXTURES.find((s) => s.id === selectedSecteur)?.label} />
+              <FTHeader secteurLabel={secteurs.find((s) => s.code_secteur === selectedSecteur)?.libelle_secteur} />
             </>
           )}
 
