@@ -13,7 +13,7 @@ const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const buildEffectifsPipeline = (
   query: Record<string, any>,
-  codeSecteur: number,
+  codeSecteur?: number,
   options?: {
     search?: string;
     sort?: "jours_sans_contrat" | "nom" | "organisme";
@@ -51,7 +51,7 @@ const buildEffectifsPipeline = (
       },
     },
     addATraiterFieldByCodeSecteur(codeSecteur),
-    matchATraiter(),
+    addATraiterField(),
   ];
 
   if (search) {
@@ -86,10 +86,18 @@ const buildEffectifsPipeline = (
   return pipeline;
 };
 
-export const addATraiterFieldByCodeSecteur = (code_secteur: number) => {
+export const addATraiterFieldByCodeSecteur = (code_secteur?: number) => {
+  if (!code_secteur) {
+    return {
+      $addFields: {
+        a_traiter: true,
+      },
+    };
+  }
+
   return {
     $addFields: {
-      a_traiter: {
+      [`a_traiter_${code_secteur}`]: {
         $cond: {
           if: { $eq: [`$ft_data.${code_secteur}`, null] },
           then: true,
@@ -100,12 +108,112 @@ export const addATraiterFieldByCodeSecteur = (code_secteur: number) => {
   };
 };
 
-export const matchATraiter = () => {
+export const matchATraiterByCodeSecteur = (code_secteur: number, a_traiter: boolean) => {
   return {
     $match: {
-      a_traiter: true,
+      [`a_traiter_${code_secteur}`]: a_traiter,
     },
   };
+};
+
+export const addATraiterField = () => {
+  return {
+    $addFields: {
+      a_traiter: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $objectToArray: "$ft_data" },
+                as: "entry",
+                cond: { $eq: ["$$entry.v", null] },
+              },
+            },
+          },
+          0,
+        ],
+      },
+    },
+  };
+};
+
+export const matchATraiter = (a_traiter: boolean) => {
+  return {
+    $match: {
+      a_traiter: a_traiter,
+    },
+  };
+};
+
+export const getEffectifSecteurActivitesArboresence = async () => {
+  const basePipeline = buildEffectifsPipeline({});
+
+  basePipeline.push(matchATraiter(true));
+  const pipelineTotal = [...basePipeline];
+  const pipelineSecteurs = [...basePipeline];
+
+  pipelineTotal.push({
+    $count: "total",
+  });
+
+  pipelineSecteurs.push(
+    {
+      $unwind: "$romes.secteur_activites",
+    },
+    {
+      $group: {
+        _id: "$romes.secteur_activites.code_secteur",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $lookup: {
+        from: "romeSecteurActivites",
+        localField: "_id",
+        foreignField: "code_secteur",
+        as: "secteur_activite",
+      },
+    },
+    {
+      $unwind: "$secteur_activite",
+    },
+    {
+      $project: {
+        _id: 0,
+        count: 1,
+        code_secteur: "$secteur_activite.code_secteur",
+        libelle_secteur: "$secteur_activite.libelle_secteur",
+      },
+    },
+    {
+      $sort: { libelle_secteur: 1 },
+    }
+  );
+
+  const secteurResult = await franceTravailEffectifsDb().aggregate(pipelineSecteurs).toArray();
+  const totalResult = await franceTravailEffectifsDb().aggregate(pipelineTotal).next();
+
+  return {
+    a_traiter: {
+      total: totalResult?.total || 0,
+      secteurs: secteurResult,
+    },
+    traite: await getTraitesCount(),
+  };
+};
+
+export const getTraitesCount = () => {
+  const pipeline = buildEffectifsPipeline({});
+
+  pipeline.push(matchATraiter(false));
+  pipeline.push({
+    $count: "total",
+  });
+
+  return franceTravailEffectifsDb()
+    .aggregate(pipeline)
+    .next()
+    .then((res) => res?.total || 0);
 };
 
 export const getFranceTravailOrganisationByCodeRegion = async (codeRegion: string) => {
@@ -114,8 +222,9 @@ export const getFranceTravailOrganisationByCodeRegion = async (codeRegion: strin
 };
 
 export const getFranceTravailEffectifsByCodeSecteur = async (
-  codeSecteur: number,
   codeRegion: string,
+  type: API_EFFECTIF_LISTE,
+  codeSecteur?: number,
   options?: {
     page: number;
     limit: number;
@@ -126,9 +235,22 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
 ) => {
   try {
     const query: Record<string, any> = {
-      "romes.secteur_activites.code_secteur": codeSecteur,
       code_region: codeRegion,
     };
+
+    let aTraiterPipelineStage: Record<string, any>;
+
+    switch (type) {
+      case API_EFFECTIF_LISTE.A_TRAITER:
+        query["romes.secteur_activites.code_secteur"] = codeSecteur;
+        aTraiterPipelineStage = codeSecteur ? matchATraiterByCodeSecteur(codeSecteur, true) : matchATraiter(true);
+        break;
+      case API_EFFECTIF_LISTE.TRAITE:
+        aTraiterPipelineStage = matchATraiter(false);
+        break;
+      default:
+        throw Boom.badRequest(`Nom de liste inconnu : ${type}`);
+    }
 
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
@@ -139,6 +261,8 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
       sort: options?.sort,
       order: options?.order,
     });
+
+    pipeline.push(aTraiterPipelineStage);
 
     pipeline.push({
       $facet: {
@@ -202,9 +326,22 @@ const getEffectifNavigation = async (
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
 ) => {
   const query: Record<string, any> = {
-    "romes.secteur_activites.code_secteur": codeSecteur,
     code_region: codeRegion,
   };
+
+  let aTraiter: boolean;
+
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER:
+      query["romes.secteur_activites.code_secteur"] = codeSecteur;
+      aTraiter = true;
+      break;
+    case API_EFFECTIF_LISTE.TRAITE:
+      aTraiter = false;
+      break;
+    default:
+      throw Boom.badRequest(`Nom de liste inconnu : ${nom_liste}`);
+  }
 
   const now = new Date();
 
@@ -214,6 +351,8 @@ const getEffectifNavigation = async (
     order: options?.order,
     now,
   });
+
+  pipeline.push(matchATraiterByCodeSecteur(codeSecteur, aTraiter));
 
   pipeline.push({
     $group: {
