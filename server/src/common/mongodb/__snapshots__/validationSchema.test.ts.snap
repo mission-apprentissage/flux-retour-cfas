@@ -9128,6 +9128,16 @@ exports[`validation-schema > should create validation schema for franceTravailEf
         },
       },
     },
+    "date_inscription": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "effectif_id": {
       "bsonType": "objectId",
     },
