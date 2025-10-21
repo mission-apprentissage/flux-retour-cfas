@@ -24,7 +24,7 @@ const insertTestData = async () => {
       effectif_id: new ObjectId(),
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
-      current_status: { value: "INSCRIT" as const, date: new Date() },
+      date_inscription: new Date(),
       ft_data: { 1: null },
       romes: {
         code: ["A1234"],
@@ -38,6 +38,7 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
+      date_inscription: new Date(),
       ft_data: { 1: null },
       romes: {
         code: ["A1234"],
@@ -51,6 +52,7 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
+      date_inscription: new Date(),
       ft_data: { 1: null },
       romes: {
         code: ["A1234"],
@@ -64,6 +66,7 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "11",
       current_status: { value: "INSCRIT" as const, date: new Date() },
+      date_inscription: new Date(),
       ft_data: { 1: null },
       romes: {
         code: ["A1234"],
@@ -77,6 +80,7 @@ const insertTestData = async () => {
       effectif_snapshot: baseEffectif as IEffectif,
       code_region: "84",
       current_status: { value: "INSCRIT" as const, date: new Date() },
+      date_inscription: new Date(),
       ft_data: { 2: null },
       romes: {
         code: ["B5678"],
@@ -356,7 +360,7 @@ describe("Tests des actions France Travail Effectif", () => {
         expect(effectif).toHaveProperty("effectif_id");
         expect(effectif).toHaveProperty("effectif_snapshot");
         expect(effectif).toHaveProperty("code_region");
-        expect(effectif).toHaveProperty("current_status");
+        expect(effectif).toHaveProperty("date_inscription");
         expect(effectif).toHaveProperty("ft_data");
         expect(effectif).toHaveProperty("jours_sans_contrat");
         expect(effectif).toHaveProperty("organisme");
@@ -382,6 +386,7 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
+            date_inscription: new Date(),
             ft_data: { 1: null },
             romes: {
               code: ["A1234"],
@@ -398,6 +403,7 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
+            date_inscription: new Date(),
             ft_data: { 1: null },
             romes: {
               code: ["A1234"],
@@ -414,6 +420,7 @@ describe("Tests des actions France Travail Effectif", () => {
             } as IEffectif,
             code_region: "84",
             current_status: { value: "INSCRIT" as const, date: new Date() },
+            date_inscription: new Date(),
             ft_data: { 1: null },
             romes: {
               code: ["A1234"],
@@ -511,6 +518,7 @@ describe("Tests des actions France Travail Effectif", () => {
               apprenant: { ...baseEffectif.apprenant, nom: "Zorro", prenom: "Alice" },
             } as IEffectif,
             code_region: "84",
+            date_inscription: threeDaysAgo,
             current_status: { value: "INSCRIT" as const, date: threeDaysAgo },
             ft_data: { 1: null },
             romes: {
@@ -527,6 +535,7 @@ describe("Tests des actions France Travail Effectif", () => {
               apprenant: { ...baseEffectif.apprenant, nom: "Alpha", prenom: "Bob" },
             } as IEffectif,
             code_region: "84",
+            date_inscription: tenDaysAgo,
             current_status: { value: "INSCRIT" as const, date: tenDaysAgo },
             ft_data: { 1: null },
             romes: {
@@ -646,6 +655,7 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
+          date_inscription: new Date(),
           ft_data: { 1: null },
           romes: {
             code: ["A1234"],
@@ -659,6 +669,7 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
+          date_inscription: new Date(),
           ft_data: { 1: null },
           romes: {
             code: ["A1234"],
@@ -672,6 +683,7 @@ describe("Tests des actions France Travail Effectif", () => {
           effectif_snapshot: baseEffectif as IEffectif,
           code_region: "84",
           current_status: { value: "INSCRIT" as const, date: new Date() },
+          date_inscription: new Date(),
           ft_data: { 99: null },
           romes: {
             code: ["C9999"],
