@@ -6,6 +6,8 @@ import { Footer } from "../_components/Footer";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
+import { FranceTravailLayoutClient } from "./FranceTravailLayoutClient";
+
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
 
@@ -23,7 +25,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
             }),
           }}
         >
-          {children}
+          <FranceTravailLayoutClient>{children}</FranceTravailLayoutClient>
         </div>
         <Footer />
       </UserContextProvider>
