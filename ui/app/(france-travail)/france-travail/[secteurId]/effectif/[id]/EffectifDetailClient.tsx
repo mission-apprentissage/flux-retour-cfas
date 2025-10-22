@@ -1,21 +1,18 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { useMemo } from "react";
 
-import {
-  useEffectifDetail,
-  useUpdateEffectif,
-  useArborescence,
-} from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
+import { useEffectifDetail, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { useFranceTravailQueryParams } from "@/app/_components/france-travail/hooks/useFranceTravailQueryParams";
-import { FranceTravailSituation } from "@/app/_components/france-travail/types";
 import {
   getDureeBadgeProps,
   calculateJoursSansContrat,
   mapSecteursFromFtData,
 } from "@/app/_components/france-travail/utils";
+import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { formatDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
@@ -71,29 +68,23 @@ function EffectifCoordonnees({ telephone, courriel, responsableMail }: EffectifC
 }
 
 export default function EffectifDetailClient() {
-  const router = useRouter();
   const params = useParams();
   const { params: queryParams, buildQueryString } = useFranceTravailQueryParams();
 
   const id = params?.id as string | undefined;
   const codeSecteur = params?.secteurId ? Number(params.secteurId) : null;
 
-  const [_selectedSituation, setSelectedSituation] = useState<FranceTravailSituation | null>(null);
-  const [_commentaire, setCommentaire] = useState("");
-
   const { data, isLoading, error } = useEffectifDetail(id || null, {
     nom_liste: "a_traiter",
-    code_secteur: codeSecteur!,
+    code_secteur: codeSecteur || 0,
     search: queryParams.search,
     sort: queryParams.sort,
     order: queryParams.order,
   });
 
-  const { mutate: _updateEffectif, isLoading: _isSubmitting } = useUpdateEffectif();
   const { data: arborescenceData } = useArborescence();
 
   const effectif = data?.effectif;
-  const existingData = effectif?.ft_data?.[codeSecteur!];
 
   const joursSansContrat = useMemo(
     () => calculateJoursSansContrat(effectif?.current_status?.date),
@@ -107,42 +98,14 @@ export default function EffectifDetailClient() {
     return mapSecteursFromFtData(effectif.ft_data, arborescenceData.a_traiter.secteurs);
   }, [arborescenceData, effectif?.ft_data]);
 
-  useEffect(() => {
-    if (existingData) {
-      setSelectedSituation(existingData.situation);
-      setCommentaire(existingData.commentaire || "");
-    }
-  }, [existingData]);
+  const currentSecteur = useMemo(() => {
+    if (!arborescenceData || !codeSecteur) return null;
+    return arborescenceData.a_traiter.secteurs.find((s) => s.code_secteur === codeSecteur);
+  }, [arborescenceData, codeSecteur]);
 
-  /*const _handleSubmit = (quit: boolean = false) => {
-    if (!selectedSituation || !id || !codeSecteur) return;
-
-    updateEffectif(
-      {
-        id: effectif?.id!,
-        commentaire: commentaire || null,
-        situation: selectedSituation,
-        code_secteur: codeSecteur,
-      },
-      {
-        onSuccess: () => {
-          if (!quit && data?.next) {
-            const queryString = buildQueryString(false);
-            router.push(
-              `/france-travail/${codeSecteur}/effectif/${data.next.id}${queryString ? `?${queryString}` : ""}`
-            );
-          } else {
-            handleRetour();
-          }
-        },
-      }
-    );
-  };*/
-
-  const _handleRetour = () => {
-    const queryString = buildQueryString(true);
-    router.push(`/france-travail/${codeSecteur}${queryString ? `?${queryString}` : ""}`);
-  };
+  if (!codeSecteur) {
+    return <Alert severity="error" title="Secteur invalide" description="Le code secteur est manquant ou invalide." />;
+  }
 
   if (error) {
     return <Alert severity="error" title="Erreur" description="Impossible de charger les détails de l'effectif." />;
@@ -164,6 +127,28 @@ export default function EffectifDetailClient() {
 
   return (
     <div className={styles.pageContainer}>
+      <div className={styles.navigationContainer}>
+        <DsfrLink
+          href={`/france-travail/${codeSecteur}${buildQueryString(true) ? `?${buildQueryString(true)}` : ""}`}
+          className="fr-link--icon-left fr-icon-arrow-left-s-line"
+          arrow="none"
+        >
+          <u>
+            Retour à la liste secteur <strong>{currentSecteur?.libelle_secteur || codeSecteur}</strong>
+          </u>
+        </DsfrLink>
+
+        <FTEffectifPageHeader
+          previous={data?.previous}
+          next={data?.next}
+          total={data?.total}
+          currentIndex={data?.currentIndex}
+          isLoading={isLoading}
+          codeSecteur={codeSecteur}
+          buildQueryString={buildQueryString}
+        />
+      </div>
+
       <div className={styles.content}>
         <div className={styles.leftColumn}>
           <div className={styles.headerSection}>
