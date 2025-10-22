@@ -62,6 +62,10 @@ function FTSideMenu({
 export function FranceTravailLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  const isEffectifDetailPage = useMemo(() => {
+    return pathname?.includes("/effectif/");
+  }, [pathname]);
+
   const selectedSecteur = useMemo(() => {
     const match = pathname?.match(/\/france-travail\/(\d+)/);
     return match ? Number(match[1]) : null;
@@ -72,6 +76,10 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
   const secteurs = arborescenceData?.a_traiter.secteurs ?? [];
   const totalATraiter = arborescenceData?.a_traiter.total ?? 0;
   const dejaTraiteCount = arborescenceData?.traite ?? 0;
+
+  if (isEffectifDetailPage) {
+    return <div className="fr-container">{children}</div>;
+  }
 
   if (arboError) {
     return (

@@ -2,7 +2,7 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { FTEffectifsTable } from "@/app/_components/france-travail/FTEffectifsTable";
@@ -10,6 +10,7 @@ import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useArborescence, useEffectifsBySecteur } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 
 export default function SecteurClient() {
+  const router = useRouter();
   const params = useParams();
   const codeSecteur = params?.secteurId ? Number(params.secteurId) : null;
 
@@ -70,6 +71,16 @@ export default function SecteurClient() {
     setCurrentPage(1);
   };
 
+  const handleEffectifClick = (effectifId: string) => {
+    const queryParams = new URLSearchParams();
+    if (debouncedSearch) queryParams.set("search", debouncedSearch);
+    if (currentPage > 1) queryParams.set("page", currentPage.toString());
+    if (pageSize !== 20) queryParams.set("limit", pageSize.toString());
+
+    const queryString = queryParams.toString();
+    router.push(`/france-travail/${codeSecteur}/effectif/${effectifId}${queryString ? `?${queryString}` : ""}`);
+  };
+
   if (error) {
     return (
       <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
@@ -96,6 +107,7 @@ export default function SecteurClient() {
         onPageSizeChange={handlePageSizeChange}
         onSearchChange={handleSearchChange}
         searchTerm={searchInput}
+        onEffectifClick={handleEffectifClick}
       />
     </>
   );
