@@ -60,9 +60,7 @@ export function FTEffectifPageHeader({
             </div>
           </>
         ) : (
-          <div className={styles.pageHeaderCenter}>
-            <Spinner size="20px" color="var(--text-action-high-blue-france)" />
-          </div>
+          <Spinner size="20px" color="var(--text-action-high-blue-france)" />
         )}
       </div>
 
