@@ -1,12 +1,17 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
-import { useEffectifDetail, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import {
+  useEffectifDetail,
+  useArborescence,
+  useUpdateEffectif,
+} from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { useFranceTravailQueryParams } from "@/app/_components/france-travail/hooks/useFranceTravailQueryParams";
+import { FranceTravailSituation } from "@/app/_components/france-travail/types";
 import {
   getDureeBadgeProps,
   calculateJoursSansContrat,
@@ -19,6 +24,7 @@ import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 
 import styles from "./EffectifDetailClient.module.css";
 import { EffectifFormationInfo } from "./EffectifFormationInfo";
+import { FTEffectifForm } from "./FTEffectifForm";
 
 interface EffectifPersonalInfoProps {
   dateNaissance?: string;
@@ -67,12 +73,27 @@ function EffectifCoordonnees({ telephone, courriel, responsableMail }: EffectifC
   );
 }
 
+const SUCCESS_DISPLAY_DURATION = 1000;
+
 export default function EffectifDetailClient() {
+  const router = useRouter();
   const params = useParams();
   const { params: queryParams, buildQueryString } = useFranceTravailQueryParams();
 
   const id = params?.id as string | undefined;
   const codeSecteur = params?.secteurId ? Number(params.secteurId) : null;
+
+  const [submissionState, setSubmissionState] = useState<{
+    isSubmitting: boolean;
+    hasSuccess: boolean;
+    hasError: boolean;
+  }>({
+    isSubmitting: false,
+    hasSuccess: false,
+    hasError: false,
+  });
+
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isLoading, error } = useEffectifDetail(id || null, {
     nom_liste: "a_traiter",
@@ -83,6 +104,7 @@ export default function EffectifDetailClient() {
   });
 
   const { data: arborescenceData } = useArborescence();
+  const { mutate: updateEffectif } = useUpdateEffectif();
 
   const effectif = data?.effectif;
 
@@ -102,6 +124,56 @@ export default function EffectifDetailClient() {
     if (!arborescenceData || !codeSecteur) return null;
     return arborescenceData.a_traiter.secteurs.find((s) => s.code_secteur === codeSecteur);
   }, [arborescenceData, codeSecteur]);
+
+  const handleFormSubmit = (
+    formData: { situation: FranceTravailSituation; commentaire: string | null },
+    saveNext: boolean
+  ) => {
+    if (!effectif?.id || !codeSecteur) return;
+
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+    }
+
+    setSubmissionState({ isSubmitting: true, hasSuccess: false, hasError: false });
+
+    updateEffectif(
+      {
+        id: effectif.id,
+        commentaire: formData.commentaire,
+        situation: formData.situation,
+        code_secteur: codeSecteur,
+      },
+      {
+        onSuccess: () => {
+          setSubmissionState({ isSubmitting: false, hasSuccess: true, hasError: false });
+
+          const nextId = data?.next?.id;
+          navigationTimeoutRef.current = setTimeout(() => {
+            if (saveNext && nextId) {
+              const queryString = buildQueryString(false);
+              router.push(`/france-travail/${codeSecteur}/effectif/${nextId}${queryString ? `?${queryString}` : ""}`);
+            } else {
+              const queryString = buildQueryString(true);
+              router.push(`/france-travail/${codeSecteur}${queryString ? `?${queryString}` : ""}`);
+            }
+          }, SUCCESS_DISPLAY_DURATION);
+        },
+        onError: (error) => {
+          console.error("Erreur lors de la mise à jour de l'effectif France Travail:", error);
+          setSubmissionState({ isSubmitting: false, hasSuccess: false, hasError: true });
+        },
+      }
+    );
+  };
+
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!codeSecteur) {
     return <Alert severity="error" title="Secteur invalide" description="Le code secteur est manquant ou invalide." />;
@@ -124,6 +196,8 @@ export default function EffectifDetailClient() {
       />
     );
   }
+
+  const existingData = effectif.ft_data?.[codeSecteur];
 
   return (
     <div className={styles.pageContainer}>
@@ -180,6 +254,26 @@ export default function EffectifDetailClient() {
               organisme={effectif.organisme}
               formation={effectif.formation}
               secteurs={secteurs}
+            />
+          </div>
+        </div>
+
+        <div className={styles.rightColumn}>
+          <div className={styles.formSection}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Suivi France Travail</h2>
+              <p className="fr-badge fr-badge--yellow-tournesol" aria-label="Effectif à traiter">
+                <i className="fr-icon-flashlight-fill fr-icon--sm" />
+                <span style={{ marginLeft: "5px" }}>À TRAITER</span>
+              </p>
+            </div>
+            <FTEffectifForm
+              initialSituation={existingData?.situation || null}
+              initialCommentaire={existingData?.commentaire || null}
+              onSubmit={handleFormSubmit}
+              isSaving={submissionState.isSubmitting}
+              hasSuccess={submissionState.hasSuccess}
+              hasError={submissionState.hasError}
             />
           </div>
         </div>
