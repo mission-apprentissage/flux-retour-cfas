@@ -15,7 +15,7 @@ const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const buildEffectifsPipeline = (
   query: Record<string, any>,
-  codeSecteur?: number,
+  codeRegion: string,
   options?: {
     search?: string;
     sort?: "jours_sans_contrat" | "nom" | "organisme";
@@ -27,6 +27,11 @@ const buildEffectifsPipeline = (
 
   const pipeline: Document[] = [
     { $match: query },
+    {
+      $match: {
+        code_region: codeRegion,
+      },
+    },
     {
       $lookup: {
         from: "organismes",
@@ -124,8 +129,8 @@ export const match180Days = () => {
   };
 };
 
-export const getEffectifSecteurActivitesArboresence = async () => {
-  const basePipeline = buildEffectifsPipeline({});
+export const getEffectifSecteurActivitesArboresence = async (codeRegion: string) => {
+  const basePipeline = buildEffectifsPipeline({}, codeRegion);
 
   basePipeline.push(match180Days());
   basePipeline.push(matchATraiter(true));
@@ -179,12 +184,12 @@ export const getEffectifSecteurActivitesArboresence = async () => {
       total: totalResult?.total || 0,
       secteurs: secteurResult,
     },
-    traite: await getTraitesCount(),
+    traite: await getTraitesCount(codeRegion),
   };
 };
 
-export const getTraitesCount = () => {
-  const pipeline = buildEffectifsPipeline({});
+export const getTraitesCount = (codeRegion: string) => {
+  const pipeline = buildEffectifsPipeline({}, codeRegion);
 
   pipeline.push(matchATraiter(false));
   pipeline.push({
@@ -215,9 +220,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
   }
 ) => {
   try {
-    const query: Record<string, any> = {
-      code_region: codeRegion,
-    };
+    const query: Record<string, any> = {};
 
     let additionalPipelineStages: Array<Record<string, any>> = [];
 
@@ -238,7 +241,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const pipeline = buildEffectifsPipeline(query, codeSecteur, {
+    const pipeline = buildEffectifsPipeline(query, codeRegion, {
       search: options?.search,
       sort: options?.sort,
       order: options?.order,
@@ -307,9 +310,7 @@ const getEffectifNavigation = async (
   nom_liste: API_EFFECTIF_LISTE,
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
 ) => {
-  const query: Record<string, any> = {
-    code_region: codeRegion,
-  };
+  const query: Record<string, any> = {};
 
   let additionalPipelineStages: Array<Record<string, any>> = [];
 
@@ -328,7 +329,7 @@ const getEffectifNavigation = async (
 
   const now = new Date();
 
-  const pipeline = buildEffectifsPipeline(query, codeSecteur, {
+  const pipeline = buildEffectifsPipeline(query, codeRegion, {
     search: options?.search,
     sort: options?.sort,
     order: options?.order,
