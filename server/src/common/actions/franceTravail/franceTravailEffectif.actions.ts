@@ -8,6 +8,7 @@ import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailE
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
 
+import { getCurrentAndNextStatus } from "../effectifs.statut.actions";
 import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -452,16 +453,18 @@ export const getEffectifFromFranceTravailId = async (
 };
 
 export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) => {
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const { current: currentStatus, next: nextStatus } = getCurrentAndNextStatus(
+    effectif._computed?.statut?.parcours,
+    new Date()
+  );
+
   const effectifCodeRegion = effectif?.apprenant?.adresse?.region;
 
   if (!effectifCodeRegion) {
     return;
   }
 
-  const inscritFilter = currentStatus?.valeur === "INSCRIT";
+  const inscritFilter = currentStatus?.valeur === "INSCRIT" && nextStatus?.valeur !== "APPRENTI";
 
   const romes = await getRomeByRncp(effectif.formation?.rncp);
   const secteurActivites = await getSecteurActivitesByCodeRome(romes);
