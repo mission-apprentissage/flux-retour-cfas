@@ -38,6 +38,7 @@ import {
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
+import { hydrateInscritSansContrat } from "./hydrate/france-travail/hydrate-france-travail";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -543,6 +544,11 @@ export async function setupJobProcessor() {
       "tmp:hydrate:rome-secteur-activites": {
         handler: async () => {
           return hydrateRomeSecteurActivites();
+        },
+      },
+      "tmp:hydrate:inscrit-sans-contrat": {
+        handler: async () => {
+          return hydrateInscritSansContrat();
         },
       },
     },
