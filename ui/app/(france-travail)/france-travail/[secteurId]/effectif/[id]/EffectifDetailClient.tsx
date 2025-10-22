@@ -110,8 +110,8 @@ export default function EffectifDetailClient() {
   const effectif = data?.effectif;
 
   const joursSansContrat = useMemo(
-    () => calculateJoursSansContrat(effectif?.current_status?.date),
-    [effectif?.current_status?.date]
+    () => calculateJoursSansContrat(effectif?.date_inscription),
+    [effectif?.date_inscription]
   );
 
   const badgeStyle = useMemo(() => getDureeBadgeProps(joursSansContrat), [joursSansContrat]);
@@ -254,7 +254,7 @@ export default function EffectifDetailClient() {
 
           <div className={styles.formationSection}>
             <EffectifFormationInfo
-              dateDebut={effectif.current_status?.date}
+              dateDebut={effectif.date_inscription}
               badgeStyle={badgeStyle}
               organisme={effectif.organisme}
               formation={effectif.formation}

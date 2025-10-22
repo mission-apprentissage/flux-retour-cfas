@@ -96,10 +96,6 @@ export interface IEffectifDetail {
     date_fin?: string;
     date_rupture?: string;
   }>;
-  current_status?: {
-    date?: string;
-    valeur_courante?: number;
-  };
   ft_data?: Record<
     string,
     {
@@ -128,6 +124,7 @@ export interface IEffectifDetail {
     telephone?: string;
     email?: string;
   };
+  date_inscription?: string;
 }
 
 export interface IEffectifDetailResponse {

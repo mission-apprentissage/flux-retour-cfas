@@ -39,9 +39,9 @@ interface FTEffectifParcoursProps {
 const buildTimeline = (effectif: IEffectifDetail): TimelineEvent[] => {
   const events: TimelineEvent[] = [];
 
-  if (effectif.current_status?.date) {
+  if (effectif.date_inscription) {
     events.push({
-      date: new Date(effectif.current_status.date),
+      date: new Date(effectif.date_inscription),
       type: TIMELINE_EVENTS.DEMARRAGE_FORMATION,
       label: EVENT_LABELS[TIMELINE_EVENTS.DEMARRAGE_FORMATION],
       subtitle: "Données transmises par le CFA",
@@ -105,12 +105,8 @@ const getIcon = (type: TimelineEventType) => {
   );
 };
 
-export const FTEffectifParcours = memo(function FTEffectifParcours({
-  effectif,
-  codeSecteur,
-  className,
-}: FTEffectifParcoursProps) {
-  const timeline = buildTimeline(effectif, codeSecteur);
+export const FTEffectifParcours = memo(function FTEffectifParcours({ effectif, className }: FTEffectifParcoursProps) {
+  const timeline = buildTimeline(effectif);
 
   if (timeline.length === 0) {
     return null;
