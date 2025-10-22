@@ -1,14 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { _get } from "@/common/httpClient";
+import { _get, _put } from "@/common/httpClient";
 
-import { IArborescenceResponse, IEffectifsBySecteurResponse } from "../types";
+import {
+  FranceTravailSituation,
+  IArborescenceResponse,
+  IEffectifDetailResponse,
+  IEffectifsBySecteurResponse,
+} from "../types";
 
 export const franceTravailQueryKeys = {
   all: ["france-travail"] as const,
   arborescence: () => [...franceTravailQueryKeys.all, "arborescence"] as const,
   effectifsBySecteur: (codeSecteur: number, params: Record<string, any>) =>
     [...franceTravailQueryKeys.all, "effectifs", "secteur", codeSecteur, params] as const,
+  effectifDetail: (id: string, params: Record<string, any>) =>
+    [...franceTravailQueryKeys.all, "effectif", id, params] as const,
 };
 
 const fetchArborescence = async (): Promise<IArborescenceResponse> => {
@@ -46,4 +53,44 @@ export function useEffectifsBySecteur(
       refetchOnWindowFocus: false,
     }
   );
+}
+
+const fetchEffectifDetail = async (
+  id: string,
+  params: { nom_liste: "a_traiter" | "traite"; code_secteur: number; search?: string; sort?: string; order?: string }
+): Promise<IEffectifDetailResponse> => {
+  return _get(`/api/v1/organisation/france-travail/effectif/${id}`, { params });
+};
+
+export function useEffectifDetail(
+  id: string | null,
+  params: { nom_liste: "a_traiter" | "traite"; code_secteur: number; search?: string; sort?: string; order?: string }
+) {
+  return useQuery(franceTravailQueryKeys.effectifDetail(id!, params), () => fetchEffectifDetail(id!, params), {
+    enabled: id !== null,
+    staleTime: 30 * 1000,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  });
+}
+
+interface UpdateEffectifParams {
+  id: string;
+  commentaire: string | null;
+  situation: FranceTravailSituation;
+  code_secteur: number;
+}
+
+const updateEffectif = async ({ id, commentaire, situation, code_secteur }: UpdateEffectifParams): Promise<void> => {
+  return _put(`/api/v1/organisation/france-travail/effectif/${id}`, { commentaire, situation, code_secteur });
+};
+
+export function useUpdateEffectif() {
+  const queryClient = useQueryClient();
+
+  return useMutation(updateEffectif, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(franceTravailQueryKeys.all);
+    },
+  });
 }
