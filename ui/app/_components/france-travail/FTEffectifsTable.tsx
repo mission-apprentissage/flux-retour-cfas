@@ -10,6 +10,7 @@ import { ColumnData } from "@/app/_components/table/types";
 
 import styles from "./FTEffectifsTable.module.css";
 import { IEffectifFranceTravail } from "./types";
+import { getDureeBadgeProps } from "./utils";
 
 interface FTEffectifsTableProps {
   effectifs: IEffectifFranceTravail[];
@@ -22,24 +23,7 @@ interface FTEffectifsTableProps {
   onPageSizeChange: (size: number) => void;
   onSearchChange: (search: string) => void;
   searchTerm: string;
-}
-
-interface DureeBadgeProps {
-  backgroundColor: string;
-  color: string;
-  label: string;
-}
-
-function getDureeBadgeProps(days: number): DureeBadgeProps {
-  if (days <= 30) {
-    return { backgroundColor: "#FEF6E3", color: "#716043", label: `${days}j/90` };
-  } else if (days <= 60) {
-    return { backgroundColor: "#F99782", color: "#FEF4F2", label: `${days}j/90` };
-  } else if (days <= 90) {
-    return { backgroundColor: "#F95C5E", color: "#FFFFFF", label: `${days}j/90` };
-  } else {
-    return { backgroundColor: "#E6E6E6", color: "#3A3A3A", label: "+ de 3 mois" };
-  }
+  onEffectifClick: (effectifId: string) => void;
 }
 
 interface StatutBadgeProps {
@@ -76,6 +60,7 @@ export function FTEffectifsTable({
   onPageSizeChange,
   onSearchChange,
   searchTerm,
+  onEffectifClick,
 }: FTEffectifsTableProps) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -201,7 +186,7 @@ export function FTEffectifsTable({
             <div className={styles.centeredBadge}>
               <button
                 className={styles.voirButton}
-                onClick={() => console.log("Voir détail effectif", effectif._id)}
+                onClick={() => onEffectifClick(effectif._id)}
                 aria-label={`Voir le détail de ${nom} ${prenom}`}
               >
                 <i className="fr-icon-arrow-right-line fr-icon--sm" aria-hidden="true" />
@@ -211,7 +196,7 @@ export function FTEffectifsTable({
         },
       };
     });
-  }, [effectifs]);
+  }, [effectifs, onEffectifClick]);
 
   const paginationInfo = {
     total: totalCount,
