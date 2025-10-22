@@ -40,6 +40,7 @@ const zFranceTravailEffectif = z.object({
   effectif_snapshot: zEffectif,
   effectif_snapshot_date: z.date().optional(),
   code_region: zAdresse.shape.region.optional(),
+  date_inscription: z.date().nullable().optional(),
   romes: z.object({
     code: z.array(z.string()),
     secteur_activites: z

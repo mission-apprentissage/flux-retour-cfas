@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
+import { differenceInYears } from "date-fns";
 import type { Document } from "mongodb";
 import { API_EFFECTIF_LISTE, IEffectif } from "shared/models";
 import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailEffectif.model";
@@ -7,6 +8,7 @@ import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailE
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
 
+import { getCurrentAndNextStatus } from "../effectifs.statut.actions";
 import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -43,14 +45,13 @@ const buildEffectifsPipeline = (
       $addFields: {
         jours_sans_contrat: {
           $dateDiff: {
-            startDate: "$current_status.date",
+            startDate: "$date_inscription",
             endDate: now,
             unit: "day",
           },
         },
       },
     },
-    addATraiterFieldByCodeSecteur(codeSecteur),
     addATraiterField(),
   ];
 
@@ -86,47 +87,17 @@ const buildEffectifsPipeline = (
   return pipeline;
 };
 
-export const addATraiterFieldByCodeSecteur = (code_secteur?: number) => {
-  if (!code_secteur) {
-    return {
-      $addFields: {
-        a_traiter: true,
-      },
-    };
-  }
-
-  return {
-    $addFields: {
-      [`a_traiter_${code_secteur}`]: {
-        $cond: {
-          if: { $eq: [`$ft_data.${code_secteur}`, null] },
-          then: true,
-          else: false,
-        },
-      },
-    },
-  };
-};
-
-export const matchATraiterByCodeSecteur = (code_secteur: number, a_traiter: boolean) => {
-  return {
-    $match: {
-      [`a_traiter_${code_secteur}`]: a_traiter,
-    },
-  };
-};
-
 export const addATraiterField = () => {
   return {
     $addFields: {
       a_traiter: {
-        $gt: [
+        $eq: [
           {
             $size: {
               $filter: {
                 input: { $objectToArray: "$ft_data" },
                 as: "entry",
-                cond: { $eq: ["$$entry.v", null] },
+                cond: { $ne: ["$$entry.v", null] },
               },
             },
           },
@@ -145,10 +116,20 @@ export const matchATraiter = (a_traiter: boolean) => {
   };
 };
 
+export const match180Days = () => {
+  return {
+    $match: {
+      jours_sans_contrat: { $lt: 180 }, // Inférieur à 6 mois
+    },
+  };
+};
+
 export const getEffectifSecteurActivitesArboresence = async () => {
   const basePipeline = buildEffectifsPipeline({});
 
+  basePipeline.push(match180Days());
   basePipeline.push(matchATraiter(true));
+
   const pipelineTotal = [...basePipeline];
   const pipelineSecteurs = [...basePipeline];
 
@@ -238,15 +219,16 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
       code_region: codeRegion,
     };
 
-    let aTraiterPipelineStage: Record<string, any>;
+    let additionalPipelineStages: Array<Record<string, any>> = [];
 
     switch (type) {
       case API_EFFECTIF_LISTE.A_TRAITER:
         query["romes.secteur_activites.code_secteur"] = codeSecteur;
-        aTraiterPipelineStage = codeSecteur ? matchATraiterByCodeSecteur(codeSecteur, true) : matchATraiter(true);
+        additionalPipelineStages.push(matchATraiter(true));
+        additionalPipelineStages.push(match180Days());
         break;
       case API_EFFECTIF_LISTE.TRAITE:
-        aTraiterPipelineStage = matchATraiter(false);
+        additionalPipelineStages.push(matchATraiter(false));
         break;
       default:
         throw Boom.badRequest(`Nom de liste inconnu : ${type}`);
@@ -262,7 +244,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
       order: options?.order,
     });
 
-    pipeline.push(aTraiterPipelineStage);
+    pipeline.push(...additionalPipelineStages);
 
     pipeline.push({
       $facet: {
@@ -276,7 +258,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
               effectif_id: 1,
               effectif_snapshot: 1,
               code_region: 1,
-              current_status: 1,
+              date_inscription: 1,
               ft_data: 1,
               jours_sans_contrat: 1,
               organisme: {
@@ -329,15 +311,16 @@ const getEffectifNavigation = async (
     code_region: codeRegion,
   };
 
-  let aTraiter: boolean;
+  let additionalPipelineStages: Array<Record<string, any>> = [];
 
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
       query["romes.secteur_activites.code_secteur"] = codeSecteur;
-      aTraiter = true;
+      additionalPipelineStages.push(match180Days());
+      additionalPipelineStages.push(matchATraiter(true));
       break;
     case API_EFFECTIF_LISTE.TRAITE:
-      aTraiter = false;
+      additionalPipelineStages.push(matchATraiter(false));
       break;
     default:
       throw Boom.badRequest(`Nom de liste inconnu : ${nom_liste}`);
@@ -352,8 +335,7 @@ const getEffectifNavigation = async (
     now,
   });
 
-  pipeline.push(matchATraiterByCodeSecteur(codeSecteur, aTraiter));
-
+  pipeline.push(...additionalPipelineStages);
   pipeline.push({
     $group: {
       _id: null,
@@ -457,7 +439,7 @@ export const getEffectifFromFranceTravailId = async (
           transmitted_at: "$effectif_snapshot.transmitted_at",
           source: "$effectif_snapshot.source",
           contrats: "$effectif_snapshot.contrats",
-          current_status: "$current_status",
+          date_inscription: "$date_inscription",
           ft_data: "$ft_data",
           organisme: {
             _id: "$organisme._id",
@@ -494,19 +476,26 @@ export const getEffectifFromFranceTravailId = async (
 };
 
 export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) => {
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const { current: currentStatus, next: nextStatus } = getCurrentAndNextStatus(
+    effectif._computed?.statut?.parcours,
+    new Date()
+  );
+
   const effectifCodeRegion = effectif?.apprenant?.adresse?.region;
 
   if (!effectifCodeRegion) {
     return;
   }
 
-  const inscritFilter = currentStatus?.valeur === "INSCRIT";
+  const inscritFilter = currentStatus?.valeur === "INSCRIT" && nextStatus?.valeur !== "APPRENTI";
+
   const romes = await getRomeByRncp(effectif.formation?.rncp);
   const secteurActivites = await getSecteurActivitesByCodeRome(romes);
   const ftData = secteurActivites.reduce((acc, curr) => ({ ...acc, [curr.code_secteur]: null }), {});
+  const adultFilter = effectif.apprenant?.date_de_naissance
+    ? differenceInYears(new Date(), new Date(effectif.apprenant?.date_de_naissance)) >= 18
+    : false;
+
   try {
     await franceTravailEffectifsDb().findOneAndUpdate(
       {
@@ -525,6 +514,7 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) =
           effectif_snapshot: effectif,
           effectif_snapshot_date: new Date(),
           code_region: effectif?.apprenant?.adresse?.region,
+          date_inscription: currentStatus?.date || null,
           ft_data: ftData,
           romes: {
             code: romes,
@@ -532,7 +522,7 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) =
           },
         },
       },
-      { upsert: !!inscritFilter }
+      { upsert: !!inscritFilter && adultFilter }
     );
   } catch (e) {
     logger.error(e);
