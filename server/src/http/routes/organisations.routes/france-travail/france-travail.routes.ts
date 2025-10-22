@@ -82,8 +82,9 @@ export default () => {
   return router;
 };
 
-const getArborescence = async (_req) => {
-  return getEffectifSecteurActivitesArboresence();
+const getArborescence = async (_req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  return getEffectifSecteurActivitesArboresence(ftOrga.code_region);
 };
 
 const getEffectifsTraites = async (req, { locals }) => {

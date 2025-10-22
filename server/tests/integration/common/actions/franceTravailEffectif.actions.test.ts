@@ -653,7 +653,7 @@ describe("Tests des actions France Travail Effectif", () => {
           created_at: new Date(),
           effectif_id: new ObjectId(),
           effectif_snapshot: baseEffectif as IEffectif,
-          code_region: "84",
+          code_region: "12",
           current_status: { value: "INSCRIT" as const, date: new Date() },
           date_inscription: new Date(),
           ft_data: { 1: null },
@@ -701,8 +701,8 @@ describe("Tests des actions France Travail Effectif", () => {
         limit: 20,
       });
 
-      expect(result?.effectifs).toHaveLength(2);
-      expect(result?.pagination.total).toBe(2);
+      expect(result?.effectifs).toHaveLength(1);
+      expect(result?.pagination.total).toBe(1);
     });
 
     it("devrait retourner un résultat vide pour un code secteur inexistant", async () => {
@@ -721,7 +721,7 @@ describe("Tests des actions France Travail Effectif", () => {
         limit: 20,
       });
 
-      expect(result?.effectifs).toHaveLength(2);
+      expect(result?.effectifs).toHaveLength(1);
       expect(result?.effectifs.every((e) => e.code_region === "84")).toBe(true);
     });
 
@@ -744,7 +744,7 @@ describe("Tests des actions France Travail Effectif", () => {
         order: "asc",
       });
 
-      expect(result?.effectifs).toHaveLength(2);
+      expect(result?.effectifs).toHaveLength(1);
       expect(result?.effectifs[0]).toHaveProperty("jours_sans_contrat");
     });
   });
