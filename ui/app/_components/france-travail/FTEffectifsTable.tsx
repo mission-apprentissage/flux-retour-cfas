@@ -111,7 +111,7 @@ export function FTEffectifsTable({
         effectif.organisme?.nom ||
         "Non renseigné";
       const formation = effectif.effectif_snapshot.formation.libelle_long || "Non renseignée";
-      const niveau = effectif.effectif_snapshot.formation.niveau || "Non renseigné";
+      const niveau = effectif.effectif_snapshot.formation.niveau_libelle || "Non renseigné";
       const joursSansContrat = effectif.jours_sans_contrat;
       const aTraiter = effectif.ft_data ? Object.values(effectif.ft_data).some((v) => v === null) : true;
 

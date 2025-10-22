@@ -25,6 +25,7 @@ export interface IEffectifFranceTravail {
       libelle_long?: string;
       niveau?: string;
       rncp?: string;
+      niveau_libelle?: string;
     };
   };
   organisme?: {
