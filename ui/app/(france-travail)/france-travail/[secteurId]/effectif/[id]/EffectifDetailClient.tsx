@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
+import { FTEffectifParcours } from "@/app/_components/france-travail/FTEffectifParcours";
 import {
   useEffectifDetail,
   useArborescence,
@@ -224,6 +225,10 @@ export default function EffectifDetailClient() {
       </div>
 
       <div className={styles.content}>
+        <div className={styles.parcoursColumn}>
+          <FTEffectifParcours effectif={effectif} codeSecteur={codeSecteur} />
+        </div>
+
         <div className={styles.leftColumn}>
           <div className={styles.headerSection}>
             <h1 className={styles.mainTitle}>

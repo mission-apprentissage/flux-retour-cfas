@@ -9,8 +9,8 @@
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 550px;
-  gap: 2rem;
+  grid-template-columns: 280px 1fr 450px;
+  gap: 1rem;
   margin-top: 2rem;
 }
 
@@ -18,6 +18,14 @@
   .content {
     grid-template-columns: 1fr;
   }
+}
+
+.parcoursColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-right: 1px solid #e5e5e5;
+  padding-right: 1rem;
 }
 
 .leftColumn {
@@ -31,7 +39,7 @@
   flex-direction: column;
   gap: 1.5rem;
   border-left: 1px solid #e5e5e5;
-  padding-left: 2rem;
+  padding-left: 1rem;
 }
 
 .formSection {
