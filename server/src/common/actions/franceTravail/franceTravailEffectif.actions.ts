@@ -429,6 +429,20 @@ export const getEffectifFromFranceTravailId = async (
         },
       },
       {
+        $lookup: {
+          from: "organismes",
+          localField: "effectif_snapshot.organisme_id",
+          foreignField: "_id",
+          as: "organisme",
+        },
+      },
+      {
+        $unwind: {
+          path: "$organisme",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           id: "$effectif_snapshot._id",
           nom: "$effectif_snapshot.apprenant.nom",
@@ -445,6 +459,15 @@ export const getEffectifFromFranceTravailId = async (
           contrats: "$effectif_snapshot.contrats",
           current_status: "$current_status",
           ft_data: "$ft_data",
+          organisme: {
+            _id: "$organisme._id",
+            nom: "$organisme.nom",
+            raison_sociale: "$organisme.raison_sociale",
+            enseigne: "$organisme.enseigne",
+            adresse: "$organisme.adresse",
+            telephone: "$organisme.contacts.telephone",
+            email: "$organisme.contacts.email",
+          },
         },
       },
     ];
