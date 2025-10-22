@@ -3,6 +3,10 @@
   padding: 1rem 0;
 }
 
+.navigationContainer {
+  margin-bottom: 1.5rem;
+}
+
 .content {
   display: grid;
   grid-template-columns: 1fr 400px;
