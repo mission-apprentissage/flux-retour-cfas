@@ -1,10 +1,18 @@
-import { ISecteurArborescence } from "./types";
+import { FranceTravailSituation, ISecteurArborescence } from "./types";
 
 export interface DureeBadgeProps {
   backgroundColor: string;
   color: string;
   label: string;
 }
+
+export const SITUATION_LABELS: Record<FranceTravailSituation, string> = {
+  [FranceTravailSituation.REORIENTATION]: "Réorientation du jeune",
+  [FranceTravailSituation.ENTREPRISE]: "Recherche d'entreprise",
+  [FranceTravailSituation.PAS_DE_RECONTACT]: "Pas de recontact",
+  [FranceTravailSituation.EVENEMENT]: "Événement",
+  [FranceTravailSituation.MISSION_LOCALE]: "Orientation mission locale",
+};
 
 export const DUREE_SEUILS = {
   COURT: 30,
@@ -29,6 +37,20 @@ export function getDureeBadgeProps(days: number): DureeBadgeProps {
   } else {
     return { backgroundColor: "#E6E6E6", color: "#3A3A3A", label: "+ de 3 mois" };
   }
+}
+
+export function getSecteurLibelle(codeSecteur: string | number, secteurs: ISecteurArborescence[]): string {
+  const secteur = secteurs.find((s) => s.code_secteur.toString() === codeSecteur.toString());
+  return secteur?.libelle_secteur || `Secteur ${codeSecteur}`;
+}
+
+export function getSituationLabel(situation: FranceTravailSituation): string {
+  return SITUATION_LABELS[situation] || situation;
+}
+
+export function getFirstNonNullFtData(ftData: Record<string, any>): [string, any] | null {
+  const entries = Object.entries(ftData).filter(([_, value]) => value !== null);
+  return entries[0] || null;
 }
 
 export function mapSecteursFromFtData(
