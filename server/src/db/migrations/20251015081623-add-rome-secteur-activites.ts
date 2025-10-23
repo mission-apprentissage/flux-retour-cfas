@@ -1,8 +1,5 @@
-import { addJob } from "job-processor";
+import { hydrateRomeSecteurActivites } from "@/jobs/hydrate/rome/hydrate-rome";
 
 export const up = async () => {
-  addJob({
-    name: "tmp:hydrate:rome-secteur-activites",
-    queued: true,
-  });
+  return hydrateRomeSecteurActivites();
 };
