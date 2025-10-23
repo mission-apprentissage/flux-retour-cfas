@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.globalControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.downloadSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background-color: #f6f6f6;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.downloadText {
+  font-size: 14px;
+  color: var(--text-default-grey);
+}
+
+.downloadButton {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.searchSection {
+  max-width: 40%;
+  margin-bottom: 2rem;
+}
+
+.moisSection {
+  scroll-margin-top: 2rem;
+}
+
+.moisHeader {
+  background-color: #f6f6f6;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.25rem;
+}
+
+.moisTitle {
+  margin: 0;
+  color: #2f4077;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.moisCount {
+  font-weight: 700;
+  color: #2f4077;
+  font-size: 24px;
+}
+
+.globalPagination {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-default-grey);
+  display: flex;
+  justify-content: center;
+}
+
+.pageInfo {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  font-weight: 500;
+  color: var(--text-default-grey);
+}
+
+@media (max-width: 768px) {
+  .downloadSection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

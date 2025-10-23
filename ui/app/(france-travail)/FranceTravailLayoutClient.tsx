@@ -6,8 +6,9 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
-import { useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
-import { ISecteurArborescence } from "@/app/_components/france-travail/types";
+import { useArborescence, useMoisTraites } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { ISecteurArborescence, IMoisTraite } from "@/app/_components/france-travail/types";
+import { formatMoisLabel } from "@/app/_components/france-travail/utils/dateFormatting";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 
 function FTSideMenu({
@@ -15,11 +16,17 @@ function FTSideMenu({
   totalATraiter,
   dejaTraiteCount,
   selectedSecteur,
+  moisList,
+  selectedMois,
+  isDejaTraitesPage,
 }: {
   secteurs: ISecteurArborescence[];
   totalATraiter: number;
   dejaTraiteCount: number;
   selectedSecteur: number | null;
+  moisList: IMoisTraite[];
+  selectedMois: string | null;
+  isDejaTraitesPage: boolean;
 }) {
   const sideMenuItems = useMemo(() => {
     return [
@@ -29,7 +36,7 @@ function FTSideMenu({
           href: "/france-travail",
         },
         isActive: false,
-        expandedByDefault: true,
+        expandedByDefault: !isDejaTraitesPage,
         items: secteurs.map((secteur) => ({
           text: `${secteur.libelle_secteur} (${secteur.count})`,
           linkProps: {
@@ -44,9 +51,17 @@ function FTSideMenu({
           href: "/france-travail/deja-traites",
         },
         isActive: false,
+        expandedByDefault: isDejaTraitesPage,
+        items: moisList.map((mois) => ({
+          text: `${formatMoisLabel(mois.mois)} (${mois.count})`,
+          linkProps: {
+            href: `/france-travail/deja-traites?mois=${mois.mois}`,
+          },
+          isActive: selectedMois !== null && selectedMois === mois.mois,
+        })),
       },
     ];
-  }, [secteurs, totalATraiter, dejaTraiteCount, selectedSecteur]);
+  }, [secteurs, totalATraiter, dejaTraiteCount, selectedSecteur, moisList, selectedMois, isDejaTraitesPage]);
 
   return (
     <SideMenu
@@ -63,7 +78,11 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
   const pathname = usePathname();
 
   const isEffectifDetailPage = useMemo(() => {
-    return pathname?.includes("/effectif/");
+    return pathname?.includes("/effectif/") ?? false;
+  }, [pathname]);
+
+  const isDejaTraitesPage = useMemo(() => {
+    return pathname?.includes("/deja-traites") ?? false;
   }, [pathname]);
 
   const selectedSecteur = useMemo(() => {
@@ -71,11 +90,19 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
     return match ? Number(match[1]) : null;
   }, [pathname]);
 
+  const selectedMois = useMemo(() => {
+    if (!pathname?.includes("/deja-traites")) return null;
+    const urlParams = new URLSearchParams(pathname.split("?")[1] || "");
+    return urlParams.get("mois");
+  }, [pathname]);
+
   const { data: arborescenceData, error: arboError, isLoading: arboLoading } = useArborescence();
+  const { data: moisData, isLoading: moisLoading } = useMoisTraites();
 
   const secteurs = arborescenceData?.a_traiter.secteurs ?? [];
   const totalATraiter = arborescenceData?.a_traiter.total ?? 0;
   const dejaTraiteCount = arborescenceData?.traite ?? 0;
+  const moisList = moisData?.mois ?? [];
 
   if (isEffectifDetailPage) {
     return <div className="fr-container">{children}</div>;
@@ -93,7 +120,7 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
     );
   }
 
-  if (arboLoading) {
+  if (arboLoading || (isDejaTraitesPage && moisLoading)) {
     return <PageWithSidebarSkeleton />;
   }
 
@@ -106,6 +133,9 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
             totalATraiter={totalATraiter}
             dejaTraiteCount={dejaTraiteCount}
             selectedSecteur={selectedSecteur}
+            moisList={moisList}
+            selectedMois={selectedMois}
+            isDejaTraitesPage={isDejaTraitesPage}
           />
         </div>
 
