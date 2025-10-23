@@ -4,6 +4,8 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { EffectifCoordonnees } from "@/app/_components/france-travail/effectif/EffectifCoordonnees";
+import { EffectifPersonalInfo } from "@/app/_components/france-travail/effectif/EffectifPersonalInfo";
 import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
 import { FTEffectifParcours } from "@/app/_components/france-travail/FTEffectifParcours";
 import {
@@ -20,59 +22,10 @@ import {
 } from "@/app/_components/france-travail/utils";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { formatDate, getAge } from "@/app/_utils/date.utils";
-import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 
 import styles from "./EffectifDetailClient.module.css";
 import { EffectifFormationInfo } from "./EffectifFormationInfo";
 import { FTEffectifForm } from "./FTEffectifForm";
-
-interface EffectifPersonalInfoProps {
-  dateNaissance?: string;
-  adresse?: { commune?: string; code_postal?: string };
-  rqth?: boolean;
-}
-
-function EffectifPersonalInfo({ dateNaissance, adresse, rqth }: EffectifPersonalInfoProps) {
-  const age = getAge(dateNaissance);
-  return (
-    <>
-      <p className={styles.infoPara}>
-        Né(e) le {formatDate(dateNaissance) || "-"}, <b>{age ? `${age} ans` : ""}</b>
-      </p>
-      <p className={styles.infoPara}>
-        <i className={`fr-icon-home-4-line`} />
-        Réside à <b>{adresse?.commune || "-"}</b>({adresse?.code_postal || "-"})
-      </p>
-      <p className={styles.infoPara}>RQTH : {rqth ? "oui" : "non"}</p>
-    </>
-  );
-}
-
-interface EffectifCoordonneesProps {
-  telephone?: string;
-  courriel?: string;
-  responsableMail?: string;
-}
-
-function EffectifCoordonnees({ telephone, courriel, responsableMail }: EffectifCoordonneesProps) {
-  return (
-    <>
-      <p className={styles.coordTitle}>Coordonnées</p>
-      <p className={styles.infoPara}>
-        <span>{formatPhoneNumber(telephone) || "-"}</span> <span>{courriel || "-"}</span>
-      </p>
-      {responsableMail && (
-        <>
-          <p className={styles.coordTitle}>Responsable légal</p>
-          <p className={styles.infoPara}>
-            <span>{responsableMail}</span>
-          </p>
-        </>
-      )}
-    </>
-  );
-}
 
 const SUCCESS_DISPLAY_DURATION = 1000;
 
@@ -244,11 +197,14 @@ export default function EffectifDetailClient() {
               dateNaissance={effectif.date_de_naissance}
               adresse={effectif.adresse}
               rqth={effectif.rqth}
+              infoParaClassName={styles.infoPara}
             />
             <EffectifCoordonnees
               telephone={effectif.telephone}
               courriel={effectif.courriel}
               responsableMail={effectif.responsable_mail}
+              coordTitleClassName={styles.coordTitle}
+              infoParaClassName={styles.infoPara}
             />
           </div>
 
