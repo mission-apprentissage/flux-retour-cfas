@@ -14,6 +14,8 @@ import {
   getEffectifFromFranceTravailId,
   getEffectifSecteurActivitesArboresence,
   getFranceTravailEffectifsByCodeSecteur,
+  getFranceTravailEffectifsTraitesMois,
+  getFranceTravailEffectifsTraitesParMois,
   updateFranceTravailData,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -29,6 +31,17 @@ export default () => {
       query: franceTravailEffectifsQuerySchema,
     }),
     returnResult(getEffectifsTraites)
+  );
+  router.get("/effectifs/traite/mois", returnResult(getEffectifsTraitesMois));
+  router.get(
+    "/effectifs/traite/mois/:mois",
+    validateRequestMiddleware({
+      params: z.object({
+        mois: z.string().regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM"),
+      }),
+      query: franceTravailEffectifsQuerySchema,
+    }),
+    returnResult(getEffectifsTraitesParMois)
   );
 
   router.get(
@@ -118,4 +131,23 @@ const updateEffectifById = async (req) => {
   const body = req.body;
 
   await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
+};
+
+const getEffectifsTraitesMois = async (_req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  return getFranceTravailEffectifsTraitesMois(ftOrga.code_region);
+};
+
+const getEffectifsTraitesParMois = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
+  const mois = req.params.mois;
+
+  return getFranceTravailEffectifsTraitesParMois(ftOrga.code_region, mois, {
+    page,
+    limit,
+    search,
+    sort,
+    order,
+  });
 };

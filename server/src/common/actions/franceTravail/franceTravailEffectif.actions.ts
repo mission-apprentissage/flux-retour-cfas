@@ -249,6 +249,36 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
 
     pipeline.push(...additionalPipelineStages);
 
+    // Pour les effectifs traités, ajouter la date de traitement
+    if (type === API_EFFECTIF_LISTE.TRAITE) {
+      pipeline.push({
+        $addFields: {
+          date_traitement: {
+            $let: {
+              vars: {
+                ftDataArray: { $objectToArray: "$ft_data" },
+              },
+              in: {
+                $first: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$$ftDataArray",
+                        as: "entry",
+                        cond: { $ne: ["$$entry.v", null] },
+                      },
+                    },
+                    as: "filteredEntry",
+                    in: "$$filteredEntry.v.created_at",
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
     pipeline.push({
       $facet: {
         results: [
@@ -264,6 +294,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
               date_inscription: 1,
               ft_data: 1,
               jours_sans_contrat: 1,
+              date_traitement: 1,
               organisme: {
                 _id: "$organisme._id",
                 nom: "$organisme.nom",
@@ -551,4 +582,204 @@ export const updateFranceTravailData = (
       },
     }
   );
+};
+
+export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) => {
+  try {
+    const pipeline = buildEffectifsPipeline({}, codeRegion);
+
+    pipeline.push(matchATraiter(false));
+
+    // Extraire le mois de traitement (date de la première clé non-null dans ft_data)
+    pipeline.push({
+      $addFields: {
+        date_traitement: {
+          $let: {
+            vars: {
+              ftDataArray: { $objectToArray: "$ft_data" },
+            },
+            in: {
+              $first: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$$ftDataArray",
+                      as: "entry",
+                      cond: { $ne: ["$$entry.v", null] },
+                    },
+                  },
+                  as: "filteredEntry",
+                  in: "$$filteredEntry.v.created_at",
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Filtrer les documents sans date de traitement
+    pipeline.push({
+      $match: {
+        date_traitement: { $ne: null },
+      },
+    });
+
+    // Grouper par mois (format YYYY-MM)
+    pipeline.push({
+      $group: {
+        _id: {
+          $dateToString: {
+            format: "%Y-%m",
+            date: "$date_traitement",
+          },
+        },
+        count: { $sum: 1 },
+      },
+    });
+
+    // Trier par mois décroissant (plus récent en premier)
+    pipeline.push({
+      $sort: { _id: -1 },
+    });
+
+    // Reformater la sortie
+    pipeline.push({
+      $project: {
+        _id: 0,
+        mois: "$_id",
+        count: 1,
+      },
+    });
+
+    const mois = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+
+    return { mois };
+  } catch (error) {
+    logger.error("Error in getFranceTravailEffectifsTraitesMois", { codeRegion, error });
+    throw error;
+  }
+};
+
+export const getFranceTravailEffectifsTraitesParMois = async (
+  codeRegion: string,
+  mois: string,
+  options?: {
+    page: number;
+    limit: number;
+    search?: string;
+    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    order?: "asc" | "desc";
+  }
+) => {
+  try {
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    // Parse le mois (format YYYY-MM)
+    const [year, month] = mois.split("-").map(Number);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 1);
+
+    const pipeline = buildEffectifsPipeline({}, codeRegion, {
+      search: options?.search,
+      sort: options?.sort,
+      order: options?.order,
+    });
+
+    pipeline.push(matchATraiter(false));
+
+    // Extraire la date de traitement
+    pipeline.push({
+      $addFields: {
+        date_traitement: {
+          $let: {
+            vars: {
+              ftDataArray: { $objectToArray: "$ft_data" },
+            },
+            in: {
+              $first: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$$ftDataArray",
+                      as: "entry",
+                      cond: { $ne: ["$$entry.v", null] },
+                    },
+                  },
+                  as: "filteredEntry",
+                  in: "$$filteredEntry.v.created_at",
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Filtrer par mois
+    pipeline.push({
+      $match: {
+        date_traitement: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      },
+    });
+
+    pipeline.push({
+      $facet: {
+        results: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 1,
+              created_at: 1,
+              effectif_id: 1,
+              effectif_snapshot: 1,
+              code_region: 1,
+              date_inscription: 1,
+              ft_data: 1,
+              jours_sans_contrat: 1,
+              date_traitement: 1,
+              organisme: {
+                _id: "$organisme._id",
+                nom: "$organisme.nom",
+                raison_sociale: "$organisme.raison_sociale",
+                enseigne: "$organisme.enseigne",
+              },
+            },
+          },
+        ],
+        totalCount: [{ $count: "count" }],
+      },
+    });
+
+    pipeline.push({
+      $project: {
+        results: "$results",
+        total: { $arrayElemAt: ["$totalCount.count", 0] },
+      },
+    });
+
+    const [data] = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+
+    const total = data?.total || 0;
+
+    return {
+      effectifs: data?.results || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+      mois,
+    };
+  } catch (error) {
+    logger.error("Error in getFranceTravailEffectifsTraitesParMois", { codeRegion, mois, options, error });
+    throw error;
+  }
 };
