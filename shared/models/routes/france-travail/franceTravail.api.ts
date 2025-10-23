@@ -24,7 +24,7 @@ export type IFranceTravailEffectifsQuery = z.infer<typeof franceTravailEffectifs
 
 export const effectifFranceTravailQuerySchema = z.object({
   nom_liste: zApiEffectifListeEnum,
-  code_secteur: codeSecteurSchema,
+  code_secteur: codeSecteurSchema.optional(),
   search: z.string().optional(),
   sort: franceTravailEffectifsSortSchema,
   order: franceTravailEffectifsSortOrderSchema,
