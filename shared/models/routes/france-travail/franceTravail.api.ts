@@ -31,3 +31,14 @@ export const effectifFranceTravailQuerySchema = z.object({
 });
 
 export type IEffectifFranceTravailQuery = z.infer<typeof effectifFranceTravailQuerySchema>;
+
+export const franceTravailEffectifsTraitesMoisQuerySchema = z.object({
+  page: z.coerce.number().positive().max(10000).default(1),
+  limit: z.coerce.number().positive().min(1).max(100).default(20),
+  search: z.string().optional(),
+  sort: franceTravailEffectifsSortSchema,
+  order: franceTravailEffectifsSortOrderSchema,
+  mois: z.string().regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM"),
+});
+
+export type IFranceTravailEffectifsTraitesMoisQuery = z.infer<typeof franceTravailEffectifsTraitesMoisQuerySchema>;

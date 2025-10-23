@@ -258,7 +258,7 @@ export function FTEffectifsTable({
           onPageSizeChange={handlePageSizeChange}
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
-          hasPagination
+          hasPagination={true}
         />
       )}
     </div>

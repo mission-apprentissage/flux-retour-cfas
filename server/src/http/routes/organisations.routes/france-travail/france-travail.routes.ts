@@ -14,6 +14,8 @@ import {
   getEffectifFromFranceTravailId,
   getEffectifSecteurActivitesArboresence,
   getFranceTravailEffectifsByCodeSecteur,
+  getFranceTravailEffectifsTraitesMois,
+  getFranceTravailEffectifsTraitesParMois,
   updateFranceTravailData,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -23,12 +25,16 @@ export default () => {
   const router = express.Router();
 
   router.get("/arborescence", returnResult(getArborescence));
+  router.get("/effectifs/traite/mois", returnResult(getEffectifsTraitesMois));
   router.get(
-    "/effectifs/traite",
+    "/effectifs/traite/mois/:mois",
     validateRequestMiddleware({
+      params: z.object({
+        mois: z.string().regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM"),
+      }),
       query: franceTravailEffectifsQuerySchema,
     }),
-    returnResult(getEffectifsTraites)
+    returnResult(getEffectifsTraitesParMois)
   );
 
   router.get(
@@ -87,19 +93,6 @@ const getArborescence = async (_req, { locals }) => {
   return getEffectifSecteurActivitesArboresence(ftOrga.code_region);
 };
 
-const getEffectifsTraites = async (req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
-
-  return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.TRAITE, undefined, {
-    page,
-    limit,
-    search,
-    sort,
-    order,
-  });
-};
-
 const getEffectifById = async (req, { locals }) => {
   const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
   const { nom_liste, code_secteur, search, sort, order } = req.query as IEffectifFranceTravailQuery;
@@ -118,4 +111,23 @@ const updateEffectifById = async (req) => {
   const body = req.body;
 
   await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
+};
+
+const getEffectifsTraitesMois = async (_req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  return getFranceTravailEffectifsTraitesMois(ftOrga.code_region);
+};
+
+const getEffectifsTraitesParMois = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
+  const mois = req.params.mois;
+
+  return getFranceTravailEffectifsTraitesParMois(ftOrga.code_region, mois, {
+    page,
+    limit,
+    search,
+    sort,
+    order,
+  });
 };

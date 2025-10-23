@@ -7,6 +7,8 @@ import {
   IArborescenceResponse,
   IEffectifDetailResponse,
   IEffectifsBySecteurResponse,
+  IEffectifsTraitesParMoisResponse,
+  IMoisTraitesResponse,
 } from "../types";
 
 export const franceTravailQueryKeys = {
@@ -16,6 +18,9 @@ export const franceTravailQueryKeys = {
     [...franceTravailQueryKeys.all, "effectifs", "secteur", codeSecteur, params] as const,
   effectifDetail: (id: string, params: Record<string, any>) =>
     [...franceTravailQueryKeys.all, "effectif", id, params] as const,
+  moisTraites: () => [...franceTravailQueryKeys.all, "mois-traites"] as const,
+  effectifsTraitesParMois: (mois: string, params: Record<string, any>) =>
+    [...franceTravailQueryKeys.all, "effectifs", "traites", "mois", mois, params] as const,
 };
 
 const fetchArborescence = async (): Promise<IArborescenceResponse> => {
@@ -93,4 +98,41 @@ export function useUpdateEffectif() {
       queryClient.invalidateQueries(franceTravailQueryKeys.all);
     },
   });
+}
+
+const fetchMoisTraites = async (): Promise<IMoisTraitesResponse> => {
+  return _get("/api/v1/organisation/france-travail/effectifs/traite/mois");
+};
+
+export function useMoisTraites() {
+  return useQuery(franceTravailQueryKeys.moisTraites(), fetchMoisTraites, {
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    retry: 3,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+const fetchEffectifsTraitesParMois = async (
+  mois: string,
+  params: Record<string, any>
+): Promise<IEffectifsTraitesParMoisResponse> => {
+  return _get(`/api/v1/organisation/france-travail/effectifs/traite/mois/${mois}`, { params });
+};
+
+export function useEffectifsTraitesParMois(
+  mois: string | null,
+  params: { page?: number; limit?: number; search?: string } = {}
+) {
+  return useQuery(
+    franceTravailQueryKeys.effectifsTraitesParMois(mois!, params),
+    () => fetchEffectifsTraitesParMois(mois!, params),
+    {
+      enabled: mois !== null,
+      staleTime: 30 * 1000,
+      retry: 3,
+      refetchOnWindowFocus: false,
+    }
+  );
 }

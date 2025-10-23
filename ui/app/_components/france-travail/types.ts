@@ -40,6 +40,7 @@ export interface IEffectifFranceTravail {
     valeur_courante: number;
   };
   ft_data?: Record<string, unknown>;
+  date_traitement?: string;
 }
 
 export interface IEffectifsBySecteurResponse {
@@ -134,4 +135,24 @@ export interface IEffectifDetailResponse {
   previous: { id: string; nom: string; prenom: string } | null;
   currentIndex: number | null;
   nomListe: "a_traiter" | "traite";
+}
+
+export interface IMoisTraite {
+  mois: string;
+  count: number;
+}
+
+export interface IMoisTraitesResponse {
+  mois: IMoisTraite[];
+}
+
+export interface IEffectifsTraitesParMoisResponse {
+  effectifs: IEffectifFranceTravail[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  mois: string;
 }
