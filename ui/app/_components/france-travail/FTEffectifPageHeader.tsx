@@ -11,7 +11,7 @@ interface FTEffectifPageHeaderProps {
   total?: number;
   currentIndex?: number | null;
   isLoading?: boolean;
-  codeSecteur: number;
+  codeSecteur?: number;
   buildQueryString: (includePageLimit?: boolean) => string;
 }
 
@@ -26,7 +26,10 @@ export function FTEffectifPageHeader({
 }: FTEffectifPageHeaderProps) {
   const getHref = (id: string) => {
     const query = buildQueryString(false);
-    return `/france-travail/${codeSecteur}/effectif/${id}${query ? `?${query}` : ""}`;
+    if (codeSecteur) {
+      return `/france-travail/${codeSecteur}/effectif/${id}${query ? `?${query}` : ""}`;
+    }
+    return `/france-travail/deja-traites/effectif/${id}${query ? `?${query}` : ""}`;
   };
 
   return (
@@ -49,7 +52,7 @@ export function FTEffectifPageHeader({
           <>
             <div className={styles.pageHeaderDesktopText}>
               <p className={styles.pageHeaderText}>
-                Dossier n°{currentIndex + 1} sur {total} à traiter
+                Dossier n°{currentIndex + 1} sur {total} {codeSecteur ? "à traiter" : "traité"}
               </p>
             </div>
 
