@@ -249,7 +249,6 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
 
     pipeline.push(...additionalPipelineStages);
 
-    // Pour les effectifs traités, ajouter la date de traitement
     if (type === API_EFFECTIF_LISTE.TRAITE) {
       pipeline.push({
         $addFields: {
@@ -590,7 +589,6 @@ export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) =
 
     pipeline.push(matchATraiter(false));
 
-    // Extraire le mois de traitement (date de la première clé non-null dans ft_data)
     pipeline.push({
       $addFields: {
         date_traitement: {
@@ -618,14 +616,12 @@ export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) =
       },
     });
 
-    // Filtrer les documents sans date de traitement
     pipeline.push({
       $match: {
         date_traitement: { $ne: null },
       },
     });
 
-    // Grouper par mois (format YYYY-MM)
     pipeline.push({
       $group: {
         _id: {
@@ -638,12 +634,10 @@ export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) =
       },
     });
 
-    // Trier par mois décroissant (plus récent en premier)
     pipeline.push({
       $sort: { _id: -1 },
     });
 
-    // Reformater la sortie
     pipeline.push({
       $project: {
         _id: 0,
@@ -677,7 +671,6 @@ export const getFranceTravailEffectifsTraitesParMois = async (
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    // Parse le mois (format YYYY-MM)
     const [year, month] = mois.split("-").map(Number);
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 1);
@@ -690,7 +683,6 @@ export const getFranceTravailEffectifsTraitesParMois = async (
 
     pipeline.push(matchATraiter(false));
 
-    // Extraire la date de traitement
     pipeline.push({
       $addFields: {
         date_traitement: {
@@ -718,7 +710,6 @@ export const getFranceTravailEffectifsTraitesParMois = async (
       },
     });
 
-    // Filtrer par mois
     pipeline.push({
       $match: {
         date_traitement: {

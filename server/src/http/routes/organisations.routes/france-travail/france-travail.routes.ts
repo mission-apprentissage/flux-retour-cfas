@@ -25,13 +25,6 @@ export default () => {
   const router = express.Router();
 
   router.get("/arborescence", returnResult(getArborescence));
-  router.get(
-    "/effectifs/traite",
-    validateRequestMiddleware({
-      query: franceTravailEffectifsQuerySchema,
-    }),
-    returnResult(getEffectifsTraites)
-  );
   router.get("/effectifs/traite/mois", returnResult(getEffectifsTraitesMois));
   router.get(
     "/effectifs/traite/mois/:mois",
@@ -98,19 +91,6 @@ export default () => {
 const getArborescence = async (_req, { locals }) => {
   const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
   return getEffectifSecteurActivitesArboresence(ftOrga.code_region);
-};
-
-const getEffectifsTraites = async (req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
-
-  return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.TRAITE, undefined, {
-    page,
-    limit,
-    search,
-    sort,
-    order,
-  });
 };
 
 const getEffectifById = async (req, { locals }) => {
