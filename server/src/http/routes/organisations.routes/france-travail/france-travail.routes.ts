@@ -1,3 +1,4 @@
+import Boom from "boom";
 import express from "express";
 import { API_EFFECTIF_LISTE, IOrganisationFranceTravail } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
@@ -11,6 +12,7 @@ import {
 import { z } from "zod";
 
 import {
+  getAllFranceTravailEffectifsByCodeSecteur,
   getEffectifFromFranceTravailId,
   getEffectifSecteurActivitesArboresence,
   getFranceTravailEffectifsByCodeSecteur,
@@ -18,6 +20,10 @@ import {
   getFranceTravailEffectifsTraitesParMois,
   updateFranceTravailData,
 } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { getSecteurActivitesByCode } from "@/common/actions/rome/rome.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
+import { getAgeFromDate } from "@/common/utils/miscUtils";
+import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -70,6 +76,16 @@ export default () => {
     returnResult(getEffectifById)
   );
 
+  router.get(
+    "/export/effectifs/:code_secteur",
+    validateRequestMiddleware({
+      params: z.object({
+        code_secteur: codeSecteurSchema,
+      }),
+    }),
+    returnResult(exportEffectifByCodeSecteur)
+  );
+
   router.put(
     "/effectif/:id",
     validateRequestMiddleware({
@@ -111,6 +127,79 @@ const updateEffectifById = async (req) => {
   const body = req.body;
 
   await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
+};
+
+const exportEffectifByCodeSecteur = async (req, res) => {
+  const ftOrga = res.locals.franceTravail as IOrganisationFranceTravail;
+  const code_secteur = Number(req.params.code_secteur);
+  const secteurActivite = await getSecteurActivitesByCode(code_secteur);
+
+  if (!secteurActivite) {
+    throw Boom.notFound("Secteur d'activité introuvable");
+  }
+
+  const fileName = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
+
+  const columns = [
+    { name: "Prénom", id: "prenom" },
+    { name: "Nom", id: "nom" },
+    { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
+    { name: "Ville de résidence", id: "commune" },
+    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "Téléphone", id: "telephone" },
+    { name: "Email", id: "email" },
+    { name: "Téléphone responsable légal 1", id: "telephone_responsable_1" },
+    { name: "Email responsable légal 1", id: "email_responsable_1" },
+    { name: "Téléphone responsable légal 2", id: "telephone_responsable_2" },
+    { name: "Email responsable légal 2", id: "email_responsable_2" },
+    { name: "Nom du CFA", id: "organisme_nom" },
+    { name: "Commune du CFA", id: "organisme_commune" },
+    { name: "Code postal du CFA", id: "organisme_code_postal" },
+    { name: "Téléphone du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "telephone" },
+    { name: "Email du CFA (utilisateur Tableau de Bord)", array: "tdb_organisme_contacts", id: "email" },
+    { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
+    { name: "Intitulé de la formation", id: "libelle_formation" },
+    { name: "Niveau de la formation", id: "niveau_formation" },
+    { name: "Date d'inscription", id: "date_inscription", transform: (d) => new Date(d) },
+    {
+      name: "Durée sans contrat /90j",
+      id: "date_inscription",
+      transform: (d) => {
+        const diffTime = Math.abs(new Date().getTime() - new Date(d).getTime());
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      },
+    },
+  ];
+  const worksheetsInfo = [
+    {
+      worksheetName: `A traiter - ${secteurActivite.libelle_secteur}`,
+      logsTag: `ft_a_traiter` as const,
+      data: await getAllFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, code_secteur),
+    },
+  ];
+  const templateFile = await addSheetToXlscFile(
+    "mission-locale/modele-inscrit-sans-contrat-ft.xlsx",
+    worksheetsInfo,
+    columns
+  );
+  res.attachment(fileName);
+  res.contentType("xlsx");
+
+  const date = new Date();
+  await Promise.all(
+    worksheetsInfo.map(async ({ logsTag, data }) => {
+      return createTelechargementListeNomLog(
+        logsTag,
+        data.map(({ _id }) => _id.toString()),
+        date,
+        req.user?._id,
+        undefined,
+        ftOrga._id
+      );
+    })
+  );
+
+  return templateFile?.xlsx.writeBuffer();
 };
 
 const getEffectifsTraitesMois = async (_req, { locals }) => {

@@ -30,3 +30,11 @@ export const getSecteurActivitesByCodeRome = async (codes: Array<string>) => {
     .toArray();
   return data;
 };
+
+export const getSecteurActivitesByCode = async (code: number) => {
+  const data = await romeSecteurActivitesDb().findOne(
+    { code_secteur: code },
+    { projection: { _id: 0, libelle_secteur: 1 } }
+  );
+  return data;
+};
