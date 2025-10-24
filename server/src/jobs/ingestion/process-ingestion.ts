@@ -22,6 +22,7 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -207,7 +208,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           },
         }
       );
-      // await createMissionLocaleSnapshot(upsertedEffectif);
+      await createMissionLocaleSnapshot(upsertedEffectif);
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {
@@ -243,7 +244,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
       { _id: effectifQueue._id },
       {
         $set: {
-          effectifv2_id: effectifv2?._id,
           validation_errors: [],
           error: formatError(err).toString(),
           processed_at: currentDate,
@@ -342,7 +342,12 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         return NEVER;
       }
 
-      const certification = await getEffectifCertification(effectif);
+      const certification = await getEffectifCertification({
+        cfd: effectif.formation?.cfd || null,
+        rncp: effectif.formation?.rncp || null,
+        date_entree: effectif.formation?.date_entree || null,
+        date_fin: effectif.formation?.date_fin || null,
+      });
 
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin

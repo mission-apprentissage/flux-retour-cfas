@@ -116,6 +116,1036 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
       "additionalProperties": false,
       "bsonType": "object",
       "properties": {
+        "session": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "properties": {
+                "base_legale": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "cfd": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "abrogation": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "creation": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                          },
+                          "required": [
+                            "creation",
+                            "abrogation",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "cfd",
+                  ],
+                },
+                "blocs_competences": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "code": {
+                                "bsonType": "string",
+                                "pattern": "^(RNCP\\d{3,5}BC)?\\d{1,2}$",
+                              },
+                              "intitule": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                            "required": [
+                              "code",
+                              "intitule",
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "rncp",
+                  ],
+                },
+                "continuite": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "cfd": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "code": {
+                                "bsonType": "string",
+                                "pattern": "^[A-Z0-9]{3}\\d{3}[A-Z0-9]{2}$",
+                              },
+                              "courant": {
+                                "bsonType": "bool",
+                              },
+                              "fermeture": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                          {
+                                            "bsonType": "string",
+                                          },
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                        ],
+                                      },
+                                      {
+                                        "bsonType": "null",
+                                      },
+                                    ],
+                                  },
+                                  {
+                                    "bsonType": "null",
+                                  },
+                                ],
+                              },
+                              "ouverture": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                          {
+                                            "bsonType": "string",
+                                          },
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                        ],
+                                      },
+                                      {
+                                        "bsonType": "null",
+                                      },
+                                    ],
+                                  },
+                                  {
+                                    "bsonType": "null",
+                                  },
+                                ],
+                              },
+                            },
+                            "required": [
+                              "ouverture",
+                              "fermeture",
+                              "code",
+                              "courant",
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "actif": {
+                                "bsonType": "bool",
+                              },
+                              "activation": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                          {
+                                            "bsonType": "string",
+                                          },
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                        ],
+                                      },
+                                      {
+                                        "bsonType": "null",
+                                      },
+                                    ],
+                                  },
+                                  {
+                                    "bsonType": "null",
+                                  },
+                                ],
+                              },
+                              "code": {
+                                "bsonType": "string",
+                                "pattern": "^RNCP\\d{3,5}$",
+                              },
+                              "courant": {
+                                "bsonType": "bool",
+                              },
+                              "fin_enregistrement": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                          {
+                                            "bsonType": "string",
+                                          },
+                                          {
+                                            "bsonType": "date",
+                                          },
+                                        ],
+                                      },
+                                      {
+                                        "bsonType": "null",
+                                      },
+                                    ],
+                                  },
+                                  {
+                                    "bsonType": "null",
+                                  },
+                                ],
+                              },
+                            },
+                            "required": [
+                              "activation",
+                              "fin_enregistrement",
+                              "code",
+                              "courant",
+                              "actif",
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "cfd",
+                    "rncp",
+                  ],
+                },
+                "convention_collectives": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "intitule": {
+                                "bsonType": "string",
+                              },
+                              "numero": {
+                                "bsonType": "string",
+                              },
+                            },
+                            "required": [
+                              "numero",
+                              "intitule",
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "rncp",
+                  ],
+                },
+                "domaines": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "formacodes": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "bsonType": "object",
+                                "properties": {
+                                  "code": {
+                                    "bsonType": "string",
+                                  },
+                                  "intitule": {
+                                    "bsonType": "string",
+                                  },
+                                },
+                                "required": [
+                                  "code",
+                                  "intitule",
+                                ],
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "rncp",
+                      ],
+                    },
+                    "nsf": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "cfd": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "code": {
+                                  "bsonType": "string",
+                                },
+                                "intitule": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                },
+                              },
+                              "required": [
+                                "code",
+                                "intitule",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "bsonType": "object",
+                                "properties": {
+                                  "code": {
+                                    "bsonType": "string",
+                                    "pattern": "^\\d{2,3}[a-z]?$",
+                                  },
+                                  "intitule": {
+                                    "bsonType": [
+                                      "string",
+                                      "null",
+                                    ],
+                                  },
+                                },
+                                "required": [
+                                  "code",
+                                  "intitule",
+                                ],
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "cfd",
+                        "rncp",
+                      ],
+                    },
+                    "rome": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "bsonType": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "bsonType": "object",
+                                "properties": {
+                                  "code": {
+                                    "bsonType": "string",
+                                    "pattern": "^[A-Z]{1}\\d{0,4}$",
+                                  },
+                                  "intitule": {
+                                    "bsonType": "string",
+                                  },
+                                },
+                                "required": [
+                                  "code",
+                                  "intitule",
+                                ],
+                              },
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "rncp",
+                      ],
+                    },
+                  },
+                  "required": [
+                    "formacodes",
+                    "nsf",
+                    "rome",
+                  ],
+                },
+                "identifiant": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "cfd": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "pattern": "^[A-Z0-9]{3}\\d{3}[A-Z0-9]{2}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "pattern": "^RNCP\\d{3,5}$",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "rncp_anterieur_2019": {
+                      "bsonType": [
+                        "bool",
+                        "null",
+                      ],
+                    },
+                  },
+                  "required": [
+                    "cfd",
+                    "rncp",
+                    "rncp_anterieur_2019",
+                  ],
+                },
+                "intitule": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "cfd": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "court": {
+                              "bsonType": "string",
+                            },
+                            "long": {
+                              "bsonType": "string",
+                            },
+                          },
+                          "required": [
+                            "long",
+                            "court",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "niveau": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "cfd": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "europeen": {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "string",
+                                      "enum": [
+                                        "1",
+                                        "2",
+                                        "3",
+                                        "4",
+                                        "5",
+                                        "6",
+                                        "7",
+                                        "8",
+                                      ],
+                                    },
+                                    {
+                                      "bsonType": "null",
+                                    },
+                                  ],
+                                },
+                                "formation_diplome": {
+                                  "bsonType": "string",
+                                },
+                                "interministeriel": {
+                                  "bsonType": "string",
+                                },
+                                "libelle": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                },
+                                "sigle": {
+                                  "bsonType": "string",
+                                },
+                              },
+                              "required": [
+                                "europeen",
+                                "formation_diplome",
+                                "interministeriel",
+                                "libelle",
+                                "sigle",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "europeen": {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "string",
+                                      "enum": [
+                                        "1",
+                                        "2",
+                                        "3",
+                                        "4",
+                                        "5",
+                                        "6",
+                                        "7",
+                                        "8",
+                                      ],
+                                    },
+                                    {
+                                      "bsonType": "null",
+                                    },
+                                  ],
+                                },
+                              },
+                              "required": [
+                                "europeen",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "cfd",
+                        "rncp",
+                      ],
+                    },
+                    "rncp": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                  },
+                  "required": [
+                    "cfd",
+                    "niveau",
+                    "rncp",
+                  ],
+                },
+                "periode_validite": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "cfd": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "derniere_session": {
+                              "anyOf": [
+                                {
+                                  "bsonType": "int",
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "fermeture": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "ouverture": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "premiere_session": {
+                              "anyOf": [
+                                {
+                                  "bsonType": "int",
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                          },
+                          "required": [
+                            "ouverture",
+                            "fermeture",
+                            "premiere_session",
+                            "derniere_session",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "debut": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                            },
+                            {
+                              "bsonType": "string",
+                            },
+                            {
+                              "bsonType": "date",
+                            },
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "fin": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "bsonType": "date",
+                            },
+                            {
+                              "bsonType": "string",
+                            },
+                            {
+                              "bsonType": "date",
+                            },
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "rncp": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "actif": {
+                              "bsonType": "bool",
+                            },
+                            "activation": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "debut_parcours": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                            "fin_enregistrement": {
+                              "anyOf": [
+                                {
+                                  "anyOf": [
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                    {
+                                      "bsonType": "string",
+                                    },
+                                    {
+                                      "bsonType": "date",
+                                    },
+                                  ],
+                                },
+                                {
+                                  "bsonType": "null",
+                                },
+                              ],
+                            },
+                          },
+                          "required": [
+                            "actif",
+                            "activation",
+                            "debut_parcours",
+                            "fin_enregistrement",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "debut",
+                    "fin",
+                    "cfd",
+                    "rncp",
+                  ],
+                },
+                "type": {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "certificateurs_rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "nom": {
+                                "bsonType": "string",
+                              },
+                              "siret": {
+                                "bsonType": "string",
+                              },
+                            },
+                            "required": [
+                              "siret",
+                              "nom",
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "enregistrement_rncp": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "Enregistrement de droit",
+                            "Enregistrement sur demande",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "gestionnaire_diplome": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "nature": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "cfd": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "code": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                },
+                                "libelle": {
+                                  "bsonType": [
+                                    "string",
+                                    "null",
+                                  ],
+                                },
+                              },
+                              "required": [
+                                "code",
+                                "libelle",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "cfd",
+                      ],
+                    },
+                    "voie_acces": {
+                      "additionalProperties": false,
+                      "bsonType": "object",
+                      "properties": {
+                        "rncp": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "bsonType": "object",
+                              "properties": {
+                                "apprentissage": {
+                                  "bsonType": "bool",
+                                },
+                                "candidature_individuelle": {
+                                  "bsonType": "bool",
+                                },
+                                "contrat_professionnalisation": {
+                                  "bsonType": "bool",
+                                },
+                                "experience": {
+                                  "bsonType": "bool",
+                                },
+                                "formation_continue": {
+                                  "bsonType": "bool",
+                                },
+                                "formation_statut_eleve": {
+                                  "bsonType": "bool",
+                                },
+                              },
+                              "required": [
+                                "apprentissage",
+                                "experience",
+                                "candidature_individuelle",
+                                "contrat_professionnalisation",
+                                "formation_continue",
+                                "formation_statut_eleve",
+                              ],
+                            },
+                            {
+                              "bsonType": "null",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "rncp",
+                      ],
+                    },
+                  },
+                  "required": [
+                    "nature",
+                    "gestionnaire_diplome",
+                    "enregistrement_rncp",
+                    "voie_acces",
+                    "certificateurs_rncp",
+                  ],
+                },
+              },
+              "required": [
+                "identifiant",
+                "intitule",
+                "base_legale",
+                "blocs_competences",
+                "convention_collectives",
+                "domaines",
+                "periode_validite",
+                "type",
+                "continuite",
+              ],
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
         "statut": {
           "additionalProperties": false,
           "bsonType": "object",
@@ -387,15 +1417,102 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
       ],
     },
     "informations_personnelles": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "rqth": {
-          "bsonType": "bool",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "email": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "rqth": {
+              "bsonType": "bool",
+            },
+            "telephone": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+          "required": [
+            "rqth",
+          ],
         },
-      },
-      "required": [
-        "rqth",
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "referent_handicap": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "email": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "nom": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "prenom": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "responsable_apprenant": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "email1": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "email2": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
     "session": {
@@ -427,7 +1544,6 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
     "adresse",
     "contrats",
     "derniere_transmission",
-    "informations_personnelles",
     "_computed",
   ],
 }
@@ -8318,6 +9434,18 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "duree_theorique_formation_mois": {
       "description": "Durée théorique de la formation en mois",
     },
+    "effectifV2_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+          "description": "Id de l'effectif v2 associé",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Id de l'effectif v2 associé",
+    },
     "effectif_id": {
       "anyOf": [
         {
@@ -8616,6 +9744,28 @@ exports[`validation-schema > should create validation schema for formationV2 > f
         "formateur_siret",
         "formateur_uai",
       ],
+    },
+    "organisme_formateur_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
+    },
+    "organisme_responsable_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
     },
   },
   "required": [
@@ -16468,6 +17618,65 @@ exports[`validation-schema > should create validation schema for personV2 > pers
         "nom",
         "prenom",
         "date_de_naissance",
+      ],
+    },
+    "parcours": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "chronologie": {
+              "bsonType": "array",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "date": {
+                    "bsonType": "date",
+                  },
+                  "id": {
+                    "bsonType": "objectId",
+                  },
+                },
+                "required": [
+                  "id",
+                  "date",
+                ],
+              },
+            },
+            "en_cours": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "date": {
+                      "bsonType": "date",
+                    },
+                    "id": {
+                      "bsonType": "objectId",
+                    },
+                  },
+                  "required": [
+                    "id",
+                    "date",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+          "required": [
+            "en_cours",
+            "chronologie",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
       ],
     },
   },
