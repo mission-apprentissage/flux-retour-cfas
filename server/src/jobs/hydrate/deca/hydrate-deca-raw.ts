@@ -337,7 +337,13 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     annee_scolaire: anneeScolaire,
   };
 
-  const certification = await getEffectifCertification(effectif);
+  const certification = await getEffectifCertification({
+    cfd: effectif?.formation?.cfd,
+    rncp: effectif?.formation?.rncp,
+    date_entree: dateDebutFormation,
+    date_fin: dateFinFormation,
+  });
+
   const computedFormation = await fiabilisationEffectifFormation(effectif, certification);
 
   return withComputedFields(
