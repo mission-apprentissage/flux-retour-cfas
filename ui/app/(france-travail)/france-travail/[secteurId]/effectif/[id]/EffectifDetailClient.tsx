@@ -105,7 +105,12 @@ export default function EffectifDetailClient() {
 
           const nextId = data?.next?.id;
           navigationTimeoutRef.current = setTimeout(() => {
-            if (saveNext && nextId) {
+            if (!nextId) {
+              router.push("/france-travail");
+              return;
+            }
+
+            if (saveNext) {
               const queryString = buildQueryString(false);
               router.push(`/france-travail/${codeSecteur}/effectif/${nextId}${queryString ? `?${queryString}` : ""}`);
             } else {
@@ -236,6 +241,7 @@ export default function EffectifDetailClient() {
               isSaving={submissionState.isSubmitting}
               hasSuccess={submissionState.hasSuccess}
               hasError={submissionState.hasError}
+              hasNext={!!data?.next}
             />
           </div>
         </div>
