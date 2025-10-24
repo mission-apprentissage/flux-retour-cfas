@@ -9,6 +9,7 @@ import {
   IOrganisationMissionLocale,
   IOrganisationARML,
   IOrganisationOrganismeFormation,
+  IOrganisationFranceTravail,
 } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -464,6 +465,14 @@ export const getAllARML = async (): Promise<IOrganisationARML[]> => {
   const organisations = await organisationsDb().find<IOrganisationARML>({ type: "ARML" }).toArray();
   if (!organisations) {
     throw Boom.notFound("Aucune ARML trouvée");
+  }
+  return organisations;
+};
+
+export const getAllFranceTravail = async (): Promise<IOrganisationFranceTravail[]> => {
+  const organisations = await organisationsDb().find<IOrganisationFranceTravail>({ type: "FRANCE_TRAVAIL" }).toArray();
+  if (!organisations) {
+    throw Boom.notFound("Aucune organisation France Travail trouvée");
   }
   return organisations;
 };

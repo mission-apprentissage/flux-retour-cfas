@@ -20,6 +20,10 @@ export const categoriesCompteInscription = [
     value: "carif_oref",
   },
   {
+    text: "Une structure régionale de France Travail",
+    value: "france_travail",
+  },
+  {
     text: "Autre organisation",
     value: "autre",
   },

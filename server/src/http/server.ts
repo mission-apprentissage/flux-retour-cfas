@@ -154,6 +154,7 @@ import franceTravailAuthentRoutes from "./routes/organisations.routes/france-tra
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
+import franceTravailPublicRoutes from "./routes/public.routes/france-travail.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
@@ -376,7 +377,8 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/v1/reseaux", getAllReseauxRoutes())
-    .use("/api/v1/mission-locale", missionLocalePublicRoutes());
+    .use("/api/v1/mission-locale", missionLocalePublicRoutes())
+    .use("/api/v1/france-travail", franceTravailPublicRoutes());
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
