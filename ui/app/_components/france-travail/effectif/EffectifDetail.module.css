@@ -1,0 +1,173 @@
+.pageContainer {
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.navigationContainer {
+  margin-bottom: 1.5rem;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 280px 1fr 450px;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 992px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.parcoursColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-right: 1px solid #e5e5e5;
+  padding-right: 1rem;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-left: 1px solid #e5e5e5;
+  padding-left: 1rem;
+}
+
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mainTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #000000;
+}
+
+.statusBadgeContainer {
+  margin-top: 0;
+}
+
+.statusBadge {
+  display: inline-block;
+  background-color: #fee9e5;
+  color: #755348;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.infoSection,
+.formationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background-color: #f5f5f5;
+  padding: 16px;
+}
+
+.infoPara {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #000000;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #161616;
+  line-height: 28px;
+}
+
+.coordTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #161616;
+  line-height: 24px;
+}
+
+.formationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.formationStart {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #000000;
+}
+
+.badgeDuree {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.orgName {
+  margin: 0;
+  font-size: 16px;
+  color: #161616;
+}
+
+.formationLevelContainer {
+  margin: 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+}
+
+.formationLevel {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+
+.formationTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #000000;
+  margin-left: 24px;
+}
+
+.icon {
+  margin-right: 8px;
+}
+
+.secteursSection {
+  margin-top: 1rem;
+}
+
+.secteursBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.secteurBadge {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.875rem;
+  display: inline-block;
+}

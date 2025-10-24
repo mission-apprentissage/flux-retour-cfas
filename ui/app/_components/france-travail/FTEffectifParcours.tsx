@@ -21,6 +21,12 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.DOSSIER_TRAITE]: "Dossier traité",
 } as const;
 
+const EVENT_PRIORITY = {
+  [TIMELINE_EVENTS.DOSSIER_TRAITE]: 1,
+  [TIMELINE_EVENTS.CONTACTE_CONSEILLER]: 2,
+  [TIMELINE_EVENTS.DEMARRAGE_FORMATION]: 3,
+} as const;
+
 type TimelineEventType = (typeof TIMELINE_EVENTS)[keyof typeof TIMELINE_EVENTS];
 
 interface TimelineEvent {
@@ -32,7 +38,7 @@ interface TimelineEvent {
 
 interface FTEffectifParcoursProps {
   effectif: IEffectifDetail;
-  codeSecteur: number;
+  codeSecteur?: number;
   className?: string;
 }
 
@@ -57,18 +63,22 @@ const buildTimeline = (effectif: IEffectifDetail): TimelineEvent[] => {
       const oldestDate = new Date(Math.min(...allCreatedDates.map((d) => d.getTime())));
       events.push({
         date: oldestDate,
-        type: TIMELINE_EVENTS.CONTACTE_CONSEILLER,
-        label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_CONSEILLER],
+        type: TIMELINE_EVENTS.DOSSIER_TRAITE,
+        label: EVENT_LABELS[TIMELINE_EVENTS.DOSSIER_TRAITE],
       });
       events.push({
         date: oldestDate,
-        type: TIMELINE_EVENTS.DOSSIER_TRAITE,
-        label: EVENT_LABELS[TIMELINE_EVENTS.DOSSIER_TRAITE],
+        type: TIMELINE_EVENTS.CONTACTE_CONSEILLER,
+        label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_CONSEILLER],
       });
     }
   }
 
-  return events.sort((a, b) => b.date.getTime() - a.date.getTime());
+  return events.sort((a, b) => {
+    const dateDiff = b.date.getTime() - a.date.getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return EVENT_PRIORITY[a.type] - EVENT_PRIORITY[b.type];
+  });
 };
 
 const getIcon = (type: TimelineEventType) => {

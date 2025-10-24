@@ -129,6 +129,35 @@ export const match180Days = () => {
   };
 };
 
+export const addDateTraitementField = () => {
+  return {
+    $addFields: {
+      date_traitement: {
+        $let: {
+          vars: {
+            ftDataArray: { $objectToArray: "$ft_data" },
+          },
+          in: {
+            $first: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$$ftDataArray",
+                    as: "entry",
+                    cond: { $ne: ["$$entry.v", null] },
+                  },
+                },
+                as: "filteredEntry",
+                in: "$$filteredEntry.v.created_at",
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
 export const getEffectifSecteurActivitesArboresence = async (codeRegion: string) => {
   const basePipeline = buildEffectifsPipeline({}, codeRegion);
 
@@ -250,6 +279,10 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
     pipeline.push(...additionalPipelineStages);
 
     if (type === API_EFFECTIF_LISTE.TRAITE) {
+      pipeline.push(addDateTraitementField());
+    }
+
+    if (type === API_EFFECTIF_LISTE.TRAITE) {
       pipeline.push({
         $addFields: {
           date_traitement: {
@@ -335,7 +368,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
 
 const getEffectifNavigation = async (
   codeRegion: string,
-  codeSecteur: number,
+  codeSecteur: number | undefined,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
@@ -346,6 +379,9 @@ const getEffectifNavigation = async (
 
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
+      if (!codeSecteur) {
+        throw Boom.badRequest("code_secteur est requis pour la liste A_TRAITER");
+      }
       query["romes.secteur_activites.code_secteur"] = codeSecteur;
       additionalPipelineStages.push(match180Days());
       additionalPipelineStages.push(matchATraiter(true));
@@ -428,7 +464,7 @@ const getEffectifNavigation = async (
 
 export const getEffectifFromFranceTravailId = async (
   codeRegion: string,
-  codeSecteur: number,
+  codeSecteur: number | undefined,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }

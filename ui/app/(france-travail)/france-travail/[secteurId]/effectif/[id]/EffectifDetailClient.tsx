@@ -4,6 +4,10 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { EffectifCoordonnees } from "@/app/_components/france-travail/effectif/EffectifCoordonnees";
+import sharedStyles from "@/app/_components/france-travail/effectif/EffectifDetail.module.css";
+import { EffectifFormationInfo } from "@/app/_components/france-travail/effectif/EffectifFormationInfo";
+import { EffectifPersonalInfo } from "@/app/_components/france-travail/effectif/EffectifPersonalInfo";
 import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
 import { FTEffectifParcours } from "@/app/_components/france-travail/FTEffectifParcours";
 import {
@@ -20,59 +24,9 @@ import {
 } from "@/app/_components/france-travail/utils";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { formatDate, getAge } from "@/app/_utils/date.utils";
-import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 
 import styles from "./EffectifDetailClient.module.css";
-import { EffectifFormationInfo } from "./EffectifFormationInfo";
 import { FTEffectifForm } from "./FTEffectifForm";
-
-interface EffectifPersonalInfoProps {
-  dateNaissance?: string;
-  adresse?: { commune?: string; code_postal?: string };
-  rqth?: boolean;
-}
-
-function EffectifPersonalInfo({ dateNaissance, adresse, rqth }: EffectifPersonalInfoProps) {
-  const age = getAge(dateNaissance);
-  return (
-    <>
-      <p className={styles.infoPara}>
-        Né(e) le {formatDate(dateNaissance) || "-"}, <b>{age ? `${age} ans` : ""}</b>
-      </p>
-      <p className={styles.infoPara}>
-        <i className={`fr-icon-home-4-line`} />
-        Réside à <b>{adresse?.commune || "-"}</b>({adresse?.code_postal || "-"})
-      </p>
-      <p className={styles.infoPara}>RQTH : {rqth ? "oui" : "non"}</p>
-    </>
-  );
-}
-
-interface EffectifCoordonneesProps {
-  telephone?: string;
-  courriel?: string;
-  responsableMail?: string;
-}
-
-function EffectifCoordonnees({ telephone, courriel, responsableMail }: EffectifCoordonneesProps) {
-  return (
-    <>
-      <p className={styles.coordTitle}>Coordonnées</p>
-      <p className={styles.infoPara}>
-        <span>{formatPhoneNumber(telephone) || "-"}</span> <span>{courriel || "-"}</span>
-      </p>
-      {responsableMail && (
-        <>
-          <p className={styles.coordTitle}>Responsable légal</p>
-          <p className={styles.infoPara}>
-            <span>{responsableMail}</span>
-          </p>
-        </>
-      )}
-    </>
-  );
-}
 
 const SUCCESS_DISPLAY_DURATION = 1000;
 
@@ -201,8 +155,8 @@ export default function EffectifDetailClient() {
   const existingData = effectif.ft_data?.[codeSecteur];
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.navigationContainer}>
+    <div className={sharedStyles.pageContainer}>
+      <div className={sharedStyles.navigationContainer}>
         <DsfrLink
           href={`/france-travail/${codeSecteur}${buildQueryString(true) ? `?${buildQueryString(true)}` : ""}`}
           className="fr-link--icon-left fr-icon-arrow-left-s-line"
@@ -224,35 +178,38 @@ export default function EffectifDetailClient() {
         />
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.parcoursColumn}>
+      <div className={sharedStyles.content}>
+        <div className={sharedStyles.parcoursColumn}>
           <FTEffectifParcours effectif={effectif} codeSecteur={codeSecteur} />
         </div>
 
-        <div className={styles.leftColumn}>
-          <div className={styles.headerSection}>
-            <h1 className={styles.mainTitle}>
+        <div className={sharedStyles.leftColumn}>
+          <div className={sharedStyles.headerSection}>
+            <h1 className={sharedStyles.mainTitle}>
               {effectif.nom} {effectif.prenom}
             </h1>
-            <div className={styles.statusBadgeContainer}>
-              <span className={styles.statusBadge}>INSCRIT SANS CONTRAT DEPUIS {badgeStyle.label}</span>
+            <div className={sharedStyles.statusBadgeContainer}>
+              <span className={sharedStyles.statusBadge}>INSCRIT SANS CONTRAT DEPUIS {badgeStyle.label}</span>
             </div>
           </div>
 
-          <div className={styles.infoSection}>
+          <div className={sharedStyles.infoSection}>
             <EffectifPersonalInfo
               dateNaissance={effectif.date_de_naissance}
               adresse={effectif.adresse}
               rqth={effectif.rqth}
+              infoParaClassName={sharedStyles.infoPara}
             />
             <EffectifCoordonnees
               telephone={effectif.telephone}
               courriel={effectif.courriel}
               responsableMail={effectif.responsable_mail}
+              coordTitleClassName={sharedStyles.coordTitle}
+              infoParaClassName={sharedStyles.infoPara}
             />
           </div>
 
-          <div className={styles.formationSection}>
+          <div className={sharedStyles.formationSection}>
             <EffectifFormationInfo
               dateDebut={effectif.date_inscription}
               badgeStyle={badgeStyle}
@@ -263,7 +220,7 @@ export default function EffectifDetailClient() {
           </div>
         </div>
 
-        <div className={styles.rightColumn}>
+        <div className={sharedStyles.rightColumn}>
           <div className={styles.formSection}>
             <div className={styles.formHeader}>
               <h2 className={styles.formTitle}>Suivi France Travail</h2>
