@@ -208,7 +208,8 @@ export default function EffectifDetailClient() {
             <EffectifCoordonnees
               telephone={effectif.telephone}
               courriel={effectif.courriel}
-              responsableMail={effectif.responsable_mail}
+              rqth={effectif.rqth}
+              referentHandicap={effectif.referent_handicap}
               coordTitleClassName={sharedStyles.coordTitle}
               infoParaClassName={sharedStyles.infoPara}
             />

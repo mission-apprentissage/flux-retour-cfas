@@ -3,7 +3,8 @@ import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 interface EffectifCoordonneesProps {
   telephone?: string;
   courriel?: string;
-  responsableMail?: string;
+  rqth?: boolean;
+  referentHandicap?: { nom: string; email: string; prenom: string };
   coordTitleClassName?: string;
   infoParaClassName?: string;
 }
@@ -11,22 +12,23 @@ interface EffectifCoordonneesProps {
 export function EffectifCoordonnees({
   telephone,
   courriel,
-  responsableMail,
+  rqth,
+  referentHandicap,
   coordTitleClassName = "",
   infoParaClassName = "",
 }: EffectifCoordonneesProps) {
   return (
     <>
-      <p className={coordTitleClassName}>Coordonnées</p>
-      <p className={infoParaClassName}>
-        <span>{formatPhoneNumber(telephone) || "-"}</span> <span>{courriel || "-"}</span>
-      </p>
-      {responsableMail && (
+      <p className={coordTitleClassName}>Coordonnées élève</p>
+      <p className={infoParaClassName}>{formatPhoneNumber(telephone) || "-"}</p>
+      <p className={infoParaClassName}>{courriel || "-"}</p>
+      {referentHandicap && rqth && (
         <>
-          <p className={coordTitleClassName}>Responsable légal</p>
+          <p className={coordTitleClassName}>Responsable RQTH</p>
           <p className={infoParaClassName}>
-            <span>{responsableMail}</span>
+            <span>{referentHandicap.prenom}</span> <span>{referentHandicap.nom}</span>
           </p>
+          <p className={infoParaClassName}>{referentHandicap.email || "-"}</p>
         </>
       )}
     </>
