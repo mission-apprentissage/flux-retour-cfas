@@ -13,10 +13,10 @@ export const InscriptionFranceTravail = ({
     _get("/api/v1/france-travail")
   );
 
-  const onSelectedFranceTravail = (armlId: string) => {
-    const arml = franceTravailOrganisations?.find(({ _id }) => _id.toString() === armlId);
-    if (arml) {
-      setOrganisation(arml);
+  const onSelectedFranceTravail = (ftId: string) => {
+    const ft = franceTravailOrganisations?.find(({ _id }) => _id.toString() === ftId);
+    if (ft) {
+      setOrganisation(ft);
     }
   };
 
@@ -24,9 +24,9 @@ export const InscriptionFranceTravail = ({
     <FormControl isRequired mb={4}>
       <FormLabel>Votre structure régionale :</FormLabel>
       <Select placeholder="Sélectionner une région" onChange={(e) => onSelectedFranceTravail(e.target.value)}>
-        {franceTravailOrganisations?.sort().map((arml) => (
-          <option value={arml._id.toString()} key={arml._id.toString()}>
-            {arml.nom}
+        {franceTravailOrganisations?.sort().map((ft) => (
+          <option value={ft._id.toString()} key={ft._id.toString()}>
+            {ft.nom}
           </option>
         ))}
       </Select>
