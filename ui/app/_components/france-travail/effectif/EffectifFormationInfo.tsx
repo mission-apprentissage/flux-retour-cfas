@@ -2,7 +2,7 @@
 
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./EffectifTraiteDetailClient.module.css";
+import styles from "./EffectifDetail.module.css";
 
 interface EffectifFormationInfoProps {
   dateDebut?: string;
