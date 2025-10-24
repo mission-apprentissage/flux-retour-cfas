@@ -88,7 +88,7 @@ export interface IEffectifDetail {
   };
   courriel?: string;
   telephone?: string;
-  responsable_mail?: string;
+  referent_handicap?: { nom: string; email: string; prenom: string };
   rqth?: boolean;
   transmitted_at?: string;
   source?: string;
