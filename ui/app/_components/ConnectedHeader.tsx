@@ -181,6 +181,15 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
+    } else if (organisationType === ORGANISATION_TYPE.FRANCE_TRAVAIL) {
+      baseItems.push({
+        text: "Accueil",
+        isActive: pathname === "/france-travail",
+        linkProps: {
+          href: "/france-travail",
+          target: "_self",
+        },
+      });
     }
 
     const aideMenuLinks: Array<{
@@ -212,7 +221,11 @@ export function ConnectedHeader() {
       text: "Centre d'aide",
     });
 
-    if (organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && organisationType !== ORGANISATION_TYPE.ARML) {
+    if (
+      organisationType !== ORGANISATION_TYPE.MISSION_LOCALE &&
+      organisationType !== ORGANISATION_TYPE.ARML &&
+      organisationType !== ORGANISATION_TYPE.FRANCE_TRAVAIL
+    ) {
       aideMenuLinks.push({
         linkProps: {
           href: "/referencement-organisme",
