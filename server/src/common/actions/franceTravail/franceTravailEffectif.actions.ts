@@ -282,6 +282,35 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
       pipeline.push(addDateTraitementField());
     }
 
+    if (type === API_EFFECTIF_LISTE.TRAITE) {
+      pipeline.push({
+        $addFields: {
+          date_traitement: {
+            $let: {
+              vars: {
+                ftDataArray: { $objectToArray: "$ft_data" },
+              },
+              in: {
+                $first: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$$ftDataArray",
+                        as: "entry",
+                        cond: { $ne: ["$$entry.v", null] },
+                      },
+                    },
+                    as: "filteredEntry",
+                    in: "$$filteredEntry.v.created_at",
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
     pipeline.push({
       $facet: {
         results: [
@@ -513,6 +542,94 @@ export const getEffectifFromFranceTravailId = async (
   }
 };
 
+export const getAllFranceTravailEffectifsByCodeSecteur = async (codeRegion: string, codeSecteur: number) => {
+  const pipeline = buildEffectifsPipeline(
+    {
+      "romes.secteur_activites.code_secteur": codeSecteur,
+    },
+    codeRegion
+  );
+
+  pipeline.push(match180Days());
+  pipeline.push(matchATraiter(true));
+
+  pipeline.push(
+    {
+      $lookup: {
+        from: "organismes",
+        localField: "effectif_snapshot.organisme_id",
+        foreignField: "_id",
+        as: "organisme",
+      },
+    },
+    {
+      $unwind: {
+        path: "$organisme",
+        preserveNullAndEmptyArrays: true,
+      },
+    }
+  );
+
+  pipeline.push(
+    {
+      $addFields: {
+        organisme_id: {
+          $toString: "$effectif_snapshot.organisme_id",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "organisme_id",
+        foreignField: "organisme_id",
+        as: "org_data",
+      },
+    },
+    {
+      $unwind: {
+        path: "$org_data",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "usersMigration",
+        localField: "org_data._id",
+        foreignField: "organisation_id",
+        as: "users_data",
+      },
+    }
+  );
+
+  pipeline.push({
+    $project: {
+      prenom: "$effectif_snapshot.apprenant.prenom",
+      nom: "$effectif_snapshot.apprenant.nom",
+      rqth: "$effectif_snapshot.apprenant.rqth",
+      date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+      commune: "$effectif_snapshot.apprenant.adresse.commune",
+      telephone: "$effectif_snapshot.apprenant.telephone",
+      email: "$effectif_snapshot.apprenant.courriel",
+      telephone_responsable_1: "$effectif_snapshot.apprenant.responsable_telephone1",
+      email_responsable_1: "$effectif_snapshot.apprenant.responsable_mail1",
+      telephone_responsable_2: "$effectif_snapshot.apprenant.responsable_telephone2",
+      email_responsable_2: "$effectif_snapshot.apprenant.responsable_mail2",
+      libelle_formation: "$effectif_snapshot.formation.libelle_long",
+      niveau_formation: "$effectif_snapshot.formation.niveau",
+      organisme_nom: "$organisme.nom",
+      organisme_code_postal: "$organisme.adresse.code_postal",
+      organisme_commune: "$organisme.adresse.commune",
+      organisme_contacts: "$organisme.contacts",
+      date_inscription: "$date_inscription",
+      tdb_organisme_contacts: "$users_data",
+    },
+  });
+
+  const effectifs = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+  return effectifs;
+};
+
 export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) => {
   const { current: currentStatus, next: nextStatus } = getCurrentAndNextStatus(
     effectif._computed?.statut?.parcours,
@@ -596,7 +713,32 @@ export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) =
 
     pipeline.push(matchATraiter(false));
 
-    pipeline.push(addDateTraitementField());
+    pipeline.push({
+      $addFields: {
+        date_traitement: {
+          $let: {
+            vars: {
+              ftDataArray: { $objectToArray: "$ft_data" },
+            },
+            in: {
+              $first: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$$ftDataArray",
+                      as: "entry",
+                      cond: { $ne: ["$$entry.v", null] },
+                    },
+                  },
+                  as: "filteredEntry",
+                  in: "$$filteredEntry.v.created_at",
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
     pipeline.push({
       $match: {
@@ -665,7 +807,32 @@ export const getFranceTravailEffectifsTraitesParMois = async (
 
     pipeline.push(matchATraiter(false));
 
-    pipeline.push(addDateTraitementField());
+    pipeline.push({
+      $addFields: {
+        date_traitement: {
+          $let: {
+            vars: {
+              ftDataArray: { $objectToArray: "$ft_data" },
+            },
+            in: {
+              $first: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$$ftDataArray",
+                      as: "entry",
+                      cond: { $ne: ["$$entry.v", null] },
+                    },
+                  },
+                  as: "filteredEntry",
+                  in: "$$filteredEntry.v.created_at",
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
     pipeline.push({
       $match: {
