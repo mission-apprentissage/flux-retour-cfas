@@ -46,7 +46,8 @@ export async function handleEffectifTransmission(
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
     const adresse = await buildAdresse(dossier);
-    return ingestDossier(dossier, adresse, date_transmission);
+    const effectif = await ingestDossier(dossier, adresse, date_transmission);
+    return effectif;
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);

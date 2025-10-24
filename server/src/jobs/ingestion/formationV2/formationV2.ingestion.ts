@@ -18,6 +18,10 @@ export type IIngestFormationUsedFields =
 export type IIngestFormationV2Params = Pick<IDossierApprenantSchemaV3, IIngestFormationUsedFields>;
 
 export async function ingestFormationV2(dossier: IIngestFormationV2Params): Promise<IFormationV2> {
+  if (!dossier.formation_cfd || !dossier.formation_rncp) {
+    throw new Error("Impossible d'ingérer la formation : ni le cfd ni le rncp ne sont fournis");
+  }
+
   const organismeFormateur = await getOrganismeByUAIAndSIRET(
     dossier.etablissement_formateur_uai,
     dossier.etablissement_formateur_siret
