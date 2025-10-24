@@ -444,7 +444,7 @@ const getEffectifNavigation = async (
       total,
       next: null,
       previous: null,
-      currentIndex: null,
+      currentIndex: 0,
       nomListe: nom_liste,
     };
   }

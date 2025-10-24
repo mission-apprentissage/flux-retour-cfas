@@ -17,6 +17,7 @@ interface FTEffectifFormProps {
   isSaving: boolean;
   hasSuccess: boolean;
   hasError: boolean;
+  hasNext: boolean;
 }
 
 export function FTEffectifForm({
@@ -26,6 +27,7 @@ export function FTEffectifForm({
   isSaving,
   hasSuccess,
   hasError,
+  hasNext,
 }: FTEffectifFormProps) {
   const [selectedSituation, setSelectedSituation] = useState<FranceTravailSituation | null>(initialSituation || null);
   const [commentaire, setCommentaire] = useState(initialCommentaire || "");
@@ -100,7 +102,13 @@ export function FTEffectifForm({
 
       {hasError && <p className={styles.errorMessage}>Une erreur est survenue. Veuillez réessayer.</p>}
 
-      <FormActions isFormValid={isFormValid} onSubmit={handleSubmit} isSaving={isSaving} hasSuccess={hasSuccess} />
+      <FormActions
+        isFormValid={isFormValid}
+        onSubmit={handleSubmit}
+        isSaving={isSaving}
+        hasSuccess={hasSuccess}
+        hasNext={hasNext}
+      />
     </>
   );
 }
@@ -110,11 +118,13 @@ function FormActions({
   onSubmit,
   isSaving,
   hasSuccess,
+  hasNext,
 }: {
   isFormValid: boolean;
   onSubmit: (saveNext: boolean) => void;
   isSaving: boolean;
   hasSuccess: boolean;
+  hasNext: boolean;
 }) {
   const [selectedButton, setSelectedButton] = useState<"saveAndQuit" | "saveAndNext" | null>(null);
 
@@ -124,7 +134,7 @@ function FormActions({
   };
 
   const disabled = !isFormValid || isSaving || hasSuccess;
-
+  const disabledNext = disabled || !hasNext;
   return (
     <div className={styles.formActions}>
       <SaveButton
@@ -132,7 +142,7 @@ function FormActions({
         selectedButton={selectedButton}
         isSaving={isSaving}
         hasSuccess={hasSuccess}
-        disabled={disabled}
+        disabled={disabledNext}
         onClick={() => handleClick("saveAndNext", true)}
         priority="primary"
       >
