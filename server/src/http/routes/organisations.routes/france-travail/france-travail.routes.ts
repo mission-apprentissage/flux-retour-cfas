@@ -1,6 +1,7 @@
 import Boom from "boom";
 import express from "express";
-import { API_EFFECTIF_LISTE, FRANCE_TRAVAIL_SITUATION_LABELS, IOrganisationFranceTravail } from "shared/models";
+import { FRANCE_TRAVAIL_SITUATION_LABELS } from "shared/constants";
+import { API_EFFECTIF_LISTE, IOrganisationFranceTravail } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
   codeSecteurSchema,
