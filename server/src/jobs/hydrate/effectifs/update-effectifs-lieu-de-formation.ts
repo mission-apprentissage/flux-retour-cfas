@@ -81,7 +81,12 @@ export async function hydrateEffectifsLieuDeFormationVersOrganismeFormateur() {
         }
 
         if (organismeFormateur) {
-          const certification = await getEffectifCertification(effectif);
+          const certification = await getEffectifCertification({
+            cfd: effectif.formation?.cfd || null,
+            rncp: effectif.formation?.rncp || null,
+            date_entree: effectif.formation?.date_entree || null,
+            date_fin: effectif.formation?.date_fin || null,
+          });
 
           const updatedEffectif = {
             organisme_id: organismeFormateur._id,
