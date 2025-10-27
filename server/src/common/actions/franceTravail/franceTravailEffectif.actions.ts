@@ -13,17 +13,8 @@ import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actio
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const buildEffectifsPipeline = (
-  query: Record<string, any>,
-  codeRegion: string,
-  options?: {
-    search?: string;
-    sort?: "jours_sans_contrat" | "nom" | "organisme";
-    order?: "asc" | "desc";
-    now?: Date;
-  }
-) => {
-  const { search, sort = "jours_sans_contrat", order = "desc", now = new Date() } = options ?? {};
+const buildEffectifsPipeline = (query: Record<string, any>, codeRegion: string) => {
+  const now = new Date();
 
   const pipeline: Document[] = [
     { $match: query },
@@ -57,8 +48,30 @@ const buildEffectifsPipeline = (
         },
       },
     },
+    {
+      $addFields: {
+        jours_sans_contrat_sort: {
+          $cond: {
+            if: { $lt: ["$jours_sans_contrat", 90] },
+            then: "$jours_sans_contrat",
+            else: { $subtract: [0, "$jours_sans_contrat"] },
+          },
+        },
+      },
+    },
     addATraiterField(),
   ];
+
+  return pipeline;
+};
+
+export const matchFilter = (options?: {
+  search?: string;
+  sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
+  order?: "asc" | "desc";
+}) => {
+  const { search, sort = "jours_sans_contrat", order = "desc" } = options ?? {};
+  const pipeline: Document[] = [];
 
   if (search) {
     const escapedSearch = escapeRegex(search);
@@ -76,7 +89,7 @@ const buildEffectifsPipeline = (
   const sortStage: Record<string, 1 | -1> = {};
   switch (sort) {
     case "jours_sans_contrat":
-      sortStage.jours_sans_contrat = sortDirection;
+      sortStage.jours_sans_contrat_sort = sortDirection;
       break;
     case "nom":
       sortStage["effectif_snapshot.apprenant.nom"] = sortDirection;
@@ -85,10 +98,12 @@ const buildEffectifsPipeline = (
     case "organisme":
       sortStage["organisme.nom"] = sortDirection;
       break;
+    case "date_traitement":
+      sortStage.date_traitement = sortDirection;
+      break;
   }
 
   pipeline.push({ $sort: sortStage });
-
   return pipeline;
 };
 
@@ -270,47 +285,14 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const pipeline = buildEffectifsPipeline(query, codeRegion, {
-      search: options?.search,
-      sort: options?.sort,
-      order: options?.order,
-    });
+    const pipeline = buildEffectifsPipeline(query, codeRegion);
 
     pipeline.push(...additionalPipelineStages);
 
     if (type === API_EFFECTIF_LISTE.TRAITE) {
       pipeline.push(addDateTraitementField());
     }
-
-    if (type === API_EFFECTIF_LISTE.TRAITE) {
-      pipeline.push({
-        $addFields: {
-          date_traitement: {
-            $let: {
-              vars: {
-                ftDataArray: { $objectToArray: "$ft_data" },
-              },
-              in: {
-                $first: {
-                  $map: {
-                    input: {
-                      $filter: {
-                        input: "$$ftDataArray",
-                        as: "entry",
-                        cond: { $ne: ["$$entry.v", null] },
-                      },
-                    },
-                    as: "filteredEntry",
-                    in: "$$filteredEntry.v.created_at",
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    }
-
+    pipeline.push(...matchFilter(options));
     pipeline.push({
       $facet: {
         results: [
@@ -393,16 +375,10 @@ const getEffectifNavigation = async (
       throw Boom.badRequest(`Nom de liste inconnu : ${nom_liste}`);
   }
 
-  const now = new Date();
-
-  const pipeline = buildEffectifsPipeline(query, codeRegion, {
-    search: options?.search,
-    sort: options?.sort,
-    order: options?.order,
-    now,
-  });
+  const pipeline = buildEffectifsPipeline(query, codeRegion);
 
   pipeline.push(...additionalPipelineStages);
+  pipeline.push(...matchFilter(options));
   pipeline.push({
     $group: {
       _id: null,
@@ -709,33 +685,7 @@ export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) =
     const pipeline = buildEffectifsPipeline({}, codeRegion);
 
     pipeline.push(matchATraiter(false));
-
-    pipeline.push({
-      $addFields: {
-        date_traitement: {
-          $let: {
-            vars: {
-              ftDataArray: { $objectToArray: "$ft_data" },
-            },
-            in: {
-              $first: {
-                $map: {
-                  input: {
-                    $filter: {
-                      input: "$$ftDataArray",
-                      as: "entry",
-                      cond: { $ne: ["$$entry.v", null] },
-                    },
-                  },
-                  as: "filteredEntry",
-                  in: "$$filteredEntry.v.created_at",
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    pipeline.push(addDateTraitementField());
 
     pipeline.push({
       $match: {
@@ -783,7 +733,7 @@ export const getFranceTravailEffectifsTraitesParMois = async (
     page: number;
     limit: number;
     search?: string;
-    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
   }
 ) => {
@@ -792,44 +742,16 @@ export const getFranceTravailEffectifsTraitesParMois = async (
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
+    const sort = options?.sort ?? "date_traitement";
+
     const [year, month] = mois.split("-").map(Number);
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 1);
 
-    const pipeline = buildEffectifsPipeline({}, codeRegion, {
-      search: options?.search,
-      sort: options?.sort,
-      order: options?.order,
-    });
+    const pipeline = buildEffectifsPipeline({}, codeRegion);
 
     pipeline.push(matchATraiter(false));
-
-    pipeline.push({
-      $addFields: {
-        date_traitement: {
-          $let: {
-            vars: {
-              ftDataArray: { $objectToArray: "$ft_data" },
-            },
-            in: {
-              $first: {
-                $map: {
-                  input: {
-                    $filter: {
-                      input: "$$ftDataArray",
-                      as: "entry",
-                      cond: { $ne: ["$$entry.v", null] },
-                    },
-                  },
-                  as: "filteredEntry",
-                  in: "$$filteredEntry.v.created_at",
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    pipeline.push(addDateTraitementField());
 
     pipeline.push({
       $match: {
@@ -840,6 +762,7 @@ export const getFranceTravailEffectifsTraitesParMois = async (
       },
     });
 
+    pipeline.push(...matchFilter({ ...options, sort }));
     pipeline.push({
       $facet: {
         results: [
