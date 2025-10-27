@@ -13,12 +13,6 @@ import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actio
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/**
- * Parse et valide un mois au format YYYY-MM et retourne les dates de début et fin
- * @param mois - Le mois au format YYYY-MM
- * @returns Un objet avec startDate et endDate en UTC
- * @throws Boom.badRequest si le format est invalide
- */
 const parseMoisToDateRange = (mois: string): { startDate: Date; endDate: Date } => {
   const parts = mois.split("-");
   if (parts.length !== 2) {
@@ -33,7 +27,6 @@ const parseMoisToDateRange = (mois: string): { startDate: Date; endDate: Date } 
     throw Boom.badRequest(`Format de mois invalide: ${mois}. Année doit être entre 2000-2100, mois entre 1-12`);
   }
 
-  // Utiliser UTC pour éviter les problèmes de fuseau horaire
   const startDate = new Date(Date.UTC(year, month - 1, 1));
   const endDate = new Date(Date.UTC(year, month, 1));
 
@@ -403,7 +396,6 @@ const getEffectifNavigation = async (
     case API_EFFECTIF_LISTE.TRAITE:
       additionalPipelineStages.push(matchATraiter(false));
 
-      // Si un mois est spécifié, filtrer par ce mois
       if (options?.mois) {
         const { startDate, endDate } = parseMoisToDateRange(options.mois);
 

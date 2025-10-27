@@ -85,12 +85,37 @@ export function useEffectifDetail(
     mois?: string;
   }
 ) {
-  return useQuery(franceTravailQueryKeys.effectifDetail(id!, params), () => fetchEffectifDetail(id!, params), {
+  const queryClient = useQueryClient();
+
+  const query = useQuery(franceTravailQueryKeys.effectifDetail(id!, params), () => fetchEffectifDetail(id!, params), {
     enabled: id !== null,
     staleTime: 30 * 1000,
     retry: 3,
     refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      if (data.next) {
+        queryClient.prefetchQuery(
+          franceTravailQueryKeys.effectifDetail(data.next.id, params),
+          () => fetchEffectifDetail(data.next!.id, params),
+          {
+            staleTime: 30 * 1000,
+          }
+        );
+      }
+
+      if (data.previous) {
+        queryClient.prefetchQuery(
+          franceTravailQueryKeys.effectifDetail(data.previous.id, params),
+          () => fetchEffectifDetail(data.previous!.id, params),
+          {
+            staleTime: 30 * 1000,
+          }
+        );
+      }
+    },
   });
+
+  return query;
 }
 
 interface UpdateEffectifParams {
