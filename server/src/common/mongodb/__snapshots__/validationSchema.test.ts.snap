@@ -19738,6 +19738,7 @@ exports[`validation-schema > should create validation schema for telechargementL
         "ml_injoignable",
         "arml",
         "ft_a_traiter",
+        "ft_traite",
       ],
     },
     "user_id": {
