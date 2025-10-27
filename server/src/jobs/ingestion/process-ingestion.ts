@@ -22,7 +22,6 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
-import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -208,7 +207,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           },
         }
       );
-      await createMissionLocaleSnapshot(upsertedEffectif);
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {

@@ -465,3 +465,10 @@ export const getAllARML = async (): Promise<IOrganisationARML[]> => {
   }
   return organisations;
 };
+
+export const getMissionLocaleByMLId = async (ml_id?: number | null): Promise<IOrganisationMissionLocale | null> => {
+  if (!ml_id) {
+    return null;
+  }
+  return organisationsDb().findOne<IOrganisationMissionLocale>({ type: "MISSION_LOCALE", ml_id });
+};
