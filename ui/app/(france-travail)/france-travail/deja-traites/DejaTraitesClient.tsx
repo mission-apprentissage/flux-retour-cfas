@@ -57,9 +57,10 @@ export default function DejaTraitesClient() {
     alert("Fonctionnalité en cours de développement");
   };
 
-  const handleEffectifClick = (effectifId: string) => {
+  const handleEffectifClick = (effectifId: string, mois: string) => {
     const queryParams = new URLSearchParams();
     if (debouncedSearch) queryParams.set("search", debouncedSearch);
+    queryParams.set("mois", mois);
 
     const queryString = queryParams.toString();
     router.push(`/france-travail/deja-traites/effectif/${effectifId}${queryString ? `?${queryString}` : ""}`);

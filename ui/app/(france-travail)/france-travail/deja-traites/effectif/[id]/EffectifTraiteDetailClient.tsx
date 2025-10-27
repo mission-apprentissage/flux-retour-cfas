@@ -2,7 +2,7 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 
 import { EffectifCoordonnees } from "@/app/_components/france-travail/effectif/EffectifCoordonnees";
 import sharedStyles from "@/app/_components/france-travail/effectif/EffectifDetail.module.css";
@@ -31,17 +31,24 @@ export default function EffectifTraiteDetailClient() {
 
   const id = params?.id as string | undefined;
   const search = searchParams?.get("search") || undefined;
+  const mois = searchParams?.get("mois") || undefined;
+
+  const buildQueryString = useCallback(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (mois) params.set("mois", mois);
+    return params.toString();
+  }, [search, mois]);
 
   const queryString = useMemo(() => {
-    if (!search) return "";
-    return `?search=${encodeURIComponent(search)}`;
-  }, [search]);
-
-  const buildQueryString = () => queryString;
+    const str = buildQueryString();
+    return str ? `?${str}` : "";
+  }, [buildQueryString]);
 
   const { data, isLoading, error } = useEffectifDetail(id || null, {
     nom_liste: "traite",
     search,
+    mois,
   });
 
   const { data: arborescenceData } = useArborescence();

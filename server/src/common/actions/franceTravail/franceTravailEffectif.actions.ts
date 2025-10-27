@@ -13,6 +13,26 @@ import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actio
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const parseMoisToDateRange = (mois: string): { startDate: Date; endDate: Date } => {
+  const parts = mois.split("-");
+  if (parts.length !== 2) {
+    throw Boom.badRequest(`Format de mois invalide: ${mois}. Format attendu: YYYY-MM`);
+  }
+
+  const [yearStr, monthStr] = parts;
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+
+  if (isNaN(year) || isNaN(month) || month < 1 || month > 12 || year < 2000 || year > 2100) {
+    throw Boom.badRequest(`Format de mois invalide: ${mois}. Année doit être entre 2000-2100, mois entre 1-12`);
+  }
+
+  const startDate = new Date(Date.UTC(year, month - 1, 1));
+  const endDate = new Date(Date.UTC(year, month, 1));
+
+  return { startDate, endDate };
+};
+
 const buildEffectifsPipeline = (query: Record<string, any>, codeRegion: string) => {
   const now = new Date();
 
@@ -353,11 +373,19 @@ const getEffectifNavigation = async (
   codeSecteur: number | undefined,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
-  options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
+  options?: {
+    search?: string;
+    sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
+    order?: "asc" | "desc";
+    mois?: string;
+  }
 ) => {
   const query: Record<string, any> = {};
 
   let additionalPipelineStages: Array<Record<string, any>> = [];
+
+  const defaultSort = nom_liste === API_EFFECTIF_LISTE.TRAITE ? "date_traitement" : "jours_sans_contrat";
+  const sort = options?.sort ?? defaultSort;
 
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
@@ -370,6 +398,20 @@ const getEffectifNavigation = async (
       break;
     case API_EFFECTIF_LISTE.TRAITE:
       additionalPipelineStages.push(matchATraiter(false));
+      additionalPipelineStages.push(addDateTraitementField());
+
+      if (options?.mois) {
+        const { startDate, endDate } = parseMoisToDateRange(options.mois);
+
+        additionalPipelineStages.push({
+          $match: {
+            date_traitement: {
+              $gte: startDate,
+              $lt: endDate,
+            },
+          },
+        });
+      }
       break;
     default:
       throw Boom.badRequest(`Nom de liste inconnu : ${nom_liste}`);
@@ -378,7 +420,7 @@ const getEffectifNavigation = async (
   const pipeline = buildEffectifsPipeline(query, codeRegion);
 
   pipeline.push(...additionalPipelineStages);
-  pipeline.push(...matchFilter(options));
+  pipeline.push(...matchFilter({ ...options, sort }));
   pipeline.push({
     $group: {
       _id: null,
@@ -443,7 +485,12 @@ export const getEffectifFromFranceTravailId = async (
   codeSecteur: number | undefined,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
-  options?: { search?: string; sort?: "jours_sans_contrat" | "nom" | "organisme"; order?: "asc" | "desc" }
+  options?: {
+    search?: string;
+    sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
+    order?: "asc" | "desc";
+    mois?: string;
+  }
 ) => {
   try {
     const aggregation = [
@@ -744,9 +791,7 @@ export const getFranceTravailEffectifsTraitesParMois = async (
 
     const sort = options?.sort ?? "date_traitement";
 
-    const [year, month] = mois.split("-").map(Number);
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 1);
+    const { startDate, endDate } = parseMoisToDateRange(mois);
 
     const pipeline = buildEffectifsPipeline({}, codeRegion);
 

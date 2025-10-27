@@ -14,7 +14,7 @@ interface MoisSectionProps {
   mois: string;
   count: number;
   secteurs: ISecteurArborescence[];
-  onEffectifClick: (effectifId: string) => void;
+  onEffectifClick: (effectifId: string, mois: string) => void;
   search: string;
 }
 
@@ -71,7 +71,7 @@ export function MoisSection({ mois, count, secteurs, onEffectifClick, search }: 
         pageSize={pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onEffectifClick={onEffectifClick}
+        onEffectifClick={(effectifId) => onEffectifClick(effectifId, mois)}
       />
     </div>
   );

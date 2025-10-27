@@ -111,13 +111,14 @@ const getArborescence = async (_req, { locals }) => {
 
 const getEffectifById = async (req, { locals }) => {
   const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { nom_liste, code_secteur, search, sort, order } = req.query as IEffectifFranceTravailQuery;
+  const { nom_liste, code_secteur, search, sort, order, mois } = req.query as IEffectifFranceTravailQuery;
   const effectifId = req.params.id;
 
   return await getEffectifFromFranceTravailId(ftOrga.code_region, code_secteur, effectifId, nom_liste, {
     search,
     sort,
     order,
+    mois,
   });
 };
 
