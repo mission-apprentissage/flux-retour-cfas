@@ -1,3 +1,5 @@
+import { FRANCE_TRAVAIL_SITUATION_LABELS } from "shared/constants";
+
 import { FranceTravailSituation, ISecteurArborescence } from "./types";
 
 export interface DureeBadgeProps {
@@ -6,13 +8,7 @@ export interface DureeBadgeProps {
   label: string;
 }
 
-export const SITUATION_LABELS: Record<FranceTravailSituation, string> = {
-  [FranceTravailSituation.REORIENTATION]: "Réorientation du jeune",
-  [FranceTravailSituation.ENTREPRISE]: "Recherche d'entreprise",
-  [FranceTravailSituation.PAS_DE_RECONTACT]: "Pas de recontact",
-  [FranceTravailSituation.EVENEMENT]: "Événement",
-  [FranceTravailSituation.MISSION_LOCALE]: "Orientation mission locale",
-};
+export const SITUATION_LABELS: Record<FranceTravailSituation, string> = FRANCE_TRAVAIL_SITUATION_LABELS;
 
 export const DUREE_SEUILS = {
   COURT: 30,
