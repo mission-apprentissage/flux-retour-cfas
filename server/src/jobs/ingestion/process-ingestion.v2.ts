@@ -42,11 +42,12 @@ async function ingestDossier(
 export async function handleEffectifTransmission(
   effectifQueue: WithId<IEffectifQueue>,
   date_transmission: Date
-): Promise<void> {
+): Promise<IEffectifV2 | undefined> {
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
     const adresse = await buildAdresse(dossier);
-    await ingestDossier(dossier, adresse, date_transmission);
+    const effectif = await ingestDossier(dossier, adresse, date_transmission);
+    return effectif;
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);

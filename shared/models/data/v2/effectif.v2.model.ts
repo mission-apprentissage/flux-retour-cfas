@@ -84,11 +84,13 @@ export const zEffectifV2 = z.object({
 
   derniere_transmission: z.date(),
 
-  informations_personnelles: z.object({
-    rqth: z.boolean(),
-    email: z.string().email().nullish(),
-    telephone: z.string().nullish(),
-  }),
+  informations_personnelles: z
+    .object({
+      rqth: z.boolean(),
+      email: z.string().email().nullish(),
+      telephone: z.string().nullish(),
+    })
+    .nullish(),
 
   responsable_apprenant: z
     .object({

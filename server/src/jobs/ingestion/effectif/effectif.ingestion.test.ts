@@ -84,9 +84,23 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
-      informations_personnelles: { rqth: false },
+      informations_personnelles: {
+        email: null,
+        rqth: false,
+        telephone: null,
+      },
+      referent_handicap: {
+        email: null,
+        nom: null,
+        prenom: null,
+      },
+      responsable_apprenant: {
+        email1: null,
+        email2: null,
+      },
       derniere_transmission: now,
       _computed: {
+        session: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -125,9 +139,23 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
-      informations_personnelles: { rqth: false },
+      informations_personnelles: {
+        email: null,
+        rqth: false,
+        telephone: null,
+      },
+      referent_handicap: {
+        email: null,
+        nom: null,
+        prenom: null,
+      },
+      responsable_apprenant: {
+        email1: null,
+        email2: null,
+      },
       derniere_transmission: lastWeek,
       _computed: {
+        session: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -149,6 +177,8 @@ describe("ingestEffectifV2", () => {
         date_inscription_formation: juil24,
         date_fin_formation: aout26,
         rqth_apprenant: true,
+        tel_apprenant: "0123456789",
+        email_contact: "test@test.com",
       },
       person_id: existingEffectif.identifiant.person_id,
       formation_id: existingEffectif.identifiant.formation_id,
@@ -159,7 +189,11 @@ describe("ingestEffectifV2", () => {
     const expectedResult = {
       ...existingEffectif,
       derniere_transmission: now,
-      informations_personnelles: { rqth: true },
+      informations_personnelles: {
+        email: "test@test.com",
+        rqth: true,
+        telephone: "0123456789",
+      },
     };
     expect(result).toEqual(expectedResult);
 
@@ -192,9 +226,23 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
-        informations_personnelles: { rqth: false },
+        informations_personnelles: {
+          email: null,
+          rqth: false,
+          telephone: null,
+        },
+        referent_handicap: {
+          email: null,
+          nom: null,
+          prenom: null,
+        },
+        responsable_apprenant: {
+          email1: null,
+          email2: null,
+        },
         derniere_transmission: lastWeek,
         _computed: {
+          session: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -223,9 +271,23 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
-        informations_personnelles: { rqth: false },
+        informations_personnelles: {
+          email: null,
+          rqth: false,
+          telephone: null,
+        },
+        referent_handicap: {
+          email: null,
+          nom: null,
+          prenom: null,
+        },
+        responsable_apprenant: {
+          email1: null,
+          email2: null,
+        },
         derniere_transmission: lastWeek,
         _computed: {
+          session: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -253,9 +315,23 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
-        informations_personnelles: { rqth: false },
+        informations_personnelles: {
+          email: null,
+          rqth: false,
+          telephone: null,
+        },
+        referent_handicap: {
+          email: null,
+          nom: null,
+          prenom: null,
+        },
+        responsable_apprenant: {
+          email1: null,
+          email2: null,
+        },
         derniere_transmission: lastWeek,
         _computed: {
+          session: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -284,9 +360,23 @@ describe("ingestEffectifV2", () => {
         },
         adresse: paris,
         contrats: {},
-        informations_personnelles: { rqth: false },
+        informations_personnelles: {
+          email: null,
+          rqth: false,
+          telephone: null,
+        },
+        referent_handicap: {
+          email: null,
+          nom: null,
+          prenom: null,
+        },
+        responsable_apprenant: {
+          email1: null,
+          email2: null,
+        },
         derniere_transmission: lastWeek,
         _computed: {
+          session: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -337,6 +427,7 @@ describe("ingestEffectifV2", () => {
         date_inscription: aout24,
         session: { debut: aout24, fin: aout25 },
         _computed: {
+          session: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -415,9 +506,23 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
-      informations_personnelles: { rqth: false },
+      informations_personnelles: {
+        email: null,
+        rqth: false,
+        telephone: null,
+      },
+      referent_handicap: {
+        email: null,
+        nom: null,
+        prenom: null,
+      },
+      responsable_apprenant: {
+        email1: null,
+        email2: null,
+      },
       derniere_transmission: lastWeek,
       _computed: {
+        session: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -477,9 +582,23 @@ describe("ingestEffectifV2", () => {
       },
       adresse: paris,
       contrats: {},
-      informations_personnelles: { rqth: false },
+      informations_personnelles: {
+        email: null,
+        rqth: false,
+        telephone: null,
+      },
+      referent_handicap: {
+        email: null,
+        nom: null,
+        prenom: null,
+      },
+      responsable_apprenant: {
+        email1: null,
+        email2: null,
+      },
       derniere_transmission: now,
       _computed: {
+        session: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -594,6 +713,7 @@ describe("ingestEffectifV2", () => {
           },
         },
         _computed: {
+          session: null,
           statut: {
             en_cours: "APPRENTI",
             parcours: [

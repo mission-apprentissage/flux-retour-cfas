@@ -25,7 +25,7 @@ export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IP
       prenom: dossier.prenom_apprenant,
       date_de_naissance: dossier.date_de_naissance_apprenant,
     }),
-    parcours: { en_cours: null, chronologie: [] }
+    parcours: { en_cours: null, chronologie: [] },
   };
 
   const result = await personV2Db().findOneAndUpdate(
@@ -37,7 +37,7 @@ export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IP
     {
       $setOnInsert: {
         ...data,
-      }
+      },
     },
     { upsert: true, returnDocument: "after", includeResultMetadata: false }
   );
@@ -46,9 +46,8 @@ export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IP
 }
 
 export async function updateParcoursPersonV2(person_id: ObjectId, effectifV2: IEffectifV2): Promise<void> {
-
-  const date_inscription = effectifV2.date_inscription
-  const effv2_id = effectifV2._id
+  const date_inscription = effectifV2.date_inscription;
+  const effv2_id = effectifV2._id;
 
   try {
     await personV2Db().updateOne(
@@ -57,9 +56,9 @@ export async function updateParcoursPersonV2(person_id: ObjectId, effectifV2: IE
         $push: {
           "parcours.chronologie": {
             $each: [{ id: effv2_id, date: date_inscription }],
-            $sort: { date: 1 }
-          }
-        }
+            $sort: { date: 1 },
+          },
+        },
       },
       {
         bypassDocumentValidation: true,
@@ -72,33 +71,31 @@ export async function updateParcoursPersonV2(person_id: ObjectId, effectifV2: IE
         $push: {
           "parcours.chronologie": {
             $each: [],
-            $sort: { date: 1 }
-          }
-        }
+            $sort: { date: 1 },
+          },
+        },
       },
       {
         bypassDocumentValidation: true,
       }
-    )
+    );
 
     await personV2Db().updateOne(
       { _id: person_id },
-      [{
-        $set: {
-          "parcours.en_cours": {
-            $arrayElemAt: ["$parcours.chronologie", -1]
-          }
-        }
-      }],
+      [
+        {
+          $set: {
+            "parcours.en_cours": {
+              $arrayElemAt: ["$parcours.chronologie", -1],
+            },
+          },
+        },
+      ],
       {
         bypassDocumentValidation: true,
       }
-    )
-
+    );
   } catch (e) {
     console.log(JSON.stringify(e, null, 2));
   }
-
-
-
 }
