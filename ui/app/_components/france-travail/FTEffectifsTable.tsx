@@ -116,6 +116,7 @@ export function FTEffectifsTable({
       const aTraiter = effectif.ft_data ? Object.values(effectif.ft_data).some((v) => v === null) : true;
 
       return {
+        _id: effectif._id,
         rawData: {
           nom: `${nom} ${prenom}`,
           organisme,
@@ -259,6 +260,7 @@ export function FTEffectifsTable({
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
           hasPagination={true}
+          onRowClick={(rowData) => onEffectifClick(rowData._id)}
         />
       )}
     </div>

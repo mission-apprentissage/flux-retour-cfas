@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -120,6 +120,7 @@ export function FullTable({
   caption = null,
   headerAction = null,
   hasPagination = true,
+  onRowClick,
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
@@ -182,12 +183,45 @@ export function FullTable({
   const totalPages = pagination?.lastPage || 1;
   const currentPage = pagination?.page || 1;
 
+  useEffect(() => {
+    if (!onRowClick || !tableRef.current) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const row = target.closest("tbody tr");
+      if (!row) return;
+
+      if (target.closest("button") || target.closest("a")) return;
+
+      const rowIndex = Array.from(row.parentElement!.children).indexOf(row);
+
+      const sortedRows = table.getSortedRowModel().rows;
+      if (sortedRows[rowIndex]) {
+        const rowData = sortedRows[rowIndex].original;
+        onRowClick(rowData);
+      }
+    };
+
+    const tableElement = tableRef.current.querySelector("table");
+    if (tableElement) {
+      tableElement.addEventListener("click", handleClick);
+      return () => tableElement.removeEventListener("click", handleClick);
+    }
+  }, [data, onRowClick, table]);
+
   return (
     <>
       {isEmpty ? (
         <p>{emptyMessage}</p>
       ) : (
-        <div ref={tableRef}>
+        <div ref={tableRef} className={onRowClick ? "clickable-table" : ""}>
+          {onRowClick && (
+            <style>{`
+              .clickable-table tbody tr {
+                cursor: pointer;
+              }
+            `}</style>
+          )}
           {(caption || headerAction) && (
             <div
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}

@@ -9,6 +9,7 @@ export function useTableData(data: TableRowData[]) {
       ...item.rawData,
       _element: item.element,
       _rawData: item.rawData,
+      _id: item._id,
     }));
   }, [data]);
 }
