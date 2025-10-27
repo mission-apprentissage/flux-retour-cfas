@@ -2,6 +2,7 @@ import { ObjectId } from "bson";
 import type { IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
+import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import { formationV2Db } from "@/common/model/collections";
 
 export type IIngestFormationUsedFields =
@@ -10,11 +11,26 @@ export type IIngestFormationUsedFields =
   | "etablissement_responsable_siret"
   | "etablissement_responsable_uai"
   | "etablissement_formateur_siret"
-  | "etablissement_formateur_uai";
+  | "etablissement_formateur_uai"
+  | "date_entree_formation"
+  | "date_fin_formation";
 
 export type IIngestFormationV2Params = Pick<IDossierApprenantSchemaV3, IIngestFormationUsedFields>;
 
 export async function ingestFormationV2(dossier: IIngestFormationV2Params): Promise<IFormationV2> {
+  if (!dossier.formation_cfd || !dossier.formation_rncp) {
+    throw new Error("Impossible d'ingérer la formation : ni le cfd ni le rncp ne sont fournis");
+  }
+
+  const organismeFormateur = await getOrganismeByUAIAndSIRET(
+    dossier.etablissement_formateur_uai,
+    dossier.etablissement_formateur_siret
+  );
+  const organismeResponsable = await getOrganismeByUAIAndSIRET(
+    dossier.etablissement_responsable_uai,
+    dossier.etablissement_responsable_siret
+  );
+
   const data: IFormationV2 = {
     _id: new ObjectId(),
     identifiant: {
@@ -36,6 +52,8 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
       "identifiant.responsable_uai": data.identifiant.responsable_uai,
       "identifiant.formateur_siret": data.identifiant.formateur_siret,
       "identifiant.formateur_uai": data.identifiant.formateur_uai,
+      organisme_formateur_id: organismeFormateur?._id,
+      organisme_responsable_id: organismeResponsable?._id,
     },
     {
       $setOnInsert: {

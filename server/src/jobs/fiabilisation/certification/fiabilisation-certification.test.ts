@@ -17,30 +17,28 @@ vi.mock("@/common/apis/apiAlternance/client", () => {
 
 describe("getEffectifSession", () => {
   it("should return session when date_entree and date_fin are defined", () => {
-    expect(
-      getEffectifSession({ formation: { date_entree: new Date("2021-09-01"), date_fin: new Date("2022-09-01") } })
-    ).toEqual({
+    expect(getEffectifSession({ date_entree: new Date("2021-09-01"), date_fin: new Date("2022-09-01") })).toEqual({
       start: new Date("2021-09-01"),
       end: new Date("2022-09-01"),
     });
   });
 
   it("should fallback over periode", () => {
-    expect(getEffectifSession({ formation: { periode: [2021, 2022] } })).toEqual({
+    expect(getEffectifSession({ periode: [2021, 2022] })).toEqual({
       start: new Date("2021-01-01"),
       end: new Date("2022-12-31"),
     });
   });
 
   it("should return null when no formation is defined", () => {
-    expect(getEffectifSession({ formation: null })).toEqual({
+    expect(getEffectifSession({})).toEqual({
       start: null,
       end: null,
     });
   });
 
   it("should prefer date_entree over periode", () => {
-    expect(getEffectifSession({ formation: { date_entree: new Date("2021-09-01"), periode: [2022, 2023] } })).toEqual({
+    expect(getEffectifSession({ date_entree: new Date("2021-09-01"), periode: [2022, 2023] })).toEqual({
       start: new Date("2021-09-01"),
       end: null,
     });
@@ -150,12 +148,12 @@ describe("getSessionCertification", () => {
 
 describe("getEffectifCertification", () => {
   it("should return null when no formation is defined", async () => {
-    expect(await getEffectifCertification({ formation: null })).toBe(null);
+    expect(await getEffectifCertification({})).toBe(null);
     expect(apiAlternanceClient.certification.index).not.toHaveBeenCalled();
   });
 
   it("should return null when no cfd and rncp are defined", async () => {
-    expect(await getEffectifCertification({ formation: { cfd: null, rncp: null } })).toBe(null);
+    expect(await getEffectifCertification({})).toBe(null);
     expect(apiAlternanceClient.certification.index).not.toHaveBeenCalled();
   });
 
@@ -163,9 +161,7 @@ describe("getEffectifCertification", () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue([]);
 
     expect(
-      await getEffectifCertification({
-        formation: { cfd: "32321014", rncp: "RNCP24440", date_entree: new Date("2021-09-01") },
-      })
+      await getEffectifCertification({ cfd: "32321014", rncp: "RNCP24440", date_entree: new Date("2021-09-01") })
     ).toBe(null);
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(3);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "32321014" } });
@@ -596,11 +592,9 @@ describe("getEffectifCertification", () => {
   it("should return certification with rncp when cfd is not defined", async () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue(certificationsByRncp);
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: null, rncp: "RNCP24440", date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(certificationsByRncp[1]);
+    expect(await getEffectifCertification({ cfd: null, rncp: "RNCP24440", date_entree: new Date("2021-09-01") })).toBe(
+      certificationsByRncp[1]
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { rncp: "RNCP24440" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { rncp: "RNCP24440" } });
@@ -609,11 +603,9 @@ describe("getEffectifCertification", () => {
   it("should return certification with cfd when rncp is not defined", async () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue(certificationsByCfd);
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: "32321014", rncp: null, date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(certificationsByCfd[2]);
+    expect(await getEffectifCertification({ cfd: "32321014", rncp: null, date_entree: new Date("2021-09-01") })).toBe(
+      certificationsByCfd[2]
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "32321014" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { cfd: "32321014" } });
@@ -637,9 +629,7 @@ describe("getEffectifCertification", () => {
     });
 
     expect(
-      await getEffectifCertification({
-        formation: { cfd: "32321014", rncp: "RNCP24440", date_entree: new Date("2021-09-01") },
-      })
+      await getEffectifCertification({ cfd: "32321014", rncp: "RNCP24440", date_entree: new Date("2021-09-01") })
     ).toBe(certificationsByCfd[2]);
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(3);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "32321014" } });
@@ -652,11 +642,9 @@ describe("getEffectifCertification", () => {
   it("should fix RNCP code format", async () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue(certificationsByRncp);
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: null, rncp: "24440", date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(certificationsByRncp[1]);
+    expect(await getEffectifCertification({ cfd: null, rncp: "24440", date_entree: new Date("2021-09-01") })).toBe(
+      certificationsByRncp[1]
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { rncp: "RNCP24440" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { rncp: "RNCP24440" } });
@@ -664,11 +652,9 @@ describe("getEffectifCertification", () => {
 
   it("should skip RNCP code not valid", async () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue(certificationsByCfd);
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: "32321014", rncp: "AA", date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(null);
+    expect(await getEffectifCertification({ cfd: "32321014", rncp: "AA", date_entree: new Date("2021-09-01") })).toBe(
+      null
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(1);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "32321014" } });
   });
@@ -682,11 +668,9 @@ describe("getEffectifCertification", () => {
       return [];
     });
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: "54", rncp: "RNCP24440", date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(null);
+    expect(await getEffectifCertification({ cfd: "54", rncp: "RNCP24440", date_entree: new Date("2021-09-01") })).toBe(
+      null
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "00000054" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { rncp: "RNCP24440" } });
@@ -824,11 +808,9 @@ describe("getEffectifCertification", () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValueOnce(certificationsByNewCfd);
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValueOnce(certificationsByCfd);
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: "32321015", rncp: null, date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(certificationsByCfd[2]);
+    expect(await getEffectifCertification({ cfd: "32321015", rncp: null, date_entree: new Date("2021-09-01") })).toBe(
+      certificationsByCfd[2]
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { cfd: "32321015" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { cfd: "32321014" } });
@@ -910,11 +892,9 @@ describe("getEffectifCertification", () => {
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValueOnce(certificationsByOldRncp);
     vi.mocked(apiAlternanceClient.certification.index).mockResolvedValueOnce(certificationsByRncp);
 
-    expect(
-      await getEffectifCertification({
-        formation: { cfd: null, rncp: "RNCP38651", date_entree: new Date("2021-09-01") },
-      })
-    ).toBe(certificationsByRncp[1]);
+    expect(await getEffectifCertification({ cfd: null, rncp: "RNCP38651", date_entree: new Date("2021-09-01") })).toBe(
+      certificationsByRncp[1]
+    );
     expect(apiAlternanceClient.certification.index).toHaveBeenCalledTimes(2);
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(1, { identifiant: { rncp: "RNCP38651" } });
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(2, { identifiant: { rncp: "RNCP24440" } });

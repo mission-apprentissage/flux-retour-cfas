@@ -236,6 +236,18 @@ describe("process-ingestion.v2", () => {
         prenom: dossier.prenom_apprenant,
         date_de_naissance: dossier.date_de_naissance_apprenant,
       },
+      parcours: {
+        chronologie: [
+          {
+            date: juil24,
+            id: expect.any(ObjectId),
+          },
+        ],
+        en_cours: {
+          date: juil24,
+          id: expect.any(ObjectId),
+        },
+      },
     });
 
     const formations = await formationV2Db().find({}).toArray();
@@ -251,6 +263,8 @@ describe("process-ingestion.v2", () => {
         formateur_uai: dossier.etablissement_formateur_uai,
       },
       draft: true,
+      organisme_formateur_id: null,
+      organisme_responsable_id: null,
     });
 
     const effectifs = await effectifV2Db().find({}).toArray();
@@ -284,9 +298,21 @@ describe("process-ingestion.v2", () => {
       contrats: {},
       derniere_transmission: now,
       informations_personnelles: {
+        email: null,
+        telephone: null,
         rqth: false,
       },
+      referent_handicap: {
+        email: null,
+        nom: null,
+        prenom: null,
+      },
+      responsable_apprenant: {
+        email1: null,
+        email2: null,
+      },
       _computed: {
+        session: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
