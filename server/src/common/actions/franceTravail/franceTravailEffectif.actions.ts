@@ -375,7 +375,7 @@ const getEffectifNavigation = async (
   nom_liste: API_EFFECTIF_LISTE,
   options?: {
     search?: string;
-    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
     mois?: string;
   }
@@ -383,6 +383,9 @@ const getEffectifNavigation = async (
   const query: Record<string, any> = {};
 
   let additionalPipelineStages: Array<Record<string, any>> = [];
+
+  const defaultSort = nom_liste === API_EFFECTIF_LISTE.TRAITE ? "date_traitement" : "jours_sans_contrat";
+  const sort = options?.sort ?? defaultSort;
 
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
@@ -395,11 +398,11 @@ const getEffectifNavigation = async (
       break;
     case API_EFFECTIF_LISTE.TRAITE:
       additionalPipelineStages.push(matchATraiter(false));
+      additionalPipelineStages.push(addDateTraitementField());
 
       if (options?.mois) {
         const { startDate, endDate } = parseMoisToDateRange(options.mois);
 
-        additionalPipelineStages.push(addDateTraitementField());
         additionalPipelineStages.push({
           $match: {
             date_traitement: {
@@ -417,7 +420,7 @@ const getEffectifNavigation = async (
   const pipeline = buildEffectifsPipeline(query, codeRegion);
 
   pipeline.push(...additionalPipelineStages);
-  pipeline.push(...matchFilter(options));
+  pipeline.push(...matchFilter({ ...options, sort }));
   pipeline.push({
     $group: {
       _id: null,
@@ -484,7 +487,7 @@ export const getEffectifFromFranceTravailId = async (
   nom_liste: API_EFFECTIF_LISTE,
   options?: {
     search?: string;
-    sort?: "jours_sans_contrat" | "nom" | "organisme";
+    sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
     mois?: string;
   }
