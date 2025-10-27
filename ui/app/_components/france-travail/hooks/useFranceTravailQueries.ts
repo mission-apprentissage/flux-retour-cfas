@@ -62,14 +62,28 @@ export function useEffectifsBySecteur(
 
 const fetchEffectifDetail = async (
   id: string,
-  params: { nom_liste: "a_traiter" | "traite"; code_secteur?: number; search?: string; sort?: string; order?: string }
+  params: {
+    nom_liste: "a_traiter" | "traite";
+    code_secteur?: number;
+    search?: string;
+    sort?: string;
+    order?: string;
+    mois?: string;
+  }
 ): Promise<IEffectifDetailResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectif/${id}`, { params });
 };
 
 export function useEffectifDetail(
   id: string | null,
-  params: { nom_liste: "a_traiter" | "traite"; code_secteur?: number; search?: string; sort?: string; order?: string }
+  params: {
+    nom_liste: "a_traiter" | "traite";
+    code_secteur?: number;
+    search?: string;
+    sort?: string;
+    order?: string;
+    mois?: string;
+  }
 ) {
   return useQuery(franceTravailQueryKeys.effectifDetail(id!, params), () => fetchEffectifDetail(id!, params), {
     enabled: id !== null,

@@ -26,6 +26,10 @@ export const effectifFranceTravailQuerySchema = z.object({
   search: z.string().optional(),
   sort: franceTravailEffectifsSortSchema,
   order: franceTravailEffectifsSortOrderSchema,
+  mois: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM")
+    .optional(),
 });
 
 export type IEffectifFranceTravailQuery = z.infer<typeof effectifFranceTravailQuerySchema>;
