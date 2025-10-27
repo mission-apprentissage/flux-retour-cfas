@@ -99,6 +99,7 @@ export default function SecteurClient() {
       <FTEffectifsTable
         effectifs={effectifsData?.effectifs || []}
         secteurLabel={secteurLabel || ""}
+        codeSecteur={codeSecteur!}
         isLoading={isLoading}
         totalCount={effectifsData?.pagination?.total || 0}
         currentPage={currentPage}
