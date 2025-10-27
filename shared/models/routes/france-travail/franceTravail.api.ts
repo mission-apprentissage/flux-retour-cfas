@@ -6,9 +6,7 @@ export const codeRomeSchema = z.string().regex(/^[A-Z]\d{4}$/, "Invalid ROME cod
 
 export const codeSecteurSchema = z.coerce.number().positive();
 
-export const franceTravailEffectifsSortSchema = z
-  .enum(["jours_sans_contrat", "nom", "organisme"])
-  .default("jours_sans_contrat");
+export const franceTravailEffectifsSortSchema = z.enum(["jours_sans_contrat", "nom", "organisme"]).optional();
 
 export const franceTravailEffectifsSortOrderSchema = z.enum(["asc", "desc"]).default("desc");
 
