@@ -83,6 +83,7 @@ export function FTEffectifsTraitesTable({
         : "Non renseignée";
 
       return {
+        _id: effectif._id,
         rawData: {
           nom: `${nom} ${prenom}`,
           secteur: secteurActivite,
@@ -159,6 +160,7 @@ export function FTEffectifsTraitesTable({
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
           hasPagination={true}
+          onRowClick={(rowData) => onEffectifClick(rowData._id)}
         />
       )}
     </div>
