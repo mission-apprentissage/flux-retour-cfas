@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useMoisTraites, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { publicConfig } from "@/config.public";
 
 import styles from "./DejaTraitesClient.module.css";
@@ -128,8 +129,13 @@ export default function DejaTraitesClient() {
     return (
       <>
         <FTHeader secteurLabel="Dossiers traités" />
-        <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
-          <Alert severity="info" title="Aucun effectif traité" description="Aucun effectif n'a encore été traité." />
+        <div className={styles.emptyStateContainer}>
+          <div className={styles.emptyStateContent}>
+            <i className={`fr-icon-survey-line fr-icon--lg ${styles.emptyStateIcon}`} aria-hidden="true" />
+            <p className={styles.emptyStateText}>Vous n&lsquo;avez pas encore traité de dossier.</p>
+            <b>Nous vous invitons à consulter </b>
+            <DsfrLink href="/france-travail">les dossiers à traiter</DsfrLink>
+          </div>
         </div>
       </>
     );
