@@ -17,6 +17,8 @@ describe("ingestFormationV2", () => {
     etablissement_responsable_uai: uaiFixtures["0491801S"],
     etablissement_formateur_siret: siretFixtures[26590673500120],
     etablissement_formateur_uai: uaiFixtures["0631408N"],
+    date_entree_formation: new Date("2024-09-01T00:00:00.000Z"),
+    date_fin_formation: new Date("2026-08-31T00:00:00.000Z"),
   } as const satisfies IIngestFormationV2Params;
 
   it("doit créer une nouvelle formation si celle-ci n'existe pas", async () => {
@@ -33,6 +35,8 @@ describe("ingestFormationV2", () => {
         formateur_uai: dossier.etablissement_formateur_uai,
       },
       draft: true,
+      organisme_formateur_id: null,
+      organisme_responsable_id: null,
     });
 
     expect(await formationV2Db().find({}).toArray()).toEqual([result]);
@@ -152,6 +156,8 @@ describe("ingestFormationV2", () => {
         formateur_uai: dossier.etablissement_formateur_uai,
       },
       draft: true,
+      organisme_formateur_id: null,
+      organisme_responsable_id: null,
     }).toEqual(result);
 
     expect(await formationV2Db().countDocuments()).toBe(existingFormations.length + 1);
