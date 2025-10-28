@@ -11961,6 +11961,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "PAS_DE_RECONTACT",
                   "EVENEMENT",
                   "MISSION_LOCALE",
+                  "ERROR",
                 ],
               },
             },
