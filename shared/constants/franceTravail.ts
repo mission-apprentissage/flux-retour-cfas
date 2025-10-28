@@ -4,6 +4,7 @@ export const FRANCE_TRAVAIL_SITUATION_LABELS = {
   PAS_DE_RECONTACT: "Pas de recontact",
   EVENEMENT: "Événement",
   MISSION_LOCALE: "Orientation mission locale",
+  ERROR: "Erreur sur le dossier",
 } as const;
 
 export type FranceTravailSituationKey = keyof typeof FRANCE_TRAVAIL_SITUATION_LABELS;

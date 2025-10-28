@@ -26,6 +26,11 @@ export const SITUATION_OPTIONS = [
     label: "J'ai redirigé le jeune vers la **Mission locale**",
     hintText: "",
   },
+  {
+    value: FranceTravailSituation.ERROR,
+    label: "Il y a une erreur sur ce dossier ?",
+    hintText: "Ex : Dossier en doublon ? Jeune qui n'est pas en statut inscrit sans contrat ?",
+  },
 ];
 
 export function parseLabelWithBold(label: string): { prefix: string; bold: string; suffix: string } {

@@ -59,6 +59,7 @@ export enum FranceTravailSituation {
   PAS_DE_RECONTACT = "PAS_DE_RECONTACT",
   EVENEMENT = "EVENEMENT",
   MISSION_LOCALE = "MISSION_LOCALE",
+  ERROR = "ERROR",
 }
 
 export interface IEffectifDetail {
