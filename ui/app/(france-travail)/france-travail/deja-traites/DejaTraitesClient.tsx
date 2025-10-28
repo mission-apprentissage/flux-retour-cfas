@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useMoisTraites, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { publicConfig } from "@/config.public";
 
 import styles from "./DejaTraitesClient.module.css";
 import { MoisSection } from "./MoisSection";
@@ -27,6 +28,7 @@ export default function DejaTraitesClient() {
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const moisRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -53,8 +55,44 @@ export default function DejaTraitesClient() {
     setSearchInput(search);
   };
 
-  const handleDownload = () => {
-    alert("Fonctionnalité en cours de développement");
+  const handleDownload = async () => {
+    setDownloadError(null);
+    try {
+      const response = await fetch(
+        `${publicConfig.baseUrl}/api/v1/organisation/france-travail/export/effectifs-traites`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du téléchargement");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      const contentDisposition = response.headers.get("content-disposition");
+      let filename = `dossiers-traites-${new Date().toISOString().split("T")[0]}.xlsx`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erreur lors du téléchargement:", error);
+      setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
+    }
   };
 
   const handleEffectifClick = (effectifId: string, mois: string) => {
@@ -102,6 +140,15 @@ export default function DejaTraitesClient() {
       <FTHeader secteurLabel="Dossiers traités" />
 
       <div className={styles.container}>
+        {downloadError && (
+          <Alert
+            severity="error"
+            title="Erreur de téléchargement"
+            description={downloadError}
+            onClose={() => setDownloadError(null)}
+            closable
+          />
+        )}
         <div className={styles.globalControls}>
           <div className={styles.downloadSection}>
             <div className={styles.downloadText}>

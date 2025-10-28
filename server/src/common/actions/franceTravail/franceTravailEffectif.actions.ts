@@ -565,16 +565,38 @@ export const getEffectifFromFranceTravailId = async (
   }
 };
 
-export const getAllFranceTravailEffectifsByCodeSecteur = async (codeRegion: string, codeSecteur: number) => {
-  const pipeline = buildEffectifsPipeline(
-    {
-      "romes.secteur_activites.code_secteur": codeSecteur,
-    },
-    codeRegion
-  );
+const buildExportEffectifsPipeline = (
+  codeRegion: string,
+  options: {
+    codeSecteur?: number;
+    mois?: string;
+    aTraiter: boolean;
+    includeFtData?: boolean;
+  }
+) => {
+  const query = options.codeSecteur ? { "romes.secteur_activites.code_secteur": options.codeSecteur } : {};
 
-  pipeline.push(match180Days());
-  pipeline.push(matchATraiter(true));
+  const pipeline = buildEffectifsPipeline(query, codeRegion);
+
+  if (options.aTraiter) {
+    pipeline.push(match180Days());
+    pipeline.push(matchATraiter(true));
+  } else {
+    pipeline.push(matchATraiter(false));
+    pipeline.push(addDateTraitementField());
+
+    if (options.mois) {
+      const { startDate, endDate } = parseMoisToDateRange(options.mois);
+      pipeline.push({
+        $match: {
+          date_traitement: {
+            $gte: startDate,
+            $lt: endDate,
+          },
+        },
+      });
+    }
+  }
 
   pipeline.push(
     {
@@ -625,25 +647,85 @@ export const getAllFranceTravailEffectifsByCodeSecteur = async (codeRegion: stri
     }
   );
 
-  pipeline.push({
-    $project: {
-      prenom: "$effectif_snapshot.apprenant.prenom",
-      nom: "$effectif_snapshot.apprenant.nom",
-      rqth: "$effectif_snapshot.apprenant.rqth",
-      date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-      commune: "$effectif_snapshot.apprenant.adresse.commune",
-      telephone: "$effectif_snapshot.apprenant.telephone",
-      email: "$effectif_snapshot.apprenant.courriel",
-      referent_handicap: "$effectif_snapshot.formation.referent_handicap",
-      libelle_formation: "$effectif_snapshot.formation.libelle_long",
-      niveau_formation: "$effectif_snapshot.formation.niveau",
-      organisme_nom: "$organisme.nom",
-      organisme_code_postal: "$organisme.adresse.code_postal",
-      organisme_commune: "$organisme.adresse.commune",
-      organisme_contacts: "$organisme.contacts",
-      date_inscription: "$date_inscription",
-      tdb_organisme_contacts: "$users_data",
-    },
+  if (options.includeFtData) {
+    pipeline.push({
+      $addFields: {
+        ft_data_entry: {
+          $let: {
+            vars: {
+              ftDataArray: { $objectToArray: "$ft_data" },
+            },
+            in: {
+              $arrayElemAt: [
+                {
+                  $sortArray: {
+                    input: {
+                      $filter: {
+                        input: "$$ftDataArray",
+                        as: "item",
+                        cond: { $ne: ["$$item.v", null] },
+                      },
+                    },
+                    sortBy: { "v.created_at": -1 },
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
+      },
+    });
+  }
+
+  const baseProjection = {
+    prenom: "$effectif_snapshot.apprenant.prenom",
+    nom: "$effectif_snapshot.apprenant.nom",
+    rqth: "$effectif_snapshot.apprenant.rqth",
+    date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+    commune: "$effectif_snapshot.apprenant.adresse.commune",
+    telephone: "$effectif_snapshot.apprenant.telephone",
+    email: "$effectif_snapshot.apprenant.courriel",
+    referent_handicap: "$effectif_snapshot.formation.referent_handicap",
+    libelle_formation: "$effectif_snapshot.formation.libelle_long",
+    niveau_formation: "$effectif_snapshot.formation.niveau",
+    organisme_nom: "$organisme.nom",
+    organisme_code_postal: "$organisme.adresse.code_postal",
+    organisme_commune: "$organisme.adresse.commune",
+    organisme_contacts: "$organisme.contacts",
+    date_inscription: "$date_inscription",
+    tdb_organisme_contacts: "$users_data",
+  };
+
+  const projection = options.includeFtData
+    ? {
+        ...baseProjection,
+        date_traitement: 1,
+        situation: "$ft_data_entry.v.situation",
+        commentaire: "$ft_data_entry.v.commentaire",
+      }
+    : baseProjection;
+
+  pipeline.push({ $project: projection });
+
+  return pipeline;
+};
+
+export const getAllFranceTravailEffectifsByCodeSecteur = async (codeRegion: string, codeSecteur: number) => {
+  const pipeline = buildExportEffectifsPipeline(codeRegion, {
+    codeSecteur,
+    aTraiter: true,
+  });
+
+  const effectifs = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+  return effectifs;
+};
+
+export const getAllFranceTravailEffectifsTraites = async (codeRegion: string, mois?: string) => {
+  const pipeline = buildExportEffectifsPipeline(codeRegion, {
+    mois,
+    aTraiter: false,
+    includeFtData: true,
   });
 
   const effectifs = await franceTravailEffectifsDb().aggregate(pipeline).toArray();

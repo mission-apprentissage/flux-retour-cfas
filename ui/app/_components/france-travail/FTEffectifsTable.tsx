@@ -1,12 +1,14 @@
 "use client";
 
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
+import { publicConfig } from "@/config.public";
 
 import styles from "./FTEffectifsTable.module.css";
 import { IEffectifFranceTravail } from "./types";
@@ -15,6 +17,7 @@ import { getDureeBadgeProps } from "./utils";
 interface FTEffectifsTableProps {
   effectifs: IEffectifFranceTravail[];
   secteurLabel: string;
+  codeSecteur: number;
   isLoading?: boolean;
   totalCount: number;
   currentPage: number;
@@ -52,6 +55,7 @@ function getStatutBadgeProps(aTraiter: boolean): StatutBadgeProps {
 export function FTEffectifsTable({
   effectifs,
   secteurLabel,
+  codeSecteur,
   isLoading = false,
   totalCount,
   currentPage,
@@ -62,6 +66,7 @@ export function FTEffectifsTable({
   searchTerm,
   onEffectifClick,
 }: FTEffectifsTableProps) {
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageChange = (page: number) => {
@@ -72,8 +77,44 @@ export function FTEffectifsTable({
     onPageSizeChange(newPageSize);
   };
 
-  const handleDownload = () => {
-    alert("Fonctionnalité en cours de développement");
+  const handleDownload = async () => {
+    setDownloadError(null);
+    try {
+      const response = await fetch(
+        `${publicConfig.baseUrl}/api/v1/organisation/france-travail/export/effectifs/${codeSecteur}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du téléchargement");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      const contentDisposition = response.headers.get("content-disposition");
+      let filename = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erreur lors du téléchargement:", error);
+      setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
+    }
   };
 
   const columns: ColumnData[] = [
@@ -222,6 +263,17 @@ export function FTEffectifsTable({
           Télécharger la liste du secteur
         </Button>
       </div>
+
+      {downloadError && (
+        <Alert
+          severity="error"
+          title="Erreur"
+          description={downloadError}
+          closable
+          onClose={() => setDownloadError(null)}
+          small
+        />
+      )}
 
       <div className={styles.searchContainer}>
         <SearchBar

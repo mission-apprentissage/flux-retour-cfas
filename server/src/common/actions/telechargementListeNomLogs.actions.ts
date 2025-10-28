@@ -22,7 +22,8 @@ export const createTelechargementListeNomLog = async (
     | "ml_traite"
     | "ml_injoignable"
     | "arml"
-    | "ft_a_traiter",
+    | "ft_a_traiter"
+    | "ft_traite",
   elementList: string[],
   date: Date,
   userId: ObjectId,
