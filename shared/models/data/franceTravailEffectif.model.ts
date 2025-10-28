@@ -34,9 +34,11 @@ const franceTravailData = z.object({
 
 const zFranceTravailEffectif = z.object({
   _id: zObjectId,
+  soft_deleted: z.boolean().optional(),
   created_at: z.date(),
   updated_at: z.date().optional(),
   effectif_id: zObjectId,
+  person_id: zObjectId.nullish(),
   effectif_snapshot: zEffectif,
   effectif_snapshot_date: z.date().optional(),
   code_region: zAdresse.shape.region.optional(),

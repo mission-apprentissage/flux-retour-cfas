@@ -2,13 +2,14 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { differenceInYears } from "date-fns";
 import type { Document } from "mongodb";
-import { API_EFFECTIF_LISTE, IEffectif } from "shared/models";
+import { API_EFFECTIF_LISTE, IEffectif, IPersonV2 } from "shared/models";
 import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailEffectif.model";
 
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 import { getCurrentAndNextStatus } from "../effectifs.statut.actions";
+import { getPersonV2FromIdentifiant } from "../personV2/personV2.actions";
 import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -41,6 +42,7 @@ const buildEffectifsPipeline = (query: Record<string, any>, codeRegion: string) 
     {
       $match: {
         code_region: codeRegion,
+        soft_deleted: { $ne: true },
       },
     },
     {
@@ -732,7 +734,9 @@ export const getAllFranceTravailEffectifsTraites = async (codeRegion: string, mo
   return effectifs;
 };
 
-export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) => {
+export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, withDedupe: boolean = true) => {
+  let person: IPersonV2 | null = null;
+
   const { current: currentStatus, next: nextStatus } = getCurrentAndNextStatus(
     effectif._computed?.statut?.parcours,
     new Date()
@@ -752,6 +756,18 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) =
   const adultFilter = effectif.apprenant?.date_de_naissance
     ? differenceInYears(new Date(), new Date(effectif.apprenant?.date_de_naissance)) >= 18
     : false;
+
+  const identifiant = {
+    nom: effectif.apprenant.nom,
+    prenom: effectif.apprenant.prenom,
+    date_de_naissance: effectif.apprenant.date_de_naissance,
+  };
+
+  const upsertCondition = !!inscritFilter && adultFilter;
+
+  if (upsertCondition) {
+    person = await getPersonV2FromIdentifiant(identifiant);
+  }
 
   try {
     await franceTravailEffectifsDb().findOneAndUpdate(
@@ -777,14 +793,51 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif) =
             code: romes,
             secteur_activites: secteurActivites,
           },
+          person_id: person?._id || null,
         },
       },
-      { upsert: !!inscritFilter && adultFilter }
+      { upsert: upsertCondition }
     );
+    withDedupe && (await dedupeFranceTravailEffectifSnapshots(effectif._id, person?._id || null));
   } catch (e) {
     logger.error(e);
     console.error("Error while creating France Travail effectif snapshot", e);
   }
+};
+
+export const dedupeFranceTravailEffectifSnapshots = async (effectifId: ObjectId, personId: ObjectId | null) => {
+  if (!personId) {
+    return;
+  }
+
+  const groupedPerson = await franceTravailEffectifsDb()
+    .aggregate([
+      {
+        $group: {
+          _id: {
+            person_id: "$person_id",
+          },
+          ids: { $push: "$_id" },
+        },
+      },
+    ])
+    .next();
+
+  if (!groupedPerson || groupedPerson.ids.length <= 1) {
+    return;
+  }
+
+  await franceTravailEffectifsDb().updateMany(
+    {
+      person_id: personId,
+      _id: { $ne: effectifId },
+    },
+    {
+      $set: {
+        soft_deleted: true,
+      },
+    }
+  );
 };
 
 export const updateFranceTravailData = (
