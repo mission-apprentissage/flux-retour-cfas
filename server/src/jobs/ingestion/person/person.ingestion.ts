@@ -1,21 +1,13 @@
 import { ObjectId } from "bson";
-import { capitalize } from "lodash-es";
 import type { IPersonV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { personV2Db } from "@/common/model/collections";
 
 export type IIngestPersonUsedFields = "nom_apprenant" | "prenom_apprenant" | "date_de_naissance_apprenant";
 
 export type IIngestPersonV2Params = Pick<IDossierApprenantSchemaV3, IIngestPersonUsedFields>;
-
-function normalisePersonIdentifiant(input: IPersonV2["identifiant"]): IPersonV2["identifiant"] {
-  return {
-    nom: input.nom.trim().normalize().toUpperCase(),
-    prenom: capitalize(input.prenom.trim().normalize()),
-    date_de_naissance: input.date_de_naissance,
-  };
-}
 
 export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IPersonV2> {
   const data: IPersonV2 = {
