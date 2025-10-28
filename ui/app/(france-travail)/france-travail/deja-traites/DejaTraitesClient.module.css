@@ -78,6 +78,38 @@
   color: var(--text-default-grey);
 }
 
+.emptyStateContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  margin-top: 2rem;
+  max-width: 650px;
+  margin: auto;
+}
+
+.emptyStateContent {
+  text-align: center;
+  padding: 3rem;
+}
+
+.emptyStateIcon {
+  font-size: 4rem;
+  color: #000091;
+  margin-bottom: 1.5rem;
+}
+
+.emptyStateText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000091;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
 @media (max-width: 768px) {
   .downloadSection {
     flex-direction: column;
