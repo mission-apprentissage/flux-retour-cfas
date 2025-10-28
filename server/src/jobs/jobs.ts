@@ -38,6 +38,7 @@ import {
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
+import { hydrateInscritSansContrat } from "./hydrate/france-travail/hydrate-france-travail";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
@@ -61,6 +62,7 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { hydrateRomeSecteurActivites } from "./hydrate/rome/hydrate-rome";
 import {
   computeDailyTransmissions,
   forceHydrateAllTransmissions,
@@ -537,6 +539,16 @@ export async function setupJobProcessor() {
       "tmp:migration:dedoublon-organisation": {
         handler: async () => {
           return deleteOrganisationWithoutUser();
+        },
+      },
+      "tmp:hydrate:rome-secteur-activites": {
+        handler: async () => {
+          return hydrateRomeSecteurActivites();
+        },
+      },
+      "tmp:hydrate:inscrit-sans-contrat": {
+        handler: async () => {
+          return hydrateInscritSansContrat();
         },
       },
     },

@@ -35,4 +35,5 @@ export interface FullTableProps {
   caption?: string | null;
   headerAction?: ReactNode;
   hasPagination?: boolean;
+  onRowClick?: (rowData: TableRowData) => void;
 }

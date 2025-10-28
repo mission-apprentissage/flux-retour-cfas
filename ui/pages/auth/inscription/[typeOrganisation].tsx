@@ -8,6 +8,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 import { SetterOrganisation } from "@/modules/auth/inscription/common";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
+import { InscriptionFranceTravail } from "@/modules/auth/inscription/InscriptionFranceTravail";
 import { InscriptionML } from "@/modules/auth/inscription/InscriptionML";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
@@ -61,6 +62,9 @@ const RegisterConfigurationOrganisationPage = () => {
         )}
         {typeOrganisation === "carif_oref" && (
           <InscriptionCarifOref setOrganisation={setOrganisation as SetterOrganisation} />
+        )}
+        {typeOrganisation === "france_travail" && (
+          <InscriptionFranceTravail setOrganisation={setOrganisation as SetterOrganisation} />
         )}
       </Box>
       {!hideBackNextButtons && (
