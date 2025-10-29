@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { publicConfig } from "@/config.public";
 
 import styles from "./FTEffectifsTable.module.css";
@@ -66,6 +67,7 @@ export function FTEffectifsTable({
   searchTerm,
   onEffectifClick,
 }: FTEffectifsTableProps) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -111,6 +113,8 @@ export function FTEffectifsTable({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      trackPlausibleEvent("isc_liste_telechargement");
     } catch (error) {
       console.error("Erreur lors du téléchargement:", error);
       setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
@@ -228,7 +232,10 @@ export function FTEffectifsTable({
             <div className={styles.centeredBadge}>
               <button
                 className={styles.voirButton}
-                onClick={() => onEffectifClick(effectif._id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEffectifClick(effectif._id);
+                }}
                 aria-label={`Voir le détail de ${nom} ${prenom}`}
               >
                 <i className="fr-icon-arrow-right-line fr-icon--sm" aria-hidden="true" />
@@ -312,7 +319,10 @@ export function FTEffectifsTable({
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
           hasPagination={true}
-          onRowClick={(rowData) => onEffectifClick(rowData._id)}
+          onRowClick={(rowData) => {
+            trackPlausibleEvent("isc_liste_dossier_ouvert");
+            onEffectifClick(rowData._id);
+          }}
         />
       )}
     </div>

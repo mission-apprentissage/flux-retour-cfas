@@ -10,6 +10,7 @@ import { useArborescence, useMoisTraites } from "@/app/_components/france-travai
 import { ISecteurArborescence, IMoisTraite } from "@/app/_components/france-travail/types";
 import { formatMoisLabel } from "@/app/_components/france-travail/utils/dateFormatting";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 function FTSideMenu({
   secteurs,
@@ -28,6 +29,8 @@ function FTSideMenu({
   selectedMois: string | null;
   isDejaTraitesPage: boolean;
 }) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
   const sideMenuItems = useMemo(() => {
     return [
       {
@@ -41,6 +44,12 @@ function FTSideMenu({
           text: `${secteur.libelle_secteur} (${secteur.count})`,
           linkProps: {
             href: `/france-travail/${secteur.code_secteur}`,
+            onClick: () => {
+              trackPlausibleEvent("isc_liste_secteur_selectionne", undefined, {
+                secteur: secteur.libelle_secteur,
+                code_secteur: secteur.code_secteur,
+              });
+            },
           },
           isActive: secteur.code_secteur === selectedSecteur,
         })),
@@ -56,6 +65,11 @@ function FTSideMenu({
           text: `${formatMoisLabel(mois.mois)} (${mois.count})`,
           linkProps: {
             href: `/france-travail/deja-traites?mois=${mois.mois}`,
+            onClick: () => {
+              trackPlausibleEvent("isc_filtre_mois_selectionne", undefined, {
+                mois: mois.mois,
+              });
+            },
           },
           isActive: selectedMois !== null && selectedMois === mois.mois,
         })),

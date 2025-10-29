@@ -24,6 +24,7 @@ import {
 } from "@/app/_components/france-travail/utils";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "./EffectifDetailClient.module.css";
 import { FTEffectifForm } from "./FTEffectifForm";
@@ -31,6 +32,7 @@ import { FTEffectifForm } from "./FTEffectifForm";
 const SUCCESS_DISPLAY_DURATION = 1000;
 
 export default function EffectifDetailClient() {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const router = useRouter();
   const params = useParams();
   const { params: queryParams, buildQueryString } = useFranceTravailQueryParams();
@@ -80,6 +82,15 @@ export default function EffectifDetailClient() {
     return arborescenceData.a_traiter.secteurs.find((s) => s.code_secteur === codeSecteur);
   }, [arborescenceData, codeSecteur]);
 
+  const lastTrackedEffectifIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (effectif && effectif.id !== lastTrackedEffectifIdRef.current) {
+      trackPlausibleEvent("isc_fiche_jeune_ouverte");
+      lastTrackedEffectifIdRef.current = effectif.id;
+    }
+  }, [effectif?.id, trackPlausibleEvent]);
+
   const handleFormSubmit = (
     formData: { situation: FranceTravailSituation; commentaire: string | null },
     saveNext: boolean
@@ -101,6 +112,8 @@ export default function EffectifDetailClient() {
       },
       {
         onSuccess: () => {
+          trackPlausibleEvent(saveNext ? "isc_fiche_validee_suivant" : "isc_fiche_validee_quitter");
+
           setSubmissionState({ isSubmitting: false, hasSuccess: true, hasError: false });
 
           const nextId = data?.next?.id;
@@ -166,6 +179,9 @@ export default function EffectifDetailClient() {
           href={`/france-travail/${codeSecteur}${buildQueryString(true) ? `?${buildQueryString(true)}` : ""}`}
           className="fr-link--icon-left fr-icon-arrow-left-s-line"
           arrow="none"
+          onClick={() => {
+            trackPlausibleEvent("isc_retour_liste_secteur");
+          }}
         >
           <u>
             Retour à la liste secteur <strong>{currentSecteur?.libelle_secteur || codeSecteur}</strong>

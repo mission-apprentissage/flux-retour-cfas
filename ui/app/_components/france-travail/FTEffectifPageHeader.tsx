@@ -2,6 +2,7 @@
 
 import { Spinner } from "@/app/_components/common/Spinner";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "./FTEffectifPageHeader.module.css";
 
@@ -24,6 +25,8 @@ export function FTEffectifPageHeader({
   codeSecteur,
   buildQueryString,
 }: FTEffectifPageHeaderProps) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
   const getHref = (id: string) => {
     const query = buildQueryString(false);
     if (codeSecteur) {
@@ -40,6 +43,9 @@ export function FTEffectifPageHeader({
           arrow="none"
           className="fr-link--icon-left fr-icon-arrow-left-s-line"
           aria-label={`Effectif précédent : ${previous.nom} ${previous.prenom}`}
+          onClick={() => {
+            trackPlausibleEvent("isc_navigation_precedent");
+          }}
         >
           Précédent
         </DsfrLink>
@@ -73,6 +79,9 @@ export function FTEffectifPageHeader({
           arrow="none"
           className="fr-link--icon-right fr-icon-arrow-right-s-line"
           aria-label={`Effectif suivant : ${next.nom} ${next.prenom}`}
+          onClick={() => {
+            trackPlausibleEvent("isc_navigation_suivant");
+          }}
         >
           Suivant
         </DsfrLink>

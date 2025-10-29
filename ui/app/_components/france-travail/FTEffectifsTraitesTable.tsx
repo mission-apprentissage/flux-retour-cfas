@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "./FTEffectifsTraitesTable.module.css";
 import { IEffectifFranceTravail, ISecteurArborescence } from "./types";
@@ -32,9 +33,11 @@ export function FTEffectifsTraitesTable({
   onPageSizeChange,
   onEffectifClick,
 }: FTEffectifsTraitesTableProps) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageChange = (page: number) => {
+    trackPlausibleEvent("isc_afficher_plus_dossiers");
     onPageChange(page);
   };
 
@@ -121,7 +124,10 @@ export function FTEffectifsTraitesTable({
             <div className={styles.centeredBadge}>
               <button
                 className={styles.voirButton}
-                onClick={() => onEffectifClick(effectif._id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEffectifClick(effectif._id);
+                }}
                 aria-label={`Voir le détail de ${nom} ${prenom}`}
               >
                 <i className="fr-icon-arrow-right-line fr-icon--sm" aria-hidden="true" />
@@ -160,7 +166,10 @@ export function FTEffectifsTraitesTable({
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
           hasPagination={true}
-          onRowClick={(rowData) => onEffectifClick(rowData._id)}
+          onRowClick={(rowData) => {
+            trackPlausibleEvent("isc_fiche_traitee_ouverte");
+            onEffectifClick(rowData._id);
+          }}
         />
       )}
     </div>

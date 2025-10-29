@@ -94,6 +94,27 @@ export const plausibleGoals = [
 
   // cfa
   "reporting_cfa_effectif",
+
+  // France Travail - Section 1: Page "À traiter"
+  "isc_liste_secteur_selectionne",
+  "isc_liste_dossier_ouvert",
+  "isc_liste_telechargement",
+  "isc_liste_recherche_utilisee",
+
+  // France Travail - Section 2: Fiche d'un jeune (à traiter)
+  "isc_fiche_jeune_ouverte",
+  "isc_navigation_precedent",
+  "isc_fiche_validee_quitter",
+  "isc_fiche_validee_suivant",
+  "isc_navigation_suivant",
+  "isc_retour_liste_secteur",
+
+  // France Travail - Section 3: Page "Déjà traité"
+  "isc_filtre_mois_selectionne",
+  "isc_recherche_dossier_traite",
+  "isc_telechargement_liste_traitee",
+  "isc_afficher_plus_dossiers",
+  "isc_fiche_traitee_ouverte",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];

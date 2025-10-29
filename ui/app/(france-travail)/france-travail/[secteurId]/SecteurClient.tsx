@@ -3,13 +3,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { FTEffectifsTable } from "@/app/_components/france-travail/FTEffectifsTable";
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useArborescence, useEffectifsBySecteur } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function SecteurClient() {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const router = useRouter();
   const params = useParams();
   const codeSecteur = params?.secteurId ? Number(params.secteurId) : null;
@@ -18,24 +20,12 @@ export default function SecteurClient() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-      setCurrentPage(1);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => {
-    setSearchInput("");
-    setDebouncedSearch("");
-    setCurrentPage(1);
-  }, [codeSecteur]);
+  const hasTrackedSearchRef = useRef(false);
 
   const { data: arborescenceData, isLoading: arboLoading } = useArborescence();
   const secteurs = arborescenceData?.a_traiter.secteurs ?? [];
+  const secteurExists = secteurs.find((s) => s.code_secteur === codeSecteur);
+  const secteurLabel = secteurExists?.libelle_secteur;
 
   const {
     data: effectifsData,
@@ -47,8 +37,30 @@ export default function SecteurClient() {
     search: debouncedSearch,
   });
 
-  const secteurExists = secteurs.find((s) => s.code_secteur === codeSecteur);
-  const secteurLabel = secteurExists?.libelle_secteur;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1);
+
+      if (searchInput && !hasTrackedSearchRef.current) {
+        console.log({ searchInput });
+        trackPlausibleEvent("isc_liste_recherche_utilisee", undefined, {
+          search: searchInput,
+        });
+        hasTrackedSearchRef.current = true;
+      } else if (!searchInput) {
+        hasTrackedSearchRef.current = false;
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, trackPlausibleEvent]);
+
+  useEffect(() => {
+    setSearchInput("");
+    setDebouncedSearch("");
+    setCurrentPage(1);
+  }, [codeSecteur]);
 
   if (arborescenceData && !arboLoading && !secteurExists) {
     return (

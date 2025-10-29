@@ -10,12 +10,14 @@ import { useState, useEffect, useRef } from "react";
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useMoisTraites, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { publicConfig } from "@/config.public";
 
 import styles from "./DejaTraitesClient.module.css";
 import { MoisSection } from "./MoisSection";
 
 export default function DejaTraitesClient() {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -32,14 +34,24 @@ export default function DejaTraitesClient() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const moisRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const hasTrackedSearchRef = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
+
+      if (searchInput && !hasTrackedSearchRef.current) {
+        trackPlausibleEvent("isc_recherche_dossier_traite", undefined, {
+          search: searchInput,
+        });
+        hasTrackedSearchRef.current = true;
+      } else if (!searchInput) {
+        hasTrackedSearchRef.current = false;
+      }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, trackPlausibleEvent]);
 
   useEffect(() => {
     if (moisFromUrl && moisRefs.current[moisFromUrl]) {
@@ -90,6 +102,8 @@ export default function DejaTraitesClient() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      trackPlausibleEvent("isc_telechargement_liste_traitee");
     } catch (error) {
       console.error("Erreur lors du téléchargement:", error);
       setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
