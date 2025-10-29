@@ -104,6 +104,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }, 0);
   };
 
+  const countUnreadNotificationsForMonth = (monthItem: MonthItem): number => {
+    return monthItem.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+  };
+
   const unreadNotificationsTraite = useMemo(() => {
     return countUnreadNotifications(sortedDataTraite);
   }, [sortedDataTraite]);
@@ -148,12 +152,18 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
       return items.map((monthItem) => {
         const label = buildMonthLabel(monthItem.month);
         const anchorId = anchorFromLabel(label.labelString);
+        const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
           monthItem.data.length > 0 ? (
-            <strong>
-              {label.labelElement}
-              {` (${monthItem.data.length})`}
-            </strong>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <strong>
+                {label.labelElement}
+                {` (${monthItem.data.length})`}
+              </strong>
+              {isCfaPage && section === "deja-traite" && unreadCount > 0 && (
+                <span className={notificationStyles.notificationDot} />
+              )}
+            </span>
           ) : (
             label.labelElement
           );
