@@ -57,10 +57,19 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
 
 function buildMonthLabel(month: string) {
   if (month === "plus-de-180-j") {
-    return { labelElement: "+ de 180j | En abandon", labelString: month };
+    return {
+      labelElement: "+ de 180j | En abandon",
+      labelString: month,
+      downloadLabel: "+ de 180j",
+    };
   }
 
-  return { labelElement: formatMonthAndYear(month), labelString: month };
+  const formattedMonth = formatMonthAndYear(month);
+  return {
+    labelElement: formattedMonth,
+    labelString: month,
+    downloadLabel: formattedMonth,
+  };
 }
 
 export const EffectifsMonthTable = memo(function EffectifsMonthTable({
@@ -75,7 +84,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const pathname = usePathname();
   const mlId = params?.id as string | undefined;
   const isCfaPage = pathname && pathname.startsWith("/cfa");
-  const { labelElement, labelString } = buildMonthLabel(monthItem.month);
+  const { labelElement, labelString, downloadLabel } = buildMonthLabel(monthItem.month);
   const anchorId = anchorFromLabel(labelString);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -178,7 +187,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
                   iconPosition="right"
                   onClick={() => onDownloadMonth(monthItem.month, listType)}
                 >
-                  Ruptures en {labelString}
+                  Ruptures en {downloadLabel}
                 </Button>
               )}
             </div>
