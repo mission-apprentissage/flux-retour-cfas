@@ -11,8 +11,10 @@ const ORGANISME_USER_MAPPING = {
 };
 
 export const up = async () => {
-  if (config.env !== "production") {
-    logger.info("[Migration] Cette migration ne s'exécute qu'en production. Environnement actuel : " + config.env);
+  if (config.env !== "production" && config.env !== "preprod") {
+    logger.info(
+      "[Migration] Cette migration ne s'exécute qu'en production et preprod. Environnement actuel : " + config.env
+    );
     return;
   }
 
