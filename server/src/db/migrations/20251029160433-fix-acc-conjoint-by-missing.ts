@@ -35,21 +35,28 @@ export const up = async () => {
     return;
   }
 
-  const bulkOps = effectifsToFix.map((effectif) => {
-    const organismeId = effectif.effectif_snapshot.organisme_id.toString();
-    const userId = ORGANISME_USER_MAPPING[organismeId as keyof typeof ORGANISME_USER_MAPPING];
+  const bulkOps = effectifsToFix
+    .map((effectif) => {
+      const organismeId = effectif.effectif_snapshot.organisme_id.toString();
+      const userId = ORGANISME_USER_MAPPING[organismeId as keyof typeof ORGANISME_USER_MAPPING];
 
-    return {
-      updateOne: {
-        filter: { _id: effectif._id },
-        update: {
-          $set: {
-            "organisme_data.acc_conjoint_by": new ObjectId(userId),
+      if (!userId) {
+        logger.warn(`[Migration] Organisme non mappé trouvé : ${organismeId} pour effectif ${effectif._id}. Ignoré.`);
+        return null;
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: effectif._id },
+          update: {
+            $set: {
+              "organisme_data.acc_conjoint_by": new ObjectId(userId),
+            },
           },
         },
-      },
-    };
-  });
+      };
+    })
+    .filter((op) => op !== null);
 
   const result = await missionLocaleEffectifsDb().bulkWrite(bulkOps);
 
