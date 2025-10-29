@@ -50,8 +50,11 @@ export const dedupeInscritSansContrat = async () => {
 
   while (await cursor.hasNext()) {
     const group = await cursor.next();
+
     if (!group) continue;
     const personId = group._id;
+
+    if (!personId) continue;
 
     const mostRecent = await franceTravailEffectifsDb()
       .find({ person_id: personId })
