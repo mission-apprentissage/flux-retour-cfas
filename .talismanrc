@@ -87,6 +87,8 @@ fileignoreconfig:
   checksum: b8f93a25559cedb9e5caa7f3c887c376d371eadde25ed9d2782521c42e484158
 - filename: .infra/vault/vault.yml
   checksum: 3aab1b0f15318f2e2598af1382c122ce6989ae0796224bdb2fae027e2a016ef3
+- filename: server/src/db/migrations/20251029160433-fix-acc-conjoint-by-missing.ts
+  checksum: 50b4531854636bf4ccb95c8a5a2b90fdb88f54b15b4490b071b970deae6a23c0
 scopeconfig:
 - scope: node
 custom_patterns:
