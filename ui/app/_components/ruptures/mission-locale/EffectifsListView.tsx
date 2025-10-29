@@ -51,13 +51,21 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }
   };
 
-  const buildMonthLabel = (month: string) => {
+  const buildMonthLabel = (month: string, count?: number) => {
     if (month === "plus-de-180-j") {
       return {
         labelElement: (
           <>
             <span>
-              + de 180j | <i> En abandon</i>
+              {isCfaPage ? (
+                <>
+                  +180j {count !== undefined ? ` (${count})` : ""} | <i> Durée légale rupture de contrat</i>
+                </>
+              ) : (
+                <>
+                  +180j | <i> En abandon</i>
+                </>
+              )}
             </span>
           </>
         ),
@@ -104,6 +112,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }, 0);
   };
 
+  const countUnreadNotificationsForMonth = (monthItem: MonthItem): number => {
+    return monthItem.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+  };
+
   const unreadNotificationsTraite = useMemo(() => {
     return countUnreadNotifications(sortedDataTraite);
   }, [sortedDataTraite]);
@@ -146,14 +158,26 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = buildMonthLabel(monthItem.month);
+        const label = buildMonthLabel(monthItem.month, monthItem.data.length);
         const anchorId = anchorFromLabel(label.labelString);
+        const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
           monthItem.data.length > 0 ? (
-            <strong>
-              {label.labelElement}
-              {` (${monthItem.data.length})`}
-            </strong>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <strong>
+                {monthItem.month === "plus-de-180-j" ? (
+                  label.labelElement
+                ) : (
+                  <>
+                    {label.labelElement}
+                    {` (${monthItem.data.length})`}
+                  </>
+                )}
+              </strong>
+              {isCfaPage && section === "deja-traite" && unreadCount > 0 && (
+                <span className={notificationStyles.notificationDot} />
+              )}
+            </span>
           ) : (
             label.labelElement
           );
