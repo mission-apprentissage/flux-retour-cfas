@@ -4,13 +4,14 @@ import type { IEffectif, IEffectifV2, IOrganisme } from "shared/models";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
+// import { createMissionLocaleSnapshotV2 } from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import parentLogger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 import { buildAdresse, type IIngestAdresseUsedFields } from "./adresse/adresse.builder";
 import { ingestEffectifV2, type IIngestEffectifUsedFields } from "./effectif/effectif.ingestion";
 import { ingestFormationV2, type IIngestFormationUsedFields } from "./formationV2/formationV2.ingestion";
-import { ingestPersonV2, type IIngestPersonUsedFields } from "./person/person.ingestion";
+import { ingestPersonV2, updateParcoursPersonV2, type IIngestPersonUsedFields } from "./person/person.ingestion";
 
 const logger = parentLogger.child({
   module: "process-ingestion.v2",
@@ -26,23 +27,27 @@ async function ingestDossier(
 ) {
   const [formation, person] = await Promise.all([ingestFormationV2(dossier), ingestPersonV2(dossier)]);
 
-  await ingestEffectifV2({
+  const effectifV2 = await ingestEffectifV2({
     dossier,
     adresse,
     person_id: person._id,
     formation_id: formation._id,
     date_transmission,
   });
+  await updateParcoursPersonV2(person._id, effectifV2);
+  // await createMissionLocaleSnapshotV2(effectifV2, person, formation);
+  return effectifV2;
 }
 
 export async function handleEffectifTransmission(
   effectifQueue: WithId<IEffectifQueue>,
   date_transmission: Date
-): Promise<void> {
+): Promise<IEffectifV2 | undefined> {
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
     const adresse = await buildAdresse(dossier);
-    await ingestDossier(dossier, adresse, date_transmission);
+    const effectif = await ingestDossier(dossier, adresse, date_transmission);
+    return effectif;
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
     captureException(e);

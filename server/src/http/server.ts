@@ -130,6 +130,7 @@ import {
   requireARML,
   requireOrganismePermission,
   returnResult,
+  requireFranceTravail,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -149,9 +150,11 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import armlAuthentRoutes from "./routes/organisations.routes/arml/arml.routes";
+import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
+import franceTravailPublicRoutes from "./routes/public.routes/france-travail.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
@@ -374,7 +377,8 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/v1/reseaux", getAllReseauxRoutes())
-    .use("/api/v1/mission-locale", missionLocalePublicRoutes());
+    .use("/api/v1/mission-locale", missionLocalePublicRoutes())
+    .use("/api/v1/france-travail", franceTravailPublicRoutes());
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
@@ -897,6 +901,7 @@ function setupRoutes(app: Application) {
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
       .use("/arml", requireARML, armlAuthentRoutes())
+      .use("/france-travail", requireFranceTravail, franceTravailAuthentRoutes())
   );
 
   /********************************

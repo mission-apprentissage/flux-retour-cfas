@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
@@ -19,8 +20,10 @@ import { _get } from "@/common/httpClient";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
+import notificationStyles from "../shared/ui/NotificationBadge.module.css";
 
 import { DownloadSection } from "./DownloadSection";
+import { useMonthDownload } from "./useMonthDownload";
 
 interface EffectifsListViewProps {
   data: MonthsData;
@@ -30,6 +33,7 @@ interface EffectifsListViewProps {
 
 export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
 
   const getInitialSection = (statut: string | null): SelectedSection => {
     switch (statut) {
@@ -45,6 +49,31 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
       default:
         return "a-traiter";
     }
+  };
+
+  const buildMonthLabel = (month: string, count?: number) => {
+    if (month === "plus-de-180-j") {
+      return {
+        labelElement: (
+          <>
+            <span>
+              {isCfaPage ? (
+                <>
+                  +180j {count !== undefined ? ` (${count})` : ""} | <i> Durée légale rupture de contrat</i>
+                </>
+              ) : (
+                <>
+                  +180j | <i> En abandon</i>
+                </>
+              )}
+            </span>
+          </>
+        ),
+        labelString: month,
+      };
+    }
+
+    return { labelElement: formatMonthAndYear(month), labelString: month };
   };
 
   const getInitialRuptureDate = (date: string | null): string => {
@@ -63,7 +92,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const [activeAnchor, setActiveAnchor] = useState("");
 
   const pathname = usePathname();
-  const isCfaPage = pathname === "/cfa";
+  const isCfaPage = pathname?.startsWith("/cfa");
 
   const aTraiter = data.a_traiter || [];
   const injoignableList = data.injoignable || [];
@@ -77,20 +106,19 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
   const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
 
-  const priorityDataInjoignable = useMemo(() => {
-    if (!data.prioritaire?.effectifs) return [];
+  const countUnreadNotifications = (items: MonthItem[]): number => {
+    return items.reduce((total, month) => {
+      return total + month.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+    }, 0);
+  };
 
-    return groupedInjoignable.flatMap((month) =>
-      month.data
-        .filter((effectif) => effectif.prioritaire === true)
-        .map((effectif) => ({
-          ...effectif,
-          date_rupture: month.month === "plus-de-180-j" ? "+ de 180j" : month.month,
-        }))
-    );
-  }, [groupedInjoignable, data.prioritaire?.effectifs]);
+  const countUnreadNotificationsForMonth = (monthItem: MonthItem): number => {
+    return monthItem.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+  };
 
-  const hadEffectifsPrioritairesInjoignable = priorityDataInjoignable.length > 0;
+  const unreadNotificationsTraite = useMemo(() => {
+    return countUnreadNotifications(sortedDataTraite);
+  }, [sortedDataTraite]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -101,20 +129,14 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   useEffect(() => {
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
-        const firstLabel =
-          groupedDataATraiter[0].month === "plus-de-180-j"
-            ? "+ de 180j"
-            : formatMonthAndYear(groupedDataATraiter[0].month);
-        setActiveAnchor(anchorFromLabel(firstLabel));
+        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month);
+        setActiveAnchor(anchorFromLabel(firstLabel.labelString));
       } else if (selectedSection === "deja-traite" && sortedDataTraite.length > 0) {
-        const label = formatMonthAndYear(sortedDataTraite[0].month);
-        setActiveAnchor(anchorFromLabel(label));
+        const label = buildMonthLabel(sortedDataTraite[0].month);
+        setActiveAnchor(anchorFromLabel(label.labelString));
       } else if (selectedSection === "injoignable" && groupedInjoignable.length > 0) {
-        const label =
-          groupedInjoignable[0].month === "plus-de-180-j"
-            ? "+ de 180j"
-            : formatMonthAndYear(groupedInjoignable[0].month);
-        setActiveAnchor(anchorFromLabel(label));
+        const label = buildMonthLabel(groupedInjoignable[0].month);
+        setActiveAnchor(anchorFromLabel(label.labelString));
       }
     }
   }, [activeAnchor, selectedSection, groupedDataATraiter, sortedDataTraite, groupedInjoignable]);
@@ -136,10 +158,29 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = monthItem.month === "plus-de-180-j" ? "+ de 180j" : formatMonthAndYear(monthItem.month);
-        const anchorId = anchorFromLabel(label);
+        const label = buildMonthLabel(monthItem.month, monthItem.data.length);
+        const anchorId = anchorFromLabel(label.labelString);
+        const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
-          monthItem.data.length > 0 ? <strong>{`${label} (${monthItem.data.length})`}</strong> : label;
+          monthItem.data.length > 0 ? (
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <strong>
+                {monthItem.month === "plus-de-180-j" ? (
+                  label.labelElement
+                ) : (
+                  <>
+                    {label.labelElement}
+                    {` (${monthItem.data.length})`}
+                  </>
+                )}
+              </strong>
+              {isCfaPage && section === "deja-traite" && unreadCount > 0 && (
+                <span className={notificationStyles.notificationDot} />
+              )}
+            </span>
+          ) : (
+            label.labelElement
+          );
         return {
           text: displayText,
           linkProps: {
@@ -169,7 +210,18 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         items: getItems(groupedDataATraiter, "a-traiter"),
       },
       {
-        text: totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`,
+        text: (
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <span>
+              {totalTraite > 0 ? <strong>{`Déjà traité (${totalTraite})`}</strong> : `Déjà traité (${totalTraite})`}
+            </span>
+            {isCfaPage && unreadNotificationsTraite > 0 && (
+              <span className={notificationStyles.notificationBadge}>
+                {unreadNotificationsTraite > 99 ? "99+" : unreadNotificationsTraite}
+              </span>
+            )}
+          </span>
+        ),
         linkProps: {
           href: "#",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -277,6 +329,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À traiter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.A_TRAITER} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -288,6 +350,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.A_TRAITER}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -299,6 +362,16 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               Déjà traité
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.TRAITE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
@@ -307,6 +380,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 listType={API_EFFECTIF_LISTE.TRAITE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>
@@ -318,17 +392,28 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
             <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
               À recontacter
             </h2>
+            {downloadError && (
+              <Alert
+                severity="error"
+                description={downloadError}
+                closable
+                onClose={() => setDownloadError(null)}
+                className="fr-mb-2w"
+                small
+              />
+            )}
             {!isCfaPage && <DownloadSection listType={API_EFFECTIF_LISTE.INJOIGNABLE} />}
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
                 data={groupedInjoignable}
-                priorityData={priorityDataInjoignable}
-                hadEffectifsPrioritaires={hadEffectifsPrioritairesInjoignable}
+                priorityData={data.injoignable_prioritaire.effectifs as EffectifPriorityData[]}
+                hadEffectifsPrioritaires={data.injoignable_prioritaire.hadEffectifsPrioritaires}
                 isTraite={false}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.INJOIGNABLE}
+                onDownloadMonth={downloadMonth}
               />
             </SuspenseWrapper>
           </>

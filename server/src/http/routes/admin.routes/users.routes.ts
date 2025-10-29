@@ -1,13 +1,18 @@
 import Boom from "boom";
 import express from "express";
 import { getWarningOnEmail } from "shared/models/data/organisations.model";
-import { zPostAdminAddMembreToMissionLocale } from "shared/models/routes/admin/users.api";
+import {
+  zPostAdminAddMembreToFranceTravail,
+  zPostAdminAddMembreToMissionLocale,
+} from "shared/models/routes/admin/users.api";
 
 import { activateMissionLocaleAtAdminValidation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
 import { inviteUserToOrganisation, rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
 import {
   getAllUsers,
+  getAllUsersForExport,
   getDetailedUserById,
   removeUser,
   resendConfirmationEmail,
@@ -34,6 +39,19 @@ export default () => {
       const query = buildFiltersFromQuery(req.query as UsersFiltersParams);
       const result = await getAllUsers(query, { page, limit, sort });
       return res.json(result);
+    }
+  );
+
+  router.get(
+    "/export",
+    validateRequestMiddleware({
+      query: usersFiltersSchema(),
+    }),
+    async (req, res) => {
+      const { sort } = req.query as unknown as UsersFiltersParams;
+      const query = buildFiltersFromQuery(req.query as unknown as UsersFiltersParams);
+      const users = await getAllUsersForExport(query, { sort });
+      return res.json(users);
     }
   );
 
@@ -123,6 +141,24 @@ export default () => {
       }
       await inviteUserToOrganisation(req.user, email, organisation._id);
       await activateMissionLocaleAtAdminValidation(organisation._id, new Date());
+    })
+  );
+
+  router.post(
+    "/france-travail/membre",
+    returnResult(async (req) => {
+      const body = await validateFullZodObjectSchema(req.body, zPostAdminAddMembreToFranceTravail);
+      const { email, code_region } = body;
+
+      if (!code_region) {
+        throw Boom.badRequest("code_region is required");
+      }
+
+      const organisation = await getFranceTravailOrganisationByCodeRegion(code_region as string);
+      if (!organisation) {
+        throw Boom.notFound("France Travail organisation not found");
+      }
+      await inviteUserToOrganisation(req.user, email, organisation._id);
     })
   );
 

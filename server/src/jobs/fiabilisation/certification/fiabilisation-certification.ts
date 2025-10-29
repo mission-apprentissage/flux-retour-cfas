@@ -9,6 +9,14 @@ import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternan
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 
+type IFormation = {
+  cfd?: string | null;
+  rncp?: string | null;
+  date_entree?: Date | null;
+  date_fin?: Date | null;
+  periode?: [number, number];
+};
+
 function isWithRange(date: Date | null, range: { debut: Date | null; fin: Date | null }): boolean {
   // If date is null, we assume it's valid
   if (date === null) {
@@ -60,12 +68,12 @@ function filterCertificationContinuiteValidity(
   };
 }
 
-export function getEffectifSession(effectif: Pick<IEffectif, "formation">): { start: Date | null; end: Date | null } {
-  if (!effectif.formation) {
+export function getEffectifSession(formation: IFormation): { start: Date | null; end: Date | null } {
+  if (!formation) {
     return { start: null, end: null };
   }
 
-  const { date_entree, periode, date_fin } = effectif.formation;
+  const { date_entree, periode, date_fin } = formation;
 
   if (date_entree) {
     return { start: date_entree, end: date_fin ?? null };
@@ -74,14 +82,14 @@ export function getEffectifSession(effectif: Pick<IEffectif, "formation">): { st
   if (periode && periode.length > 0) {
     const [start, end] = periode;
 
-    return { start: new Date(`${start}-01-01`), end: effectif.formation.date_fin ?? new Date(`${end}-12-31`) };
+    return { start: new Date(`${start}-01-01`), end: formation.date_fin ?? new Date(`${end}-12-31`) };
   }
 
   return { start: null, end: date_fin ?? null };
 }
 
-async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Promise<string | null> {
-  const rawCfd = effectif.formation?.cfd ?? null;
+async function resolveEffectiveCFD(formation: { cfd?: string | null; rncp?: string | null }): Promise<string | null> {
+  const rawCfd = formation?.cfd ?? null;
 
   if (rawCfd === null) {
     return null;
@@ -90,7 +98,7 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
   const cfd = rawCfd.padStart(8, "0");
 
   if (!zCfd.safeParse(cfd).success) {
-    logger.warn(Boom.internal("fiabilisation-certification: invalid cfd", { cfd, formation: effectif.formation }));
+    logger.warn(Boom.internal("fiabilisation-certification: invalid cfd", { cfd, formation }));
     return rawCfd;
   }
 
@@ -100,13 +108,13 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
     logger.warn(
       Boom.internal("fiabilisation-certification: cfd non found on API alternance", {
         cfd,
-        formation: effectif.formation,
+        formation,
       })
     );
     return rawCfd;
   }
 
-  const session = getEffectifSession(effectif);
+  const session = getEffectifSession(formation);
 
   // We check only the CFD, so we consider only CFD validity
   if (isSessionValidForCfd(session, certifications[0].periode_validite.cfd)) {
@@ -119,7 +127,7 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
     logger.warn(
       Boom.internal("fiabilisation-certification: no replacement found for cfd", {
         cfd,
-        formation: effectif.formation,
+        formation,
       })
     );
     return cfd;
@@ -130,7 +138,7 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
       Boom.internal("fiabilisation-certification: multiple replacement found for cfd", {
         cfd,
         continuite,
-        formation: effectif.formation,
+        formation,
       })
     );
     return cfd;
@@ -139,8 +147,8 @@ async function resolveEffectiveCFD(effectif: Pick<IEffectif, "formation">): Prom
   return continuite.cfd[0].code;
 }
 
-async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Promise<string | null> {
-  let rncp = effectif.formation?.rncp ?? null;
+async function resolveEffectiveRNCP(formation: IFormation): Promise<string | null> {
+  let rncp = formation?.rncp ?? null;
 
   if (rncp === null) {
     return null;
@@ -160,13 +168,13 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
     logger.warn(
       Boom.internal("fiabilisation-certification: rncp non found on API alternance", {
         rncp,
-        formation: effectif.formation,
+        formation,
       })
     );
     return rncp;
   }
 
-  const session = getEffectifSession(effectif);
+  const session = getEffectifSession(formation);
 
   // We check only the RNCP, so we consider only RNCP validity
   if (isSessionValidForRncp(session, certifications[0].periode_validite.rncp)) {
@@ -179,7 +187,7 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
     logger.warn(
       Boom.internal("fiabilisation-certification: no replacement found for rncp", {
         rncp,
-        formation: effectif.formation,
+        formation,
         continuite,
       })
     );
@@ -191,7 +199,7 @@ async function resolveEffectiveRNCP(effectif: Pick<IEffectif, "formation">): Pro
       Boom.internal("fiabilisation-certification: multiple replacement found for rncp", {
         rncp,
         continuite,
-        formation: effectif.formation,
+        formation,
       })
     );
     return rncp;
@@ -224,15 +232,13 @@ export function getSessionCertification<C extends Pick<ICertification, "periode_
   return candidats[0] ?? null;
 }
 
-export async function getEffectifCertification(effectif: Pick<IEffectif, "formation">): Promise<ICertification | null> {
+export async function getEffectifCertification(formation: IFormation): Promise<ICertification | null> {
   try {
-    const { formation } = effectif;
-
     if (!formation) {
       return null;
     }
 
-    const [cfd, rncp] = await Promise.all([resolveEffectiveCFD(effectif), resolveEffectiveRNCP(effectif)]);
+    const [cfd, rncp] = await Promise.all([resolveEffectiveCFD(formation), resolveEffectiveRNCP(formation)]);
 
     const filter: Parameters<typeof apiAlternanceClient.certification.index>[0]["identifiant"] = {};
 
@@ -257,12 +263,12 @@ export async function getEffectifCertification(effectif: Pick<IEffectif, "format
     }
 
     const certifications = await apiAlternanceClient.certification.index({ identifiant: filter });
-    const session = getEffectifSession(effectif);
+    const session = getEffectifSession(formation);
 
     return getSessionCertification(session, certifications);
   } catch (err) {
     captureException(err);
-    logger.error("fiabilisation-certification: error while getting effectif certification", { err, effectif });
+    logger.error("fiabilisation-certification: error while getting effectif certification", { err, formation });
     return null;
   }
 }

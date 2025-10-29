@@ -74,6 +74,8 @@ function redirectToHome(
       return NextResponse.redirect(new URL("/arml", request.url));
     case "ACADEMIE":
       return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
+    case "FRANCE_TRAVAIL":
+      return NextResponse.redirect(new URL("/france-travail", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
@@ -111,6 +113,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "MISSION_LOCALE") {
+      return NextResponse.redirect(new URL("/home", request.url));
+    }
+    return NextResponse.next(requestNextData);
+  }
+
+  if (pathname === "/france-travail") {
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    if (session.organisation?.type !== "FRANCE_TRAVAIL") {
       return NextResponse.redirect(new URL("/home", request.url));
     }
     return NextResponse.next(requestNextData);

@@ -18,6 +18,7 @@ type EffectifsSearchableTableProps = {
   onSearchChange: (term: string) => void;
   handleSectionChange?: (section: SelectedSection) => void;
   listType: IMissionLocaleEffectifList;
+  onDownloadMonth?: (month: string, listType: IMissionLocaleEffectifList) => void;
 };
 
 export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
@@ -29,10 +30,11 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   onSearchChange,
   handleSectionChange,
   listType,
+  onDownloadMonth,
 }: EffectifsSearchableTableProps) {
   return (
     <div>
-      <div>
+      <div style={{ marginBottom: "2rem" }}>
         <SearchBar
           label="Rechercher un dossier par nom et/ou prénom"
           renderInput={({ id, className, placeholder }) => (
@@ -48,12 +50,14 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
         />
       </div>
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
-        <EffectifsPriorityTable
-          priorityData={priorityData}
-          searchTerm={searchTerm}
-          hadEffectifsPrioritaires={hadEffectifsPrioritaires}
-          listType={listType}
-        />
+        <div style={{ marginBottom: "2rem" }}>
+          <EffectifsPriorityTable
+            priorityData={priorityData}
+            searchTerm={searchTerm}
+            hadEffectifsPrioritaires={hadEffectifsPrioritaires}
+            listType={listType}
+          />
+        </div>
       )}
       {data.map((monthItem) => (
         <EffectifsMonthTable
@@ -62,6 +66,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
           searchTerm={searchTerm}
           handleSectionChange={handleSectionChange}
           listType={listType}
+          onDownloadMonth={onDownloadMonth}
         />
       ))}
     </div>

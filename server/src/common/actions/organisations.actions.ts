@@ -9,6 +9,7 @@ import {
   IOrganisationMissionLocale,
   IOrganisationARML,
   IOrganisationOrganismeFormation,
+  IOrganisationFranceTravail,
 } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -405,6 +406,8 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {
   const organisation = await getOrganisationById(organisationId);
   switch (organisation.type) {
+    case "FRANCE_TRAVAIL":
+      return "France Travail";
     case "MISSION_LOCALE":
       return `Mission locale ${organisation.nom}`;
     case "ARML":
@@ -462,6 +465,14 @@ export const getAllARML = async (): Promise<IOrganisationARML[]> => {
   const organisations = await organisationsDb().find<IOrganisationARML>({ type: "ARML" }).toArray();
   if (!organisations) {
     throw Boom.notFound("Aucune ARML trouvée");
+  }
+  return organisations;
+};
+
+export const getAllFranceTravail = async (): Promise<IOrganisationFranceTravail[]> => {
+  const organisations = await organisationsDb().find<IOrganisationFranceTravail>({ type: "FRANCE_TRAVAIL" }).toArray();
+  if (!organisations) {
+    throw Boom.notFound("Aucune organisation France Travail trouvée");
   }
   return organisations;
 };

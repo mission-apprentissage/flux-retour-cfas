@@ -52,13 +52,14 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
   return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data, user);
 };
 
-const getEffectifsParMoisMissionLocale = async (_req, { locals }) => {
+const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale;
   if (!missionLocale) {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  return await getAllEffectifsParMois(missionLocale);
+  const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+  return await getAllEffectifsParMois(missionLocale, userId);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
@@ -66,40 +67,45 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
+  const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
   const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleAPISchema);
   const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
 
-  const computeFileInfo = async (types: Array<API_EFFECTIF_LISTE>) => {
+  const computeFileInfo = async (types: Array<API_EFFECTIF_LISTE>, month?: string) => {
     const dataArr: Array<{
       worksheetName: string;
       logsTag: "ml_a_traiter" | "ml_traite" | "ml_injoignable";
       data: Array<Record<string, string>>;
     }> = [];
     for (const type of types) {
+      let effectifsList = (await getEffectifsListByMisisonLocaleId(missionLocale, { type, month })) as Array<
+        Record<string, string>
+      >;
+
       switch (type) {
         case API_EFFECTIF_LISTE.A_TRAITER:
           dataArr.push({
             worksheetName: "À traiter",
             logsTag: "ml_a_traiter" as const,
-            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
+            data: effectifsList,
           });
           break;
         case API_EFFECTIF_LISTE.TRAITE:
           dataArr.push({
             worksheetName: "Déjà traités",
             logsTag: "ml_traite" as const,
-            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
+            data: effectifsList,
           });
           break;
         case API_EFFECTIF_LISTE.INJOIGNABLE:
           dataArr.push({
             worksheetName: "À recontacter",
             logsTag: "ml_injoignable" as const,
-            data: (await getEffectifsListByMisisonLocaleId(missionLocale, { type })) as Array<Record<string, string>>,
+            data: effectifsList,
           });
           break;
         default:
@@ -110,7 +116,7 @@ const exportEffectifMissionLocale = async (req, res) => {
     return dataArr;
   };
 
-  const worksheetsInfo = await computeFileInfo(filters.type);
+  const worksheetsInfo = await computeFileInfo(filters.type, filters.month);
   const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
 
   const columns = [

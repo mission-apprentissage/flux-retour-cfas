@@ -32,3 +32,21 @@
 .noWrapBadge {
   white-space: nowrap;
 }
+
+.monthSection {
+  padding: 1.5rem;
+  background-color: #f6f6f6;
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monthTitle {
+  color: var(--text-title-blue-france);
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}

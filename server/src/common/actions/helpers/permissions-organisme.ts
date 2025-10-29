@@ -29,7 +29,23 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {
     // Tout a false pour les missions locales
     // Cela assure aucun accès potentiels aux autres apis
-
+    case "FRANCE_TRAVAIL": {
+      return {
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
+        effectifsNominatifs: {
+          apprenant: false,
+          apprenti: false,
+          inscritSansContrat: false,
+          rupturant: false,
+          abandon: false,
+          inconnu: false,
+        },
+        manageEffectifs: false,
+        configurerModeTransmission: false,
+      };
+    }
     case "MISSION_LOCALE": {
       return {
         viewContacts: false,

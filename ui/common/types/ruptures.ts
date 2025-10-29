@@ -14,6 +14,7 @@ export type EffectifData = {
   rqth: boolean;
   a_traiter: boolean;
   nouveau_contrat: boolean;
+  unread_by_current_user?: boolean;
 };
 
 export type EffectifPriorityData = EffectifData & {
@@ -31,6 +32,7 @@ export type SelectedSection = "a-traiter" | "deja-traite" | "injoignable" | "pri
 export type MonthsData = {
   a_traiter: MonthItem[];
   prioritaire: { hadEffectifsPrioritaires: boolean; effectifs: EffectifData[] };
+  injoignable_prioritaire: { hadEffectifsPrioritaires: boolean; effectifs: EffectifData[] };
   traite: MonthItem[];
   injoignable: MonthItem[];
 };

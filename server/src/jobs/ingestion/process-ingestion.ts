@@ -22,6 +22,7 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
@@ -166,7 +167,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
   try {
     //Process du nouveau schéma de données
-    await handleEffectifTransmission(effectifQueue, currentDate);
+    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -176,7 +177,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
       const { effectif, organisme } = result.data;
 
       // création ou mise à jour de l'effectif
-      const [{ effectifId, itemProcessingInfos }] = await Promise.all([
+      const [{ upsertedEffectif, itemProcessingInfos }] = await Promise.all([
         createOrUpdateEffectif(effectif, 0, organismeTarget.uai),
         updateOrganismeTransmission(
           organisme,
@@ -194,7 +195,8 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
         { _id: effectifQueue._id },
         {
           $set: {
-            effectif_id: effectifId,
+            effectif_id: upsertedEffectif._id,
+            effectifv2_id: effectifv2?._id,
             organisme_id: organisme._id,
             updated_at: currentDate,
             processed_at: currentDate,
@@ -207,6 +209,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           },
         }
       );
+      await createMissionLocaleSnapshot(upsertedEffectif);
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {
@@ -216,6 +219,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
         {
           $set: {
             validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
+            effectifv2_id: effectifv2?._id,
             updated_at: currentDate,
             processed_at: currentDate,
             has_error: true,
@@ -230,6 +234,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
     }
     await handleDECAMechanism(organismeTarget);
+
     return result.success;
   } catch (err: any) {
     const error = Boom.internal("failed processing item", ctx);
@@ -338,7 +343,12 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         return NEVER;
       }
 
-      const certification = await getEffectifCertification(effectif);
+      const certification = await getEffectifCertification({
+        cfd: effectif.formation?.cfd || null,
+        rncp: effectif.formation?.rncp || null,
+        date_entree: effectif.formation?.date_entree || null,
+        date_fin: effectif.formation?.date_fin || null,
+      });
 
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
@@ -438,7 +448,7 @@ const createOrUpdateEffectif = async (
   effectif: WithoutId<IEffectif>,
   retryCount = 0,
   uai: string | undefined | null
-): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
+): Promise<{ upsertedEffectif: IEffectif; itemProcessingInfos: ItemProcessingInfos }> => {
   const itemProcessingInfos: ItemProcessingInfos = {};
   let effectifDb = await checkIfEffectifExists<IEffectif>(effectif, effectifsDb());
   itemProcessingInfos.effectif_new = !effectifDb;
@@ -471,7 +481,8 @@ const createOrUpdateEffectif = async (
     }
 
     await createMissionLocaleSnapshot(effectifDb);
-    return { effectifId: effectifDb._id, itemProcessingInfos };
+    await createFranceTravailEffectifSnapshot(effectifDb);
+    return { upsertedEffectif: effectifDb, itemProcessingInfos };
   } catch (err) {
     // Le code d'erreur 11000 correspond à une duplication d'index unique
     // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue

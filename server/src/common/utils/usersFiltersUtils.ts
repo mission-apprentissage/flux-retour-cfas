@@ -8,15 +8,58 @@ export const parseStringToArray = (value: string | undefined): string[] => {
     .filter((s) => s.length > 0);
 };
 
-export const buildTextSearchQuery = (searchTerm: string) => {
-  if (searchTerm.length < 2) {
+export const escapeRegex = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+export const analyzeSearchTerm = (searchTerm: string): "user" | "org" | "mixed" | "email-exact" => {
+  const trimmed = searchTerm.trim();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const isCompleteEmail = emailRegex.test(trimmed);
+
+  if (isCompleteEmail) return "email-exact";
+
+  const isSiret = /^\d{14}$/.test(trimmed);
+  const isUAI = /^\d{7}[A-Za-z]$/.test(trimmed);
+  const hasOrgKeywords = /\b(CFA|mission\s+locale|ARML|organisme|centre|formation)\b/i.test(trimmed);
+
+  if (isSiret || isUAI) return "org";
+  if (hasOrgKeywords) return "org";
+
+  const isPartialEmail = /@/.test(trimmed);
+  const hasUserKeywords = /\b(monsieur|madame|directeur|directrice|responsable)\b/i.test(trimmed);
+
+  if (isPartialEmail || hasUserKeywords) return "user";
+
+  return "mixed";
+};
+
+export const buildTextSearchQueryAfterLookup = (searchTerm: string) => {
+  const trimmedTerm = searchTerm.trim();
+
+  if (trimmedTerm.length < 2) {
     return [];
   }
 
+  if (trimmedTerm.length > 100) {
+    return [];
+  }
+
+  const escapedTerm = escapeRegex(trimmedTerm);
+
   return [
-    { nom: { $regex: searchTerm, $options: "i" } },
-    { prenom: { $regex: searchTerm, $options: "i" } },
-    { email: { $regex: searchTerm, $options: "i" } },
+    { nom: { $regex: escapedTerm, $options: "i" } },
+    { prenom: { $regex: escapedTerm, $options: "i" } },
+    { email: { $regex: escapedTerm, $options: "i" } },
+    { "organisation.nom": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.siret": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.uai": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.organisme.nom": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.organisme.raison_sociale": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.organisme.enseigne": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.organisme.siret": { $regex: escapedTerm, $options: "i" } },
+    { "organisation.organisme.uai": { $regex: escapedTerm, $options: "i" } },
   ];
 };
 
@@ -24,12 +67,11 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const { q, account_status, type_utilisateur, reseaux, departements, regions } = queryParams;
   const query: any = {};
   const organizationFilters: any = {};
+  const searchTerm = q?.trim();
 
-  if (q && q.trim()) {
-    const textSearchQuery = buildTextSearchQuery(q.trim());
-    if (textSearchQuery.length > 0) {
-      query.$or = textSearchQuery;
-    }
+  if (searchTerm && searchTerm.length >= 2) {
+    query._hasTextSearch = true;
+    query._searchTerm = searchTerm;
   }
 
   const statusValues = parseStringToArray(account_status);

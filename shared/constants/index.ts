@@ -2,6 +2,7 @@ export * from "./aide";
 export * from "./dossierApprenant";
 export * from "./effectifs";
 export * from "./fiabilisation";
+export * from "./franceTravail";
 export * from "./indicateurs";
 export * from "./organisme";
 export * from "./organismes";

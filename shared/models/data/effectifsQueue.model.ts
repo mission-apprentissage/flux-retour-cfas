@@ -40,6 +40,7 @@ const internalFields = {
   source_organisme_id: z.string({ description: effectifsProps.source_organisme_id.description }).nullish(),
   user_erp_id: z.string({ description: "Id de l'utilisateur ERP" }).nullish(),
   effectif_id: zObjectId.describe("Id de l'effectif associé").nullish(),
+  effectifV2_id: zObjectId.describe("Id de l'effectif v2 associé").nullish(),
   organisme_id: zObjectId.describe("Id de l'organisme associé").nullish(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),

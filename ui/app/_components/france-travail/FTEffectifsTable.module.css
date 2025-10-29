@@ -1,0 +1,142 @@
+.container {
+  margin-top: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  background-color: #f6f6f6;
+  padding: 1rem;
+}
+
+.headerText {
+  font-size: 14px;
+  color: var(--text-default-grey);
+}
+
+.downloadButton {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.searchContainer {
+  margin-bottom: 2rem;
+  max-width: 40%;
+}
+
+.nomContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nomText {
+  color: var(--text-default-grey);
+  font-weight: 700;
+}
+
+.organismeText {
+  color: var(--text-default-grey);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 140px;
+}
+
+.formationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.formationTitle {
+  font-weight: 400;
+  color: var(--text-default-grey);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.centeredHeader {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.centeredBadge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.centeredBadge .fr-badge {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+}
+
+.dureeBadge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5rem;
+  text-transform: uppercase;
+}
+
+.voirButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-mention-grey);
+  font-style: italic;
+}
+
+.skeletonContainer {
+  margin-top: 1rem;
+}
+
+.skeletonTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonRow {
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
