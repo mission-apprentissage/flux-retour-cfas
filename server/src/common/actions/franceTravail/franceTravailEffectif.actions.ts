@@ -810,20 +810,11 @@ export const dedupeFranceTravailEffectifSnapshots = async (effectifId: ObjectId,
     return;
   }
 
-  const groupedPerson = await franceTravailEffectifsDb()
-    .aggregate([
-      {
-        $group: {
-          _id: {
-            person_id: "$person_id",
-          },
-          ids: { $push: "$_id" },
-        },
-      },
-    ])
-    .next();
+  const foundPersons = await franceTravailEffectifsDb()
+    .find({ person_id: personId, soft_deleted: { $ne: true } })
+    .toArray();
 
-  if (!groupedPerson || groupedPerson.ids.length <= 1) {
+  if (!foundPersons || foundPersons.length <= 1) {
     return;
   }
 
