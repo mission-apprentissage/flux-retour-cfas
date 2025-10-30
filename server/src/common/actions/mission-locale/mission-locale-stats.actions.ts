@@ -7,13 +7,17 @@ import { getOrganisationById } from "../organisations.actions";
 
 import { computeMissionLocaleStats } from "./mission-locale.actions";
 
-export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId) => {
+export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
+  const dateToUse = date ?? new Date();
+  dateToUse.setUTCHours(0, 0, 0, 0);
+
   const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const mlStats = await computeMissionLocaleStats(ml);
+  const mlStats = await computeMissionLocaleStats(ml, dateToUse);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
+      computed_day: date,
     },
     {
       $set: {
