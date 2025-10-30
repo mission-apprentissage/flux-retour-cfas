@@ -81,6 +81,17 @@ const buildEffectifsPipeline = (query: Record<string, any>, codeRegion: string) 
         },
       },
     },
+    {
+      $addFields: {
+        nom_complet: {
+          $concat: [
+            { $ifNull: ["$effectif_snapshot.apprenant.prenom", ""] },
+            " ",
+            { $ifNull: ["$effectif_snapshot.apprenant.nom", ""] },
+          ],
+        },
+      },
+    },
     addATraiterField(),
   ];
 
@@ -96,15 +107,34 @@ export const matchFilter = (options?: {
   const pipeline: Document[] = [];
 
   if (search) {
-    const escapedSearch = escapeRegex(search);
-    pipeline.push({
-      $match: {
-        $or: [
-          { "effectif_snapshot.apprenant.nom": { $regex: escapedSearch, $options: "i" } },
-          { "effectif_snapshot.apprenant.prenom": { $regex: escapedSearch, $options: "i" } },
-        ],
-      },
-    });
+    const trimmedSearch = search.trim();
+
+    if (trimmedSearch.length > 0) {
+      const searchWords = trimmedSearch.split(/\s+/).filter((w) => w.length > 0);
+
+      if (searchWords.length === 1) {
+        const escapedSearch = escapeRegex(trimmedSearch);
+        pipeline.push({
+          $match: {
+            $or: [
+              { "effectif_snapshot.apprenant.nom": { $regex: escapedSearch, $options: "i" } },
+              { "effectif_snapshot.apprenant.prenom": { $regex: escapedSearch, $options: "i" } },
+              { nom_complet: { $regex: escapedSearch, $options: "i" } },
+            ],
+          },
+        });
+      } else {
+        const regexConditions = searchWords.map((word) => ({
+          nom_complet: { $regex: escapeRegex(word), $options: "i" },
+        }));
+
+        pipeline.push({
+          $match: {
+            $and: regexConditions,
+          },
+        });
+      }
+    }
   }
 
   const sortDirection = order === "asc" ? 1 : -1;
