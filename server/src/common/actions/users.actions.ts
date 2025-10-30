@@ -198,7 +198,7 @@ function buildUsersAggregationPipeline(
   userQuery: { [key: string]: any },
   organizationFilters: { [key: string]: any },
   sort: { [key: string]: number },
-  searchMode: "user" | "org" | "email-exact" | "standard" = "standard"
+  searchMode: "user" | "org" | "email-exact" | "phone" | "email-domain" | "standard" = "standard"
 ) {
   const pipeline: any[] = [];
 
@@ -213,6 +213,14 @@ function buildUsersAggregationPipeline(
   if (searchMode === "email-exact" && hasTextSearch && searchTerm) {
     const trimmedTerm = searchTerm.trim().toLowerCase();
     cleanQuery.email = { $regex: `^${escapeRegex(trimmedTerm)}$`, $options: "i" };
+  } else if (searchMode === "email-domain" && hasTextSearch && searchTerm) {
+    const domain = searchTerm.trim();
+    const escapedDomain = escapeRegex(domain);
+    cleanQuery.email = { $regex: `^[^@]+${escapedDomain}`, $options: "i" };
+  } else if (searchMode === "phone" && hasTextSearch && searchTerm) {
+    const normalizedPhone = searchTerm.replace(/[\s.\-+()]/g, "");
+    const escapedPhone = escapeRegex(normalizedPhone);
+    cleanQuery.telephone = { $regex: escapedPhone, $options: "i" };
   } else if (searchMode === "user" && hasTextSearch && searchTerm) {
     const trimmedTerm = searchTerm.trim();
     if (trimmedTerm.length >= 2 && trimmedTerm.length <= 100) {
@@ -286,7 +294,13 @@ function buildUsersAggregationPipeline(
         ],
       },
     },
-    { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } }
+    { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        nomComplet: { $concat: ["$prenom", " ", "$nom"] },
+        nomCompletInverse: { $concat: ["$nom", " ", "$prenom"] },
+      },
+    }
   );
 
   const postLookupFilters: any[] = [];
@@ -300,7 +314,10 @@ function buildUsersAggregationPipeline(
       const searchConditions: any[] = [
         { nom: { $regex: escapedTerm, $options: "i" } },
         { prenom: { $regex: escapedTerm, $options: "i" } },
+        { nomComplet: { $regex: escapedTerm, $options: "i" } },
+        { nomCompletInverse: { $regex: escapedTerm, $options: "i" } },
         { email: { $regex: escapedTerm, $options: "i" } },
+        { telephone: { $regex: escapedTerm, $options: "i" } },
         { "organisation.nom": { $regex: escapedTerm, $options: "i" } },
         { "organisation.siret": { $regex: escapedTerm, $options: "i" } },
         { "organisation.uai": { $regex: escapedTerm, $options: "i" } },
@@ -352,7 +369,7 @@ export const getAllUsers = async (
   const userQuery = { ...query };
   delete userQuery._organizationFilters;
 
-  let searchMode: "user" | "org" | "email-exact" | "standard" = "standard";
+  let searchMode: "user" | "org" | "email-exact" | "phone" | "email-domain" | "standard" = "standard";
   const hasTextSearch = userQuery._hasTextSearch;
   const searchTerm = userQuery._searchTerm;
 
@@ -362,6 +379,10 @@ export const getAllUsers = async (
 
     if (searchType === "email-exact") {
       searchMode = "email-exact";
+    } else if (searchType === "email-domain") {
+      searchMode = "email-domain";
+    } else if (searchType === "phone") {
+      searchMode = "phone";
     } else if (searchType === "user") {
       searchMode = "user";
     } else if (searchType === "org") {
