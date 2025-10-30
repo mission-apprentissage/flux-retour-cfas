@@ -4,7 +4,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
@@ -69,6 +69,7 @@ export function FTEffectifsTable({
 }: FTEffectifsTableProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageChange = (page: number) => {
@@ -287,12 +288,12 @@ export function FTEffectifsTable({
           label="Rechercher par nom ou prénom"
           renderInput={({ id, className, placeholder }) => (
             <input
+              ref={searchInputRef}
               id={id}
               className={className}
               placeholder={placeholder}
               type="search"
               value={searchTerm}
-              disabled={isLoading}
               onChange={(e) => {
                 onSearchChange(e.target.value);
               }}
