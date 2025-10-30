@@ -103,7 +103,7 @@ export function FTEffectifsTable({
       const contentDisposition = response.headers.get("content-disposition");
       let filename = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
