@@ -43,7 +43,6 @@ export default function SecteurClient() {
       setCurrentPage(1);
 
       if (searchInput && !hasTrackedSearchRef.current) {
-        console.log({ searchInput });
         trackPlausibleEvent("isc_liste_recherche_utilisee", undefined, {
           search: searchInput,
         });
