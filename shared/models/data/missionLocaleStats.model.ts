@@ -4,11 +4,14 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "missionLocaleStats";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ mission_locale_id: 1 }, { unique: true }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ mission_locale_id: 1, computed_day: 1 }, { unique: true }],
+];
 const zMissionLocaleStats = z.object({
   _id: zObjectId,
   created_at: z.date(),
-  updated_at: z.date(),
+  updated_at: z.date().optional(),
+  computed_day: z.date(),
   mission_locale_id: zObjectId,
   stats: z.object({
     a_traiter: z.number().int().default(0),

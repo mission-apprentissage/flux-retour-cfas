@@ -43,6 +43,7 @@ import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalog
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
+  hydrateDailyMissionLocaleStats,
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleEffectifDateRupture,
   hydrateMissionLocaleOrganisation,
@@ -549,6 +550,11 @@ export async function setupJobProcessor() {
       "tmp:hydrate:inscrit-sans-contrat": {
         handler: async () => {
           return hydrateInscritSansContrat();
+        },
+      },
+      "tmp:hydrate:timeseries-stats-ml": {
+        handler: async () => {
+          return hydrateDailyMissionLocaleStats();
         },
       },
     },
