@@ -2,6 +2,7 @@ import express from "express";
 import { z } from "zod";
 
 import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
+import { getSummaryStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getAllARML, getAllMissionsLocales } from "@/common/actions/organisations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -24,6 +25,18 @@ export default () => {
     }),
     getLbaLink
   );
+  router.get(
+    "/stats/summary",
+    validateRequestMiddleware({
+      query: z.object({
+        period: z.enum(["30days", "3months", "all"]).optional(),
+      }),
+    }),
+    returnResult(getSummaryStatsRoute)
+  );
+  router.get("/stats/national", returnResult(getNationalStatsRoute));
+  router.get("/stats/region/:code_region", returnResult(getRegionalStatsRoute));
+
   return router;
 };
 
@@ -48,4 +61,21 @@ const getLbaLink = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const getSummaryStatsRoute = async (req) => {
+  // return await getNationalStats();
+  const { period } = req.query;
+  return getSummaryStats(new Date(), period as "30days" | "3months" | "all" | undefined);
+};
+
+const getNationalStatsRoute = async (_req) => {
+  // return await getNationalStats();
+  return;
+};
+
+const getRegionalStatsRoute = async (_req) => {
+  // const code_region = req.params.code_region;
+  // return await getRegionalStats(code_region);
+  return;
 };
