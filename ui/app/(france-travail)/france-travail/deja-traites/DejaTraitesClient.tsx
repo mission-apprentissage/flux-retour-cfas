@@ -91,7 +91,7 @@ export default function DejaTraitesClient() {
       const contentDisposition = response.headers.get("content-disposition");
       let filename = `dossiers-traites-${new Date().toISOString().split("T")[0]}.xlsx`;
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
