@@ -64,7 +64,6 @@ const getLbaLink = async (req, res, next) => {
 };
 
 const getSummaryStatsRoute = async (req) => {
-  // return await getNationalStats();
   const { period } = req.query;
   return getSummaryStats(new Date(), period as "30days" | "3months" | "all" | undefined);
 };
