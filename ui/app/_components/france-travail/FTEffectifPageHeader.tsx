@@ -29,7 +29,7 @@ export function FTEffectifPageHeader({
 
   const getHref = (id: string) => {
     const query = buildQueryString(false);
-    if (codeSecteur) {
+    if (codeSecteur !== undefined && codeSecteur !== null) {
       return `/france-travail/${codeSecteur}/effectif/${id}${query ? `?${query}` : ""}`;
     }
     return `/france-travail/deja-traites/effectif/${id}${query ? `?${query}` : ""}`;
@@ -58,7 +58,8 @@ export function FTEffectifPageHeader({
           <>
             <div className={styles.pageHeaderDesktopText}>
               <p className={styles.pageHeaderText}>
-                Dossier n°{currentIndex + 1} sur {total} {codeSecteur ? "à traiter" : "traité"}
+                Dossier n°{currentIndex + 1} sur {total}{" "}
+                {codeSecteur !== undefined && codeSecteur !== null ? "à traiter" : "traité"}
               </p>
             </div>
 
