@@ -22,6 +22,11 @@ export const SITUATION_OPTIONS = [
     hintText: "",
   },
   {
+    value: FranceTravailSituation.FT_SERVICES,
+    label: "J'ai présenté l'offre de **services France travail**",
+    hintText: "",
+  },
+  {
     value: FranceTravailSituation.MISSION_LOCALE,
     label: "J'ai redirigé le jeune vers la **Mission locale**",
     hintText: "",
