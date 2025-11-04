@@ -53,7 +53,7 @@ export default function SecteurClient() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchInput, trackPlausibleEvent]);
+  }, [searchInput]);
 
   useEffect(() => {
     setSearchInput("");
