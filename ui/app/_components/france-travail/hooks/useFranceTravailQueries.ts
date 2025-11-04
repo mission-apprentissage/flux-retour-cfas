@@ -46,7 +46,7 @@ export function useArborescence() {
 
 export function useEffectifsBySecteur(
   codeSecteur: number | null,
-  params: { page?: number; limit?: number; search?: string } = {}
+  params: { page?: number; limit?: number; search?: string; departements?: string } = {}
 ) {
   return useQuery(
     franceTravailQueryKeys.effectifsBySecteur(codeSecteur!, params),
@@ -162,7 +162,7 @@ const fetchEffectifsTraitesParMois = async (
 
 export function useEffectifsTraitesParMois(
   mois: string | null,
-  params: { page?: number; limit?: number; search?: string } = {}
+  params: { page?: number; limit?: number; search?: string; departements?: string } = {}
 ) {
   return useQuery(
     franceTravailQueryKeys.effectifsTraitesParMois(mois!, params),

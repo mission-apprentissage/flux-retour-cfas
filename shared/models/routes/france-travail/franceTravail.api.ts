@@ -16,6 +16,7 @@ export const franceTravailEffectifsQuerySchema = z.object({
   search: z.string().optional(),
   sort: franceTravailEffectifsSortSchema,
   order: franceTravailEffectifsSortOrderSchema,
+  departements: z.string().optional().describe("Codes départements séparés par des virgules (ex: 01,59,75)"),
 });
 
 export type IFranceTravailEffectifsQuery = z.infer<typeof franceTravailEffectifsQuerySchema>;

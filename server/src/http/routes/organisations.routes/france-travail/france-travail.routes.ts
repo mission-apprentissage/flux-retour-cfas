@@ -56,7 +56,7 @@ export default () => {
     returnResult(async (req, { locals }) => {
       const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
       const code_secteur = Number(req.params.code_secteur);
-      const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
+      const { page, limit, search, sort, order, departements } = req.query as IFranceTravailEffectifsQuery;
 
       return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.A_TRAITER, code_secteur, {
         page,
@@ -64,6 +64,7 @@ export default () => {
         search,
         sort,
         order,
+        departements,
       });
     })
   );
@@ -83,6 +84,9 @@ export default () => {
     validateRequestMiddleware({
       params: z.object({
         code_secteur: codeSecteurSchema,
+      }),
+      query: z.object({
+        departements: z.string().optional().describe("Codes départements séparés par des virgules"),
       }),
     }),
     returnResult(exportEffectifByCodeSecteur)
@@ -148,6 +152,7 @@ const updateEffectifById = async (req) => {
 const exportEffectifByCodeSecteur = async (req, res) => {
   const ftOrga = res.locals.franceTravail as IOrganisationFranceTravail;
   const code_secteur = Number(req.params.code_secteur);
+  const departements = req.query.departements as string | undefined;
   const secteurActivite = await getSecteurActivitesByCode(code_secteur);
 
   if (!secteurActivite) {
@@ -190,7 +195,7 @@ const exportEffectifByCodeSecteur = async (req, res) => {
     {
       worksheetName: `A traiter - ${secteurActivite.libelle_secteur}`,
       logsTag: `ft_a_traiter` as const,
-      data: await getAllFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, code_secteur),
+      data: await getAllFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, code_secteur, { departements }),
     },
   ];
   const templateFile = await addSheetToXlscFile(
@@ -293,7 +298,7 @@ const getEffectifsTraitesMois = async (_req, { locals }) => {
 
 const getEffectifsTraitesParMois = async (req, { locals }) => {
   const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { page, limit, search, sort, order } = req.query as IFranceTravailEffectifsQuery;
+  const { page, limit, search, sort, order, departements } = req.query as IFranceTravailEffectifsQuery;
   const mois = req.params.mois;
 
   return getFranceTravailEffectifsTraitesParMois(ftOrga.code_region, mois, {
@@ -302,5 +307,6 @@ const getEffectifsTraitesParMois = async (req, { locals }) => {
     search,
     sort,
     order,
+    departements,
   });
 };
