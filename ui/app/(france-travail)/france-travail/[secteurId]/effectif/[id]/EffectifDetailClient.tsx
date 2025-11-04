@@ -89,7 +89,7 @@ export default function EffectifDetailClient() {
       trackPlausibleEvent("isc_fiche_jeune_ouverte");
       lastTrackedEffectifIdRef.current = effectif.id;
     }
-  }, [effectif?.id, trackPlausibleEvent]);
+  }, [effectif?.id]);
 
   const handleFormSubmit = (
     formData: { situation: FranceTravailSituation; commentaire: string | null },

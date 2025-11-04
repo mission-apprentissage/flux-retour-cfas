@@ -51,7 +51,7 @@ export default function DejaTraitesClient() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchInput, trackPlausibleEvent]);
+  }, [searchInput]);
 
   useEffect(() => {
     if (moisFromUrl && moisRefs.current[moisFromUrl]) {
