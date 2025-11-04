@@ -3,6 +3,7 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
 import { EffectifCoordonnees } from "@/app/_components/france-travail/effectif/EffectifCoordonnees";
 import sharedStyles from "@/app/_components/france-travail/effectif/EffectifDetail.module.css";
@@ -78,7 +79,10 @@ export default function EffectifDetailClient() {
   }, [arborescenceData, effectif?.ft_data]);
 
   const currentSecteur = useMemo(() => {
-    if (!arborescenceData || !codeSecteur) return null;
+    if (!arborescenceData || codeSecteur === null) return null;
+    if (codeSecteur === TOUS_LES_SECTEURS_CODE) {
+      return { code_secteur: TOUS_LES_SECTEURS_CODE, libelle_secteur: "Tous les secteurs", count: 0 };
+    }
     return arborescenceData.a_traiter.secteurs.find((s) => s.code_secteur === codeSecteur);
   }, [arborescenceData, codeSecteur]);
 
@@ -95,7 +99,7 @@ export default function EffectifDetailClient() {
     formData: { situation: FranceTravailSituation; commentaire: string | null },
     saveNext: boolean
   ) => {
-    if (!effectif?.id || !codeSecteur) return;
+    if (!effectif?.id || codeSecteur === null) return;
 
     if (navigationTimeoutRef.current) {
       clearTimeout(navigationTimeoutRef.current);
@@ -103,12 +107,15 @@ export default function EffectifDetailClient() {
 
     setSubmissionState({ isSubmitting: true, hasSuccess: false, hasError: false });
 
+    const submitCodeSecteur =
+      codeSecteur === TOUS_LES_SECTEURS_CODE ? Number(Object.keys(effectif.ft_data || {})[0] || 0) : codeSecteur;
+
     updateEffectif(
       {
         id: effectif.id,
         commentaire: formData.commentaire,
         situation: formData.situation,
-        code_secteur: codeSecteur,
+        code_secteur: submitCodeSecteur,
       },
       {
         onSuccess: () => {
@@ -148,7 +155,7 @@ export default function EffectifDetailClient() {
     };
   }, []);
 
-  if (!codeSecteur) {
+  if (codeSecteur === null) {
     return <Alert severity="error" title="Secteur invalide" description="Le code secteur est manquant ou invalide." />;
   }
 
@@ -170,7 +177,9 @@ export default function EffectifDetailClient() {
     );
   }
 
-  const existingData = effectif.ft_data?.[codeSecteur];
+  const existingDataKey =
+    codeSecteur === TOUS_LES_SECTEURS_CODE ? Number(Object.keys(effectif.ft_data || {})[0] || 0) : codeSecteur;
+  const existingData = effectif.ft_data?.[existingDataKey];
 
   return (
     <div className={sharedStyles.pageContainer}>
