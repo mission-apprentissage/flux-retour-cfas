@@ -22,6 +22,7 @@ export enum FRANCE_TRAVAIL_SITUATION_ENUM {
   EVENEMENT = "EVENEMENT",
   MISSION_LOCALE = "MISSION_LOCALE",
   ERROR = "ERROR",
+  FT_SERVICES = "FT_SERVICES",
 }
 
 export const zFranceTravailSituationEnum = z.nativeEnum(FRANCE_TRAVAIL_SITUATION_ENUM);

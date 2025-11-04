@@ -60,6 +60,7 @@ export enum FranceTravailSituation {
   EVENEMENT = "EVENEMENT",
   MISSION_LOCALE = "MISSION_LOCALE",
   ERROR = "ERROR",
+  FT_SERVICES = "FT_SERVICES",
 }
 
 export interface IEffectifDetail {
