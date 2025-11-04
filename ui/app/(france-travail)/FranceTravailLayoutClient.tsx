@@ -5,6 +5,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
 import { useArborescence, useMoisTraites } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { ISecteurArborescence, IMoisTraite } from "@/app/_components/france-travail/types";
@@ -36,7 +37,7 @@ function FTSideMenu({
       {
         text: `À traiter (${totalATraiter})`,
         linkProps: {
-          href: "/france-travail",
+          href: `/france-travail/${TOUS_LES_SECTEURS_CODE}`,
         },
         isActive: false,
         expandedByDefault: !isDejaTraitesPage,

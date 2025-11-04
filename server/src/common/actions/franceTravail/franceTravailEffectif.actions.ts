@@ -2,6 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { differenceInYears } from "date-fns";
 import type { Document } from "mongodb";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 import { API_EFFECTIF_LISTE, IEffectif, IPersonV2 } from "shared/models";
 import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailEffectif.model";
 
@@ -13,6 +14,10 @@ import { getPersonV2FromIdentifiant } from "../personV2/personV2.actions";
 import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const isTousLesSecteurs = (codeSecteur?: number) => codeSecteur === TOUS_LES_SECTEURS_CODE;
+
+const shouldFilterBySecteur = (codeSecteur?: number) => codeSecteur && !isTousLesSecteurs(codeSecteur);
 
 const parseMoisToDateRange = (mois: string): { startDate: Date; endDate: Date } => {
   const parts = mois.split("-");
@@ -289,11 +294,21 @@ export const getEffectifSecteurActivitesArboresence = async (codeRegion: string)
 
   const secteurResult = await franceTravailEffectifsDb().aggregate(pipelineSecteurs).toArray();
   const totalResult = await franceTravailEffectifsDb().aggregate(pipelineTotal).next();
+  const total = totalResult?.total || 0;
+
+  const secteursAvecTous = [
+    {
+      code_secteur: TOUS_LES_SECTEURS_CODE,
+      libelle_secteur: "Tous les secteurs",
+      count: total,
+    },
+    ...secteurResult,
+  ];
 
   return {
     a_traiter: {
-      total: totalResult?.total || 0,
-      secteurs: secteurResult,
+      total,
+      secteurs: secteursAvecTous,
     },
     traite: await getTraitesCount(codeRegion),
   };
@@ -338,7 +353,9 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
 
     switch (type) {
       case API_EFFECTIF_LISTE.A_TRAITER:
-        query["romes.secteur_activites.code_secteur"] = codeSecteur;
+        if (shouldFilterBySecteur(codeSecteur)) {
+          query["romes.secteur_activites.code_secteur"] = codeSecteur;
+        }
         additionalPipelineStages.push(matchATraiter(true));
         additionalPipelineStages.push(match180Days());
         break;
@@ -437,10 +454,12 @@ const getEffectifNavigation = async (
 
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
-      if (!codeSecteur) {
+      if (!codeSecteur && codeSecteur !== TOUS_LES_SECTEURS_CODE) {
         throw Boom.badRequest("code_secteur est requis pour la liste A_TRAITER");
       }
-      query["romes.secteur_activites.code_secteur"] = codeSecteur;
+      if (shouldFilterBySecteur(codeSecteur)) {
+        query["romes.secteur_activites.code_secteur"] = codeSecteur;
+      }
       additionalPipelineStages.push(match180Days());
       additionalPipelineStages.push(matchATraiter(true));
       break;
@@ -780,7 +799,7 @@ export const getAllFranceTravailEffectifsByCodeSecteur = async (
   options?: { departements?: string }
 ) => {
   const pipeline = buildExportEffectifsPipeline(codeRegion, {
-    codeSecteur,
+    codeSecteur: isTousLesSecteurs(codeSecteur) ? undefined : codeSecteur,
     aTraiter: true,
     departements: options?.departements,
   });

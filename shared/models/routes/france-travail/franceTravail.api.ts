@@ -4,7 +4,7 @@ import { zApiEffectifListeEnum } from "../../data/missionLocaleEffectif.model";
 
 export const codeRomeSchema = z.string().regex(/^[A-Z]\d{4}$/, "Invalid ROME code format: expected [A-Z][0-9]{4}");
 
-export const codeSecteurSchema = z.coerce.number().positive();
+export const codeSecteurSchema = z.coerce.number().nonnegative();
 
 export const franceTravailEffectifsSortSchema = z.enum(["jours_sans_contrat", "nom", "organisme"]).optional();
 

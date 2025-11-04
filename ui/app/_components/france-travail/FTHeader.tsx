@@ -1,10 +1,14 @@
 "use client";
 
+import Image from "next/image";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
+
 import { DepartementMultiSelect } from "./DepartementMultiSelect";
 import styles from "./FTHeader.module.css";
 
 interface FTHeaderProps {
   secteurLabel?: string | null;
+  codeSecteur?: number | null;
   departementsOptions?: { value: string; label: string }[];
   selectedDepartements?: string[];
   onDepartementsChange?: (departements: string[]) => void;
@@ -13,13 +17,14 @@ interface FTHeaderProps {
 
 export const FTHeader = ({
   secteurLabel,
+  codeSecteur,
   departementsOptions = [],
   selectedDepartements = [],
   onDepartementsChange,
   totalCount,
 }: FTHeaderProps) => {
-  const title = secteurLabel ? `${secteurLabel}` : "Liste des jeunes inscrits en CFA sans contrat | À traiter";
-
+  const title = secteurLabel || "Liste des jeunes inscrits en CFA sans contrat | À traiter";
+  const showTousLesSecteurs = codeSecteur === TOUS_LES_SECTEURS_CODE;
   const isEffectifsTraites = secteurLabel === "Dossiers traités";
 
   return (
@@ -33,6 +38,25 @@ export const FTHeader = ({
         )}
       </div>
 
+      {showTousLesSecteurs && (
+        <div className={styles.infoContainer}>
+          <p className={styles.infoText}>
+            Nous affichons sur le Tableau de bord, tous les jeunes ayant un statut d&apos;inscrit en CFA mais sans
+            contrat en entreprise, en les classant par date d&apos;inscription en formation (du plus récent au plus
+            ancien). <br />
+            Source : CFA
+          </p>
+          <div className={styles.imageWrapper}>
+            <Image
+              src="/images/france-travail-select-secteur.png"
+              alt="Illustration - Sélectionner un secteur d'activité"
+              fill
+              style={{ objectFit: "contain" }}
+            />
+          </div>
+        </div>
+      )}
+
       {departementsOptions.length > 0 && onDepartementsChange && (
         <div className={styles.filterContainer}>
           <DepartementMultiSelect
@@ -45,14 +69,6 @@ export const FTHeader = ({
         </div>
       )}
 
-      {!secteurLabel && (
-        <p className={styles.description}>
-          Nous affichons sur le Tableau de bord, tous les jeunes ayant un statut d&apos;inscrit en CFA mais sans contrat
-          en entreprise, en les classant par date d&apos;inscription en formation (du plus récent au plus ancien).{" "}
-          <br />
-          Source : CFA
-        </p>
-      )}
       {isEffectifsTraites && (
         <p className={styles.description}>
           Retrouvez ici les dossiers de tous les jeunes inscrits en CFA sans contrat à la rentrée qui ont été contactés
