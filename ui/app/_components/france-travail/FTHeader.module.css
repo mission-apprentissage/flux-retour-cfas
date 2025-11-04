@@ -36,3 +36,22 @@
   margin-bottom: 1.5rem;
   max-width: 400px;
 }
+
+.infoContainer {
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+}
+
+.infoText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #3a3a3a;
+  margin-bottom: 1.5rem;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2860 / 605;
+  margin: 0 auto;
+}

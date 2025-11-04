@@ -127,6 +127,7 @@ export default function SecteurClient() {
     <>
       <FTHeader
         secteurLabel={secteurLabel}
+        codeSecteur={codeSecteur}
         departementsOptions={departementsOptions}
         selectedDepartements={selectedDepartements}
         onDepartementsChange={handleDepartementsChange}

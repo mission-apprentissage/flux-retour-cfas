@@ -1,11 +1,6 @@
-import { Metadata } from "next";
-
-import FranceTravailClient from "./FranceTravailClient";
-
-export const metadata: Metadata = {
-  title: "Inscrits sans contrat | Tableau de bord de l'apprentissage",
-};
+import { redirect } from "next/navigation";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
 export default function Page() {
-  return <FranceTravailClient />;
+  redirect(`/france-travail/${TOUS_LES_SECTEURS_CODE}`);
 }

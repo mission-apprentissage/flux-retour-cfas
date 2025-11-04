@@ -1,3 +1,5 @@
+export const TOUS_LES_SECTEURS_CODE = 0;
+
 export const FRANCE_TRAVAIL_SITUATION_LABELS = {
   REORIENTATION: "Réorientation du jeune",
   ENTREPRISE: "Recherche d'entreprise",
