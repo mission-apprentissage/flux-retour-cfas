@@ -28,6 +28,8 @@ interface FTEffectifsTableProps {
   onSearchChange: (search: string) => void;
   searchTerm: string;
   onEffectifClick: (effectifId: string) => void;
+  departementsOptions?: { value: string; label: string }[];
+  selectedDepartements?: string[];
 }
 
 interface StatutBadgeProps {
@@ -66,39 +68,67 @@ export function FTEffectifsTable({
   onSearchChange,
   searchTerm,
   onEffectifClick,
+  departementsOptions = [],
+  selectedDepartements = [],
 }: FTEffectifsTableProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handlePageChange = (page: number) => {
-    onPageChange(page);
+  const getDepartmentName = (code: string): string => {
+    const dept = departementsOptions.find((d) => d.value === code);
+    return dept?.label.split(" - ")[1] || dept?.label || code;
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    onPageSizeChange(newPageSize);
+  const getDownloadHeaderText = () => {
+    const isAllSelected = !selectedDepartements.length || selectedDepartements.length === departementsOptions.length;
+
+    if (isAllSelected) {
+      return (
+        <>
+          Télécharger la liste des inscrits sans contrat dans le secteur <strong>{secteurLabel}</strong> pour toute la
+          région
+        </>
+      );
+    }
+
+    const deptText =
+      selectedDepartements.length === 1
+        ? `le département ${getDepartmentName(selectedDepartements[0])}`
+        : `les départements : ${selectedDepartements.map(getDepartmentName).join(", ")}`;
+
+    return (
+      <>
+        Télécharger la liste des inscrits sans contrat dans le secteur <strong>{secteurLabel}</strong> pour{" "}
+        <strong>{deptText}</strong>
+      </>
+    );
   };
 
   const handleDownload = async () => {
     setDownloadError(null);
     try {
-      const response = await fetch(
-        `${publicConfig.baseUrl}/api/v1/organisation/france-travail/export/effectifs/${codeSecteur}`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      const params = new URLSearchParams();
+      if (selectedDepartements.length > 0) {
+        params.set("departements", selectedDepartements.join(","));
+      }
+      const queryString = params.toString();
+      const exportUrl = `${publicConfig.baseUrl}/api/v1/organisation/france-travail/export/effectifs/${codeSecteur}${queryString ? `?${queryString}` : ""}`;
+
+      const response = await fetch(exportUrl, {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error("Erreur lors du téléchargement");
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = downloadUrl;
 
       const contentDisposition = response.headers.get("content-disposition");
       let filename = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
@@ -112,7 +142,7 @@ export function FTEffectifsTable({
 
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
 
       trackPlausibleEvent("isc_liste_telechargement");
@@ -197,38 +227,33 @@ export function FTEffectifsTable({
               <Tag small>{niveau}</Tag>
             </div>
           ),
-          duree: (
-            <div className={styles.centeredBadge}>
-              {(() => {
-                const badgeProps = getDureeBadgeProps(joursSansContrat);
-                return (
-                  <span
-                    className={styles.dureeBadge}
-                    style={{ backgroundColor: badgeProps.backgroundColor, color: badgeProps.color }}
-                    aria-label="Durée sans contrat"
-                  >
-                    {badgeProps.label}
-                  </span>
-                );
-              })()}
-            </div>
-          ),
-          statut: (
-            <div className={styles.centeredBadge}>
-              {(() => {
-                const badgeProps = getStatutBadgeProps(aTraiter);
-                const badgeClassName = badgeProps.badgeClass ? `fr-badge ${badgeProps.badgeClass}` : "fr-badge";
-                const ariaLabel = `Effectif ${badgeProps.label.toLowerCase()}`;
-
-                return (
-                  <p className={badgeClassName} style={badgeProps.customStyle} aria-label={ariaLabel}>
-                    <i className={`${badgeProps.icon} fr-icon--sm`} />
-                    <span style={{ marginLeft: "2px", fontSize: "12px", fontWeight: 700 }}>{badgeProps.label}</span>
-                  </p>
-                );
-              })()}
-            </div>
-          ),
+          duree: (() => {
+            const badgeProps = getDureeBadgeProps(joursSansContrat);
+            return (
+              <div className={styles.centeredBadge}>
+                <span
+                  className={styles.dureeBadge}
+                  style={{ backgroundColor: badgeProps.backgroundColor, color: badgeProps.color }}
+                  aria-label="Durée sans contrat"
+                >
+                  {badgeProps.label}
+                </span>
+              </div>
+            );
+          })(),
+          statut: (() => {
+            const badgeProps = getStatutBadgeProps(aTraiter);
+            const badgeClassName = badgeProps.badgeClass ? `fr-badge ${badgeProps.badgeClass}` : "fr-badge";
+            const ariaLabel = `Effectif ${badgeProps.label.toLowerCase()}`;
+            return (
+              <div className={styles.centeredBadge}>
+                <p className={badgeClassName} style={badgeProps.customStyle} aria-label={ariaLabel}>
+                  <i className={`${badgeProps.icon} fr-icon--sm`} />
+                  <span style={{ marginLeft: "2px", fontSize: "12px", fontWeight: 700 }}>{badgeProps.label}</span>
+                </p>
+              </div>
+            );
+          })(),
           voir: (
             <div className={styles.centeredBadge}>
               <button
@@ -258,9 +283,7 @@ export function FTEffectifsTable({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.headerText}>
-          Télécharger la liste des inscrits sans contrat dans le secteur <strong>{secteurLabel}</strong>
-        </div>
+        <div className={styles.headerText}>{getDownloadHeaderText()}</div>
         <Button
           priority="secondary"
           iconId="ri-download-line"
@@ -315,8 +338,8 @@ export function FTEffectifsTable({
           data={tableData}
           columns={columns}
           pagination={paginationInfo}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           pageSize={pageSize}
           emptyMessage="Aucun effectif trouvé"
           hasPagination={true}

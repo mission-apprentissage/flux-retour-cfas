@@ -102,8 +102,9 @@ export const matchFilter = (options?: {
   search?: string;
   sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
   order?: "asc" | "desc";
+  departements?: string;
 }) => {
-  const { search, sort = "jours_sans_contrat", order = "desc" } = options ?? {};
+  const { search, sort = "jours_sans_contrat", order = "desc", departements } = options ?? {};
   const pipeline: Document[] = [];
 
   if (search) {
@@ -134,6 +135,20 @@ export const matchFilter = (options?: {
           },
         });
       }
+    }
+  }
+
+  if (departements && departements.trim().length > 0) {
+    const departementsArray = departements
+      .split(",")
+      .map((d) => d.trim())
+      .filter((d) => d.length > 0);
+    if (departementsArray.length > 0) {
+      pipeline.push({
+        $match: {
+          "effectif_snapshot.apprenant.adresse.departement": { $in: departementsArray },
+        },
+      });
     }
   }
 
@@ -313,6 +328,7 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
     search?: string;
     sort?: "jours_sans_contrat" | "nom" | "organisme";
     order?: "asc" | "desc";
+    departements?: string;
   }
 ) => {
   try {
@@ -604,6 +620,7 @@ const buildExportEffectifsPipeline = (
     mois?: string;
     aTraiter: boolean;
     includeFtData?: boolean;
+    departements?: string;
   }
 ) => {
   const query = options.codeSecteur ? { "romes.secteur_activites.code_secteur": options.codeSecteur } : {};
@@ -625,6 +642,20 @@ const buildExportEffectifsPipeline = (
             $gte: startDate,
             $lt: endDate,
           },
+        },
+      });
+    }
+  }
+
+  if (options.departements && options.departements.trim().length > 0) {
+    const departementsArray = options.departements
+      .split(",")
+      .map((d) => d.trim())
+      .filter((d) => d.length > 0);
+    if (departementsArray.length > 0) {
+      pipeline.push({
+        $match: {
+          "effectif_snapshot.apprenant.adresse.departement": { $in: departementsArray },
         },
       });
     }
@@ -743,10 +774,15 @@ const buildExportEffectifsPipeline = (
   return pipeline;
 };
 
-export const getAllFranceTravailEffectifsByCodeSecteur = async (codeRegion: string, codeSecteur: number) => {
+export const getAllFranceTravailEffectifsByCodeSecteur = async (
+  codeRegion: string,
+  codeSecteur: number,
+  options?: { departements?: string }
+) => {
   const pipeline = buildExportEffectifsPipeline(codeRegion, {
     codeSecteur,
     aTraiter: true,
+    departements: options?.departements,
   });
 
   const effectifs = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
@@ -938,6 +974,7 @@ export const getFranceTravailEffectifsTraitesParMois = async (
     search?: string;
     sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
+    departements?: string;
   }
 ) => {
   try {

@@ -3,11 +3,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 import { FTEffectifsTable } from "@/app/_components/france-travail/FTEffectifsTable";
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useArborescence, useEffectifsBySecteur } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import { getDepartementsByRegion } from "@/app/_components/france-travail/utils/departements";
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function SecteurClient() {
@@ -15,17 +17,33 @@ export default function SecteurClient() {
   const router = useRouter();
   const params = useParams();
   const codeSecteur = params?.secteurId ? Number(params.secteurId) : null;
+  const { user } = useAuth();
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [selectedDepartements, setSelectedDepartements] = useState<string[]>([]);
   const hasTrackedSearchRef = useRef(false);
 
   const { data: arborescenceData, isLoading: arboLoading } = useArborescence();
   const secteurs = arborescenceData?.a_traiter.secteurs ?? [];
   const secteurExists = secteurs.find((s) => s.code_secteur === codeSecteur);
   const secteurLabel = secteurExists?.libelle_secteur;
+
+  const departementsOptions = useMemo(() => {
+    const codeRegion = user?.organisation?.code_region;
+    if (!codeRegion) return [];
+    const depts = getDepartementsByRegion(codeRegion);
+    return depts;
+  }, [user]);
+
+  useEffect(() => {
+    if (departementsOptions.length > 0) {
+      const allDeptCodes = departementsOptions.map((opt) => opt.value);
+      setSelectedDepartements(allDeptCodes);
+    }
+  }, [departementsOptions]);
 
   const {
     data: effectifsData,
@@ -35,6 +53,7 @@ export default function SecteurClient() {
     page: currentPage,
     limit: pageSize,
     search: debouncedSearch,
+    departements: selectedDepartements.length > 0 ? selectedDepartements.join(",") : undefined,
   });
 
   useEffect(() => {
@@ -61,6 +80,10 @@ export default function SecteurClient() {
     setCurrentPage(1);
   }, [codeSecteur]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedDepartements]);
+
   if (arborescenceData && !arboLoading && !secteurExists) {
     return (
       <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
@@ -69,17 +92,13 @@ export default function SecteurClient() {
     );
   }
 
-  const handleSearchChange = (search: string) => {
-    setSearchInput(search);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
     setCurrentPage(1);
+  };
+
+  const handleDepartementsChange = (departements: string[]) => {
+    setSelectedDepartements(departements);
   };
 
   const handleEffectifClick = (effectifId: string) => {
@@ -106,7 +125,13 @@ export default function SecteurClient() {
 
   return (
     <>
-      <FTHeader secteurLabel={secteurLabel} />
+      <FTHeader
+        secteurLabel={secteurLabel}
+        departementsOptions={departementsOptions}
+        selectedDepartements={selectedDepartements}
+        onDepartementsChange={handleDepartementsChange}
+        totalCount={effectifsData?.pagination?.total}
+      />
       <FTEffectifsTable
         effectifs={effectifsData?.effectifs || []}
         secteurLabel={secteurLabel || ""}
@@ -115,11 +140,13 @@ export default function SecteurClient() {
         totalCount={effectifsData?.pagination?.total || 0}
         currentPage={currentPage}
         pageSize={pageSize}
-        onPageChange={handlePageChange}
+        onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
-        onSearchChange={handleSearchChange}
+        onSearchChange={setSearchInput}
         searchTerm={searchInput}
         onEffectifClick={handleEffectifClick}
+        departementsOptions={departementsOptions}
+        selectedDepartements={selectedDepartements}
       />
     </>
   );
