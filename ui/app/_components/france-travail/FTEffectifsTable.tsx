@@ -5,6 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useMemo, useRef, useState } from "react";
+import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
@@ -75,6 +76,7 @@ export function FTEffectifsTable({
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.ceil(totalCount / pageSize);
+  const isTousLesSecteurs = codeSecteur === TOUS_LES_SECTEURS_CODE;
 
   const getDepartmentName = (code: string): string => {
     const dept = departementsOptions.find((d) => d.value === code);
@@ -84,24 +86,20 @@ export function FTEffectifsTable({
   const getDownloadHeaderText = () => {
     const isAllSelected = !selectedDepartements.length || selectedDepartements.length === departementsOptions.length;
 
-    if (isAllSelected) {
-      return (
-        <>
-          Télécharger la liste des inscrits sans contrat dans le secteur <strong>{secteurLabel}</strong> pour toute la
-          région
-        </>
-      );
-    }
+    const getDeptText = () => {
+      if (isAllSelected) return "toute la région";
+      if (selectedDepartements.length === 1) return `le département ${getDepartmentName(selectedDepartements[0])}`;
+      return `les départements : ${selectedDepartements.map(getDepartmentName).join(", ")}`;
+    };
 
-    const deptText =
-      selectedDepartements.length === 1
-        ? `le département ${getDepartmentName(selectedDepartements[0])}`
-        : `les départements : ${selectedDepartements.map(getDepartmentName).join(", ")}`;
+    const deptText = getDeptText();
+    const secteurText = isTousLesSecteurs
+      ? "tous les dossiers"
+      : `la liste des inscrits sans contrat dans le secteur ${secteurLabel}`;
 
     return (
       <>
-        Télécharger la liste des inscrits sans contrat dans le secteur <strong>{secteurLabel}</strong> pour{" "}
-        <strong>{deptText}</strong>
+        Télécharger {secteurText} pour <strong>{deptText}</strong>
       </>
     );
   };
@@ -189,7 +187,7 @@ export function FTEffectifsTable({
       const formation = effectif.effectif_snapshot.formation.libelle_long || "Non renseignée";
       const niveau = effectif.effectif_snapshot.formation.niveau_libelle || "Non renseigné";
       const joursSansContrat = effectif.jours_sans_contrat;
-      const aTraiter = effectif.ft_data ? Object.values(effectif.ft_data).some((v) => v === null) : true;
+      const aTraiter = effectif.ft_data ? Object.values(effectif.ft_data).every((v) => v === null) : true;
 
       return {
         _id: effectif._id,
@@ -280,6 +278,8 @@ export function FTEffectifsTable({
     lastPage: totalPages,
   };
 
+  const downloadButtonLabel = isTousLesSecteurs ? "Télécharger tous les dossiers" : "Télécharger la liste du secteur";
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -291,7 +291,7 @@ export function FTEffectifsTable({
           onClick={handleDownload}
           className={styles.downloadButton}
         >
-          Télécharger la liste du secteur
+          {downloadButtonLabel}
         </Button>
       </div>
 

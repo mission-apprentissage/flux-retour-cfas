@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
-import { DepartementMultiSelect } from "./DepartementMultiSelect";
+import { DepartementButtonGroup } from "./DepartementButtonGroup";
 import styles from "./FTHeader.module.css";
+import { IDepartementCountsResponse } from "./types";
 
 interface FTHeaderProps {
   secteurLabel?: string | null;
@@ -13,6 +14,8 @@ interface FTHeaderProps {
   selectedDepartements?: string[];
   onDepartementsChange?: (departements: string[]) => void;
   totalCount?: number;
+  departementCounts?: IDepartementCountsResponse;
+  isLoadingCounts?: boolean;
 }
 
 export const FTHeader = ({
@@ -21,7 +24,8 @@ export const FTHeader = ({
   departementsOptions = [],
   selectedDepartements = [],
   onDepartementsChange,
-  totalCount,
+  departementCounts = {},
+  isLoadingCounts = false,
 }: FTHeaderProps) => {
   const title = secteurLabel || "Liste des jeunes inscrits en CFA sans contrat | À traiter";
   const showTousLesSecteurs = codeSecteur === TOUS_LES_SECTEURS_CODE;
@@ -31,11 +35,6 @@ export const FTHeader = ({
     <div className={styles.headerContainer}>
       <div className={styles.titleContainer}>
         <h2 className={`fr-h2 ${styles.title}`}>{title}</h2>
-        {totalCount !== undefined && (
-          <span className={styles.badge}>
-            {totalCount} effectif{totalCount > 1 ? "s" : ""}
-          </span>
-        )}
       </div>
 
       {showTousLesSecteurs && (
@@ -46,6 +45,18 @@ export const FTHeader = ({
             ancien). <br />
             Source : CFA
           </p>
+          {departementsOptions.length > 0 && onDepartementsChange && (
+            <div className={styles.filterContainer}>
+              <DepartementButtonGroup
+                label="Par département :"
+                options={departementsOptions}
+                value={selectedDepartements}
+                onChange={onDepartementsChange}
+                departementCounts={departementCounts}
+                isLoadingCounts={isLoadingCounts}
+              />
+            </div>
+          )}
           <div className={styles.imageWrapper}>
             <Image
               src="/images/france-travail-select-secteur.png"
@@ -57,14 +68,15 @@ export const FTHeader = ({
         </div>
       )}
 
-      {departementsOptions.length > 0 && onDepartementsChange && (
+      {!showTousLesSecteurs && departementsOptions.length > 0 && onDepartementsChange && (
         <div className={styles.filterContainer}>
-          <DepartementMultiSelect
-            label="Filtrer par département"
+          <DepartementButtonGroup
+            label="Par département :"
             options={departementsOptions}
             value={selectedDepartements}
             onChange={onDepartementsChange}
-            placeholder="Tous les départements"
+            departementCounts={departementCounts}
+            isLoadingCounts={isLoadingCounts}
           />
         </div>
       )}

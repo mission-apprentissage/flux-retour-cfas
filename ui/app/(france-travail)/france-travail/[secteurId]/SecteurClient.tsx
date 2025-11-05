@@ -7,8 +7,13 @@ import { useState, useEffect, useRef, useMemo } from "react";
 
 import { FTEffectifsTable } from "@/app/_components/france-travail/FTEffectifsTable";
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
-import { useArborescence, useEffectifsBySecteur } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import {
+  useArborescence,
+  useDepartementCounts,
+  useEffectifsBySecteur,
+} from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { getDepartementsByRegion } from "@/app/_components/france-travail/utils/departements";
+import { LOCAL_STORAGE_KEYS } from "@/app/_constants/localStorage";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
@@ -40,6 +45,21 @@ export default function SecteurClient() {
 
   useEffect(() => {
     if (departementsOptions.length > 0) {
+      const storedDepartements = localStorage.getItem(LOCAL_STORAGE_KEYS.FT_SELECTED_DEPARTEMENTS);
+      if (storedDepartements) {
+        try {
+          const parsed = JSON.parse(storedDepartements);
+          const availableDeptCodes = departementsOptions.map((opt) => opt.value);
+          const validDepartements = parsed.filter((code: string) => availableDeptCodes.includes(code));
+          if (validDepartements.length > 0) {
+            setSelectedDepartements(validDepartements);
+            return;
+          }
+        } catch (e) {
+          console.error("Error parsing stored departements:", e);
+          localStorage.removeItem(LOCAL_STORAGE_KEYS.FT_SELECTED_DEPARTEMENTS);
+        }
+      }
       const allDeptCodes = departementsOptions.map((opt) => opt.value);
       setSelectedDepartements(allDeptCodes);
     }
@@ -55,6 +75,8 @@ export default function SecteurClient() {
     search: debouncedSearch,
     departements: selectedDepartements.length > 0 ? selectedDepartements.join(",") : undefined,
   });
+
+  const { data: departementCounts, isLoading: isLoadingCounts } = useDepartementCounts(codeSecteur);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,6 +121,7 @@ export default function SecteurClient() {
 
   const handleDepartementsChange = (departements: string[]) => {
     setSelectedDepartements(departements);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.FT_SELECTED_DEPARTEMENTS, JSON.stringify(departements));
   };
 
   const handleEffectifClick = (effectifId: string) => {
@@ -132,6 +155,8 @@ export default function SecteurClient() {
         selectedDepartements={selectedDepartements}
         onDepartementsChange={handleDepartementsChange}
         totalCount={effectifsData?.pagination?.total}
+        departementCounts={departementCounts}
+        isLoadingCounts={isLoadingCounts}
       />
       <FTEffectifsTable
         effectifs={effectifsData?.effectifs || []}

@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+  gap: 1rem;
+}
+
+.buttonsColumn {
+  flex: 1;
+}
+
+.enabled {
+  color: #000091 !important;
+  background-color: #ececfe !important;
+  border-color: #6a6af4 !important;
+}
+
+.disabled {
+  background-color: #ffffff !important;
+  color: #666666 !important;
+  border: 1px solid #000091 !important;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}

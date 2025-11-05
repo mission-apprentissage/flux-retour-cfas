@@ -5,6 +5,7 @@ import { _get, _put } from "@/common/httpClient";
 import {
   FranceTravailSituation,
   IArborescenceResponse,
+  IDepartementCountsResponse,
   IEffectifDetailResponse,
   IEffectifsBySecteurResponse,
   IEffectifsTraitesParMoisResponse,
@@ -21,6 +22,8 @@ export const franceTravailQueryKeys = {
   moisTraites: () => [...franceTravailQueryKeys.all, "mois-traites"] as const,
   effectifsTraitesParMois: (mois: string, params: Record<string, any>) =>
     [...franceTravailQueryKeys.all, "effectifs", "traites", "mois", mois, params] as const,
+  departementCounts: (codeSecteur: number) =>
+    [...franceTravailQueryKeys.all, "departement-counts", codeSecteur] as const,
 };
 
 const fetchArborescence = async (): Promise<IArborescenceResponse> => {
@@ -174,4 +177,18 @@ export function useEffectifsTraitesParMois(
       refetchOnWindowFocus: false,
     }
   );
+}
+
+const fetchDepartementCounts = async (codeSecteur: number): Promise<IDepartementCountsResponse> => {
+  return _get(`/api/v1/organisation/france-travail/departement-counts/${codeSecteur}`);
+};
+
+export function useDepartementCounts(codeSecteur: number | null) {
+  return useQuery(franceTravailQueryKeys.departementCounts(codeSecteur!), () => fetchDepartementCounts(codeSecteur!), {
+    enabled: codeSecteur !== null,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  });
 }

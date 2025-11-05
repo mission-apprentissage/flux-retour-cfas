@@ -15,6 +15,7 @@ import { z } from "zod";
 import {
   getAllFranceTravailEffectifsByCodeSecteur,
   getAllFranceTravailEffectifsTraites,
+  getDepartementCountsBySecteur,
   getEffectifFromFranceTravailId,
   getEffectifSecteurActivitesArboresence,
   getFranceTravailEffectifsByCodeSecteur,
@@ -33,6 +34,19 @@ export default () => {
   const router = express.Router();
 
   router.get("/arborescence", returnResult(getArborescence));
+  router.get(
+    "/departement-counts/:code_secteur",
+    validateRequestMiddleware({
+      params: z.object({
+        code_secteur: codeSecteurSchema,
+      }),
+    }),
+    returnResult(async (req, { locals }) => {
+      const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+      const code_secteur = Number(req.params.code_secteur);
+      return getDepartementCountsBySecteur(ftOrga.code_region, code_secteur);
+    })
+  );
   router.get("/effectifs/traite/mois", returnResult(getEffectifsTraitesMois));
   router.get(
     "/effectifs/traite/mois/:mois",

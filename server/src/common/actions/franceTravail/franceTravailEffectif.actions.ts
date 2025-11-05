@@ -1075,3 +1075,63 @@ export const getFranceTravailEffectifsTraitesParMois = async (
     throw error;
   }
 };
+
+export const getDepartementCountsBySecteur = async (codeRegion: string, codeSecteur?: number) => {
+  try {
+    const now = new Date();
+    const query: Record<string, any> = {
+      code_region: codeRegion,
+      soft_deleted: { $ne: true },
+    };
+
+    if (shouldFilterBySecteur(codeSecteur)) {
+      query["romes.secteur_activites.code_secteur"] = codeSecteur;
+    }
+
+    const pipeline: Document[] = [
+      { $match: query },
+      {
+        $addFields: {
+          jours_sans_contrat: {
+            $dateDiff: {
+              startDate: "$date_inscription",
+              endDate: now,
+              unit: "day",
+            },
+          },
+        },
+      },
+      addATraiterField(),
+      matchATraiter(true),
+      match180Days(),
+      {
+        $group: {
+          _id: "$effectif_snapshot.apprenant.adresse.departement",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          departement: "$_id",
+          count: 1,
+        },
+      },
+    ];
+
+    const results = await franceTravailEffectifsDb().aggregate(pipeline).toArray();
+
+    return results.reduce(
+      (acc, item) => {
+        if (item.departement) {
+          acc[item.departement] = item.count;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  } catch (error) {
+    logger.error("Error in getDepartementCountsBySecteur", { codeRegion, codeSecteur, error });
+    throw error;
+  }
+};
