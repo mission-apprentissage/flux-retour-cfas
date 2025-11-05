@@ -443,6 +443,7 @@ const getEffectifNavigation = async (
     sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
     mois?: string;
+    departements?: string;
   }
 ) => {
   const query: Record<string, any> = {};
@@ -557,6 +558,7 @@ export const getEffectifFromFranceTravailId = async (
     sort?: "jours_sans_contrat" | "nom" | "organisme" | "date_traitement";
     order?: "asc" | "desc";
     mois?: string;
+    departements?: string;
   }
 ) => {
   try {

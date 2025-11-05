@@ -129,6 +129,7 @@ export default function SecteurClient() {
     if (debouncedSearch) queryParams.set("search", debouncedSearch);
     if (currentPage > 1) queryParams.set("page", currentPage.toString());
     if (pageSize !== 20) queryParams.set("limit", pageSize.toString());
+    if (selectedDepartements.length > 0) queryParams.set("departements", selectedDepartements.join(","));
 
     const queryString = queryParams.toString();
     router.push(`/france-travail/${codeSecteur}/effectif/${effectifId}${queryString ? `?${queryString}` : ""}`);
