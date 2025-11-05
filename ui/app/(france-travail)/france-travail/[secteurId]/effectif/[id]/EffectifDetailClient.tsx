@@ -59,6 +59,7 @@ export default function EffectifDetailClient() {
     search: queryParams.search,
     sort: queryParams.sort,
     order: queryParams.order,
+    departements: queryParams.departements,
   });
 
   const { data: arborescenceData } = useArborescence();
