@@ -32,9 +32,7 @@
 }
 
 .filterContainer {
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
-  max-width: 400px;
+  margin: 2rem 0;
 }
 
 .infoContainer {

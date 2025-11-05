@@ -12,6 +12,10 @@ export interface IArborescenceResponse {
   traite: number;
 }
 
+export interface IDepartementCountsResponse {
+  [departementCode: string]: number;
+}
+
 export interface IEffectifFranceTravail {
   _id: string;
   effectif_id: string;
