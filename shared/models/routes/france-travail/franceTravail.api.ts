@@ -31,6 +31,7 @@ export const effectifFranceTravailQuerySchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM")
     .optional(),
+  departements: z.string().optional().describe("Codes départements séparés par des virgules (ex: 01,59,75)"),
 });
 
 export type IEffectifFranceTravailQuery = z.infer<typeof effectifFranceTravailQuerySchema>;
