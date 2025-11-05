@@ -72,6 +72,7 @@ const fetchEffectifDetail = async (
     sort?: string;
     order?: string;
     mois?: string;
+    departements?: string;
   }
 ): Promise<IEffectifDetailResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectif/${id}`, { params });
@@ -86,6 +87,7 @@ export function useEffectifDetail(
     sort?: string;
     order?: string;
     mois?: string;
+    departements?: string;
   }
 ) {
   const queryClient = useQueryClient();
