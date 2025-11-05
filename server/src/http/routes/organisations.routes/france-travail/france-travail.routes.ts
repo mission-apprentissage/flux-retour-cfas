@@ -1,6 +1,6 @@
 import Boom from "boom";
 import express from "express";
-import { FRANCE_TRAVAIL_SITUATION_LABELS } from "shared/constants";
+import { FRANCE_TRAVAIL_SITUATION_LABELS, TOUS_LES_SECTEURS_CODE } from "shared/constants";
 import { API_EFFECTIF_LISTE, IOrganisationFranceTravail } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
@@ -167,10 +167,17 @@ const exportEffectifByCodeSecteur = async (req, res) => {
   const ftOrga = res.locals.franceTravail as IOrganisationFranceTravail;
   const code_secteur = Number(req.params.code_secteur);
   const departements = req.query.departements as string | undefined;
-  const secteurActivite = await getSecteurActivitesByCode(code_secteur);
 
-  if (!secteurActivite) {
-    throw Boom.notFound("Secteur d'activité introuvable");
+  let secteurLibelle: string;
+
+  if (code_secteur === TOUS_LES_SECTEURS_CODE) {
+    secteurLibelle = "Tous les secteurs";
+  } else {
+    const secteurActivite = await getSecteurActivitesByCode(code_secteur);
+    if (!secteurActivite) {
+      throw Boom.notFound("Secteur d'activité introuvable");
+    }
+    secteurLibelle = secteurActivite.libelle_secteur;
   }
 
   const fileName = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
@@ -207,7 +214,7 @@ const exportEffectifByCodeSecteur = async (req, res) => {
   ];
   const worksheetsInfo = [
     {
-      worksheetName: `A traiter - ${secteurActivite.libelle_secteur}`,
+      worksheetName: `A traiter - ${secteurLibelle}`,
       logsTag: `ft_a_traiter` as const,
       data: await getAllFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, code_secteur, { departements }),
     },
