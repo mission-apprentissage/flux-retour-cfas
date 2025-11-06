@@ -18785,6 +18785,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
     "_id": {
       "bsonType": "objectId",
     },
+    "computed_day": {
+      "bsonType": "date",
+    },
     "created_at": {
       "bsonType": "date",
     },
@@ -18891,7 +18894,7 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
   "required": [
     "_id",
     "created_at",
-    "updated_at",
+    "computed_day",
     "mission_locale_id",
     "stats",
   ],
