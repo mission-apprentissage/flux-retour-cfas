@@ -440,25 +440,17 @@ export const hydrateMissionLocaleStats = async () => {
 };
 
 export const hydrateDailyMissionLocaleStats = async () => {
-  const startTime = Date.now();
-  console.log("=== DEBUT HYDRATATION MISSION LOCALE STATS ===");
-  console.log(`Heure de début: ${new Date().toISOString()}`);
-
-  const deleteResult = await missionLocaleStatsDb().deleteMany({});
-  console.log(`Documents supprimés: ${deleteResult.deletedCount}`);
+  await missionLocaleStatsDb().deleteMany({});
 
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
-  console.log(`Missions Locales trouvées: ${mls.length}`);
 
   const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
 
   if (!firstDate) {
-    console.error("ERREUR: Aucun effectif Mission Locale trouvé dans la base");
     return;
   }
 
   const startDate = firstDate.created_at;
-  console.log(`Premier effectif créé le: ${startDate.toISOString()}`);
 
   const getAllDateSinceStartingDate = (start: Date): Date[] => {
     const today = new Date();
@@ -474,51 +466,12 @@ export const hydrateDailyMissionLocaleStats = async () => {
   };
 
   const allDates = getAllDateSinceStartingDate(startDate);
-  const totalDays = allDates.length;
-  const totalDocuments = totalDays * mls.length;
-
-  console.log(`Nombre de jours à traiter: ${totalDays}`);
-  console.log(`Documents théoriques à créer: ${totalDocuments}`);
-  console.log(`De ${startDate.toISOString().split("T")[0]} à aujourd'hui`);
-
-  let processedDays = 0;
-  let successCount = 0;
-  let errorCount = 0;
 
   for (const date of allDates) {
     const mapped = mls.map((ml) => () => {
       return createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
     });
 
-    const results = await Promise.allSettled(mapped.map((fn) => fn()));
-
-    results.forEach((result) => {
-      if (result.status === "fulfilled") {
-        successCount++;
-      } else {
-        errorCount++;
-        console.error(`Erreur pour date ${date.toISOString()}: ${result.reason?.message || result.reason}`);
-      }
-    });
-
-    processedDays++;
-
-    if (processedDays % 10 === 0 || processedDays === totalDays) {
-      const progress = Math.round((processedDays / totalDays) * 100);
-      const elapsed = Math.round((Date.now() - startTime) / 1000);
-      console.log(
-        `Progression: ${processedDays}/${totalDays} jours (${progress}%) - ${successCount} succès, ${errorCount} erreurs - ${elapsed}s écoulées`
-      );
-    }
+    await Promise.allSettled(mapped.map((fn) => fn()));
   }
-
-  const duration = Math.round((Date.now() - startTime) / 1000);
-  const finalCount = await missionLocaleStatsDb().countDocuments();
-
-  console.log("=== FIN HYDRATATION ===");
-  console.log(`Durée totale: ${duration}s`);
-  console.log(`Documents créés/mis à jour: ${successCount}`);
-  console.log(`Erreurs: ${errorCount}`);
-  console.log(`Documents finaux en base: ${finalCount}`);
-  console.log(`Heure de fin: ${new Date().toISOString()}`);
 };
