@@ -17,12 +17,13 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
   await missionLocaleStatsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
-      computed_day: date,
+      computed_day: dateToUse,
     },
     {
       $set: {
         stats: mlStats,
         updated_at: new Date(),
+        computed_day: dateToUse,
       },
       $setOnInsert: {
         mission_locale_id: ml._id,
@@ -47,6 +48,12 @@ export const getSummaryStats = async (evaluationDate: Date, period: "30days" | "
   });
 
   const evenlySpacedDates = await getEvenlySpacedDates(period, normalizedDate);
+
+  const firstDate = evenlySpacedDates[0];
+  const previousActivatedMlCount = await organisationsDb().countDocuments({
+    type: "MISSION_LOCALE",
+    activated_at: { $lte: firstDate },
+  });
 
   const summary = await Promise.allSettled(
     evenlySpacedDates.map(async (date) => {
@@ -73,6 +80,7 @@ export const getSummaryStats = async (evaluationDate: Date, period: "30days" | "
     arml: arml.filter((result) => result.status === "fulfilled").map((result) => result.value),
     mlCount,
     activatedMlCount,
+    previousActivatedMlCount,
     date: normalizedDate,
   };
 };
@@ -199,4 +207,165 @@ export const getEvenlySpacedDates = async (
   }
 
   return dates;
+};
+
+export const getRegionalStats = async (period: "30days" | "3months" | "all" = "30days") => {
+  const evaluationDate = new Date();
+  evaluationDate.setUTCHours(0, 0, 0, 0);
+
+  let startDate = new Date(evaluationDate);
+  switch (period) {
+    case "30days":
+      startDate.setUTCDate(evaluationDate.getUTCDate() - 30);
+      break;
+    case "3months":
+      startDate.setUTCMonth(evaluationDate.getUTCMonth() - 3);
+      break;
+    case "all":
+      startDate = new Date(0);
+      break;
+  }
+  startDate.setUTCHours(0, 0, 0, 0);
+
+  const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
+
+  const regions = await organisationsDb()
+    .aggregate([
+      { $match: { type: "MISSION_LOCALE" } },
+      {
+        $group: {
+          _id: "$adresse.region",
+          ml_total: { $sum: 1 },
+          ml_activees_current: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+                    { $lte: ["$activated_at", evaluationDate] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          ml_activees_previous: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [{ $ne: [{ $ifNull: ["$activated_at", null] }, null] }, { $lte: ["$activated_at", startDate] }],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          ml_ids: { $push: "$_id" },
+        },
+      },
+      {
+        $lookup: {
+          from: "regions",
+          localField: "_id",
+          foreignField: "code",
+          as: "region_info",
+        },
+      },
+      {
+        $addFields: {
+          nom: { $arrayElemAt: ["$region_info.nom", 0] },
+        },
+      },
+      { $sort: { ml_total: -1 } },
+    ])
+    .toArray();
+
+  const allEngagementStats = await missionLocaleStatsDb()
+    .aggregate([
+      {
+        $match: {
+          computed_day: { $in: [evaluationDate, startDate] },
+        },
+      },
+      {
+        $lookup: {
+          from: "organisations",
+          localField: "mission_locale_id",
+          foreignField: "_id",
+          as: "ml",
+        },
+      },
+      { $unwind: "$ml" },
+      {
+        $match: {
+          "ml.activated_at": { $exists: true, $ne: null },
+          "ml.type": "MISSION_LOCALE",
+        },
+      },
+      {
+        $project: {
+          region_code: "$ml.adresse.region",
+          computed_day: 1,
+          is_engaged: {
+            $cond: [
+              {
+                $and: [{ $ne: ["$stats.total", 0] }, { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, 0.7] }],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            region: "$region_code",
+            date: "$computed_day",
+          },
+          engaged_count: { $sum: "$is_engaged" },
+        },
+      },
+    ])
+    .toArray();
+
+  const engagementByRegionDate = new Map<string, { current: number; previous: number }>();
+  allEngagementStats.forEach((stat) => {
+    const regionCode = stat._id.region;
+    const isCurrent = stat._id.date.getTime() === evaluationDate.getTime();
+
+    if (!engagementByRegionDate.has(regionCode)) {
+      engagementByRegionDate.set(regionCode, { current: 0, previous: 0 });
+    }
+
+    const entry = engagementByRegionDate.get(regionCode)!;
+    if (isCurrent) {
+      entry.current = stat.engaged_count;
+    } else {
+      entry.previous = stat.engaged_count;
+    }
+  });
+
+  const regionsWithEngagement = regions
+    .filter((region) => region._id != null)
+    .map((region) => {
+      const engagement = engagementByRegionDate.get(region._id) || { current: 0, previous: 0 };
+
+      return {
+        code: region._id,
+        nom: region.nom || "Région inconnue",
+        deployed: DEPLOYED_REGION_CODES.includes(region._id),
+        ml_total: region.ml_total,
+        ml_activees: region.ml_activees_current,
+        ml_activees_delta: region.ml_activees_current - region.ml_activees_previous,
+        ml_engagees: engagement.current,
+        ml_engagees_delta: engagement.current - engagement.previous,
+        engagement_rate: region.ml_activees_current > 0 ? engagement.current / region.ml_activees_current : 0,
+      };
+    });
+
+  return {
+    regions: regionsWithEngagement,
+  };
 };
