@@ -17,7 +17,7 @@ interface CardSkeletonProps {
 export function CardSkeleton({ className }: CardSkeletonProps) {
   return (
     <div className={className}>
-      <Skeleton width="80px" height="24px" className={styles.skeletonMarginBottom} />
+      <Skeleton width="80px" height="20px" className={styles.skeletonMarginBottom} />
       <Skeleton width="40px" height="20px" />
     </div>
   );

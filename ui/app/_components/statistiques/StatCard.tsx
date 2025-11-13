@@ -4,8 +4,8 @@ import styles from "./StatCard.module.css";
 
 interface StatCardProps {
   label: string;
-  value: number;
-  previousValue: number;
+  value: number | undefined;
+  previousValue: number | undefined;
   loading: boolean;
 }
 

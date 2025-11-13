@@ -3,7 +3,7 @@ import { Skeleton } from "./Skeleton";
 
 interface DeploymentRowProps {
   label: string | React.ReactNode;
-  value: number | React.ReactNode;
+  value: number | undefined | React.ReactNode;
   loading: boolean;
   color?: string;
   percentage?: string;
