@@ -1696,7 +1696,8 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
 };
 
 export const computeMissionLocaleStats = async (
-  organisation: IOrganisationMissionLocale
+  organisation: IOrganisationMissionLocale,
+  endDate: Date = new Date()
 ): Promise<IMissionLocaleStats["stats"]> => {
   const mineurCondition = {
     $gte: [
@@ -1707,23 +1708,69 @@ export const computeMissionLocaleStats = async (
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
   const effectifsMissionLocaleAggregation = [
+    ...(endDate
+      ? [
+          {
+            $match: {
+              created_at: { $lte: endDate },
+            },
+          },
+        ]
+      : []),
     ...missionLocaleBaseAggregation(organisation),
+    {
+      $lookup: {
+        from: "missionLocaleEffectifLog",
+        localField: "_id",
+        foreignField: "mission_locale_effectif_id",
+        as: "logs",
+      },
+    },
+    {
+      $addFields: {
+        filteredLogs: {
+          $filter: {
+            input: "$logs",
+            as: "log",
+            cond: {
+              $lte: ["$$log.created_at", endDate],
+            },
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        log: {
+          $arrayElemAt: [{ $slice: [{ $sortArray: { input: "$filteredLogs", sortBy: { created_at: 1 } } }, -1] }, 0],
+        },
+      },
+    },
+    {
+      $addFields: {
+        computed_situation: { $ifNull: ["$log.situation", "$situation"] },
+        computed_deja_connu: { $ifNull: ["$log.deja_connu", "$deja_connu"] },
+        computed_situation_autre: { $ifNull: ["$log.situation_autre", "$situation_autre"] },
+        computed_probleme_type: { $ifNull: ["$log.probleme_type", "$probleme_type"] },
+        computed_probleme_detail: { $ifNull: ["$log.probleme_detail", "$probleme_detail"] },
+      },
+    },
     {
       $group: {
         _id: null,
         total: { $sum: 1 },
         a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
         traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
-        rdv_pris: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
-        nouveau_projet: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }, 1, 0] } },
-        deja_accompagne: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }, 1, 0] } },
+        rdv_pris: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        nouveau_projet: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NOUVEAU_PROJET] }, 1, 0] } },
+        deja_accompagne: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }, 1, 0] } },
         contacte_sans_retour: {
           $sum: {
             $cond: [
               {
                 $or: [
-                  { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
-                  { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
+                  { $eq: ["$computed_situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
+                  { $eq: ["$computed_situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
                 ],
               },
               1,
@@ -1732,10 +1779,10 @@ export const computeMissionLocaleStats = async (
           },
         },
         coordonnees_incorrectes: {
-          $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
         },
-        autre: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
-        deja_connu: { $sum: { $cond: ["$deja_connu", 1, 0] } },
+        autre: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+        deja_connu: { $sum: { $cond: ["$computed_deja_connu", 1, 0] } },
         mineur: {
           $sum: {
             $cond: [mineurCondition, 1, 0],
@@ -1753,17 +1800,21 @@ export const computeMissionLocaleStats = async (
         },
         mineur_rdv_pris: {
           $sum: {
-            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0],
+            $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0],
           },
         },
         mineur_nouveau_projet: {
           $sum: {
-            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0],
+            $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0],
           },
         },
         mineur_deja_accompagne: {
           $sum: {
-            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] }, 1, 0],
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] },
+              1,
+              0,
+            ],
           },
         },
         mineur_contacte_sans_retour: {
@@ -1774,8 +1825,8 @@ export const computeMissionLocaleStats = async (
                   mineurCondition,
                   {
                     $or: [
-                      { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
-                      { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
+                      { $eq: ["$computed_situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
+                      { $eq: ["$computed_situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
                     ],
                   },
                 ],
@@ -1787,12 +1838,16 @@ export const computeMissionLocaleStats = async (
         },
         mineur_coordonnees_incorrectes: {
           $sum: {
-            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] }, 1, 0],
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] },
+              1,
+              0,
+            ],
           },
         },
         mineur_autre: {
           $sum: {
-            $cond: [{ $and: [mineurCondition, { $eq: ["$situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
+            $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
         rqth: {
@@ -1812,17 +1867,17 @@ export const computeMissionLocaleStats = async (
         },
         rqth_rdv_pris: {
           $sum: {
-            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0],
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }] }, 1, 0],
           },
         },
         rqth_nouveau_projet: {
           $sum: {
-            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0],
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NOUVEAU_PROJET] }] }, 1, 0],
           },
         },
         rqth_deja_accompagne: {
           $sum: {
-            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] }, 1, 0],
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.DEJA_ACCOMPAGNE] }] }, 1, 0],
           },
         },
         rqth_contacte_sans_retour: {
@@ -1833,8 +1888,8 @@ export const computeMissionLocaleStats = async (
                   rqthCondition,
                   {
                     $or: [
-                      { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
-                      { $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
+                      { $eq: ["$computed_situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
+                      { $eq: ["$computed_situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] },
                     ],
                   },
                 ],
@@ -1846,12 +1901,16 @@ export const computeMissionLocaleStats = async (
         },
         rqth_coordonnees_incorrectes: {
           $sum: {
-            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] }, 1, 0],
+            $cond: [
+              { $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }] },
+              1,
+              0,
+            ],
           },
         },
         rqth_autre: {
           $sum: {
-            $cond: [{ $and: [rqthCondition, { $eq: ["$situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
         abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },

@@ -1,0 +1,23 @@
+.skeleton {
+  background-color: #e5e5e5;
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.skeletonMarginBottom {
+  margin-bottom: 2px;
+}
+
+.skeletonRow {
+  margin-bottom: 8px;
+}

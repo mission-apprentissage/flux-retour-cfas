@@ -15,7 +15,13 @@ import {
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsQueueDb,
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+} from "@/common/model/collections";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -260,14 +266,6 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
   }
 };
 
-export const hydrateMissionLocaleStats = async () => {
-  const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
-
-  for (const ml of mls) {
-    await createOrUpdateMissionLocaleStats(ml._id);
-  }
-};
-
 export const updateMissionLocaleAdresseFromExternalData = async (
   data: Array<{ ml_id: number; corrected_cp: string }>
 ) => {
@@ -424,5 +422,56 @@ export const updateNotActivatedMissionLocaleEffectifSnapshot = async () => {
       continue;
     }
     await updateEffectifMissionLocaleSnapshotAtMLActivation(orga._id);
+  }
+};
+
+export const hydrateMissionLocaleStats = async () => {
+  const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  for (const ml of mls) {
+    await createOrUpdateMissionLocaleStats(ml._id, today);
+    await createOrUpdateMissionLocaleStats(ml._id, yesterday);
+  }
+};
+
+export const hydrateDailyMissionLocaleStats = async () => {
+  await missionLocaleStatsDb().deleteMany({});
+
+  const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
+
+  const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
+
+  if (!firstDate) {
+    return;
+  }
+
+  const startDate = firstDate.created_at;
+
+  const getAllDateSinceStartingDate = (start: Date): Date[] => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const dates: Date[] = [];
+    const currentDate = new Date(start);
+    currentDate.setUTCHours(0, 0, 0, 0);
+    while (currentDate <= today) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return dates;
+  };
+
+  const allDates = getAllDateSinceStartingDate(startDate);
+
+  for (const date of allDates) {
+    const mapped = mls.map((ml) => () => {
+      return createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+    });
+
+    await Promise.allSettled(mapped.map((fn) => fn()));
   }
 };

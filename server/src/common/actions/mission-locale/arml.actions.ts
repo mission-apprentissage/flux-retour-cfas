@@ -14,8 +14,20 @@ export const getMissionsLocalesByArml = async (armlId: ObjectId) => {
     {
       $lookup: {
         from: "missionLocaleStats",
-        localField: "_id",
-        foreignField: "mission_locale_id",
+        let: { ml_id: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$mission_locale_id", "$$ml_id"] },
+            },
+          },
+          {
+            $sort: { computed_day: -1 },
+          },
+          {
+            $limit: 1,
+          },
+        ],
         as: "stats",
       },
     },
@@ -26,12 +38,29 @@ export const getMissionsLocalesByArml = async (armlId: ObjectId) => {
       },
     },
     {
+      $addFields: {
+        stats: {
+          $ifNull: [
+            "$stats.stats",
+            {
+              total: 0,
+              a_traiter: 0,
+              traite: 0,
+              sans_statut: 0,
+              a_contacter: 0,
+              autres: 0,
+            },
+          ],
+        },
+      },
+    },
+    {
       $project: {
         _id: 1,
         nom: 1,
         code_postal: "$adresse.code_postal",
         activated_at: 1,
-        stats: "$stats.stats",
+        stats: 1,
       },
     },
   ];
