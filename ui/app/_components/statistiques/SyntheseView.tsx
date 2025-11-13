@@ -12,6 +12,7 @@ import { PeriodSelector } from "./PeriodSelector";
 import { RegionTable } from "./RegionTable";
 import { Skeleton, TableSkeleton } from "./Skeleton";
 import { StatCard } from "./StatCard";
+import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
 
 export function SyntheseView() {
@@ -100,8 +101,7 @@ export function SyntheseView() {
         </div>
       </div>
 
-      <section className={`${fr.cx("fr-mb-6w")} ${styles.sectionContainer}`}>
-        <h2 className={fr.cx("fr-h4", "fr-mb-3w")}>Traitement</h2>
+      <StatSection title="Traitement">
         <div className={styles.cardsContainer}>
           <StatCard
             label="Total jeunes identifiés en rupture"
@@ -128,7 +128,7 @@ export function SyntheseView() {
             loading={loading}
           />
         </div>
-      </section>
+      </StatSection>
 
       <section className={`${fr.cx("fr-mb-6w")} ${styles.sectionContainer}`}>
         <h2 className={fr.cx("fr-h4", "fr-mb-3w")}>Déploiement</h2>
