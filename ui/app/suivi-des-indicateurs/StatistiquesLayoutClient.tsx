@@ -48,17 +48,17 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
       <div className={styles.mainContainer}>
         <div className="fr-container">
           <div className="fr-grid-row">
-            <div className="fr-col-12 fr-col-md-2">
+            <div className={`fr-col-12 fr-col-md-2 ${styles.sideMenuColumn}`}>
               <SideMenu
                 align="left"
                 burgerMenuButtonText="Dans cette rubrique"
-                sticky={false}
+                sticky={true}
                 items={sideMenuItems}
                 className={styles.sideMenuContainer}
               />
             </div>
 
-            <div className="fr-col-12 fr-col-md-10">{children}</div>
+            <div className={`fr-col-12 fr-col-md-10 ${styles.contentColumn}`}>{children}</div>
           </div>
         </div>
       </div>

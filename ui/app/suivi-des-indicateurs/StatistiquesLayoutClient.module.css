@@ -28,7 +28,22 @@
   max-width: 1232px;
 }
 
+.sideMenuColumn {
+  border-right: 1px solid #dddddd;
+  min-height: 100%;
+}
+
+.contentColumn {
+  padding-left: 24px;
+}
+
 .sideMenuContainer {
   max-height: none;
   overflow: visible;
+}
+
+@media (min-width: 48em) {
+  .sideMenuContainer :global(.fr-sidemenu__inner) {
+    box-shadow: none;
+  }
 }
