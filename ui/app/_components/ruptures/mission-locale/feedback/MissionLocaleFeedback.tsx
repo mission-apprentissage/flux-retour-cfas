@@ -40,10 +40,14 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
   const organismeFormationLayout = () => {
     return (
       <>
-        {sortedLogs.map((log, index) => (
-          <div key={log._id.toString()}>
-            <>
-              {log.created_at && log.situation && (
+        {sortedLogs.map((log, index) => {
+          if (!log.situation || !SITUATION_LABEL_ENUM[log.situation]) {
+            return null;
+          }
+
+          return (
+            <div key={log._id.toString()}>
+              {log.created_at && (
                 <h3
                   className="fr-mb-2v"
                   style={{ fontSize: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
@@ -125,7 +129,7 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
                     <p className="fr-mb-1v fr-mt-3v">
                       <b>Quel est le retour sur la prise de contact ?</b>
                     </p>
-                    <Tag>{log.situation ? SITUATION_LABEL_ENUM[log.situation] : "Situation inconnue"}</Tag>
+                    <Tag>{SITUATION_LABEL_ENUM[log.situation]}</Tag>
 
                     {log.commentaires && (
                       <>
@@ -138,9 +142,9 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
                   </div>
                 );
               })()}
-            </>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </>
     );
   };
@@ -148,110 +152,118 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
   const missionLocaleLayout = () => {
     return (
       <>
-        {sortedLogs.map((log, index) => (
-          <div key={log._id?.toString() || index}>
-            <h6 className="fr-mb-2v">
-              {log._id?.toString() === "virtual-log"
-                ? "Situation actuelle"
-                : `Le ${formatDate(log.created_at)}${formatContactTimeText(calculateDaysSince(log.created_at))}`}
-            </h6>
-            {(() => {
-              if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
-                return (
-                  <div className={styles.feedbackContainer}>
-                    <p className="fr-mb-0">
-                      <b>Ce jeune est resté injoignable.</b>
-                    </p>
-                  </div>
-                );
-              }
+        {sortedLogs.map((log, index) => {
+          if (!log.situation || !SITUATION_LABEL_ENUM[log.situation]) {
+            return null;
+          }
 
-              const isSecondAttempt = index === 1 && log.probleme_type;
+          return (
+            <div key={log._id?.toString() || index}>
+              <h6 className="fr-mb-2v">
+                {log._id?.toString() === "virtual-log"
+                  ? "Situation actuelle"
+                  : `Le ${formatDate(log.created_at)}${formatContactTimeText(calculateDaysSince(log.created_at))}`}
+              </h6>
+              {(() => {
+                if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {
+                  return (
+                    <div className={styles.feedbackContainer}>
+                      <p className="fr-mb-0">
+                        <b>Ce jeune est resté injoignable.</b>
+                      </p>
+                    </div>
+                  );
+                }
 
-              if (isSecondAttempt || isNouveauContrat) {
+                const isSecondAttempt = index === 1 && log.probleme_type;
+
+                if (isSecondAttempt || isNouveauContrat) {
+                  return (
+                    <div className={styles.feedbackContainer}>
+                      <p className="fr-mb-1v">
+                        <b>Êtes-vous entré en contact avec ce jeune ?</b>
+                      </p>
+                      <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
+                      {isNouveauContrat ? (
+                        <p className="fr-mb-0">
+                          <b>Ce jeune a retrouvé un contrat d&apos;apprentissage.</b>
+                        </p>
+                      ) : null}
+                      {log.probleme_type && (
+                        <>
+                          <p className="fr-mb-1v fr-mt-3v">
+                            <b>Quel était le problème selon vous ?</b>
+                          </p>
+                          <div className={styles.feedbackSituationContainer}>
+                            <Tag>
+                              {log.probleme_type === PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES &&
+                                "Coordonnées incorrectes"}
+                              {log.probleme_type === PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE && "Le jeune est injoignable"}
+                              {log.probleme_type === PROBLEME_TYPE_ENUM.AUTRE && `Autre - ${log.probleme_detail}`}
+                            </Tag>
+                          </div>
+                        </>
+                      )}
+
+                      <p className="fr-mb-1v fr-mt-3v">
+                        <b>Vous avez décidé</b>
+                      </p>
+                      <Tag>
+                        {log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? (
+                          <>
+                            Garder le jeune dans la liste{" "}
+                            <span className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
+                              <i className="fr-icon-phone-fill fr-icon--sm" />
+                              <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            Marquer le dossier du jeune comme{" "}
+                            <Badge as="span" style={{ marginLeft: "5px" }} severity="success">
+                              traité
+                            </Badge>
+                          </>
+                        )}
+                      </Tag>
+                    </div>
+                  );
+                }
+
                 return (
                   <div className={styles.feedbackContainer}>
                     <p className="fr-mb-1v">
-                      <b>Êtes-vous entré en contact avec ce jeune ?</b>
+                      <b>Quel est votre retour sur la prise de contact ?</b>
                     </p>
-                    <Tag>{log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? "Non" : "Oui"}</Tag>
-                    {isNouveauContrat ? (
-                      <p className="fr-mb-0">
-                        <b>Ce jeune a retrouvé un contrat d&apos;apprentissage.</b>
-                      </p>
-                    ) : null}
-                    {log.probleme_type && (
+                    <div className={styles.feedbackSituationContainer}>
+                      <Tag>{SITUATION_LABEL_ENUM[log.situation]}</Tag>
+                      {log.situation === SITUATION_ENUM.AUTRE && (
+                        <p className={styles.feedbackText}>({log.situation_autre})</p>
+                      )}
+                    </div>
+                    {index === sortedLogs.length - 1 && (
                       <>
-                        <p className="fr-mb-1v fr-mt-3v">
-                          <b>Quel était le problème selon vous ?</b>
+                        <p className="fr-mb-1v">
+                          <b>Ce jeune était-il déjà connu de votre Mission Locale ?</b>
                         </p>
-                        <div className={styles.feedbackSituationContainer}>
-                          <Tag>
-                            {log.probleme_type === PROBLEME_TYPE_ENUM.COORDONNEES_INCORRECTES &&
-                              "Coordonnées incorrectes"}
-                            {log.probleme_type === PROBLEME_TYPE_ENUM.JEUNE_INJOIGNABLE && "Le jeune est injoignable"}
-                            {log.probleme_type === PROBLEME_TYPE_ENUM.AUTRE && `Autre - ${log.probleme_detail}`}
-                          </Tag>
-                        </div>
+                        <Tag>{log.deja_connu ? "Oui" : "Non"}</Tag>
                       </>
                     )}
 
-                    <p className="fr-mb-1v fr-mt-3v">
-                      <b>Vous avez décidé</b>
-                    </p>
-                    <Tag>
-                      {log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR ? (
-                        <>
-                          Garder le jeune dans la liste{" "}
-                          <span className="fr-badge fr-badge--purple-glycine" style={{ marginLeft: "0.5rem" }}>
-                            <i className="fr-icon-phone-fill fr-icon--sm" />
-                            <span style={{ marginLeft: "5px" }}>À RECONTACTER</span>
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          Marquer le dossier du jeune comme{" "}
-                          <Badge as="span" style={{ marginLeft: "5px" }} severity="success">
-                            traité
-                          </Badge>
-                        </>
-                      )}
-                    </Tag>
+                    {log.commentaires ? (
+                      <>
+                        <p className="fr-mb-1v">
+                          <b>Commentaires</b>
+                        </p>
+                        <p className={styles.feedbackText}>{log.commentaires}</p>
+                      </>
+                    ) : null}
                   </div>
                 );
-              }
-
-              return (
-                <div className={styles.feedbackContainer}>
-                  <p className="fr-mb-1v">
-                    <b>Quel est votre retour sur la prise de contact ?</b>
-                  </p>
-                  <div className={styles.feedbackSituationContainer}>
-                    <Tag>{log.situation ? SITUATION_LABEL_ENUM[log.situation] : "Situation inconnue"}</Tag>
-                    {log.situation === "AUTRE" && <p className={styles.feedbackText}>({log.situation_autre})</p>}
-                  </div>
-                  {index === sortedLogs.length - 1 && (
-                    <>
-                      <p className="fr-mb-1v">
-                        <b>Ce jeune était-il déjà connu de votre Mission Locale ?</b>
-                      </p>
-                      <Tag>{log.deja_connu ? "Oui" : "Non"}</Tag>
-                    </>
-                  )}
-
-                  {log.commentaires ? (
-                    <>
-                      <p className="fr-mb-1v">
-                        <b>Commentaires</b>
-                      </p>
-                      <p className={styles.feedbackText}>{log.commentaires}</p>
-                    </>
-                  ) : null}
-                </div>
-              );
-            })()}
-          </div>
-        ))}
+              })()}
+            </div>
+          );
+        })}
       </>
     );
   };
