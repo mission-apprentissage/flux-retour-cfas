@@ -13,6 +13,7 @@ import { getPriorityLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.u
 import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
+import { matchesSearchTerm } from "../utils/searchUtils";
 
 import { EffectifPriorityBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
@@ -68,11 +69,7 @@ export function EffectifsPriorityTable({
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return priorityData;
-    return priorityData.filter(
-      (effectif) =>
-        effectif.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        effectif.prenom.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return priorityData.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm));
   }, [priorityData, searchTerm]);
 
   const dataToShow = searchTerm
