@@ -21,6 +21,7 @@ interface MissionLocaleStats {
   nouveau_projet: number;
   deja_accompagne: number;
   contacte_sans_retour: number;
+  injoignables: number;
   coordonnees_incorrectes: number;
   autre: number;
   deja_connu: number;
@@ -47,6 +48,7 @@ const colorMap = {
   nouveau_projet: { color: "#568AC3", label: "Nouveau projet" },
   deja_accompagne: { color: "#00386A", label: "Déjà acco." },
   contacte_sans_retour: { color: "#31A7AE", label: "Sans retour" },
+  injoignables: { color: "#FF6B6B", label: "Injoignables" },
   coordonnees_incorrectes: { color: "#8B53C8", label: "Coord inc." },
   autre: { color: "#A78BCC", label: "Autre" },
 };
@@ -239,6 +241,7 @@ const TableauRepartitionTraitePercent = ({
       nouveau_projet_pourcentage: computePercentage(stats.nouveau_projet, stats.traite),
       deja_accompagne_pourcentage: computePercentage(stats.deja_accompagne, stats.traite),
       contacte_sans_retour_pourcentage: computePercentage(stats.contacte_sans_retour, stats.traite),
+      injoignables_pourcentage: computePercentage(stats.injoignables, stats.traite),
       coordonnees_incorrectes_pourcentage: computePercentage(stats.coordonnees_incorrectes, stats.traite),
       autre_pourcentage: computePercentage(stats.autre, stats.traite),
       deja_connu: computePercentage(stats.deja_connu, stats.traite),
@@ -267,6 +270,7 @@ const TableauRepartitionTraitePercent = ({
       nouveau_projet_pourcentage: <>{item.rawData.nouveau_projet_pourcentage}%</>,
       deja_accompagne_pourcentage: <>{item.rawData.deja_accompagne_pourcentage}%</>,
       contacte_sans_retour_pourcentage: <>{item.rawData.contacte_sans_retour_pourcentage}%</>,
+      injoignables_pourcentage: <>{item.rawData.injoignables_pourcentage}%</>,
       coordonnees_incorrectes_pourcentage: <>{item.rawData.coordonnees_incorrectes_pourcentage}%</>,
       autre_pourcentage: <>{item.rawData.autre_pourcentage}%</>,
       deja_connu: <>{item.rawData.deja_connu}%</>,
@@ -283,6 +287,7 @@ const TableauRepartitionTraitePercent = ({
       { label: "Nouv. proj. %", dataKey: "nouveau_projet_pourcentage", width: 50 },
       { label: "Déjà acc. %", dataKey: "deja_accompagne_pourcentage", width: 50 },
       { label: "Cont. sans ret. %", dataKey: "contacte_sans_retour_pourcentage", width: 50 },
+      { label: "Injoignables %", dataKey: "injoignables_pourcentage", width: 50 },
       { label: "Coord. inc. %", dataKey: "coordonnees_incorrectes_pourcentage", width: 50 },
       { label: "Autre %", dataKey: "autre_pourcentage", width: 50 },
       { label: "Déjà connu %", dataKey: "deja_connu", width: 50 },
@@ -321,6 +326,7 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
   const nouveau_projet_pct = (stats.nouveau_projet / total) * 100;
   const deja_accompagne_pct = (stats.deja_accompagne / total) * 100;
   const contacte_sans_retour_pct = (stats.contacte_sans_retour / total) * 100;
+  const injoignables_pct = (stats.injoignables / total) * 100;
   const coordonnees_incorrectes_pct = (stats.coordonnees_incorrectes / total) * 100;
   const autre_pct = (stats.autre / total) * 100;
 
@@ -360,6 +366,14 @@ const StatsBarChart = ({ stats, nom }: { stats: MissionLocaleStats; nom: string 
           stack: "stack1",
           color: colorMap.contacte_sans_retour.color,
           valueFormatter: () => stats.contacte_sans_retour.toString(),
+        },
+        {
+          id: "injoignables",
+          data: [injoignables_pct],
+          label: "Injoignables",
+          stack: "stack1",
+          color: colorMap.injoignables.color,
+          valueFormatter: () => stats.injoignables.toString(),
         },
         {
           id: "coordonnees_incorrectes",

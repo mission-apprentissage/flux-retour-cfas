@@ -81,6 +81,7 @@ const exportMissionLocalesData = async (req, res) => {
       const nouveauProjet = stats.nouveau_projet || 0;
       const dejaAccompagne = stats.deja_accompagne || 0;
       const sansReponse = stats.contacte_sans_retour || 0;
+      const injoignables = stats.injoignables || 0;
       const coordonnesIncorrectes = stats.coordonnees_incorrectes || 0;
       const autre = stats.autre || 0;
       const dejaConnu = stats.deja_connu || 0;
@@ -100,6 +101,8 @@ const exportMissionLocalesData = async (req, res) => {
         deja_accompagne_pct: traite ? ((dejaAccompagne / traite) * 100).toFixed(2) : "0.00",
         sans_reponse: sansReponse,
         sans_reponse_pct: traite ? ((sansReponse / traite) * 100).toFixed(2) : "0.00",
+        injoignables: injoignables,
+        injoignables_pct: traite ? ((injoignables / traite) * 100).toFixed(2) : "0.00",
         coordonnes_incorrectes: coordonnesIncorrectes,
         coordonnes_incorrectes_pct: traite ? ((coordonnesIncorrectes / traite) * 100).toFixed(2) : "0.00",
         autre: autre,
@@ -168,6 +171,14 @@ const exportMissionLocalesData = async (req, res) => {
     {
       name: "Sans réponse %",
       id: "sans_reponse_pct",
+    },
+    {
+      name: "Injoignables",
+      id: "injoignables",
+    },
+    {
+      name: "Injoignables %",
+      id: "injoignables_pct",
     },
     {
       name: "Coordonées incorrectes",

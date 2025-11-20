@@ -1,0 +1,46 @@
+.deploymentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deploymentLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deploymentDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.deploymentLabelText {
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.deploymentValue {
+  margin: 0;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: right;
+}
+
+.deploymentValueWithPercentage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardPercentage {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0;
+}

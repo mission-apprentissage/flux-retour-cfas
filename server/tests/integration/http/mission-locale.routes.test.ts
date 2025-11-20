@@ -1,7 +1,13 @@
 import { ObjectId } from "bson";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsQueueDb,
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import {
   createRandomDossierApprenantApiInputV3WithFixedDates,
@@ -20,6 +26,7 @@ const ML_DATA = { ml_id: 609, nom: "MA MISSION LOCALE", type: "MISSION_LOCALE" a
 
 let EFFECTIF_ID: ObjectId;
 let requestAsOrganisation: RequestAsOrganisationFunc;
+let httpClient: Awaited<ReturnType<typeof initTestApp>>["httpClient"];
 
 describe("Mission Locale Routes", () => {
   useNock();
@@ -27,6 +34,7 @@ describe("Mission Locale Routes", () => {
   beforeEach(async () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
+    httpClient = app.httpClient;
     await organisationsDb().insertOne({
       _id: ML_ID,
       created_at: new Date(),
@@ -248,6 +256,494 @@ describe("Mission Locale Routes", () => {
           `/api/v1/organisation/mission-locale/effectifs-per-month`
         );
         expect(res2.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      });
+    });
+  });
+
+  describe("Statistiques Mission Locale", () => {
+    describe("GET /api/v1/mission-locale/stats/summary", () => {
+      beforeEach(async () => {
+        await missionLocaleStatsDb().deleteMany({});
+        await organisationsDb().deleteMany({});
+      });
+
+      it("Doit retourner les statistiques agrégées pour la période par défaut (all)", async () => {
+        const currentDate = new Date("2025-03-15");
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+        const ml2Id = new ObjectId();
+
+        await organisationsDb().insertMany([
+          {
+            _id: ml1Id,
+            nom: "ML Paris",
+            ml_id: 1,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+          },
+          {
+            _id: ml2Id,
+            nom: "ML Lyon",
+            ml_id: 2,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-15"),
+          },
+        ]);
+
+        await missionLocaleStatsDb().insertMany([
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml1Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: {
+              total: 100,
+              a_traiter: 30,
+              traite: 70,
+              rdv_pris: 20,
+              nouveau_projet: 15,
+              deja_accompagne: 10,
+              contacte_sans_retour: 25,
+              injoignables: 0,
+              coordonnees_incorrectes: 5,
+              autre: 5,
+              autre_avec_contact: 0,
+              deja_connu: 10,
+              mineur: 0,
+              mineur_a_traiter: 0,
+              mineur_traite: 0,
+              mineur_rdv_pris: 0,
+              mineur_nouveau_projet: 0,
+              mineur_deja_accompagne: 0,
+              mineur_contacte_sans_retour: 0,
+              mineur_injoignables: 0,
+              mineur_coordonnees_incorrectes: 0,
+              mineur_autre: 0,
+              mineur_autre_avec_contact: 0,
+              rqth: 0,
+              rqth_a_traiter: 0,
+              rqth_traite: 0,
+              rqth_rdv_pris: 0,
+              rqth_nouveau_projet: 0,
+              rqth_deja_accompagne: 0,
+              rqth_contacte_sans_retour: 0,
+              rqth_injoignables: 0,
+              rqth_coordonnees_incorrectes: 0,
+              rqth_autre: 0,
+              rqth_autre_avec_contact: 0,
+              abandon: 0,
+            },
+          },
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml2Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: {
+              total: 50,
+              a_traiter: 20,
+              traite: 30,
+              rdv_pris: 10,
+              nouveau_projet: 5,
+              deja_accompagne: 5,
+              contacte_sans_retour: 10,
+              injoignables: 0,
+              coordonnees_incorrectes: 3,
+              autre: 2,
+              autre_avec_contact: 0,
+              deja_connu: 5,
+              mineur: 0,
+              mineur_a_traiter: 0,
+              mineur_traite: 0,
+              mineur_rdv_pris: 0,
+              mineur_nouveau_projet: 0,
+              mineur_deja_accompagne: 0,
+              mineur_contacte_sans_retour: 0,
+              mineur_injoignables: 0,
+              mineur_coordonnees_incorrectes: 0,
+              mineur_autre: 0,
+              mineur_autre_avec_contact: 0,
+              rqth: 0,
+              rqth_a_traiter: 0,
+              rqth_traite: 0,
+              rqth_rdv_pris: 0,
+              rqth_nouveau_projet: 0,
+              rqth_deja_accompagne: 0,
+              rqth_contacte_sans_retour: 0,
+              rqth_injoignables: 0,
+              rqth_coordonnees_incorrectes: 0,
+              rqth_autre: 0,
+              rqth_autre_avec_contact: 0,
+              abandon: 0,
+            },
+          },
+        ]);
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/summary");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("summary");
+        expect(response.data).toHaveProperty("arml");
+        expect(response.data).toHaveProperty("mlCount");
+        expect(response.data).toHaveProperty("activatedMlCount");
+        expect(response.data.mlCount).toBe(2);
+        expect(response.data.activatedMlCount).toBe(2);
+      });
+
+      it("Doit retourner les statistiques pour une période de 30 jours", async () => {
+        const currentDate = new Date("2025-03-15");
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Test",
+          ml_id: 3,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          activated_at: new Date("2025-02-01"),
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: {
+            total: 100,
+            a_traiter: 30,
+            traite: 70,
+            rdv_pris: 20,
+            nouveau_projet: 15,
+            deja_accompagne: 10,
+            contacte_sans_retour: 25,
+            injoignables: 0,
+            coordonnees_incorrectes: 5,
+            autre: 5,
+            autre_avec_contact: 0,
+            deja_connu: 10,
+            mineur: 0,
+            mineur_a_traiter: 0,
+            mineur_traite: 0,
+            mineur_rdv_pris: 0,
+            mineur_nouveau_projet: 0,
+            mineur_deja_accompagne: 0,
+            mineur_contacte_sans_retour: 0,
+            mineur_injoignables: 0,
+            mineur_coordonnees_incorrectes: 0,
+            mineur_autre: 0,
+            mineur_autre_avec_contact: 0,
+            rqth: 0,
+            rqth_a_traiter: 0,
+            rqth_traite: 0,
+            rqth_rdv_pris: 0,
+            rqth_nouveau_projet: 0,
+            rqth_deja_accompagne: 0,
+            rqth_contacte_sans_retour: 0,
+            rqth_injoignables: 0,
+            rqth_coordonnees_incorrectes: 0,
+            rqth_autre: 0,
+            rqth_autre_avec_contact: 0,
+            abandon: 0,
+          },
+        });
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=30days");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("summary");
+        expect(response.data.summary).toBeInstanceOf(Array);
+        expect(response.data.summary.length).toBeGreaterThan(0);
+      });
+
+      it("Doit valider le paramètre period", async () => {
+        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=invalid");
+
+        expect(response.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/v1/mission-locale/stats/regions", () => {
+      beforeEach(async () => {
+        await missionLocaleStatsDb().deleteMany({});
+        await organisationsDb().deleteMany({});
+      });
+
+      it("Doit retourner les statistiques par région pour la période par défaut (30days)", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+        const ml2Id = new ObjectId();
+
+        await organisationsDb().insertMany([
+          {
+            _id: ml1Id,
+            nom: "ML Île-de-France",
+            ml_id: 4,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            adresse: { region: "11" },
+            activated_at: new Date("2025-02-01"),
+          },
+          {
+            _id: ml2Id,
+            nom: "ML Auvergne-Rhône-Alpes",
+            ml_id: 5,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            adresse: { region: "84" },
+            activated_at: new Date("2025-02-15"),
+          },
+        ]);
+
+        await missionLocaleStatsDb().insertMany([
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml1Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: {
+              total: 100,
+              a_traiter: 30,
+              traite: 70,
+              rdv_pris: 20,
+              nouveau_projet: 15,
+              deja_accompagne: 10,
+              contacte_sans_retour: 25,
+              injoignables: 0,
+              coordonnees_incorrectes: 5,
+              autre: 5,
+              autre_avec_contact: 0,
+              deja_connu: 10,
+              mineur: 0,
+              mineur_a_traiter: 0,
+              mineur_traite: 0,
+              mineur_rdv_pris: 0,
+              mineur_nouveau_projet: 0,
+              mineur_deja_accompagne: 0,
+              mineur_contacte_sans_retour: 0,
+              mineur_injoignables: 0,
+              mineur_coordonnees_incorrectes: 0,
+              mineur_autre: 0,
+              mineur_autre_avec_contact: 0,
+              rqth: 0,
+              rqth_a_traiter: 0,
+              rqth_traite: 0,
+              rqth_rdv_pris: 0,
+              rqth_nouveau_projet: 0,
+              rqth_deja_accompagne: 0,
+              rqth_contacte_sans_retour: 0,
+              rqth_injoignables: 0,
+              rqth_coordonnees_incorrectes: 0,
+              rqth_autre: 0,
+              rqth_autre_avec_contact: 0,
+              abandon: 0,
+            },
+          },
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml2Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: {
+              total: 50,
+              a_traiter: 20,
+              traite: 30,
+              rdv_pris: 10,
+              nouveau_projet: 5,
+              deja_accompagne: 5,
+              contacte_sans_retour: 10,
+              injoignables: 0,
+              coordonnees_incorrectes: 3,
+              autre: 2,
+              autre_avec_contact: 0,
+              deja_connu: 5,
+              mineur: 0,
+              mineur_a_traiter: 0,
+              mineur_traite: 0,
+              mineur_rdv_pris: 0,
+              mineur_nouveau_projet: 0,
+              mineur_deja_accompagne: 0,
+              mineur_contacte_sans_retour: 0,
+              mineur_injoignables: 0,
+              mineur_coordonnees_incorrectes: 0,
+              mineur_autre: 0,
+              mineur_autre_avec_contact: 0,
+              rqth: 0,
+              rqth_a_traiter: 0,
+              rqth_traite: 0,
+              rqth_rdv_pris: 0,
+              rqth_nouveau_projet: 0,
+              rqth_deja_accompagne: 0,
+              rqth_contacte_sans_retour: 0,
+              rqth_injoignables: 0,
+              rqth_coordonnees_incorrectes: 0,
+              rqth_autre: 0,
+              rqth_autre_avec_contact: 0,
+              abandon: 0,
+            },
+          },
+        ]);
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/regions");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("regions");
+        expect(response.data.regions).toBeInstanceOf(Array);
+        expect(response.data.regions.length).toBeGreaterThan(0);
+
+        const region = response.data.regions[0];
+        expect(region).toHaveProperty("code");
+        expect(region).toHaveProperty("nom");
+        expect(region).toHaveProperty("ml_total");
+        expect(region).toHaveProperty("ml_activees");
+        expect(region).toHaveProperty("ml_engagees");
+        expect(region).toHaveProperty("engagement_rate");
+      });
+
+      it("Doit retourner les statistiques pour une période de 3 mois", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Test",
+          ml_id: 6,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          adresse: { region: "11" },
+          activated_at: new Date("2025-02-01"),
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: {
+            total: 100,
+            a_traiter: 30,
+            traite: 70,
+            rdv_pris: 20,
+            nouveau_projet: 15,
+            deja_accompagne: 10,
+            contacte_sans_retour: 25,
+            injoignables: 0,
+            coordonnees_incorrectes: 5,
+            autre: 5,
+            autre_avec_contact: 0,
+            deja_connu: 10,
+            mineur: 0,
+            mineur_a_traiter: 0,
+            mineur_traite: 0,
+            mineur_rdv_pris: 0,
+            mineur_nouveau_projet: 0,
+            mineur_deja_accompagne: 0,
+            mineur_contacte_sans_retour: 0,
+            mineur_injoignables: 0,
+            mineur_coordonnees_incorrectes: 0,
+            mineur_autre: 0,
+            mineur_autre_avec_contact: 0,
+            rqth: 0,
+            rqth_a_traiter: 0,
+            rqth_traite: 0,
+            rqth_rdv_pris: 0,
+            rqth_nouveau_projet: 0,
+            rqth_deja_accompagne: 0,
+            rqth_contacte_sans_retour: 0,
+            rqth_injoignables: 0,
+            rqth_coordonnees_incorrectes: 0,
+            rqth_autre: 0,
+            rqth_autre_avec_contact: 0,
+            abandon: 0,
+          },
+        });
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=3months");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("regions");
+        expect(response.data.regions).toBeInstanceOf(Array);
+      });
+
+      it("Doit retourner les statistiques pour toute la période (all)", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Test",
+          ml_id: 7,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          adresse: { region: "11" },
+          activated_at: new Date("2025-02-01"),
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: {
+            total: 100,
+            a_traiter: 30,
+            traite: 70,
+            rdv_pris: 20,
+            nouveau_projet: 15,
+            deja_accompagne: 10,
+            contacte_sans_retour: 25,
+            injoignables: 0,
+            coordonnees_incorrectes: 5,
+            autre: 5,
+            autre_avec_contact: 0,
+            deja_connu: 10,
+            mineur: 0,
+            mineur_a_traiter: 0,
+            mineur_traite: 0,
+            mineur_rdv_pris: 0,
+            mineur_nouveau_projet: 0,
+            mineur_deja_accompagne: 0,
+            mineur_contacte_sans_retour: 0,
+            mineur_injoignables: 0,
+            mineur_coordonnees_incorrectes: 0,
+            mineur_autre: 0,
+            mineur_autre_avec_contact: 0,
+            rqth: 0,
+            rqth_a_traiter: 0,
+            rqth_traite: 0,
+            rqth_rdv_pris: 0,
+            rqth_nouveau_projet: 0,
+            rqth_deja_accompagne: 0,
+            rqth_contacte_sans_retour: 0,
+            rqth_injoignables: 0,
+            rqth_coordonnees_incorrectes: 0,
+            rqth_autre: 0,
+            rqth_autre_avec_contact: 0,
+            abandon: 0,
+          },
+        });
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=all");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("regions");
+        expect(response.data.regions).toBeInstanceOf(Array);
+      });
+
+      it("Doit valider le paramètre period", async () => {
+        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=invalid");
+
+        expect(response.status).toBe(400);
       });
     });
   });
