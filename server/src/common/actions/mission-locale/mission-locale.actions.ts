@@ -1391,8 +1391,20 @@ export const getEffectifsListByMisisonLocaleId = (
         libelle_formation: "$effectif_snapshot.formation.libelle_long",
         organisme_nom: "$organisme.nom",
         organisme_code_postal: "$organisme.adresse.code_postal",
-        organisme_contacts: "$organisme.contacts_from_referentiel",
-        tdb_organisme_contacts: "$tdb_users",
+        organisme_contacts: {
+          $cond: [
+            { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+            "$organisme.contacts_from_referentiel",
+            [],
+          ],
+        },
+        tdb_organisme_contacts: {
+          $cond: [
+            { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+            "$tdb_users",
+            [],
+          ],
+        },
         effectif_choice: "$_effectif_choice_label",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
