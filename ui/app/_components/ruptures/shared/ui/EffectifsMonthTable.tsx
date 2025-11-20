@@ -11,6 +11,8 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatMonthAndYear, anchorFromLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.utils";
 import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
+import { matchesSearchTerm } from "../utils/searchUtils";
+
 import { EffectifPriorityBadge, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 import notificationStyles from "./NotificationBadge.module.css";
@@ -125,11 +127,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const columns: ColumnData[] = getColumns(listType);
 
   const filteredData = searchTerm
-    ? monthItem.data.filter(
-        (effectif) =>
-          effectif.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          effectif.prenom.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? monthItem.data.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm))
     : monthItem.data;
 
   const dataToShow = searchTerm
