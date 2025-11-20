@@ -107,7 +107,7 @@ export const getStatsAtDate = async (currentDate: Date) => {
             },
           },
           total_repondu: { $sum: { $add: ["$stats.rdv_pris", "$stats.nouveau_projet", "$stats.deja_accompagne"] } },
-          total_accompagne: { $sum: { $add: ["$stats.rdv_pris", "$stats.nouveau_projet"] } },
+          total_accompagne: { $sum: { $add: ["$stats.rdv_pris", "$stats.deja_accompagne"] } },
           rdv_pris: { $sum: "$stats.rdv_pris" },
           nouveau_projet: { $sum: "$stats.nouveau_projet" },
           deja_accompagne: { $sum: "$stats.deja_accompagne" },

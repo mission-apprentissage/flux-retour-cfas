@@ -82,7 +82,7 @@ export function SyntheseView() {
             loading={loading}
           />
           <StatCard
-            label="Total jeunes accompagnés ou en nouveau projet sécurisé"
+            label="Total jeunes accompagnés"
             value={latestStats?.total_accompagne}
             previousValue={firstStats?.total_accompagne}
             loading={loading}
