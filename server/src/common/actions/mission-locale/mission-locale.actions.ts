@@ -1787,6 +1787,20 @@ export const computeMissionLocaleStats = async (
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
         },
         autre: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+        autre_avec_contact: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] },
+                  { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         deja_connu: { $sum: { $cond: ["$computed_deja_connu", 1, 0] } },
         mineur: {
           $sum: {
@@ -1868,6 +1882,21 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        mineur_autre_avec_contact: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  mineurCondition,
+                  { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] },
+                  { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         rqth: {
           $sum: {
             $cond: [rqthCondition, 1, 0],
@@ -1944,6 +1973,21 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        rqth_autre_avec_contact: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  rqthCondition,
+                  { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] },
+                  { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },
       },
     },
@@ -1960,6 +2004,7 @@ export const computeMissionLocaleStats = async (
         injoignables: 1,
         coordonnees_incorrectes: 1,
         autre: 1,
+        autre_avec_contact: 1,
         deja_connu: 1,
         mineur: 1,
         mineur_a_traiter: 1,
@@ -1971,6 +2016,7 @@ export const computeMissionLocaleStats = async (
         mineur_injoignables: 1,
         mineur_coordonnees_incorrectes: 1,
         mineur_autre: 1,
+        mineur_autre_avec_contact: 1,
         rqth: 1,
         rqth_a_traiter: 1,
         rqth_traite: 1,
@@ -1981,6 +2027,7 @@ export const computeMissionLocaleStats = async (
         rqth_injoignables: 1,
         rqth_coordonnees_incorrectes: 1,
         rqth_autre: 1,
+        rqth_autre_avec_contact: 1,
         abandon: 1,
       },
     },
@@ -2001,6 +2048,7 @@ export const computeMissionLocaleStats = async (
       injoignables: 0,
       coordonnees_incorrectes: 0,
       autre: 0,
+      autre_avec_contact: 0,
       deja_connu: 0,
       mineur: 0,
       mineur_a_traiter: 0,
@@ -2012,6 +2060,7 @@ export const computeMissionLocaleStats = async (
       mineur_injoignables: 0,
       mineur_coordonnees_incorrectes: 0,
       mineur_autre: 0,
+      mineur_autre_avec_contact: 0,
       rqth: 0,
       rqth_a_traiter: 0,
       rqth_traite: 0,
@@ -2022,6 +2071,7 @@ export const computeMissionLocaleStats = async (
       rqth_injoignables: 0,
       rqth_coordonnees_incorrectes: 0,
       rqth_autre: 0,
+      rqth_autre_avec_contact: 0,
       abandon: 0,
     };
   }
