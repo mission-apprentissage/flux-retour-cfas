@@ -18807,6 +18807,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "autre": {
           "bsonType": "int",
         },
+        "autre_avec_contact": {
+          "bsonType": "int",
+        },
         "contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18819,6 +18822,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "deja_connu": {
           "bsonType": "int",
         },
+        "injoignables": {
+          "bsonType": "int",
+        },
         "mineur": {
           "bsonType": "int",
         },
@@ -18828,6 +18834,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_autre": {
           "bsonType": "int",
         },
+        "mineur_autre_avec_contact": {
+          "bsonType": "int",
+        },
         "mineur_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18835,6 +18844,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
           "bsonType": "int",
         },
         "mineur_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "mineur_injoignables": {
           "bsonType": "int",
         },
         "mineur_nouveau_projet": {
@@ -18861,6 +18873,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "rqth_autre": {
           "bsonType": "int",
         },
+        "rqth_autre_avec_contact": {
+          "bsonType": "int",
+        },
         "rqth_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18868,6 +18883,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
           "bsonType": "int",
         },
         "rqth_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "rqth_injoignables": {
           "bsonType": "int",
         },
         "rqth_nouveau_projet": {
