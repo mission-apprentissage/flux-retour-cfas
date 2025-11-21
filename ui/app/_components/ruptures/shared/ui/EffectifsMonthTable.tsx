@@ -13,7 +13,7 @@ import { EffectifData, MonthItem, SelectedSection } from "@/common/types/rupture
 
 import { matchesSearchTerm } from "../utils/searchUtils";
 
-import { EffectifPriorityBadge, EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 import notificationStyles from "./NotificationBadge.module.css";
 
@@ -41,14 +41,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     ),
     name: (
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadge effectif={effectif} isHeader />}
+        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />}
         <div className={notificationStyles.badgeContainer}>
           {isCfaPage && effectif.unread_by_current_user && (
             <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
           )}
-          <div
-            className={`fr-text--bold ${styles.monthTableNameContainer}`}
-          >{`${effectif.nom} ${effectif.prenom}`}</div>
+          <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
+            {`${effectif.nom} ${effectif.prenom}`}
+          </div>
         </div>
       </div>
     ),

@@ -550,6 +550,33 @@ const addMissionLocaleFieldTraitementStatus = () => {
         a_risque_accompagnement_conjoint: {
           $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
         },
+        a_risque_presque_6_mois_avec_cfa: {
+          $cond: [
+            {
+              $and: [PRESQUE_6_MOIS_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+            },
+            true,
+            false,
+          ],
+        },
+        a_risque_mineur_avec_cfa: {
+          $cond: [
+            {
+              $and: [MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+            },
+            true,
+            false,
+          ],
+        },
+        a_risque_rqth_avec_cfa: {
+          $cond: [
+            {
+              $and: [RQTH_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+            },
+            true,
+            false,
+          ],
+        },
       },
     },
     {
@@ -687,10 +714,13 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
+        a_risque_presque_6_mois_avec_cfa: -1,
+        a_risque_mineur_avec_cfa: -1,
+        a_risque_rqth_avec_cfa: -1,
+        a_risque_accompagnement_conjoint: -1,
         a_risque_presque_6_mois: -1,
         a_risque_mineur: -1,
         a_risque_rqth: -1,
-        a_risque_accompagnement_conjoint: -1,
         a_contacter: -1,
       };
   }
