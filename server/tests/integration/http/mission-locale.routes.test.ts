@@ -746,5 +746,121 @@ describe("Mission Locale Routes", () => {
         expect(response.status).toBe(400);
       });
     });
+
+    describe("GET /api/v1/mission-locale/stats/national", () => {
+      beforeEach(async () => {
+        await missionLocaleStatsDb().deleteMany({});
+        await organisationsDb().deleteMany({});
+      });
+
+      it("Doit retourner les statistiques nationales pour la période par défaut (30days)", async () => {
+        const currentDate = new Date("2025-03-15");
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Paris",
+          ml_id: 1,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          activated_at: new Date("2025-02-01"),
+          adresse: {
+            region: "11", // Île-de-France
+          },
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: {
+            total: 100,
+            a_traiter: 30,
+            traite: 70,
+            rdv_pris: 20,
+            nouveau_projet: 15,
+            deja_accompagne: 10,
+            contacte_sans_retour: 25,
+            injoignables: 0,
+            coordonnees_incorrectes: 5,
+            autre: 5,
+            autre_avec_contact: 0,
+            deja_connu: 8,
+            mineur: 0,
+            mineur_a_traiter: 0,
+            mineur_traite: 0,
+            mineur_rdv_pris: 0,
+            mineur_nouveau_projet: 0,
+            mineur_deja_accompagne: 0,
+            mineur_contacte_sans_retour: 0,
+            mineur_injoignables: 0,
+            mineur_coordonnees_incorrectes: 0,
+            mineur_autre: 0,
+            mineur_autre_avec_contact: 0,
+            rqth: 0,
+            rqth_a_traiter: 0,
+            rqth_traite: 0,
+            rqth_rdv_pris: 0,
+            rqth_nouveau_projet: 0,
+            rqth_deja_accompagne: 0,
+            rqth_contacte_sans_retour: 0,
+            rqth_injoignables: 0,
+            rqth_coordonnees_incorrectes: 0,
+            rqth_autre: 0,
+            rqth_autre_avec_contact: 0,
+            abandon: 0,
+          },
+        });
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/national");
+
+        expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("rupturantsTimeSeries");
+        expect(response.data).toHaveProperty("rupturantsSummary");
+        expect(response.data).toHaveProperty("detailsTraites");
+        expect(response.data).toHaveProperty("regional");
+        expect(response.data).toHaveProperty("period");
+
+        expect(response.data.rupturantsTimeSeries).toHaveLength(6);
+
+        expect(response.data.rupturantsSummary).toHaveProperty("a_traiter");
+        expect(response.data.rupturantsSummary.a_traiter).toHaveProperty("current");
+        expect(response.data.rupturantsSummary.a_traiter).toHaveProperty("variation");
+        expect(response.data.rupturantsSummary).toHaveProperty("traites");
+        expect(response.data.rupturantsSummary).toHaveProperty("total");
+
+        expect(response.data.detailsTraites).toHaveProperty("rdv_pris");
+        expect(response.data.detailsTraites).toHaveProperty("nouveau_projet");
+        expect(response.data.detailsTraites).toHaveProperty("contacte_sans_retour");
+        expect(response.data.detailsTraites).toHaveProperty("injoignables");
+        expect(response.data.detailsTraites).toHaveProperty("coordonnees_incorrectes");
+        expect(response.data.detailsTraites).toHaveProperty("autre");
+        expect(response.data.detailsTraites).toHaveProperty("deja_connu");
+        expect(response.data.detailsTraites).toHaveProperty("total");
+      });
+
+      it("Doit accepter les différentes périodes", async () => {
+        const response30d = await httpClient.get("/api/v1/mission-locale/stats/national?period=30days");
+        expect(response30d.status).toBe(200);
+        expect(response30d.data.period).toBe("30days");
+
+        const response3m = await httpClient.get("/api/v1/mission-locale/stats/national?period=3months");
+        expect(response3m.status).toBe(200);
+        expect(response3m.data.period).toBe("3months");
+
+        const responseAll = await httpClient.get("/api/v1/mission-locale/stats/national?period=all");
+        expect(responseAll.status).toBe(200);
+        expect(responseAll.data.period).toBe("all");
+      });
+
+      it("Doit valider le paramètre period", async () => {
+        const response = await httpClient.get("/api/v1/mission-locale/stats/national?period=invalid");
+
+        expect(response.status).toBe(400);
+      });
+    });
   });
 });
