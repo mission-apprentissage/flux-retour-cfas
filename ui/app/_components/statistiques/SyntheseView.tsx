@@ -17,7 +17,11 @@ import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
 
-export function SyntheseView() {
+interface SyntheseViewProps {
+  showDetailColumn?: boolean;
+}
+
+export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}) {
   const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
 
   const {
@@ -174,7 +178,7 @@ export function SyntheseView() {
           ) : loadingRegional ? (
             <TableSkeleton rows={5} />
           ) : (
-            <RegionTable regions={regionalStats} />
+            <RegionTable regions={regionalStats} showDetailColumn={showDetailColumn} />
           )}
         </div>
       </section>

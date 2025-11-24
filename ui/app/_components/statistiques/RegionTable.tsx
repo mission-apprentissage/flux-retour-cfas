@@ -21,9 +21,10 @@ export interface RegionStats {
 
 interface RegionTableProps {
   regions: RegionStats[];
+  showDetailColumn?: boolean;
 }
 
-export function RegionTable({ regions }: RegionTableProps) {
+export function RegionTable({ regions, showDetailColumn = true }: RegionTableProps) {
   const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -123,7 +124,7 @@ export function RegionTable({ regions }: RegionTableProps) {
                   title="Les Missions locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
                 />
               </div>,
-              "Détail",
+              ...(showDetailColumn ? ["Détail"] : []),
             ]}
             data={displayedRegions.map((region) => [
               region.nom,
@@ -141,7 +142,7 @@ export function RegionTable({ regions }: RegionTableProps) {
                 {formatDelta(region.ml_engagees_delta)}
                 {formatEngagementBadge(region.engagement_rate)}
               </div>,
-              "",
+              ...(showDetailColumn ? [""] : []),
             ])}
           />
         </div>
