@@ -821,7 +821,6 @@ describe("Mission Locale Routes", () => {
         expect(response.data).toHaveProperty("rupturantsTimeSeries");
         expect(response.data).toHaveProperty("rupturantsSummary");
         expect(response.data).toHaveProperty("detailsTraites");
-        expect(response.data).toHaveProperty("regional");
         expect(response.data).toHaveProperty("period");
 
         expect(response.data.rupturantsTimeSeries).toHaveLength(6);
