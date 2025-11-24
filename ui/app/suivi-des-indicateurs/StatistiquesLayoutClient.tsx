@@ -1,7 +1,11 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { ORGANISATION_TYPE } from "shared";
+
+import { useAuth } from "@/app/_context/UserContext";
 
 import styles from "./StatistiquesLayoutClient.module.css";
 
@@ -24,8 +28,18 @@ const SyntheseLabel = () => (
   </>
 );
 
+const NationalLabel = () => (
+  <>
+    <Image src="/images/france-icon.svg" alt="France" width={22} height={22} className={styles.syntheseIcon} />
+    National
+  </>
+);
+
 export function StatistiquesLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const isAdmin = user?.organisation?.type === ORGANISATION_TYPE.ADMINISTRATEUR;
 
   const sideMenuItems = [
     {
@@ -35,6 +49,17 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
       },
       isActive: pathname === "/suivi-des-indicateurs",
     },
+    ...(isAdmin
+      ? [
+          {
+            text: <NationalLabel />,
+            linkProps: {
+              href: "/suivi-des-indicateurs/national",
+            },
+            isActive: pathname === "/suivi-des-indicateurs/national",
+          },
+        ]
+      : []),
   ];
 
   return (

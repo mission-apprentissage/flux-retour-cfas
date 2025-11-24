@@ -1,6 +1,7 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import styles from "./StatistiquesLayoutClient.module.css";
@@ -24,6 +25,13 @@ const SyntheseLabel = () => (
   </>
 );
 
+const NationalLabel = () => (
+  <>
+    <Image src="/images/france-icon.svg" alt="France" width={22} height={22} className={styles.syntheseIcon} />
+    National
+  </>
+);
+
 export function StatistiquesLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -34,6 +42,13 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
         href: "/admin/suivi-des-indicateurs",
       },
       isActive: pathname === "/admin/suivi-des-indicateurs",
+    },
+    {
+      text: <NationalLabel />,
+      linkProps: {
+        href: "/admin/suivi-des-indicateurs/national",
+      },
+      isActive: pathname === "/admin/suivi-des-indicateurs/national",
     },
   ];
 
