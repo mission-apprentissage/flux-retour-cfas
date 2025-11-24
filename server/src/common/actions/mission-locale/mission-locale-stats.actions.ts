@@ -10,7 +10,7 @@ import {
   ITraitementStatsResponse,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
-import { calculateVariation } from "shared/utils/stats";
+import { calculateVariation, calculatePercentage } from "shared/utils/stats";
 
 import logger from "@/common/logger";
 import { missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
@@ -573,7 +573,7 @@ async function calculateStartDate(period: "30days" | "3months" | "all", referenc
 function createStatWithVariation(current: number, previous: number): IStatWithVariation {
   return {
     current,
-    variation: calculateVariation(current, previous),
+    variation: calculatePercentage(current, previous),
   };
 }
 
