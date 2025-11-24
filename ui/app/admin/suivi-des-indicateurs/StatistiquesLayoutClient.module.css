@@ -1,0 +1,58 @@
+.syntheseIcon {
+  margin-right: 5px;
+  min-width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+
+.bannerContainer {
+  background-color: #f6f6f6;
+  padding: 34px 0;
+  margin-bottom: 32px;
+  margin-top: -2.5rem;
+
+  /* Full-bleed technique : pas le plus propre mais le plus simple */
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.bannerContent {
+  margin: auto;
+  max-width: 1232px;
+  padding: 0 24px;
+}
+
+.bannerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000091;
+  margin: 0;
+}
+
+.mainContainer {
+  margin: auto;
+}
+
+.sideMenuColumn {
+  border-right: 1px solid #dddddd;
+  min-height: 100%;
+}
+
+.contentColumn {
+  padding-left: 24px;
+}
+
+.sideMenuContainer {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (min-width: 48em) {
+  .sideMenuContainer :global(.fr-sidemenu__inner) {
+    box-shadow: none;
+  }
+}

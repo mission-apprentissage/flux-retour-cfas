@@ -123,6 +123,15 @@ export function ConnectedHeader() {
         ORGANISATION_TYPE.ADMINISTRATEUR,
       ].includes(organisationType || "")
     ) {
+      if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
+        baseItems.push({
+          text: "Suivi des indicateurs",
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs",
+            target: "_self",
+          },
+        });
+      }
       baseItems.push({
         text: "Mon tableau de bord",
         linkProps: {
