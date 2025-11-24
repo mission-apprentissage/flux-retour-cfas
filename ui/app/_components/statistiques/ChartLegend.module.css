@@ -1,0 +1,53 @@
+.legendContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.legendLeftContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendColorCircle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #161616;
+}
+
+.legendRightContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendVariation {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.legendValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #161616;
+}
