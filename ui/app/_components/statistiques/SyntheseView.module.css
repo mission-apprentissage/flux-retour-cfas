@@ -137,6 +137,17 @@
   margin-top: 16px;
 }
 
+.headerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.logoContainer {
+  margin-bottom: 16px;
+}
+
 .headerTitle {
   font-family: Marianne;
   font-weight: 700;
@@ -145,7 +156,6 @@
   letter-spacing: 0%;
   color: #000091;
   margin: 0;
-  margin-bottom: 32px;
 }
 
 .periodSelectorContainer {

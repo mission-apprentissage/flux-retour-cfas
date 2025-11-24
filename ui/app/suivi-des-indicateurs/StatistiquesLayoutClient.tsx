@@ -1,15 +1,15 @@
 "use client";
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ORGANISATION_TYPE } from "shared";
 
+import { FranceIcon } from "@/app/_components/statistiques/FranceIcon";
 import { useAuth } from "@/app/_context/UserContext";
 
 import styles from "./StatistiquesLayoutClient.module.css";
 
-const SyntheseLabel = () => (
+const SyntheseLabel = ({ isActive }: { isActive: boolean }) => (
   <>
     <svg
       width="22"
@@ -21,16 +21,16 @@ const SyntheseLabel = () => (
     >
       <path
         d="M2.75 11H6.41667V19.25H2.75V11ZM15.5833 7.33331H19.25V19.25H15.5833V7.33331ZM9.16667 1.83331H12.8333V19.25H9.16667V1.83331Z"
-        fill="#000091"
+        fill={isActive ? "#000091" : "#CECECE"}
       />
     </svg>
     Synthèse
   </>
 );
 
-const NationalLabel = () => (
+const NationalLabel = ({ isActive }: { isActive: boolean }) => (
   <>
-    <Image src="/images/france-icon.svg" alt="France" width={22} height={22} className={styles.syntheseIcon} />
+    <FranceIcon isActive={isActive} width={22} height={22} className={styles.syntheseIcon} />
     National
   </>
 );
@@ -43,7 +43,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
 
   const sideMenuItems = [
     {
-      text: <SyntheseLabel />,
+      text: <SyntheseLabel isActive={pathname === "/suivi-des-indicateurs"} />,
       linkProps: {
         href: "/suivi-des-indicateurs",
       },
@@ -52,7 +52,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
     ...(isAdmin
       ? [
           {
-            text: <NationalLabel />,
+            text: <NationalLabel isActive={pathname === "/suivi-des-indicateurs/national"} />,
             linkProps: {
               href: "/suivi-des-indicateurs/national",
             },
