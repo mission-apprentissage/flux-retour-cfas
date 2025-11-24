@@ -835,6 +835,7 @@ describe("Mission Locale Routes", () => {
         expect(response.data.detailsTraites).toHaveProperty("rdv_pris");
         expect(response.data.detailsTraites).toHaveProperty("nouveau_projet");
         expect(response.data.detailsTraites).toHaveProperty("contacte_sans_retour");
+        expect(response.data.detailsTraites).toHaveProperty("deja_accompagne");
         expect(response.data.detailsTraites).toHaveProperty("injoignables");
         expect(response.data.detailsTraites).toHaveProperty("coordonnees_incorrectes");
         expect(response.data.detailsTraites).toHaveProperty("autre");

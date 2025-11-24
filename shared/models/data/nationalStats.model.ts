@@ -48,6 +48,7 @@ const zDetailsDossiersTraites = z.object({
   rdv_pris: zStatWithVariation,
   nouveau_projet: zStatWithVariation,
   contacte_sans_retour: zStatWithVariation,
+  deja_accompagne: zStatWithVariation,
   injoignables: zStatWithVariation,
   coordonnees_incorrectes: zStatWithVariation,
   autre: zStatWithVariation,

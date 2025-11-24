@@ -768,6 +768,7 @@ export const getNationalStats = async (period: "30days" | "3months" | "all" = "3
       currentStats.contacte_sans_retour,
       previousStats.contacte_sans_retour
     ),
+    deja_accompagne: createStatWithVariation(currentStats.deja_accompagne, previousStats.deja_accompagne),
     injoignables: createStatWithVariation(currentStats.injoignables, previousStats.injoignables),
     coordonnees_incorrectes: createStatWithVariation(
       currentStats.coordonnees_incorrectes,
