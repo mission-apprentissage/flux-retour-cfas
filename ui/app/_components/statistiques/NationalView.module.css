@@ -1,0 +1,74 @@
+.headerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.logoContainer {
+  margin-bottom: 16px;
+}
+
+.franceLogo {
+  display: block;
+  object-fit: contain;
+}
+
+.headerTitle {
+  font-family: Marianne;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 48px;
+  letter-spacing: 0%;
+  color: #000091;
+  margin: 0;
+}
+
+.periodSelectorContainer {
+  max-width: 240px;
+}
+
+.sectionContainer {
+  background-color: #f6f6f6;
+  padding: 32px 16px;
+}
+
+.cardsContainer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.card {
+  border: none;
+  box-shadow: none;
+  background: white;
+  flex: 1 1 calc(25% - 6px);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.tableContainer {
+  margin-top: 16px;
+}
+
+.chartsRow {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.rupturantsContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

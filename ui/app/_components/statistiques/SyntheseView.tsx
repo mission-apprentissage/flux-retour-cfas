@@ -2,12 +2,14 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+
+import { _get } from "@/common/httpClient";
 
 import { calculatePercentage, getPercentageColor } from "./constants";
 import { DeploymentRow } from "./DeploymentRow";
 import { FranceMapSVG } from "./FranceMapSVG";
-import { useSummaryStats, useRegionalStats } from "./hooks/useMissionLocaleStatsQueries";
 import { PeriodSelector } from "./PeriodSelector";
 import { RegionTable } from "./RegionTable";
 import { TableSkeleton } from "./Skeleton";
@@ -18,9 +20,35 @@ import styles from "./SyntheseView.module.css";
 export function SyntheseView() {
   const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
 
-  const { data: stats, isLoading: loading, error: summaryError } = useSummaryStats(period);
+  const {
+    data: stats,
+    isLoading: loading,
+    error: summaryError,
+  } = useQuery(
+    ["mission-locale-stats", "summary", period],
+    () => _get(`/api/v1/mission-locale/stats/summary`, { params: { period } }),
+    {
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+      retry: 3,
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  const { data: regionalData, isLoading: loadingRegional, error: regionalError } = useRegionalStats(period);
+  const {
+    data: regionalData,
+    isLoading: loadingRegional,
+    error: regionalError,
+  } = useQuery(
+    ["mission-locale-stats", "regional", period],
+    () => _get(`/api/v1/mission-locale/stats/regions`, { params: { period } }),
+    {
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+      retry: 3,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const regionalStats = regionalData?.regions || [];
 
@@ -57,7 +85,7 @@ export function SyntheseView() {
       <div className={fr.cx("fr-mb-4w")}>
         <h2 className={styles.headerTitle}>Synthèse</h2>
         <div className={styles.periodSelectorContainer}>
-          <PeriodSelector value={period} onChange={setPeriod} includAll={true} hideLabel={true} />
+          <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
         </div>
       </div>
 
