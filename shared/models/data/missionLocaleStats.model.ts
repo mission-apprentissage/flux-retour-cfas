@@ -6,6 +6,7 @@ const collectionName = "missionLocaleStats";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ mission_locale_id: 1, computed_day: 1 }, { unique: true }],
+  [{ computed_day: -1 }, {}],
 ];
 const zMissionLocaleStats = z.object({
   _id: zObjectId,
