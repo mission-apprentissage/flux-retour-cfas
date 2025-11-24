@@ -90,8 +90,6 @@ export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps
 }
 
 export function EffectifPriorityBadge({ effectif, isHeader = false }: EffectifStatusBadgeProps) {
-  // PRIORITAIRE
-
   const fontSize = isHeader ? "12px" : "14px";
   const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
 
@@ -108,7 +106,7 @@ export function EffectifPriorityBadge({ effectif, isHeader = false }: EffectifSt
   }
 
   if (effectif.acc_conjoint) {
-    return <AccConjointBadge iconSize={iconSize} fontSize={fontSize} />;
+    return <AccConjointBadge withCollab={true} fontSize={fontSize} />;
   }
 
   if (effectif.a_contacter) {
@@ -118,11 +116,46 @@ export function EffectifPriorityBadge({ effectif, isHeader = false }: EffectifSt
   return null;
 }
 
+export function EffectifPriorityBadgeMultiple({ effectif, isHeader = false }: EffectifStatusBadgeProps) {
+  const fontSize = isHeader ? "12px" : "14px";
+  const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
+
+  const badges: JSX.Element[] = [];
+
+  if (effectif.presque_6_mois) {
+    badges.push(<Presque6MoisBadge key="presque_6_mois" iconSize={iconSize} fontSize={fontSize} />);
+  } else if (effectif.mineur) {
+    badges.push(<MineurBadge key="mineur" iconSize={iconSize} fontSize={fontSize} />);
+  } else if (effectif.rqth) {
+    badges.push(<RQTHBadge key="rqth" iconSize={iconSize} fontSize={fontSize} />);
+  } else if (effectif.a_contacter) {
+    badges.push(<AContacterBadge key="a_contacter" iconSize={iconSize} fontSize={fontSize} />);
+  }
+
+  if (effectif.acc_conjoint) {
+    badges.push(<AccConjointBadge key="acc_conjoint" withCollab={false} fontSize={fontSize} />);
+  }
+
+  if (badges.length === 0) {
+    return null;
+  }
+
+  if (badges.length === 1) {
+    return badges[0];
+  }
+
+  return <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>{badges}</div>;
+}
+
 export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffecifMissionLocale["effectif"] }) {
   if (!(effectif.prioritaire && (effectif.a_traiter || effectif.injoignable))) {
     return null;
   }
   const badgeArray: Array<JSX.Element> = [];
+
+  if (effectif.acc_conjoint) {
+    badgeArray.push(<AccConjointBadge key="acc_conjoint" withCollab={true} fontSize="12px" />);
+  }
 
   if (effectif.presque_6_mois) {
     badgeArray.push(<Presque6MoisBadge key="presque_6_mois" iconSize="fr-icon--xs" fontSize="12px" />);
@@ -134,10 +167,6 @@ export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffecifMiss
 
   if (effectif.rqth) {
     badgeArray.push(<RQTHBadge key="rqth" iconSize="fr-icon--xs" fontSize="12px" />);
-  }
-
-  if (effectif.acc_conjoint) {
-    badgeArray.push(<AccConjointBadge key="acc_conjoint" iconSize="fr-icon--xs" fontSize="12px" />);
   }
 
   if (effectif.a_contacter) {
@@ -175,11 +204,31 @@ function RQTHBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string 
   );
 }
 
-function AccConjointBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
+function AccConjointBadge({ withCollab, fontSize }: { withCollab: boolean; fontSize: string }) {
   return (
-    <p className="fr-badge fr-badge--red" aria-label="Effectif en collaboration avec un CFA">
-      <i className={`fr-icon-time-fill ${iconSize}`} />
-      <span style={{ marginLeft: "5px", fontSize }}>{"COLLAB CFA"}</span>
+    <p
+      className="fr-badge"
+      aria-label="Effectif en collaboration avec un CFA"
+      style={{
+        backgroundColor: "#ECECFE",
+        color: "#161616",
+        fontSize,
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+      }}
+    >
+      <div
+        style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          backgroundColor: "#E1000F",
+          flexShrink: 0,
+        }}
+      />
+      {withCollab ? "Collab CFA" : "CFA"}
     </p>
   );
 }
