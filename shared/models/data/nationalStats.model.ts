@@ -94,7 +94,6 @@ const zTraitementStats = z.object({
 export type ITraitementStats = z.output<typeof zTraitementStats>;
 
 const zNationalStats = z.object({
-  traitement: zTraitementStats,
   rupturantsTimeSeries: z.array(zTimeSeriesPoint),
   rupturantsSummary: zRupturantsSummary,
   detailsTraites: zDetailsDossiersTraites,
@@ -103,5 +102,23 @@ const zNationalStats = z.object({
 });
 
 export type INationalStats = z.output<typeof zNationalStats>;
+
+const zTraitementStatsData = z.object({
+  total: z.number(),
+  total_contacte: z.number(),
+  total_repondu: z.number(),
+  total_accompagne: z.number(),
+});
+
+export type ITraitementStatsData = z.output<typeof zTraitementStatsData>;
+
+const zTraitementStatsResponse = z.object({
+  latest: zTraitementStatsData,
+  first: zTraitementStatsData,
+  evaluationDate: z.date(),
+  period: z.enum(["30days", "3months", "all"]),
+});
+
+export type ITraitementStatsResponse = z.output<typeof zTraitementStatsResponse>;
 
 export default { zod: zNationalStats };

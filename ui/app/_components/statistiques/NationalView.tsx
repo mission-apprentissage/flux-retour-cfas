@@ -15,9 +15,9 @@ import styles from "./NationalView.module.css";
 import { PeriodSelector } from "./PeriodSelector";
 import { RupturantsBarChart } from "./RupturantsBarChart";
 import { RupturantsPieChart } from "./RupturantsPieChart";
-import { StatCard } from "./StatCard";
 import { StatisticsSection } from "./StatisticsSection";
 import syntheseStyles from "./SyntheseView.module.css";
+import { TraitementCards } from "./TraitementCards";
 
 type ChartType = "bar" | "pie";
 
@@ -43,7 +43,22 @@ export function NationalView() {
     }
   );
 
-  if (!loading && !stats) {
+  const {
+    data: traitementData,
+    isLoading: loadingTraitement,
+    error: traitementError,
+  } = useQuery(
+    ["mission-locale-stats", "traitement", period],
+    () => _get(`/api/v1/mission-locale/stats/traitement`, { params: { period } }),
+    {
+      staleTime: FIVE_MINUTES,
+      cacheTime: TEN_MINUTES,
+      retry: 3,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  if (!loading && !loadingTraitement && (!stats || !traitementData)) {
     return (
       <div>
         <div className={styles.headerContainer}>
@@ -73,6 +88,14 @@ export function NationalView() {
           className={fr.cx("fr-mb-4w")}
         />
       ) : null}
+      {traitementError ? (
+        <Alert
+          severity="error"
+          title="Erreur"
+          description={traitementError instanceof Error ? traitementError.message : "Une erreur est survenue"}
+          className={fr.cx("fr-mb-4w")}
+        />
+      ) : null}
 
       <div className={styles.headerContainer}>
         <div className={styles.logoContainer}>
@@ -89,29 +112,10 @@ export function NationalView() {
 
       <CardSection title="De l'identification au suivi">
         <div className={syntheseStyles.cardsContainer}>
-          <StatCard
-            label="Total jeunes identifiés en rupture"
-            value={stats?.traitement.total}
-            previousValue={stats?.traitement.total_previous}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes contactés par les Missions locales"
-            value={stats?.traitement.total_contacte}
-            previousValue={stats?.traitement.total_contacte_previous}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes ayant répondu"
-            value={stats?.traitement.total_repondu}
-            previousValue={stats?.traitement.total_repondu_previous}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes accompagnés ou en nouveau projet sécurisé"
-            value={stats?.traitement.total_accompagne}
-            previousValue={stats?.traitement.total_accompagne_previous}
-            loading={loading}
+          <TraitementCards
+            latestStats={traitementData?.latest}
+            firstStats={traitementData?.first}
+            loading={loadingTraitement}
           />
         </div>
       </CardSection>

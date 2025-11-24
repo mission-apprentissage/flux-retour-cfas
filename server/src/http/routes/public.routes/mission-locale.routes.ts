@@ -6,6 +6,7 @@ import {
   getSummaryStats,
   getRegionalStats,
   getNationalStats,
+  getTraitementStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getAllARML, getAllMissionsLocales } from "@/common/actions/organisations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -56,6 +57,15 @@ export default () => {
     }),
     returnResult(getNationalStatsRoute)
   );
+  router.get(
+    "/stats/traitement",
+    validateRequestMiddleware({
+      query: z.object({
+        period: z.enum(["30days", "3months", "all"]).optional(),
+      }),
+    }),
+    returnResult(getTraitementStatsRoute)
+  );
 
   return router;
 };
@@ -96,4 +106,9 @@ const getRegionalStatsRoute = async (req) => {
 const getNationalStatsRoute = async (req) => {
   const { period } = req.query;
   return await getNationalStats(period as "30days" | "3months" | "all" | undefined);
+};
+
+const getTraitementStatsRoute = async (req) => {
+  const { period } = req.query;
+  return await getTraitementStats(period as "30days" | "3months" | "all" | undefined);
 };

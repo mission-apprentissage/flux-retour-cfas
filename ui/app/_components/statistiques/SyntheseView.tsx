@@ -13,9 +13,9 @@ import { FranceMapSVG } from "./FranceMapSVG";
 import { PeriodSelector } from "./PeriodSelector";
 import { RegionTable } from "./RegionTable";
 import { TableSkeleton } from "./Skeleton";
-import { StatCard } from "./StatCard";
 import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
+import { TraitementCards } from "./TraitementCards";
 
 export function SyntheseView() {
   const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
@@ -50,15 +50,24 @@ export function SyntheseView() {
     }
   );
 
+  const {
+    data: traitementData,
+    isLoading: loadingTraitement,
+    error: traitementError,
+  } = useQuery(
+    ["mission-locale-stats", "traitement", period],
+    () => _get(`/api/v1/mission-locale/stats/traitement`, { params: { period } }),
+    {
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+      retry: 3,
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const regionalStats = regionalData?.regions || [];
 
-  const latestStats = stats?.summary
-    .slice()
-    .reverse()
-    .find((entry) => entry.stats.length > 0)?.stats[0];
-  const firstStats = stats?.summary[0]?.stats[0];
-
-  if (!loading && (!stats || !latestStats || !firstStats)) {
+  if (!loading && !loadingTraitement && (!stats || !traitementData)) {
     return (
       <div>
         <Alert
@@ -81,6 +90,14 @@ export function SyntheseView() {
           className={fr.cx("fr-mb-4w")}
         />
       ) : null}
+      {traitementError ? (
+        <Alert
+          severity="error"
+          title="Erreur"
+          description={traitementError instanceof Error ? traitementError.message : "Une erreur est survenue"}
+          className={fr.cx("fr-mb-4w")}
+        />
+      ) : null}
 
       <div className={fr.cx("fr-mb-4w")}>
         <h2 className={styles.headerTitle}>Synthèse</h2>
@@ -91,41 +108,10 @@ export function SyntheseView() {
 
       <StatSection title="Traitement">
         <div className={styles.cardsContainer}>
-          <StatCard
-            label="Total jeunes identifiés en rupture"
-            value={latestStats?.total}
-            previousValue={firstStats?.total}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes contactés par les Missions locales"
-            value={latestStats?.total_contacte}
-            previousValue={firstStats?.total_contacte}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes ayant répondu"
-            value={latestStats?.total_repondu}
-            previousValue={firstStats?.total_repondu}
-            loading={loading}
-          />
-          <StatCard
-            label="Total jeunes accompagnés"
-            value={latestStats?.total_accompagne}
-            previousValue={firstStats?.total_accompagne}
-            loading={loading}
-            tooltip={
-              <>
-                Les &quot;jeunes accompagnés&quot; représentent la somme :
-                <ul>
-                  <li>
-                    Des jeunes non connus du service public à l&apos;emploi qui ont obtenu un rdv avec une Mission
-                    locale grâce au TBA (RDV pris)
-                  </li>
-                  <li>Les jeunes déjà connus et accompagnés par le service public à l&apos;emploi</li>
-                </ul>
-              </>
-            }
+          <TraitementCards
+            latestStats={traitementData?.latest}
+            firstStats={traitementData?.first}
+            loading={loadingTraitement}
           />
         </div>
       </StatSection>

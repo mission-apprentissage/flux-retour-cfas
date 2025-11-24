@@ -7,7 +7,7 @@ import {
   IRupturantsSummary,
   IStatWithVariation,
   ITimeSeriesPoint,
-  ITraitementStats,
+  ITraitementStatsResponse,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculateVariation } from "shared/utils/stats";
@@ -51,43 +51,21 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
 export const getSummaryStats = async (evaluationDate: Date, period: "30days" | "3months" | "all" = "all") => {
   const normalizedDate = normalizeToUTCDay(evaluationDate);
 
-  const mlCount = await organisationsDb().countDocuments({ type: "MISSION_LOCALE" });
-  const activatedMlCount = await organisationsDb().countDocuments({
-    type: "MISSION_LOCALE",
-    activated_at: { $lte: normalizedDate },
-  });
+  const startDate = await calculateStartDate(period, normalizedDate);
 
-  const evenlySpacedDates = await getEvenlySpacedDates(period, normalizedDate);
-
-  const firstDate = evenlySpacedDates[0];
-  const previousActivatedMlCount = await organisationsDb().countDocuments({
-    type: "MISSION_LOCALE",
-    activated_at: { $lte: firstDate },
-  });
-
-  const summary = await Promise.allSettled(
-    evenlySpacedDates.map(async (date) => {
-      const stats = await getStatsAtDate(date);
-      return {
-        date,
-        stats: stats,
-      };
-    })
-  );
-
-  const arml = await Promise.allSettled(
-    [evenlySpacedDates[0], evenlySpacedDates[evenlySpacedDates.length - 1]].map(async (date) => {
-      const stats = await getARMLStatsAtDate(date);
-      return {
-        date,
-        stats: stats,
-      };
-    })
-  );
+  const [mlCount, activatedMlCount, previousActivatedMlCount] = await Promise.all([
+    organisationsDb().countDocuments({ type: "MISSION_LOCALE" }),
+    organisationsDb().countDocuments({
+      type: "MISSION_LOCALE",
+      activated_at: { $lte: normalizedDate },
+    }),
+    organisationsDb().countDocuments({
+      type: "MISSION_LOCALE",
+      activated_at: { $lte: startDate },
+    }),
+  ]);
 
   return {
-    summary: summary.filter((result) => result.status === "fulfilled").map((result) => result.value),
-    arml: arml.filter((result) => result.status === "fulfilled").map((result) => result.value),
     mlCount,
     activatedMlCount,
     previousActivatedMlCount,
@@ -685,6 +663,66 @@ async function getStatsForPeriod(
   }
 }
 
+export const getTraitementStats = async (
+  period: "30days" | "3months" | "all" = "30days",
+  evaluationDate: Date = normalizeToUTCDay(new Date())
+): Promise<ITraitementStatsResponse> => {
+  const endDate = evaluationDate;
+  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
+
+  const allStatsResults = await Promise.allSettled(
+    evenlySpacedDates.map(async (date) => {
+      const stats = await getStatsAtDate(date);
+      return {
+        date,
+        stats: stats,
+      };
+    })
+  );
+
+  const allStats = allStatsResults
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => (result as PromiseFulfilledResult<{ date: Date; stats: any[] }>).value);
+
+  const latestEntry = allStats
+    .slice()
+    .reverse()
+    .find((entry) => entry.stats.length > 0);
+
+  const firstEntry = allStats[0];
+
+  const latestStats = latestEntry?.stats[0] || {
+    total: 0,
+    total_contacte: 0,
+    total_repondu: 0,
+    total_accompagne: 0,
+  };
+
+  const firstStats = firstEntry?.stats[0] || {
+    total: 0,
+    total_contacte: 0,
+    total_repondu: 0,
+    total_accompagne: 0,
+  };
+
+  return {
+    latest: {
+      total: latestStats.total,
+      total_contacte: latestStats.total_contacte,
+      total_repondu: latestStats.total_repondu,
+      total_accompagne: latestStats.total_accompagne,
+    },
+    first: {
+      total: firstStats.total,
+      total_contacte: firstStats.total_contacte,
+      total_repondu: firstStats.total_repondu,
+      total_accompagne: firstStats.total_accompagne,
+    },
+    evaluationDate: endDate,
+    period,
+  };
+};
+
 export const getNationalStats = async (period: "30days" | "3months" | "all" = "30days"): Promise<INationalStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
@@ -740,19 +778,7 @@ export const getNationalStats = async (period: "30days" | "3months" | "all" = "3
     total: currentStats.total_traites,
   };
 
-  const traitement: ITraitementStats = {
-    total: currentStats.total,
-    total_previous: previousStats.total,
-    total_contacte: currentStats.total_contacte,
-    total_contacte_previous: previousStats.total_contacte,
-    total_repondu: currentStats.total_repondu,
-    total_repondu_previous: previousStats.total_repondu,
-    total_accompagne: currentStats.total_accompagne,
-    total_accompagne_previous: previousStats.total_accompagne,
-  };
-
   return {
-    traitement,
     rupturantsTimeSeries,
     rupturantsSummary,
     detailsTraites,
