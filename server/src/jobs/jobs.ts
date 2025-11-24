@@ -1,6 +1,6 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
+import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
@@ -273,7 +273,7 @@ export async function setupJobProcessor() {
             {
               query: {
                 annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
-                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
+                updated_at: { $lt: subtractDaysUTC(evaluationDate, 7) },
                 ...(organismeId ? { organisme_id: organismeId } : {}),
               },
             },
