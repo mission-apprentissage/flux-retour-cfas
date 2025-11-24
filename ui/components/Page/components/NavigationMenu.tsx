@@ -130,6 +130,9 @@ function NavBarTransverse(): React.ReactElement {
     default:
       return (
         <>
+          {organisationType === "ADMINISTRATEUR" && (
+            <NavItem to="/admin/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
+          )}
           <NavItem to="/home" exactMatch>
             Mon tableau de bord
           </NavItem>
