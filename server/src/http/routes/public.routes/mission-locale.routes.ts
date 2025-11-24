@@ -2,7 +2,11 @@ import express from "express";
 import { z } from "zod";
 
 import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
-import { getSummaryStats, getRegionalStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import {
+  getSummaryStats,
+  getRegionalStats,
+  getNationalStats,
+} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getAllARML, getAllMissionsLocales } from "@/common/actions/organisations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -43,6 +47,15 @@ export default () => {
     }),
     returnResult(getRegionalStatsRoute)
   );
+  router.get(
+    "/stats/national",
+    validateRequestMiddleware({
+      query: z.object({
+        period: z.enum(["30days", "3months", "all"]).optional(),
+      }),
+    }),
+    returnResult(getNationalStatsRoute)
+  );
 
   return router;
 };
@@ -78,4 +91,9 @@ const getSummaryStatsRoute = async (req) => {
 const getRegionalStatsRoute = async (req) => {
   const { period } = req.query;
   return await getRegionalStats(period as "30days" | "3months" | "all" | undefined);
+};
+
+const getNationalStatsRoute = async (req) => {
+  const { period } = req.query;
+  return await getNationalStats(period as "30days" | "3months" | "all" | undefined);
 };
