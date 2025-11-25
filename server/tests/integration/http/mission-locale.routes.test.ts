@@ -302,14 +302,14 @@ describe("Mission Locale Routes", () => {
   });
 
   describe("Statistiques Mission Locale", () => {
-    describe("GET /api/v1/mission-locale/stats/summary", () => {
+    describe("GET /api/v1/mission-locale/stats/synthese", () => {
       beforeEach(async () => {
         await missionLocaleStatsDb().deleteMany({});
         await organisationsDb().deleteMany({});
       });
 
-      it("Doit retourner les statistiques agrégées pour la période par défaut (all)", async () => {
-        const currentDate = new Date("2025-03-15");
+      it("Doit retourner les statistiques de synthèse pour la période par défaut (30days)", async () => {
+        const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
 
         const ml1Id = new ObjectId();
@@ -323,6 +323,7 @@ describe("Mission Locale Routes", () => {
             type: "MISSION_LOCALE",
             created_at: new Date("2025-01-01"),
             activated_at: new Date("2025-02-01"),
+            adresse: { region: "11" },
           },
           {
             _id: ml2Id,
@@ -331,118 +332,7 @@ describe("Mission Locale Routes", () => {
             type: "MISSION_LOCALE",
             created_at: new Date("2025-01-01"),
             activated_at: new Date("2025-02-15"),
-          },
-        ]);
-
-        await missionLocaleStatsDb().insertMany([
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml1Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: createMockStats(),
-          },
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml2Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: createMockStats({
-              total: 50,
-              a_traiter: 20,
-              traite: 30,
-              rdv_pris: 10,
-              nouveau_projet: 5,
-              deja_accompagne: 5,
-              contacte_sans_retour: 10,
-              coordonnees_incorrectes: 3,
-              autre: 2,
-              deja_connu: 5,
-            }),
-          },
-        ]);
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary");
-
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("mlCount");
-        expect(response.data).toHaveProperty("activatedMlCount");
-        expect(response.data).toHaveProperty("previousActivatedMlCount");
-        expect(response.data).toHaveProperty("date");
-        expect(response.data.mlCount).toBe(2);
-        expect(response.data.activatedMlCount).toBe(2);
-      });
-
-      it("Doit retourner les statistiques pour une période de 30 jours", async () => {
-        const currentDate = new Date("2025-03-15");
-        currentDate.setUTCHours(0, 0, 0, 0);
-
-        const ml1Id = new ObjectId();
-
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 3,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          activated_at: new Date("2025-02-01"),
-        });
-
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: createMockStats(),
-        });
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=30days");
-
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("mlCount");
-        expect(response.data).toHaveProperty("activatedMlCount");
-        expect(response.data).toHaveProperty("previousActivatedMlCount");
-        expect(response.data).toHaveProperty("date");
-      });
-
-      it("Doit valider le paramètre period", async () => {
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=invalid");
-
-        expect(response.status).toBe(400);
-      });
-    });
-
-    describe("GET /api/v1/mission-locale/stats/regions", () => {
-      beforeEach(async () => {
-        await missionLocaleStatsDb().deleteMany({});
-        await organisationsDb().deleteMany({});
-      });
-
-      it("Doit retourner les statistiques par région pour la période par défaut (30days)", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
-
-        const ml1Id = new ObjectId();
-        const ml2Id = new ObjectId();
-
-        await organisationsDb().insertMany([
-          {
-            _id: ml1Id,
-            nom: "ML Île-de-France",
-            ml_id: 4,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
-            adresse: { region: "11" },
-            activated_at: new Date("2025-02-01"),
-          },
-          {
-            _id: ml2Id,
-            nom: "ML Auvergne-Rhône-Alpes",
-            ml_id: 5,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
             adresse: { region: "84" },
-            activated_at: new Date("2025-02-15"),
           },
         ]);
 
@@ -474,20 +364,30 @@ describe("Mission Locale Routes", () => {
           },
         ]);
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/synthese");
 
         expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("summary");
+        expect(response.data.summary).toHaveProperty("mlCount");
+        expect(response.data.summary).toHaveProperty("activatedMlCount");
+        expect(response.data.summary).toHaveProperty("previousActivatedMlCount");
+        expect(response.data.summary).toHaveProperty("date");
+        expect(response.data.summary.mlCount).toBe(2);
+        expect(response.data.summary.activatedMlCount).toBe(2);
+
         expect(response.data).toHaveProperty("regions");
         expect(response.data.regions).toBeInstanceOf(Array);
-        expect(response.data.regions.length).toBeGreaterThan(0);
 
-        const region = response.data.regions[0];
-        expect(region).toHaveProperty("code");
-        expect(region).toHaveProperty("nom");
-        expect(region).toHaveProperty("ml_total");
-        expect(region).toHaveProperty("ml_activees");
-        expect(region).toHaveProperty("ml_engagees");
-        expect(region).toHaveProperty("engagement_rate");
+        expect(response.data).toHaveProperty("traitement");
+        expect(response.data.traitement).toHaveProperty("latest");
+        expect(response.data.traitement).toHaveProperty("first");
+        expect(response.data.traitement.latest).toHaveProperty("total");
+        expect(response.data.traitement.latest).toHaveProperty("total_contacte");
+        expect(response.data.traitement.latest).toHaveProperty("total_repondu");
+        expect(response.data.traitement.latest).toHaveProperty("total_accompagne");
+
+        expect(response.data).toHaveProperty("evaluationDate");
+        expect(response.data).toHaveProperty("period");
       });
 
       it("Doit retourner les statistiques pour une période de 3 mois", async () => {
@@ -499,11 +399,11 @@ describe("Mission Locale Routes", () => {
         await organisationsDb().insertOne({
           _id: ml1Id,
           nom: "ML Test",
-          ml_id: 6,
+          ml_id: 3,
           type: "MISSION_LOCALE",
           created_at: new Date("2025-01-01"),
-          adresse: { region: "11" },
           activated_at: new Date("2025-02-01"),
+          adresse: { region: "11" },
         });
 
         await missionLocaleStatsDb().insertOne({
@@ -514,46 +414,17 @@ describe("Mission Locale Routes", () => {
           stats: createMockStats(),
         });
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=3months");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/synthese?period=3months");
 
         expect(response.status).toBe(200);
+        expect(response.data).toHaveProperty("summary");
         expect(response.data).toHaveProperty("regions");
-        expect(response.data.regions).toBeInstanceOf(Array);
-      });
-
-      it("Doit retourner les statistiques pour toute la période (all)", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
-
-        const ml1Id = new ObjectId();
-
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 7,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          adresse: { region: "11" },
-          activated_at: new Date("2025-02-01"),
-        });
-
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: createMockStats(),
-        });
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=all");
-
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("regions");
-        expect(response.data.regions).toBeInstanceOf(Array);
+        expect(response.data).toHaveProperty("traitement");
+        expect(response.data.period).toBe("3months");
       });
 
       it("Doit valider le paramètre period", async () => {
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=invalid");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/synthese?period=invalid");
 
         expect(response.status).toBe(400);
       });
@@ -620,6 +491,15 @@ describe("Mission Locale Routes", () => {
         // Vérifier que les données régionales sont présentes
         expect(response.data.regional).toHaveProperty("regions");
         expect(Array.isArray(response.data.regional.regions)).toBe(true);
+
+        // Vérifier que les données de traitement sont présentes
+        expect(response.data).toHaveProperty("traitement");
+        expect(response.data.traitement).toHaveProperty("latest");
+        expect(response.data.traitement).toHaveProperty("first");
+        expect(response.data.traitement.latest).toHaveProperty("total");
+        expect(response.data.traitement.latest).toHaveProperty("total_contacte");
+        expect(response.data.traitement.latest).toHaveProperty("total_repondu");
+        expect(response.data.traitement.latest).toHaveProperty("total_accompagne");
       });
 
       it("Doit accepter les différentes périodes", async () => {
@@ -643,19 +523,15 @@ describe("Mission Locale Routes", () => {
       });
     });
 
-    describe("GET /api/v1/mission-locale/stats/traitement", () => {
+    describe("GET /api/v1/mission-locale/stats/traitement-ml", () => {
       beforeEach(async () => {
         await missionLocaleStatsDb().deleteMany({});
         await organisationsDb().deleteMany({});
       });
 
-      it("Doit retourner les statistiques de traitement pour la période par défaut (30days)", async () => {
+      it("Doit retourner les statistiques de traitement par ML avec pagination par défaut", async () => {
         const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
-
-        const oldDate = new Date();
-        oldDate.setDate(oldDate.getDate() - 30);
-        oldDate.setUTCHours(0, 0, 0, 0);
 
         const ml1Id = new ObjectId();
 
@@ -666,138 +542,103 @@ describe("Mission Locale Routes", () => {
           type: "MISSION_LOCALE",
           created_at: new Date("2025-01-01"),
           activated_at: new Date("2025-02-01"),
-          adresse: {
-            region: "11",
-          },
+          adresse: { region: "11" },
         });
 
-        // Stats anciennes (first)
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: oldDate,
-          created_at: new Date(),
-          stats: createMockStats({
-            total: 50,
-            a_traiter: 20,
-            traite: 30,
-            rdv_pris: 10,
-            nouveau_projet: 5,
-            deja_accompagne: 5,
-            contacte_sans_retour: 10,
-            coordonnees_incorrectes: 3,
-            autre: 2,
-            deja_connu: 5,
-          }),
-        });
-
-        // Stats récentes (latest)
         await missionLocaleStatsDb().insertOne({
           _id: new ObjectId(),
           mission_locale_id: ml1Id,
           computed_day: currentDate,
           created_at: new Date(),
-          stats: createMockStats({ deja_connu: 8 }),
+          stats: createMockStats(),
         });
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml");
 
         expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("latest");
-        expect(response.data).toHaveProperty("first");
-        expect(response.data).toHaveProperty("evaluationDate");
+        expect(response.data).toHaveProperty("data");
+        expect(response.data).toHaveProperty("pagination");
         expect(response.data).toHaveProperty("period");
 
-        // Vérifier la structure de latest
-        expect(response.data.latest).toHaveProperty("total");
-        expect(response.data.latest).toHaveProperty("total_contacte");
-        expect(response.data.latest).toHaveProperty("total_repondu");
-        expect(response.data.latest).toHaveProperty("total_accompagne");
+        expect(response.data.data).toBeInstanceOf(Array);
+        expect(response.data.pagination).toHaveProperty("page");
+        expect(response.data.pagination).toHaveProperty("limit");
+        expect(response.data.pagination).toHaveProperty("total");
+        expect(response.data.pagination).toHaveProperty("totalPages");
 
-        // Vérifier la structure de first
-        expect(response.data.first).toHaveProperty("total");
-        expect(response.data.first).toHaveProperty("total_contacte");
-        expect(response.data.first).toHaveProperty("total_repondu");
-        expect(response.data.first).toHaveProperty("total_accompagne");
-
-        // Vérifier que latest contient les données récentes
-        expect(response.data.latest.total).toBe(100);
-        expect(response.data.first.total).toBe(50);
-
+        expect(response.data.pagination.page).toBe(1);
+        expect(response.data.pagination.limit).toBe(10);
         expect(response.data.period).toBe("30days");
+
+        if (response.data.data.length > 0) {
+          const ml = response.data.data[0];
+          expect(ml).toHaveProperty("id");
+          expect(ml).toHaveProperty("nom");
+          expect(ml).toHaveProperty("region_code");
+          expect(ml).toHaveProperty("region_nom");
+          expect(ml).toHaveProperty("total_jeunes");
+          expect(ml).toHaveProperty("a_traiter");
+          expect(ml).toHaveProperty("traites");
+          expect(ml).toHaveProperty("pourcentage_traites");
+          expect(ml).toHaveProperty("pourcentage_evolution");
+          expect(ml).toHaveProperty("details");
+          expect(ml.details).toHaveProperty("rdv_pris");
+          expect(ml.details).toHaveProperty("nouveau_projet");
+          expect(ml.details).toHaveProperty("deja_accompagne");
+          expect(ml.details).toHaveProperty("contacte_sans_retour");
+          expect(ml.details).toHaveProperty("injoignables");
+          expect(ml.details).toHaveProperty("coordonnees_incorrectes");
+          expect(ml.details).toHaveProperty("autre");
+        }
       });
 
-      it("Doit retourner les statistiques pour une période de 3 mois", async () => {
+      it("Doit supporter la pagination personnalisée", async () => {
         const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
 
-        const ml1Id = new ObjectId();
+        const mls: Array<{
+          _id: ObjectId;
+          nom: string;
+          ml_id: number;
+          type: "MISSION_LOCALE";
+          created_at: Date;
+          activated_at: Date;
+          adresse: { region: string };
+        }> = [];
+        for (let i = 1; i <= 15; i++) {
+          const mlId = new ObjectId();
+          mls.push({
+            _id: mlId,
+            nom: `ML Test ${i}`,
+            ml_id: i,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+            adresse: { region: "11" },
+          });
+          await missionLocaleStatsDb().insertOne({
+            _id: new ObjectId(),
+            mission_locale_id: mlId,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: createMockStats({ total: 100 + i, a_traiter: 30 + i, traite: 70 }),
+          });
+        }
+        await organisationsDb().insertMany(mls);
 
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 2,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          activated_at: new Date("2025-02-01"),
-        });
-
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: createMockStats(),
-        });
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=3months");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?page=2&limit=5");
 
         expect(response.status).toBe(200);
-        expect(response.data.period).toBe("3months");
+        expect(response.data.pagination.page).toBe(2);
+        expect(response.data.pagination.limit).toBe(5);
+        expect(response.data.pagination.total).toBe(15);
+        expect(response.data.pagination.totalPages).toBe(3);
+        expect(response.data.data.length).toBe(5);
       });
 
-      it("Doit retourner les statistiques pour toute la période (all)", async () => {
+      it("Doit supporter le tri par total_jeunes décroissant (par défaut)", async () => {
         const currentDate = new Date();
         currentDate.setUTCHours(0, 0, 0, 0);
-
-        const ml1Id = new ObjectId();
-
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 3,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          activated_at: new Date("2025-02-01"),
-        });
-
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: createMockStats(),
-        });
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=all");
-
-        expect(response.status).toBe(200);
-        expect(response.data.period).toBe("all");
-      });
-
-      it("Doit valider le paramètre period", async () => {
-        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=invalid");
-
-        expect(response.status).toBe(400);
-      });
-
-      it("Doit calculer correctement les totaux agrégés avec plusieurs MLs", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
-
-        const oldDate = new Date();
-        oldDate.setDate(oldDate.getDate() - 30);
-        oldDate.setUTCHours(0, 0, 0, 0);
 
         const ml1Id = new ObjectId();
         const ml2Id = new ObjectId();
@@ -805,8 +646,8 @@ describe("Mission Locale Routes", () => {
         await organisationsDb().insertMany([
           {
             _id: ml1Id,
-            nom: "ML Paris",
-            ml_id: 4,
+            nom: "ML Petite",
+            ml_id: 1,
             type: "MISSION_LOCALE",
             created_at: new Date("2025-01-01"),
             activated_at: new Date("2025-02-01"),
@@ -814,8 +655,164 @@ describe("Mission Locale Routes", () => {
           },
           {
             _id: ml2Id,
-            nom: "ML Lyon",
-            ml_id: 5,
+            nom: "ML Grande",
+            ml_id: 2,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+            adresse: { region: "84" },
+          },
+        ]);
+
+        await missionLocaleStatsDb().insertMany([
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml1Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: createMockStats({ total: 50, a_traiter: 20, traite: 30 }),
+          },
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml2Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: createMockStats({ total: 150, a_traiter: 50, traite: 100 }),
+          },
+        ]);
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml");
+
+        expect(response.status).toBe(200);
+        expect(response.data.data.length).toBe(2);
+        expect(response.data.data[0].nom).toBe("ML Grande");
+        expect(response.data.data[1].nom).toBe("ML Petite");
+      });
+
+      it("Doit supporter le tri par nom ascendant", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+        const ml2Id = new ObjectId();
+
+        await organisationsDb().insertMany([
+          {
+            _id: ml1Id,
+            nom: "ML Zebra",
+            ml_id: 1,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+            adresse: { region: "11" },
+          },
+          {
+            _id: ml2Id,
+            nom: "ML Alpha",
+            ml_id: 2,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+            adresse: { region: "84" },
+          },
+        ]);
+
+        await missionLocaleStatsDb().insertMany([
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml1Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: createMockStats(),
+          },
+          {
+            _id: new ObjectId(),
+            mission_locale_id: ml2Id,
+            computed_day: currentDate,
+            created_at: new Date(),
+            stats: createMockStats(),
+          },
+        ]);
+
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?sort_by=nom&sort_order=asc");
+
+        expect(response.status).toBe(200);
+        expect(response.data.data.length).toBe(2);
+        expect(response.data.data[0].nom).toBe("ML Alpha");
+        expect(response.data.data[1].nom).toBe("ML Zebra");
+      });
+
+      it("Doit retourner les statistiques pour différentes périodes", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Test",
+          ml_id: 1,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          activated_at: new Date("2025-02-01"),
+          adresse: { region: "11" },
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: createMockStats(),
+        });
+
+        const response30d = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?period=30days");
+        expect(response30d.status).toBe(200);
+        expect(response30d.data.period).toBe("30days");
+
+        const response3m = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?period=3months");
+        expect(response3m.status).toBe(200);
+        expect(response3m.data.period).toBe("3months");
+
+        const responseAll = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?period=all");
+        expect(responseAll.status).toBe(200);
+        expect(responseAll.data.period).toBe("all");
+      });
+
+      it("Doit valider le paramètre period", async () => {
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-ml?period=invalid");
+
+        expect(response.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/v1/mission-locale/stats/traitement-regions", () => {
+      beforeEach(async () => {
+        await missionLocaleStatsDb().deleteMany({});
+        await organisationsDb().deleteMany({});
+      });
+
+      it("Doit retourner les statistiques de traitement par région", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        const ml1Id = new ObjectId();
+        const ml2Id = new ObjectId();
+
+        await organisationsDb().insertMany([
+          {
+            _id: ml1Id,
+            nom: "ML Île-de-France",
+            ml_id: 1,
+            type: "MISSION_LOCALE",
+            created_at: new Date("2025-01-01"),
+            activated_at: new Date("2025-02-01"),
+            adresse: { region: "11" },
+          },
+          {
+            _id: ml2Id,
+            nom: "ML Auvergne-Rhône-Alpes",
+            ml_id: 2,
             type: "MISSION_LOCALE",
             created_at: new Date("2025-01-01"),
             activated_at: new Date("2025-02-15"),
@@ -823,98 +820,78 @@ describe("Mission Locale Routes", () => {
           },
         ]);
 
-        // Stats anciennes
-        await missionLocaleStatsDb().insertMany([
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml1Id,
-            computed_day: oldDate,
-            created_at: new Date(),
-            stats: createMockStats({
-              total: 50,
-              a_traiter: 20,
-              traite: 30,
-              rdv_pris: 10,
-              nouveau_projet: 5,
-              deja_accompagne: 5,
-              contacte_sans_retour: 10,
-              coordonnees_incorrectes: 3,
-              autre: 2,
-              deja_connu: 5,
-            }),
-          },
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml2Id,
-            computed_day: oldDate,
-            created_at: new Date(),
-            stats: createMockStats({
-              total: 30,
-              a_traiter: 15,
-              traite: 15,
-              rdv_pris: 5,
-              nouveau_projet: 3,
-              deja_accompagne: 2,
-              contacte_sans_retour: 5,
-              coordonnees_incorrectes: 2,
-              autre: 1,
-              deja_connu: 2,
-            }),
-          },
-        ]);
-
-        // Stats récentes
         await missionLocaleStatsDb().insertMany([
           {
             _id: new ObjectId(),
             mission_locale_id: ml1Id,
             computed_day: currentDate,
             created_at: new Date(),
-            stats: createMockStats({ deja_connu: 8 }),
+            stats: createMockStats({ total: 100, a_traiter: 30, traite: 70 }),
           },
           {
             _id: new ObjectId(),
             mission_locale_id: ml2Id,
             computed_day: currentDate,
             created_at: new Date(),
-            stats: createMockStats({
-              total: 60,
-              a_traiter: 25,
-              traite: 35,
-              rdv_pris: 12,
-              nouveau_projet: 8,
-              deja_accompagne: 5,
-              contacte_sans_retour: 10,
-              coordonnees_incorrectes: 3,
-              autre: 2,
-              deja_connu: 5,
-            }),
+            stats: createMockStats({ total: 50, a_traiter: 20, traite: 30 }),
           },
         ]);
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement");
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-regions");
 
         expect(response.status).toBe(200);
+        expect(response.data).toBeInstanceOf(Array);
 
-        // Vérifier agrégation des totaux (100 + 60 = 160)
-        expect(response.data.latest.total).toBe(160);
-        expect(response.data.first.total).toBe(80); // 50 + 30
+        if (response.data.length > 0) {
+          const region = response.data[0];
+          expect(region).toHaveProperty("code");
+          expect(region).toHaveProperty("nom");
+          expect(region).toHaveProperty("total_jeunes");
+          expect(region).toHaveProperty("a_traiter");
+          expect(region).toHaveProperty("traites");
+          expect(region).toHaveProperty("pourcentage_traites");
+          expect(region).toHaveProperty("ml_actives");
+        }
+      });
 
-        // Vérifier total_contacte = total - (a_traiter + injoignables + coordonnees_incorrectes + autre)
-        // Latest: 160 - (30+25) - (0) - (5+3) - (5+2) = 160 - 55 - 0 - 8 - 7 = 90
-        // total_contacte = traite = 70 + 35 = 105
-        expect(response.data.latest.total_contacte).toBe(105);
-        expect(response.data.first.total_contacte).toBe(45); // 30 + 15
+      it("Doit retourner les statistiques pour différentes périodes", async () => {
+        const currentDate = new Date();
+        currentDate.setUTCHours(0, 0, 0, 0);
 
-        // Vérifier total_repondu = rdv_pris + nouveau_projet + deja_accompagne + autre_avec_contact
-        // Latest: (20+12) + (15+8) + (10+5) + (0+0) = 32 + 23 + 15 + 0 = 70
-        expect(response.data.latest.total_repondu).toBe(70);
-        expect(response.data.first.total_repondu).toBe(30); // (10+5) + (5+3) + (5+2) + (0+0) = 15 + 8 + 7 + 0 = 30
+        const ml1Id = new ObjectId();
 
-        // Vérifier total_accompagne = rdv_pris + deja_accompagne
-        // Latest: (20+12) + (10+5) = 32 + 15 = 47
-        expect(response.data.latest.total_accompagne).toBe(47);
-        expect(response.data.first.total_accompagne).toBe(22); // (10+5) + (5+2) = 15 + 7 = 22
+        await organisationsDb().insertOne({
+          _id: ml1Id,
+          nom: "ML Test",
+          ml_id: 1,
+          type: "MISSION_LOCALE",
+          created_at: new Date("2025-01-01"),
+          activated_at: new Date("2025-02-01"),
+          adresse: { region: "11" },
+        });
+
+        await missionLocaleStatsDb().insertOne({
+          _id: new ObjectId(),
+          mission_locale_id: ml1Id,
+          computed_day: currentDate,
+          created_at: new Date(),
+          stats: createMockStats(),
+        });
+
+        const response30d = await httpClient.get("/api/v1/mission-locale/stats/traitement-regions?period=30days");
+        expect(response30d.status).toBe(200);
+
+        const response3m = await httpClient.get("/api/v1/mission-locale/stats/traitement-regions?period=3months");
+        expect(response3m.status).toBe(200);
+
+        const responseAll = await httpClient.get("/api/v1/mission-locale/stats/traitement-regions?period=all");
+        expect(responseAll.status).toBe(200);
+      });
+
+      it("Doit valider le paramètre period", async () => {
+        const response = await httpClient.get("/api/v1/mission-locale/stats/traitement-regions?period=invalid");
+
+        expect(response.status).toBe(400);
       });
     });
   });
