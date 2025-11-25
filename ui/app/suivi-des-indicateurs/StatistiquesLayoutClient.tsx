@@ -66,7 +66,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
     <>
       <div className={styles.bannerContainer}>
         <div className={styles.bannerContent}>
-          <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions locales sur le service</h1>
+          <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions Locales sur le service</h1>
         </div>
       </div>
 

@@ -121,7 +121,7 @@ export function RegionTable({ regions, showDetailColumn = true }: RegionTablePro
                 </div>
                 <Tooltip
                   kind="hover"
-                  title="Les Missions locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                  title="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
                 />
               </div>,
               ...(showDetailColumn ? ["Détail"] : []),

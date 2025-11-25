@@ -64,7 +64,7 @@ export function NationalView() {
           <div className={styles.logoContainer}>
             <Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />
           </div>
-          <h2 className={styles.headerTitle}>France entière</h2>
+          <h2 className={styles.headerTitle}>National</h2>
         </div>
 
         <Alert
@@ -100,7 +100,7 @@ export function NationalView() {
         <div className={styles.logoContainer}>
           <Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />
         </div>
-        <h2 className={styles.headerTitle}>France entière</h2>
+        <h2 className={styles.headerTitle}>National</h2>
       </div>
 
       <div className={fr.cx("fr-mb-4w")}>

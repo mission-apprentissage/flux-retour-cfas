@@ -23,7 +23,7 @@ export function TraitementCards({ latestStats, firstStats, loading = false }: Tr
         loading={loading}
       />
       <StatCard
-        label="Total jeunes contactés par les Missions locales"
+        label="Total jeunes contactés par les Missions Locales"
         value={latestStats?.total_contacte}
         previousValue={firstStats?.total_contacte}
         loading={loading}

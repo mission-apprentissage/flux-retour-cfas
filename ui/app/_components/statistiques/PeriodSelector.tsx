@@ -19,13 +19,10 @@ export function PeriodSelector({
   includeAll = false,
   hideLabel = false,
 }: PeriodSelectorProps) {
-  const options = [
-    { label: "30 derniers jours", value: "30days" },
-    { label: "3 derniers mois", value: "3months" },
-  ];
+  const options = [{ label: "30 derniers jours", value: "30days" }];
 
   if (includeAll) {
-    options.push({ label: "depuis le lancement (février 2025)", value: "all" });
+    options.push({ label: "Depuis le lancement (février 2025)", value: "all" });
   }
 
   return (

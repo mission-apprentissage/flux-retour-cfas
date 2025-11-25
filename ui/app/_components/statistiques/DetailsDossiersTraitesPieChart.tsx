@@ -139,7 +139,7 @@ export function DetailsDossiersTraitesPieChart({ data, loading }: DetailsDossier
             }}
           />
         </div>
-        <span className={styles.knownYoungLabel}>Part des jeunes déjà connus par les Missions locales</span>
+        <span className={styles.knownYoungLabel}>Part des jeunes déjà connus par les Missions Locales</span>
         <span className={styles.knownYoungValue}>
           <strong>{data.deja_connu.toLocaleString("fr-FR")}</strong> sur {data.total.toLocaleString("fr-FR")}
         </span>

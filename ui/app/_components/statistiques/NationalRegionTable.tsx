@@ -117,7 +117,7 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
                 column="ml_engagees"
                 label="ML engagées"
                 centered={true}
-                tooltip="Les Missions locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
               />,
               <SortableHeader key="a_traiter" column="a_traiter" label="À traiter" centered={true} />,
               <SortableHeader key="traites" column="traites" label="Traités" centered={true} />,

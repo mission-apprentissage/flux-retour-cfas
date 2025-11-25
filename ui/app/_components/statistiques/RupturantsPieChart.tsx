@@ -48,7 +48,7 @@ export function RupturantsPieChart({ data, loading }: RupturantsPieChartProps) {
               highlightScope: { highlight: "item" },
             },
           ]}
-          height={180}
+          height={280}
           margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
           slots={{
             legend: () => null,
@@ -56,7 +56,7 @@ export function RupturantsPieChart({ data, loading }: RupturantsPieChartProps) {
           }}
           sx={{
             width: "100%",
-            maxWidth: "180px",
+            maxWidth: "280px",
             "& .MuiChartsLegend-root": {
               display: "none",
             },

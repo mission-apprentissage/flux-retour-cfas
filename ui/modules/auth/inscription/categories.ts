@@ -8,7 +8,7 @@ export const categoriesCompteInscription = [
     value: "operateur_public",
   },
   {
-    text: "Une structure des Missions locales",
+    text: "Une structure des Missions Locales",
     value: "missions_locales",
   },
   {

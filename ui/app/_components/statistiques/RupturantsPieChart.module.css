@@ -3,17 +3,17 @@
   flex-direction: column;
   flex: 1;
   height: 100%;
-  justify-content: center;
 }
 
 .chartSection {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 1;
 }
 
 .legendSection {
-  margin-top: 16px;
+  margin-top: auto;
 }
 
 .totalSection {

@@ -140,7 +140,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
               <DeploymentRow
                 label={
                   <>
-                    Missions locales actives
+                    Missions Locales actives
                     <br /> sur le Tableau de bord
                   </>
                 }
