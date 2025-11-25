@@ -7,12 +7,14 @@ import { useState } from "react";
 
 import { _get } from "@/common/httpClient";
 
+import commonStyles from "./common.module.css";
 import { calculatePercentage, getPercentageColor } from "./constants";
 import { DeploymentRow } from "./DeploymentRow";
 import { FranceMapSVG } from "./FranceMapSVG";
-import { PeriodSelector } from "./PeriodSelector";
+import { PeriodSelector, type Period } from "./PeriodSelector";
 import { RegionTable } from "./RegionTable";
 import { TableSkeleton } from "./Skeleton";
+import { STATS_QUERY_CONFIG } from "./statistiques.config";
 import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
@@ -22,56 +24,23 @@ interface SyntheseViewProps {
 }
 
 export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}) {
-  const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
+  const [period, setPeriod] = useState<Period>("30days");
 
   const {
-    data: stats,
+    data,
     isLoading: loading,
-    error: summaryError,
+    error,
   } = useQuery(
-    ["mission-locale-stats", "summary", period],
-    () => _get(`/api/v1/mission-locale/stats/summary`, { params: { period } }),
-    {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
+    ["mission-locale-stats", "synthese", period],
+    () => _get(`/api/v1/mission-locale/stats/synthese`, { params: { period } }),
+    STATS_QUERY_CONFIG
   );
 
-  const {
-    data: regionalData,
-    isLoading: loadingRegional,
-    error: regionalError,
-  } = useQuery(
-    ["mission-locale-stats", "regional", period],
-    () => _get(`/api/v1/mission-locale/stats/regions`, { params: { period } }),
-    {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const stats = data?.summary;
+  const regionalStats = data?.regions || [];
+  const traitementData = data?.traitement;
 
-  const {
-    data: traitementData,
-    isLoading: loadingTraitement,
-    error: traitementError,
-  } = useQuery(
-    ["mission-locale-stats", "traitement", period],
-    () => _get(`/api/v1/mission-locale/stats/traitement`, { params: { period } }),
-    {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  const regionalStats = regionalData?.regions || [];
-
-  if (!loading && !loadingTraitement && (!stats || !traitementData)) {
+  if (!loading && !data) {
     return (
       <div>
         <Alert
@@ -86,45 +55,33 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
 
   return (
     <div>
-      {summaryError ? (
+      {error ? (
         <Alert
           severity="error"
           title="Erreur"
-          description={summaryError instanceof Error ? summaryError.message : "Une erreur est survenue"}
-          className={fr.cx("fr-mb-4w")}
-        />
-      ) : null}
-      {traitementError ? (
-        <Alert
-          severity="error"
-          title="Erreur"
-          description={traitementError instanceof Error ? traitementError.message : "Une erreur est survenue"}
+          description={error instanceof Error ? error.message : "Une erreur est survenue"}
           className={fr.cx("fr-mb-4w")}
         />
       ) : null}
 
-      <div className={styles.headerContainer}>
-        <div className={styles.logoContainer}>
+      <div className={commonStyles.headerContainer}>
+        <div className={commonStyles.logoContainer}>
           <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7.5 30H17.5V52.5H7.5V30ZM42.5 20H52.5V52.5H42.5V20ZM25 5H35V52.5H25V5Z" fill="#6A6AF4" />
           </svg>
         </div>
-        <h2 className={styles.headerTitle}>Synthèse</h2>
+        <h2 className={commonStyles.headerTitle}>Synthèse</h2>
       </div>
 
       <div className={fr.cx("fr-mb-4w")}>
-        <div className={styles.periodSelectorContainer}>
+        <div className={commonStyles.periodSelectorContainer}>
           <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
         </div>
       </div>
 
       <StatSection title="Traitement">
         <div className={styles.cardsContainer}>
-          <TraitementCards
-            latestStats={traitementData?.latest}
-            firstStats={traitementData?.first}
-            loading={loadingTraitement}
-          />
+          <TraitementCards latestStats={traitementData?.latest} firstStats={traitementData?.first} loading={loading} />
         </div>
       </StatSection>
 
@@ -164,18 +121,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
         </div>
 
         <div className={styles.tableContainer}>
-          {regionalError ? (
-            <Alert
-              severity="error"
-              title="Erreur"
-              description={
-                regionalError instanceof Error
-                  ? regionalError.message
-                  : "Erreur lors du chargement des statistiques régionales"
-              }
-              className={fr.cx("fr-mb-4w")}
-            />
-          ) : loadingRegional ? (
+          {loading ? (
             <TableSkeleton rows={5} />
           ) : (
             <RegionTable regions={regionalStats} showDetailColumn={showDetailColumn} />
