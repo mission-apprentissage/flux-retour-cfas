@@ -1,0 +1,283 @@
+/* Wrapper for table content - intentionally minimal styling */
+.tableContainer {
+  width: 100%;
+}
+
+.tableDescription {
+  font-size: 12px;
+  color: #666666;
+  margin-bottom: 1rem;
+}
+
+/* Sortable headers */
+.sortableHeader {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortableHeaderCentered {
+  composes: sortableHeader;
+  justify-content: center;
+}
+
+.sortableContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortIcon {
+  font-size: 1rem;
+}
+
+.centeredCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.emptyValue {
+  color: var(--text-mention-grey);
+}
+
+.percentageBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  min-width: 48px;
+}
+
+.percentageBadgeHigh {
+  composes: percentageBadge;
+  background-color: var(--background-contrast-success);
+  color: var(--text-title-grey);
+}
+
+.percentageBadgeMedium {
+  composes: percentageBadge;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-title-grey);
+}
+
+.percentageBadgeZero {
+  composes: percentageBadge;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+}
+
+.activityToday {
+  color: var(--text-default-success);
+  font-weight: 700;
+}
+
+.activityRecent {
+  color: var(--text-title-grey);
+}
+
+.activityOld {
+  color: var(--text-mention-grey);
+}
+
+.stackedBarContainer {
+  position: relative;
+  min-width: 60px;
+  cursor: pointer;
+}
+
+.stackedBar {
+  display: flex;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--background-contrast-grey);
+}
+
+.stackedBarSegment {
+  height: 100%;
+  transition: opacity 0.2s;
+}
+
+.stackedBarSegment:hover {
+  opacity: 0.8;
+}
+
+.stackedBarTooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  border-radius: 4px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 220px;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    visibility 0.2s;
+}
+
+.stackedBarContainer:hover .stackedBarTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltipTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-title-grey);
+  margin-bottom: 6px;
+}
+
+.tooltipItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-title-grey);
+  padding: 2px 0;
+}
+
+.tooltipLabel {
+  font-weight: 500;
+  flex: 1;
+}
+
+.tooltipValue {
+  font-weight: 700;
+  text-align: right;
+}
+
+.tooltipDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.traitementTable {
+  width: 100%;
+}
+
+.traitementTable table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.regionTable th:first-child,
+.regionTable td:first-child {
+  width: 280px;
+}
+
+.regionTable th:nth-child(2),
+.regionTable td:nth-child(2),
+.regionTable th:nth-child(3),
+.regionTable td:nth-child(3),
+.regionTable th:nth-child(4),
+.regionTable td:nth-child(4),
+.regionTable th:nth-child(6),
+.regionTable td:nth-child(6) {
+  width: 120px;
+  text-align: center;
+}
+
+.regionTable th:nth-child(5),
+.regionTable td:nth-child(5) {
+  width: 140px;
+  text-align: center;
+}
+
+.mlTable th:first-child,
+.mlTable td:first-child {
+  width: 200px;
+}
+
+.mlTable th:nth-child(2),
+.mlTable td:nth-child(2) {
+  width: 100px;
+  text-align: center;
+}
+
+.mlTable th:nth-child(3),
+.mlTable td:nth-child(3),
+.mlTable th:nth-child(4),
+.mlTable td:nth-child(4) {
+  width: 90px;
+  text-align: center;
+}
+
+.mlTable th:nth-child(5),
+.mlTable td:nth-child(5) {
+  width: 60px;
+}
+
+.mlTable th:nth-child(6),
+.mlTable td:nth-child(6) {
+  width: 130px;
+  text-align: center;
+}
+
+.mlTable th:nth-child(7),
+.mlTable td:nth-child(7) {
+  width: 150px;
+  text-align: center;
+}
+
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+  width: calc(100% + 2rem);
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.pageSizeSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 160px;
+}
+
+.pageSizeSelector label {
+  font-size: 14px;
+  color: var(--text-mention-grey);
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-mention-grey);
+}
+
+.evolutionBadge {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.evolutionPositive {
+  composes: evolutionBadge;
+  color: var(--text-default-success);
+}
+
+.evolutionNegative {
+  composes: evolutionBadge;
+  color: var(--text-default-error);
+}
+
+.evolutionZero {
+  composes: evolutionBadge;
+  color: var(--text-mention-grey);
+}
