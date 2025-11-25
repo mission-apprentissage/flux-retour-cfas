@@ -10,31 +10,24 @@ import { useState } from "react";
 import { _get } from "@/common/httpClient";
 
 import { CardSection } from "./CardSection";
+import commonStyles from "./common.module.css";
 import { DetailsDossiersTraitesPieChart } from "./DetailsDossiersTraitesPieChart";
 import { NationalRegionTable } from "./NationalRegionTable";
 import styles from "./NationalView.module.css";
-import { PeriodSelector } from "./PeriodSelector";
+import { PeriodSelector, type Period } from "./PeriodSelector";
 import { RupturantsBarChart } from "./RupturantsBarChart";
 import { RupturantsPieChart } from "./RupturantsPieChart";
 import { TableSkeleton } from "./Skeleton";
 import { StatisticsSection } from "./StatisticsSection";
+import { STATS_QUERY_CONFIG } from "./statistiques.config";
+import { SuiviTraitementSection } from "./SuiviTraitementSection";
 import syntheseStyles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
 
 type ChartType = "bar" | "pie";
 
-const FIVE_MINUTES = 5 * 60 * 1000;
-const TEN_MINUTES = 10 * 60 * 1000;
-
-const STATS_QUERY_CONFIG = {
-  staleTime: FIVE_MINUTES,
-  cacheTime: TEN_MINUTES,
-  retry: 3,
-  refetchOnWindowFocus: false,
-};
-
 export function NationalView() {
-  const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
+  const [period, setPeriod] = useState<Period>("30days");
   const [chartType, setChartType] = useState<ChartType>("bar");
 
   const {
@@ -47,24 +40,14 @@ export function NationalView() {
     STATS_QUERY_CONFIG
   );
 
-  const {
-    data: traitementData,
-    isLoading: loadingTraitement,
-    error: traitementError,
-  } = useQuery(
-    ["mission-locale-stats", "traitement", period],
-    () => _get(`/api/v1/mission-locale/stats/traitement`, { params: { period } }),
-    STATS_QUERY_CONFIG
-  );
-
-  if (!loading && !loadingTraitement && (!stats || !traitementData)) {
+  if (!loading && !stats) {
     return (
       <div>
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer}>
+        <div className={commonStyles.headerContainer}>
+          <div className={commonStyles.logoContainer}>
             <Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />
           </div>
-          <h2 className={styles.headerTitle}>National</h2>
+          <h2 className={commonStyles.headerTitle}>National</h2>
         </div>
 
         <Alert
@@ -87,24 +70,16 @@ export function NationalView() {
           className={fr.cx("fr-mb-4w")}
         />
       ) : null}
-      {traitementError ? (
-        <Alert
-          severity="error"
-          title="Erreur"
-          description={traitementError instanceof Error ? traitementError.message : "Une erreur est survenue"}
-          className={fr.cx("fr-mb-4w")}
-        />
-      ) : null}
 
-      <div className={styles.headerContainer}>
-        <div className={styles.logoContainer}>
+      <div className={commonStyles.headerContainer}>
+        <div className={commonStyles.logoContainer}>
           <Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />
         </div>
-        <h2 className={styles.headerTitle}>National</h2>
+        <h2 className={commonStyles.headerTitle}>National</h2>
       </div>
 
       <div className={fr.cx("fr-mb-4w")}>
-        <div className={styles.periodSelectorContainer}>
+        <div className={commonStyles.periodSelectorContainer}>
           <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
         </div>
       </div>
@@ -112,9 +87,9 @@ export function NationalView() {
       <CardSection title="De l'identification au suivi">
         <div className={syntheseStyles.cardsContainer}>
           <TraitementCards
-            latestStats={traitementData?.latest}
-            firstStats={traitementData?.first}
-            loading={loadingTraitement}
+            latestStats={stats?.traitement?.latest}
+            firstStats={stats?.traitement?.first}
+            loading={loading}
           />
         </div>
       </CardSection>
@@ -173,11 +148,13 @@ export function NationalView() {
         </StatisticsSection>
       </div>
 
-      <StatisticsSection title="Couverture et activités en région">
+      <StatisticsSection title="Couverture et activités en région" className={styles.reducedMarginBottom}>
         <div className={styles.tableContainer}>
           {loading ? <TableSkeleton rows={6} /> : <NationalRegionTable regions={stats?.regional?.regions || []} />}
         </div>
       </StatisticsSection>
+
+      <SuiviTraitementSection period={period} />
     </div>
   );
 }

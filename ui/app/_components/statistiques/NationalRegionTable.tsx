@@ -4,31 +4,17 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
+import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
 import styles from "./NationalRegionTable.module.css";
 
-export interface NationalRegionStats {
-  code: string;
-  nom: string;
-  deployed: boolean;
-  ml_total: number;
-  ml_activees: number;
-  ml_activees_delta: number;
-  ml_engagees: number;
-  ml_engagees_delta: number;
-  engagement_rate: number;
-  a_traiter?: number;
-  traites?: number;
-  traites_variation?: string;
-}
-
 interface NationalRegionTableProps {
-  regions: NationalRegionStats[];
+  regions: IRegionStats[];
 }
 
 export function NationalRegionTable({ regions }: NationalRegionTableProps) {
   const [showAll, setShowAll] = useState(false);
-  const [sortColumn, setSortColumn] = useState<keyof NationalRegionStats>("ml_activees");
+  const [sortColumn, setSortColumn] = useState<keyof IRegionStats>("ml_activees");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const sortedRegions = [...regions].sort((a, b) => {
@@ -49,7 +35,7 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
 
   const hasMoreThan6Regions = sortedRegions.length > 6;
 
-  const handleSort = (column: keyof NationalRegionStats) => {
+  const handleSort = (column: keyof IRegionStats) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -79,7 +65,7 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
     centered,
     tooltip,
   }: {
-    column: keyof NationalRegionStats;
+    column: keyof IRegionStats;
     label: string;
     centered?: boolean;
     tooltip?: string;
