@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const STATS_PERIODS = ["30days", "3months", "all"] as const;
+export const zStatsPeriod = z.enum(STATS_PERIODS);
+export type StatsPeriod = z.output<typeof zStatsPeriod>;
+
 const zStatWithVariation = z.object({
   current: z.number(),
   variation: z.string(),
@@ -100,7 +104,21 @@ const zNationalStats = z.object({
   detailsTraites: zDetailsDossiersTraites,
   regional: zRegionalStatsResponse,
   evaluationDate: z.date(),
-  period: z.enum(["30days", "3months", "all"]),
+  period: zStatsPeriod,
+  traitement: z.object({
+    latest: z.object({
+      total: z.number(),
+      total_contacte: z.number(),
+      total_repondu: z.number(),
+      total_accompagne: z.number(),
+    }),
+    first: z.object({
+      total: z.number(),
+      total_contacte: z.number(),
+      total_repondu: z.number(),
+      total_accompagne: z.number(),
+    }),
+  }),
 });
 
 export type INationalStats = z.output<typeof zNationalStats>;
@@ -118,9 +136,81 @@ const zTraitementStatsResponse = z.object({
   latest: zTraitementStatsData,
   first: zTraitementStatsData,
   evaluationDate: z.date(),
-  period: z.enum(["30days", "3months", "all"]),
+  period: zStatsPeriod,
 });
 
 export type ITraitementStatsResponse = z.output<typeof zTraitementStatsResponse>;
+
+const zTraitementDetails = z.object({
+  rdv_pris: z.number(),
+  nouveau_projet: z.number(),
+  deja_accompagne: z.number(),
+  contacte_sans_retour: z.number(),
+  injoignables: z.number(),
+  coordonnees_incorrectes: z.number(),
+  autre: z.number(),
+});
+
+export type ITraitementDetails = z.output<typeof zTraitementDetails>;
+
+const zMissionLocaleTraitementStats = z.object({
+  id: z.string(),
+  nom: z.string(),
+  region_code: z.string(),
+  region_nom: z.string(),
+  total_jeunes: z.number(),
+  a_traiter: z.number(),
+  traites: z.number(),
+  pourcentage_traites: z.number(),
+  pourcentage_evolution: z.string(),
+  details: zTraitementDetails,
+  derniere_activite: z.date().nullable(),
+  jours_depuis_activite: z.number().nullable(),
+});
+
+export type IMissionLocaleTraitementStats = z.output<typeof zMissionLocaleTraitementStats>;
+
+const zTraitementMLStatsResponse = z.object({
+  data: z.array(zMissionLocaleTraitementStats),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+  period: zStatsPeriod,
+});
+
+export type ITraitementMLStatsResponse = z.output<typeof zTraitementMLStatsResponse>;
+
+const zTraitementRegionStats = z.object({
+  code: z.string(),
+  nom: z.string(),
+  total_jeunes: z.number(),
+  a_traiter: z.number(),
+  traites: z.number(),
+  pourcentage_traites: z.number(),
+  ml_actives: z.number(),
+});
+
+export type ITraitementRegionStats = z.output<typeof zTraitementRegionStats>;
+
+const zSyntheseStats = z.object({
+  summary: z.object({
+    mlCount: z.number(),
+    activatedMlCount: z.number(),
+    previousActivatedMlCount: z.number(),
+    date: z.date(),
+  }),
+  regions: z.array(zRegionStats),
+  traitement: z.object({
+    latest: zTraitementStatsData,
+    first: zTraitementStatsData,
+  }),
+  evaluationDate: z.date(),
+  period: zStatsPeriod,
+});
+
+export type ISyntheseStats = z.output<typeof zSyntheseStats>;
 
 export default { zod: zNationalStats };

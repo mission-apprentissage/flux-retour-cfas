@@ -1,12 +1,13 @@
 import express from "express";
+import { zStatsPeriod, type StatsPeriod } from "shared/models/data/nationalStats.model";
 import { z } from "zod";
 
 import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import {
-  getSummaryStats,
-  getRegionalStats,
   getNationalStats,
-  getTraitementStats,
+  getTraitementStatsByMissionLocale,
+  getSuiviTraitementByRegion,
+  getSyntheseStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getAllARML, getAllMissionsLocales } from "@/common/actions/organisations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -31,40 +32,44 @@ export default () => {
     getLbaLink
   );
   router.get(
-    "/stats/summary",
+    "/stats/synthese",
     validateRequestMiddleware({
       query: z.object({
-        period: z.enum(["30days", "3months", "all"]).optional(),
+        period: zStatsPeriod.optional(),
       }),
     }),
-    returnResult(getSummaryStatsRoute)
-  );
-  router.get(
-    "/stats/regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: z.enum(["30days", "3months", "all"]).optional(),
-      }),
-    }),
-    returnResult(getRegionalStatsRoute)
+    returnResult(getSyntheseStatsRoute)
   );
   router.get(
     "/stats/national",
     validateRequestMiddleware({
       query: z.object({
-        period: z.enum(["30days", "3months", "all"]).optional(),
+        period: zStatsPeriod.optional(),
       }),
     }),
     returnResult(getNationalStatsRoute)
   );
   router.get(
-    "/stats/traitement",
+    "/stats/traitement-ml",
     validateRequestMiddleware({
       query: z.object({
-        period: z.enum(["30days", "3months", "all"]).optional(),
+        period: zStatsPeriod.optional(),
+        page: z.coerce.number().optional().default(1),
+        limit: z.coerce.number().optional().default(10),
+        sort_by: z.string().optional().default("total_jeunes"),
+        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
       }),
     }),
-    returnResult(getTraitementStatsRoute)
+    returnResult(getTraitementStatsByMLRoute)
+  );
+  router.get(
+    "/stats/traitement-regions",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getTraitementStatsByRegionRoute)
   );
 
   return router;
@@ -93,22 +98,28 @@ const getLbaLink = async (req, res, next) => {
   }
 };
 
-const getSummaryStatsRoute = async (req) => {
+const getSyntheseStatsRoute = async (req) => {
   const { period } = req.query;
-  return getSummaryStats(new Date(), period as "30days" | "3months" | "all" | undefined);
-};
-
-const getRegionalStatsRoute = async (req) => {
-  const { period } = req.query;
-  return await getRegionalStats(period as "30days" | "3months" | "all" | undefined);
+  return await getSyntheseStats(period as StatsPeriod | undefined);
 };
 
 const getNationalStatsRoute = async (req) => {
   const { period } = req.query;
-  return await getNationalStats(period as "30days" | "3months" | "all" | undefined);
+  return await getNationalStats(period as StatsPeriod | undefined);
 };
 
-const getTraitementStatsRoute = async (req) => {
+const getTraitementStatsByMLRoute = async (req) => {
+  const { period, page, limit, sort_by, sort_order } = req.query;
+  return await getTraitementStatsByMissionLocale({
+    period: (period as StatsPeriod) || "30days",
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    sort_by: (sort_by as string) || "total_jeunes",
+    sort_order: (sort_order as "asc" | "desc") || "desc",
+  });
+};
+
+const getTraitementStatsByRegionRoute = async (req) => {
   const { period } = req.query;
-  return await getTraitementStats(period as "30days" | "3months" | "all" | undefined);
+  return await getSuiviTraitementByRegion(period as StatsPeriod | undefined);
 };
