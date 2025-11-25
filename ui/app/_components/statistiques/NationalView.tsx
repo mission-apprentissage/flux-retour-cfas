@@ -11,10 +11,12 @@ import { _get } from "@/common/httpClient";
 
 import { CardSection } from "./CardSection";
 import { DetailsDossiersTraitesPieChart } from "./DetailsDossiersTraitesPieChart";
+import { NationalRegionTable } from "./NationalRegionTable";
 import styles from "./NationalView.module.css";
 import { PeriodSelector } from "./PeriodSelector";
 import { RupturantsBarChart } from "./RupturantsBarChart";
 import { RupturantsPieChart } from "./RupturantsPieChart";
+import { TableSkeleton } from "./Skeleton";
 import { StatisticsSection } from "./StatisticsSection";
 import syntheseStyles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
@@ -23,6 +25,13 @@ type ChartType = "bar" | "pie";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const TEN_MINUTES = 10 * 60 * 1000;
+
+const STATS_QUERY_CONFIG = {
+  staleTime: FIVE_MINUTES,
+  cacheTime: TEN_MINUTES,
+  retry: 3,
+  refetchOnWindowFocus: false,
+};
 
 export function NationalView() {
   const [period, setPeriod] = useState<"30days" | "3months" | "all">("30days");
@@ -35,12 +44,7 @@ export function NationalView() {
   } = useQuery(
     ["mission-locale-stats", "national", period],
     () => _get(`/api/v1/mission-locale/stats/national`, { params: { period } }),
-    {
-      staleTime: FIVE_MINUTES,
-      cacheTime: TEN_MINUTES,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
+    STATS_QUERY_CONFIG
   );
 
   const {
@@ -50,12 +54,7 @@ export function NationalView() {
   } = useQuery(
     ["mission-locale-stats", "traitement", period],
     () => _get(`/api/v1/mission-locale/stats/traitement`, { params: { period } }),
-    {
-      staleTime: FIVE_MINUTES,
-      cacheTime: TEN_MINUTES,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
+    STATS_QUERY_CONFIG
   );
 
   if (!loading && !loadingTraitement && (!stats || !traitementData)) {
@@ -173,6 +172,12 @@ export function NationalView() {
           <DetailsDossiersTraitesPieChart data={stats?.detailsTraites} loading={loading} />
         </StatisticsSection>
       </div>
+
+      <StatisticsSection title="Couverture et activités en région">
+        <div className={styles.tableContainer}>
+          {loading ? <TableSkeleton rows={6} /> : <NationalRegionTable regions={stats?.regional?.regions || []} />}
+        </div>
+      </StatisticsSection>
     </div>
   );
 }

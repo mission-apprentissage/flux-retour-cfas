@@ -98,6 +98,7 @@ const zNationalStats = z.object({
   rupturantsTimeSeries: z.array(zTimeSeriesPoint),
   rupturantsSummary: zRupturantsSummary,
   detailsTraites: zDetailsDossiersTraites,
+  regional: zRegionalStatsResponse,
   evaluationDate: z.date(),
   period: z.enum(["30days", "3months", "all"]),
 });
