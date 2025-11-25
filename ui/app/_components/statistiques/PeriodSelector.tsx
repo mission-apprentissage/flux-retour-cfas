@@ -1,12 +1,15 @@
 "use client";
 
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
+import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
-export type Period = "30days" | "3months" | "all";
+import { STATS_LAUNCH_DATE_LABEL } from "./statistiques.config";
+
+export type { StatsPeriod as Period } from "shared/models/data/nationalStats.model";
 
 interface PeriodSelectorProps {
-  value: Period;
-  onChange: (period: Period) => void;
+  value: StatsPeriod;
+  onChange: (period: StatsPeriod) => void;
   className?: string;
   includeAll?: boolean;
   hideLabel?: boolean;
@@ -19,10 +22,13 @@ export function PeriodSelector({
   includeAll = false,
   hideLabel = false,
 }: PeriodSelectorProps) {
-  const options = [{ label: "30 derniers jours", value: "30days" }];
+  const options = [
+    { label: "30 derniers jours", value: "30days" },
+    { label: "3 derniers mois", value: "3months" },
+  ];
 
   if (includeAll) {
-    options.push({ label: "Depuis le lancement (février 2025)", value: "all" });
+    options.push({ label: `Depuis le lancement (${STATS_LAUNCH_DATE_LABEL})`, value: "all" });
   }
 
   return (
@@ -31,7 +37,7 @@ export function PeriodSelector({
       options={options}
       nativeSelectProps={{
         value,
-        onChange: (e) => onChange(e.target.value as Period),
+        onChange: (e) => onChange(e.target.value as StatsPeriod),
         className,
       }}
     />
