@@ -23,6 +23,7 @@ import { STATS_QUERY_CONFIG } from "./statistiques.config";
 import { SuiviTraitementSection } from "./SuiviTraitementSection";
 import syntheseStyles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
+import { useStatsPrefetch } from "./useStatsPrefetch";
 
 type ChartType = "bar" | "pie";
 
@@ -30,13 +31,15 @@ export function NationalView() {
   const [period, setPeriod] = useState<Period>("30days");
   const [chartType, setChartType] = useState<ChartType>("bar");
 
+  useStatsPrefetch("national", period);
+
   const {
     data: stats,
     isLoading: loading,
     error,
   } = useQuery(
     ["mission-locale-stats", "national", period],
-    () => _get(`/api/v1/mission-locale/stats/national`, { params: { period } }),
+    () => _get(`/api/v1/admin/mission-locale/stats/national`, { params: { period } }),
     STATS_QUERY_CONFIG
   );
 

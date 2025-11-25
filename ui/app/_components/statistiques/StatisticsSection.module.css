@@ -52,3 +52,7 @@
 .tabsContainer {
   margin-top: 1rem;
 }
+
+.tabsContainer :global(.fr-table__container) {
+  overflow: visible;
+}

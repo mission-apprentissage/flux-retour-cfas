@@ -1,9 +1,9 @@
-const FIVE_MINUTES = 5 * 60 * 1000;
-const TEN_MINUTES = 10 * 60 * 1000;
+const THIRTY_MINUTES = 30 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
 export const STATS_QUERY_CONFIG = {
-  staleTime: FIVE_MINUTES,
-  cacheTime: TEN_MINUTES,
+  staleTime: THIRTY_MINUTES,
+  cacheTime: ONE_HOUR,
   retry: 3,
   refetchOnWindowFocus: false,
 } as const;

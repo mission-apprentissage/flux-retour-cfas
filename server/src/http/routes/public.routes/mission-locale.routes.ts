@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import {
-  getNationalStats,
   getTraitementStatsByMissionLocale,
   getSuiviTraitementByRegion,
   getSyntheseStats,
@@ -39,15 +38,6 @@ export default () => {
       }),
     }),
     returnResult(getSyntheseStatsRoute)
-  );
-  router.get(
-    "/stats/national",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getNationalStatsRoute)
   );
   router.get(
     "/stats/traitement-ml",
@@ -101,11 +91,6 @@ const getLbaLink = async (req, res, next) => {
 const getSyntheseStatsRoute = async (req) => {
   const { period } = req.query;
   return await getSyntheseStats(period as StatsPeriod | undefined);
-};
-
-const getNationalStatsRoute = async (req) => {
-  const { period } = req.query;
-  return await getNationalStats(period as StatsPeriod | undefined);
 };
 
 const getTraitementStatsByMLRoute = async (req) => {

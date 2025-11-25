@@ -7,6 +7,7 @@ import {
   updateMissionLocaleEffectifApi,
 } from "shared/models";
 import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
+import { zStatsPeriod, type StatsPeriod } from "shared/models/data/nationalStats.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -22,6 +23,7 @@ import {
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
+import { getNationalStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -55,6 +57,16 @@ export default () => {
       }),
     }),
     returnResult(getAllMlsStats)
+  );
+
+  router.get(
+    "/stats/national",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getNationalStatsRoute)
   );
 
   router.post(
@@ -252,4 +264,9 @@ export const activateOrganismeAtDate = async (req) => {
   for (const organisme of organismes) {
     await activateOrganisme(new Date(date), organisme._id);
   }
+};
+
+const getNationalStatsRoute = async (req) => {
+  const { period } = req.query;
+  return await getNationalStats(period as StatsPeriod | undefined);
 };

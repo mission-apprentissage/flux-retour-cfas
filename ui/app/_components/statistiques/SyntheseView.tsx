@@ -18,6 +18,7 @@ import { STATS_QUERY_CONFIG } from "./statistiques.config";
 import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
 import { TraitementCards } from "./TraitementCards";
+import { useStatsPrefetch } from "./useStatsPrefetch";
 
 interface SyntheseViewProps {
   showDetailColumn?: boolean;
@@ -25,6 +26,8 @@ interface SyntheseViewProps {
 
 export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}) {
   const [period, setPeriod] = useState<Period>("30days");
+
+  useStatsPrefetch("synthese", period);
 
   const {
     data,

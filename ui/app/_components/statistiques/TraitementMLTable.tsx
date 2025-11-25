@@ -3,8 +3,8 @@
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import type { ITraitementMLStatsResponse, StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { _get } from "@/common/httpClient";
@@ -23,12 +23,13 @@ interface TraitementMLTableProps {
 type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
 
 export function TraitementMLTable({ period }: TraitementMLTableProps) {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortColumn, setSortColumn] = useState<SortColumn>("total_jeunes");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const { data, isLoading } = useQuery<ITraitementMLStatsResponse>(
+  const { data, isLoading, isFetching } = useQuery<ITraitementMLStatsResponse>(
     ["mission-locale-stats", "traitement-ml", period, page, limit, sortColumn, sortDirection],
     () =>
       _get(`/api/v1/mission-locale/stats/traitement-ml`, {
@@ -56,8 +57,24 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
     setPage(1);
   };
 
-  if (isLoading && !data) {
-    return <TableSkeleton rows={10} />;
+  useEffect(() => {
+    if (data?.pagination && !isLoading) {
+      const nextPage = page + 1;
+      if (nextPage <= data.pagination.totalPages) {
+        queryClient.prefetchQuery({
+          queryKey: ["mission-locale-stats", "traitement-ml", period, nextPage, limit, sortColumn, sortDirection],
+          queryFn: () =>
+            _get(`/api/v1/mission-locale/stats/traitement-ml`, {
+              params: { period, page: nextPage, limit, sort_by: sortColumn, sort_order: sortDirection },
+            }),
+          staleTime: STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA.staleTime,
+        });
+      }
+    }
+  }, [data, isLoading, page, period, limit, sortColumn, sortDirection, queryClient]);
+
+  if (isFetching) {
+    return <TableSkeleton rows={limit} />;
   }
 
   const mlList = data?.data || [];
