@@ -44,34 +44,24 @@ const EMPTY_STATS = {
 const buildOrgLookupPipeline = (options: { checkActivation?: boolean; localField?: string } = {}) => {
   const { checkActivation = true, localField = "mission_locale_id" } = options;
 
-  const lookupMatchConditions: Record<string, unknown> = {
-    $expr: { $eq: ["$_id", "$$org_id"] },
-    type: "MISSION_LOCALE",
+  const matchConditions: Record<string, unknown> = {
+    "ml.type": "MISSION_LOCALE",
   };
   if (checkActivation) {
-    lookupMatchConditions.activated_at = { $exists: true, $ne: null };
+    matchConditions["ml.activated_at"] = { $exists: true, $ne: null };
   }
 
   return [
     {
       $lookup: {
         from: "organisations",
-        let: { org_id: `$${localField}` },
-        pipeline: [
-          { $match: lookupMatchConditions },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-              activated_at: 1,
-              "adresse.region": 1,
-            },
-          },
-        ],
+        localField,
+        foreignField: "_id",
         as: "ml",
       },
     },
     { $unwind: "$ml" },
+    { $match: matchConditions },
   ];
 };
 
@@ -79,8 +69,8 @@ const buildRegionLookupPipeline = (localField = "_id") => [
   {
     $lookup: {
       from: "regions",
-      let: { region_code: `$${localField}` },
-      pipeline: [{ $match: { $expr: { $eq: ["$code", "$$region_code"] } } }, { $project: { nom: 1, code: 1 } }],
+      localField,
+      foreignField: "code",
       as: "region_info",
     },
   },
@@ -102,12 +92,25 @@ const buildPercentageExpression = (numerator: MongoExpression, denominator: Mong
   ],
 });
 
+let cachedEarliestDate: Date | null = null;
+let earliestDateCacheExpiry = 0;
+const EARLIEST_DATE_CACHE_TTL = 60 * 60 * 1000;
+
 const getEarliestDate = async () => {
+  const now = Date.now();
+  if (cachedEarliestDate && now < earliestDateCacheExpiry) {
+    return cachedEarliestDate;
+  }
+
   const earliestDate = await missionLocaleStatsDb().findOne(
     {},
     { sort: { computed_day: 1 }, projection: { computed_day: 1 } }
   );
-  return earliestDate?.computed_day;
+
+  cachedEarliestDate = earliestDate?.computed_day || null;
+  earliestDateCacheExpiry = now + EARLIEST_DATE_CACHE_TTL;
+
+  return cachedEarliestDate;
 };
 
 function calculateStartDate(period: StatsPeriod, referenceDate: Date, earliestDate?: Date): Date {
@@ -286,59 +289,52 @@ const getStatsAtDateWithInjoignable = async (currentDate: Date) => {
   });
 };
 
-const getCumulativeStatsAtDate = async (currentDate: Date) => {
-  const stats = await missionLocaleStatsDb()
-    .aggregate(
-      [
-        { $match: { computed_day: { $lte: currentDate } } },
-        {
-          $sort: { computed_day: -1 },
-        },
-        {
-          $group: {
-            _id: "$mission_locale_id",
-            latest_stats: { $first: "$stats" },
-            latest_day: { $first: "$computed_day" },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: "$latest_stats.total" },
-            total_traites: { $sum: "$latest_stats.traite" },
-            total_a_traiter: { $sum: "$latest_stats.a_traiter" },
-            total_contacte: {
-              $sum: {
-                $add: [
-                  "$latest_stats.rdv_pris",
-                  "$latest_stats.nouveau_projet",
-                  "$latest_stats.deja_accompagne",
-                  "$latest_stats.contacte_sans_retour",
-                ],
-              },
-            },
-            total_repondu: {
-              $sum: {
-                $add: ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet", "$latest_stats.deja_accompagne"],
-              },
-            },
-            total_accompagne: { $sum: { $add: ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet"] } },
-            rdv_pris: { $sum: "$latest_stats.rdv_pris" },
-            nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
-            deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
-            contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
-            injoignables: { $sum: "$latest_stats.injoignables" },
-            coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
-            autre: { $sum: "$latest_stats.autre" },
-            deja_connu: { $sum: "$latest_stats.deja_connu" },
-          },
-        },
-      ],
-      { allowDiskUse: true }
-    )
+const buildCumulativeStatsPipeline = (targetDate: Date) => [
+  { $match: { computed_day: { $lte: targetDate } } },
+  { $sort: { computed_day: -1 as const } },
+  {
+    $group: {
+      _id: "$mission_locale_id",
+      latest_stats: { $first: "$stats" },
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: "$latest_stats.total" },
+      total_traites: { $sum: "$latest_stats.traite" },
+      total_a_traiter: { $sum: "$latest_stats.a_traiter" },
+    },
+  },
+];
+
+const getCumulativeStatsForDates = async (dates: Date[]) => {
+  if (dates.length === 0) return [];
+
+  const facetPipelines: Record<string, object[]> = {};
+  dates.forEach((date, index) => {
+    facetPipelines[`date_${index}`] = buildCumulativeStatsPipeline(date);
+  });
+
+  const maxDate = dates.reduce((max, d) => (d > max ? d : max), dates[0]);
+
+  const [result] = await missionLocaleStatsDb()
+    .aggregate([{ $match: { computed_day: { $lte: maxDate } } }, { $facet: facetPipelines }], { allowDiskUse: true })
     .toArray();
 
-  return stats;
+  return dates.map((date, index) => {
+    const stats = result?.[`date_${index}`]?.[0] || { total: 0, total_a_traiter: 0, total_traites: 0 };
+    return {
+      date,
+      stats: [
+        {
+          total: stats.total || 0,
+          total_a_traiter: stats.total_a_traiter || 0,
+          total_traites: stats.total_traites || 0,
+        },
+      ],
+    };
+  });
 };
 
 const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
@@ -642,53 +638,79 @@ const getTraitementStats = async (
   const endDate = evaluationDate;
   const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
 
-  const allStatsResults = await Promise.allSettled(
-    evenlySpacedDates.map(async (date) => {
-      const stats = await getStatsAtDate(date);
-      return {
-        date,
-        stats: stats,
-      };
-    })
-  );
+  const allStats = await missionLocaleStatsDb()
+    .aggregate([
+      { $match: { computed_day: { $in: evenlySpacedDates } } },
+      {
+        $group: {
+          _id: "$computed_day",
+          total: { $sum: "$stats.total" },
+          total_contacte: {
+            $sum: {
+              $add: [
+                "$stats.rdv_pris",
+                "$stats.nouveau_projet",
+                "$stats.deja_accompagne",
+                "$stats.contacte_sans_retour",
+                { $ifNull: ["$stats.injoignables", 0] },
+              ],
+            },
+          },
+          total_repondu: {
+            $sum: {
+              $add: [
+                "$stats.rdv_pris",
+                "$stats.nouveau_projet",
+                "$stats.deja_accompagne",
+                { $ifNull: ["$stats.autre_avec_contact", 0] },
+              ],
+            },
+          },
+          total_accompagne: {
+            $sum: {
+              $add: ["$stats.rdv_pris", "$stats.deja_accompagne"],
+            },
+          },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+    .toArray();
 
-  const allStats = allStatsResults
-    .filter((result) => result.status === "fulfilled")
-    .map((result) => (result as PromiseFulfilledResult<{ date: Date; stats: any[] }>).value);
-
-  const latestEntry = allStats
-    .slice()
-    .reverse()
-    .find((entry) => entry.stats.length > 0);
-
-  const firstEntry = allStats[0];
-
-  const latestStats = latestEntry?.stats[0] || {
-    total: 0,
-    total_contacte: 0,
-    total_repondu: 0,
-    total_accompagne: 0,
+  type TraitementStatEntry = {
+    _id: Date;
+    total: number;
+    total_contacte: number;
+    total_repondu: number;
+    total_accompagne: number;
   };
 
-  const firstStats = firstEntry?.stats[0] || {
-    total: 0,
-    total_contacte: 0,
-    total_repondu: 0,
-    total_accompagne: 0,
-  };
+  const typedStats = allStats as TraitementStatEntry[];
+  const statsMap = new Map(typedStats.map((s) => [s._id.getTime(), s]));
+
+  let latestStats: TraitementStatEntry | null = null;
+  for (let i = evenlySpacedDates.length - 1; i >= 0; i--) {
+    const stat = statsMap.get(evenlySpacedDates[i].getTime());
+    if (stat && stat.total > 0) {
+      latestStats = stat;
+      break;
+    }
+  }
+
+  const firstStats = statsMap.get(evenlySpacedDates[0]?.getTime());
 
   return {
     latest: {
-      total: latestStats.total,
-      total_contacte: latestStats.total_contacte,
-      total_repondu: latestStats.total_repondu,
-      total_accompagne: latestStats.total_accompagne,
+      total: latestStats?.total || 0,
+      total_contacte: latestStats?.total_contacte || 0,
+      total_repondu: latestStats?.total_repondu || 0,
+      total_accompagne: latestStats?.total_accompagne || 0,
     },
     first: {
-      total: firstStats.total,
-      total_contacte: firstStats.total_contacte,
-      total_repondu: firstStats.total_repondu,
-      total_accompagne: firstStats.total_accompagne,
+      total: firstStats?.total || 0,
+      total_contacte: firstStats?.total_contacte || 0,
+      total_repondu: firstStats?.total_repondu || 0,
+      total_accompagne: firstStats?.total_accompagne || 0,
     },
     evaluationDate: endDate,
     period,
@@ -704,23 +726,7 @@ export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<
 
   const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
 
-  const timeSeriesResults = await Promise.allSettled(
-    evenlySpacedDates.map(async (date) => {
-      const stats = await getCumulativeStatsAtDate(date);
-      return {
-        date,
-        stats: stats.map((s) => ({
-          total: s.total || 0,
-          total_a_traiter: s.total_a_traiter || 0,
-          total_traites: s.total_traites || 0,
-        })),
-      };
-    })
-  );
-
-  const rupturantsTimeSeries: ITimeSeriesPoint[] = timeSeriesResults
-    .filter((result) => result.status === "fulfilled")
-    .map((result) => (result as PromiseFulfilledResult<ITimeSeriesPoint>).value);
+  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
 
   const [currentStats, previousStats, regionalData, traitementData] = await Promise.all([
     getStatsForPeriod(startDate, endDate),
@@ -813,28 +819,18 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
     {
       $lookup: {
         from: "organisations",
-        let: { ml_id: "$_id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ["$_id", "$$ml_id"] },
-              type: "MISSION_LOCALE",
-              activated_at: { $exists: true, $ne: null },
-            },
-          },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-              activated_at: 1,
-              "adresse.region": 1,
-            },
-          },
-        ],
+        localField: "_id",
+        foreignField: "_id",
         as: "ml",
       },
     },
     { $unwind: "$ml" },
+    {
+      $match: {
+        "ml.type": "MISSION_LOCALE",
+        "ml.activated_at": { $exists: true, $ne: null },
+      },
+    },
     {
       $lookup: {
         from: "regions",
@@ -894,8 +890,8 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
           {
             $lookup: {
               from: "missionLocaleEffectif",
-              let: { ml_id: "$_id" },
-              pipeline: [{ $match: { $expr: { $eq: ["$mission_locale_id", "$$ml_id"] } } }, { $project: { _id: 1 } }],
+              localField: "_id",
+              foreignField: "mission_locale_id",
               as: "effectif_ids",
             },
           },
