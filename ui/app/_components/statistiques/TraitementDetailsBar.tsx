@@ -6,9 +6,10 @@ import styles from "./TraitementTable.module.css";
 interface TraitementDetailsBarProps {
   details: ITraitementDetails;
   total: number;
+  tooltipPosition?: "top" | "bottom";
 }
 
-export function TraitementDetailsBar({ details, total }: TraitementDetailsBarProps) {
+export function TraitementDetailsBar({ details, total, tooltipPosition = "top" }: TraitementDetailsBarProps) {
   if (total === 0) {
     return <span className={styles.emptyValue}>-</span>;
   }
@@ -22,6 +23,8 @@ export function TraitementDetailsBar({ details, total }: TraitementDetailsBarPro
       percentage,
     };
   }).filter((s) => s.value > 0);
+
+  const tooltipClassName = tooltipPosition === "bottom" ? styles.stackedBarTooltipBottom : styles.stackedBarTooltipTop;
 
   return (
     <div className={styles.stackedBarContainer}>
@@ -37,7 +40,7 @@ export function TraitementDetailsBar({ details, total }: TraitementDetailsBarPro
           />
         ))}
       </div>
-      <div className={styles.stackedBarTooltip}>
+      <div className={tooltipClassName}>
         <div className={styles.tooltipTitle}>Détails</div>
         {segments.map((s) => (
           <div key={s.key} className={styles.tooltipItem}>

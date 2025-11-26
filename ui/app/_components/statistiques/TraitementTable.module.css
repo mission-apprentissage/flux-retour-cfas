@@ -108,16 +108,15 @@
   opacity: 0.8;
 }
 
-.stackedBarTooltip {
+.stackedBarTooltipBase {
   position: absolute;
-  top: calc(100% + 8px);
   left: 0;
   background-color: var(--background-default-grey);
   border: 1px solid var(--border-default-grey);
   border-radius: 4px;
   padding: 8px 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  z-index: 1000;
   min-width: 220px;
   visibility: hidden;
   opacity: 0;
@@ -126,7 +125,18 @@
     visibility 0.2s;
 }
 
-.stackedBarContainer:hover .stackedBarTooltip {
+.stackedBarTooltipTop {
+  composes: stackedBarTooltipBase;
+  bottom: calc(100% + 8px);
+}
+
+.stackedBarTooltipBottom {
+  composes: stackedBarTooltipBase;
+  top: calc(100% + 8px);
+}
+
+.stackedBarContainer:hover .stackedBarTooltipTop,
+.stackedBarContainer:hover .stackedBarTooltipBottom {
   visibility: visible;
   opacity: 1;
 }

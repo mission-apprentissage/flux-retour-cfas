@@ -149,8 +149,10 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
               centered
             />,
           ]}
-          data={mlList.map((ml) => {
+          data={mlList.map((ml, index) => {
             const activity = formatActivityDuration(ml.jours_depuis_activite);
+            const isInLastThreeRows = index >= mlList.length - 3;
+            const tooltipPosition = isInLastThreeRows ? "top" : "bottom";
             return [
               ml.nom,
               <div className={styles.centeredCell} key={`total-${ml.id}`}>
@@ -162,7 +164,12 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
               <div className={styles.centeredCell} key={`traites-${ml.id}`}>
                 {ml.traites}
               </div>,
-              <TraitementDetailsBar key={`details-${ml.id}`} details={ml.details} total={ml.traites} />,
+              <TraitementDetailsBar
+                key={`details-${ml.id}`}
+                details={ml.details}
+                total={ml.traites}
+                tooltipPosition={tooltipPosition}
+              />,
               <div className={styles.centeredCell} key={`pct-${ml.id}`}>
                 {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution)}
               </div>,
