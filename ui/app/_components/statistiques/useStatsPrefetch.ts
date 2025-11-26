@@ -10,44 +10,41 @@ import { STATS_QUERY_CONFIG } from "./statistiques.config";
 
 const PERIODS: Period[] = ["30days", "3months", "all"];
 
-interface UseStatsPrefetchOptions {
-  prefetchNational?: boolean;
-}
+type StatsView = "synthese" | "national";
 
-export function useStatsPrefetch(
-  currentView: "synthese" | "national",
-  currentPeriod: Period,
-  options: UseStatsPrefetchOptions = {}
-) {
-  const { prefetchNational = false } = options;
+const VIEW_URLS: Record<StatsView, string> = {
+  synthese: "/api/v1/mission-locale/stats/synthese",
+  national: "/api/v1/admin/mission-locale/stats/national",
+};
+
+export function useStatsPrefetch(currentView: StatsView, currentPeriod: Period) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    const prefetchWithErrorHandling = async (queryKey: string[], queryFn: () => Promise<unknown>) => {
+      try {
+        await queryClient.prefetchQuery({
+          queryKey,
+          queryFn,
+          staleTime: STATS_QUERY_CONFIG.staleTime,
+        });
+      } catch (error) {
+        console.error(`[useStatsPrefetch] Failed to prefetch ${queryKey.join("/")}:`, error);
+      }
+    };
+
     if (currentView === "national") {
-      queryClient.prefetchQuery({
-        queryKey: ["mission-locale-stats", "synthese", currentPeriod],
-        queryFn: () => _get(`/api/v1/mission-locale/stats/synthese`, { params: { period: currentPeriod } }),
-        staleTime: STATS_QUERY_CONFIG.staleTime,
-      });
-    } else if (prefetchNational) {
-      queryClient.prefetchQuery({
-        queryKey: ["mission-locale-stats", "national", currentPeriod],
-        queryFn: () => _get(`/api/v1/admin/mission-locale/stats/national`, { params: { period: currentPeriod } }),
-        staleTime: STATS_QUERY_CONFIG.staleTime,
-      });
+      prefetchWithErrorHandling(["mission-locale-stats", "synthese", currentPeriod], () =>
+        _get(`/api/v1/mission-locale/stats/synthese`, { params: { period: currentPeriod } })
+      );
     }
 
-    const baseUrl =
-      currentView === "national"
-        ? "/api/v1/admin/mission-locale/stats/national"
-        : "/api/v1/mission-locale/stats/synthese";
+    const baseUrl = VIEW_URLS[currentView];
 
     PERIODS.filter((p) => p !== currentPeriod).forEach((period) => {
-      queryClient.prefetchQuery({
-        queryKey: ["mission-locale-stats", currentView, period],
-        queryFn: () => _get(baseUrl, { params: { period } }),
-        staleTime: STATS_QUERY_CONFIG.staleTime,
-      });
+      prefetchWithErrorHandling(["mission-locale-stats", currentView, period], () =>
+        _get(baseUrl, { params: { period } })
+      );
     });
-  }, [currentView, currentPeriod, prefetchNational, queryClient]);
+  }, [currentView, currentPeriod, queryClient]);
 }
