@@ -88,7 +88,7 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
     <div className={styles.tableContainer}>
       <p className={styles.tableDescription}>
         <strong>Sur ce tableau :</strong> Suivez les statistiques de traitement des dossiers à l&apos;échelle des
-        Missions locales. Par défaut, le tableau classe la présentation des Missions locales par leur dernière activité
+        Missions Locales. Par défaut, le tableau classe la présentation des Missions Locales par leur dernière activité
         sur le service, vous pouvez modifier cet ordre en manipulant les options de tris.
       </p>
       <div className={`${styles.traitementTable} ${styles.mlTable}`}>
@@ -151,8 +151,9 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
           ]}
           data={mlList.map((ml, index) => {
             const activity = formatActivityDuration(ml.jours_depuis_activite);
-            const isInLastThreeRows = index >= mlList.length - 3;
-            const tooltipPosition = isInLastThreeRows ? "top" : "bottom";
+            const visibleRowsThreshold = Math.min(3, Math.floor(limit / 3));
+            const isInLastRows = index >= mlList.length - visibleRowsThreshold;
+            const tooltipPosition = isInLastRows ? "top" : "bottom";
             return [
               ml.nom,
               <div className={styles.centeredCell} key={`total-${ml.id}`}>
