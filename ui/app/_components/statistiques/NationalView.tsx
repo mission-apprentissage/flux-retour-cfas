@@ -98,6 +98,8 @@ export function NationalView() {
         </div>
       </CardSection>
 
+      <hr className="fr-hr" />
+
       <div className={styles.chartsRow}>
         <StatisticsSection
           title="Jeunes rupturants"
