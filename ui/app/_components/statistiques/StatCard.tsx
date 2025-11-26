@@ -1,3 +1,5 @@
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+
 import { calculatePercentage, getPercentageColor } from "./constants";
 import { CardSkeleton } from "./Skeleton";
 import styles from "./StatCard.module.css";
@@ -7,9 +9,10 @@ interface StatCardProps {
   value: number | undefined;
   previousValue: number | undefined;
   loading: boolean;
+  tooltip?: React.ReactNode;
 }
 
-export function StatCard({ label, value, previousValue, loading }: StatCardProps) {
+export function StatCard({ label, value, previousValue, loading, tooltip }: StatCardProps) {
   const percentage = calculatePercentage(value || 0, previousValue || 0);
   const percentageColor = getPercentageColor(value || 0, previousValue || 0);
 
@@ -17,7 +20,14 @@ export function StatCard({ label, value, previousValue, loading }: StatCardProps
     <div className={styles.card}>
       <div className={styles.cardBody}>
         <div className={styles.cardContent}>
-          <p className={styles.cardLabel}>{label}</p>
+          <p className={styles.cardLabel}>
+            {label}
+            {tooltip && (
+              <span className={styles.tooltip}>
+                <Tooltip kind="hover" title={tooltip} />
+              </span>
+            )}
+          </p>
           {loading ? (
             <CardSkeleton />
           ) : (

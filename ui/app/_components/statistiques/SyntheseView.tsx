@@ -86,6 +86,18 @@ export function SyntheseView() {
             value={latestStats?.total_accompagne}
             previousValue={firstStats?.total_accompagne}
             loading={loading}
+            tooltip={
+              <>
+                Les &quot;jeunes accompagnés&quot; représentent la somme :
+                <ul>
+                  <li>
+                    Des jeunes non connus du service public à l&apos;emploi qui ont obtenu un rdv avec une Mission
+                    locale grâce au TBA (RDV pris)
+                  </li>
+                  <li>Les jeunes déjà connus et accompagnés par le service public à l&apos;emploi</li>
+                </ul>
+              </>
+            }
           />
         </div>
       </StatSection>

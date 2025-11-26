@@ -44,3 +44,7 @@
   line-height: 20px;
   margin: 0;
 }
+
+.tooltip {
+  margin-left: 5px;
+}
