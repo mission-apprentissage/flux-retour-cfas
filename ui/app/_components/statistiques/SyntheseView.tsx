@@ -92,7 +92,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
         <h2 className={fr.cx("fr-h4", "fr-mb-3w")}>Déploiement</h2>
         <div className={styles.deploymentContentCard}>
           <div className={styles.deploymentMapContainer}>
-            <FranceMapSVG />
+            <FranceMapSVG regionsActives={regionalStats.filter((r) => r.deployed).map((r) => r.code)} />
           </div>
 
           <div className={styles.deploymentLegendsContainer}>
