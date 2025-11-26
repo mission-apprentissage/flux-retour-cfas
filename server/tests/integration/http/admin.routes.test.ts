@@ -10,6 +10,7 @@ import { it, expect, describe, beforeEach } from "vitest";
 import {
   auditLogsDb,
   effectifsDb,
+  missionLocaleEffectifsDb,
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
@@ -891,6 +892,80 @@ describe("Routes administrateur", () => {
       );
 
       expect(response.status).toBe(400);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/accompagnement-conjoint", () => {
+    beforeEach(async () => {
+      await missionLocaleEffectifsDb().deleteMany({});
+      await organisationsDb().deleteMany({});
+      await organismesDb().deleteMany({});
+    });
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/accompagnement-conjoint");
+      expectUnauthorizedError(response);
+    });
+
+    it("Doit retourner les statistiques d'accompagnement conjoint vides quand pas de données", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("cfaPartenaires");
+      expect(response.data).toHaveProperty("mlConcernees");
+      expect(response.data).toHaveProperty("regionsActives");
+      expect(response.data).toHaveProperty("totalJeunesRupturants");
+      expect(response.data).toHaveProperty("totalDossiersPartages");
+      expect(response.data).toHaveProperty("totalDossiersTraites");
+      expect(response.data).toHaveProperty("pourcentageTraites");
+      expect(response.data).toHaveProperty("motifs");
+      expect(response.data).toHaveProperty("statutsTraitement");
+      expect(response.data).toHaveProperty("dejaConnu");
+      expect(response.data).toHaveProperty("totalPourDejaConnu");
+      expect(response.data).toHaveProperty("evaluationDate");
+
+      expect(response.data.cfaPartenaires).toBe(0);
+      expect(response.data.mlConcernees).toBe(0);
+      expect(response.data.regionsActives).toEqual([]);
+    });
+
+    it("Doit retourner la structure correcte des motifs", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.motifs).toHaveProperty("mobilite");
+      expect(response.data.motifs).toHaveProperty("logement");
+      expect(response.data.motifs).toHaveProperty("sante");
+      expect(response.data.motifs).toHaveProperty("finance");
+      expect(response.data.motifs).toHaveProperty("administratif");
+      expect(response.data.motifs).toHaveProperty("reorientation");
+      expect(response.data.motifs).toHaveProperty("recherche_emploi");
+      expect(response.data.motifs).toHaveProperty("autre");
+    });
+
+    it("Doit retourner la structure correcte des statuts de traitement", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.statutsTraitement).toHaveProperty("rdv_pris");
+      expect(response.data.statutsTraitement).toHaveProperty("nouveau_projet");
+      expect(response.data.statutsTraitement).toHaveProperty("deja_accompagne");
+      expect(response.data.statutsTraitement).toHaveProperty("contacte_sans_retour");
+      expect(response.data.statutsTraitement).toHaveProperty("injoignables");
+      expect(response.data.statutsTraitement).toHaveProperty("coordonnees_incorrectes");
+      expect(response.data.statutsTraitement).toHaveProperty("autre");
     });
   });
 });

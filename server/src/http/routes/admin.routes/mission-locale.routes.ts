@@ -23,7 +23,10 @@ import {
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
-import { getNationalStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import {
+  getAccompagnementConjointStats,
+  getNationalStats,
+} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -68,6 +71,8 @@ export default () => {
     }),
     returnResult(getNationalStatsRoute)
   );
+
+  router.get("/stats/accompagnement-conjoint", returnResult(getAccompagnementConjointStatsRoute));
 
   router.post(
     "/activate",
@@ -269,4 +274,8 @@ export const activateOrganismeAtDate = async (req) => {
 const getNationalStatsRoute = async (req) => {
   const { period } = req.query;
   return await getNationalStats(period as StatsPeriod | undefined);
+};
+
+const getAccompagnementConjointStatsRoute = async () => {
+  return await getAccompagnementConjointStats();
 };

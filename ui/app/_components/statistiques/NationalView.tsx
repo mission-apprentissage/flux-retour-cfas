@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import { _get } from "@/common/httpClient";
 
+import { AccompagnementConjointSection } from "./AccompagnementConjointSection";
 import { CardSection } from "./CardSection";
 import commonStyles from "./common.module.css";
 import { DetailsDossiersTraitesPieChart } from "./DetailsDossiersTraitesPieChart";
@@ -158,6 +159,8 @@ export function NationalView() {
       </StatisticsSection>
 
       <SuiviTraitementSection period={period} />
+
+      <AccompagnementConjointSection />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { ObjectId } from "bson";
-import { IOrganisationMissionLocale } from "shared/models";
+import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import {
+  IAccompagnementConjointStats,
   IAggregatedStats,
   IDetailsDossiersTraites,
   INationalStats,
@@ -14,7 +15,12 @@ import { normalizeToUTCDay } from "shared/utils/date";
 import { calculateVariation, calculatePercentage } from "shared/utils/stats";
 
 import logger from "@/common/logger";
-import { missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 
 import { getOrganisationById } from "../organisations.actions";
 
@@ -92,25 +98,13 @@ const buildPercentageExpression = (numerator: MongoExpression, denominator: Mong
   ],
 });
 
-let cachedEarliestDate: Date | null = null;
-let earliestDateCacheExpiry = 0;
-const EARLIEST_DATE_CACHE_TTL = 60 * 60 * 1000;
-
 const getEarliestDate = async () => {
-  const now = Date.now();
-  if (cachedEarliestDate && now < earliestDateCacheExpiry) {
-    return cachedEarliestDate;
-  }
-
   const earliestDate = await missionLocaleStatsDb().findOne(
     {},
     { sort: { computed_day: 1 }, projection: { computed_day: 1 } }
   );
 
-  cachedEarliestDate = earliestDate?.computed_day || null;
-  earliestDateCacheExpiry = now + EARLIEST_DATE_CACHE_TTL;
-
-  return cachedEarliestDate;
+  return earliestDate?.computed_day || null;
 };
 
 function calculateStartDate(period: StatsPeriod, referenceDate: Date, earliestDate?: Date): Date {
@@ -966,7 +960,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
       pourcentage_evolution = `${evolutionValue}%`;
     }
 
-    const { pourcentage_evolution_value, ...rest } = item;
+    const { pourcentage_evolution_value: _pourcentage_evolution_value, ...rest } = item;
     return {
       ...rest,
       pourcentage_evolution,
@@ -1067,5 +1061,170 @@ export const getSyntheseStats = async (period: StatsPeriod = "30days") => {
     },
     evaluationDate,
     period,
+  };
+};
+
+const buildCountIf = (field: string, value: string) => ({
+  $sum: { $cond: [{ $eq: [field, value] }, 1, 0] },
+});
+
+const DEFAULT_MOTIFS = {
+  mobilite: 0,
+  logement: 0,
+  sante: 0,
+  finance: 0,
+  administratif: 0,
+  reorientation: 0,
+  recherche_emploi: 0,
+  autre: 0,
+};
+
+const DEFAULT_STATUTS_TRAITEMENT = {
+  rdv_pris: 0,
+  nouveau_projet: 0,
+  deja_accompagne: 0,
+  contacte_sans_retour: 0,
+  injoignables: 0,
+  coordonnees_incorrectes: 0,
+  autre: 0,
+  total_traites: 0,
+};
+
+const MOTIFS_PIPELINE = [
+  { $unwind: { path: "$organisme_data.motif", preserveNullAndEmptyArrays: true } },
+  {
+    $group: {
+      _id: null,
+      mobilite: buildCountIf("$organisme_data.motif", "MOBILITE"),
+      logement: buildCountIf("$organisme_data.motif", "LOGEMENT"),
+      sante: buildCountIf("$organisme_data.motif", "SANTE"),
+      finance: buildCountIf("$organisme_data.motif", "FINANCE"),
+      administratif: buildCountIf("$organisme_data.motif", "ADMINISTRATIF"),
+      reorientation: buildCountIf("$organisme_data.motif", "REORIENTATION"),
+      recherche_emploi: buildCountIf("$organisme_data.motif", "RECHERCHE_EMPLOI"),
+      autre: buildCountIf("$organisme_data.motif", "AUTRE"),
+    },
+  },
+];
+
+const STATUTS_TRAITEMENT_PIPELINE = [
+  {
+    $group: {
+      _id: null,
+      rdv_pris: buildCountIf("$situation", "RDV_PRIS"),
+      nouveau_projet: buildCountIf("$situation", "NOUVEAU_PROJET"),
+      deja_accompagne: buildCountIf("$situation", "DEJA_ACCOMPAGNE"),
+      contacte_sans_retour: buildCountIf("$situation", "CONTACTE_SANS_RETOUR"),
+      injoignables: buildCountIf("$situation", "INJOIGNABLE_APRES_RELANCES"),
+      coordonnees_incorrectes: buildCountIf("$situation", "COORDONNEES_INCORRECT"),
+      autre: buildCountIf("$situation", "AUTRE"),
+      total_traites: {
+        $sum: { $cond: [{ $and: [{ $ne: ["$situation", null] }, { $ne: ["$situation", ""] }] }, 1, 0] },
+      },
+    },
+  },
+];
+
+const getCfaPilotes = async () => {
+  const cfaPilotes = (await organisationsDb()
+    .find({
+      type: "ORGANISME_FORMATION",
+      ml_beta_activated_at: { $exists: true, $ne: null },
+    })
+    .toArray()) as IOrganisationOrganismeFormation[];
+
+  const cfaPilotesOids = cfaPilotes
+    .map((o) => (o.organisme_id ? new ObjectId(o.organisme_id) : null))
+    .filter((id): id is ObjectId => id !== null);
+
+  return { cfaPilotes, cfaPilotesOids };
+};
+
+const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
+  const organismesAvecRegion = await organismesDb()
+    .find({ _id: { $in: cfaPilotesOids } }, { projection: { "adresse.region": 1 } })
+    .toArray();
+
+  return [...new Set(organismesAvecRegion.map((o) => o.adresse?.region).filter(Boolean))] as string[];
+};
+
+export const getAccompagnementConjointStats = async (): Promise<IAccompagnementConjointStats> => {
+  const evaluationDate = normalizeToUTCDay(new Date());
+
+  const { cfaPilotes, cfaPilotesOids } = await getCfaPilotes();
+  const regionsActives = await getRegionsActives(cfaPilotesOids);
+
+  const [accConjointStats] = await missionLocaleEffectifsDb()
+    .aggregate([
+      {
+        $match: {
+          "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
+          "organisme_data.acc_conjoint": true,
+        },
+      },
+      {
+        $facet: {
+          dossiersPartages: [{ $count: "count" }],
+          mlConcernees: [{ $group: { _id: "$mission_locale_id" } }, { $count: "count" }],
+          motifs: MOTIFS_PIPELINE,
+          statutsTraitement: STATUTS_TRAITEMENT_PIPELINE,
+          dejaConnu: [
+            {
+              $group: {
+                _id: null,
+                count: { $sum: { $cond: [{ $eq: ["$deja_connu", true] }, 1, 0] } },
+                total: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+    ])
+    .toArray();
+
+  const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
+    "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
+  });
+
+  const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
+  const mlConcernees = accConjointStats?.mlConcernees[0]?.count || 0;
+  const motifs = { ...DEFAULT_MOTIFS, ...accConjointStats?.motifs[0] };
+  const statutsTraitement = { ...DEFAULT_STATUTS_TRAITEMENT, ...accConjointStats?.statutsTraitement[0] };
+  const dejaConnuData = accConjointStats?.dejaConnu[0] || { count: 0, total: 0 };
+
+  const totalDossiersTraites = statutsTraitement.total_traites;
+  const pourcentageTraites =
+    totalDossiersPartages > 0 ? Math.round((totalDossiersTraites / totalDossiersPartages) * 100) : 0;
+
+  return {
+    cfaPartenaires: cfaPilotes.length,
+    mlConcernees,
+    regionsActives,
+    totalJeunesRupturants,
+    totalDossiersPartages,
+    totalDossiersTraites,
+    pourcentageTraites,
+    motifs: {
+      mobilite: motifs.mobilite || 0,
+      logement: motifs.logement || 0,
+      sante: motifs.sante || 0,
+      finance: motifs.finance || 0,
+      administratif: motifs.administratif || 0,
+      reorientation: motifs.reorientation || 0,
+      recherche_emploi: motifs.recherche_emploi || 0,
+      autre: motifs.autre || 0,
+    },
+    statutsTraitement: {
+      rdv_pris: statutsTraitement.rdv_pris || 0,
+      nouveau_projet: statutsTraitement.nouveau_projet || 0,
+      deja_accompagne: statutsTraitement.deja_accompagne || 0,
+      contacte_sans_retour: statutsTraitement.contacte_sans_retour || 0,
+      injoignables: statutsTraitement.injoignables || 0,
+      coordonnees_incorrectes: statutsTraitement.coordonnees_incorrectes || 0,
+      autre: statutsTraitement.autre || 0,
+    },
+    dejaConnu: dejaConnuData.count,
+    totalPourDejaConnu: dejaConnuData.total,
+    evaluationDate,
   };
 };

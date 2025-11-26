@@ -213,4 +213,34 @@ const zSyntheseStats = z.object({
 
 export type ISyntheseStats = z.output<typeof zSyntheseStats>;
 
+const zAccompagnementConjointMotifs = z.object({
+  mobilite: z.number(),
+  logement: z.number(),
+  sante: z.number(),
+  finance: z.number(),
+  administratif: z.number(),
+  reorientation: z.number(),
+  recherche_emploi: z.number(),
+  autre: z.number(),
+});
+
+export type IAccompagnementConjointMotifs = z.output<typeof zAccompagnementConjointMotifs>;
+
+const zAccompagnementConjointStats = z.object({
+  cfaPartenaires: z.number(),
+  mlConcernees: z.number(),
+  regionsActives: z.array(z.string()),
+  totalJeunesRupturants: z.number(),
+  totalDossiersPartages: z.number(),
+  totalDossiersTraites: z.number(),
+  pourcentageTraites: z.number(),
+  motifs: zAccompagnementConjointMotifs,
+  statutsTraitement: zTraitementDetails,
+  dejaConnu: z.number(),
+  totalPourDejaConnu: z.number(),
+  evaluationDate: z.coerce.date(),
+});
+
+export type IAccompagnementConjointStats = z.output<typeof zAccompagnementConjointStats>;
+
 export default { zod: zNationalStats };
