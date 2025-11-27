@@ -12,9 +12,10 @@ import { AxisChartTooltip } from "./ChartTooltip";
 interface RupturantsBarChartProps {
   data: ITimeSeriesPoint[];
   loading?: boolean;
+  loadingVariation?: boolean;
 }
 
-export function RupturantsBarChart({ data, loading }: RupturantsBarChartProps) {
+export function RupturantsBarChart({ data, loading, loadingVariation }: RupturantsBarChartProps) {
   if (loading || !data || data.length === 0) {
     return (
       <>
@@ -102,6 +103,7 @@ export function RupturantsBarChart({ data, loading }: RupturantsBarChartProps) {
             variationColor: variationColor,
           },
         ]}
+        loadingVariation={loadingVariation}
       />
     </>
   );

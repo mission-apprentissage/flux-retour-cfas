@@ -1,3 +1,5 @@
+import { Skeleton } from "../ui/Skeleton";
+
 import styles from "./legend.module.css";
 
 interface LegendItem {
@@ -10,9 +12,10 @@ interface LegendItem {
 
 interface ChartLegendProps {
   items: LegendItem[];
+  loadingVariation?: boolean;
 }
 
-export function ChartLegend({ items }: ChartLegendProps) {
+export function ChartLegend({ items, loadingVariation = false }: ChartLegendProps) {
   return (
     <div className={styles.legendContainer}>
       {items.map((item, index) => (
@@ -22,11 +25,14 @@ export function ChartLegend({ items }: ChartLegendProps) {
             <span className={styles.legendLabel}>{item.label}</span>
           </div>
           <div className={styles.legendRightContent}>
-            {item.variation && (
-              <span className={styles.legendVariation} style={{ color: item.variationColor }}>
-                {item.variation}
-              </span>
-            )}
+            {item.variation !== undefined &&
+              (loadingVariation ? (
+                <Skeleton width="40px" height="16px" />
+              ) : (
+                <span className={styles.legendVariation} style={{ color: item.variationColor }}>
+                  {item.variation}
+                </span>
+              ))}
             <span className={styles.legendValue}>{item.value.toLocaleString("fr-FR")}</span>
           </div>
         </div>

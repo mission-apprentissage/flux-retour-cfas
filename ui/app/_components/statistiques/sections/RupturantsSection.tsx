@@ -21,7 +21,9 @@ interface RupturantsSectionProps {
 export function RupturantsSection({ period = "30days" }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
-  const { data, isLoading, error } = useRupturantsStats(period);
+  const { data, isLoading, isFetching, error } = useRupturantsStats(period);
+
+  const loadingVariation = isFetching && !isLoading;
 
   return (
     <StatisticsSection
@@ -67,9 +69,9 @@ export function RupturantsSection({ period = "30days" }: RupturantsSectionProps)
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         <div className={styles.rupturantsContainer}>
           {chartType === "bar" ? (
-            <RupturantsBarChart data={data?.timeSeries || []} loading={isLoading} />
+            <RupturantsBarChart data={data?.timeSeries || []} loading={isLoading} loadingVariation={loadingVariation} />
           ) : (
-            <RupturantsPieChart data={data?.summary} loading={isLoading} />
+            <RupturantsPieChart data={data?.summary} loading={isLoading} loadingVariation={loadingVariation} />
           )}
         </div>
       </StatsErrorHandler>

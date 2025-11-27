@@ -7,14 +7,20 @@ import { useTraitementStats } from "../hooks/useStatsQueries";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
+import { DossiersTraitesSection } from "./DossiersTraitesSection";
 import styles from "./IdentificationSuiviSection.module.css";
+import { RupturantsSection } from "./RupturantsSection";
 import { StatisticsSection } from "./StatisticsSection";
 
 interface IdentificationSuiviSectionProps {
   defaultPeriod?: Period;
+  showCharts?: boolean;
 }
 
-export function IdentificationSuiviSection({ defaultPeriod = "30days" }: IdentificationSuiviSectionProps) {
+export function IdentificationSuiviSection({
+  defaultPeriod = "30days",
+  showCharts = true,
+}: IdentificationSuiviSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const { data, isLoading, isFetching, error } = useTraitementStats(period);
 
@@ -35,6 +41,12 @@ export function IdentificationSuiviSection({ defaultPeriod = "30days" }: Identif
             loadingPercentage={loadingPercentage}
           />
         </div>
+        {showCharts && (
+          <div className={styles.chartsContainer}>
+            <RupturantsSection period={period} />
+            <DossiersTraitesSection period={period} />
+          </div>
+        )}
       </StatsErrorHandler>
     </StatisticsSection>
   );

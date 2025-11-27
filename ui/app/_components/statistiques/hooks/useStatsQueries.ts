@@ -120,7 +120,7 @@ export function useRupturantsStats(period: Period) {
   return useQuery<IRupturantsStatsResponse>(
     statsQueryKeys.rupturants(period),
     () => _get("/api/v1/admin/mission-locale/stats/national/rupturants", { params: { period } }),
-    STATS_QUERY_CONFIG
+    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
 
@@ -128,7 +128,7 @@ export function useDossiersTraitesStats(period: Period) {
   return useQuery<IDossiersTraitesStatsResponse>(
     statsQueryKeys.dossiersTraites(period),
     () => _get("/api/v1/admin/mission-locale/stats/national/dossiers-traites", { params: { period } }),
-    STATS_QUERY_CONFIG
+    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
 

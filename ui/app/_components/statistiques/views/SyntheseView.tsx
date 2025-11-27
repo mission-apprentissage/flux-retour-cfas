@@ -20,7 +20,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
         <h2 className={commonStyles.headerTitle}>Synthèse</h2>
       </div>
 
-      <IdentificationSuiviSection />
+      <IdentificationSuiviSection showCharts={false} />
 
       <DeploymentSection showDetailColumn={showDetailColumn} />
     </div>

@@ -12,12 +12,14 @@ interface DossiersTraitesSectionProps {
 }
 
 export function DossiersTraitesSection({ period = "30days" }: DossiersTraitesSectionProps) {
-  const { data, isLoading, error } = useDossiersTraitesStats(period);
+  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(period);
+
+  const loadingVariation = isFetching && !isLoading;
 
   return (
     <StatisticsSection title="Dossiers traités" width="two-thirds" smallTitle>
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-        <DetailsDossiersTraitesPieChart data={data?.details} loading={isLoading} />
+        <DetailsDossiersTraitesPieChart data={data?.details} loading={isLoading} loadingVariation={loadingVariation} />
       </StatsErrorHandler>
     </StatisticsSection>
   );

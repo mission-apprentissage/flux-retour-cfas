@@ -4,3 +4,23 @@
   flex-wrap: wrap;
   align-items: stretch;
 }
+
+.chartsContainer {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 24px;
+}
+
+.chartsContainer > section {
+  background-color: white;
+  margin-bottom: 0;
+}
+
+.chartsContainer > section:first-child {
+  width: calc(33.33% + 50px);
+}
+
+.chartsContainer > section:last-child {
+  width: calc(66.66% - 50px);
+}

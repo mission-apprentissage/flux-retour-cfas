@@ -12,9 +12,14 @@ import styles from "./DetailsDossiersTraitesPieChart.module.css";
 interface DetailsDossiersTraitesPieChartProps {
   data?: IDetailsDossiersTraites;
   loading?: boolean;
+  loadingVariation?: boolean;
 }
 
-export function DetailsDossiersTraitesPieChart({ data, loading }: DetailsDossiersTraitesPieChartProps) {
+export function DetailsDossiersTraitesPieChart({
+  data,
+  loading,
+  loadingVariation,
+}: DetailsDossiersTraitesPieChartProps) {
   if (loading || !data) {
     return (
       <div className={styles.container}>
@@ -85,9 +90,13 @@ export function DetailsDossiersTraitesPieChart({ data, loading }: DetailsDossier
                   <span className={styles.legendLabel}>{item.label}</span>
                 </div>
                 <div className={styles.legendRightContent}>
-                  <span className={styles.variation} style={{ color: getVariationColorFromString(variation) }}>
-                    {variation}
-                  </span>
+                  {loadingVariation ? (
+                    <Skeleton width="40px" height="16px" />
+                  ) : (
+                    <span className={styles.variation} style={{ color: getVariationColorFromString(variation) }}>
+                      {variation}
+                    </span>
+                  )}
                   <span className={styles.value}>{item.value.toLocaleString("fr-FR")}</span>
                 </div>
               </div>

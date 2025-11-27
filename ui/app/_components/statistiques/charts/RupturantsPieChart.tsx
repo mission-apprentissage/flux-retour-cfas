@@ -13,9 +13,10 @@ import styles from "./RupturantsPieChart.module.css";
 interface RupturantsPieChartProps {
   data?: IRupturantsSummary;
   loading?: boolean;
+  loadingVariation?: boolean;
 }
 
-export function RupturantsPieChart({ data, loading }: RupturantsPieChartProps) {
+export function RupturantsPieChart({ data, loading, loadingVariation }: RupturantsPieChartProps) {
   if (loading || !data) {
     return (
       <div className={styles.container}>
@@ -80,6 +81,7 @@ export function RupturantsPieChart({ data, loading }: RupturantsPieChartProps) {
               variationColor: getVariationColorFromString(data.traites.variation),
             },
           ]}
+          loadingVariation={loadingVariation}
         />
       </div>
       <div className={styles.totalSection}>
