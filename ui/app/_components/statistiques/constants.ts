@@ -56,7 +56,7 @@ export const DOSSIERS_TRAITES_LABELS = {
 
 export const RUPTURANTS_COLORS = {
   a_traiter: COLOR_PALETTE.ML_INACTIVE,
-  traites: COLOR_PALETTE.GREEN_DARK,
+  traites: "#00A95F",
 } as const;
 
 export const RUPTURANTS_LABELS = {

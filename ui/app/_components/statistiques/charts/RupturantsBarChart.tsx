@@ -19,7 +19,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
   if (loading || !data || data.length === 0) {
     return (
       <>
-        <Skeleton height="180px" width="100%" />
+        <Skeleton height="260px" width="100%" />
         <div style={{ marginTop: "16px" }}>
           <Skeleton height="60px" width="100%" />
         </div>
@@ -45,10 +45,17 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
 
   const formatYAxis = (value: number) => {
     if (value >= 1000) {
-      return `${value / 1000}k`;
+      return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
     }
     return value.toString();
   };
+
+  const allTotals = data.map((point) => (point.stats[0]?.total_a_traiter || 0) + (point.stats[0]?.total_traites || 0));
+  const maxTotal = Math.max(...allTotals);
+  const minTotal = Math.min(...allTotals);
+  const range = maxTotal - minTotal;
+
+  const yAxisMin = range < maxTotal * 0.1 && minTotal > 0 ? Math.floor((minTotal * 0.9) / 1000) * 1000 : 0;
 
   return (
     <>
@@ -59,7 +66,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
             data: dates,
             disableLine: true,
             disableTicks: true,
-            categoryGapRatio: 0.5,
+            categoryGapRatio: 0.75,
             barGapRatio: 0.2,
           },
         ]}
@@ -68,6 +75,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
             disableLine: true,
             disableTicks: false,
             valueFormatter: formatYAxis,
+            min: yAxisMin,
           },
         ]}
         series={[
@@ -84,7 +92,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
             color: RUPTURANTS_COLORS.a_traiter,
           },
         ]}
-        height={180}
+        height={260}
         margin={{ right: -5, left: -10, bottom: 10 }}
         slots={{
           legend: () => null,
