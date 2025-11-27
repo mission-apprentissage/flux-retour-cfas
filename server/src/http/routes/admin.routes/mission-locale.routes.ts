@@ -7,7 +7,7 @@ import {
   updateMissionLocaleEffectifApi,
 } from "shared/models";
 import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
-import { zStatsPeriod, type StatsPeriod } from "shared/models/data/nationalStats.model";
+import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -24,8 +24,12 @@ import {
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 import {
+  getRupturantsStats,
+  getDossiersTraitesStats,
+  getCouvertureRegionsStats,
+  getTraitementStatsByMissionLocale,
+  getSuiviTraitementByRegion,
   getAccompagnementConjointStats,
-  getNationalStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   getAllEffectifsParMois,
@@ -61,18 +65,6 @@ export default () => {
     }),
     returnResult(getAllMlsStats)
   );
-
-  router.get(
-    "/stats/national",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getNationalStatsRoute)
-  );
-
-  router.get("/stats/accompagnement-conjoint", returnResult(getAccompagnementConjointStatsRoute));
 
   router.post(
     "/activate",
@@ -115,6 +107,62 @@ export default () => {
     }),
     returnResult(activateOrganismeAtDate)
   );
+
+  router.get(
+    "/stats/national/rupturants",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getRupturantsRoute)
+  );
+
+  router.get(
+    "/stats/national/dossiers-traites",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getDossiersTraitesRoute)
+  );
+
+  router.get(
+    "/stats/national/couverture-regions",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getCouvertureRegionsRoute)
+  );
+
+  router.get(
+    "/stats/traitement/ml",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+        page: z.coerce.number().optional().default(1),
+        limit: z.coerce.number().optional().default(10),
+        sort_by: z.string().optional().default("total_jeunes"),
+        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+      }),
+    }),
+    returnResult(getTraitementMLRoute)
+  );
+
+  router.get(
+    "/stats/traitement/regions",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getTraitementRegionsRoute)
+  );
+
+  router.get("/stats/accompagnement-conjoint", returnResult(getAccompagnementConjointRoute));
 
   router.get("/:id", returnResult(getMl));
   router.get(
@@ -271,11 +319,37 @@ export const activateOrganismeAtDate = async (req) => {
   }
 };
 
-const getNationalStatsRoute = async (req) => {
+const getRupturantsRoute = async (req) => {
   const { period } = req.query;
-  return await getNationalStats(period as StatsPeriod | undefined);
+  return await getRupturantsStats((period as StatsPeriod) || "30days");
 };
 
-const getAccompagnementConjointStatsRoute = async () => {
+const getDossiersTraitesRoute = async (req) => {
+  const { period } = req.query;
+  return await getDossiersTraitesStats((period as StatsPeriod) || "30days");
+};
+
+const getCouvertureRegionsRoute = async (req) => {
+  const { period } = req.query;
+  return await getCouvertureRegionsStats((period as StatsPeriod) || "30days");
+};
+
+const getTraitementMLRoute = async (req) => {
+  const { period, page, limit, sort_by, sort_order } = req.query;
+  return await getTraitementStatsByMissionLocale({
+    period: (period as StatsPeriod) || "30days",
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    sort_by: (sort_by as string) || "total_jeunes",
+    sort_order: (sort_order as "asc" | "desc") || "desc",
+  });
+};
+
+const getTraitementRegionsRoute = async (req) => {
+  const { period } = req.query;
+  return await getSuiviTraitementByRegion((period as StatsPeriod) || "30days");
+};
+
+const getAccompagnementConjointRoute = async () => {
   return await getAccompagnementConjointStats();
 };

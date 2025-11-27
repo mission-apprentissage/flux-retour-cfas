@@ -2,16 +2,13 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { IAccompagnementConjointStats } from "shared/models/data/nationalStats.model";
 
-import { _get } from "@/common/httpClient";
-
 import { ItemChartTooltip } from "../charts/ChartTooltip";
 import { MotifsBarChart } from "../charts/MotifsBarChart";
-import { STATS_QUERY_CONFIG } from "../config";
 import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS } from "../constants";
+import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { Skeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
@@ -199,15 +196,7 @@ function ExplanationAccordion({ isExpanded, onToggle }: { isExpanded: boolean; o
 export function AccompagnementConjointSection() {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const {
-    data: stats,
-    isLoading: loading,
-    error,
-  } = useQuery<IAccompagnementConjointStats>(
-    ["mission-locale-stats", "accompagnement-conjoint"],
-    () => _get(`/api/v1/admin/mission-locale/stats/accompagnement-conjoint`),
-    STATS_QUERY_CONFIG
-  );
+  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats();
 
   const pieData = useMemo(() => {
     if (!stats) return [];

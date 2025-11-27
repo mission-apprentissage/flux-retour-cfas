@@ -124,7 +124,7 @@ function calculateStartDate(period: StatsPeriod, referenceDate: Date, earliestDa
   return normalizeToUTCDay(startDate);
 }
 
-async function calculateStartDateAsync(period: StatsPeriod, referenceDate: Date): Promise<Date> {
+export async function calculateStartDateAsync(period: StatsPeriod, referenceDate: Date): Promise<Date> {
   if (period === "all") {
     const earliestDate = await getEarliestDate();
     return calculateStartDate(period, referenceDate, earliestDate || undefined);
@@ -168,7 +168,7 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
   );
 };
 
-const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod = "all") => {
+export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod = "all") => {
   const normalizedDate = normalizeToUTCDay(evaluationDate);
 
   const startDate = await calculateStartDateAsync(period, normalizedDate);
@@ -302,7 +302,7 @@ const buildCumulativeStatsPipeline = (targetDate: Date) => [
   },
 ];
 
-const getCumulativeStatsForDates = async (dates: Date[]) => {
+export const getCumulativeStatsForDates = async (dates: Date[]) => {
   if (dates.length === 0) return [];
 
   const facetPipelines: Record<string, object[]> = {};
@@ -331,7 +331,7 @@ const getCumulativeStatsForDates = async (dates: Date[]) => {
   });
 };
 
-const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
+export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
   const startDate = await calculateStartDateAsync(period, referenceDate);
 
   const timeDiff = referenceDate.getTime() - startDate.getTime();
@@ -527,7 +527,7 @@ async function getTraitementStatsByRegion(evaluationDate: Date, startDate: Date)
   return traitementByRegionDate;
 }
 
-const getRegionalStats = async (period: StatsPeriod = "30days") => {
+export const getRegionalStats = async (period: StatsPeriod = "30days") => {
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = calculateStartDate(period, evaluationDate);
 
@@ -569,8 +569,8 @@ const getRegionalStats = async (period: StatsPeriod = "30days") => {
   };
 };
 
-async function getStatsForPeriod(
-  startDate: Date,
+export async function getStatsForPeriod(
+  _startDate: Date,
   endDate: Date
 ): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
   try {
@@ -579,7 +579,7 @@ async function getStatsForPeriod(
     if (stats.length === 0) {
       const lastAvailableStats = await missionLocaleStatsDb()
         .find({
-          computed_day: { $lte: endDate, $gte: startDate },
+          computed_day: { $lte: endDate },
         })
         .sort({ computed_day: -1 })
         .limit(1)
@@ -592,9 +592,7 @@ async function getStatsForPeriod(
     }
 
     if (stats.length === 0) {
-      logger.warn(
-        `[getStatsForPeriod] Aucune donnée disponible pour la période ${startDate.toISOString()} - ${endDate.toISOString()}`
-      );
+      logger.warn(`[getStatsForPeriod] Aucune donnée disponible jusqu'à ${endDate.toISOString()}`);
       return { ...EMPTY_STATS };
     }
 
@@ -618,58 +616,52 @@ async function getStatsForPeriod(
     };
   } catch (error) {
     logger.error(
-      `[getStatsForPeriod] Erreur lors de la récupération des stats pour la période ${startDate.toISOString()} - ${endDate.toISOString()}`,
+      `[getStatsForPeriod] Erreur lors de la récupération des stats jusqu'à ${endDate.toISOString()}`,
       error
     );
     return { ...EMPTY_STATS };
   }
 }
 
-const getTraitementStats = async (
+export const getTraitementStats = async (
   period: StatsPeriod = "30days",
   evaluationDate: Date = normalizeToUTCDay(new Date())
 ): Promise<ITraitementStatsResponse> => {
   const endDate = evaluationDate;
-  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
+  const startDate = await calculateStartDateAsync(period, endDate);
 
-  const allStats = await missionLocaleStatsDb()
-    .aggregate([
-      { $match: { computed_day: { $in: evenlySpacedDates } } },
-      {
-        $group: {
-          _id: "$computed_day",
-          total: { $sum: "$stats.total" },
-          total_contacte: {
-            $sum: {
-              $add: [
-                "$stats.rdv_pris",
-                "$stats.nouveau_projet",
-                "$stats.deja_accompagne",
-                "$stats.contacte_sans_retour",
-                { $ifNull: ["$stats.injoignables", 0] },
-              ],
-            },
-          },
-          total_repondu: {
-            $sum: {
-              $add: [
-                "$stats.rdv_pris",
-                "$stats.nouveau_projet",
-                "$stats.deja_accompagne",
-                { $ifNull: ["$stats.autre_avec_contact", 0] },
-              ],
-            },
-          },
-          total_accompagne: {
-            $sum: {
-              $add: ["$stats.rdv_pris", "$stats.deja_accompagne"],
-            },
-          },
+  const traitementsGroupStage = {
+    $group: {
+      _id: "$computed_day",
+      total: { $sum: "$stats.total" },
+      total_contacte: {
+        $sum: {
+          $add: [
+            "$stats.rdv_pris",
+            "$stats.nouveau_projet",
+            "$stats.deja_accompagne",
+            "$stats.contacte_sans_retour",
+            { $ifNull: ["$stats.injoignables", 0] },
+          ],
         },
       },
-      { $sort: { _id: 1 } },
-    ])
-    .toArray();
+      total_repondu: {
+        $sum: {
+          $add: [
+            "$stats.rdv_pris",
+            "$stats.nouveau_projet",
+            "$stats.deja_accompagne",
+            { $ifNull: ["$stats.autre_avec_contact", 0] },
+          ],
+        },
+      },
+      total_accompagne: {
+        $sum: {
+          $add: ["$stats.rdv_pris", "$stats.deja_accompagne"],
+        },
+      },
+    },
+  };
 
   type TraitementStatEntry = {
     _id: Date;
@@ -679,32 +671,38 @@ const getTraitementStats = async (
     total_accompagne: number;
   };
 
-  const typedStats = allStats as TraitementStatEntry[];
-  const statsMap = new Map(typedStats.map((s) => [s._id.getTime(), s]));
+  const [latestStatsResult] = (await missionLocaleStatsDb()
+    .aggregate([
+      { $match: { computed_day: { $lte: endDate } } },
+      traitementsGroupStage,
+      { $match: { total: { $gt: 0 } } },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ])
+    .toArray()) as TraitementStatEntry[];
 
-  let latestStats: TraitementStatEntry | null = null;
-  for (let i = evenlySpacedDates.length - 1; i >= 0; i--) {
-    const stat = statsMap.get(evenlySpacedDates[i].getTime());
-    if (stat && stat.total > 0) {
-      latestStats = stat;
-      break;
-    }
-  }
-
-  const firstStats = statsMap.get(evenlySpacedDates[0]?.getTime());
+  const [firstStatsResult] = (await missionLocaleStatsDb()
+    .aggregate([
+      { $match: { computed_day: { $gte: startDate, $lte: endDate } } },
+      traitementsGroupStage,
+      { $match: { total: { $gt: 0 } } },
+      { $sort: { _id: 1 } },
+      { $limit: 1 },
+    ])
+    .toArray()) as TraitementStatEntry[];
 
   return {
     latest: {
-      total: latestStats?.total || 0,
-      total_contacte: latestStats?.total_contacte || 0,
-      total_repondu: latestStats?.total_repondu || 0,
-      total_accompagne: latestStats?.total_accompagne || 0,
+      total: latestStatsResult?.total || 0,
+      total_contacte: latestStatsResult?.total_contacte || 0,
+      total_repondu: latestStatsResult?.total_repondu || 0,
+      total_accompagne: latestStatsResult?.total_accompagne || 0,
     },
     first: {
-      total: firstStats?.total || 0,
-      total_contacte: firstStats?.total_contacte || 0,
-      total_repondu: firstStats?.total_repondu || 0,
-      total_accompagne: firstStats?.total_accompagne || 0,
+      total: firstStatsResult?.total || 0,
+      total_contacte: firstStatsResult?.total_contacte || 0,
+      total_repondu: firstStatsResult?.total_repondu || 0,
+      total_accompagne: firstStatsResult?.total_accompagne || 0,
     },
     evaluationDate: endDate,
     period,
@@ -797,7 +795,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
   const pipeline = [
     {
       $match: {
-        computed_day: { $lte: evaluationDate, $gte: startDate },
+        computed_day: { $lte: evaluationDate },
       },
     },
     { $sort: { computed_day: -1 as const } },
@@ -806,10 +804,41 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         _id: "$mission_locale_id",
         latest_stats: { $first: "$stats" },
         latest_day: { $first: "$computed_day" },
-        first_stats: { $last: "$stats" },
-        first_day: { $last: "$computed_day" },
       },
     },
+    {
+      $lookup: {
+        from: "missionLocaleStats",
+        let: { ml_id: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$mission_locale_id", "$$ml_id"] },
+                  { $gte: ["$computed_day", startDate] },
+                  { $lte: ["$computed_day", evaluationDate] },
+                ],
+              },
+            },
+          },
+          { $sort: { computed_day: 1 } },
+          { $limit: 1 },
+        ],
+        as: "period_start_entry",
+      },
+    },
+    {
+      $addFields: {
+        first_stats: {
+          $ifNull: [{ $arrayElemAt: ["$period_start_entry.stats", 0] }, "$latest_stats"],
+        },
+        first_day: {
+          $ifNull: [{ $arrayElemAt: ["$period_start_entry.computed_day", 0] }, "$latest_day"],
+        },
+      },
+    },
+    { $unset: "period_start_entry" },
     {
       $lookup: {
         from: "organisations",
@@ -878,7 +907,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
       $facet: {
         total: [{ $count: "count" }],
         data: [
-          { $sort: { [mongoSortField]: sortDirection } as Record<string, 1 | -1> },
+          { $sort: { [mongoSortField]: sortDirection, nom: 1 } as Record<string, 1 | -1> },
           { $skip: skip },
           { $limit: limit },
           {
@@ -979,14 +1008,13 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
   };
 };
 
-export const getSuiviTraitementByRegion = async (period: StatsPeriod = "30days") => {
+export const getSuiviTraitementByRegion = async (_period: StatsPeriod = "30days") => {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
 
   const pipeline = [
     {
       $match: {
-        computed_day: { $lte: evaluationDate, $gte: startDate },
+        computed_day: { $lte: evaluationDate },
       },
     },
     { $sort: { computed_day: -1 as const } },
@@ -1022,7 +1050,7 @@ export const getSuiviTraitementByRegion = async (period: StatsPeriod = "30days")
         ml_actives: 1,
       },
     },
-    { $sort: { pourcentage_traites: -1 as const } },
+    { $sort: { pourcentage_traites: -1 as const, nom: 1 as const } },
   ];
 
   const results = await missionLocaleStatsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
@@ -1228,3 +1256,102 @@ export const getAccompagnementConjointStats = async (): Promise<IAccompagnementC
     evaluationDate,
   };
 };
+
+export async function getDeploymentStats(period: StatsPeriod = "30days") {
+  const evaluationDate = normalizeToUTCDay(new Date());
+  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+
+  return {
+    summary: {
+      mlCount: summary.mlCount,
+      activatedMlCount: summary.activatedMlCount,
+      previousActivatedMlCount: summary.previousActivatedMlCount,
+      date: summary.date,
+    },
+    regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
+    evaluationDate,
+    period,
+  };
+}
+
+export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
+  const regional = await getRegionalStats(period);
+
+  return {
+    regions: regional.regions,
+    period,
+  };
+}
+
+export async function getRupturantsStats(period: StatsPeriod = "30days") {
+  const evaluationDate = normalizeToUTCDay(new Date());
+  const endDate = evaluationDate;
+  const startDate = await calculateStartDateAsync(period, endDate);
+  const previousStartDate = await calculateStartDateAsync(period, startDate);
+
+  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
+  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
+
+  const [currentStats, previousStats] = await Promise.all([
+    getStatsForPeriod(startDate, endDate),
+    getStatsForPeriod(previousStartDate, startDate),
+  ]);
+
+  const rupturantsSummary: IRupturantsSummary = {
+    a_traiter: createStatWithVariation(currentStats.total_a_traiter, previousStats.total_a_traiter),
+    traites: createStatWithVariation(currentStats.total_traites, previousStats.total_traites),
+    total: currentStats.total,
+  };
+
+  return {
+    timeSeries: rupturantsTimeSeries,
+    summary: rupturantsSummary,
+    evaluationDate,
+    period,
+  };
+}
+
+export async function getDossiersTraitesStats(period: StatsPeriod = "30days") {
+  const evaluationDate = normalizeToUTCDay(new Date());
+  const endDate = evaluationDate;
+  const startDate = await calculateStartDateAsync(period, endDate);
+  const previousStartDate = await calculateStartDateAsync(period, startDate);
+
+  const [currentStats, previousStats] = await Promise.all([
+    getStatsForPeriod(startDate, endDate),
+    getStatsForPeriod(previousStartDate, startDate),
+  ]);
+
+  const detailsTraites: IDetailsDossiersTraites = {
+    rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
+    nouveau_projet: createStatWithVariation(currentStats.nouveau_projet, previousStats.nouveau_projet),
+    contacte_sans_retour: createStatWithVariation(
+      currentStats.contacte_sans_retour,
+      previousStats.contacte_sans_retour
+    ),
+    deja_accompagne: createStatWithVariation(currentStats.deja_accompagne, previousStats.deja_accompagne),
+    injoignables: createStatWithVariation(currentStats.injoignables, previousStats.injoignables),
+    coordonnees_incorrectes: createStatWithVariation(
+      currentStats.coordonnees_incorrectes,
+      previousStats.coordonnees_incorrectes
+    ),
+    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
+    deja_connu: currentStats.deja_connu,
+    total: currentStats.total_traites,
+  };
+
+  return {
+    details: detailsTraites,
+    evaluationDate,
+    period,
+  };
+}
+
+export async function getCouvertureRegionsStats(period: StatsPeriod = "30days") {
+  const regional = await getRegionalStats(period);
+
+  return {
+    regions: regional.regions,
+    period,
+  };
+}

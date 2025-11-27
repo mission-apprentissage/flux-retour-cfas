@@ -1,8 +1,9 @@
 "use client";
 
 import styles from "./tables/TraitementTable.module.css";
+import { Skeleton } from "./ui/Skeleton";
 
-export function formatPercentageBadge(percentage: number, evolution?: string) {
+export function formatPercentageBadge(percentage: number, evolution?: string, loadingEvolution?: boolean) {
   let badgeClass = styles.percentageBadgeMedium;
   if (percentage >= 70) {
     badgeClass = styles.percentageBadgeHigh;
@@ -19,7 +20,11 @@ export function formatPercentageBadge(percentage: number, evolution?: string) {
   return (
     <span>
       <span className={badgeClass}>{percentage}%</span>
-      {evolution && evolution !== "" && <span className={getEvolutionClass(evolution)}>{evolution}</span>}
+      {loadingEvolution ? (
+        <Skeleton width="32px" height="16px" inline />
+      ) : (
+        evolution && evolution !== "" && <span className={getEvolutionClass(evolution)}>{evolution}</span>
+      )}
     </span>
   );
 }

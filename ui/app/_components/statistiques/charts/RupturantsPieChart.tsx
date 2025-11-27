@@ -11,7 +11,7 @@ import { ItemChartTooltip } from "./ChartTooltip";
 import styles from "./RupturantsPieChart.module.css";
 
 interface RupturantsPieChartProps {
-  data: IRupturantsSummary;
+  data?: IRupturantsSummary;
   loading?: boolean;
 }
 

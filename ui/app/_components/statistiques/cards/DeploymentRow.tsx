@@ -6,12 +6,21 @@ interface DeploymentRowProps {
   label: string | React.ReactNode;
   value: number | undefined | React.ReactNode;
   loading: boolean;
+  loadingPercentage?: boolean;
   color?: string;
   percentage?: string;
   percentageColor?: string;
 }
 
-export function DeploymentRow({ label, value, loading, color, percentage, percentageColor }: DeploymentRowProps) {
+export function DeploymentRow({
+  label,
+  value,
+  loading,
+  loadingPercentage = false,
+  color,
+  percentage,
+  percentageColor,
+}: DeploymentRowProps) {
   return (
     <div className={styles.deploymentRow}>
       <div className={styles.deploymentLabel}>
@@ -30,11 +39,14 @@ export function DeploymentRow({ label, value, loading, color, percentage, percen
       ) : (
         <div className={percentage ? styles.deploymentValueWithPercentage : undefined}>
           <p className={styles.deploymentValue}>{value}</p>
-          {percentage && (
-            <p className={styles.cardPercentage} style={{ color: percentageColor }}>
-              {percentage}
-            </p>
-          )}
+          {percentage &&
+            (loadingPercentage ? (
+              <Skeleton width="40px" height="20px" />
+            ) : (
+              <p className={styles.cardPercentage} style={{ color: percentageColor }}>
+                {percentage}
+              </p>
+            ))}
         </div>
       )}
     </div>

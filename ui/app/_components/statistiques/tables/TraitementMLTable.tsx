@@ -3,13 +3,10 @@
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import type { ITraitementMLStatsResponse, StatsPeriod } from "shared/models/data/nationalStats.model";
+import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
-import { _get } from "@/common/httpClient";
-
-import { STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA } from "../config";
+import { useTraitementMLStats, usePrefetchTraitementML } from "../hooks/useStatsQueries";
 import { TableSkeleton } from "../ui/Skeleton";
 import { formatActivityDuration, formatPercentageBadge } from "../utils";
 
@@ -24,20 +21,19 @@ interface TraitementMLTableProps {
 type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
 
 export function TraitementMLTable({ period }: TraitementMLTableProps) {
-  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortColumn, setSortColumn] = useState<SortColumn>("total_jeunes");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const { data, isLoading, isFetching } = useQuery<ITraitementMLStatsResponse>(
-    ["mission-locale-stats", "traitement-ml", period, page, limit, sortColumn, sortDirection],
-    () =>
-      _get(`/api/v1/mission-locale/stats/traitement-ml`, {
-        params: { period, page, limit, sort_by: sortColumn, sort_order: sortDirection },
-      }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+  const { data, isLoading, isFetching } = useTraitementMLStats({
+    period,
+    page,
+    limit,
+    sort_by: sortColumn,
+    sort_order: sortDirection,
+  });
+  const prefetchNextPage = usePrefetchTraitementML();
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -62,21 +58,22 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
     if (data?.pagination && !isLoading) {
       const nextPage = page + 1;
       if (nextPage <= data.pagination.totalPages) {
-        queryClient.prefetchQuery({
-          queryKey: ["mission-locale-stats", "traitement-ml", period, nextPage, limit, sortColumn, sortDirection],
-          queryFn: () =>
-            _get(`/api/v1/mission-locale/stats/traitement-ml`, {
-              params: { period, page: nextPage, limit, sort_by: sortColumn, sort_order: sortDirection },
-            }),
-          staleTime: STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA.staleTime,
+        prefetchNextPage({
+          period,
+          page: nextPage,
+          limit,
+          sort_by: sortColumn,
+          sort_order: sortDirection,
         });
       }
     }
-  }, [data, isLoading, page, period, limit, sortColumn, sortDirection, queryClient]);
+  }, [data, isLoading, page, period, limit, sortColumn, sortDirection, prefetchNextPage]);
 
-  if (isFetching) {
+  if (isLoading) {
     return <TableSkeleton rows={limit} />;
   }
+
+  const loadingEvolution = isFetching && !isLoading;
 
   const mlList = data?.data || [];
   const pagination = data?.pagination;
@@ -173,7 +170,7 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
                 tooltipPosition={tooltipPosition}
               />,
               <div className={styles.centeredCell} key={`pct-${ml.id}`}>
-                {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution)}
+                {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution, loadingEvolution)}
               </div>,
               <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
                 {activity.text}

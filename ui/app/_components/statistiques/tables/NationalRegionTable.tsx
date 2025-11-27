@@ -5,14 +5,17 @@ import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useState } from "react";
 import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "../ui/Skeleton";
+
 import styles from "./NationalRegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
 
 interface NationalRegionTableProps {
   regions: IRegionStats[];
+  loadingDeltas?: boolean;
 }
 
-export function NationalRegionTable({ regions }: NationalRegionTableProps) {
+export function NationalRegionTable({ regions, loadingDeltas = false }: NationalRegionTableProps) {
   const [showAll, setShowAll] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof IRegionStats>("ml_activees");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -115,7 +118,7 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
                   <span>
                     <strong>{region.ml_activees}</strong>/{region.ml_total}
                   </span>
-                  {formatDelta(region.ml_activees_delta)}
+                  {loadingDeltas ? <Skeleton width="24px" height="16px" /> : formatDelta(region.ml_activees_delta)}
                 </div>,
                 <div className={styles.centeredCell} key={`engaged-${region.code}`}>
                   {hasActiveML ? (
@@ -123,7 +126,7 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
                       <span>
                         <strong>{region.ml_engagees}</strong>/{region.ml_activees}
                       </span>
-                      {formatDelta(region.ml_engagees_delta)}
+                      {loadingDeltas ? <Skeleton width="24px" height="16px" /> : formatDelta(region.ml_engagees_delta)}
                     </>
                   ) : (
                     <span>-</span>
@@ -136,7 +139,11 @@ export function NationalRegionTable({ regions }: NationalRegionTableProps) {
                   {hasActiveML ? (
                     <>
                       <span>{region.traites || 0}</span>
-                      {region.traites_variation && formatVariationBadge(region.traites_variation)}
+                      {loadingDeltas ? (
+                        <Skeleton width="40px" height="16px" />
+                      ) : (
+                        region.traites_variation && formatVariationBadge(region.traites_variation)
+                      )}
                     </>
                   ) : (
                     <span>-</span>

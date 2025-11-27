@@ -1,13 +1,10 @@
 "use client";
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ITraitementRegionStats, StatsPeriod } from "shared/models/data/nationalStats.model";
 
-import { _get } from "@/common/httpClient";
-
-import { STATS_QUERY_CONFIG } from "../config";
+import { useTraitementRegionsStats } from "../hooks/useStatsQueries";
 import { TableSkeleton } from "../ui/Skeleton";
 import { formatMlActives, formatPercentageBadgeSimple } from "../utils";
 
@@ -24,11 +21,7 @@ export function TraitementRegionTable({ period }: TraitementRegionTableProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn>("pourcentage_traites");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const { data: regions, isLoading } = useQuery<ITraitementRegionStats[]>(
-    ["mission-locale-stats", "traitement-regions", period],
-    () => _get(`/api/v1/mission-locale/stats/traitement-regions`, { params: { period } }),
-    STATS_QUERY_CONFIG
-  );
+  const { data: regions, isLoading } = useTraitementRegionsStats(period);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {

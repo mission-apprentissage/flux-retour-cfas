@@ -11,9 +11,15 @@ interface TraitementCardsProps {
   latestStats?: TraitementStats;
   firstStats?: TraitementStats;
   loading?: boolean;
+  loadingPercentage?: boolean;
 }
 
-export function TraitementCards({ latestStats, firstStats, loading = false }: TraitementCardsProps) {
+export function TraitementCards({
+  latestStats,
+  firstStats,
+  loading = false,
+  loadingPercentage = false,
+}: TraitementCardsProps) {
   return (
     <>
       <StatCard
@@ -21,24 +27,28 @@ export function TraitementCards({ latestStats, firstStats, loading = false }: Tr
         value={latestStats?.total}
         previousValue={firstStats?.total}
         loading={loading}
+        loadingPercentage={loadingPercentage}
       />
       <StatCard
         label="Total jeunes contactés par les Missions Locales"
         value={latestStats?.total_contacte}
         previousValue={firstStats?.total_contacte}
         loading={loading}
+        loadingPercentage={loadingPercentage}
       />
       <StatCard
         label="Total jeunes ayant répondu"
         value={latestStats?.total_repondu}
         previousValue={firstStats?.total_repondu}
         loading={loading}
+        loadingPercentage={loadingPercentage}
       />
       <StatCard
         label="Total jeunes accompagnés"
         value={latestStats?.total_accompagne}
         previousValue={firstStats?.total_accompagne}
         loading={loading}
+        loadingPercentage={loadingPercentage}
         tooltip={
           <>
             Les &quot;jeunes accompagnés&quot; représentent la somme :

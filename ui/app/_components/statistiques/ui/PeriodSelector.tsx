@@ -5,6 +5,8 @@ import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { STATS_LAUNCH_DATE_LABEL } from "../constants";
 
+import styles from "./PeriodSelector.module.css";
+
 export type { StatsPeriod as Period } from "shared/models/data/nationalStats.model";
 
 interface PeriodSelectorProps {
@@ -32,14 +34,16 @@ export function PeriodSelector({
   }
 
   return (
-    <Select
-      label={hideLabel ? "" : "Période"}
-      options={options}
-      nativeSelectProps={{
-        value,
-        onChange: (e) => onChange(e.target.value as StatsPeriod),
-        className,
-      }}
-    />
+    <div className={styles.selector}>
+      <Select
+        label={hideLabel ? "" : "Période"}
+        options={options}
+        nativeSelectProps={{
+          value,
+          onChange: (e) => onChange(e.target.value as StatsPeriod),
+          className,
+        }}
+      />
+    </div>
   );
 }

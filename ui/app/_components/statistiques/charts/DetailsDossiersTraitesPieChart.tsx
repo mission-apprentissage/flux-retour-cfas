@@ -10,7 +10,7 @@ import { ItemChartTooltip } from "./ChartTooltip";
 import styles from "./DetailsDossiersTraitesPieChart.module.css";
 
 interface DetailsDossiersTraitesPieChartProps {
-  data: IDetailsDossiersTraites;
+  data?: IDetailsDossiersTraites;
   loading?: boolean;
 }
 

@@ -4,6 +4,8 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useState } from "react";
 
+import { Skeleton } from "../ui/Skeleton";
+
 import styles from "./RegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
 
@@ -22,9 +24,10 @@ export interface RegionStats {
 interface RegionTableProps {
   regions: RegionStats[];
   showDetailColumn?: boolean;
+  loadingDeltas?: boolean;
 }
 
-export function RegionTable({ regions, showDetailColumn = true }: RegionTableProps) {
+export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = false }: RegionTableProps) {
   const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -122,14 +125,23 @@ export function RegionTable({ regions, showDetailColumn = true }: RegionTablePro
                 <span>
                   <strong>{region.ml_activees}</strong>/{region.ml_total}
                 </span>
-                {formatDelta(region.ml_activees_delta)}
+                {loadingDeltas ? <Skeleton width="24px" height="16px" /> : formatDelta(region.ml_activees_delta)}
               </div>,
               <div className={styles.centeredCell} key={`engaged-${region.code}`}>
                 <span>
                   <strong>{region.ml_engagees}</strong>/{region.ml_activees}
                 </span>
-                {formatDelta(region.ml_engagees_delta)}
-                {formatEngagementBadge(region.engagement_rate)}
+                {loadingDeltas ? (
+                  <>
+                    <Skeleton width="24px" height="16px" />
+                    <Skeleton width="32px" height="20px" />
+                  </>
+                ) : (
+                  <>
+                    {formatDelta(region.ml_engagees_delta)}
+                    {formatEngagementBadge(region.engagement_rate)}
+                  </>
+                )}
               </div>,
               ...(showDetailColumn ? [""] : []),
             ])}

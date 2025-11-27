@@ -4,10 +4,17 @@ interface SkeletonProps {
   width?: string | number;
   height?: string | number;
   className?: string;
+  inline?: boolean;
 }
 
-export function Skeleton({ width = "100%", height = "24px", className }: SkeletonProps) {
-  return <div className={`${styles.skeleton} ${className || ""}`} style={{ width, height }} />;
+export function Skeleton({ width = "100%", height = "24px", className, inline = false }: SkeletonProps) {
+  const Element = inline ? "span" : "div";
+  return (
+    <Element
+      className={`${styles.skeleton} ${inline ? styles.skeletonInline : ""} ${className || ""}`}
+      style={{ width, height }}
+    />
+  );
 }
 
 interface CardSkeletonProps {
