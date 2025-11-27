@@ -21,6 +21,20 @@ export function NationalRegionTable({ regions, loadingDeltas = false }: National
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const sortedRegions = [...regions].sort((a, b) => {
+    const columnsWithEmptyHandling: (keyof IRegionStats)[] = ["ml_engagees", "a_traiter", "traites"];
+
+    if (columnsWithEmptyHandling.includes(sortColumn)) {
+      const aHasActiveML = a.ml_activees > 0;
+      const bHasActiveML = b.ml_activees > 0;
+
+      if (!aHasActiveML && !bHasActiveML) {
+        if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
+        return b.ml_engagees - a.ml_engagees;
+      }
+      if (!aHasActiveML) return sortDirection === "asc" ? -1 : 1;
+      if (!bHasActiveML) return sortDirection === "asc" ? 1 : -1;
+    }
+
     const aVal = a[sortColumn] ?? 0;
     const bVal = b[sortColumn] ?? 0;
 

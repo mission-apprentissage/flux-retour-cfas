@@ -785,7 +785,8 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
     traites: "traites",
     pourcentage_traites: "pourcentage_traites",
     derniere_activite: "derniere_activite",
-    jours_depuis_activite: "jours_depuis_activite",
+    // Utilise le champ _sort qui a une grande valeur pour les null (ML sans activité en dernier)
+    jours_depuis_activite: "jours_depuis_activite_sort",
   };
 
   const mongoSortField = sortFieldMap[sort_by] || "total_jeunes";
@@ -904,33 +905,71 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
       },
     },
     {
+      $lookup: {
+        from: "missionLocaleEffectif",
+        localField: "_id",
+        foreignField: "mission_locale_id",
+        as: "effectif_ids",
+      },
+    },
+    {
+      $lookup: {
+        from: "missionLocaleEffectifLog",
+        let: { effectif_ids: "$effectif_ids._id" },
+        pipeline: [
+          { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
+          { $sort: { created_at: -1 as const } },
+          { $limit: 1 },
+          { $project: { created_at: 1 } },
+        ],
+        as: "last_log",
+      },
+    },
+    {
+      $addFields: {
+        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
+        jours_depuis_activite_sort: {
+          $cond: [
+            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            -9999999,
+            {
+              $multiply: [
+                -1,
+                {
+                  $floor: {
+                    $divide: [
+                      { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
+                      1000 * 60 * 60 * 24,
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        jours_depuis_activite: {
+          $cond: [
+            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            null,
+            {
+              $floor: {
+                $divide: [
+                  { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
+                  1000 * 60 * 60 * 24,
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
       $facet: {
         total: [{ $count: "count" }],
         data: [
           { $sort: { [mongoSortField]: sortDirection, nom: 1 } as Record<string, 1 | -1> },
           { $skip: skip },
           { $limit: limit },
-          {
-            $lookup: {
-              from: "missionLocaleEffectif",
-              localField: "_id",
-              foreignField: "mission_locale_id",
-              as: "effectif_ids",
-            },
-          },
-          {
-            $lookup: {
-              from: "missionLocaleEffectifLog",
-              let: { effectif_ids: "$effectif_ids._id" },
-              pipeline: [
-                { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
-                { $sort: { created_at: -1 as const } },
-                { $limit: 1 },
-                { $project: { created_at: 1 } },
-              ],
-              as: "last_log",
-            },
-          },
           {
             $project: {
               id: { $toString: "$_id" },
@@ -950,21 +989,8 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
                 coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
                 autre: { $ifNull: ["$latest_stats.autre", 0] },
               },
-              derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
-              jours_depuis_activite: {
-                $cond: [
-                  { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
-                  null,
-                  {
-                    $floor: {
-                      $divide: [
-                        { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
-                        1000 * 60 * 60 * 24,
-                      ],
-                    },
-                  },
-                ],
-              },
+              derniere_activite: 1,
+              jours_depuis_activite: 1,
               pourcentage_evolution_value: {
                 $round: [{ $subtract: ["$pourcentage_traites", "$first_pourcentage_traites"] }, 0],
               },

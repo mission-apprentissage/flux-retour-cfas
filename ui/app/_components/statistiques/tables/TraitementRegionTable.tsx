@@ -18,7 +18,7 @@ interface TraitementRegionTableProps {
 type SortColumn = keyof ITraitementRegionStats;
 
 export function TraitementRegionTable({ period }: TraitementRegionTableProps) {
-  const [sortColumn, setSortColumn] = useState<SortColumn>("pourcentage_traites");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("traites");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const { data: regions, isLoading } = useTraitementRegionsStats(period);
