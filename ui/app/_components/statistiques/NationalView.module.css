@@ -11,15 +11,10 @@
   display: flex;
   gap: 24px;
   align-items: stretch;
-  margin-bottom: -1.5rem;
 }
 
 .rupturantsContainer {
   display: flex;
   flex-direction: column;
   flex: 1;
-}
-
-.reducedMarginBottom {
-  margin-bottom: 1.5rem !important;
 }

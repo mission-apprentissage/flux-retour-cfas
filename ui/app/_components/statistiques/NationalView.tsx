@@ -10,9 +10,9 @@ import { useState } from "react";
 import { _get } from "@/common/httpClient";
 
 import { AccompagnementConjointSection } from "./AccompagnementConjointSection";
-import { CardSection } from "./CardSection";
 import commonStyles from "./common.module.css";
 import { DetailsDossiersTraitesPieChart } from "./DetailsDossiersTraitesPieChart";
+import { IdentificationSuiviSection } from "./IdentificationSuiviSection";
 import { NationalRegionTable } from "./NationalRegionTable";
 import styles from "./NationalView.module.css";
 import { PeriodSelector, type Period } from "./PeriodSelector";
@@ -22,8 +22,6 @@ import { TableSkeleton } from "./Skeleton";
 import { StatisticsSection } from "./StatisticsSection";
 import { STATS_QUERY_CONFIG } from "./statistiques.config";
 import { SuiviTraitementSection } from "./SuiviTraitementSection";
-import syntheseStyles from "./SyntheseView.module.css";
-import { TraitementCards } from "./TraitementCards";
 import { useStatsPrefetch } from "./useStatsPrefetch";
 
 type ChartType = "bar" | "pie";
@@ -88,17 +86,13 @@ export function NationalView() {
         </div>
       </div>
 
-      <CardSection title="De l'identification au suivi">
-        <div className={syntheseStyles.cardsContainer}>
-          <TraitementCards
-            latestStats={stats?.traitement?.latest}
-            firstStats={stats?.traitement?.first}
-            loading={loading}
-          />
-        </div>
-      </CardSection>
+      <IdentificationSuiviSection
+        latestStats={stats?.traitement?.latest}
+        firstStats={stats?.traitement?.first}
+        loading={loading}
+      />
 
-      <hr className="fr-hr" />
+      <hr />
 
       <div className={styles.chartsRow}>
         <StatisticsSection
@@ -154,7 +148,7 @@ export function NationalView() {
         </StatisticsSection>
       </div>
 
-      <StatisticsSection title="Couverture et activités en région" className={styles.reducedMarginBottom}>
+      <StatisticsSection title="Couverture et activités en région">
         <div className={styles.tableContainer}>
           {loading ? <TableSkeleton rows={6} /> : <NationalRegionTable regions={stats?.regional?.regions || []} />}
         </div>

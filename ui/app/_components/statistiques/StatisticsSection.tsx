@@ -27,7 +27,7 @@ export function StatisticsSection({
   const headerClass = wrapTitle ? `${styles.header} ${styles.headerWrap}` : styles.header;
 
   return (
-    <section className={`${fr.cx("fr-mb-6w")} ${styles.section} ${widthClass} ${className || ""}`}>
+    <section className={`${styles.section} ${widthClass} ${className || ""}`}>
       <div className={headerClass}>
         <h2 className={titleClass}>{title}</h2>
         {controls && <div className={styles.controls}>{controls}</div>}

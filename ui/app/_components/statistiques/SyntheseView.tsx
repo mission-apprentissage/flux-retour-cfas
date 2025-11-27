@@ -11,13 +11,13 @@ import commonStyles from "./common.module.css";
 import { calculatePercentage, getPercentageColor } from "./constants";
 import { DeploymentRow } from "./DeploymentRow";
 import { FranceMapSVG } from "./FranceMapSVG";
+import { IdentificationSuiviSection } from "./IdentificationSuiviSection";
 import { PeriodSelector, type Period } from "./PeriodSelector";
 import { RegionTable } from "./RegionTable";
 import { TableSkeleton } from "./Skeleton";
+import { StatisticsSection } from "./StatisticsSection";
 import { STATS_QUERY_CONFIG } from "./statistiques.config";
-import { StatSection } from "./StatSection";
 import styles from "./SyntheseView.module.css";
-import { TraitementCards } from "./TraitementCards";
 import { useStatsPrefetch } from "./useStatsPrefetch";
 
 interface SyntheseViewProps {
@@ -82,14 +82,13 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
         </div>
       </div>
 
-      <StatSection title="Traitement">
-        <div className={styles.cardsContainer}>
-          <TraitementCards latestStats={traitementData?.latest} firstStats={traitementData?.first} loading={loading} />
-        </div>
-      </StatSection>
+      <IdentificationSuiviSection
+        latestStats={traitementData?.latest}
+        firstStats={traitementData?.first}
+        loading={loading}
+      />
 
-      <section className={`${fr.cx("fr-mb-6w")} ${styles.sectionContainer}`}>
-        <h2 className={fr.cx("fr-h4", "fr-mb-3w")}>Déploiement</h2>
+      <StatisticsSection title="Déploiement" className={styles.sectionContainer}>
         <div className={styles.deploymentContentCard}>
           <div className={styles.deploymentMapContainer}>
             <FranceMapSVG regionsActives={regionalStats.filter((r) => r.deployed).map((r) => r.code)} />
@@ -130,7 +129,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
             <RegionTable regions={regionalStats} showDetailColumn={showDetailColumn} />
           )}
         </div>
-      </section>
+      </StatisticsSection>
     </div>
   );
 }
