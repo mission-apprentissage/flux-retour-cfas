@@ -1,0 +1,109 @@
+.container {
+  padding: 0;
+  background: #f6f6f6;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000091;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 8px 0;
+}
+
+.content {
+  background: transparent;
+  padding: 16px 0;
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  flex: 1;
+}
+
+.chartWrapper {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  max-width: 250px;
+}
+
+.legend {
+  flex: 1 1 auto;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legendItem {
+  composes: legendItem from "./legend.module.css";
+}
+
+.legendDot {
+  composes: legendColorCircle from "./legend.module.css";
+}
+
+.legendLeftContent {
+  composes: legendLeftContent from "./legend.module.css";
+}
+
+.legendLabel {
+  composes: legendLabel from "./legend.module.css";
+}
+
+.legendRightContent {
+  composes: legendRightContent from "./legend.module.css";
+}
+
+.variation {
+  composes: legendVariation from "./legend.module.css";
+}
+
+.value {
+  composes: legendValue from "./legend.module.css";
+}
+
+.separator {
+  composes: legendSeparator from "./legend.module.css";
+}
+
+.knownYoungSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #eeeeee;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.miniChartWrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+
+.knownYoungLabel {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #161616;
+}
+
+.knownYoungValue {
+  flex: 0 0 auto;
+  font-size: 16px;
+  color: #161616;
+}

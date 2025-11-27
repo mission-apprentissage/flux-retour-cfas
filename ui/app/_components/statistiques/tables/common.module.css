@@ -1,0 +1,104 @@
+.sortableHeader {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortableHeaderCentered {
+  composes: sortableHeader;
+  justify-content: center;
+}
+
+.sortableContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortIcon {
+  font-size: 1rem;
+}
+
+.centeredCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-mention-grey);
+}
+
+.emptyValue {
+  color: var(--text-mention-grey);
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.delta {
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.deltaZero {
+  composes: delta;
+  color: var(--text-default-grey);
+}
+
+.deltaPositive {
+  composes: delta;
+  color: var(--text-default-success);
+}
+
+.deltaNegative {
+  composes: delta;
+  color: var(--text-default-error);
+}
+
+.variation {
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.variationZero {
+  composes: variation;
+  color: var(--text-default-grey);
+}
+
+.variationPositive {
+  composes: variation;
+  color: var(--text-default-success);
+}
+
+.variationNegative {
+  composes: variation;
+  color: var(--text-default-error);
+}
+
+.evolutionBadge {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.evolutionPositive {
+  composes: evolutionBadge;
+  color: var(--text-default-success);
+}
+
+.evolutionNegative {
+  composes: evolutionBadge;
+  color: var(--text-default-error);
+}
+
+.evolutionZero {
+  composes: evolutionBadge;
+  color: var(--text-mention-grey);
+}

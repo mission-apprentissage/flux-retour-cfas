@@ -1,4 +1,4 @@
-import { SyntheseView } from "../../_components/statistiques/SyntheseView";
+import { SyntheseView } from "../../_components/statistiques/views/SyntheseView";
 
 export default function StatistiquesPage() {
   return <SyntheseView showDetailColumn={true} />;

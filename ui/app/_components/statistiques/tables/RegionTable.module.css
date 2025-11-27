@@ -1,0 +1,87 @@
+.regionStatsTable {
+  display: flex;
+  justify-content: center;
+}
+
+.regionStatsTable table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.regionStatsTable th:first-child,
+.regionStatsTable td:first-child {
+  width: 300px;
+}
+
+.regionStatsTable th:nth-child(2),
+.regionStatsTable td:nth-child(2) {
+  width: 150px;
+  text-align: center;
+}
+
+.regionStatsTable th:nth-child(3),
+.regionStatsTable td:nth-child(3) {
+  width: 200px;
+  text-align: center;
+}
+
+.regionStatsTable th:nth-child(4),
+.regionStatsTable td:nth-child(4) {
+  width: 200px;
+  text-align: center;
+}
+
+.regionStatsTable th:nth-child(5),
+.regionStatsTable td:nth-child(5) {
+  width: 80px;
+}
+
+.centeredCell {
+  composes: centeredCell from "./common.module.css";
+}
+
+.buttonContainer {
+  composes: buttonContainer from "./common.module.css";
+}
+
+.emptyMessage {
+  composes: emptyMessage from "./common.module.css";
+}
+
+.delta {
+  composes: delta from "./common.module.css";
+}
+
+.deltaZero {
+  composes: deltaZero from "./common.module.css";
+}
+
+.deltaPositive {
+  composes: deltaPositive from "./common.module.css";
+}
+
+.deltaNegative {
+  composes: deltaNegative from "./common.module.css";
+}
+
+.engagementBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.engagementBadgeHigh {
+  composes: engagementBadge;
+  background-color: var(--background-contrast-success);
+  color: var(--text-label-green-emeraude);
+}
+
+.engagementBadgeLow {
+  composes: engagementBadge;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+}

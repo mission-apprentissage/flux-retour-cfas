@@ -3,7 +3,7 @@
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 
-import { FranceIcon } from "@/app/_components/statistiques/FranceIcon";
+import { FranceIcon } from "@/app/_components/statistiques/ui/FranceIcon";
 
 import styles from "./StatistiquesLayoutClient.module.css";
 

@@ -1,0 +1,53 @@
+.tooltipContainer {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tooltipContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 180px;
+}
+
+.tooltipLeftContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipColorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #161616;
+}
+
+.tooltipValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #161616;
+}
+
+.axisTooltipItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.axisTooltipTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #161616;
+  margin-bottom: 4px;
+}

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { ORGANISATION_TYPE } from "shared";
 
-import { NationalView } from "@/app/_components/statistiques/NationalView";
+import { NationalView } from "@/app/_components/statistiques/views/NationalView";
 import { getSession } from "@/app/_utils/session.utils";
 
 export default async function NationalPage() {

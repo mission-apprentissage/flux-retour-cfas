@@ -4,7 +4,7 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { ORGANISATION_TYPE } from "shared";
 
-import { FranceIcon } from "@/app/_components/statistiques/FranceIcon";
+import { FranceIcon } from "@/app/_components/statistiques/ui/FranceIcon";
 import { useAuth } from "@/app/_context/UserContext";
 
 import styles from "./StatistiquesLayoutClient.module.css";
