@@ -60,13 +60,6 @@ export function DeploymentSection({ defaultPeriod = "30days", showDetailColumn =
           <div className={styles.deploymentLegendsContainer}>
             <div className={styles.deploymentLegends}>
               <DeploymentRow
-                label="ML inactives"
-                value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
-                loading={loading}
-                color="#E3E3FD"
-              />
-
-              <DeploymentRow
                 label={
                   <>
                     Missions Locales actives
@@ -79,6 +72,13 @@ export function DeploymentSection({ defaultPeriod = "30days", showDetailColumn =
                 color="#6A6AF4"
                 percentage={calculatePercentage(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
                 percentageColor={getPercentageColor(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
+              />
+
+              <DeploymentRow
+                label="ML inactives"
+                value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
+                loading={loading}
+                color="#E3E3FD"
               />
 
               <div className={styles.deploymentSeparator} />
