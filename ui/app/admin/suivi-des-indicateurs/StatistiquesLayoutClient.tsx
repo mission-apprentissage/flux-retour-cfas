@@ -3,9 +3,11 @@
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 
+import { FranceIcon } from "@/app/_components/statistiques/ui/FranceIcon";
+
 import styles from "./StatistiquesLayoutClient.module.css";
 
-const SyntheseLabel = () => (
+const SyntheseLabel = ({ isActive }: { isActive: boolean }) => (
   <>
     <svg
       width="22"
@@ -17,10 +19,17 @@ const SyntheseLabel = () => (
     >
       <path
         d="M2.75 11H6.41667V19.25H2.75V11ZM15.5833 7.33331H19.25V19.25H15.5833V7.33331ZM9.16667 1.83331H12.8333V19.25H9.16667V1.83331Z"
-        fill="#000091"
+        fill={isActive ? "#000091" : "#CECECE"}
       />
     </svg>
     Synthèse
+  </>
+);
+
+const NationalLabel = ({ isActive }: { isActive: boolean }) => (
+  <>
+    <FranceIcon isActive={isActive} width={22} height={22} className={styles.syntheseIcon} />
+    National
   </>
 );
 
@@ -29,11 +38,18 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
 
   const sideMenuItems = [
     {
-      text: <SyntheseLabel />,
+      text: <SyntheseLabel isActive={pathname === "/admin/suivi-des-indicateurs"} />,
       linkProps: {
         href: "/admin/suivi-des-indicateurs",
       },
       isActive: pathname === "/admin/suivi-des-indicateurs",
+    },
+    {
+      text: <NationalLabel isActive={pathname === "/admin/suivi-des-indicateurs/national"} />,
+      linkProps: {
+        href: "/admin/suivi-des-indicateurs/national",
+      },
+      isActive: pathname === "/admin/suivi-des-indicateurs/national",
     },
   ];
 
@@ -41,7 +57,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
     <>
       <div className={styles.bannerContainer}>
         <div className={styles.bannerContent}>
-          <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions locales sur le service</h1>
+          <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions Locales sur le service</h1>
         </div>
       </div>
 

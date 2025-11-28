@@ -19,7 +19,7 @@ const typesOrganisation = [
     disabled: false,
   },
   {
-    label: "Une Mission locale",
+    label: "Une Mission Locale",
     value: "ML",
     disabled: false,
   },
@@ -125,9 +125,9 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
 
       {typeOrganisation === "ML" && !!missionLocaleList.length && (
         <FormControl isRequired>
-          <FormLabel>Votre Mission locale :</FormLabel>
+          <FormLabel>Votre Mission Locale :</FormLabel>
           <Select
-            placeholder="Sélectionner une Mission locale"
+            placeholder="Sélectionner une Mission Locale"
             onChange={(e) => onSelectedMissionLocale(e.target.value)}
           >
             {missionLocaleList.map((ml) => (

@@ -4,6 +4,11 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+.skeletonInline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 @keyframes pulse {
   0%,
   100% {
