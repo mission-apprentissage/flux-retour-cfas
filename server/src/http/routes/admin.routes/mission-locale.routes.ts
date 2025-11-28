@@ -113,6 +113,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         period: zStatsPeriod.optional(),
+        region: z.string().optional(),
       }),
     }),
     returnResult(getRupturantsRoute)
@@ -123,6 +124,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         period: zStatsPeriod.optional(),
+        region: z.string().optional(),
       }),
     }),
     returnResult(getDossiersTraitesRoute)
@@ -143,6 +145,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         period: zStatsPeriod.optional(),
+        region: z.string().optional(),
         page: z.coerce.number().optional().default(1),
         limit: z.coerce.number().optional().default(10),
         sort_by: z.string().optional().default("total_jeunes"),
@@ -162,7 +165,15 @@ export default () => {
     returnResult(getTraitementRegionsRoute)
   );
 
-  router.get("/stats/accompagnement-conjoint", returnResult(getAccompagnementConjointRoute));
+  router.get(
+    "/stats/accompagnement-conjoint",
+    validateRequestMiddleware({
+      query: z.object({
+        region: z.string().optional(),
+      }),
+    }),
+    returnResult(getAccompagnementConjointRoute)
+  );
 
   router.get("/:id", returnResult(getMl));
   router.get(
@@ -320,13 +331,13 @@ export const activateOrganismeAtDate = async (req) => {
 };
 
 const getRupturantsRoute = async (req) => {
-  const { period } = req.query;
-  return await getRupturantsStats((period as StatsPeriod) || "30days");
+  const { period, region } = req.query;
+  return await getRupturantsStats((period as StatsPeriod) || "30days", region as string | undefined);
 };
 
 const getDossiersTraitesRoute = async (req) => {
-  const { period } = req.query;
-  return await getDossiersTraitesStats((period as StatsPeriod) || "30days");
+  const { period, region } = req.query;
+  return await getDossiersTraitesStats((period as StatsPeriod) || "30days", region as string | undefined);
 };
 
 const getCouvertureRegionsRoute = async (req) => {
@@ -335,9 +346,10 @@ const getCouvertureRegionsRoute = async (req) => {
 };
 
 const getTraitementMLRoute = async (req) => {
-  const { period, page, limit, sort_by, sort_order } = req.query;
+  const { period, region, page, limit, sort_by, sort_order } = req.query;
   return await getTraitementStatsByMissionLocale({
     period: (period as StatsPeriod) || "30days",
+    region: region as string | undefined,
     page: Number(page) || 1,
     limit: Number(limit) || 10,
     sort_by: (sort_by as string) || "total_jeunes",
@@ -350,6 +362,7 @@ const getTraitementRegionsRoute = async (req) => {
   return await getSuiviTraitementByRegion((period as StatsPeriod) || "30days");
 };
 
-const getAccompagnementConjointRoute = async () => {
-  return await getAccompagnementConjointStats();
+const getAccompagnementConjointRoute = async (req) => {
+  const { region } = req.query;
+  return await getAccompagnementConjointStats(region as string | undefined);
 };
