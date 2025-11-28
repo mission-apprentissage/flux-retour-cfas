@@ -86,6 +86,18 @@ export function SyntheseView() {
             value={latestStats?.total_accompagne}
             previousValue={firstStats?.total_accompagne}
             loading={loading}
+            tooltip={
+              <>
+                Les &quot;jeunes accompagnés&quot; représentent la somme :
+                <ul>
+                  <li>
+                    Des jeunes non connus du service public à l&apos;emploi qui ont obtenu un rdv avec une Mission
+                    locale grâce au TBA (RDV pris)
+                  </li>
+                  <li>Les jeunes déjà connus et accompagnés par le service public à l&apos;emploi</li>
+                </ul>
+              </>
+            }
           />
         </div>
       </StatSection>
@@ -100,13 +112,6 @@ export function SyntheseView() {
           <div className={styles.deploymentLegendsContainer}>
             <div className={styles.deploymentLegends}>
               <DeploymentRow
-                label="ML inactives"
-                value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
-                loading={loading}
-                color="#E3E3FD"
-              />
-
-              <DeploymentRow
                 label={
                   <>
                     Missions locales actives
@@ -119,7 +124,12 @@ export function SyntheseView() {
                 percentage={calculatePercentage(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
                 percentageColor={getPercentageColor(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
               />
-
+              <DeploymentRow
+                label="ML inactives"
+                value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
+                loading={loading}
+                color="#E3E3FD"
+              />
               <div className={styles.deploymentSeparator} />
 
               <DeploymentRow label="Total ML en France" value={stats?.mlCount} loading={loading} />
