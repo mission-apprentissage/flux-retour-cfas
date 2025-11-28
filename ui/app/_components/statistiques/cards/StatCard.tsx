@@ -2,6 +2,7 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
 import { calculatePercentage, COLORS, getPercentageColor } from "../constants";
 import { CardSkeleton, Skeleton } from "../ui/Skeleton";
+
 import styles from "./StatCard.module.css";
 
 interface StatCardProps {
