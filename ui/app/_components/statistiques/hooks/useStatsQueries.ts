@@ -73,29 +73,33 @@ export const STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA = {
 } as const;
 
 export const statsQueryKeys = {
-  traitement: (period: Period) => ["stats", "traitement", period] as const,
+  traitement: (period: Period, region?: string) => ["stats", "traitement", period, region] as const,
   deployment: (period: Period) => ["stats", "deployment", period] as const,
   syntheseRegions: (period: Period) => ["stats", "synthese-regions", period] as const,
-  rupturants: (period: Period) => ["stats", "rupturants", period] as const,
-  dossiersTraites: (period: Period) => ["stats", "dossiers-traites", period] as const,
+  rupturants: (period: Period, region?: string) => ["stats", "rupturants", period, region] as const,
+  dossiersTraites: (period: Period, region?: string) => ["stats", "dossiers-traites", period, region] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
   traitementRegions: (period: Period) => ["stats", "traitement-regions", period] as const,
-  accompagnementConjoint: () => ["stats", "accompagnement-conjoint"] as const,
+  accompagnementConjoint: (region?: string) => ["stats", "accompagnement-conjoint", region] as const,
 };
 
 export interface TraitementMLParams {
   period: Period;
+  region?: string;
   page: number;
   limit: number;
   sort_by: string;
   sort_order: "asc" | "desc";
 }
 
-export function useTraitementStats(period: Period) {
+export function useTraitementStats(period: Period, region?: string) {
   return useQuery<ITraitementStatsResponse>(
-    statsQueryKeys.traitement(period),
-    () => _get("/api/v1/mission-locale/stats/traitement", { params: { period } }),
+    statsQueryKeys.traitement(period, region),
+    () =>
+      _get("/api/v1/mission-locale/stats/traitement", {
+        params: { period, ...(region && { region }) },
+      }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
@@ -116,18 +120,24 @@ export function useSyntheseRegionsStats(period: Period) {
   );
 }
 
-export function useRupturantsStats(period: Period) {
+export function useRupturantsStats(period: Period, region?: string) {
   return useQuery<IRupturantsStatsResponse>(
-    statsQueryKeys.rupturants(period),
-    () => _get("/api/v1/admin/mission-locale/stats/national/rupturants", { params: { period } }),
+    statsQueryKeys.rupturants(period, region),
+    () =>
+      _get("/api/v1/admin/mission-locale/stats/national/rupturants", {
+        params: { period, ...(region && { region }) },
+      }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
 
-export function useDossiersTraitesStats(period: Period) {
+export function useDossiersTraitesStats(period: Period, region?: string) {
   return useQuery<IDossiersTraitesStatsResponse>(
-    statsQueryKeys.dossiersTraites(period),
-    () => _get("/api/v1/admin/mission-locale/stats/national/dossiers-traites", { params: { period } }),
+    statsQueryKeys.dossiersTraites(period, region),
+    () =>
+      _get("/api/v1/admin/mission-locale/stats/national/dossiers-traites", {
+        params: { period, ...(region && { region }) },
+      }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
@@ -147,6 +157,7 @@ export function useTraitementMLStats(params: TraitementMLParams) {
       _get("/api/v1/admin/mission-locale/stats/traitement/ml", {
         params: {
           period: params.period,
+          ...(params.region && { region: params.region }),
           page: params.page,
           limit: params.limit,
           sort_by: params.sort_by,
@@ -168,6 +179,7 @@ export function usePrefetchTraitementML() {
           _get("/api/v1/admin/mission-locale/stats/traitement/ml", {
             params: {
               period: params.period,
+              ...(params.region && { region: params.region }),
               page: params.page,
               limit: params.limit,
               sort_by: params.sort_by,
@@ -189,10 +201,13 @@ export function useTraitementRegionsStats(period: Period) {
   );
 }
 
-export function useAccompagnementConjointStats() {
+export function useAccompagnementConjointStats(region?: string) {
   return useQuery<IAccompagnementConjointStats>(
-    statsQueryKeys.accompagnementConjoint(),
-    () => _get("/api/v1/admin/mission-locale/stats/accompagnement-conjoint"),
+    statsQueryKeys.accompagnementConjoint(region),
+    () =>
+      _get("/api/v1/admin/mission-locale/stats/accompagnement-conjoint", {
+        params: region ? { region } : {},
+      }),
     STATS_QUERY_CONFIG
   );
 }

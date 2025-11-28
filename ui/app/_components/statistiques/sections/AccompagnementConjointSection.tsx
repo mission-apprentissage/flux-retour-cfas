@@ -3,6 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useMemo, useState } from "react";
+import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { IAccompagnementConjointStats } from "shared/models/data/nationalStats.model";
 
 import { ItemChartTooltip } from "../charts/ChartTooltip";
@@ -10,6 +11,7 @@ import { MotifsBarChart } from "../charts/MotifsBarChart";
 import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS } from "../constants";
 import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
+import { RegionSVG } from "../ui/RegionSVG";
 import { Skeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
@@ -23,12 +25,25 @@ const SECTION_TITLE =
 
 type StatusId = keyof typeof DOSSIERS_TRAITES_COLORS;
 
-function MapSection({ stats, loading }: { stats?: IAccompagnementConjointStats; loading: boolean }) {
+function MapSection({
+  stats,
+  loading,
+  region,
+}: {
+  stats?: IAccompagnementConjointStats;
+  loading: boolean;
+  region?: string;
+}) {
+  const regionInfo = region ? REGIONS_BY_CODE[region as keyof typeof REGIONS_BY_CODE] : undefined;
+  const locationLabel = regionInfo ? `dans la région ${regionInfo.nom}` : "en France";
+
   return (
     <div className={styles.mapSection}>
       <div className={styles.mapContainer}>
         {loading ? (
           <Skeleton height="232px" width="228px" />
+        ) : region ? (
+          <RegionSVG regionCode={region} fill="#6A6AF4" />
         ) : (
           <FranceMapSVG regionsActives={stats?.regionsActives || []} />
         )}
@@ -36,7 +51,7 @@ function MapSection({ stats, loading }: { stats?: IAccompagnementConjointStats; 
 
       <div className={styles.statsCards}>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>CFA partenaires en France</span>
+          <span className={styles.statLabel}>CFA partenaires {locationLabel}</span>
           {loading ? (
             <Skeleton height="20px" width="40px" />
           ) : (
@@ -45,7 +60,7 @@ function MapSection({ stats, loading }: { stats?: IAccompagnementConjointStats; 
         </div>
 
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Missions Locales concernées</span>
+          <span className={styles.statLabel}>Missions Locales concernées {locationLabel}</span>
           {loading ? (
             <Skeleton height="20px" width="40px" />
           ) : (
@@ -193,10 +208,14 @@ function ExplanationAccordion({ isExpanded, onToggle }: { isExpanded: boolean; o
   );
 }
 
-export function AccompagnementConjointSection() {
+interface AccompagnementConjointSectionProps {
+  region?: string;
+}
+
+export function AccompagnementConjointSection({ region }: AccompagnementConjointSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats();
+  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats(region);
 
   const pieData = useMemo(() => {
     if (!stats) return [];
@@ -207,6 +226,10 @@ export function AccompagnementConjointSection() {
       color: DOSSIERS_TRAITES_COLORS[id],
     }));
   }, [stats]);
+
+  if (region && stats && !stats.regionsActives.includes(region)) {
+    return null;
+  }
 
   return (
     <StatisticsSection
@@ -219,7 +242,7 @@ export function AccompagnementConjointSection() {
         <ExplanationAccordion isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
 
         <div className={styles.content}>
-          <MapSection stats={stats} loading={loading} />
+          <MapSection stats={stats} loading={loading} region={region} />
           <FunnelCards stats={stats} loading={loading} />
 
           <div className={styles.chartsRow}>

@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.section h2 {
+  max-width: calc(100% - 80px);
+}
+
 .betaBadge {
   position: absolute;
   top: 32px;
@@ -73,6 +77,18 @@
   flex: 0 0 40%;
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.mapContainer > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mapContainer svg {
+  width: 228px;
+  height: 232px;
 }
 
 .statsCards {

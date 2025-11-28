@@ -11,5 +11,5 @@ export default async function NationalPage() {
     redirect("/suivi-des-indicateurs");
   }
 
-  return <NationalView />;
+  return <NationalView isAdmin={true} />;
 }

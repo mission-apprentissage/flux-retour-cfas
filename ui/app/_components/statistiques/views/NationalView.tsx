@@ -10,7 +10,11 @@ import commonStyles from "../ui/common.module.css";
 
 import styles from "./NationalView.module.css";
 
-export function NationalView() {
+interface NationalViewProps {
+  isAdmin?: boolean;
+}
+
+export function NationalView({ isAdmin = false }: NationalViewProps = {}) {
   return (
     <div>
       <div className={commonStyles.headerContainer}>
@@ -22,7 +26,7 @@ export function NationalView() {
 
       <IdentificationSuiviSection />
 
-      <CouvertureRegionsSection />
+      <CouvertureRegionsSection isAdmin={isAdmin} />
 
       <SuiviTraitementSection />
 

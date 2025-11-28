@@ -12,10 +12,23 @@ import styles from "./StatisticsSection.module.css";
 
 interface SuiviTraitementSectionProps {
   defaultPeriod?: Period;
+  region?: string;
 }
 
-export function SuiviTraitementSection({ defaultPeriod = "30days" }: SuiviTraitementSectionProps) {
+export function SuiviTraitementSection({ defaultPeriod = "30days", region }: SuiviTraitementSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
+
+  if (region) {
+    return (
+      <StatisticsSection
+        title="Suivi traitement"
+        controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
+        controlsPosition="below-left"
+      >
+        <TraitementMLTable period={period} region={region} />
+      </StatisticsSection>
+    );
+  }
 
   return (
     <StatisticsSection

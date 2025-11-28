@@ -16,11 +16,12 @@ import styles from "./TraitementTable.module.css";
 
 interface TraitementMLTableProps {
   period: StatsPeriod;
+  region?: string;
 }
 
 type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
 
-export function TraitementMLTable({ period }: TraitementMLTableProps) {
+export function TraitementMLTable({ period, region }: TraitementMLTableProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortColumn, setSortColumn] = useState<SortColumn>("jours_depuis_activite");
@@ -28,6 +29,7 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
 
   const { data, isLoading, isFetching } = useTraitementMLStats({
     period,
+    region,
     page,
     limit,
     sort_by: sortColumn,
@@ -60,6 +62,7 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
       if (nextPage <= data.pagination.totalPages) {
         prefetchNextPage({
           period,
+          region,
           page: nextPage,
           limit,
           sort_by: sortColumn,
@@ -67,7 +70,7 @@ export function TraitementMLTable({ period }: TraitementMLTableProps) {
         });
       }
     }
-  }, [data, isLoading, page, period, limit, sortColumn, sortDirection, prefetchNextPage]);
+  }, [data, isLoading, page, period, region, limit, sortColumn, sortDirection, prefetchNextPage]);
 
   if (isLoading) {
     return <TableSkeleton rows={limit} />;

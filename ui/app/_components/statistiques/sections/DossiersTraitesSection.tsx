@@ -9,10 +9,11 @@ import { StatisticsSection } from "./StatisticsSection";
 
 interface DossiersTraitesSectionProps {
   period?: Period;
+  region?: string;
 }
 
-export function DossiersTraitesSection({ period = "30days" }: DossiersTraitesSectionProps) {
-  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(period);
+export function DossiersTraitesSection({ period = "30days", region }: DossiersTraitesSectionProps) {
+  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(period, region);
 
   const loadingVariation = isFetching && !isLoading;
 
