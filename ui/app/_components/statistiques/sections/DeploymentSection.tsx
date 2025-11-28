@@ -17,9 +17,14 @@ import { StatisticsSection } from "./StatisticsSection";
 interface DeploymentSectionProps {
   defaultPeriod?: Period;
   showDetailColumn?: boolean;
+  isAdmin?: boolean;
 }
 
-export function DeploymentSection({ defaultPeriod = "30days", showDetailColumn = true }: DeploymentSectionProps) {
+export function DeploymentSection({
+  defaultPeriod = "30days",
+  showDetailColumn = true,
+  isAdmin = false,
+}: DeploymentSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
 
   const {
@@ -96,6 +101,7 @@ export function DeploymentSection({ defaultPeriod = "30days", showDetailColumn =
               regions={regionalStats}
               showDetailColumn={showDetailColumn}
               loadingDeltas={loadingPercentage}
+              isAdmin={isAdmin}
             />
           )}
         </div>

@@ -16,12 +16,13 @@ type ChartType = "bar" | "pie";
 
 interface RupturantsSectionProps {
   period?: Period;
+  region?: string;
 }
 
-export function RupturantsSection({ period = "30days" }: RupturantsSectionProps) {
+export function RupturantsSection({ period = "30days", region }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
-  const { data, isLoading, isFetching, error } = useRupturantsStats(period);
+  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region);
 
   const loadingVariation = isFetching && !isLoading;
 

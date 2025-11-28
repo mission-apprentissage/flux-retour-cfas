@@ -16,8 +16,8 @@ export function FranceIcon({ isActive, width = 22, height = 22, className }: Fra
       height={height}
       className={className}
       style={{
-        filter: isActive ? "none" : "grayscale(100%)",
-        opacity: isActive ? 1 : 0.6,
+        filter: isActive ? "none" : "grayscale(100%) brightness(1.6)",
+        opacity: isActive ? 1 : 0.35,
       }}
     />
   );

@@ -6,9 +6,10 @@ import commonStyles from "../ui/common.module.css";
 
 interface SyntheseViewProps {
   showDetailColumn?: boolean;
+  isAdmin?: boolean;
 }
 
-export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}) {
+export function SyntheseView({ showDetailColumn = true, isAdmin = false }: SyntheseViewProps = {}) {
   return (
     <div>
       <div className={commonStyles.headerContainer}>
@@ -22,7 +23,7 @@ export function SyntheseView({ showDetailColumn = true }: SyntheseViewProps = {}
 
       <IdentificationSuiviSection showCharts={false} />
 
-      <DeploymentSection showDetailColumn={showDetailColumn} />
+      <DeploymentSection showDetailColumn={showDetailColumn} isAdmin={isAdmin} />
     </div>
   );
 }

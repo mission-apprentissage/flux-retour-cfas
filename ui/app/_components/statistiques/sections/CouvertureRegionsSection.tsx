@@ -12,9 +12,10 @@ import { StatisticsSection } from "./StatisticsSection";
 
 interface CouvertureRegionsSectionProps {
   defaultPeriod?: Period;
+  isAdmin?: boolean;
 }
 
-export function CouvertureRegionsSection({ defaultPeriod = "30days" }: CouvertureRegionsSectionProps) {
+export function CouvertureRegionsSection({ defaultPeriod = "30days", isAdmin = false }: CouvertureRegionsSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const { data, isLoading, isFetching, error } = useCouvertureRegionsStats(period);
 
@@ -31,7 +32,7 @@ export function CouvertureRegionsSection({ defaultPeriod = "30days" }: Couvertur
           {isLoading ? (
             <TableSkeleton rows={6} />
           ) : (
-            <NationalRegionTable regions={data?.regions || []} loadingDeltas={loadingDeltas} />
+            <NationalRegionTable regions={data?.regions || []} loadingDeltas={loadingDeltas} isAdmin={isAdmin} />
           )}
         </div>
       </StatsErrorHandler>

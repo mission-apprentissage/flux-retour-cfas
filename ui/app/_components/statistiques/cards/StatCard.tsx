@@ -45,14 +45,14 @@ export function StatCard({
             <CardSkeleton />
           ) : (
             <>
-              <p className={styles.cardValue}>
+              <div className={styles.cardValue}>
                 {value?.toLocaleString("fr-FR") || 0}
                 {tooltip && (
                   <span className={styles.tooltip}>
                     <Tooltip kind="hover" title={tooltip} />
                   </span>
                 )}
-              </p>
+              </div>
               {loadingPercentage ? (
                 <Skeleton width="40px" height="20px" />
               ) : (

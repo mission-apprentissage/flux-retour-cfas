@@ -24,3 +24,16 @@
 .chartsContainer > section:last-child {
   width: calc(66.66% - 50px);
 }
+
+.chartsContainerFullWidth {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 24px;
+}
+
+.chartsContainerFullWidth > section {
+  background-color: white;
+  margin-bottom: 0;
+  width: 100%;
+}

@@ -36,6 +36,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         period: zStatsPeriod.optional(),
+        region: z.string().optional(),
       }),
     }),
     returnResult(getTraitementRoute)
@@ -88,8 +89,8 @@ const getLbaLink = async (req, res, next) => {
 };
 
 const getTraitementRoute = async (req) => {
-  const { period } = req.query;
-  return await getTraitementStats((period as StatsPeriod) || "30days");
+  const { period, region } = req.query;
+  return await getTraitementStats((period as StatsPeriod) || "30days", undefined, region as string | undefined);
 };
 
 const getDeploymentRoute = async (req) => {

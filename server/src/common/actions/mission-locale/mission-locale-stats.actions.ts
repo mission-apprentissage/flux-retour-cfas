@@ -87,6 +87,31 @@ const buildRegionLookupPipeline = (localField = "_id") => [
   },
 ];
 
+const getMissionLocaleIdsByRegion = async (region: string): Promise<ObjectId[]> => {
+  const mls = await organisationsDb()
+    .find(
+      {
+        type: "MISSION_LOCALE",
+        "adresse.region": region,
+        activated_at: { $exists: true, $ne: null },
+      },
+      { projection: { _id: 1 } }
+    )
+    .toArray();
+
+  return mls.map((ml) => ml._id);
+};
+
+const withMissionLocaleFilter = <T extends Record<string, unknown>>(
+  filter: T,
+  missionLocaleIds?: ObjectId[]
+): T & { mission_locale_id?: { $in: ObjectId[] } } => {
+  if (missionLocaleIds && missionLocaleIds.length > 0) {
+    return { ...filter, mission_locale_id: { $in: missionLocaleIds } };
+  }
+  return filter;
+};
+
 type MongoExpression = string | Record<string, unknown>;
 const buildPercentageExpression = (numerator: MongoExpression, denominator: MongoExpression) => ({
   $cond: [
@@ -212,7 +237,11 @@ const DEFAULT_STATS_OPTIONS: StatsAggregationOptions = {
 
 type MongoAggregationField = string | { $ifNull: [string, number] };
 
-const getStatsAtDate = async (currentDate: Date, options: StatsAggregationOptions = DEFAULT_STATS_OPTIONS) => {
+const getStatsAtDate = async (
+  currentDate: Date,
+  options: StatsAggregationOptions = DEFAULT_STATS_OPTIONS,
+  missionLocaleIds?: ObjectId[]
+) => {
   const opts = { ...DEFAULT_STATS_OPTIONS, ...options };
 
   const totalContacteAdd: MongoAggregationField[] = [
@@ -238,9 +267,11 @@ const getStatsAtDate = async (currentDate: Date, options: StatsAggregationOption
     ? ["$stats.rdv_pris", "$stats.nouveau_projet"]
     : ["$stats.rdv_pris", "$stats.deja_accompagne"];
 
+  const matchFilter = withMissionLocaleFilter({ computed_day: currentDate }, missionLocaleIds);
+
   const stats = await missionLocaleStatsDb()
     .aggregate([
-      { $match: { computed_day: currentDate } },
+      { $match: matchFilter },
       {
         $group: {
           _id: null,
@@ -275,45 +306,55 @@ const getStatsAtDate = async (currentDate: Date, options: StatsAggregationOption
   return stats;
 };
 
-const getStatsAtDateWithInjoignable = async (currentDate: Date) => {
-  return getStatsAtDate(currentDate, {
-    includeInjoignableInContacte: false,
-    includeAutreAvecContactInRepondu: false,
-    accompagneUsesNouveauProjet: true,
-  });
+const getStatsAtDateWithInjoignable = async (currentDate: Date, missionLocaleIds?: ObjectId[]) => {
+  return getStatsAtDate(
+    currentDate,
+    {
+      includeInjoignableInContacte: false,
+      includeAutreAvecContactInRepondu: false,
+      accompagneUsesNouveauProjet: true,
+    },
+    missionLocaleIds
+  );
 };
 
-const buildCumulativeStatsPipeline = (targetDate: Date) => [
-  { $match: { computed_day: { $lte: targetDate } } },
-  { $sort: { computed_day: -1 as const } },
-  {
-    $group: {
-      _id: "$mission_locale_id",
-      latest_stats: { $first: "$stats" },
-    },
-  },
-  {
-    $group: {
-      _id: null,
-      total: { $sum: "$latest_stats.total" },
-      total_traites: { $sum: "$latest_stats.traite" },
-      total_a_traiter: { $sum: "$latest_stats.a_traiter" },
-    },
-  },
-];
+const buildCumulativeStatsPipeline = (targetDate: Date, missionLocaleIds?: ObjectId[]) => {
+  const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: targetDate } }, missionLocaleIds);
 
-export const getCumulativeStatsForDates = async (dates: Date[]) => {
+  return [
+    { $match: matchFilter },
+    { $sort: { computed_day: -1 as const } },
+    {
+      $group: {
+        _id: "$mission_locale_id",
+        latest_stats: { $first: "$stats" },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$latest_stats.total" },
+        total_traites: { $sum: "$latest_stats.traite" },
+        total_a_traiter: { $sum: "$latest_stats.a_traiter" },
+      },
+    },
+  ];
+};
+
+export const getCumulativeStatsForDates = async (dates: Date[], missionLocaleIds?: ObjectId[]) => {
   if (dates.length === 0) return [];
 
   const facetPipelines: Record<string, object[]> = {};
   dates.forEach((date, index) => {
-    facetPipelines[`date_${index}`] = buildCumulativeStatsPipeline(date);
+    facetPipelines[`date_${index}`] = buildCumulativeStatsPipeline(date, missionLocaleIds);
   });
 
   const maxDate = dates.reduce((max, d) => (d > max ? d : max), dates[0]);
 
+  const initialMatchFilter = withMissionLocaleFilter({ computed_day: { $lte: maxDate } }, missionLocaleIds);
+
   const [result] = await missionLocaleStatsDb()
-    .aggregate([{ $match: { computed_day: { $lte: maxDate } } }, { $facet: facetPipelines }], { allowDiskUse: true })
+    .aggregate([{ $match: initialMatchFilter }, { $facet: facetPipelines }], { allowDiskUse: true })
     .toArray();
 
   return dates.map((date, index) => {
@@ -571,23 +612,24 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
 
 export async function getStatsForPeriod(
   _startDate: Date,
-  endDate: Date
+  endDate: Date,
+  missionLocaleIds?: ObjectId[]
 ): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
   try {
-    let stats = await getStatsAtDateWithInjoignable(endDate);
+    let stats = await getStatsAtDateWithInjoignable(endDate, missionLocaleIds);
 
     if (stats.length === 0) {
+      const findFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+
       const lastAvailableStats = await missionLocaleStatsDb()
-        .find({
-          computed_day: { $lte: endDate },
-        })
+        .find(findFilter)
         .sort({ computed_day: -1 })
         .limit(1)
         .toArray();
 
       if (lastAvailableStats.length > 0) {
         const lastDate = lastAvailableStats[0].computed_day;
-        stats = await getStatsAtDateWithInjoignable(lastDate);
+        stats = await getStatsAtDateWithInjoignable(lastDate, missionLocaleIds);
       }
     }
 
@@ -625,10 +667,14 @@ export async function getStatsForPeriod(
 
 export const getTraitementStats = async (
   period: StatsPeriod = "30days",
-  evaluationDate: Date = normalizeToUTCDay(new Date())
+  evaluationDate: Date = normalizeToUTCDay(new Date()),
+  region?: string
 ): Promise<ITraitementStatsResponse> => {
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
+
+  // Récupérer les IDs des missions locales de la région si spécifiée
+  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
 
   const traitementsGroupStage = {
     $group: {
@@ -671,9 +717,23 @@ export const getTraitementStats = async (
     total_accompagne: number;
   };
 
+  const latestMatchStage = {
+    $match: {
+      computed_day: { $lte: endDate },
+      ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
+    },
+  };
+
+  const firstMatchStage = {
+    $match: {
+      computed_day: { $gte: startDate, $lte: endDate },
+      ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
+    },
+  };
+
   const [latestStatsResult] = (await missionLocaleStatsDb()
     .aggregate([
-      { $match: { computed_day: { $lte: endDate } } },
+      latestMatchStage,
       traitementsGroupStage,
       { $match: { total: { $gt: 0 } } },
       { $sort: { _id: -1 } },
@@ -683,7 +743,7 @@ export const getTraitementStats = async (
 
   const [firstStatsResult] = (await missionLocaleStatsDb()
     .aggregate([
-      { $match: { computed_day: { $gte: startDate, $lte: endDate } } },
+      firstMatchStage,
       traitementsGroupStage,
       { $match: { total: { $gt: 0 } } },
       { $sort: { _id: 1 } },
@@ -767,6 +827,7 @@ export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<
 
 interface TraitementMLParams {
   period: StatsPeriod;
+  region?: string;
   page: number;
   limit: number;
   sort_by: string;
@@ -774,7 +835,7 @@ interface TraitementMLParams {
 }
 
 export const getTraitementStatsByMissionLocale = async (params: TraitementMLParams) => {
-  const { period, page, limit, sort_by, sort_order } = params;
+  const { period, region, page, limit, sort_by, sort_order } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = calculateStartDate(period, evaluationDate);
 
@@ -853,6 +914,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
       $match: {
         "ml.type": "MISSION_LOCALE",
         "ml.activated_at": { $exists: true, $ne: null },
+        ...(region && { "ml.adresse.region": region }),
       },
     },
     {
@@ -1202,11 +1264,13 @@ const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
   return [...new Set(organismesAvecRegion.map((o) => o.adresse?.region).filter(Boolean))] as string[];
 };
 
-export const getAccompagnementConjointStats = async (): Promise<IAccompagnementConjointStats> => {
+export const getAccompagnementConjointStats = async (region?: string): Promise<IAccompagnementConjointStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
   const { cfaPilotes, cfaPilotesOids } = await getCfaPilotes();
   const regionsActives = await getRegionsActives(cfaPilotesOids);
+
+  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
 
   const [accConjointStats] = await missionLocaleEffectifsDb()
     .aggregate([
@@ -1214,6 +1278,7 @@ export const getAccompagnementConjointStats = async (): Promise<IAccompagnementC
         $match: {
           "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
           "organisme_data.acc_conjoint": true,
+          ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
         },
       },
       {
@@ -1238,6 +1303,7 @@ export const getAccompagnementConjointStats = async (): Promise<IAccompagnementC
 
   const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
     "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
+    ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
   });
 
   const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
@@ -1309,18 +1375,23 @@ export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
   };
 }
 
-export async function getRupturantsStats(period: StatsPeriod = "30days") {
+export async function getRupturantsStats(period: StatsPeriod = "30days", region?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
   const previousStartDate = await calculateStartDateAsync(period, startDate);
 
+  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
+
   const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
-  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
+  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(
+    evenlySpacedDates,
+    missionLocaleIds
+  );
 
   const [currentStats, previousStats] = await Promise.all([
-    getStatsForPeriod(startDate, endDate),
-    getStatsForPeriod(previousStartDate, startDate),
+    getStatsForPeriod(startDate, endDate, missionLocaleIds),
+    getStatsForPeriod(previousStartDate, startDate, missionLocaleIds),
   ]);
 
   const rupturantsSummary: IRupturantsSummary = {
@@ -1337,15 +1408,17 @@ export async function getRupturantsStats(period: StatsPeriod = "30days") {
   };
 }
 
-export async function getDossiersTraitesStats(period: StatsPeriod = "30days") {
+export async function getDossiersTraitesStats(period: StatsPeriod = "30days", region?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
   const previousStartDate = await calculateStartDateAsync(period, startDate);
 
+  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
+
   const [currentStats, previousStats] = await Promise.all([
-    getStatsForPeriod(startDate, endDate),
-    getStatsForPeriod(previousStartDate, startDate),
+    getStatsForPeriod(startDate, endDate, missionLocaleIds),
+    getStatsForPeriod(previousStartDate, startDate, missionLocaleIds),
   ]);
 
   const detailsTraites: IDetailsDossiersTraites = {

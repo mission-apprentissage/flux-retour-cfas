@@ -2,6 +2,7 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Skeleton } from "../ui/Skeleton";
@@ -25,28 +26,29 @@ interface RegionTableProps {
   regions: RegionStats[];
   showDetailColumn?: boolean;
   loadingDeltas?: boolean;
+  isAdmin?: boolean;
 }
 
-export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = false }: RegionTableProps) {
+export function RegionTable({
+  regions,
+  showDetailColumn = true,
+  loadingDeltas = false,
+  isAdmin = false,
+}: RegionTableProps) {
   const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const filteredRegions = showInactive ? regions : regions.filter((r) => r.deployed);
 
-  const displayedRegions = [...filteredRegions].sort((a, b) => {
+  const sortedDisplayedRegions = [...filteredRegions].sort((a, b) => {
     const aVal = a[sortColumn];
     const bVal = b[sortColumn];
-
     const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
     const primarySort = sortDirection === "desc" ? -comparison : comparison;
-
     if (primarySort !== 0) return primarySort;
-
     if (a.ml_total !== b.ml_total) return b.ml_total - a.ml_total;
-
     if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
-
     return b.ml_engagees - a.ml_engagees;
   });
 
@@ -78,7 +80,7 @@ export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = 
 
   return (
     <div>
-      {displayedRegions.length === 0 ? (
+      {sortedDisplayedRegions.length === 0 ? (
         <p className={styles.emptyMessage}>
           Aucune région à afficher.{" "}
           {!showInactive && hasInactiveRegions && "Cliquez sur le bouton ci-dessous pour afficher toutes les régions."}
@@ -118,7 +120,7 @@ export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = 
               />,
               ...(showDetailColumn ? ["Détail"] : []),
             ]}
-            data={displayedRegions.map((region) => [
+            data={sortedDisplayedRegions.map((region) => [
               region.nom,
               region.ml_total.toString(),
               <div className={styles.centeredCell} key={`active-${region.code}`}>
@@ -143,7 +145,21 @@ export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = 
                   </>
                 )}
               </div>,
-              ...(showDetailColumn ? [""] : []),
+              ...(showDetailColumn
+                ? [
+                    isAdmin ? (
+                      <Link
+                        key={`detail-${region.code}`}
+                        href={`/admin/suivi-des-indicateurs/region/${region.code}`}
+                        className={`${styles.detailLink} ${styles.stretchedLink}`}
+                      >
+                        <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
+                      </Link>
+                    ) : (
+                      ""
+                    ),
+                  ]
+                : []),
             ])}
           />
         </div>

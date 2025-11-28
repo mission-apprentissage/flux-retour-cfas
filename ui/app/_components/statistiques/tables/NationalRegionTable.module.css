@@ -80,3 +80,41 @@
 .variationNegative {
   composes: variationNegative from "./common.module.css";
 }
+
+.detailArrow {
+  color: #000091;
+}
+
+.detailLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+}
+
+.regionStatsTable tbody tr {
+  position: relative;
+}
+
+.stretchedLink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.regionStatsTable tbody tr:has(.stretchedLink) {
+  cursor: pointer;
+}
+
+.regionStatsTable tbody tr:has(.stretchedLink):hover {
+  background-color: var(--background-alt-grey);
+}
+
+.regionStatsTable th:nth-child(6),
+.regionStatsTable td:nth-child(6) {
+  width: 80px;
+}

@@ -15,14 +15,18 @@ import { StatisticsSection } from "./StatisticsSection";
 interface IdentificationSuiviSectionProps {
   defaultPeriod?: Period;
   showCharts?: boolean;
+  region?: string;
+  hideDossiersTraites?: boolean;
 }
 
 export function IdentificationSuiviSection({
   defaultPeriod = "30days",
   showCharts = true,
+  region,
+  hideDossiersTraites = false,
 }: IdentificationSuiviSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
-  const { data, isLoading, isFetching, error } = useTraitementStats(period);
+  const { data, isLoading, isFetching, error } = useTraitementStats(period, region);
 
   const loadingPercentage = isFetching && !isLoading;
 
@@ -42,9 +46,9 @@ export function IdentificationSuiviSection({
           />
         </div>
         {showCharts && (
-          <div className={styles.chartsContainer}>
-            <RupturantsSection period={period} />
-            <DossiersTraitesSection period={period} />
+          <div className={hideDossiersTraites ? styles.chartsContainerFullWidth : styles.chartsContainer}>
+            <RupturantsSection period={period} region={region} />
+            {!hideDossiersTraites && <DossiersTraitesSection period={period} region={region} />}
           </div>
         )}
       </StatsErrorHandler>

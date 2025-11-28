@@ -2,10 +2,15 @@
 
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
+import { REGIONS_BY_CODE, REGION_CODES_WITH_SVG, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { FranceIcon } from "@/app/_components/statistiques/ui/FranceIcon";
+import { FranceMapSVG } from "@/app/_components/statistiques/ui/FranceMapSVG";
+import { RegionSVG } from "@/app/_components/statistiques/ui/RegionSVG";
 
 import styles from "./StatistiquesLayoutClient.module.css";
+
+const DEFAULT_REGION_CODE = "84";
 
 const SyntheseLabel = ({ isActive }: { isActive: boolean }) => (
   <>
@@ -33,8 +38,38 @@ const NationalLabel = ({ isActive }: { isActive: boolean }) => (
   </>
 );
 
+const RegionsLabel = ({ isActive }: { isActive: boolean }) => (
+  <>
+    <div
+      className={styles.regionsIcon}
+      style={{
+        filter: isActive ? "none" : "grayscale(100%)",
+        opacity: isActive ? 1 : 0.6,
+      }}
+    >
+      <FranceMapSVG regionsActives={[...REGION_CODES_WITH_SVG]} />
+    </div>
+    Par région
+  </>
+);
+
+const RegionItemLabel = ({ regionCode, isActive }: { regionCode: string; isActive: boolean }) => {
+  const region = REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE];
+  return (
+    <>
+      <RegionSVG regionCode={regionCode} className={styles.regionItemIcon} fill={isActive ? "#6A6AF4" : "#CECECE"} />
+      {region?.nom || regionCode}
+    </>
+  );
+};
+
 export function StatistiquesLayoutClient({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
+  const isRegionPage = pathname.includes("/admin/suivi-des-indicateurs/region/");
+
+  const currentRegionCode = isRegionPage ? pathname.split("/region/")[1]?.split("/")[0] : null;
+
+  const regionMenuHref = isRegionPage ? pathname : `/admin/suivi-des-indicateurs/region/${DEFAULT_REGION_CODE}`;
 
   const sideMenuItems = [
     {
@@ -51,6 +86,21 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
       },
       isActive: pathname === "/admin/suivi-des-indicateurs/national",
     },
+    {
+      text: <RegionsLabel isActive={isRegionPage} />,
+      linkProps: {
+        href: regionMenuHref,
+      },
+      isActive: isRegionPage,
+      expandedByDefault: isRegionPage,
+      items: REGIONS_WITH_SVG_SORTED.map((region) => ({
+        text: <RegionItemLabel regionCode={region.code} isActive={currentRegionCode === region.code} />,
+        linkProps: {
+          href: `/admin/suivi-des-indicateurs/region/${region.code}`,
+        },
+        isActive: currentRegionCode === region.code,
+      })),
+    },
   ];
 
   return (
@@ -64,7 +114,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
       <div className={styles.mainContainer}>
         <div className="fr-container">
           <div className="fr-grid-row">
-            <div className={`fr-col-12 fr-col-md-2 ${styles.sideMenuColumn}`}>
+            <div className={`fr-col-12 fr-col-md-3 ${styles.sideMenuColumn}`}>
               <SideMenu
                 align="left"
                 burgerMenuButtonText="Dans cette rubrique"
@@ -74,7 +124,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
               />
             </div>
 
-            <div className={`fr-col-12 fr-col-md-10 ${styles.contentColumn}`}>{children}</div>
+            <div className={`fr-col-12 fr-col-md-9 ${styles.contentColumn}`}>{children}</div>
           </div>
         </div>
       </div>
