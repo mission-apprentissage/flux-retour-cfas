@@ -21,6 +21,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
+import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 
 import { getOrganisationById } from "../organisations.actions";
 
@@ -832,10 +833,11 @@ interface TraitementMLParams {
   limit: number;
   sort_by: string;
   sort_order: "asc" | "desc";
+  search?: string;
 }
 
 export const getTraitementStatsByMissionLocale = async (params: TraitementMLParams) => {
-  const { period, region, page, limit, sort_by, sort_order } = params;
+  const { period, region, page, limit, sort_by, sort_order, search } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = calculateStartDate(period, evaluationDate);
 
@@ -915,6 +917,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         "ml.type": "MISSION_LOCALE",
         "ml.activated_at": { $exists: true, $ne: null },
         ...(region && { "ml.adresse.region": region }),
+        ...(search && { "ml.nom": { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
     {

@@ -91,6 +91,7 @@ export interface TraitementMLParams {
   limit: number;
   sort_by: string;
   sort_order: "asc" | "desc";
+  search?: string;
 }
 
 export function useTraitementStats(period: Period, region?: string) {
@@ -162,6 +163,7 @@ export function useTraitementMLStats(params: TraitementMLParams) {
           limit: params.limit,
           sort_by: params.sort_by,
           sort_order: params.sort_order,
+          ...(params.search && { search: params.search }),
         },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
@@ -184,6 +186,7 @@ export function usePrefetchTraitementML() {
               limit: params.limit,
               sort_by: params.sort_by,
               sort_order: params.sort_order,
+              ...(params.search && { search: params.search }),
             },
           }),
         staleTime: STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA.staleTime,

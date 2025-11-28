@@ -38,6 +38,19 @@ const NationalLabel = ({ isActive }: { isActive: boolean }) => (
   </>
 );
 
+const MissionLocaleLabel = ({ isActive }: { isActive: boolean }) => (
+  <>
+    <i
+      className={`ri-school-fill ${styles.syntheseIcon}`}
+      style={{
+        fontSize: "22px",
+        color: isActive ? "#000091" : "#CECECE",
+      }}
+    />
+    Par Mission Locale
+  </>
+);
+
 const RegionsLabel = ({ isActive }: { isActive: boolean }) => (
   <>
     <div
@@ -66,6 +79,7 @@ const RegionItemLabel = ({ regionCode, isActive }: { regionCode: string; isActiv
 export function StatistiquesLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const isRegionPage = pathname.includes("/admin/suivi-des-indicateurs/region/");
+  const isMissionLocalePage = pathname === "/admin/suivi-des-indicateurs/mission-locale";
 
   const currentRegionCode = isRegionPage ? pathname.split("/region/")[1]?.split("/")[0] : null;
 
@@ -100,6 +114,13 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
         },
         isActive: currentRegionCode === region.code,
       })),
+    },
+    {
+      text: <MissionLocaleLabel isActive={isMissionLocalePage} />,
+      linkProps: {
+        href: "/admin/suivi-des-indicateurs/mission-locale",
+      },
+      isActive: isMissionLocalePage,
     },
   ];
 

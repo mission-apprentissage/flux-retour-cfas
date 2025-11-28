@@ -150,6 +150,7 @@ export default () => {
         limit: z.coerce.number().optional().default(10),
         sort_by: z.string().optional().default("total_jeunes"),
         sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+        search: z.string().optional(),
       }),
     }),
     returnResult(getTraitementMLRoute)
@@ -346,7 +347,7 @@ const getCouvertureRegionsRoute = async (req) => {
 };
 
 const getTraitementMLRoute = async (req) => {
-  const { period, region, page, limit, sort_by, sort_order } = req.query;
+  const { period, region, page, limit, sort_by, sort_order, search } = req.query;
   return await getTraitementStatsByMissionLocale({
     period: (period as StatsPeriod) || "30days",
     region: region as string | undefined,
@@ -354,6 +355,7 @@ const getTraitementMLRoute = async (req) => {
     limit: Number(limit) || 10,
     sort_by: (sort_by as string) || "total_jeunes",
     sort_order: (sort_order as "asc" | "desc") || "desc",
+    search: search as string | undefined,
   });
 };
 
