@@ -2,6 +2,7 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
+import Link from "next/link";
 import { useState } from "react";
 import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
@@ -13,9 +14,10 @@ import { SortableTableHeader } from "./SortableTableHeader";
 interface NationalRegionTableProps {
   regions: IRegionStats[];
   loadingDeltas?: boolean;
+  isAdmin?: boolean;
 }
 
-export function NationalRegionTable({ regions, loadingDeltas = false }: NationalRegionTableProps) {
+export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = false }: NationalRegionTableProps) {
   const [showAll, setShowAll] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof IRegionStats>("ml_activees");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -122,6 +124,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false }: National
                 onSort={handleSort}
                 centered
               />,
+              ...(isAdmin ? ["Détail"] : []),
             ]}
             data={displayedRegions.map((region) => {
               const hasActiveML = region.ml_activees > 0;
@@ -163,6 +166,17 @@ export function NationalRegionTable({ regions, loadingDeltas = false }: National
                     <span>-</span>
                   )}
                 </div>,
+                ...(isAdmin
+                  ? [
+                      <Link
+                        key={`detail-${region.code}`}
+                        href={`/admin/suivi-des-indicateurs/region/${region.code}`}
+                        className={`${styles.detailLink} ${styles.stretchedLink}`}
+                      >
+                        <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
+                      </Link>,
+                    ]
+                  : []),
               ];
             })}
           />
