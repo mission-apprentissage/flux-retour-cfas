@@ -20,19 +20,19 @@ export function StatCard({ label, value, previousValue, loading, tooltip }: Stat
     <div className={styles.card}>
       <div className={styles.cardBody}>
         <div className={styles.cardContent}>
-          <p className={styles.cardLabel}>
-            {label}
-            {tooltip && (
-              <span className={styles.tooltip}>
-                <Tooltip kind="hover" title={tooltip} />
-              </span>
-            )}
-          </p>
+          <p className={styles.cardLabel}>{label}</p>
           {loading ? (
             <CardSkeleton />
           ) : (
             <>
-              <p className={styles.cardValue}>{value?.toLocaleString("fr-FR") || 0}</p>
+              <p className={styles.cardValue}>
+                {value?.toLocaleString("fr-FR") || 0}
+                {tooltip && (
+                  <span className={styles.tooltip}>
+                    <Tooltip kind="hover" title={tooltip} />
+                  </span>
+                )}
+              </p>
               <p className={styles.cardPercentage} style={{ color: percentageColor }}>
                 {percentage}
               </p>
