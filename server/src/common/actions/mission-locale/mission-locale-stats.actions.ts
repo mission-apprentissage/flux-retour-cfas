@@ -30,6 +30,7 @@ import { computeMissionLocaleStats } from "./mission-locale.actions";
 export type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
 const TIME_SERIES_POINTS_COUNT = 6;
+const ENGAGEMENT_THRESHOLD = 0.7;
 
 const EMPTY_STATS = {
   total: 0,
@@ -460,7 +461,7 @@ async function getEngagementStatsByRegion(evaluationDate: Date, startDate: Date)
                   {
                     $and: [
                       { $ne: ["$stats.total", 0] },
-                      { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, 0.7] },
+                      { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, ENGAGEMENT_THRESHOLD] },
                     ],
                   },
                   1,
@@ -612,7 +613,6 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
 };
 
 export async function getStatsForPeriod(
-  _startDate: Date,
   endDate: Date,
   missionLocaleIds?: ObjectId[]
 ): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
@@ -775,15 +775,14 @@ export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<
 
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
-  const previousStartDate = await calculateStartDateAsync(period, startDate);
 
   const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
 
   const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
 
   const [currentStats, previousStats, regionalData, traitementData] = await Promise.all([
-    getStatsForPeriod(startDate, endDate),
-    getStatsForPeriod(previousStartDate, startDate),
+    getStatsForPeriod(endDate),
+    getStatsForPeriod(startDate),
     getRegionalStats(period),
     getTraitementStats(period, evaluationDate),
   ]);
@@ -1099,7 +1098,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
   };
 };
 
-export const getSuiviTraitementByRegion = async (_period: StatsPeriod = "30days") => {
+export const getSuiviTraitementByRegion = async () => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
   const pipeline = [
@@ -1378,13 +1377,12 @@ export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
   };
 }
 
-export async function getRupturantsStats(period: StatsPeriod = "30days", region?: string) {
+export async function getRupturantsStats(period: StatsPeriod = "30days", region?: string, mlId?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
-  const previousStartDate = await calculateStartDateAsync(period, startDate);
 
-  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
+  const missionLocaleIds = mlId ? [new ObjectId(mlId)] : region ? await getMissionLocaleIdsByRegion(region) : undefined;
 
   const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
   const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(
@@ -1393,8 +1391,8 @@ export async function getRupturantsStats(period: StatsPeriod = "30days", region?
   );
 
   const [currentStats, previousStats] = await Promise.all([
-    getStatsForPeriod(startDate, endDate, missionLocaleIds),
-    getStatsForPeriod(previousStartDate, startDate, missionLocaleIds),
+    getStatsForPeriod(endDate, missionLocaleIds),
+    getStatsForPeriod(startDate, missionLocaleIds),
   ]);
 
   const rupturantsSummary: IRupturantsSummary = {
@@ -1411,17 +1409,16 @@ export async function getRupturantsStats(period: StatsPeriod = "30days", region?
   };
 }
 
-export async function getDossiersTraitesStats(period: StatsPeriod = "30days", region?: string) {
+export async function getDossiersTraitesStats(period: StatsPeriod = "30days", region?: string, mlId?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
-  const previousStartDate = await calculateStartDateAsync(period, startDate);
 
-  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
+  const missionLocaleIds = mlId ? [new ObjectId(mlId)] : region ? await getMissionLocaleIdsByRegion(region) : undefined;
 
   const [currentStats, previousStats] = await Promise.all([
-    getStatsForPeriod(startDate, endDate, missionLocaleIds),
-    getStatsForPeriod(previousStartDate, startDate, missionLocaleIds),
+    getStatsForPeriod(endDate, missionLocaleIds),
+    getStatsForPeriod(startDate, missionLocaleIds),
   ]);
 
   const detailsTraites: IDetailsDossiersTraites = {

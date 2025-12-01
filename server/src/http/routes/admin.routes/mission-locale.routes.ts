@@ -16,6 +16,8 @@ import {
   activateMissionLocale,
   activateOrganisme,
   getAllMlFromOrganisations,
+  getMissionLocaleDetail,
+  getMissionLocaleMembers,
   getMissionsLocalesStatsAdmin,
   getMissionsLocalesStatsAdminById,
   getMlFromOrganisations,
@@ -114,6 +116,10 @@ export default () => {
       query: z.object({
         period: zStatsPeriod.optional(),
         region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
       }),
     }),
     returnResult(getRupturantsRoute)
@@ -125,6 +131,10 @@ export default () => {
       query: z.object({
         period: zStatsPeriod.optional(),
         region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
       }),
     }),
     returnResult(getDossiersTraitesRoute)
@@ -146,8 +156,8 @@ export default () => {
       query: z.object({
         period: zStatsPeriod.optional(),
         region: z.string().optional(),
-        page: z.coerce.number().optional().default(1),
-        limit: z.coerce.number().optional().default(10),
+        page: z.coerce.number().min(1).optional().default(1),
+        limit: z.coerce.number().min(1).max(100).optional().default(10),
         sort_by: z.string().optional().default("total_jeunes"),
         sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
         search: z.string().optional(),
@@ -177,6 +187,8 @@ export default () => {
   );
 
   router.get("/:id", returnResult(getMl));
+  router.get("/:id/detail", returnResult(getMlDetail));
+  router.get("/:id/membres", returnResult(getMlMembres));
   router.get(
     "/:id/stats",
     validateRequestMiddleware({
@@ -332,13 +344,21 @@ export const activateOrganismeAtDate = async (req) => {
 };
 
 const getRupturantsRoute = async (req) => {
-  const { period, region } = req.query;
-  return await getRupturantsStats((period as StatsPeriod) || "30days", region as string | undefined);
+  const { period, region, ml_id } = req.query;
+  return await getRupturantsStats(
+    (period as StatsPeriod) || "30days",
+    region as string | undefined,
+    ml_id as string | undefined
+  );
 };
 
 const getDossiersTraitesRoute = async (req) => {
-  const { period, region } = req.query;
-  return await getDossiersTraitesStats((period as StatsPeriod) || "30days", region as string | undefined);
+  const { period, region, ml_id } = req.query;
+  return await getDossiersTraitesStats(
+    (period as StatsPeriod) || "30days",
+    region as string | undefined,
+    ml_id as string | undefined
+  );
 };
 
 const getCouvertureRegionsRoute = async (req) => {
@@ -359,12 +379,25 @@ const getTraitementMLRoute = async (req) => {
   });
 };
 
-const getTraitementRegionsRoute = async (req) => {
-  const { period } = req.query;
-  return await getSuiviTraitementByRegion((period as StatsPeriod) || "30days");
+const getTraitementRegionsRoute = async () => {
+  return await getSuiviTraitementByRegion();
 };
 
 const getAccompagnementConjointRoute = async (req) => {
   const { region } = req.query;
   return await getAccompagnementConjointStats(region as string | undefined);
+};
+
+const getMlDetail = async (req) => {
+  const id = req.params.id;
+  return getMissionLocaleDetail(new ObjectId(id));
+};
+
+const getMlMembres = async (req) => {
+  const id = req.params.id;
+  const organisationMl = await getMlFromOrganisations(id);
+  if (!organisationMl) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
+  }
+  return getMissionLocaleMembers(new ObjectId(id));
 };
