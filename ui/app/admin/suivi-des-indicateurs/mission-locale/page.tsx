@@ -4,14 +4,14 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useState, useEffect } from "react";
 
 import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
-import { SearchableMissionLocaleTable } from "@/app/_components/statistiques/tables/SearchableMissionLocaleTable";
+import { TraitementMLTable } from "@/app/_components/statistiques/tables/TraitementMLTable";
 import commonStyles from "@/app/_components/statistiques/ui/common.module.css";
 import { PeriodSelector, type Period } from "@/app/_components/statistiques/ui/PeriodSelector";
 
 import styles from "./page.module.css";
 
 export default function MissionLocalePage() {
-  const [period, setPeriod] = useState<Period>("all");
+  const [period, setPeriod] = useState<Period>("30days");
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -55,7 +55,7 @@ export default function MissionLocalePage() {
         controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
         controlsPosition="below-left"
       >
-        <SearchableMissionLocaleTable period={period} search={debouncedSearch} />
+        <TraitementMLTable period={period} search={debouncedSearch} hideDescription />
       </StatisticsSection>
     </div>
   );
