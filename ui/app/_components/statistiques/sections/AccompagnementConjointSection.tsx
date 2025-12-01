@@ -11,6 +11,7 @@ import { MotifsBarChart } from "../charts/MotifsBarChart";
 import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS } from "../constants";
 import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
+import { NoDataMessage } from "../ui/NoDataMessage";
 import { RegionSVG } from "../ui/RegionSVG";
 import { Skeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
@@ -210,12 +211,17 @@ function ExplanationAccordion({ isExpanded, onToggle }: { isExpanded: boolean; o
 
 interface AccompagnementConjointSectionProps {
   region?: string;
+  mlId?: string;
+  compact?: boolean;
+  noData?: boolean;
 }
 
-export function AccompagnementConjointSection({ region }: AccompagnementConjointSectionProps) {
+export function AccompagnementConjointSection({ region, mlId, compact, noData }: AccompagnementConjointSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats(region);
+  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats(region, mlId);
+
+  const sectionTitle = compact ? "Suivi collaboration CFA" : SECTION_TITLE;
 
   const pieData = useMemo(() => {
     if (!stats) return [];
@@ -231,9 +237,23 @@ export function AccompagnementConjointSection({ region }: AccompagnementConjoint
     return null;
   }
 
+  if (noData) {
+    return (
+      <StatisticsSection
+        title={sectionTitle}
+        controls={<span className={styles.betaBadge}>BETA</span>}
+        className={styles.section}
+        wrapTitle
+      >
+        <ExplanationAccordion isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
+        <NoDataMessage />
+      </StatisticsSection>
+    );
+  }
+
   return (
     <StatisticsSection
-      title={SECTION_TITLE}
+      title={sectionTitle}
       controls={<span className={styles.betaBadge}>BETA</span>}
       className={styles.section}
       wrapTitle
@@ -242,7 +262,7 @@ export function AccompagnementConjointSection({ region }: AccompagnementConjoint
         <ExplanationAccordion isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
 
         <div className={styles.content}>
-          <MapSection stats={stats} loading={loading} region={region} />
+          {!compact && <MapSection stats={stats} loading={loading} region={region} />}
           <FunnelCards stats={stats} loading={loading} />
 
           <div className={styles.chartsRow}>
