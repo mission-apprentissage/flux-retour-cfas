@@ -12,7 +12,7 @@ import styles from "./StatistiquesLayoutClient.module.css";
 
 const DEFAULT_REGION_CODE = "84";
 
-const SyntheseLabel = ({ isActive }: { isActive: boolean }) => (
+const SyntheseLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
     <svg
       width="22"
@@ -27,18 +27,18 @@ const SyntheseLabel = ({ isActive }: { isActive: boolean }) => (
         fill={isActive ? "#000091" : "#CECECE"}
       />
     </svg>
-    Synthèse
+    {!collapsed && "Synthèse"}
   </>
 );
 
-const NationalLabel = ({ isActive }: { isActive: boolean }) => (
+const NationalLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
     <FranceIcon isActive={isActive} width={22} height={22} className={styles.syntheseIcon} />
-    National
+    {!collapsed && "National"}
   </>
 );
 
-const MissionLocaleLabel = ({ isActive }: { isActive: boolean }) => (
+const MissionLocaleLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
     <i
       className={`ri-school-fill ${styles.syntheseIcon}`}
@@ -47,11 +47,11 @@ const MissionLocaleLabel = ({ isActive }: { isActive: boolean }) => (
         color: isActive ? "#000091" : "#CECECE",
       }}
     />
-    Par Mission Locale
+    {!collapsed && "Par Mission Locale"}
   </>
 );
 
-const RegionsLabel = ({ isActive }: { isActive: boolean }) => (
+const RegionsLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
     <div
       className={styles.regionsIcon}
@@ -62,7 +62,7 @@ const RegionsLabel = ({ isActive }: { isActive: boolean }) => (
     >
       <FranceMapSVG regionsActives={[...REGION_CODES_WITH_SVG]} />
     </div>
-    Par région
+    {!collapsed && "Par région"}
   </>
 );
 
@@ -80,49 +80,86 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
   const pathname = usePathname() ?? "";
   const isRegionPage = pathname.includes("/admin/suivi-des-indicateurs/region/");
   const isMissionLocalePage = pathname === "/admin/suivi-des-indicateurs/mission-locale";
+  const isMissionLocaleDetailPage = pathname.match(/\/admin\/suivi-des-indicateurs\/mission-locale\/[^/]+$/);
 
   const currentRegionCode = isRegionPage ? pathname.split("/region/")[1]?.split("/")[0] : null;
+  const isCollapsedMenu = !!isMissionLocaleDetailPage;
 
   const regionMenuHref = isRegionPage ? pathname : `/admin/suivi-des-indicateurs/region/${DEFAULT_REGION_CODE}`;
 
-  const sideMenuItems = [
-    {
-      text: <SyntheseLabel isActive={pathname === "/admin/suivi-des-indicateurs"} />,
-      linkProps: {
-        href: "/admin/suivi-des-indicateurs",
-      },
-      isActive: pathname === "/admin/suivi-des-indicateurs",
-    },
-    {
-      text: <NationalLabel isActive={pathname === "/admin/suivi-des-indicateurs/national"} />,
-      linkProps: {
-        href: "/admin/suivi-des-indicateurs/national",
-      },
-      isActive: pathname === "/admin/suivi-des-indicateurs/national",
-    },
-    {
-      text: <RegionsLabel isActive={isRegionPage} />,
-      linkProps: {
-        href: regionMenuHref,
-      },
-      isActive: isRegionPage,
-      expandedByDefault: isRegionPage,
-      items: REGIONS_WITH_SVG_SORTED.map((region) => ({
-        text: <RegionItemLabel regionCode={region.code} isActive={currentRegionCode === region.code} />,
-        linkProps: {
-          href: `/admin/suivi-des-indicateurs/region/${region.code}`,
+  const sideMenuItems = isCollapsedMenu
+    ? [
+        {
+          text: <SyntheseLabel isActive={pathname === "/admin/suivi-des-indicateurs"} collapsed />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs",
+            title: "Synthèse",
+          },
+          isActive: pathname === "/admin/suivi-des-indicateurs",
         },
-        isActive: currentRegionCode === region.code,
-      })),
-    },
-    {
-      text: <MissionLocaleLabel isActive={isMissionLocalePage} />,
-      linkProps: {
-        href: "/admin/suivi-des-indicateurs/mission-locale",
-      },
-      isActive: isMissionLocalePage,
-    },
-  ];
+        {
+          text: <NationalLabel isActive={pathname === "/admin/suivi-des-indicateurs/national"} collapsed />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs/national",
+            title: "National",
+          },
+          isActive: pathname === "/admin/suivi-des-indicateurs/national",
+        },
+        {
+          text: <RegionsLabel isActive={isRegionPage} collapsed />,
+          linkProps: {
+            href: regionMenuHref,
+            title: "Par région",
+          },
+          isActive: isRegionPage,
+        },
+        {
+          text: <MissionLocaleLabel isActive={isMissionLocalePage || !!isMissionLocaleDetailPage} collapsed />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs/mission-locale",
+            title: "Par Mission Locale",
+          },
+          isActive: isMissionLocalePage || !!isMissionLocaleDetailPage,
+        },
+      ]
+    : [
+        {
+          text: <SyntheseLabel isActive={pathname === "/admin/suivi-des-indicateurs"} />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs",
+          },
+          isActive: pathname === "/admin/suivi-des-indicateurs",
+        },
+        {
+          text: <NationalLabel isActive={pathname === "/admin/suivi-des-indicateurs/national"} />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs/national",
+          },
+          isActive: pathname === "/admin/suivi-des-indicateurs/national",
+        },
+        {
+          text: <RegionsLabel isActive={isRegionPage} />,
+          linkProps: {
+            href: regionMenuHref,
+          },
+          isActive: isRegionPage,
+          expandedByDefault: isRegionPage,
+          items: REGIONS_WITH_SVG_SORTED.map((region) => ({
+            text: <RegionItemLabel regionCode={region.code} isActive={currentRegionCode === region.code} />,
+            linkProps: {
+              href: `/admin/suivi-des-indicateurs/region/${region.code}`,
+            },
+            isActive: currentRegionCode === region.code,
+          })),
+        },
+        {
+          text: <MissionLocaleLabel isActive={isMissionLocalePage} />,
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs/mission-locale",
+          },
+          isActive: isMissionLocalePage,
+        },
+      ];
 
   return (
     <>
@@ -135,17 +172,21 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
       <div className={styles.mainContainer}>
         <div className="fr-container">
           <div className="fr-grid-row">
-            <div className={`fr-col-12 fr-col-md-3 ${styles.sideMenuColumn}`}>
+            <div
+              className={`fr-col-12 ${isCollapsedMenu ? "fr-col-md-1" : "fr-col-md-3"} ${styles.sideMenuColumn} ${isCollapsedMenu ? styles.sideMenuColumnCollapsed : ""}`}
+            >
               <SideMenu
                 align="left"
                 burgerMenuButtonText="Dans cette rubrique"
                 sticky={true}
                 items={sideMenuItems}
-                className={styles.sideMenuContainer}
+                className={`${styles.sideMenuContainer} ${isCollapsedMenu ? styles.sideMenuCollapsed : ""}`}
               />
             </div>
 
-            <div className={`fr-col-12 fr-col-md-9 ${styles.contentColumn}`}>{children}</div>
+            <div className={`fr-col-12 ${isCollapsedMenu ? "fr-col-md-11" : "fr-col-md-9"} ${styles.contentColumn}`}>
+              {children}
+            </div>
           </div>
         </div>
       </div>

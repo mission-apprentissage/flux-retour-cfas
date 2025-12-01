@@ -100,4 +100,35 @@
     flex: 0 0 80%;
     max-width: 80%;
   }
+
+  .sideMenuColumnCollapsed {
+    flex: 0 0 60px;
+    max-width: 60px;
+    padding-right: 0;
+  }
+
+  .sideMenuColumnCollapsed + .contentColumn {
+    flex: 0 0 calc(100% - 60px);
+    max-width: calc(100% - 60px);
+  }
+}
+
+.sideMenuCollapsed {
+  width: 60px;
+}
+
+.sideMenuCollapsed :global(.fr-sidemenu__list) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sideMenuCollapsed :global(.fr-sidemenu__item) {
+  width: auto;
+}
+
+.sideMenuCollapsed :global(.fr-sidemenu__link) {
+  padding: 8px;
+  justify-content: center;
 }
