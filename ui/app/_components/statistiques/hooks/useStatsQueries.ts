@@ -76,12 +76,17 @@ export const statsQueryKeys = {
   traitement: (period: Period, region?: string) => ["stats", "traitement", period, region] as const,
   deployment: (period: Period) => ["stats", "deployment", period] as const,
   syntheseRegions: (period: Period) => ["stats", "synthese-regions", period] as const,
-  rupturants: (period: Period, region?: string) => ["stats", "rupturants", period, region] as const,
-  dossiersTraites: (period: Period, region?: string) => ["stats", "dossiers-traites", period, region] as const,
+  rupturants: (period: Period, region?: string, mlId?: string) =>
+    ["stats", "rupturants", period, region, mlId] as const,
+  dossiersTraites: (period: Period, region?: string, mlId?: string) =>
+    ["stats", "dossiers-traites", period, region, mlId] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
   traitementRegions: (period: Period) => ["stats", "traitement-regions", period] as const,
-  accompagnementConjoint: (region?: string) => ["stats", "accompagnement-conjoint", region] as const,
+  accompagnementConjoint: (region?: string, mlId?: string) =>
+    ["stats", "accompagnement-conjoint", region, mlId] as const,
+  missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
+  missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
 };
 
 export interface TraitementMLParams {
@@ -121,23 +126,23 @@ export function useSyntheseRegionsStats(period: Period) {
   );
 }
 
-export function useRupturantsStats(period: Period, region?: string) {
+export function useRupturantsStats(period: Period, region?: string, mlId?: string) {
   return useQuery<IRupturantsStatsResponse>(
-    statsQueryKeys.rupturants(period, region),
+    statsQueryKeys.rupturants(period, region, mlId),
     () =>
       _get("/api/v1/admin/mission-locale/stats/national/rupturants", {
-        params: { period, ...(region && { region }) },
+        params: { period, ...(region && { region }), ...(mlId && { ml_id: mlId }) },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }
 
-export function useDossiersTraitesStats(period: Period, region?: string) {
+export function useDossiersTraitesStats(period: Period, region?: string, mlId?: string) {
   return useQuery<IDossiersTraitesStatsResponse>(
-    statsQueryKeys.dossiersTraites(period, region),
+    statsQueryKeys.dossiersTraites(period, region, mlId),
     () =>
       _get("/api/v1/admin/mission-locale/stats/national/dossiers-traites", {
-        params: { period, ...(region && { region }) },
+        params: { period, ...(region && { region }), ...(mlId && { ml_id: mlId }) },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
@@ -204,13 +209,66 @@ export function useTraitementRegionsStats(period: Period) {
   );
 }
 
-export function useAccompagnementConjointStats(region?: string) {
+export function useAccompagnementConjointStats(region?: string, mlId?: string) {
   return useQuery<IAccompagnementConjointStats>(
-    statsQueryKeys.accompagnementConjoint(region),
+    statsQueryKeys.accompagnementConjoint(region, mlId),
     () =>
       _get("/api/v1/admin/mission-locale/stats/accompagnement-conjoint", {
-        params: region ? { region } : {},
+        params: { ...(region && { region }), ...(mlId && { ml_id: mlId }) },
       }),
     STATS_QUERY_CONFIG
+  );
+}
+
+export interface IMissionLocaleMemberResponse {
+  _id: string;
+  civility: string;
+  nom: string;
+  prenom: string;
+  telephone: string;
+  email: string;
+  last_traitement_at: string | null;
+}
+
+export interface IMissionLocaleDetailResponse {
+  ml: {
+    _id: string;
+    ml_id: number;
+    nom: string;
+    siret?: string;
+    email?: string;
+    telephone?: string;
+    site_web?: string;
+    adresse?: {
+      commune?: string;
+      code_postal?: string;
+      localite?: string;
+    };
+  };
+  activated_at: string | null;
+  last_activity_at: string | null;
+  has_cfa_collaboration: boolean;
+  traites_count: number;
+}
+
+export function useMissionLocaleDetail(mlId: string) {
+  return useQuery<IMissionLocaleDetailResponse>(
+    statsQueryKeys.missionLocaleDetail(mlId),
+    () => _get(`/api/v1/admin/mission-locale/${mlId}/detail`),
+    {
+      ...STATS_QUERY_CONFIG,
+      enabled: !!mlId,
+    }
+  );
+}
+
+export function useMissionLocaleMembres(mlId: string) {
+  return useQuery<IMissionLocaleMemberResponse[]>(
+    statsQueryKeys.missionLocaleMembres(mlId),
+    () => _get(`/api/v1/admin/mission-locale/${mlId}/membres`),
+    {
+      ...STATS_QUERY_CONFIG,
+      enabled: !!mlId,
+    }
   );
 }
