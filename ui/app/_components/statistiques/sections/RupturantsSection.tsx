@@ -17,19 +17,21 @@ type ChartType = "bar" | "pie";
 interface RupturantsSectionProps {
   period?: Period;
   region?: string;
+  mlId?: string;
+  fullWidth?: boolean;
 }
 
-export function RupturantsSection({ period = "30days", region }: RupturantsSectionProps) {
+export function RupturantsSection({ period = "30days", region, mlId, fullWidth }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
-  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region);
+  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region, mlId);
 
   const loadingVariation = isFetching && !isLoading;
 
   return (
     <StatisticsSection
       title="Jeunes rupturants"
-      width="one-third"
+      width={fullWidth ? "full" : "one-third"}
       smallTitle
       controls={
         <SegmentedControl

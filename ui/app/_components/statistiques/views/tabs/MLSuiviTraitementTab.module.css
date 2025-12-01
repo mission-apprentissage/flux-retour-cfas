@@ -1,0 +1,14 @@
+.container {
+  padding: 12px 0 24px 0;
+}
+
+.periodSelectorContainer {
+  margin-bottom: 24px;
+  max-width: 320px;
+}
+
+.chartsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

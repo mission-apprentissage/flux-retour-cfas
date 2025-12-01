@@ -258,3 +258,14 @@
 .evolutionZero {
   composes: evolutionZero from "./common.module.css";
 }
+
+.mlNameCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mlNameCell span {
+  font-weight: 500;
+}
