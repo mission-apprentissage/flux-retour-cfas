@@ -13,9 +13,16 @@ import styles from "./StatisticsSection.module.css";
 interface SuiviTraitementSectionProps {
   defaultPeriod?: Period;
   region?: string;
+  isAdmin?: boolean;
+  national?: boolean;
 }
 
-export function SuiviTraitementSection({ defaultPeriod = "30days", region }: SuiviTraitementSectionProps) {
+export function SuiviTraitementSection({
+  defaultPeriod = "30days",
+  region,
+  isAdmin = true,
+  national = false,
+}: SuiviTraitementSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
 
   if (region) {
@@ -25,7 +32,19 @@ export function SuiviTraitementSection({ defaultPeriod = "30days", region }: Sui
         controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
         controlsPosition="below-left"
       >
-        <TraitementMLTable period={period} region={region} />
+        <TraitementMLTable period={period} region={region} isAdmin={isAdmin} />
+      </StatisticsSection>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <StatisticsSection
+        title="Suivi traitement"
+        controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
+        controlsPosition="below-left"
+      >
+        <TraitementRegionTable period={period} national={national} />
       </StatisticsSection>
     );
   }
@@ -41,11 +60,11 @@ export function SuiviTraitementSection({ defaultPeriod = "30days", region }: Sui
         tabs={[
           {
             label: "Par Mission Locale",
-            content: <TraitementMLTable period={period} />,
+            content: <TraitementMLTable period={period} isAdmin={isAdmin} />,
           },
           {
             label: "Par région",
-            content: <TraitementRegionTable period={period} />,
+            content: <TraitementRegionTable period={period} national={national} />,
           },
         ]}
       />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { TraitementCards } from "../cards/TraitementCards";
+import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useTraitementStats } from "../hooks/useStatsQueries";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
@@ -11,11 +12,11 @@ import { DossiersTraitesSection } from "./DossiersTraitesSection";
 import styles from "./IdentificationSuiviSection.module.css";
 import { RupturantsSection } from "./RupturantsSection";
 import { StatisticsSection } from "./StatisticsSection";
+import type { BaseSectionProps } from "./types";
 
-interface IdentificationSuiviSectionProps {
+interface IdentificationSuiviSectionProps extends BaseSectionProps {
   defaultPeriod?: Period;
   showCharts?: boolean;
-  region?: string;
   hideDossiersTraites?: boolean;
 }
 
@@ -24,11 +25,12 @@ export function IdentificationSuiviSection({
   showCharts = true,
   region,
   hideDossiersTraites = false,
+  national = false,
 }: IdentificationSuiviSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const { data, isLoading, isFetching, error } = useTraitementStats(period, region);
 
-  const loadingPercentage = isFetching && !isLoading;
+  const loadingPercentage = isLoadingVariation(isFetching, isLoading);
 
   return (
     <StatisticsSection
@@ -47,8 +49,8 @@ export function IdentificationSuiviSection({
         </div>
         {showCharts && (
           <div className={hideDossiersTraites ? styles.chartsContainerFullWidth : styles.chartsContainer}>
-            <RupturantsSection period={period} region={region} />
-            {!hideDossiersTraites && <DossiersTraitesSection period={period} region={region} />}
+            <RupturantsSection period={period} region={region} national={national} />
+            {!hideDossiersTraites && <DossiersTraitesSection period={period} region={region} national={national} />}
           </div>
         )}
       </StatsErrorHandler>
