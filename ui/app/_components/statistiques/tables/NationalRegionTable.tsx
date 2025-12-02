@@ -3,10 +3,12 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
+import { useSortableTable } from "../hooks/useSortableTable";
 import { Skeleton } from "../ui/Skeleton";
+import { formatDelta, formatVariationBadge } from "../utils";
 
 import styles from "./NationalRegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
@@ -17,66 +19,44 @@ interface NationalRegionTableProps {
   isAdmin?: boolean;
 }
 
+type SortColumn = keyof IRegionStats;
+
 export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = false }: NationalRegionTableProps) {
   const [showAll, setShowAll] = useState(false);
-  const [sortColumn, setSortColumn] = useState<keyof IRegionStats>("ml_activees");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("ml_activees");
 
-  const sortedRegions = [...regions].sort((a, b) => {
-    const columnsWithEmptyHandling: (keyof IRegionStats)[] = ["ml_engagees", "a_traiter", "traites"];
+  const sortedRegions = useMemo(() => {
+    const columnsWithEmptyHandling: SortColumn[] = ["ml_engagees", "a_traiter", "traites"];
 
-    if (columnsWithEmptyHandling.includes(sortColumn)) {
-      const aHasActiveML = a.ml_activees > 0;
-      const bHasActiveML = b.ml_activees > 0;
+    return [...regions].sort((a, b) => {
+      if (columnsWithEmptyHandling.includes(sortColumn)) {
+        const aHasActiveML = a.ml_activees > 0;
+        const bHasActiveML = b.ml_activees > 0;
 
-      if (!aHasActiveML && !bHasActiveML) {
-        if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
-        return b.ml_engagees - a.ml_engagees;
+        if (!aHasActiveML && !bHasActiveML) {
+          if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
+          return b.ml_engagees - a.ml_engagees;
+        }
+        if (!aHasActiveML) return sortDirection === "asc" ? -1 : 1;
+        if (!bHasActiveML) return sortDirection === "asc" ? 1 : -1;
       }
-      if (!aHasActiveML) return sortDirection === "asc" ? -1 : 1;
-      if (!bHasActiveML) return sortDirection === "asc" ? 1 : -1;
-    }
 
-    const aVal = a[sortColumn] ?? 0;
-    const bVal = b[sortColumn] ?? 0;
+      const aVal = a[sortColumn] ?? 0;
+      const bVal = b[sortColumn] ?? 0;
 
-    const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-    const primarySort = sortDirection === "desc" ? -comparison : comparison;
+      const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      const primarySort = sortDirection === "desc" ? -comparison : comparison;
 
-    if (primarySort !== 0) return primarySort;
+      if (primarySort !== 0) return primarySort;
 
-    if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
+      if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
 
-    return b.ml_engagees - a.ml_engagees;
-  });
+      return b.ml_engagees - a.ml_engagees;
+    });
+  }, [regions, sortColumn, sortDirection]);
 
   const displayedRegions = showAll ? sortedRegions : sortedRegions.slice(0, 6);
-
   const hasMoreThan6Regions = sortedRegions.length > 6;
-
-  const handleSort = (column: keyof IRegionStats) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-  };
-
-  const formatNumericIndicator = (value: number | string, type: "delta" | "variation") => {
-    const numValue = typeof value === "string" ? parseInt(value.replace(/[+%]/g, "")) : value;
-    const displayValue = type === "delta" && typeof value === "number" && value > 0 ? `+${value}` : value;
-
-    const stylePrefix = type === "delta" ? "delta" : "variation";
-    const specialZeroDisplay = type === "delta" && numValue === 0 ? "=" : displayValue;
-
-    if (numValue === 0) return <span className={styles[`${stylePrefix}Zero`]}>{specialZeroDisplay}</span>;
-    if (numValue > 0) return <span className={styles[`${stylePrefix}Positive`]}>{displayValue}</span>;
-    return <span className={styles[`${stylePrefix}Negative`]}>{displayValue}</span>;
-  };
-
-  const formatDelta = (delta: number) => formatNumericIndicator(delta, "delta");
-  const formatVariationBadge = (variation: string) => formatNumericIndicator(variation, "variation");
 
   return (
     <div>

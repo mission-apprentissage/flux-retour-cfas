@@ -1,5 +1,10 @@
 "use client";
 
+import format from "date-fns/format/index";
+import formatDistanceToNow from "date-fns/formatDistanceToNow/index";
+import { fr } from "date-fns/locale";
+
+import commonStyles from "./tables/common.module.css";
 import styles from "./tables/TraitementTable.module.css";
 import { Skeleton } from "./ui/Skeleton";
 
@@ -56,4 +61,38 @@ export function formatMlActives(count: number) {
     return <span className={styles.emptyValue}>Aucune ML</span>;
   }
   return count;
+}
+
+export function formatDateFr(dateString: string | null): string | null {
+  if (!dateString) return null;
+  try {
+    return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
+  } catch {
+    return null;
+  }
+}
+
+export function formatDateWithRelativeTime(dateString: string | null): string {
+  if (!dateString) return "Aucune activité";
+  try {
+    const date = new Date(dateString);
+    const formattedDate = format(date, "dd/MM/yyyy", { locale: fr });
+    const relativeTime = formatDistanceToNow(date, { locale: fr, addSuffix: true });
+    return `${formattedDate}, ${relativeTime}`;
+  } catch {
+    return "Aucune activité";
+  }
+}
+
+export function formatDelta(delta: number) {
+  if (delta === 0) return <span className={commonStyles.deltaZero}>=</span>;
+  if (delta > 0) return <span className={commonStyles.deltaPositive}>+{delta}</span>;
+  return <span className={commonStyles.deltaNegative}>{delta}</span>;
+}
+
+export function formatVariationBadge(variation: string) {
+  const numValue = parseInt(variation.replace(/[+%]/g, ""));
+  if (numValue === 0) return <span className={commonStyles.variationZero}>{variation}</span>;
+  if (numValue > 0) return <span className={commonStyles.variationPositive}>{variation}</span>;
+  return <span className={commonStyles.variationNegative}>{variation}</span>;
 }
