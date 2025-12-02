@@ -11,6 +11,7 @@ import {
   PermissionOrganisme,
 } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { effectifsDb, effectifsDECADb, organisationsDb } from "@/common/model/collections";
@@ -160,5 +161,34 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
     default:
       throw Boom.forbidden("Accès non autorisé");
   }
+  next();
+}
+
+export async function requireIndicateursMlAccess(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+
+  const allowedTypes = [
+    ORGANISATION_TYPE.ARML,
+    ORGANISATION_TYPE.DREETS,
+    ORGANISATION_TYPE.DDETS,
+    ORGANISATION_TYPE.ADMINISTRATEUR,
+  ];
+
+  if (!allowedTypes.includes(user.organisation.type as (typeof allowedTypes)[number])) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = await organisationsDb().findOne({
+    _id: new ObjectId(user.organisation._id),
+  });
+
+  if (!orga) {
+    throw Boom.notFound("Organisation non trouvée");
+  }
+
+  res.locals.organisation = orga;
+  res.locals.regions = getRegionsFromOrganisation(orga as OrganisationWithRegions);
+
   next();
 }
