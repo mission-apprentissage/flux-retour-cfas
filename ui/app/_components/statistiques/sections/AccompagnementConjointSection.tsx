@@ -7,6 +7,7 @@ import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { IAccompagnementConjointStats } from "shared/models/data/nationalStats.model";
 
 import { ItemChartTooltip } from "../charts/ChartTooltip";
+import { DejaConnuMiniChart } from "../charts/DejaConnuMiniChart";
 import { MotifsBarChart } from "../charts/MotifsBarChart";
 import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS } from "../constants";
 import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
@@ -151,49 +152,6 @@ function StatutsTraitementPieChart({
   );
 }
 
-function DejaConnuSection({ stats, loading }: { stats?: IAccompagnementConjointStats; loading: boolean }) {
-  if (loading) {
-    return (
-      <div className={styles.dejaConnuSection}>
-        <Skeleton height="50px" width="100%" />
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.dejaConnuSection}>
-      <div className={styles.dejaConnuChart}>
-        <PieChart
-          series={[
-            {
-              data: [
-                { id: "connu", value: stats?.dejaConnu || 0, label: "Connus", color: "#6A6AF4" },
-                {
-                  id: "inconnu",
-                  value: (stats?.totalPourDejaConnu || 0) - (stats?.dejaConnu || 0),
-                  label: "Non connus",
-                  color: "#FFFFFF",
-                },
-              ],
-              innerRadius: 0,
-              outerRadius: 20,
-            },
-          ]}
-          height={50}
-          width={50}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-          slots={{ legend: () => null, tooltip: ItemChartTooltip }}
-        />
-      </div>
-      <span className={styles.dejaConnuLabel}>Part des jeunes déjà connus par les Missions Locales</span>
-      <span className={styles.dejaConnuValue}>
-        <strong>{stats?.dejaConnu?.toLocaleString("fr-FR") || 0}</strong> sur{" "}
-        {stats?.totalPourDejaConnu?.toLocaleString("fr-FR") || 0}
-      </span>
-    </div>
-  );
-}
-
 function ExplanationAccordion({ isExpanded, onToggle }: { isExpanded: boolean; onToggle: () => void }) {
   return (
     <div className={styles.expandableSection}>
@@ -214,12 +172,19 @@ interface AccompagnementConjointSectionProps {
   mlId?: string;
   compact?: boolean;
   noData?: boolean;
+  national?: boolean;
 }
 
-export function AccompagnementConjointSection({ region, mlId, compact, noData }: AccompagnementConjointSectionProps) {
+export function AccompagnementConjointSection({
+  region,
+  mlId,
+  compact,
+  noData,
+  national = false,
+}: AccompagnementConjointSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats(region, mlId);
+  const { data: stats, isLoading: loading, error } = useAccompagnementConjointStats(region, mlId, national);
 
   const sectionTitle = compact ? "Suivi collaboration CFA" : SECTION_TITLE;
 
@@ -278,7 +243,11 @@ export function AccompagnementConjointSection({ region, mlId, compact, noData }:
                 Statut des dossiers traités par les ML sur les jeunes transmis par les CFA partenaires
               </h3>
               <StatutsTraitementPieChart stats={stats} loading={loading} pieData={pieData} />
-              <DejaConnuSection stats={stats} loading={loading} />
+              <DejaConnuMiniChart
+                dejaConnu={stats?.dejaConnu || 0}
+                total={stats?.totalPourDejaConnu || 0}
+                loading={loading}
+              />
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS, getVariationColorFrom
 import { Skeleton } from "../ui/Skeleton";
 
 import { ItemChartTooltip } from "./ChartTooltip";
+import { DejaConnuMiniChart } from "./DejaConnuMiniChart";
 import styles from "./DetailsDossiersTraitesPieChart.module.css";
 
 interface DetailsDossiersTraitesPieChartProps {
@@ -112,48 +113,7 @@ export function DetailsDossiersTraitesPieChart({
         </div>
       </div>
 
-      <div className={styles.knownYoungSection}>
-        <div className={styles.miniChartWrapper}>
-          <PieChart
-            series={[
-              {
-                data: [
-                  {
-                    id: "connu",
-                    value: data.deja_connu,
-                    label: "Connus",
-                    color: "#6A6AF4",
-                  },
-                  {
-                    id: "inconnu",
-                    value: data.total - data.deja_connu,
-                    label: "Non connus",
-                    color: "#FFFFFF",
-                  },
-                ],
-                innerRadius: 0,
-                outerRadius: 20,
-              },
-            ]}
-            height={50}
-            width={50}
-            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-            slots={{
-              legend: () => null,
-              tooltip: ItemChartTooltip,
-            }}
-            sx={{
-              "& .MuiChartsLegend-root": {
-                display: "none",
-              },
-            }}
-          />
-        </div>
-        <span className={styles.knownYoungLabel}>Part des jeunes déjà connus par les Missions Locales</span>
-        <span className={styles.knownYoungValue}>
-          <strong>{data.deja_connu.toLocaleString("fr-FR")}</strong> sur {data.total.toLocaleString("fr-FR")}
-        </span>
-      </div>
+      <DejaConnuMiniChart dejaConnu={data.deja_connu} total={data.total} />
     </div>
   );
 }
