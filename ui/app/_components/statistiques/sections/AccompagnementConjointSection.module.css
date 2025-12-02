@@ -58,32 +58,17 @@
 }
 
 .noDataBox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 24px;
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
+  composes: noDataBox from "../ui/common.module.css";
   margin-top: 16px;
   height: 260px;
 }
 
 .noDataIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #161616;
+  composes: noDataIcon from "../ui/common.module.css";
 }
 
 .noDataMessage {
-  font-size: 16px;
-  font-weight: 700;
-  color: #161616;
-  margin: 0;
-  text-align: center;
-  max-width: 480px;
+  composes: noDataMessage from "../ui/common.module.css";
 }
 
 .content {
@@ -222,77 +207,32 @@
 }
 
 .pieLegend {
-  display: flex;
-  flex-direction: column;
+  composes: legendContainer from "../charts/legend.module.css";
   gap: 6px;
-  flex: 1;
-  width: 100%;
 }
 
 .pieLegendItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  composes: legendItem from "../charts/legend.module.css";
 }
 
 .pieLegendDot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  composes: legendColorCircle from "../charts/legend.module.css";
 }
 
 .pieLegendLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #161616;
+  composes: legendLabel from "../charts/legend.module.css";
   flex: 1;
 }
 
 .pieLegendValue {
-  font-size: 16px;
-  font-weight: 700;
-  color: #161616;
+  composes: legendValue from "../charts/legend.module.css";
 }
 
 .pieLegendTotal {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  composes: legendItem from "../charts/legend.module.css";
   margin-top: 0;
   padding-top: 12px;
   border-top: 1px solid #e5e5e5;
-}
-
-.dejaConnuSection {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background-color: #eeeeee;
-  padding: 16px;
-  margin-top: 16px;
-}
-
-.dejaConnuChart {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-}
-
-.dejaConnuLabel {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-  color: #161616;
-}
-
-.dejaConnuValue {
-  flex: 0 0 auto;
-  font-size: 16px;
-  color: #161616;
 }
 
 @media (max-width: 992px) {
