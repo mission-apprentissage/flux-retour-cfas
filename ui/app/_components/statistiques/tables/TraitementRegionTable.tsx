@@ -1,9 +1,9 @@
 "use client";
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useState } from "react";
 import type { ITraitementRegionStats, StatsPeriod } from "shared/models/data/nationalStats.model";
 
+import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementRegionsStats } from "../hooks/useStatsQueries";
 import { TableSkeleton } from "../ui/Skeleton";
 import { formatMlActives, formatPercentageBadgeSimple } from "../utils";
@@ -13,37 +13,16 @@ import styles from "./TraitementTable.module.css";
 
 interface TraitementRegionTableProps {
   period: StatsPeriod;
+  national?: boolean;
 }
 
 type SortColumn = keyof ITraitementRegionStats;
 
-export function TraitementRegionTable({ period }: TraitementRegionTableProps) {
-  const [sortColumn, setSortColumn] = useState<SortColumn>("traites");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+export function TraitementRegionTable({ period, national = false }: TraitementRegionTableProps) {
+  const { sortColumn, sortDirection, handleSort, sortData } = useSortableTable<SortColumn>("traites");
+  const { data: regions, isLoading } = useTraitementRegionsStats(period, national);
 
-  const { data: regions, isLoading } = useTraitementRegionsStats(period);
-
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-  };
-
-  const sortedRegions = [...(regions || [])].sort((a, b) => {
-    const aVal = a[sortColumn] ?? 0;
-    const bVal = b[sortColumn] ?? 0;
-
-    if (sortColumn === "nom") {
-      const comparison = String(aVal).localeCompare(String(bVal), "fr");
-      return sortDirection === "desc" ? -comparison : comparison;
-    }
-
-    const comparison = Number(aVal) - Number(bVal);
-    return sortDirection === "desc" ? -comparison : comparison;
-  });
+  const sortedRegions = sortData(regions || []);
 
   if (isLoading) {
     return <TableSkeleton rows={6} />;

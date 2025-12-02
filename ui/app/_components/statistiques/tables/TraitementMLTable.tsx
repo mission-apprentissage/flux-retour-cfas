@@ -4,9 +4,11 @@ import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
+import { isLoadingVariation } from "../hooks/useLoadingVariation";
+import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementMLStats, usePrefetchTraitementML } from "../hooks/useStatsQueries";
 import { TableSkeleton } from "../ui/Skeleton";
 import { formatActivityDuration, formatPercentageBadge } from "../utils";
@@ -20,17 +22,34 @@ interface TraitementMLTableProps {
   region?: string;
   search?: string;
   hideDescription?: boolean;
+  isAdmin?: boolean;
 }
 
 type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
 
-export function TraitementMLTable({ period, region, search, hideDescription }: TraitementMLTableProps) {
+export function TraitementMLTable({ period, region, search, hideDescription, isAdmin = true }: TraitementMLTableProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [sortColumn, setSortColumn] = useState<SortColumn>("jours_depuis_activite");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  const resetPage = useCallback(() => setPage(1), []);
+  const {
+    sortColumn,
+    sortDirection,
+    handleSort: baseSortHandler,
+  } = useSortableTable<SortColumn>("jours_depuis_activite", "desc", { onSortChange: resetPage });
 
   const isSearching = !!search && search.length > 0;
+
+  const effectiveSortBy = isSearching ? "nom" : sortColumn;
+  const effectiveSortOrder = isSearching ? "asc" : sortDirection;
+
+  const handleSort = useCallback(
+    (column: SortColumn) => {
+      if (isSearching) return;
+      baseSortHandler(column);
+    },
+    [isSearching, baseSortHandler]
+  );
 
   useEffect(() => {
     setPage(1);
@@ -41,22 +60,11 @@ export function TraitementMLTable({ period, region, search, hideDescription }: T
     region,
     page,
     limit,
-    sort_by: isSearching ? "nom" : sortColumn,
-    sort_order: isSearching ? "asc" : sortDirection,
+    sort_by: effectiveSortBy,
+    sort_order: effectiveSortOrder,
     search: search || undefined,
   });
   const prefetchNextPage = usePrefetchTraitementML();
-
-  const handleSort = (column: SortColumn) => {
-    if (isSearching) return;
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-    setPage(1);
-  };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -76,15 +84,15 @@ export function TraitementMLTable({ period, region, search, hideDescription }: T
           region,
           page: nextPage,
           limit,
-          sort_by: isSearching ? "nom" : sortColumn,
-          sort_order: isSearching ? "asc" : sortDirection,
+          sort_by: effectiveSortBy,
+          sort_order: effectiveSortOrder,
           search: search || undefined,
         });
       }
     }
-  }, [data, isLoading, page, period, region, limit, sortColumn, sortDirection, prefetchNextPage, search, isSearching]);
+  }, [data, isLoading, page, period, region, limit, effectiveSortBy, effectiveSortOrder, prefetchNextPage, search]);
 
-  const loadingEvolution = isFetching && !isLoading;
+  const loadingEvolution = isLoadingVariation(isFetching, isLoading);
 
   const mlList = data?.data || [];
   const pagination = data?.pagination;
@@ -96,7 +104,8 @@ export function TraitementMLTable({ period, region, search, hideDescription }: T
     params.set("sort_by", sortColumn);
     params.set("sort_order", sortDirection);
     if (search) params.set("search", search);
-    return `/admin/suivi-des-indicateurs/mission-locale/${mlId}?${params.toString()}`;
+    const basePath = isAdmin ? "/admin/suivi-des-indicateurs" : "/suivi-des-indicateurs";
+    return `${basePath}/mission-locale/${mlId}?${params.toString()}`;
   };
 
   const tableHeaders = useMemo(() => {
@@ -160,7 +169,7 @@ export function TraitementMLTable({ period, region, search, hideDescription }: T
         centered
       />,
     ];
-  }, [isSearching, sortColumn, sortDirection]);
+  }, [isSearching, sortColumn, sortDirection, handleSort]);
 
   return (
     <div className={styles.tableContainer}>
