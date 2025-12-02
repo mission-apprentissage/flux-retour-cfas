@@ -1,12 +1,12 @@
 "use client";
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { format, formatDistanceToNow, fr } from "date-fns";
 
 import { useMissionLocaleMembres } from "../../hooks/useStatsQueries";
 import { NoDataMessage } from "../../ui/NoDataMessage";
 import { TableSkeleton } from "../../ui/Skeleton";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
+import { formatDateWithRelativeTime } from "../../utils";
 
 import styles from "./MLEquipeTab.module.css";
 
@@ -17,18 +17,6 @@ interface MLEquipeTabProps {
 
 export function MLEquipeTab({ mlId, noData }: MLEquipeTabProps) {
   const { data, isLoading, error } = useMissionLocaleMembres(mlId);
-
-  const formatActivityDate = (dateString: string | null) => {
-    if (!dateString) return "Aucune activité";
-    try {
-      const date = new Date(dateString);
-      const formattedDate = format(date, "dd/MM/yyyy", { locale: fr });
-      const relativeTime = formatDistanceToNow(date, { locale: fr, addSuffix: true });
-      return `${formattedDate}, ${relativeTime}`;
-    } catch {
-      return "Aucune activité";
-    }
-  };
 
   const formatCivility = (civility: string) => {
     if (civility === "Monsieur") return "M.";
@@ -71,7 +59,7 @@ export function MLEquipeTab({ mlId, noData }: MLEquipeTabProps) {
                   formatName(membre),
                   membre.telephone || "-",
                   membre.email || "-",
-                  formatActivityDate(membre.last_traitement_at),
+                  formatDateWithRelativeTime(membre.last_traitement_at),
                 ])}
               />
             </div>
