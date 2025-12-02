@@ -158,5 +158,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(requestNextData);
   }
 
+  if (pathname.startsWith("/suivi-des-indicateurs/")) {
+    const allowedTypes = ["ARML", "DREETS", "DDETS"];
+    if (!session || !allowedTypes.includes(session.organisation?.type || "")) {
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
+    }
+    return NextResponse.next(requestNextData);
+  }
+
   return NextResponse.next(requestNextData);
 }

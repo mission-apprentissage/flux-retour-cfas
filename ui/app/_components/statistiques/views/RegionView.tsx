@@ -6,16 +6,17 @@ import { useTraitementStats } from "../hooks/useStatsQueries";
 import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
 import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
-import commonStyles from "../ui/common.module.css";
 import { RegionSVG } from "../ui/RegionSVG";
+import { ViewHeader } from "../ui/ViewHeader";
 
 import styles from "./RegionView.module.css";
 
 interface RegionViewProps {
   regionCode: string;
+  isAdmin?: boolean;
 }
 
-export function RegionView({ regionCode }: RegionViewProps) {
+export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
   const region = REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE];
   const regionName = region?.nom || "Région inconnue";
 
@@ -24,12 +25,14 @@ export function RegionView({ regionCode }: RegionViewProps) {
 
   return (
     <div>
-      <div className={commonStyles.headerContainer}>
-        <div className={styles.mapContainer}>
-          <RegionSVG regionCode={regionCode} fill="#6A6AF4" />
-        </div>
-        <h2 className={commonStyles.headerTitle}>{regionName}</h2>
-      </div>
+      <ViewHeader
+        title={regionName}
+        icon={
+          <div className={styles.mapContainer}>
+            <RegionSVG regionCode={regionCode} fill="#6A6AF4" />
+          </div>
+        }
+      />
 
       {hasNoActiveML && (
         <div className={styles.warningBanner}>
@@ -42,7 +45,7 @@ export function RegionView({ regionCode }: RegionViewProps) {
 
       {!hasNoActiveML && (
         <>
-          <SuiviTraitementSection region={regionCode} />
+          <SuiviTraitementSection region={regionCode} isAdmin={isAdmin} />
           <AccompagnementConjointSection region={regionCode} />
         </>
       )}

@@ -6,7 +6,7 @@ import { AccompagnementConjointSection } from "../sections/AccompagnementConjoin
 import { CouvertureRegionsSection } from "../sections/CouvertureRegionsSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
 import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
-import commonStyles from "../ui/common.module.css";
+import { ViewHeader } from "../ui/ViewHeader";
 
 import styles from "./NationalView.module.css";
 
@@ -17,20 +17,18 @@ interface NationalViewProps {
 export function NationalView({ isAdmin = false }: NationalViewProps = {}) {
   return (
     <div>
-      <div className={commonStyles.headerContainer}>
-        <div className={commonStyles.logoContainer}>
-          <Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />
-        </div>
-        <h2 className={commonStyles.headerTitle}>National</h2>
-      </div>
+      <ViewHeader
+        title="National"
+        icon={<Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />}
+      />
 
-      <IdentificationSuiviSection />
+      <IdentificationSuiviSection national />
 
-      <CouvertureRegionsSection isAdmin={isAdmin} />
+      <CouvertureRegionsSection isAdmin={isAdmin} national />
 
-      <SuiviTraitementSection />
+      <SuiviTraitementSection isAdmin={isAdmin} national />
 
-      <AccompagnementConjointSection />
+      <AccompagnementConjointSection national />
     </div>
   );
 }

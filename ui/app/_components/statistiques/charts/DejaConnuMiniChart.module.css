@@ -1,0 +1,15 @@
+.section {
+  composes: dejaConnuSection from "../ui/common.module.css";
+}
+
+.chart {
+  composes: dejaConnuChart from "../ui/common.module.css";
+}
+
+.label {
+  composes: dejaConnuLabel from "../ui/common.module.css";
+}
+
+.value {
+  composes: dejaConnuValue from "../ui/common.module.css";
+}

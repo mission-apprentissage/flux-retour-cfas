@@ -2,7 +2,6 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { format, fr } from "date-fns";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -11,6 +10,7 @@ import { _post } from "@/common/httpClient";
 import { useMissionLocaleDetail } from "../hooks/useStatsQueries";
 import { NO_DATA_ML_MESSAGE } from "../ui/NoDataMessage";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
+import { formatDateFr } from "../utils";
 
 import styles from "./MissionLocaleDetailView.module.css";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
@@ -18,9 +18,10 @@ import { MLSuiviTraitementTab } from "./tabs/MLSuiviTraitementTab";
 
 interface MissionLocaleDetailViewProps {
   mlId: string;
+  isAdmin?: boolean;
 }
 
-export function MissionLocaleDetailView({ mlId }: MissionLocaleDetailViewProps) {
+export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleDetailViewProps) {
   const searchParams = useSearchParams();
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
 
@@ -49,16 +50,8 @@ export function MissionLocaleDetailView({ mlId }: MissionLocaleDetailViewProps) 
     if (search) params.set("search", search);
 
     const queryString = params.toString();
-    return `/admin/suivi-des-indicateurs/mission-locale${queryString ? `?${queryString}` : ""}`;
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return null;
-    try {
-      return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
-    } catch {
-      return null;
-    }
+    const basePath = isAdmin ? "/admin/suivi-des-indicateurs" : "/suivi-des-indicateurs";
+    return `${basePath}/mission-locale${queryString ? `?${queryString}` : ""}`;
   };
 
   if (isLoading) {
@@ -125,14 +118,16 @@ export function MissionLocaleDetailView({ mlId }: MissionLocaleDetailViewProps) 
         </div>
 
         <aside className={styles.sidebar}>
-          <Button
-            iconId="ri-user-follow-line"
-            priority="primary"
-            onClick={handleImpersonate}
-            className={styles.sidebarButton}
-          >
-            Voir le suivi des jeunes
-          </Button>
+          {isAdmin && (
+            <Button
+              iconId="ri-user-follow-line"
+              priority="primary"
+              onClick={handleImpersonate}
+              className={styles.sidebarButton}
+            >
+              Voir le suivi des jeunes
+            </Button>
+          )}
 
           <div className={styles.aboutBox}>
             <h2 className={styles.sidebarTitle}>À propos</h2>
@@ -181,13 +176,13 @@ export function MissionLocaleDetailView({ mlId }: MissionLocaleDetailViewProps) 
                 {data?.activated_at && (
                   <div className={styles.aboutItem}>
                     <i className="fr-icon-calendar-line fr-icon--sm" aria-hidden="true" />
-                    <span>Activée le {formatDate(data.activated_at)}</span>
+                    <span>Activée le {formatDateFr(data.activated_at)}</span>
                   </div>
                 )}
                 {data?.last_activity_at && (
                   <div className={styles.aboutItem}>
                     <i className="fr-icon-time-line fr-icon--sm" aria-hidden="true" />
-                    <span>Dernière activité le {formatDate(data.last_activity_at)}</span>
+                    <span>Dernière activité le {formatDateFr(data.last_activity_at)}</span>
                   </div>
                 )}
               </div>

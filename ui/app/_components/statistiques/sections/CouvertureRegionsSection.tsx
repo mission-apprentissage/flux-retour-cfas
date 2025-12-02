@@ -13,11 +13,16 @@ import { StatisticsSection } from "./StatisticsSection";
 interface CouvertureRegionsSectionProps {
   defaultPeriod?: Period;
   isAdmin?: boolean;
+  national?: boolean;
 }
 
-export function CouvertureRegionsSection({ defaultPeriod = "30days", isAdmin = false }: CouvertureRegionsSectionProps) {
+export function CouvertureRegionsSection({
+  defaultPeriod = "30days",
+  isAdmin = false,
+  national = false,
+}: CouvertureRegionsSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
-  const { data, isLoading, isFetching, error } = useCouvertureRegionsStats(period);
+  const { data, isLoading, isFetching, error } = useCouvertureRegionsStats(period, national);
 
   const loadingDeltas = isFetching && !isLoading;
 

@@ -1,21 +1,16 @@
 "use client";
 
 import { DetailsDossiersTraitesPieChart } from "../charts/DetailsDossiersTraitesPieChart";
+import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useDossiersTraitesStats } from "../hooks/useStatsQueries";
 import { NoDataMessage } from "../ui/NoDataMessage";
-import type { Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./DossiersTraitesSection.module.css";
 import { StatisticsSection } from "./StatisticsSection";
+import type { SectionWithPeriodAndMlProps, SectionWithNoDataProps, SectionWithLayoutProps } from "./types";
 
-interface DossiersTraitesSectionProps {
-  period?: Period;
-  region?: string;
-  mlId?: string;
-  fullWidth?: boolean;
-  noData?: boolean;
-}
+type DossiersTraitesSectionProps = SectionWithPeriodAndMlProps & SectionWithNoDataProps & SectionWithLayoutProps;
 
 export function DossiersTraitesSection({
   period = "30days",
@@ -23,10 +18,11 @@ export function DossiersTraitesSection({
   mlId,
   fullWidth,
   noData,
+  national = false,
 }: DossiersTraitesSectionProps) {
-  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(period, region, mlId);
+  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(period, region, mlId, national);
 
-  const loadingVariation = isFetching && !isLoading;
+  const loadingVariation = isLoadingVariation(isFetching, isLoading);
 
   if (noData) {
     return (

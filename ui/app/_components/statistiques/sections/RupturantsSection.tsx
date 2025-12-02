@@ -5,28 +5,30 @@ import { useState } from "react";
 
 import { RupturantsBarChart } from "../charts/RupturantsBarChart";
 import { RupturantsPieChart } from "../charts/RupturantsPieChart";
+import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useRupturantsStats } from "../hooks/useStatsQueries";
-import type { Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./RupturantsSection.module.css";
 import { StatisticsSection } from "./StatisticsSection";
+import type { SectionWithPeriodAndMlProps, SectionWithLayoutProps } from "./types";
 
 type ChartType = "bar" | "pie";
 
-interface RupturantsSectionProps {
-  period?: Period;
-  region?: string;
-  mlId?: string;
-  fullWidth?: boolean;
-}
+type RupturantsSectionProps = SectionWithPeriodAndMlProps & SectionWithLayoutProps;
 
-export function RupturantsSection({ period = "30days", region, mlId, fullWidth }: RupturantsSectionProps) {
+export function RupturantsSection({
+  period = "30days",
+  region,
+  mlId,
+  fullWidth,
+  national = false,
+}: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
-  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region, mlId);
+  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region, mlId, national);
 
-  const loadingVariation = isFetching && !isLoading;
+  const loadingVariation = isLoadingVariation(isFetching, isLoading);
 
   return (
     <StatisticsSection
