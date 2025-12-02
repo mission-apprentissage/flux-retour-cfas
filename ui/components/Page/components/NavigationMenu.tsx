@@ -27,6 +27,7 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
     case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
+    case "ARML":
       return "Mon territoire";
 
     case "OPERATEUR_PUBLIC_NATIONAL":
@@ -132,6 +133,11 @@ function NavBarTransverse(): React.ReactElement {
         <>
           {organisationType === "ADMINISTRATEUR" && (
             <NavItem to="/admin/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
+          )}
+          {(organisationType === ORGANISATION_TYPE.DREETS ||
+            organisationType === ORGANISATION_TYPE.DDETS ||
+            organisationType === ORGANISATION_TYPE.ARML) && (
+            <NavItem to="/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
           )}
           <NavItem to="/home" exactMatch>
             Mon tableau de bord
@@ -273,6 +279,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
+    case "ARML":
       // fourre-tout, mais on pourra avoir des différences plus tard
       return <NavBarTransverse />;
   }
