@@ -20,6 +20,8 @@ interface IDeploymentStatsResponse {
     mlCount: number;
     activatedMlCount: number;
     previousActivatedMlCount: number;
+    engagedMlCount: number;
+    previousEngagedMlCount: number;
     date: string;
   };
   regionsActives: string[];

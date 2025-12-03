@@ -1180,15 +1180,53 @@ export const getAccompagnementConjointStats = async (region?: string): Promise<I
   };
 };
 
+async function countEngagedMlAtDate(date: Date): Promise<number> {
+  const [result] = await missionLocaleStatsDb()
+    .aggregate(
+      [
+        { $match: { computed_day: date } },
+        ...buildOrgLookupPipeline({ checkActivation: true }),
+        {
+          $match: {
+            "stats.total": { $ne: 0 },
+            $expr: { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, ENGAGEMENT_THRESHOLD] },
+          },
+        },
+        { $count: "count" },
+      ],
+      { allowDiskUse: true }
+    )
+    .toArray();
+
+  return result?.count || 0;
+}
+
+async function getNationalEngagementStats(evaluationDate: Date, startDate: Date) {
+  const [engagedMlCount, previousEngagedMlCount] = await Promise.all([
+    countEngagedMlAtDate(evaluationDate),
+    countEngagedMlAtDate(startDate),
+  ]);
+
+  return { engagedMlCount, previousEngagedMlCount };
+}
+
 export async function getDeploymentStats(period: StatsPeriod = "30days") {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+
+  const [summary, regional, engagement] = await Promise.all([
+    getSummaryStats(evaluationDate, period),
+    getRegionalStats(period),
+    getNationalEngagementStats(evaluationDate, startDate),
+  ]);
 
   return {
     summary: {
       mlCount: summary.mlCount,
       activatedMlCount: summary.activatedMlCount,
       previousActivatedMlCount: summary.previousActivatedMlCount,
+      engagedMlCount: engagement.engagedMlCount,
+      previousEngagedMlCount: engagement.previousEngagedMlCount,
       date: summary.date,
     },
     regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
