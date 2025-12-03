@@ -1,3 +1,5 @@
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+
 import { Skeleton } from "../ui/Skeleton";
 
 import styles from "./DeploymentRow.module.css";
@@ -10,6 +12,8 @@ interface DeploymentRowProps {
   color?: string;
   percentage?: string;
   percentageColor?: string;
+  tooltip?: string;
+  indented?: boolean;
 }
 
 export function DeploymentRow({
@@ -20,12 +24,17 @@ export function DeploymentRow({
   color,
   percentage,
   percentageColor,
+  tooltip,
+  indented = false,
 }: DeploymentRowProps) {
+  const labelClassName = `${styles.deploymentLabelText}${indented ? ` ${styles.deploymentLabelIndented}` : ""}`;
+
   return (
     <div className={styles.deploymentRow}>
       <div className={styles.deploymentLabel}>
         {color && <div className={styles.deploymentDot} style={{ backgroundColor: color }} />}
-        {typeof label === "string" ? <p className={styles.deploymentLabelText}>{label}</p> : label}
+        <p className={labelClassName}>{label}</p>
+        {tooltip && <Tooltip kind="hover" title={tooltip} />}
       </div>
       {loading ? (
         percentage ? (

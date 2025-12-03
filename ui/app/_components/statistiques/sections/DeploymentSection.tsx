@@ -80,6 +80,17 @@ export function DeploymentSection({
               />
 
               <DeploymentRow
+                label="ML engagées"
+                value={stats?.engagedMlCount}
+                loading={loading}
+                loadingPercentage={loadingPercentage}
+                percentage={calculatePercentage(stats?.engagedMlCount || 0, stats?.previousEngagedMlCount || 0)}
+                percentageColor={getPercentageColor(stats?.engagedMlCount || 0, stats?.previousEngagedMlCount || 0)}
+                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                indented
+              />
+
+              <DeploymentRow
                 label="ML inactives"
                 value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
                 loading={loading}

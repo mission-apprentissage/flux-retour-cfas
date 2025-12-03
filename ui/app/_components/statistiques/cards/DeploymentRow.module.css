@@ -24,6 +24,10 @@
   line-height: 24px;
 }
 
+.deploymentLabelIndented {
+  margin-left: 28px;
+}
+
 .deploymentValue {
   margin: 0;
   font-weight: 700;

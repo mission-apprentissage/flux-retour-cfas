@@ -226,6 +226,11 @@ export function AccompagnementConjointSection({
       <StatsErrorHandler data={stats} error={error} isLoading={loading} emptyMessage="Aucune donnée n'est disponible">
         <ExplanationAccordion isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
 
+        <div className={styles.cumulativeNotice}>
+          <span className="fr-icon-time-line" aria-hidden="true" />
+          <span>Données cumulées depuis le début de l&apos;expérimentation (septembre 2025)</span>
+        </div>
+
         <div className={styles.content}>
           {!compact && <MapSection stats={stats} loading={loading} region={region} />}
           <FunnelCards stats={stats} loading={loading} />

@@ -57,6 +57,15 @@
   color: var(--text-default-grey);
 }
 
+.cumulativeNotice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+  margin-bottom: 1rem;
+}
+
 .noDataBox {
   composes: noDataBox from "../ui/common.module.css";
   margin-top: 16px;
