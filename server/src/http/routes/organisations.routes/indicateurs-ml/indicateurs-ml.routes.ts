@@ -20,6 +20,7 @@ import {
   getSyntheseStats,
   getSyntheseRegionsStats,
   getCouvertureRegionsStats,
+  getTraitementExportData,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { organisationsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -128,6 +129,16 @@ export default () => {
       }),
     }),
     returnResult(getTraitementRegionsRoute)
+  );
+
+  router.get(
+    "/stats/traitement/export",
+    validateRequestMiddleware({
+      query: z.object({
+        region: z.string().optional(),
+      }),
+    }),
+    returnResult(getTraitementExportRoute)
   );
 
   router.get(
@@ -313,6 +324,19 @@ const getTraitementRegionsRoute = async (req, { locals }) => {
   }
 
   return allRegions;
+};
+
+const getTraitementExportRoute = async (req, { locals }) => {
+  const { region } = req.query;
+  const userRegions = locals.regions as string[];
+
+  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
+    throw Boom.forbidden("Accès non autorisé à cette région");
+  }
+
+  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
+
+  return await getTraitementExportData({ region: targetRegion as string | undefined });
 };
 
 const getCouvertureRegionsRoute = async (req, { locals }) => {

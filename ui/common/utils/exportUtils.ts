@@ -46,4 +46,48 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   writeFileXLSX(workbook, filename, { compression: true });
 }
 
+export interface SheetData {
+  sheetName: string;
+  rows: Record<string, unknown>[];
+  columns: ReadonlyArray<ExportColumn>;
+}
+
+export function exportMultiSheetXlsx(filename: string, sheets: SheetData[]) {
+  const workbook = utils.book_new();
+
+  for (const sheet of sheets) {
+    const columnsWithXlsxType = sheet.columns.filter((column) => column.xlsxType);
+
+    const processedRows = sheet.rows.map((row) => {
+      const newRow = { ...row };
+      for (const column of columnsWithXlsxType) {
+        if (column.xlsxType === "date" && newRow[column.key]) {
+          newRow[column.key] = new Date(newRow[column.key] as string);
+        } else if (column.xlsxType === "string" && newRow[column.key]) {
+          newRow[column.key] = {
+            v: newRow[column.key],
+            t: "s",
+            w: `${newRow[column.key]}`,
+          };
+        }
+      }
+      return newRow;
+    });
+
+    const worksheet = utils.json_to_sheet(processedRows, {
+      header: sheet.columns.map((column) => column.key),
+    });
+
+    utils.sheet_add_aoa(worksheet, [sheet.columns.map((column) => column.label)], {
+      origin: "A1",
+    });
+
+    worksheet["!cols"] = sheet.columns.map((column) => ({ wch: column.width }));
+
+    utils.book_append_sheet(workbook, worksheet, sheet.sheetName);
+  }
+
+  writeFileXLSX(workbook, filename, { compression: true });
+}
+
 export const MODEL_EXPORT_LAST_UPDATE = "29012025";

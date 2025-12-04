@@ -1336,3 +1336,165 @@ export async function getCouvertureRegionsStats(period: StatsPeriod = "30days") 
     period,
   };
 }
+
+interface TraitementExportParams {
+  region?: string;
+}
+
+const buildPercentageField = (numerator: string, denominator: string) => ({
+  $round: [
+    {
+      $cond: [
+        { $eq: [`$${denominator}`, 0] },
+        0,
+        { $multiply: [{ $divide: [`$${numerator}`, `$${denominator}`] }, 100] },
+      ],
+    },
+    1,
+  ],
+});
+
+const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
+  { $match: { computed_day: { $lte: evaluationDate } } },
+  { $sort: { computed_day: -1 as const } },
+  { $group: { _id: "$mission_locale_id", latest_stats: { $first: "$stats" } } },
+  { $lookup: { from: "organisations", localField: "_id", foreignField: "_id", as: "ml" } },
+  { $unwind: "$ml" },
+  {
+    $match: {
+      "ml.type": "MISSION_LOCALE",
+      "ml.activated_at": { $exists: true, $ne: null },
+      ...(region && { "ml.adresse.region": region }),
+    },
+  },
+  {
+    $lookup: {
+      from: "missionLocaleEffectif",
+      localField: "_id",
+      foreignField: "mission_locale_id",
+      as: "effectif_ids",
+    },
+  },
+  {
+    $lookup: {
+      from: "missionLocaleEffectifLog",
+      let: { effectif_ids: "$effectif_ids._id" },
+      pipeline: [
+        { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
+        { $sort: { created_at: -1 as const } },
+        { $limit: 1 },
+        { $project: { created_at: 1 } },
+      ],
+      as: "last_log",
+    },
+  },
+];
+
+const buildPercentageProjections = () => ({
+  pourcentage_traites: buildPercentageField("traites", "total_jeunes"),
+  pourcentage_a_recontacter: buildPercentageField("contacte_sans_retour", "traites"),
+  pourcentage_rdv_pris: buildPercentageField("rdv_pris", "traites"),
+  pourcentage_connu_ml: buildPercentageField("deja_connu", "traites"),
+});
+
+const buildDetailFieldsProjection = () => ({
+  rdv_pris: 1,
+  nouveau_projet: 1,
+  deja_accompagne: 1,
+  contacte_sans_retour: 1,
+  injoignables: 1,
+  coordonnees_incorrectes: 1,
+  autre: 1,
+});
+
+export const getTraitementExportData = async (params: TraitementExportParams) => {
+  const { region } = params;
+  const evaluationDate = normalizeToUTCDay(new Date());
+
+  const basePipeline = buildExportBasePipeline(evaluationDate, region);
+
+  const mlPipeline = [
+    ...basePipeline,
+    { $lookup: { from: "regions", localField: "ml.adresse.region", foreignField: "code", as: "region_info" } },
+    {
+      $addFields: {
+        total_jeunes: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] },
+        traites: "$latest_stats.traite",
+        a_traiter: "$latest_stats.a_traiter",
+        rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
+        nouveau_projet: { $ifNull: ["$latest_stats.nouveau_projet", 0] },
+        deja_accompagne: { $ifNull: ["$latest_stats.deja_accompagne", 0] },
+        contacte_sans_retour: { $ifNull: ["$latest_stats.contacte_sans_retour", 0] },
+        injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
+        coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
+        autre: { $ifNull: ["$latest_stats.autre", 0] },
+        deja_connu: { $ifNull: ["$latest_stats.deja_connu", 0] },
+        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
+      },
+    },
+    {
+      $project: {
+        region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
+        nom: "$ml.nom",
+        siret: { $ifNull: ["$ml.siret", null] },
+        total_jeunes: 1,
+        a_traiter: 1,
+        traites: 1,
+        ...buildPercentageProjections(),
+        date_activation: { $ifNull: ["$ml.activated_at", null] },
+        derniere_activite: 1,
+        ...buildDetailFieldsProjection(),
+      },
+    },
+    { $sort: { region_nom: 1 as const, nom: 1 as const } },
+  ];
+
+  const regionPipeline = [
+    ...basePipeline,
+    { $addFields: { derniere_activite_ml: { $arrayElemAt: ["$last_log.created_at", 0] } } },
+    {
+      $group: {
+        _id: "$ml.adresse.region",
+        total_jeunes: { $sum: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] } },
+        a_traiter: { $sum: "$latest_stats.a_traiter" },
+        traites: { $sum: "$latest_stats.traite" },
+        rdv_pris: { $sum: { $ifNull: ["$latest_stats.rdv_pris", 0] } },
+        nouveau_projet: { $sum: { $ifNull: ["$latest_stats.nouveau_projet", 0] } },
+        deja_accompagne: { $sum: { $ifNull: ["$latest_stats.deja_accompagne", 0] } },
+        contacte_sans_retour: { $sum: { $ifNull: ["$latest_stats.contacte_sans_retour", 0] } },
+        injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
+        coordonnees_incorrectes: { $sum: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] } },
+        autre: { $sum: { $ifNull: ["$latest_stats.autre", 0] } },
+        deja_connu: { $sum: { $ifNull: ["$latest_stats.deja_connu", 0] } },
+        ml_actives: { $sum: 1 },
+        derniere_activite: { $max: "$derniere_activite_ml" },
+      },
+    },
+    { $match: { _id: { $ne: null } } },
+    ...buildRegionLookupPipeline(),
+    {
+      $project: {
+        region_nom: "$nom",
+        total_jeunes: 1,
+        a_traiter: 1,
+        traites: 1,
+        ...buildPercentageProjections(),
+        ml_actives: 1,
+        derniere_activite: 1,
+        ...buildDetailFieldsProjection(),
+      },
+    },
+    { $sort: { region_nom: 1 as const } },
+  ];
+
+  const [mlData, regionData] = await Promise.all([
+    missionLocaleStatsDb().aggregate(mlPipeline, { allowDiskUse: true }).toArray(),
+    missionLocaleStatsDb().aggregate(regionPipeline, { allowDiskUse: true }).toArray(),
+  ]);
+
+  return {
+    mlData,
+    regionData,
+    exportDate: evaluationDate,
+  };
+};
