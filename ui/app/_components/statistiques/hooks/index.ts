@@ -21,3 +21,4 @@ export {
 
 export { useSortableTable } from "./useSortableTable";
 export { isLoadingVariation } from "./useLoadingVariation";
+export { useTraitementExport } from "./useTraitementExport";
