@@ -105,39 +105,6 @@ export const buildPercentageExpression = (numerator: MongoExpression, denominato
 });
 
 /**
- * Builder pour les champs de traitement utilisés dans les agrégations
- * Centralise la logique de calcul de total_contacte, total_repondu, total_accompagne
- */
-export const buildTraitementFields = () => ({
-  total_contacte: {
-    $sum: {
-      $add: [
-        "$stats.rdv_pris",
-        "$stats.nouveau_projet",
-        "$stats.deja_accompagne",
-        "$stats.contacte_sans_retour",
-        { $ifNull: ["$stats.injoignables", 0] },
-      ],
-    },
-  },
-  total_repondu: {
-    $sum: {
-      $add: [
-        "$stats.rdv_pris",
-        "$stats.nouveau_projet",
-        "$stats.deja_accompagne",
-        { $ifNull: ["$stats.autre_avec_contact", 0] },
-      ],
-    },
-  },
-  total_accompagne: {
-    $sum: {
-      $add: ["$stats.rdv_pris", "$stats.deja_accompagne"],
-    },
-  },
-});
-
-/**
  * Récupère les IDs des Missions Locales d'une région donnée
  */
 export const getMissionLocaleIdsByRegion = async (region: string): Promise<ObjectId[]> => {
