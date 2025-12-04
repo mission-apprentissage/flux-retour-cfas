@@ -29,7 +29,6 @@ import {
   buildOrgLookupPipeline,
   buildPercentageExpression,
   buildRegionLookupPipeline,
-  buildTraitementFields,
   calculateStartDate,
   calculateStartDateAsync,
   createStatWithVariation,
@@ -114,49 +113,60 @@ const DEFAULT_STATS_OPTIONS: StatsAggregationOptions = {
   accompagneUsesNouveauProjet: false,
 };
 
-type MongoAggregationField = string | { $ifNull: [string, number] };
-
-const getStatsAtDate = async (
-  currentDate: Date,
+const getLatestStatsPerML = async (
+  endDate: Date,
   options: StatsAggregationOptions = DEFAULT_STATS_OPTIONS,
   missionLocaleIds?: ObjectId[]
 ) => {
   const opts = { ...DEFAULT_STATS_OPTIONS, ...options };
 
-  const totalContacteAdd: MongoAggregationField[] = [
-    "$stats.rdv_pris",
-    "$stats.nouveau_projet",
-    "$stats.deja_accompagne",
-    "$stats.contacte_sans_retour",
+  const totalContacteAdd: string[] = [
+    "$latest_stats.rdv_pris",
+    "$latest_stats.nouveau_projet",
+    "$latest_stats.deja_accompagne",
+    "$latest_stats.contacte_sans_retour",
   ];
   if (opts.includeInjoignableInContacte) {
-    totalContacteAdd.push({ $ifNull: ["$stats.injoignables", 0] });
+    totalContacteAdd.push("$injoignables");
   }
 
-  const totalReponduAdd: MongoAggregationField[] = [
-    "$stats.rdv_pris",
-    "$stats.nouveau_projet",
-    "$stats.deja_accompagne",
+  const totalReponduAdd: string[] = [
+    "$latest_stats.rdv_pris",
+    "$latest_stats.nouveau_projet",
+    "$latest_stats.deja_accompagne",
   ];
   if (opts.includeAutreAvecContactInRepondu) {
-    totalReponduAdd.push({ $ifNull: ["$stats.autre_avec_contact", 0] });
+    totalReponduAdd.push("$autre_avec_contact");
   }
 
-  const totalAccompagneAdd: MongoAggregationField[] = opts.accompagneUsesNouveauProjet
-    ? ["$stats.rdv_pris", "$stats.nouveau_projet"]
-    : ["$stats.rdv_pris", "$stats.deja_accompagne"];
+  const totalAccompagneAdd: string[] = opts.accompagneUsesNouveauProjet
+    ? ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet"]
+    : ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"];
 
-  const matchFilter = withMissionLocaleFilter({ computed_day: currentDate }, missionLocaleIds);
+  const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
 
   const stats = await missionLocaleStatsDb()
     .aggregate([
       { $match: matchFilter },
+      { $sort: { computed_day: -1 as const } },
+      {
+        $group: {
+          _id: "$mission_locale_id",
+          latest_stats: { $first: "$stats" },
+        },
+      },
+      {
+        $addFields: {
+          injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
+          autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
+        },
+      },
       {
         $group: {
           _id: null,
-          total: { $sum: "$stats.total" },
-          total_traites: { $sum: "$stats.traite" },
-          total_a_traiter: { $sum: "$stats.a_traiter" },
+          total: { $sum: "$latest_stats.total" },
+          total_traites: { $sum: "$latest_stats.traite" },
+          total_a_traiter: { $sum: "$latest_stats.a_traiter" },
           total_contacte: {
             $sum: {
               $add: totalContacteAdd,
@@ -168,15 +178,15 @@ const getStatsAtDate = async (
             },
           },
           total_accompagne: { $sum: { $add: totalAccompagneAdd } },
-          rdv_pris: { $sum: "$stats.rdv_pris" },
-          nouveau_projet: { $sum: "$stats.nouveau_projet" },
-          deja_accompagne: { $sum: "$stats.deja_accompagne" },
-          contacte_sans_retour: { $sum: "$stats.contacte_sans_retour" },
-          injoignables: { $sum: { $ifNull: ["$stats.injoignables", 0] } },
-          coordonnees_incorrectes: { $sum: "$stats.coordonnees_incorrectes" },
-          autre: { $sum: "$stats.autre" },
-          autre_avec_contact: { $sum: { $ifNull: ["$stats.autre_avec_contact", 0] } },
-          deja_connu: { $sum: "$stats.deja_connu" },
+          rdv_pris: { $sum: "$latest_stats.rdv_pris" },
+          nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
+          deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
+          contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
+          injoignables: { $sum: "$injoignables" },
+          coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
+          autre: { $sum: "$latest_stats.autre" },
+          autre_avec_contact: { $sum: "$autre_avec_contact" },
+          deja_connu: { $sum: "$latest_stats.deja_connu" },
         },
       },
     ])
@@ -185,9 +195,9 @@ const getStatsAtDate = async (
   return stats;
 };
 
-const getStatsAtDateWithInjoignable = async (currentDate: Date, missionLocaleIds?: ObjectId[]) => {
-  return getStatsAtDate(
-    currentDate,
+const getLatestStatsPerMLWithOptions = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
+  return getLatestStatsPerML(
+    endDate,
     {
       includeInjoignableInContacte: false,
       includeAutreAvecContactInRepondu: false,
@@ -471,22 +481,7 @@ export async function getStatsForPeriod(
   missionLocaleIds?: ObjectId[]
 ): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
   try {
-    let stats = await getStatsAtDateWithInjoignable(endDate, missionLocaleIds);
-
-    if (stats.length === 0) {
-      const findFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
-
-      const lastAvailableStats = await missionLocaleStatsDb()
-        .find(findFilter)
-        .sort({ computed_day: -1 })
-        .limit(1)
-        .toArray();
-
-      if (lastAvailableStats.length > 0) {
-        const lastDate = lastAvailableStats[0].computed_day;
-        stats = await getStatsAtDateWithInjoignable(lastDate, missionLocaleIds);
-      }
-    }
+    const stats = await getLatestStatsPerMLWithOptions(endDate, missionLocaleIds);
 
     if (stats.length === 0) {
       logger.warn(`[getStatsForPeriod] Aucune donnée disponible jusqu'à ${endDate.toISOString()}`);
@@ -531,54 +526,74 @@ export const getTraitementStats = async (
   // Récupérer les IDs des missions locales de la région si spécifiée
   const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
 
-  const traitementsGroupStage = {
-    $group: {
-      _id: "$computed_day",
-      total: { $sum: "$stats.total" },
-      ...buildTraitementFields(),
-    },
-  };
-
   type TraitementStatEntry = {
-    _id: Date;
     total: number;
     total_contacte: number;
     total_repondu: number;
     total_accompagne: number;
   };
 
-  const latestMatchStage = {
-    $match: {
-      computed_day: { $lte: endDate },
-      ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
+  const buildTraitementPipeline = (matchFilter: object) => [
+    { $match: matchFilter },
+    { $sort: { computed_day: -1 as const } },
+    {
+      $group: {
+        _id: "$mission_locale_id",
+        latest_stats: { $first: "$stats" },
+      },
     },
-  };
+    {
+      $addFields: {
+        injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
+        autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$latest_stats.total" },
+        total_contacte: {
+          $sum: {
+            $add: [
+              "$latest_stats.rdv_pris",
+              "$latest_stats.nouveau_projet",
+              "$latest_stats.deja_accompagne",
+              "$latest_stats.contacte_sans_retour",
+              "$injoignables",
+            ],
+          },
+        },
+        total_repondu: {
+          $sum: {
+            $add: [
+              "$latest_stats.rdv_pris",
+              "$latest_stats.nouveau_projet",
+              "$latest_stats.deja_accompagne",
+              "$autre_avec_contact",
+            ],
+          },
+        },
+        total_accompagne: {
+          $sum: {
+            $add: ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"],
+          },
+        },
+      },
+    },
+  ];
 
-  const firstMatchStage = {
-    $match: {
-      computed_day: { $gte: startDate, $lte: endDate },
-      ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
-    },
-  };
+  const latestMatchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+  const firstMatchFilter = withMissionLocaleFilter(
+    { computed_day: { $gte: startDate, $lte: endDate } },
+    missionLocaleIds
+  );
 
   const [latestStatsResult] = (await missionLocaleStatsDb()
-    .aggregate([
-      latestMatchStage,
-      traitementsGroupStage,
-      { $match: { total: { $gt: 0 } } },
-      { $sort: { _id: -1 } },
-      { $limit: 1 },
-    ])
+    .aggregate(buildTraitementPipeline(latestMatchFilter))
     .toArray()) as TraitementStatEntry[];
 
   const [firstStatsResult] = (await missionLocaleStatsDb()
-    .aggregate([
-      firstMatchStage,
-      traitementsGroupStage,
-      { $match: { total: { $gt: 0 } } },
-      { $sort: { _id: 1 } },
-      { $limit: 1 },
-    ])
+    .aggregate(buildTraitementPipeline(firstMatchFilter))
     .toArray()) as TraitementStatEntry[];
 
   return {
