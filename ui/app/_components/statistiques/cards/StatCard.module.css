@@ -1,9 +1,10 @@
 .card {
   border: none;
   box-shadow: none;
-  background: #f6f6f6;
+  background: white;
   flex: 1 1 calc(25% - 6px);
   min-width: 200px;
+  height: 200px;
   display: flex;
   flex-direction: column;
 }
@@ -35,7 +36,6 @@
   font-weight: 700;
   line-height: 24px;
   margin: 0;
-  margin-bottom: 0;
 }
 
 .cardPercentage {

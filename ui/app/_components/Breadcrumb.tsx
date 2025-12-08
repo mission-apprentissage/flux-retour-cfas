@@ -6,14 +6,14 @@ export default function CustomBreadcrumb({ path, name = "Mission Locale" }) {
 
   const navigation = {
     "/arml/missions-locales": {
-      pageLabel: "Missions locales",
+      pageLabel: "Missions Locales",
       segments: [],
     },
     "/arml/missions-locales/[mlId]": {
       pageLabel: name,
       segments: [
         {
-          label: "Missions locales",
+          label: "Missions Locales",
           linkProps: {
             href: "/arml/missions-locales",
           },

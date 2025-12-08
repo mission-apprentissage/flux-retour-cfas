@@ -6,7 +6,10 @@ import { zSituationEnum, zProblemeTypeEnum } from "./missionLocaleEffectif.model
 
 const collectionName = "missionLocaleEffectifLog";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ mission_locale_effectif_id: 1 }, {}]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ mission_locale_effectif_id: 1 }, {}],
+  [{ mission_locale_effectif_id: 1, created_at: -1 }, { name: "effectif_id_created_at" }],
+];
 export const zMissionLocaleEffectifLog = z.object({
   _id: zObjectId,
   mission_locale_effectif_id: zObjectId,

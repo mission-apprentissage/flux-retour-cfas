@@ -37,53 +37,31 @@
 }
 
 .centeredCell {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  justify-content: center;
-}
-
-.sortableHeader {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sortableHeaderCentered {
-  composes: sortableHeader;
-  justify-content: center;
+  composes: centeredCell from "./common.module.css";
 }
 
 .buttonContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.75rem;
+  composes: buttonContainer from "./common.module.css";
 }
 
 .emptyMessage {
-  text-align: center;
-  padding: 1rem;
+  composes: emptyMessage from "./common.module.css";
 }
 
 .delta {
-  font-size: 12px;
-  vertical-align: middle;
+  composes: delta from "./common.module.css";
 }
 
 .deltaZero {
-  composes: delta;
-  color: var(--text-default-grey);
+  composes: deltaZero from "./common.module.css";
 }
 
 .deltaPositive {
-  composes: delta;
-  color: var(--text-default-success);
+  composes: deltaPositive from "./common.module.css";
 }
 
 .deltaNegative {
-  composes: delta;
-  color: var(--text-default-error);
+  composes: deltaNegative from "./common.module.css";
 }
 
 .engagementBadge {
@@ -106,14 +84,4 @@
   composes: engagementBadge;
   background-color: var(--background-contrast-grey);
   color: var(--text-mention-grey);
-}
-
-.sortIcon {
-  font-size: 1rem;
-}
-
-.sortableContent {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }

@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
+.chartSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.legendSection {
+  margin-top: auto;
+}
+
+.totalSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.totalContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666666;
+}
+
+.totalValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #161616;
+}

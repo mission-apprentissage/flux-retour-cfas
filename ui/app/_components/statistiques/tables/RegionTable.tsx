@@ -2,10 +2,12 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
 
+import { Skeleton } from "../ui/Skeleton";
+
 import styles from "./RegionTable.module.css";
+import { SortableTableHeader } from "./SortableTableHeader";
 
 export interface RegionStats {
   code: string;
@@ -21,9 +23,11 @@ export interface RegionStats {
 
 interface RegionTableProps {
   regions: RegionStats[];
+  showDetailColumn?: boolean;
+  loadingDeltas?: boolean;
 }
 
-export function RegionTable({ regions }: RegionTableProps) {
+export function RegionTable({ regions, showDetailColumn = true, loadingDeltas = false }: RegionTableProps) {
   const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -72,29 +76,6 @@ export function RegionTable({ regions }: RegionTableProps) {
     );
   };
 
-  const SortableHeader = ({
-    column,
-    label,
-    centered,
-  }: {
-    column: keyof RegionStats;
-    label: string;
-    centered?: boolean;
-  }) => {
-    const isSorted = sortColumn === column;
-    const iconClass = sortDirection === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line";
-
-    return (
-      <div
-        onClick={() => handleSort(column)}
-        className={centered ? styles.sortableHeaderCentered : styles.sortableHeader}
-      >
-        {label}
-        {isSorted && <i className={`${iconClass} ${styles.sortIcon}`} />}
-      </div>
-    );
-  };
-
   return (
     <div>
       {displayedRegions.length === 0 ? (
@@ -107,23 +88,35 @@ export function RegionTable({ regions }: RegionTableProps) {
           <Table
             headers={[
               "Région",
-              <SortableHeader key="ml_total" column="ml_total" label="Total ML" centered={true} />,
-              <SortableHeader key="ml_activees" column="ml_activees" label="ML actives" centered={true} />,
-              <div key="ml_engagees" className={styles.sortableHeaderCentered}>
-                <div onClick={() => handleSort("ml_engagees")} className={styles.sortableContent}>
-                  ML engagées
-                  {sortColumn === "ml_engagees" && (
-                    <i
-                      className={`${sortDirection === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line"} ${styles.sortIcon}`}
-                    />
-                  )}
-                </div>
-                <Tooltip
-                  kind="hover"
-                  title="Les Missions locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
-                />
-              </div>,
-              "Détail",
+              <SortableTableHeader
+                key="ml_total"
+                column="ml_total"
+                label="Total ML"
+                currentSortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                centered
+              />,
+              <SortableTableHeader
+                key="ml_activees"
+                column="ml_activees"
+                label="ML actives"
+                currentSortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                centered
+              />,
+              <SortableTableHeader
+                key="ml_engagees"
+                column="ml_engagees"
+                label="ML engagées"
+                currentSortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                centered
+                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+              />,
+              ...(showDetailColumn ? ["Détail"] : []),
             ]}
             data={displayedRegions.map((region) => [
               region.nom,
@@ -132,16 +125,25 @@ export function RegionTable({ regions }: RegionTableProps) {
                 <span>
                   <strong>{region.ml_activees}</strong>/{region.ml_total}
                 </span>
-                {formatDelta(region.ml_activees_delta)}
+                {loadingDeltas ? <Skeleton width="24px" height="16px" /> : formatDelta(region.ml_activees_delta)}
               </div>,
               <div className={styles.centeredCell} key={`engaged-${region.code}`}>
                 <span>
                   <strong>{region.ml_engagees}</strong>/{region.ml_activees}
                 </span>
-                {formatDelta(region.ml_engagees_delta)}
-                {formatEngagementBadge(region.engagement_rate)}
+                {loadingDeltas ? (
+                  <>
+                    <Skeleton width="24px" height="16px" />
+                    <Skeleton width="32px" height="20px" />
+                  </>
+                ) : (
+                  <>
+                    {formatDelta(region.ml_engagees_delta)}
+                    {formatEngagementBadge(region.engagement_rate)}
+                  </>
+                )}
               </div>,
-              "",
+              ...(showDetailColumn ? [""] : []),
             ])}
           />
         </div>
