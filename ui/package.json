@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "dev": "yarn predev && next dev",
-    "build": "yarn prebuild && next build --experimental-build-mode compile",
+    "build": "yarn prebuild && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "predev": "rm -rf .next && react-dsfr update-icons",
