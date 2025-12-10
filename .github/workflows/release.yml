@@ -10,6 +10,8 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   release:
+    if: ${{ success() }}
+    needs: ["tests"]
     concurrency:
       group: "release-${{ github.workflow }}-${{ github.ref }}"
     permissions: write-all
