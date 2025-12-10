@@ -13,6 +13,8 @@ import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./_dsfr-setup/start-dsfr";
 import "./global.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   return (
     <html {...getHtmlAttributes({ defaultColorScheme })}>
