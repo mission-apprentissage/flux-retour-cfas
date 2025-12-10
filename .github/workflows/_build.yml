@@ -35,6 +35,8 @@ jobs:
         run: mna-npm-check/npm-check.sh -p .
 
   release:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
     concurrency:
       group: "build-${{ github.workflow }}-${{ github.ref }}"
     permissions: write-all
