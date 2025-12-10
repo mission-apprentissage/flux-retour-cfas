@@ -16,7 +16,6 @@ on:
           - demo
 
 jobs:
-
   npm-packages-check:
     runs-on: ubuntu-latest
     steps:
