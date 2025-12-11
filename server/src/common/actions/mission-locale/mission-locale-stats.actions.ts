@@ -533,9 +533,9 @@ export const getTraitementStats = async (
     total_accompagne: number;
   };
 
-  const buildTraitementPipeline = (matchFilter: object) => [
+  const buildTraitementPipeline = (matchFilter: object, sortOrder: 1 | -1 = -1) => [
     { $match: matchFilter },
-    { $sort: { computed_day: -1 as const } },
+    { $sort: { computed_day: sortOrder } },
     {
       $group: {
         _id: "$mission_locale_id",
@@ -593,7 +593,7 @@ export const getTraitementStats = async (
     .toArray()) as TraitementStatEntry[];
 
   const [firstStatsResult] = (await missionLocaleStatsDb()
-    .aggregate(buildTraitementPipeline(firstMatchFilter))
+    .aggregate(buildTraitementPipeline(firstMatchFilter, 1))
     .toArray()) as TraitementStatEntry[];
 
   return {
