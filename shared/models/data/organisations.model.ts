@@ -31,6 +31,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ siret: 1, uai: 1 }, { name: "siret_uai" }],
+  [{ type: 1, "adresse.region": 1 }, { name: "type_adresse_region" }],
+  [{ type: 1, activated_at: 1 }, { name: "type_activated_at" }],
 ];
 
 const zOrganisationBase = z.object({

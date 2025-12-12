@@ -1,0 +1,11 @@
+.noDataBox {
+  composes: noDataBox from "./common.module.css";
+}
+
+.noDataIcon {
+  composes: noDataIcon from "./common.module.css";
+}
+
+.noDataMessage {
+  composes: noDataMessage from "./common.module.css";
+}

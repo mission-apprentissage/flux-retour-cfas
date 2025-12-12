@@ -1,0 +1,13 @@
+.selector {
+  width: fit-content;
+}
+
+.selector :global(.fr-select-group) {
+  width: fit-content;
+  margin-bottom: 0;
+}
+
+.selector :global(.fr-select) {
+  width: auto;
+  min-width: 0;
+}

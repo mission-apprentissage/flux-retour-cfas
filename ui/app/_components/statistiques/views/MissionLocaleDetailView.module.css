@@ -1,0 +1,266 @@
+.pageLayout {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.mainContent {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 0 0 0 20px;
+  border-left: 1px solid #e6e6e6;
+  align-self: stretch;
+}
+
+.sidebarButton {
+  width: 100%;
+}
+
+.aboutBox {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e6e6e6;
+}
+
+.sidebarTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #161616;
+  margin: 0 0 16px 0;
+}
+
+.aboutList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aboutItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666666;
+}
+
+.aboutItem i {
+  color: #666666;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activityBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e6e6e6;
+}
+
+.sidebarWarningBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #fee9e6;
+  color: #c9191e;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 30px;
+}
+
+.sidebarWarningBanner .fr-icon-info-fill::before {
+  color: #c9191e;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoLabel {
+  font-size: 16px;
+  font-weight: 400;
+  color: #161616;
+}
+
+.infoValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #161616;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.iconContainer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.title {
+  font-family: Marianne, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: #000091;
+  margin: 0;
+}
+
+.warningBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  background-color: #fee9e6;
+  color: #c9191e;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.warningBanner .fr-icon-info-fill::before {
+  color: #c9191e;
+}
+
+.cfaBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background-color: #b8fec9;
+  color: #18753c;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 4px;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.cfaBadgeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: #18753c;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cfaBadgeIcon i {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  background-color: #f6f6f6;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  color: #666666;
+  margin-bottom: 16px;
+}
+
+.emptyStateTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #161616;
+  margin: 0 0 8px 0;
+}
+
+.emptyStateText {
+  font-size: 16px;
+  color: #666666;
+  margin: 0;
+  max-width: 400px;
+}
+
+.tabsContainer {
+  margin-top: 32px;
+}
+
+.tabsContainer :global(.fr-tabs__panel) {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.chartsContainer {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.headerSkeleton {
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .pageLayout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .chartsContainer {
+    grid-template-columns: 1fr;
+  }
+}

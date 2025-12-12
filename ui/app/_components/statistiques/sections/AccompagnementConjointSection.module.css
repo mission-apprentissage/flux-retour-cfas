@@ -1,0 +1,275 @@
+.section {
+  position: relative;
+}
+
+.section h2 {
+  max-width: calc(100% - 80px);
+}
+
+.betaBadge {
+  position: absolute;
+  top: 32px;
+  right: 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6e445a;
+  background-color: #fee7fc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.expandableSection {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.expandableLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #000091;
+  cursor: pointer;
+  text-align: left;
+}
+
+.expandableIcon {
+  flex-shrink: 0;
+}
+
+.expandableLinkText {
+  font-size: 1rem;
+  text-decoration: underline;
+}
+
+.expandableLink:hover .expandableLinkText {
+  text-decoration: none;
+}
+
+.expandableText {
+  white-space: pre-line;
+  margin: 1rem 0 0 0;
+  line-height: 1.6;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+}
+
+.cumulativeNotice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+  margin-bottom: 2rem;
+}
+
+.noDataBox {
+  composes: noDataBox from "../ui/common.module.css";
+  margin-top: 16px;
+  height: 260px;
+}
+
+.noDataIcon {
+  composes: noDataIcon from "../ui/common.module.css";
+}
+
+.noDataMessage {
+  composes: noDataMessage from "../ui/common.module.css";
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.mapSection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  align-items: center;
+  padding: 1.5rem 0;
+  background-color: #fff;
+}
+
+.mapContainer {
+  flex: 0 0 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mapContainer > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mapContainer svg {
+  width: 228px;
+  height: 232px;
+}
+
+.statsCards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 0 0 40%;
+}
+
+.statCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #161616;
+}
+
+.statValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #161616;
+  text-align: right;
+  min-width: 30px;
+}
+
+.funnelCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: -1rem;
+}
+
+.funnelCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background-color: #fff;
+  height: 200px;
+}
+
+.funnelCardLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #161616;
+  line-height: 1.4;
+}
+
+.funnelCardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #161616;
+}
+
+.funnelCardValueWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.funnelCardBadge {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #161616;
+  background-color: #b8fec9;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+/* Charts Row */
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: -1rem;
+}
+
+.chartCard {
+  padding: 1.5rem;
+  background-color: #fff;
+}
+
+.chartCard h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pieChartContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.pieChartWrapper {
+  flex-shrink: 0;
+}
+
+.pieLegend {
+  composes: legendContainer from "../charts/legend.module.css";
+  gap: 6px;
+}
+
+.pieLegendItem {
+  composes: legendItem from "../charts/legend.module.css";
+}
+
+.pieLegendDot {
+  composes: legendColorCircle from "../charts/legend.module.css";
+}
+
+.pieLegendLabel {
+  composes: legendLabel from "../charts/legend.module.css";
+  flex: 1;
+}
+
+.pieLegendValue {
+  composes: legendValue from "../charts/legend.module.css";
+}
+
+.pieLegendTotal {
+  composes: legendItem from "../charts/legend.module.css";
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+@media (max-width: 992px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .funnelCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mapSection {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .statsCards {
+    width: 100%;
+  }
+
+  .pieChartContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pieLegend {
+    width: 100%;
+  }
+}

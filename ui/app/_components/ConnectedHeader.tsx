@@ -132,6 +132,16 @@ export function ConnectedHeader() {
           },
         });
       }
+      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+        baseItems.push({
+          text: "Suivi des indicateurs",
+          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
+          linkProps: {
+            href: "/suivi-des-indicateurs",
+            target: "_self",
+          },
+        });
+      }
       baseItems.push({
         text: "Mon tableau de bord",
         linkProps: {
@@ -174,6 +184,14 @@ export function ConnectedHeader() {
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
+      baseItems.push({
+        text: "Suivi des indicateurs",
+        isActive: pathname?.startsWith("/suivi-des-indicateurs"),
+        linkProps: {
+          href: "/suivi-des-indicateurs",
+          target: "_self",
+        },
+      });
       baseItems.push({
         text: "Vue d'ensemble",
         isActive: pathname === "/arml",

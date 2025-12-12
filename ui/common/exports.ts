@@ -250,3 +250,45 @@ export function convertOrganismeToExport(
     telephone: organisme.relatedUser?.telephone ?? "",
   };
 }
+
+export const traitementMLExportColumns = [
+  { label: "Région", key: "region_nom", width: 30 },
+  { label: "Mission Locale", key: "nom", width: 40 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 15 },
+  { label: "Total jeunes", key: "total_jeunes", width: 12 },
+  { label: "A traiter", key: "a_traiter", width: 12 },
+  { label: "Traités", key: "traites", width: 12 },
+  { label: "% Traités", key: "pourcentage_traites", width: 12 },
+  { label: "% A recontacter", key: "pourcentage_a_recontacter", width: 15 },
+  { label: "% RDV pris", key: "pourcentage_rdv_pris", width: 12 },
+  { label: "% Connu de la ML", key: "pourcentage_connu_ml", width: 16 },
+  { label: "Date activation", key: "date_activation", xlsxType: "date", width: 15 },
+  { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
+  { label: "RDV pris", key: "rdv_pris", width: 10 },
+  { label: "Nouveau projet", key: "nouveau_projet", width: 14 },
+  { label: "Déjà accompagné", key: "deja_accompagne", width: 15 },
+  { label: "A recontacter", key: "contacte_sans_retour", width: 13 },
+  { label: "Injoignable", key: "injoignables", width: 12 },
+  { label: "Coordonnées incorrectes", key: "coordonnees_incorrectes", width: 22 },
+  { label: "Autre", key: "autre", width: 10 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const traitementRegionExportColumns = [
+  { label: "Région", key: "region_nom", width: 30 },
+  { label: "Total jeunes", key: "total_jeunes", width: 12 },
+  { label: "A traiter", key: "a_traiter", width: 12 },
+  { label: "Traités", key: "traites", width: 12 },
+  { label: "% Traités", key: "pourcentage_traites", width: 12 },
+  { label: "% A recontacter", key: "pourcentage_a_recontacter", width: 15 },
+  { label: "% RDV pris", key: "pourcentage_rdv_pris", width: 12 },
+  { label: "% Connu de la ML", key: "pourcentage_connu_ml", width: 16 },
+  { label: "Nb ML actives", key: "ml_actives", width: 13 },
+  { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
+  { label: "RDV pris", key: "rdv_pris", width: 10 },
+  { label: "Nouveau projet", key: "nouveau_projet", width: 14 },
+  { label: "Déjà accompagné", key: "deja_accompagne", width: 15 },
+  { label: "A recontacter", key: "contacte_sans_retour", width: 13 },
+  { label: "Injoignable", key: "injoignables", width: 12 },
+  { label: "Coordonnées incorrectes", key: "coordonnees_incorrectes", width: 22 },
+  { label: "Autre", key: "autre", width: 10 },
+] as const satisfies ReadonlyArray<ExportColumn>;
