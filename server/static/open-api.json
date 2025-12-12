@@ -5,7 +5,7 @@
     "title": "API mission apprentissage",
     "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
     "contact": {
-      "url": "https://cfas.apprentissage.beta.gouv.fr/contact",
+      "url": "/contact",
       "name": "API Support"
     }
   },
@@ -26,11 +26,6 @@
   ],
   "components": {
     "securitySchemes": {
-      "httpAuth": {
-        "description": "Méthode d'authentification pour la V1 et V2, avec un login et un mot de passe",
-        "type": "http",
-        "scheme": "basic"
-      },
       "apiKeyAuth": {
         "description": "Méthode d'authentification pour la V3 avec une clé d'API",
         "type": "http",
@@ -81,6 +76,16 @@
                     "annee_scolaire": {
                       "type": "string"
                     },
+                    "statut_apprenant": {
+                      "type": "integer",
+                      "description": "Valeurs possibles: 0,2,3",
+                      "enum": [0, 2, 3]
+                    },
+                    "date_metier_mise_a_jour_statut": {
+                      "type": "string",
+                      "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
+                      "format": "YYYY-MM-DDT00:00:00Z"
+                    },
                     "id_erp_apprenant": {
                       "type": "string",
                       "description": "Identifiant de l'apprenant dans l'ERP"
@@ -98,7 +103,6 @@
                     "tel_apprenant": {
                       "type": "string",
                       "nullable": true,
-                      "pattern": "^$|.*[0-9].*",
                       "description": "Téléphone de l'apprenant",
                       "example": "0628000000"
                     },
@@ -123,19 +127,25 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-09-06T21:38:32.499Z"
+                      "example": "2025-06-15T15:11:26.405Z"
                     },
                     "contrat_date_fin": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "contrat_date_rupture": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
+                    },
+                    "custom_statut_apprenant": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Champ libre décrivant le statut de l'apprenant",
+                      "example": "Mon Statut"
                     },
                     "adresse_apprenant": {
                       "type": "string",
@@ -149,21 +159,21 @@
                     "code_postal_de_naissance_apprenant": {
                       "type": "string",
                       "pattern": "^[0-9]{5}$",
-                      "description": "Code postal de naissance de l'apprenant"
+                      "description": "Code postal de l'apprenant"
                     },
                     "code_commune_insee_apprenant": {
                       "type": "string",
-                      "pattern": "^[0-9]{5}$",
-                      "description": "Code commune insee de l'apprenant"
+                      "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                      "description": "Code Insee de la commune de résidence de l'apprenant"
                     },
                     "code_commune_insee_de_naissance_apprenant": {
                       "type": "string",
-                      "pattern": "^[0-9]{5}$",
-                      "description": "Code commune insee de naissance de l'apprenant"
+                      "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                      "description": "Code Insee de la commune de résidence de l'apprenant"
                     },
                     "sexe_apprenant": {
                       "type": "string",
-                      "pattern": "^[MF]$",
+                      "enum": ["M", "F"],
                       "description": "Sexe de l'apprenant",
                       "example": "M"
                     },
@@ -199,13 +209,13 @@
                       "type": "string",
                       "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "date_exclusion_formation": {
                       "type": "string",
                       "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "cause_exclusion_formation": {
                       "type": "string",
@@ -245,19 +255,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-09-06T21:38:32.499Z"
+                      "example": "2025-06-15T15:11:26.405Z"
                     },
                     "contrat_date_fin_2": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "contrat_date_rupture_2": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "cause_rupture_contrat_2": {
                       "type": "string",
@@ -275,19 +285,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-09-06T21:38:32.499Z"
+                      "example": "2025-06-15T15:11:26.405Z"
                     },
                     "contrat_date_fin_3": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "contrat_date_rupture_3": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "cause_rupture_contrat_3": {
                       "type": "string",
@@ -305,19 +315,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-09-06T21:38:32.499Z"
+                      "example": "2025-06-15T15:11:26.405Z"
                     },
                     "contrat_date_fin_4": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "contrat_date_rupture_4": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "cause_rupture_contrat_4": {
                       "type": "string",
@@ -377,13 +387,13 @@
                       "type": "string",
                       "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-09-06T21:38:32.499Z"
+                      "example": "2025-06-15T15:11:26.405Z"
                     },
                     "date_fin_formation": {
                       "type": "string",
                       "description": "Date de fin de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2024-02-03T22:38:32.499Z"
+                      "example": "2025-11-12T16:11:26.405Z"
                     },
                     "etablissement_responsable_uai": {
                       "type": "string",
@@ -421,6 +431,15 @@
                       "description": "SIRET de l'établissement (lieu de formation)",
                       "example": "19750655300019"
                     },
+                    "etablissement_lieu_de_formation_adresse": {
+                      "type": "string",
+                      "description": "Adresse du lieu de formation"
+                    },
+                    "etablissement_lieu_de_formation_code_postal": {
+                      "type": "string",
+                      "pattern": "^[0-9]{5}$",
+                      "description": "Code postal du lieu de formation"
+                    },
                     "formation_cfd": {
                       "type": "string",
                       "nullable": true,
@@ -429,26 +448,284 @@
                       "example": "50022141"
                     },
                     "derniere_situation": {
-                      "type": "integer",
-                      "description": "Situation de l'apprenant N-1",
-                      "enum": [
-                        1003, 1005, 1009, 1013, 1015, 1017, 1018, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001, 3101,
-                        3003, 3103, 3009, 3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119, 3021, 3121,
-                        3023, 3123, 4001, 4101, 4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015,
-                        4115, 4017, 4117, 4019, 4119, 4021, 4121, 5901, 5903, 5905, 5907, 5909, 9900, 9999
-                      ]
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "enum": [1003]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1005]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1009]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1017]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1019]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1021]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [1023]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [2001]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [2003]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [2005]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [2007]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3001]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3101]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3003]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3103]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3009]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3109]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3011]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3111]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3031]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3131]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3032]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3132]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3033]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3133]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3117]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3119]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3021]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3121]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3023]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [3123]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4001]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4101]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4003]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4103]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4005]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4105]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4007]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4107]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4009]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4011]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4111]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4013]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4113]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4015]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4115]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4017]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4117]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4019]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4119]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4021]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4121]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4023]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4123]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4025]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4125]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4027]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [4127]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [5901]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [5903]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [5905]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [5907]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [5909]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [9900]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [9999]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [0]
+                        }
+                      ],
+                      "description": "Situation de l'apprenant N-1"
                     },
                     "dernier_organisme_uai": {
                       "type": "string",
-                      "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
+                      "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
                       "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
                       "example": "0123456A"
                     },
                     "type_cfa": {
                       "type": "string",
-                      "pattern": "^(01|02|03|04|05|06|07|08|09|10)$",
-                      "description": "Type de CFA",
-                      "enum": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
+                      "enum": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+                      "description": "Type de CFA"
                     }
                   },
                   "required": [
@@ -517,6 +794,16 @@
                           "annee_scolaire": {
                             "type": "string"
                           },
+                          "statut_apprenant": {
+                            "type": "integer",
+                            "description": "Valeurs possibles: 0,2,3",
+                            "enum": [0, 2, 3]
+                          },
+                          "date_metier_mise_a_jour_statut": {
+                            "type": "string",
+                            "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
+                            "format": "YYYY-MM-DDT00:00:00Z"
+                          },
                           "id_erp_apprenant": {
                             "type": "string",
                             "description": "Identifiant de l'apprenant dans l'ERP"
@@ -534,7 +821,6 @@
                           "tel_apprenant": {
                             "type": "string",
                             "nullable": true,
-                            "pattern": "^$|.*[0-9].*",
                             "description": "Téléphone de l'apprenant",
                             "example": "0628000000"
                           },
@@ -559,19 +845,25 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-09-06T21:38:32.499Z"
+                            "example": "2025-06-15T15:11:26.405Z"
                           },
                           "contrat_date_fin": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "contrat_date_rupture": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
+                          },
+                          "custom_statut_apprenant": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Champ libre décrivant le statut de l'apprenant",
+                            "example": "Mon Statut"
                           },
                           "has_nir": {
                             "type": "boolean"
@@ -592,17 +884,17 @@
                           },
                           "code_commune_insee_apprenant": {
                             "type": "string",
-                            "pattern": "^[0-9]{5}$",
-                            "description": "Code commune insee de l'apprenant"
+                            "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                            "description": "Code Insee de la commune de résidence de l'apprenant"
                           },
                           "code_commune_insee_de_naissance_apprenant": {
                             "type": "string",
-                            "pattern": "^[0-9]{5}$",
-                            "description": "Code commune insee de naissance de l'apprenant"
+                            "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                            "description": "Code Insee de la commune de résidence de l'apprenant"
                           },
                           "sexe_apprenant": {
                             "type": "string",
-                            "pattern": "^[MF]$",
+                            "enum": ["M", "F"],
                             "description": "Sexe de l'apprenant",
                             "example": "M"
                           },
@@ -638,13 +930,13 @@
                             "type": "string",
                             "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "date_exclusion_formation": {
                             "type": "string",
                             "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "cause_exclusion_formation": {
                             "type": "string",
@@ -684,19 +976,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-09-06T21:38:32.499Z"
+                            "example": "2025-06-15T15:11:26.405Z"
                           },
                           "contrat_date_fin_2": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "contrat_date_rupture_2": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "cause_rupture_contrat_2": {
                             "type": "string",
@@ -714,19 +1006,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-09-06T21:38:32.499Z"
+                            "example": "2025-06-15T15:11:26.405Z"
                           },
                           "contrat_date_fin_3": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "contrat_date_rupture_3": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "cause_rupture_contrat_3": {
                             "type": "string",
@@ -744,19 +1036,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-09-06T21:38:32.499Z"
+                            "example": "2025-06-15T15:11:26.405Z"
                           },
                           "contrat_date_fin_4": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "contrat_date_rupture_4": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "cause_rupture_contrat_4": {
                             "type": "string",
@@ -816,13 +1108,13 @@
                             "type": "string",
                             "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-09-06T21:38:32.499Z"
+                            "example": "2025-06-15T15:11:26.405Z"
                           },
                           "date_fin_formation": {
                             "type": "string",
                             "description": "Date de fin de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2024-02-03T22:38:32.499Z"
+                            "example": "2025-11-12T16:11:26.405Z"
                           },
                           "etablissement_responsable_uai": {
                             "type": "string",
@@ -860,6 +1152,15 @@
                             "description": "SIRET de l'établissement (lieu de formation)",
                             "example": "19750655300019"
                           },
+                          "etablissement_lieu_de_formation_adresse": {
+                            "type": "string",
+                            "description": "Adresse du lieu de formation"
+                          },
+                          "etablissement_lieu_de_formation_code_postal": {
+                            "type": "string",
+                            "pattern": "^[0-9]{5}$",
+                            "description": "Code postal du lieu de formation"
+                          },
                           "formation_cfd": {
                             "type": "string",
                             "nullable": true,
@@ -868,27 +1169,284 @@
                             "example": "50022141"
                           },
                           "derniere_situation": {
-                            "type": "integer",
-                            "description": "Situation de l'apprenant N-1",
-                            "enum": [
-                              1003, 1005, 1009, 1013, 1015, 1017, 1018, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001,
-                              3101, 3003, 3103, 3009, 3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119,
-                              3021, 3121, 3023, 3123, 4001, 4101, 4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111,
-                              4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021, 4121, 5901, 5903, 5905, 5907, 5909,
-                              9900, 9999
-                            ]
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "enum": [1003]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1005]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1009]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1017]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1019]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1021]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [1023]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [2001]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [2003]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [2005]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [2007]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3001]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3101]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3003]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3103]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3009]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3109]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3011]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3111]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3031]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3131]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3032]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3132]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3033]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3133]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3117]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3119]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3021]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3121]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3023]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [3123]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4001]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4101]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4003]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4103]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4005]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4105]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4007]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4107]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4009]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4011]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4111]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4013]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4113]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4015]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4115]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4017]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4117]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4019]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4119]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4021]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4121]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4023]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4123]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4025]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4125]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4027]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [4127]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [5901]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [5903]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [5905]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [5907]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [5909]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [9900]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [9999]
+                              },
+                              {
+                                "type": "number",
+                                "enum": [0]
+                              }
+                            ],
+                            "description": "Situation de l'apprenant N-1"
                           },
                           "dernier_organisme_uai": {
                             "type": "string",
-                            "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
+                            "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[678]|99[0135]|[0-9]{7}[a-zA-Z])$",
                             "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
                             "example": "0123456A"
                           },
                           "type_cfa": {
                             "type": "string",
-                            "pattern": "^(01|02|03|04|05|06|07|08|09|10)$",
-                            "description": "Type de CFA",
-                            "enum": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
+                            "enum": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+                            "description": "Type de CFA"
                           },
                           "validation_errors": {
                             "type": "array",
@@ -931,7 +1489,7 @@
                           "source": {
                             "type": "string",
                             "description": "Source de l'effectif (nom de l'ERP)",
-                            "example": "my-erp"
+                            "example": "ERP"
                           },
                           "source_organisme_id": {
                             "type": "string",

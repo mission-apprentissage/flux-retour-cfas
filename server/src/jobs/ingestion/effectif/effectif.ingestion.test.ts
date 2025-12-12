@@ -74,7 +74,7 @@ describe("ingestEffectifV2", () => {
       },
       annee_scolaires: ["2024-2025"],
       id_erp: ["#1"],
-
+      custom_statut_apprenant: null,
       date_inscription: juil24,
       exclusion: null,
       diplome: null,
@@ -129,7 +129,7 @@ describe("ingestEffectifV2", () => {
       },
       annee_scolaires: ["2024-2025"],
       id_erp: ["#1"],
-
+      custom_statut_apprenant: null,
       date_inscription: juil24,
       exclusion: null,
       diplome: null,
@@ -216,7 +216,7 @@ describe("ingestEffectifV2", () => {
         },
         annee_scolaires: ["2024-2025"],
         id_erp: ["#1"],
-
+        custom_statut_apprenant: null,
         date_inscription: juil24,
         exclusion: null,
         diplome: null,
@@ -261,7 +261,7 @@ describe("ingestEffectifV2", () => {
         },
         annee_scolaires: ["2024-2025"],
         id_erp: ["#1"],
-
+        custom_statut_apprenant: null,
         date_inscription: juil24,
         exclusion: null,
         diplome: null,
@@ -305,7 +305,7 @@ describe("ingestEffectifV2", () => {
         },
         annee_scolaires: ["2024-2025"],
         id_erp: ["#1"],
-
+        custom_statut_apprenant: null,
         date_inscription: juil24,
         exclusion: null,
         diplome: null,
@@ -350,7 +350,7 @@ describe("ingestEffectifV2", () => {
         },
         annee_scolaires: ["2024-2025"],
         id_erp: ["#1"],
-
+        custom_statut_apprenant: null,
         date_inscription: juil24,
         exclusion: null,
         diplome: null,
@@ -496,7 +496,7 @@ describe("ingestEffectifV2", () => {
       },
       annee_scolaires: ["2024-2025"],
       id_erp: ["#1"],
-
+      custom_statut_apprenant: null,
       date_inscription: juil24,
       exclusion: null,
       diplome: null,
@@ -572,7 +572,7 @@ describe("ingestEffectifV2", () => {
       },
       annee_scolaires: ["2024-2025"],
       id_erp: ["#1"],
-
+      custom_statut_apprenant: null,
       date_inscription: juil24,
       exclusion: null,
       diplome: null,

@@ -170,4 +170,10 @@ export const zApprenant = zodOpenApi.object({
       description: "Relicat déprécié et non utilisé",
     })
     .nullish(),
+  custom_statut_apprenant: zodOpenApi
+    .string()
+    .openapi({
+      description: "Champ libre décrivant le statut de l'apprenant",
+    })
+    .nullish(),
 });
