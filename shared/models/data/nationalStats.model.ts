@@ -243,4 +243,58 @@ const zAccompagnementConjointStats = z.object({
 
 export type IAccompagnementConjointStats = z.output<typeof zAccompagnementConjointStats>;
 
+const zMissionLocaleExportData = z.object({
+  region_nom: z.string(),
+  nom: z.string(),
+  siret: z.string().nullable(),
+  total_jeunes: z.number(),
+  a_traiter: z.number(),
+  traites: z.number(),
+  pourcentage_traites: z.number(),
+  pourcentage_a_recontacter: z.number(),
+  pourcentage_rdv_pris: z.number(),
+  pourcentage_connu_ml: z.number(),
+  date_activation: z.date().nullable(),
+  derniere_activite: z.date().nullable(),
+  rdv_pris: z.number(),
+  nouveau_projet: z.number(),
+  deja_accompagne: z.number(),
+  contacte_sans_retour: z.number(),
+  injoignables: z.number(),
+  coordonnees_incorrectes: z.number(),
+  autre: z.number(),
+});
+
+export type IMissionLocaleExportData = z.output<typeof zMissionLocaleExportData>;
+
+const zRegionExportData = z.object({
+  region_nom: z.string(),
+  total_jeunes: z.number(),
+  a_traiter: z.number(),
+  traites: z.number(),
+  pourcentage_traites: z.number(),
+  pourcentage_a_recontacter: z.number(),
+  pourcentage_rdv_pris: z.number(),
+  pourcentage_connu_ml: z.number(),
+  ml_actives: z.number(),
+  derniere_activite: z.date().nullable(),
+  rdv_pris: z.number(),
+  nouveau_projet: z.number(),
+  deja_accompagne: z.number(),
+  contacte_sans_retour: z.number(),
+  injoignables: z.number(),
+  coordonnees_incorrectes: z.number(),
+  autre: z.number(),
+});
+
+export type IRegionExportData = z.output<typeof zRegionExportData>;
+
+const zTraitementExportResponse = z.object({
+  mlData: z.array(zMissionLocaleExportData),
+  regionData: z.array(zRegionExportData),
+  exportDate: z.date(),
+});
+
+export type ITraitementExportResponse = z.output<typeof zTraitementExportResponse>;
+
 export default { zod: zNationalStats };

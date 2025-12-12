@@ -10,7 +10,6 @@ on:
           - production
           - recette
           - preprod
-          - demo
       app_version:
         description: app version
         type: string

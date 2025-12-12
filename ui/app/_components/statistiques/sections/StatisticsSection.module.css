@@ -69,3 +69,33 @@
     width: 33.33%;
   }
 }
+
+.controlsWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.controlsBelowLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.exportError {
+  margin-bottom: 16px;
+}
+
+.tabsContainer {
+  margin-top: 16px;
+}
+
+.tabsContainer :global(.fr-tabs__panel) {
+  padding-left: 0;
+  padding-right: 0;
+}
