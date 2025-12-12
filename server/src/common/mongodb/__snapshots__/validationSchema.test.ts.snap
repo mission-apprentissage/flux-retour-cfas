@@ -1332,6 +1332,12 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
       },
       "bsonType": "object",
     },
+    "custom_statut_apprenant": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
     "date_inscription": {
       "bsonType": "date",
     },
@@ -2673,6 +2679,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "null",
           ],
           "description": "Adresse mail de contact de l'apprenant",
+        },
+        "custom_statut_apprenant": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
         },
         "date_de_naissance": {
           "anyOf": [
@@ -5467,6 +5479,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           ],
           "description": "Adresse mail de contact de l'apprenant",
         },
+        "custom_statut_apprenant": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
         "date_de_naissance": {
           "anyOf": [
             {
@@ -7750,6 +7768,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "null",
           ],
           "description": "Adresse mail de contact de l'apprenant",
+        },
+        "custom_statut_apprenant": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
         },
         "date_de_naissance": {
           "anyOf": [
@@ -11415,6 +11439,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Adresse mail de contact de l'apprenant",
             },
+            "custom_statut_apprenant": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
             "date_de_naissance": {
               "anyOf": [
                 {
@@ -14705,6 +14735,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   ],
                   "description": "Adresse mail de contact de l'apprenant",
                 },
+                "custom_statut_apprenant": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
+                },
                 "date_de_naissance": {
                   "anyOf": [
                     {
@@ -16936,6 +16972,12 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                     "null",
                   ],
                   "description": "Adresse mail de contact de l'apprenant",
+                },
+                "custom_statut_apprenant": {
+                  "bsonType": [
+                    "string",
+                    "null",
+                  ],
                 },
                 "date_de_naissance": {
                   "anyOf": [

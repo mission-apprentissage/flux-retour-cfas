@@ -49,7 +49,8 @@ export type IIngestEffectifUsedFields =
   | "responsable_apprenant_mail1"
   | "responsable_apprenant_mail2"
   | "formation_cfd"
-  | "formation_rncp";
+  | "formation_rncp"
+  | "custom_statut_apprenant";
 
 export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
@@ -191,6 +192,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
       email1: input.dossier.responsable_apprenant_mail1 ?? null,
       email2: input.dossier.responsable_apprenant_mail2 ?? null,
     },
+    custom_statut_apprenant: input.dossier.custom_statut_apprenant ?? null,
   };
 
   const contrats = getContrats(input);

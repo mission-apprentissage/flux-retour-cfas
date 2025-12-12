@@ -107,6 +107,8 @@ export const zEffectifV2 = z.object({
     })
     .nullish(),
 
+  custom_statut_apprenant: z.string().nullish(),
+
   _computed: z.object({
     statut: zEffectifComputedStatut,
     session: zCertification.nullish(),
