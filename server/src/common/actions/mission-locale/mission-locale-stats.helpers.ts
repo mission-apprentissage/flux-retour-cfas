@@ -113,7 +113,6 @@ export const getMissionLocaleIdsByRegion = async (region: string): Promise<Objec
       {
         type: "MISSION_LOCALE",
         "adresse.region": region,
-        activated_at: { $exists: true, $ne: null },
       },
       { projection: { _id: 1 } }
     )
