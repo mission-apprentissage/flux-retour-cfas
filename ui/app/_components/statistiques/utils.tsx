@@ -46,7 +46,7 @@ export function formatPercentageBadgeSimple(percentage: number) {
 
 export function formatActivityDuration(days: number | null): { text: string; className: string } {
   if (days === null) return { text: "-", className: styles.emptyValue };
-  if (days === 0) return { text: "Aujourd'hui", className: styles.activityToday };
+  if (days <= 0) return { text: "Aujourd'hui", className: styles.activityToday };
   if (days < 30) return { text: `Il y a ${days} jour${days > 1 ? "s" : ""}`, className: styles.activityRecent };
   if (days < 365) {
     const months = Math.floor(days / 30);
