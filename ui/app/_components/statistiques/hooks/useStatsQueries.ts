@@ -76,7 +76,7 @@ function buildStatsParams(params: {
   return {
     ...(params.period && { period: params.period }),
     ...(params.region && { region: params.region }),
-    ...(params.mlId && { mlId: params.mlId }),
+    ...(params.mlId && { ml_id: params.mlId }),
     ...(params.national && { national: true }),
   };
 }
