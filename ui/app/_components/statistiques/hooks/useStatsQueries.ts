@@ -181,14 +181,15 @@ export function useCouvertureRegionsStats(period: Period, national?: boolean) {
 }
 
 export function useTraitementMLStats(params: TraitementMLParams) {
-  return useQuery<ITraitementMLStatsResponse>(
-    statsQueryKeys.traitementML(params),
-    () =>
+  return useQuery<ITraitementMLStatsResponse>({
+    queryKey: statsQueryKeys.traitementML(params),
+    queryFn: ({ signal }) =>
       _get("/api/v1/organisation/indicateurs-ml/stats/traitement/ml", {
         params: buildTraitementMLRequestParams(params),
+        signal,
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function usePrefetchTraitementML() {

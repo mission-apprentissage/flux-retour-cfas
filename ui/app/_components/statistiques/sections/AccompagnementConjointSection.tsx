@@ -202,6 +202,20 @@ export function AccompagnementConjointSection({
     return null;
   }
 
+  if (mlId && stats && stats.totalDossiersPartages === 0) {
+    return (
+      <StatisticsSection
+        title={sectionTitle}
+        controls={<span className={styles.betaBadge}>BETA</span>}
+        className={styles.section}
+        wrapTitle
+      >
+        <ExplanationAccordion isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
+        <NoDataMessage />
+      </StatisticsSection>
+    );
+  }
+
   if (noData) {
     return (
       <StatisticsSection

@@ -11,7 +11,7 @@ import {
   StatsPeriod,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
-import { calculateVariation } from "shared/utils/stats";
+import { calculatePercentage } from "shared/utils/stats";
 
 import logger from "@/common/logger";
 import {
@@ -398,7 +398,7 @@ async function getTraitementStatsByPeriod(endDate: Date, startDate?: Date): Prom
 
 async function getTraitementStatsByRegion(evaluationDate: Date, startDate: Date) {
   const [allTraitementStats, allTraitementStatsPrevious] = await Promise.all([
-    getTraitementStatsByPeriod(evaluationDate, startDate),
+    getTraitementStatsByPeriod(evaluationDate),
     getTraitementStatsByPeriod(startDate),
   ]);
 
@@ -467,7 +467,7 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
         engagement_rate: region.ml_activees_current > 0 ? engagement.current / region.ml_activees_current : 0,
         a_traiter: traitement.current.a_traiter,
         traites: traitement.current.traites,
-        traites_variation: calculateVariation(traitement.current.traites, traitement.previous.traites),
+        traites_variation: calculatePercentage(traitement.current.traites, traitement.previous.traites),
       };
     });
 
@@ -1116,7 +1116,7 @@ export const getAccompagnementConjointStats = async (
 ): Promise<IAccompagnementConjointStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const { cfaPilotes, cfaPilotesOids } = await getCfaPilotes();
+  const { cfaPilotesOids } = await getCfaPilotes();
   const regionsActives = await getRegionsActives(cfaPilotesOids);
 
   const missionLocaleFilter = mlId
@@ -1138,6 +1138,7 @@ export const getAccompagnementConjointStats = async (
         $facet: {
           dossiersPartages: [{ $count: "count" }],
           mlConcernees: [{ $group: { _id: "$mission_locale_id" } }, { $count: "count" }],
+          cfaPartenaires: [{ $group: { _id: "$effectif_snapshot.organisme_id" } }, { $count: "count" }],
           motifs: MOTIFS_PIPELINE,
           statutsTraitement: STATUTS_TRAITEMENT_PIPELINE,
           dejaConnu: [
@@ -1161,6 +1162,7 @@ export const getAccompagnementConjointStats = async (
 
   const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
   const mlConcernees = accConjointStats?.mlConcernees[0]?.count || 0;
+  const cfaPartenairesCount = accConjointStats?.cfaPartenaires[0]?.count || 0;
   const motifs = { ...DEFAULT_MOTIFS, ...accConjointStats?.motifs[0] };
   const statutsTraitement = { ...DEFAULT_STATUTS_TRAITEMENT, ...accConjointStats?.statutsTraitement[0] };
   const dejaConnuData = accConjointStats?.dejaConnu[0] || { count: 0, total: 0 };
@@ -1170,7 +1172,7 @@ export const getAccompagnementConjointStats = async (
     totalDossiersPartages > 0 ? Math.round((totalDossiersTraites / totalDossiersPartages) * 100) : 0;
 
   return {
-    cfaPartenaires: cfaPilotes.length,
+    cfaPartenaires: cfaPartenairesCount,
     mlConcernees,
     regionsActives,
     totalJeunesRupturants,

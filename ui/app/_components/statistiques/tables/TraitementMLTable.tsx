@@ -4,7 +4,7 @@ import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
@@ -65,6 +65,27 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
     search: search || undefined,
   });
   const prefetchNextPage = usePrefetchTraitementML();
+
+  const prevParamsRef = useRef({ page, limit, sortColumn, sortDirection, search, period });
+
+  const isPeriodChangeOnly = useMemo(() => {
+    const prev = prevParamsRef.current;
+    const periodChanged = prev.period !== period;
+    const otherParamsChanged =
+      prev.page !== page ||
+      prev.limit !== limit ||
+      prev.sortColumn !== sortColumn ||
+      prev.sortDirection !== sortDirection ||
+      prev.search !== search;
+
+    return periodChanged && !otherParamsChanged;
+  }, [page, limit, sortColumn, sortDirection, search, period]);
+
+  useEffect(() => {
+    prevParamsRef.current = { page, limit, sortColumn, sortDirection, search, period };
+  }, [page, limit, sortColumn, sortDirection, search, period]);
+
+  const showFullSkeleton = isLoading || (isFetching && !isPeriodChangeOnly);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -173,7 +194,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
 
   return (
     <div className={styles.tableContainer}>
-      {isLoading ? (
+      {showFullSkeleton ? (
         <TableSkeleton rows={limit} />
       ) : mlList.length === 0 ? (
         <p className={styles.emptyMessage}>
