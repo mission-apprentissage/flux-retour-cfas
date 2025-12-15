@@ -56,17 +56,20 @@ export function AxisChartTooltip(props: ChartsTooltipContainerProps) {
       <div className={styles.tooltipContainer}>
         <div className={styles.axisTooltipItems}>
           <div className={styles.axisTooltipTitle}>{axisFormattedValue || String(axisValue)}</div>
-          {seriesItems.map((item, index) => (
-            <div key={index} className={styles.tooltipContent}>
-              <div className={styles.tooltipLeftContent}>
-                <div className={styles.tooltipColorDot} style={{ backgroundColor: item.color }} />
-                <span className={styles.tooltipLabel}>{item.formattedLabel}</span>
+          {seriesItems
+            .filter((item) => item.formattedLabel)
+            .reverse()
+            .map((item, index) => (
+              <div key={index} className={styles.tooltipContent}>
+                <div className={styles.tooltipLeftContent}>
+                  <div className={styles.tooltipColorDot} style={{ backgroundColor: item.color }} />
+                  <span className={styles.tooltipLabel}>{item.formattedLabel}</span>
+                </div>
+                <span className={styles.tooltipValue}>
+                  {typeof item.value === "number" ? item.value.toLocaleString("fr-FR") : String(item.value)}
+                </span>
               </div>
-              <span className={styles.tooltipValue}>
-                {typeof item.value === "number" ? item.value.toLocaleString("fr-FR") : String(item.value)}
-              </span>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </ChartsTooltipContainer>

@@ -1,6 +1,11 @@
 "use client";
 
-import { BarChart } from "@mui/x-charts/BarChart";
+import { BarPlot } from "@mui/x-charts/BarChart";
+import { ChartContainer } from "@mui/x-charts/ChartContainer";
+import { ChartsGrid } from "@mui/x-charts/ChartsGrid";
+import { ChartsXAxis } from "@mui/x-charts/ChartsXAxis";
+import { ChartsYAxis } from "@mui/x-charts/ChartsYAxis";
+import { LinePlot, MarkPlot } from "@mui/x-charts/LineChart";
 import { ITimeSeriesPoint } from "shared/models/data/nationalStats.model";
 
 import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
@@ -50,18 +55,12 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
     return value.toString();
   };
 
-  const allTotals = data.map((point) => (point.stats[0]?.total_a_traiter || 0) + (point.stats[0]?.total_traites || 0));
-  const maxTotal = Math.max(...allTotals);
-  const minTotal = Math.min(...allTotals);
-  const range = maxTotal - minTotal;
-
-  const yAxisMin = range < maxTotal * 0.1 && minTotal > 0 ? Math.floor((minTotal * 0.9) / 1000) * 1000 : 0;
-
   return (
-    <>
-      <BarChart
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <ChartContainer
         xAxis={[
           {
+            id: "x-axis",
             scaleType: "band",
             data: dates,
             disableLine: true,
@@ -72,47 +71,61 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
         ]}
         yAxis={[
           {
+            id: "y-axis",
             disableLine: true,
             disableTicks: false,
             valueFormatter: formatYAxis,
-            min: yAxisMin,
           },
         ]}
         series={[
           {
+            type: "bar",
             data: traitesData,
             label: RUPTURANTS_LABELS.traites,
             stack: "total",
             color: RUPTURANTS_COLORS.traites,
           },
           {
+            type: "bar",
             data: aTraiterData,
             label: RUPTURANTS_LABELS.a_traiter,
             stack: "total",
             color: RUPTURANTS_COLORS.a_traiter,
           },
-        ]}
-        height={260}
-        margin={{ right: -5, left: -10, bottom: 10 }}
-        slots={{
-          legend: () => null,
-          tooltip: AxisChartTooltip,
-        }}
-        grid={{ horizontal: true }}
-      />
-      <ChartLegend
-        items={[
-          { label: RUPTURANTS_LABELS.a_traiter, color: RUPTURANTS_COLORS.a_traiter, value: totalATraiter },
           {
-            label: RUPTURANTS_LABELS.traites,
+            type: "line",
+            data: traitesData,
             color: RUPTURANTS_COLORS.traites,
-            value: totalTraites,
-            variation: variationTraites,
-            variationColor: variationColor,
+            showMark: true,
+            disableHighlight: true,
           },
         ]}
-        loadingVariation={loadingVariation}
-      />
-    </>
+        height={320}
+        margin={{ right: -5, left: -10, bottom: 10 }}
+      >
+        <ChartsGrid horizontal />
+        <BarPlot />
+        <LinePlot />
+        <MarkPlot slotProps={{ mark: { r: 3 } }} />
+        <ChartsXAxis />
+        <ChartsYAxis />
+        <AxisChartTooltip />
+      </ChartContainer>
+      <div style={{ marginTop: "auto" }}>
+        <ChartLegend
+          items={[
+            { label: RUPTURANTS_LABELS.a_traiter, color: RUPTURANTS_COLORS.a_traiter, value: totalATraiter },
+            {
+              label: RUPTURANTS_LABELS.traites,
+              color: RUPTURANTS_COLORS.traites,
+              value: totalTraites,
+              variation: variationTraites,
+              variationColor: variationColor,
+            },
+          ]}
+          loadingVariation={loadingVariation}
+        />
+      </div>
+    </div>
   );
 }
