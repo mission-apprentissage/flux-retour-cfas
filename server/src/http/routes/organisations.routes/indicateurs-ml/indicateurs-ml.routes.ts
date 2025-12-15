@@ -157,6 +157,10 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         region: z.string().optional(),
+        mlId: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
         national: z.coerce.boolean().optional(),
       }),
     }),
@@ -357,11 +361,16 @@ const getCouvertureRegionsRoute = async (req, { locals }) => {
 };
 
 const getAccompagnementConjointRoute = async (req, { locals }) => {
-  const { region, national } = req.query;
+  const { region, mlId, national } = req.query;
   const userRegions = locals.regions as string[];
 
   if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
     throw Boom.forbidden("Accès non autorisé à cette région");
+  }
+
+  if (mlId) {
+    await verifyMlInRegions(mlId as string, userRegions);
+    return await getAccompagnementConjointStats(undefined, mlId as string);
   }
 
   if (national) {

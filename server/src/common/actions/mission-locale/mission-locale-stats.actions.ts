@@ -1110,13 +1110,20 @@ const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
   return [...new Set(organismesAvecRegion.map((o) => o.adresse?.region).filter(Boolean))] as string[];
 };
 
-export const getAccompagnementConjointStats = async (region?: string): Promise<IAccompagnementConjointStats> => {
+export const getAccompagnementConjointStats = async (
+  region?: string,
+  mlId?: string
+): Promise<IAccompagnementConjointStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
   const { cfaPilotes, cfaPilotesOids } = await getCfaPilotes();
   const regionsActives = await getRegionsActives(cfaPilotesOids);
 
-  const missionLocaleIds = region ? await getMissionLocaleIdsByRegion(region) : undefined;
+  const missionLocaleFilter = mlId
+    ? { mission_locale_id: new ObjectId(mlId) }
+    : region
+      ? { mission_locale_id: { $in: await getMissionLocaleIdsByRegion(region) } }
+      : {};
 
   const [accConjointStats] = await missionLocaleEffectifsDb()
     .aggregate([
@@ -1124,7 +1131,7 @@ export const getAccompagnementConjointStats = async (region?: string): Promise<I
         $match: {
           "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
           "organisme_data.acc_conjoint": true,
-          ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
+          ...missionLocaleFilter,
         },
       },
       {
@@ -1149,7 +1156,7 @@ export const getAccompagnementConjointStats = async (region?: string): Promise<I
 
   const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
     "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-    ...(missionLocaleIds && { mission_locale_id: { $in: missionLocaleIds } }),
+    ...missionLocaleFilter,
   });
 
   const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;

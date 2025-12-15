@@ -129,10 +129,11 @@ export const withMissionLocaleFilter = <T extends Record<string, unknown>>(
   filter: T,
   missionLocaleIds?: ObjectId[]
 ): T & { mission_locale_id?: { $in: ObjectId[] } } => {
-  if (missionLocaleIds && missionLocaleIds.length > 0) {
-    return { ...filter, mission_locale_id: { $in: missionLocaleIds } };
+  if (missionLocaleIds === undefined) {
+    return filter;
   }
-  return filter;
+
+  return { ...filter, mission_locale_id: { $in: missionLocaleIds } };
 };
 
 /**
