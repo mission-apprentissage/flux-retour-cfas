@@ -60,7 +60,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
 function buildMonthLabel(month: string) {
   if (month === "plus-de-180-j") {
     return {
-      labelElement: "+ de 180j | En abandon",
+      labelElement: "+ de 180j",
       labelString: month,
       downloadLabel: "+ de 180j",
     };
