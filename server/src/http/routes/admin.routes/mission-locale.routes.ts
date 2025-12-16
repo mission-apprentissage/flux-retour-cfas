@@ -181,7 +181,7 @@ export default () => {
     validateRequestMiddleware({
       query: z.object({
         region: z.string().optional(),
-        mlId: z
+        ml_id: z
           .string()
           .regex(/^[0-9a-f]{24}$/)
           .optional(),
@@ -388,8 +388,8 @@ const getTraitementRegionsRoute = async () => {
 };
 
 const getAccompagnementConjointRoute = async (req) => {
-  const { region, mlId } = req.query;
-  return await getAccompagnementConjointStats(region as string | undefined, mlId as string | undefined);
+  const { region, ml_id } = req.query;
+  return await getAccompagnementConjointStats(region as string | undefined, ml_id as string | undefined);
 };
 
 const getMlDetail = async (req) => {
