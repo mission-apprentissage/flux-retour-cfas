@@ -15,12 +15,20 @@ function createTransporter(smtp) {
   return transporter;
 }
 
+export interface SendEmailOptions {
+  noreply?: boolean;
+}
+
 export function createMailerService(transporter = createTransporter({ ...config.smtp, secure: false })) {
-  async function sendEmailMessage(to, template) {
+  async function sendEmailMessage(to: string, template: any, options?: SendEmailOptions) {
     const { subject, data } = template;
 
+    const from = options?.noreply
+      ? `${config.email_noreply_from} <${config.email_noreply}>`
+      : `${config.email_from} <${config.email}>`;
+
     const { messageId } = await transporter.sendMail({
-      from: `${config.email_from} <${config.email}>`,
+      from,
       to,
       subject,
       html: await generateHtml(to, template),
@@ -41,14 +49,21 @@ export function createMailerService(transporter = createTransporter({ ...config.
 export async function sendEmail<T extends TemplateName>(
   recipient: string,
   template: T,
-  payload: TemplatePayloads[T]
+  payload: TemplatePayloads[T],
+  options?: SendEmailOptions
 ): Promise<void> {
   // identifiant email car stocké en BDD et possibilité de le consulter via navigateur
-  await sendStoredEmail(recipient, template, payload, {
-    subject: templatesTitleFuncs[template](payload),
-    templateFile: getStaticFilePath(`./emails/${template}.mjml.ejs`),
-    data: payload,
-  });
+  await sendStoredEmail(
+    recipient,
+    template,
+    payload,
+    {
+      subject: templatesTitleFuncs[template](payload),
+      templateFile: getStaticFilePath(`./emails/${template}.mjml.ejs`),
+      data: payload,
+    },
+    options
+  );
 }
 
 export function getEmailInfos<T extends TemplateName>(template: T, payload: TemplatePayloads[T]) {

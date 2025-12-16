@@ -85,22 +85,27 @@ export async function sendMissionLocaleWeeklyRecap() {
       const dateFin = format(weekEnd, "dd/MM/yyyy", { locale: fr });
 
       for (const user of users) {
-        await sendEmail(user.email, "mission_locale_weekly_recap", {
-          recipient: {
-            nom: user.nom,
-            prenom: user.prenom,
+        await sendEmail(
+          user.email,
+          "mission_locale_weekly_recap",
+          {
+            recipient: {
+              nom: user.nom,
+              prenom: user.prenom,
+            },
+            effectifs_prioritaire: stats.effectifs_prioritaire,
+            effectifs_a_traiter: stats.effectifs_a_traiter,
+            effectifs_a_recontacter: stats.effectifs_a_recontacter,
+            total: stats.total,
+            date_debut: dateDebut,
+            date_fin: dateFin,
+            mission_locale: {
+              id: ml.ml_id,
+              nom: ml.nom,
+            },
           },
-          effectifs_prioritaire: stats.effectifs_prioritaire,
-          effectifs_a_traiter: stats.effectifs_a_traiter,
-          effectifs_a_recontacter: stats.effectifs_a_recontacter,
-          total: stats.total,
-          date_debut: dateDebut,
-          date_fin: dateFin,
-          mission_locale: {
-            id: ml.ml_id,
-            nom: ml.nom,
-          },
-        });
+          { noreply: true }
+        );
 
         logger.info(
           {
