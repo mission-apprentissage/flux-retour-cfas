@@ -113,9 +113,9 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
       case API_EFFECTIF_LISTE.INJOIGNABLE:
         return [
-          { label: "Apprenant", dataKey: "name", width: 300 },
+          { label: "Apprenant", dataKey: "name", width: 200 },
           { label: "Formation", dataKey: "formation", width: 300 },
-          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "Statut", dataKey: "badge", width: 320 },
           { label: "", dataKey: "icon", width: 10 },
         ];
 
