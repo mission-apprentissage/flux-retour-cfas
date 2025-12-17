@@ -20,7 +20,7 @@ interface EffectifStatusBadgeProps {
 }
 
 export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBadgeProps) {
-  if (effectif.nouveau_contrat && effectif.a_traiter && !effectif.injoignable) {
+  if (effectif.nouveau_contrat && (effectif.a_traiter || effectif.injoignable)) {
     return <Badge severity="info">Nouveau contrat</Badge>;
   }
 

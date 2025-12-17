@@ -60,7 +60,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
 function buildMonthLabel(month: string) {
   if (month === "plus-de-180-j") {
     return {
-      labelElement: "+ de 180j | En abandon",
+      labelElement: "+ de 180j",
       labelString: month,
       downloadLabel: "+ de 180j",
     };
@@ -113,9 +113,9 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
       case API_EFFECTIF_LISTE.INJOIGNABLE:
         return [
-          { label: "Apprenant", dataKey: "name", width: 300 },
+          { label: "Apprenant", dataKey: "name", width: 200 },
           { label: "Formation", dataKey: "formation", width: 300 },
-          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "Statut", dataKey: "badge", width: 320 },
           { label: "", dataKey: "icon", width: 10 },
         ];
 
