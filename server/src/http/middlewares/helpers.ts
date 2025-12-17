@@ -145,11 +145,6 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
   ensureValidUser(req.user);
 
   switch (req.user.organisation.type) {
-    case ORGANISATION_TYPE.DREETS:
-      res.locals.academie_list = getAcademieListByRegion(
-        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
-      );
-      break;
     case ORGANISATION_TYPE.DRAFPIC:
       res.locals.academie_list = getAcademieListByRegion(
         (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
