@@ -25,6 +25,7 @@ export function ChartLegend({ items, loadingVariation = false }: ChartLegendProp
             <span className={styles.legendLabel}>{item.label}</span>
           </div>
           <div className={styles.legendRightContent}>
+            <span className={styles.legendValue}>{item.value.toLocaleString("fr-FR")}</span>
             {item.variation !== undefined &&
               (loadingVariation ? (
                 <Skeleton width="40px" height="16px" />
@@ -33,7 +34,6 @@ export function ChartLegend({ items, loadingVariation = false }: ChartLegendProp
                   {item.variation}
                 </span>
               ))}
-            <span className={styles.legendValue}>{item.value.toLocaleString("fr-FR")}</span>
           </div>
         </div>
       ))}

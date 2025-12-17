@@ -91,6 +91,7 @@ export function DetailsDossiersTraitesPieChart({
                   <span className={styles.legendLabel}>{item.label}</span>
                 </div>
                 <div className={styles.legendRightContent}>
+                  <span className={styles.value}>{item.value.toLocaleString("fr-FR")}</span>
                   {loadingVariation ? (
                     <Skeleton width="40px" height="16px" />
                   ) : (
@@ -98,7 +99,6 @@ export function DetailsDossiersTraitesPieChart({
                       {variation}
                     </span>
                   )}
-                  <span className={styles.value}>{item.value.toLocaleString("fr-FR")}</span>
                 </div>
               </div>
             );
