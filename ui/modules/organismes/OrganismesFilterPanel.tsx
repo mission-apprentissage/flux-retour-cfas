@@ -76,7 +76,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const isAllowedToShowFilterDepartement = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
-      case "DREETS":
       case "DRAAF":
       case "CONSEIL_REGIONAL":
       case "CARIF_OREF_REGIONAL":
@@ -108,7 +107,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const isAllowedToShowFilterUAI = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
-      case "DREETS":
       case "DRAAF":
       case "CONSEIL_REGIONAL":
       case "CARIF_OREF_REGIONAL":
