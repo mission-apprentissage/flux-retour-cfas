@@ -80,7 +80,7 @@ describe("Route indicateurs", () => {
     });
 
     describe("Permissions", () => {
-      const accesOrganisme: PermissionsTestConfig<number> = {
+      const accesOrganisme: PermissionsTestConfig<number | false> = {
         "OF cible": 1,
         "OF non lié": 0,
         "OF formateur": 0,
@@ -88,8 +88,8 @@ describe("Route indicateurs", () => {
         "Tête de réseau même réseau": 1,
         "Tête de réseau Responsable": 1,
         "Tête de réseau autre réseau": 0,
-        "DREETS même région": 1,
-        "DREETS autre région": 0,
+        "DREETS même région": false,
+        "DREETS autre région": false,
         "DRAFPIC régional même région": 1,
         "DRAFPIC régional autre région": 0,
         "DRAAF même région": 1,
@@ -98,8 +98,8 @@ describe("Route indicateurs", () => {
         "Conseil Régional autre région": 0,
         "CARIF OREF régional même région": 1,
         "CARIF OREF régional autre région": 0,
-        "DDETS même département": 1,
-        "DDETS autre département": 0,
+        "DDETS même département": false,
+        "DDETS autre département": false,
         "Académie même académie": 1,
         "Académie autre académie": 0,
         "Opérateur public national": 1,
@@ -113,21 +113,25 @@ describe("Route indicateurs", () => {
           `/api/v1/indicateurs/effectifs/par-departement?date=${date}`
         );
 
-        expect(response.status).toStrictEqual(200);
-        expect(response.data).toStrictEqual(
-          nbApprentis > 0
-            ? [
-                {
-                  departement: "56",
-                  apprenants: nbApprentis,
-                  apprentis: nbApprentis,
-                  inscrits: 0,
-                  rupturants: 0,
-                  abandons: 0,
-                },
-              ]
-            : []
-        );
+        if (nbApprentis === false) {
+          expect(response.status).toStrictEqual(403);
+        } else {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(
+            nbApprentis > 0
+              ? [
+                  {
+                    departement: "56",
+                    apprenants: nbApprentis,
+                    apprentis: nbApprentis,
+                    inscrits: 0,
+                    rupturants: 0,
+                    abandons: 0,
+                  },
+                ]
+              : []
+          );
+        }
       });
     });
 
@@ -143,7 +147,7 @@ describe("Route indicateurs", () => {
 
     describe("Permissions", () => {
       // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
-      const accesOrganisme: PermissionsTestConfig<number, "Tête de réseau Responsable"> = {
+      const accesOrganisme: PermissionsTestConfig<number | false, "Tête de réseau Responsable"> = {
         "OF cible": 2,
         "OF non lié": 1,
         "OF formateur": 1,
@@ -151,8 +155,8 @@ describe("Route indicateurs", () => {
         "Tête de réseau même réseau": 4,
         // "Tête de réseau Responsable": 4,
         "Tête de réseau autre réseau": 0,
-        "DREETS même région": 4,
-        "DREETS autre région": 4,
+        "DREETS même région": false,
+        "DREETS autre région": false,
         "DRAFPIC régional même région": 4,
         "DRAFPIC régional autre région": 4,
         "DRAAF même région": 4,
@@ -161,8 +165,8 @@ describe("Route indicateurs", () => {
         "Conseil Régional autre région": 4,
         "CARIF OREF régional même région": 4,
         "CARIF OREF régional autre région": 4,
-        "DDETS même département": 4,
-        "DDETS autre département": 4,
+        "DDETS même département": false,
+        "DDETS autre département": false,
         "Académie même académie": 4,
         "Académie autre académie": 4,
         "Opérateur public national": 4,
@@ -176,44 +180,48 @@ describe("Route indicateurs", () => {
           "/api/v1/indicateurs/organismes/par-departement"
         );
 
-        expect(response.status).toStrictEqual(200);
-        expect(response.data).toStrictEqual(
-          nbOrganismes > 0
-            ? [
-                {
-                  departement: "56",
-                  organismesNonTransmetteurs: {
-                    formateurs: 0,
-                    inconnues: 0,
-                    responsables: 0,
-                    responsablesFormateurs: 0,
-                    total: 0,
+        if (nbOrganismes === false) {
+          expect(response.status).toStrictEqual(403);
+        } else {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(
+            nbOrganismes > 0
+              ? [
+                  {
+                    departement: "56",
+                    organismesNonTransmetteurs: {
+                      formateurs: 0,
+                      inconnues: 0,
+                      responsables: 0,
+                      responsablesFormateurs: 0,
+                      total: 0,
+                    },
+                    organismesTransmetteurs: {
+                      formateurs: 0,
+                      inconnues: 0,
+                      responsables: 0,
+                      responsablesFormateurs: nbOrganismes,
+                      total: nbOrganismes,
+                    },
+                    tauxCouverture: {
+                      formateurs: 100,
+                      inconnues: 100,
+                      responsables: 100,
+                      responsablesFormateurs: 100,
+                      total: 100,
+                    },
+                    totalOrganismes: {
+                      formateurs: 0,
+                      inconnues: 0,
+                      responsables: 0,
+                      responsablesFormateurs: nbOrganismes,
+                      total: nbOrganismes,
+                    },
                   },
-                  organismesTransmetteurs: {
-                    formateurs: 0,
-                    inconnues: 0,
-                    responsables: 0,
-                    responsablesFormateurs: nbOrganismes,
-                    total: nbOrganismes,
-                  },
-                  tauxCouverture: {
-                    formateurs: 100,
-                    inconnues: 100,
-                    responsables: 100,
-                    responsablesFormateurs: 100,
-                    total: 100,
-                  },
-                  totalOrganismes: {
-                    formateurs: 0,
-                    inconnues: 0,
-                    responsables: 0,
-                    responsablesFormateurs: nbOrganismes,
-                    total: nbOrganismes,
-                  },
-                },
-              ]
-            : []
-        );
+                ]
+              : []
+          );
+        }
       });
     });
 
@@ -261,7 +269,7 @@ describe("Route indicateurs", () => {
 
     describe("Permissions", () => {
       // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
-      const accesOrganisme: PermissionsTestConfig<number, "Tête de réseau Responsable"> = {
+      const accesOrganisme: PermissionsTestConfig<number | false, "Tête de réseau Responsable"> = {
         "OF cible": 1,
         "OF non lié": 0,
         "OF formateur": 0,
@@ -269,8 +277,8 @@ describe("Route indicateurs", () => {
         "Tête de réseau même réseau": 1,
         // "Tête de réseau Responsable": 1,
         "Tête de réseau autre réseau": 0,
-        "DREETS même région": 1,
-        "DREETS autre région": 0,
+        "DREETS même région": false,
+        "DREETS autre région": false,
         "DRAFPIC régional même région": 1,
         "DRAFPIC régional autre région": 0,
         "DRAAF même région": 1,
@@ -279,8 +287,8 @@ describe("Route indicateurs", () => {
         "Conseil Régional autre région": 0,
         "CARIF OREF régional même région": 1,
         "CARIF OREF régional autre région": 0,
-        "DDETS même département": 1,
-        "DDETS autre département": 0,
+        "DDETS même département": false,
+        "DDETS autre département": false,
         "Académie même académie": 1,
         "Académie autre académie": 0,
         "Opérateur public national": 1,
@@ -294,25 +302,29 @@ describe("Route indicateurs", () => {
           `/api/v1/indicateurs/effectifs/par-organisme?date=${date}`
         );
 
-        expect(response.status).toStrictEqual(200);
-        expect(response.data).toStrictEqual(
-          nbApprentis > 0
-            ? [
-                {
-                  organisme_id: id(1),
-                  nom: "ADEN Formations (Caen)",
-                  nature: "responsable_formateur",
-                  siret: "00000000000018",
-                  uai: "0000000A",
-                  apprenants: nbApprentis,
-                  apprentis: nbApprentis,
-                  inscrits: 0,
-                  rupturants: 0,
-                  abandons: 0,
-                },
-              ]
-            : []
-        );
+        if (nbApprentis === false) {
+          expect(response.status).toStrictEqual(403);
+        } else {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(
+            nbApprentis > 0
+              ? [
+                  {
+                    organisme_id: id(1),
+                    nom: "ADEN Formations (Caen)",
+                    nature: "responsable_formateur",
+                    siret: "00000000000018",
+                    uai: "0000000A",
+                    apprenants: nbApprentis,
+                    apprentis: nbApprentis,
+                    inscrits: 0,
+                    rupturants: 0,
+                    abandons: 0,
+                  },
+                ]
+              : []
+          );
+        }
       });
     });
 
@@ -398,8 +410,8 @@ describe("Route indicateurs", () => {
         "Tête de réseau même réseau": false,
         // "Tête de réseau Responsable": false,
         "Tête de réseau autre réseau": false,
-        "DREETS même région": effectifResultWithContact,
-        "DREETS autre région": emptyResult,
+        "DREETS même région": false,
+        "DREETS autre région": false,
         "DRAFPIC régional même région": effectifResult,
         "DRAFPIC régional autre région": emptyResult,
         "DRAAF même région": effectifResult,
@@ -408,8 +420,8 @@ describe("Route indicateurs", () => {
         "Conseil Régional autre région": false,
         "CARIF OREF régional même région": false,
         "CARIF OREF régional autre région": false,
-        "DDETS même département": effectifResultWithContact,
-        "DDETS autre département": emptyResult,
+        "DDETS même département": false,
+        "DDETS autre département": false,
         "Académie même académie": effectifResultWithContact,
         "Académie autre académie": emptyResult,
         "Opérateur public national": false,
