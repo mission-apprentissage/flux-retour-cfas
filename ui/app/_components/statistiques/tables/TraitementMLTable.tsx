@@ -213,10 +213,13 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
             <Table
               headers={tableHeaders}
               data={mlList.map((ml, index) => {
+                const isNotActivated = ml.is_activated === false;
                 const hasNoActivity = ml.traites === 0;
-                const activity = hasNoActivity
-                  ? { text: "Aucune activité", className: styles.emptyValue }
-                  : formatActivityDuration(ml.jours_depuis_activite);
+                const activity = isNotActivated
+                  ? { text: "Non activée", className: styles.emptyValue }
+                  : hasNoActivity
+                    ? { text: "Aucune activité", className: styles.emptyValue }
+                    : formatActivityDuration(ml.jours_depuis_activite);
                 const visibleRowsThreshold = Math.min(3, Math.floor(limit / 3));
                 const isInLastRows = index >= mlList.length - visibleRowsThreshold;
                 const tooltipPosition = isInLastRows ? "top" : "bottom";

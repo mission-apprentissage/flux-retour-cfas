@@ -166,6 +166,7 @@ const zMissionLocaleTraitementStats = z.object({
   details: zTraitementDetails,
   derniere_activite: z.date().nullable(),
   jours_depuis_activite: z.number().nullable(),
+  is_activated: z.boolean(),
 });
 
 export type IMissionLocaleTraitementStats = z.output<typeof zMissionLocaleTraitementStats>;

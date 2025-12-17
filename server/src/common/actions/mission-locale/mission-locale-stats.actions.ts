@@ -758,7 +758,6 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
     {
       $match: {
         "ml.type": "MISSION_LOCALE",
-        "ml.activated_at": { $exists: true, $ne: null },
         ...(region && { "ml.adresse.region": region }),
         ...(search && { "ml.nom": { $regex: escapeRegex(search), $options: "i" } }),
       },
@@ -810,6 +809,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
         a_traiter: "$latest_stats.a_traiter",
         traites: "$latest_stats.traite",
+        is_activated: { $ne: ["$ml.activated_at", null] },
       },
     },
     {
@@ -888,6 +888,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
               a_traiter: 1,
               traites: 1,
               pourcentage_traites: 1,
+              is_activated: 1,
               details: {
                 rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
                 nouveau_projet: { $ifNull: ["$latest_stats.nouveau_projet", 0] },
@@ -1372,7 +1373,6 @@ const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
   {
     $match: {
       "ml.type": "MISSION_LOCALE",
-      "ml.activated_at": { $exists: true, $ne: null },
       ...(region && { "ml.adresse.region": region }),
     },
   },
