@@ -382,21 +382,9 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     .limit(1)
     .toArray();
 
-  const cfaPilotes = await organisationsDb()
-    .find({
-      type: "ORGANISME_FORMATION",
-      ml_beta_activated_at: { $exists: true, $ne: null },
-    })
-    .project({ organisme_id: 1 })
-    .toArray();
-
-  const cfaPilotesOids = cfaPilotes
-    .map((o) => (o.organisme_id ? new ObjectId(o.organisme_id) : null))
-    .filter((id): id is ObjectId => id !== null);
-
-  const hasCfaCollaboration = mlEffectifs.some((e) => {
-    const organismeId = e.effectif_snapshot?.organisme_id;
-    return organismeId && cfaPilotesOids.some((cfaId) => cfaId.equals(organismeId));
+  const hasCfaCollaboration = await missionLocaleEffectifsDb().countDocuments({
+    mission_locale_id: missionLocaleId,
+    "organisme_data.acc_conjoint": true,
   });
 
   const traitesCount = mlEffectifs.filter((e) => e.situation != null).length;
@@ -405,7 +393,7 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     ml,
     activated_at: ml.activated_at || null,
     last_activity_at: lastLog.length > 0 ? lastLog[0].created_at : null,
-    has_cfa_collaboration: hasCfaCollaboration,
+    has_cfa_collaboration: hasCfaCollaboration > 0,
     traites_count: traitesCount,
   };
 };
