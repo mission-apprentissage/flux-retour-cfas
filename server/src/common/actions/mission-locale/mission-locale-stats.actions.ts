@@ -692,7 +692,6 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
     traites: "traites",
     pourcentage_traites: "pourcentage_traites",
     derniere_activite: "derniere_activite",
-    // Utilise le champ _sort qui a une grande valeur pour les null (ML sans activité en dernier)
     jours_depuis_activite: "jours_depuis_activite_sort",
   };
 
@@ -703,15 +702,27 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
   const pipeline = [
     {
       $match: {
-        computed_day: { $lte: evaluationDate },
+        type: "MISSION_LOCALE",
+        ...(region && { "adresse.region": region }),
+        ...(search && { nom: { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
-    { $sort: { computed_day: -1 as const } },
     {
-      $group: {
-        _id: "$mission_locale_id",
-        latest_stats: { $first: "$stats" },
-        latest_day: { $first: "$computed_day" },
+      $lookup: {
+        from: "missionLocaleStats",
+        let: { ml_id: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ["$mission_locale_id", "$$ml_id"] }, { $lte: ["$computed_day", evaluationDate] }],
+              },
+            },
+          },
+          { $sort: { computed_day: -1 } },
+          { $limit: 1 },
+        ],
+        as: "latest_stats_entry",
       },
     },
     {
@@ -733,57 +744,55 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
           { $sort: { computed_day: 1 } },
           { $limit: 1 },
         ],
-        as: "period_start_entry",
+        as: "first_stats_entry",
       },
     },
     {
       $addFields: {
+        latest_stats: { $arrayElemAt: ["$latest_stats_entry.stats", 0] },
         first_stats: {
-          $ifNull: [{ $arrayElemAt: ["$period_start_entry.stats", 0] }, "$latest_stats"],
+          $ifNull: [
+            { $arrayElemAt: ["$first_stats_entry.stats", 0] },
+            { $arrayElemAt: ["$latest_stats_entry.stats", 0] },
+          ],
         },
-        first_day: {
-          $ifNull: [{ $arrayElemAt: ["$period_start_entry.computed_day", 0] }, "$latest_day"],
-        },
       },
     },
-    { $unset: "period_start_entry" },
-    {
-      $lookup: {
-        from: "organisations",
-        localField: "_id",
-        foreignField: "_id",
-        as: "ml",
-      },
-    },
-    { $unwind: "$ml" },
-    {
-      $match: {
-        "ml.type": "MISSION_LOCALE",
-        ...(region && { "ml.adresse.region": region }),
-        ...(search && { "ml.nom": { $regex: escapeRegex(search), $options: "i" } }),
-      },
-    },
+    { $unset: ["latest_stats_entry", "first_stats_entry"] },
     {
       $lookup: {
         from: "regions",
-        localField: "ml.adresse.region",
+        localField: "adresse.region",
         foreignField: "code",
         as: "region_info",
       },
     },
+    // Calculer les champs
     {
       $addFields: {
-        total_jeunes: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] },
+        total_jeunes: {
+          $add: [{ $ifNull: ["$latest_stats.a_traiter", 0] }, { $ifNull: ["$latest_stats.traite", 0] }],
+        },
         pourcentage_traites: {
           $round: [
             {
               $cond: [
-                { $eq: [{ $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] }, 0] },
+                {
+                  $eq: [
+                    { $add: [{ $ifNull: ["$latest_stats.a_traiter", 0] }, { $ifNull: ["$latest_stats.traite", 0] }] },
+                    0,
+                  ],
+                },
                 0,
                 {
                   $multiply: [
                     {
-                      $divide: ["$latest_stats.traite", { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] }],
+                      $divide: [
+                        { $ifNull: ["$latest_stats.traite", 0] },
+                        {
+                          $add: [{ $ifNull: ["$latest_stats.a_traiter", 0] }, { $ifNull: ["$latest_stats.traite", 0] }],
+                        },
+                      ],
                     },
                     100,
                   ],
@@ -795,24 +804,32 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         },
         first_pourcentage_traites: {
           $cond: [
-            { $eq: [{ $add: ["$first_stats.a_traiter", "$first_stats.traite"] }, 0] },
+            {
+              $eq: [{ $add: [{ $ifNull: ["$first_stats.a_traiter", 0] }, { $ifNull: ["$first_stats.traite", 0] }] }, 0],
+            },
             0,
             {
               $multiply: [
-                { $divide: ["$first_stats.traite", { $add: ["$first_stats.a_traiter", "$first_stats.traite"] }] },
+                {
+                  $divide: [
+                    { $ifNull: ["$first_stats.traite", 0] },
+                    { $add: [{ $ifNull: ["$first_stats.a_traiter", 0] }, { $ifNull: ["$first_stats.traite", 0] }] },
+                  ],
+                },
                 100,
               ],
             },
           ],
         },
-        nom: { $trim: { input: "$ml.nom" } },
-        region_code: "$ml.adresse.region",
+        nom: { $trim: { input: "$nom" } },
+        region_code: "$adresse.region",
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
-        a_traiter: "$latest_stats.a_traiter",
-        traites: "$latest_stats.traite",
-        is_activated: { $ne: ["$ml.activated_at", null] },
+        a_traiter: { $ifNull: ["$latest_stats.a_traiter", 0] },
+        traites: { $ifNull: ["$latest_stats.traite", 0] },
+        is_activated: { $ne: ["$activated_at", null] },
       },
     },
+    // Lookup effectifs pour dernière activité
     {
       $lookup: {
         from: "missionLocaleEffectif",
@@ -911,7 +928,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
     },
   ];
 
-  const [result] = await missionLocaleStatsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
+  const [result] = await organisationsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
 
   const total = result.total[0]?.count || 0;
   const data = result.data || [];

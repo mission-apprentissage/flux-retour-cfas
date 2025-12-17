@@ -2,7 +2,6 @@
 
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
-import { useDossiersTraitesStats, useTraitementStats } from "../hooks/useStatsQueries";
 import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
 import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
@@ -20,11 +19,6 @@ export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
   const region = REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE];
   const regionName = region?.nom || "Région inconnue";
 
-  const { data: traitementStats } = useTraitementStats("30days", regionCode);
-  const { data: dossiersTraitesData } = useDossiersTraitesStats("30days", regionCode);
-  const hasNoActiveML = traitementStats?.latest?.total === 0;
-  const hasNoDossiersTraites = dossiersTraitesData?.details?.total === 0;
-
   return (
     <div>
       <ViewHeader
@@ -36,23 +30,10 @@ export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
         }
       />
 
-      {hasNoActiveML && (
-        <div className={styles.warningBanner}>
-          <span className="fr-icon-info-fill" aria-hidden="true" />
-          <span>Il n&apos;y a aucune Mission Locale active sur Tableau de bord dans cette région pour le moment</span>
-        </div>
-      )}
-
       <IdentificationSuiviSection region={regionCode} />
 
-      {!hasNoActiveML && !hasNoDossiersTraites && (
-        <>
-          <SuiviTraitementSection region={regionCode} isAdmin={isAdmin} />
-          <AccompagnementConjointSection region={regionCode} />
-        </>
-      )}
-
-      {!hasNoActiveML && hasNoDossiersTraites && <AccompagnementConjointSection region={regionCode} />}
+      <SuiviTraitementSection region={regionCode} isAdmin={isAdmin} />
+      <AccompagnementConjointSection region={regionCode} />
     </div>
   );
 }
