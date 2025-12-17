@@ -804,7 +804,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
             },
           ],
         },
-        nom: "$ml.nom",
+        nom: { $trim: { input: "$ml.nom" } },
         region_code: "$ml.adresse.region",
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
         a_traiter: "$latest_stats.a_traiter",
@@ -1444,7 +1444,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     {
       $project: {
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
-        nom: "$ml.nom",
+        nom: { $trim: { input: "$ml.nom" } },
         siret: { $ifNull: ["$ml.siret", null] },
         total_jeunes: 1,
         a_traiter: 1,

@@ -225,7 +225,7 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
     {
       $project: {
         _id: 1,
-        nom: 1,
+        nom: { $trim: { input: "$nom" } },
         code_postal: "$adresse.code_postal",
         activated_at: 1,
         arml_id: 1,
