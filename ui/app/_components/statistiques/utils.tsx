@@ -16,11 +16,13 @@ export function formatPercentageBadge(percentage: number, evolution?: string, lo
     badgeClass = styles.percentageBadgeZero;
   }
 
-  const getEvolutionClass = (evo: string) => {
-    if (evo.startsWith("+")) return styles.evolutionPositive;
-    if (evo.startsWith("-")) return styles.evolutionNegative;
-    return styles.evolutionZero;
+  const getEvolutionDisplay = (evo: string): { icon: string | null; className: string } => {
+    if (evo.startsWith("+")) return { icon: "fr-icon-arrow-up-s-line", className: styles.evolutionPositive };
+    if (evo.startsWith("-")) return { icon: "fr-icon-arrow-down-s-line", className: styles.evolutionNegative };
+    return { icon: null, className: styles.evolutionZero };
   };
+
+  const evolutionDisplay = evolution && evolution !== "" ? getEvolutionDisplay(evolution) : null;
 
   return (
     <span>
@@ -28,7 +30,12 @@ export function formatPercentageBadge(percentage: number, evolution?: string, lo
       {loadingEvolution ? (
         <Skeleton width="32px" height="16px" inline />
       ) : (
-        evolution && evolution !== "" && <span className={getEvolutionClass(evolution)}>{evolution}</span>
+        evolutionDisplay &&
+        (evolutionDisplay.icon ? (
+          <span className={`${evolutionDisplay.icon} ${evolutionDisplay.className}`} aria-hidden="true" />
+        ) : (
+          <span className={evolutionDisplay.className}>=</span>
+        ))
       )}
     </span>
   );

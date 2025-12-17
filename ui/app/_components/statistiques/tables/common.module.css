@@ -101,5 +101,5 @@
 
 .evolutionZero {
   composes: evolutionBadge;
-  color: var(--text-mention-grey);
+  color: var(--text-title-grey);
 }
