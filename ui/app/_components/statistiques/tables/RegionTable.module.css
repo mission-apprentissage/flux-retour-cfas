@@ -118,3 +118,8 @@
 .regionStatsTable tbody tr:has(.stretchedLink):hover {
   background-color: var(--background-alt-grey);
 }
+
+.fewRows {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}

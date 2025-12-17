@@ -86,7 +86,7 @@ export function RegionTable({
           {!showInactive && hasInactiveRegions && "Cliquez sur le bouton ci-dessous pour afficher toutes les régions."}
         </p>
       ) : (
-        <div className={styles.regionStatsTable}>
+        <div className={`${styles.regionStatsTable} ${sortedDisplayedRegions.length < 4 ? styles.fewRows : ""}`}>
           <Table
             headers={[
               "Région",
