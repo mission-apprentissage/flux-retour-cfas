@@ -25,7 +25,7 @@ const FiltreAffelnetDepartement = (props: FiltreAffelnetDepartementProps) => {
   const organisation = auth.organisation as any;
 
   const configDepartements = useMemo(() => {
-    if (organisation.type === "DREETS" || organisation.type === "DRAFPIC") {
+    if (organisation.type === "DRAFPIC") {
       return DEPARTEMENTS_SORTED.filter(
         (departement) => departement.region.code === (organisation as IOrganisationOperateurPublicRegion).code_region
       );
