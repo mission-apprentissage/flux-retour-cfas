@@ -560,6 +560,7 @@ export const getTraitementStats = async (
               "$latest_stats.deja_accompagne",
               "$latest_stats.contacte_sans_retour",
               "$injoignables",
+              "$autre_avec_contact",
             ],
           },
         },
