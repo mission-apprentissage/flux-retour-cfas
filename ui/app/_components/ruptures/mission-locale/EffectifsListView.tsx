@@ -62,9 +62,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                   +180j {count !== undefined ? ` (${count})` : ""} | <i> Durée légale rupture de contrat</i>
                 </>
               ) : (
-                <>
-                  +180j | <i> En abandon</i>
-                </>
+                <>+180j</>
               )}
             </span>
           </>
