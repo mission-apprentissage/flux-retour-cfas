@@ -1,0 +1,27 @@
+.noDataContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.noDataPieChartPlaceholder {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background-color: #eeeeee;
+  flex-shrink: 0;
+}
+
+.noDataBox {
+  composes: noDataBox from "../ui/common.module.css";
+  height: 260px;
+}
+
+.noDataIcon {
+  composes: noDataIcon from "../ui/common.module.css";
+}
+
+.noDataMessage {
+  composes: noDataMessage from "../ui/common.module.css";
+}

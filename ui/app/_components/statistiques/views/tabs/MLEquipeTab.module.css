@@ -1,0 +1,58 @@
+.container {
+  padding: 24px 0;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #161616;
+  margin: 0 0 16px 0;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background-color: #f6f6f6;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  font-size: 40px;
+  color: #666666;
+  margin-bottom: 16px;
+}
+
+.emptyStateTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #161616;
+  margin: 0 0 8px 0;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
+  max-width: 300px;
+}
+
+.noDataBox {
+  composes: noDataBox from "../../ui/common.module.css";
+  height: 260px;
+}
+
+.noDataIcon {
+  composes: noDataIcon from "../../ui/common.module.css";
+}
+
+.noDataMessage {
+  composes: noDataMessage from "../../ui/common.module.css";
+}

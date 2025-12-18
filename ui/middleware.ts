@@ -76,6 +76,9 @@ function redirectToHome(
       return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     case "FRANCE_TRAVAIL":
       return NextResponse.redirect(new URL("/france-travail", request.url));
+    case "DREETS":
+    case "DDETS":
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
@@ -138,6 +141,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(requestNextData);
   }
 
+  const isDreetsOrDdets = session?.organisation?.type === "DREETS" || session?.organisation?.type === "DDETS";
+  if (isDreetsOrDdets) {
+    const restrictedPaths = ["/home", "/organismes", "/indicateurs", "/national/indicateurs", "/voeux-affelnet"];
+    const isRestrictedPath = restrictedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+    if (isRestrictedPath) {
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
+    }
+  }
+
   if (pathname === "/parametres") {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
@@ -154,6 +166,14 @@ export async function middleware(request: NextRequest) {
         url.searchParams.set(key, value);
       });
       return NextResponse.redirect(url);
+    }
+    return NextResponse.next(requestNextData);
+  }
+
+  if (pathname.startsWith("/suivi-des-indicateurs/")) {
+    const allowedTypes = ["ARML", "DREETS", "DDETS"];
+    if (!session || !allowedTypes.includes(session.organisation?.type || "")) {
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     }
     return NextResponse.next(requestNextData);
   }

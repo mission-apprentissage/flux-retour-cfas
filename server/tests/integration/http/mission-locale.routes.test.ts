@@ -1,3 +1,4 @@
+import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import { it, expect, describe, beforeEach } from "vitest";
 
@@ -7,6 +8,7 @@ import {
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
+  regionsDb,
 } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import {
@@ -15,7 +17,7 @@ import {
 } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
-import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
+import { initTestApp, RequestAsOrganisationFunc, expectUnauthorizedError } from "@tests/utils/testUtils";
 
 const UAI = "0802004U";
 const SIRET = "77937827200016";
@@ -26,7 +28,6 @@ const ML_DATA = { ml_id: 609, nom: "MA MISSION LOCALE", type: "MISSION_LOCALE" a
 
 let EFFECTIF_ID: ObjectId;
 let requestAsOrganisation: RequestAsOrganisationFunc;
-let httpClient: Awaited<ReturnType<typeof initTestApp>>["httpClient"];
 
 describe("Mission Locale Routes", () => {
   useNock();
@@ -34,7 +35,6 @@ describe("Mission Locale Routes", () => {
   beforeEach(async () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
-    httpClient = app.httpClient;
     await organisationsDb().insertOne({
       _id: ML_ID,
       created_at: new Date(),
@@ -259,492 +259,696 @@ describe("Mission Locale Routes", () => {
       });
     });
   });
+});
 
-  describe("Statistiques Mission Locale", () => {
-    describe("GET /api/v1/mission-locale/stats/summary", () => {
-      beforeEach(async () => {
-        await missionLocaleStatsDb().deleteMany({});
-        await organisationsDb().deleteMany({});
-      });
+describe("Mission Locale Stats Routes - Public", () => {
+  useNock();
+  useMongo();
 
-      it("Doit retourner les statistiques agrégées pour la période par défaut (all)", async () => {
-        const currentDate = new Date("2025-03-15");
-        currentDate.setUTCHours(0, 0, 0, 0);
+  let httpClient: AxiosInstance;
 
-        const ml1Id = new ObjectId();
-        const ml2Id = new ObjectId();
+  const ML_ID_STATS = new ObjectId();
+  const ML_ID_STATS_ARA = new ObjectId();
+  const ML_DATA_STATS = { ml_id: 610, nom: "ML STATS TEST", type: "MISSION_LOCALE" as const };
+  const ML_DATA_STATS_ARA = { ml_id: 612, nom: "ML STATS ARA", type: "MISSION_LOCALE" as const };
 
-        await organisationsDb().insertMany([
-          {
-            _id: ml1Id,
-            nom: "ML Paris",
-            ml_id: 1,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
-            activated_at: new Date("2025-02-01"),
-          },
-          {
-            _id: ml2Id,
-            nom: "ML Lyon",
-            ml_id: 2,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
-            activated_at: new Date("2025-02-15"),
-          },
-        ]);
+  beforeEach(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
 
-        await missionLocaleStatsDb().insertMany([
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml1Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: {
-              total: 100,
-              a_traiter: 30,
-              traite: 70,
-              rdv_pris: 20,
-              nouveau_projet: 15,
-              deja_accompagne: 10,
-              contacte_sans_retour: 25,
-              injoignables: 0,
-              coordonnees_incorrectes: 5,
-              autre: 5,
-              autre_avec_contact: 0,
-              deja_connu: 10,
-              mineur: 0,
-              mineur_a_traiter: 0,
-              mineur_traite: 0,
-              mineur_rdv_pris: 0,
-              mineur_nouveau_projet: 0,
-              mineur_deja_accompagne: 0,
-              mineur_contacte_sans_retour: 0,
-              mineur_injoignables: 0,
-              mineur_coordonnees_incorrectes: 0,
-              mineur_autre: 0,
-              mineur_autre_avec_contact: 0,
-              rqth: 0,
-              rqth_a_traiter: 0,
-              rqth_traite: 0,
-              rqth_rdv_pris: 0,
-              rqth_nouveau_projet: 0,
-              rqth_deja_accompagne: 0,
-              rqth_contacte_sans_retour: 0,
-              rqth_injoignables: 0,
-              rqth_coordonnees_incorrectes: 0,
-              rqth_autre: 0,
-              rqth_autre_avec_contact: 0,
-              abandon: 0,
-            },
-          },
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml2Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: {
-              total: 50,
-              a_traiter: 20,
-              traite: 30,
-              rdv_pris: 10,
-              nouveau_projet: 5,
-              deja_accompagne: 5,
-              contacte_sans_retour: 10,
-              injoignables: 0,
-              coordonnees_incorrectes: 3,
-              autre: 2,
-              autre_avec_contact: 0,
-              deja_connu: 5,
-              mineur: 0,
-              mineur_a_traiter: 0,
-              mineur_traite: 0,
-              mineur_rdv_pris: 0,
-              mineur_nouveau_projet: 0,
-              mineur_deja_accompagne: 0,
-              mineur_contacte_sans_retour: 0,
-              mineur_injoignables: 0,
-              mineur_coordonnees_incorrectes: 0,
-              mineur_autre: 0,
-              mineur_autre_avec_contact: 0,
-              rqth: 0,
-              rqth_a_traiter: 0,
-              rqth_traite: 0,
-              rqth_rdv_pris: 0,
-              rqth_nouveau_projet: 0,
-              rqth_deja_accompagne: 0,
-              rqth_contacte_sans_retour: 0,
-              rqth_injoignables: 0,
-              rqth_coordonnees_incorrectes: 0,
-              rqth_autre: 0,
-              rqth_autre_avec_contact: 0,
-              abandon: 0,
-            },
-          },
-        ]);
+    await regionsDb().insertMany([
+      {
+        _id: new ObjectId(),
+        code: "11",
+        nom: "Île-de-France",
+      },
+      {
+        _id: new ObjectId(),
+        code: "84",
+        nom: "Auvergne-Rhône-Alpes",
+      },
+    ]);
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary");
+    await organisationsDb().insertMany([
+      {
+        _id: ML_ID_STATS,
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "11" },
+        ...ML_DATA_STATS,
+      },
+      {
+        _id: ML_ID_STATS_ARA,
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "84" },
+        ...ML_DATA_STATS_ARA,
+      },
+    ]);
 
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("summary");
-        expect(response.data).toHaveProperty("arml");
-        expect(response.data).toHaveProperty("mlCount");
-        expect(response.data).toHaveProperty("activatedMlCount");
-        expect(response.data.mlCount).toBe(2);
-        expect(response.data.activatedMlCount).toBe(2);
-      });
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
-      it("Doit retourner les statistiques pour une période de 30 jours", async () => {
-        const currentDate = new Date("2025-03-15");
-        currentDate.setUTCHours(0, 0, 0, 0);
+    const statsBase = {
+      abandon: 0,
+      mineur: 0,
+      mineur_a_traiter: 0,
+      mineur_traite: 0,
+      mineur_rdv_pris: 0,
+      mineur_nouveau_projet: 0,
+      mineur_deja_accompagne: 0,
+      mineur_contacte_sans_retour: 0,
+      mineur_injoignables: 0,
+      mineur_coordonnees_incorrectes: 0,
+      mineur_autre: 0,
+      mineur_autre_avec_contact: 0,
+      rqth: 0,
+      rqth_a_traiter: 0,
+      rqth_traite: 0,
+      rqth_rdv_pris: 0,
+      rqth_nouveau_projet: 0,
+      rqth_deja_accompagne: 0,
+      rqth_contacte_sans_retour: 0,
+      rqth_injoignables: 0,
+      rqth_coordonnees_incorrectes: 0,
+      rqth_autre: 0,
+      rqth_autre_avec_contact: 0,
+    };
 
-        const ml1Id = new ObjectId();
+    await missionLocaleStatsDb().insertMany([
+      {
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID_STATS,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 100,
+          a_traiter: 30,
+          traite: 70,
+          rdv_pris: 20,
+          nouveau_projet: 15,
+          deja_accompagne: 10,
+          contacte_sans_retour: 10,
+          injoignables: 5,
+          coordonnees_incorrectes: 5,
+          autre: 5,
+          autre_avec_contact: 2,
+          deja_connu: 8,
+          ...statsBase,
+        },
+      },
+      {
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID_STATS_ARA,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 50,
+          a_traiter: 20,
+          traite: 30,
+          rdv_pris: 10,
+          nouveau_projet: 8,
+          deja_accompagne: 5,
+          contacte_sans_retour: 3,
+          injoignables: 2,
+          coordonnees_incorrectes: 1,
+          autre: 1,
+          autre_avec_contact: 1,
+          deja_connu: 4,
+          ...statsBase,
+        },
+      },
+    ]);
+  });
 
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 3,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          activated_at: new Date("2025-02-01"),
-        });
+  describe("GET /api/v1/mission-locale/stats/traitement", () => {
+    it("Retourne les stats de traitement sans authentification", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/traitement");
 
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: {
-            total: 100,
-            a_traiter: 30,
-            traite: 70,
-            rdv_pris: 20,
-            nouveau_projet: 15,
-            deja_accompagne: 10,
-            contacte_sans_retour: 25,
-            injoignables: 0,
-            coordonnees_incorrectes: 5,
-            autre: 5,
-            autre_avec_contact: 0,
-            deja_connu: 10,
-            mineur: 0,
-            mineur_a_traiter: 0,
-            mineur_traite: 0,
-            mineur_rdv_pris: 0,
-            mineur_nouveau_projet: 0,
-            mineur_deja_accompagne: 0,
-            mineur_contacte_sans_retour: 0,
-            mineur_injoignables: 0,
-            mineur_coordonnees_incorrectes: 0,
-            mineur_autre: 0,
-            mineur_autre_avec_contact: 0,
-            rqth: 0,
-            rqth_a_traiter: 0,
-            rqth_traite: 0,
-            rqth_rdv_pris: 0,
-            rqth_nouveau_projet: 0,
-            rqth_deja_accompagne: 0,
-            rqth_contacte_sans_retour: 0,
-            rqth_injoignables: 0,
-            rqth_coordonnees_incorrectes: 0,
-            rqth_autre: 0,
-            rqth_autre_avec_contact: 0,
-            abandon: 0,
-          },
-        });
-
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=30days");
-
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("summary");
-        expect(response.data.summary).toBeInstanceOf(Array);
-        expect(response.data.summary.length).toBeGreaterThan(0);
-      });
-
-      it("Doit valider le paramètre period", async () => {
-        const response = await httpClient.get("/api/v1/mission-locale/stats/summary?period=invalid");
-
-        expect(response.status).toBe(400);
-      });
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("latest");
+      expect(response.data).toHaveProperty("first");
+      expect(response.data).toHaveProperty("evaluationDate");
+      expect(response.data).toHaveProperty("period");
+      expect(response.data.latest).toHaveProperty("total");
+      expect(response.data.latest).toHaveProperty("total_contacte");
+      expect(response.data.latest).toHaveProperty("total_repondu");
+      expect(response.data.latest).toHaveProperty("total_accompagne");
     });
 
-    describe("GET /api/v1/mission-locale/stats/regions", () => {
-      beforeEach(async () => {
-        await missionLocaleStatsDb().deleteMany({});
-        await organisationsDb().deleteMany({});
-      });
+    it("Accepte le paramètre period", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=3months");
 
-      it("Doit retourner les statistiques par région pour la période par défaut (30days)", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
+      expect(response.status).toBe(200);
+      expect(response.data.period).toBe("3months");
+    });
 
-        const ml1Id = new ObjectId();
-        const ml2Id = new ObjectId();
+    it("Rejette une période invalide", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=invalid");
 
-        await organisationsDb().insertMany([
-          {
-            _id: ml1Id,
-            nom: "ML Île-de-France",
-            ml_id: 4,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
-            adresse: { region: "11" },
-            activated_at: new Date("2025-02-01"),
-          },
-          {
-            _id: ml2Id,
-            nom: "ML Auvergne-Rhône-Alpes",
-            ml_id: 5,
-            type: "MISSION_LOCALE",
-            created_at: new Date("2025-01-01"),
-            adresse: { region: "84" },
-            activated_at: new Date("2025-02-15"),
-          },
-        ]);
+      expect(response.status).toBe(400);
+    });
 
-        await missionLocaleStatsDb().insertMany([
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml1Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: {
-              total: 100,
-              a_traiter: 30,
-              traite: 70,
-              rdv_pris: 20,
-              nouveau_projet: 15,
-              deja_accompagne: 10,
-              contacte_sans_retour: 25,
-              injoignables: 0,
-              coordonnees_incorrectes: 5,
-              autre: 5,
-              autre_avec_contact: 0,
-              deja_connu: 10,
-              mineur: 0,
-              mineur_a_traiter: 0,
-              mineur_traite: 0,
-              mineur_rdv_pris: 0,
-              mineur_nouveau_projet: 0,
-              mineur_deja_accompagne: 0,
-              mineur_contacte_sans_retour: 0,
-              mineur_injoignables: 0,
-              mineur_coordonnees_incorrectes: 0,
-              mineur_autre: 0,
-              mineur_autre_avec_contact: 0,
-              rqth: 0,
-              rqth_a_traiter: 0,
-              rqth_traite: 0,
-              rqth_rdv_pris: 0,
-              rqth_nouveau_projet: 0,
-              rqth_deja_accompagne: 0,
-              rqth_contacte_sans_retour: 0,
-              rqth_injoignables: 0,
-              rqth_coordonnees_incorrectes: 0,
-              rqth_autre: 0,
-              rqth_autre_avec_contact: 0,
-              abandon: 0,
-            },
-          },
-          {
-            _id: new ObjectId(),
-            mission_locale_id: ml2Id,
-            computed_day: currentDate,
-            created_at: new Date(),
-            stats: {
-              total: 50,
-              a_traiter: 20,
-              traite: 30,
-              rdv_pris: 10,
-              nouveau_projet: 5,
-              deja_accompagne: 5,
-              contacte_sans_retour: 10,
-              injoignables: 0,
-              coordonnees_incorrectes: 3,
-              autre: 2,
-              autre_avec_contact: 0,
-              deja_connu: 5,
-              mineur: 0,
-              mineur_a_traiter: 0,
-              mineur_traite: 0,
-              mineur_rdv_pris: 0,
-              mineur_nouveau_projet: 0,
-              mineur_deja_accompagne: 0,
-              mineur_contacte_sans_retour: 0,
-              mineur_injoignables: 0,
-              mineur_coordonnees_incorrectes: 0,
-              mineur_autre: 0,
-              mineur_autre_avec_contact: 0,
-              rqth: 0,
-              rqth_a_traiter: 0,
-              rqth_traite: 0,
-              rqth_rdv_pris: 0,
-              rqth_nouveau_projet: 0,
-              rqth_deja_accompagne: 0,
-              rqth_contacte_sans_retour: 0,
-              rqth_injoignables: 0,
-              rqth_coordonnees_incorrectes: 0,
-              rqth_autre: 0,
-              rqth_autre_avec_contact: 0,
-              abandon: 0,
-            },
-          },
-        ]);
+    it("Filtre par région quand le paramètre region est fourni", async () => {
+      const responseIDF = await httpClient.get("/api/v1/mission-locale/stats/traitement?region=11");
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions");
+      expect(responseIDF.status).toBe(200);
+      expect(responseIDF.data.latest.total).toBe(100);
 
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("regions");
-        expect(response.data.regions).toBeInstanceOf(Array);
-        expect(response.data.regions.length).toBeGreaterThan(0);
+      const responseARA = await httpClient.get("/api/v1/mission-locale/stats/traitement?region=84");
 
-        const region = response.data.regions[0];
-        expect(region).toHaveProperty("code");
-        expect(region).toHaveProperty("nom");
-        expect(region).toHaveProperty("ml_total");
-        expect(region).toHaveProperty("ml_activees");
-        expect(region).toHaveProperty("ml_engagees");
-        expect(region).toHaveProperty("engagement_rate");
-      });
+      expect(responseARA.status).toBe(200);
+      expect(responseARA.data.latest.total).toBe(50);
+    });
 
-      it("Doit retourner les statistiques pour une période de 3 mois", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
+    it("Retourne les stats de toutes les régions sans le paramètre region", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/traitement");
 
-        const ml1Id = new ObjectId();
+      expect(response.status).toBe(200);
+      expect(response.data.latest.total).toBe(150);
+    });
+  });
 
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 6,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          adresse: { region: "11" },
-          activated_at: new Date("2025-02-01"),
-        });
+  describe("GET /api/v1/mission-locale/stats/synthese/deployment", () => {
+    it("Retourne les stats de déploiement sans authentification", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/synthese/deployment");
 
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: {
-            total: 100,
-            a_traiter: 30,
-            traite: 70,
-            rdv_pris: 20,
-            nouveau_projet: 15,
-            deja_accompagne: 10,
-            contacte_sans_retour: 25,
-            injoignables: 0,
-            coordonnees_incorrectes: 5,
-            autre: 5,
-            autre_avec_contact: 0,
-            deja_connu: 10,
-            mineur: 0,
-            mineur_a_traiter: 0,
-            mineur_traite: 0,
-            mineur_rdv_pris: 0,
-            mineur_nouveau_projet: 0,
-            mineur_deja_accompagne: 0,
-            mineur_contacte_sans_retour: 0,
-            mineur_injoignables: 0,
-            mineur_coordonnees_incorrectes: 0,
-            mineur_autre: 0,
-            mineur_autre_avec_contact: 0,
-            rqth: 0,
-            rqth_a_traiter: 0,
-            rqth_traite: 0,
-            rqth_rdv_pris: 0,
-            rqth_nouveau_projet: 0,
-            rqth_deja_accompagne: 0,
-            rqth_contacte_sans_retour: 0,
-            rqth_injoignables: 0,
-            rqth_coordonnees_incorrectes: 0,
-            rqth_autre: 0,
-            rqth_autre_avec_contact: 0,
-            abandon: 0,
-          },
-        });
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("summary");
+      expect(response.data).toHaveProperty("regionsActives");
+      expect(response.data).toHaveProperty("evaluationDate");
+      expect(response.data).toHaveProperty("period");
+      expect(response.data.summary).toHaveProperty("mlCount");
+      expect(response.data.summary).toHaveProperty("activatedMlCount");
+    });
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=3months");
+    it("Accepte le paramètre period", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/synthese/deployment?period=all");
 
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("regions");
-        expect(response.data.regions).toBeInstanceOf(Array);
-      });
+      expect(response.status).toBe(200);
+      expect(response.data.period).toBe("all");
+    });
+  });
 
-      it("Doit retourner les statistiques pour toute la période (all)", async () => {
-        const currentDate = new Date();
-        currentDate.setUTCHours(0, 0, 0, 0);
+  describe("GET /api/v1/mission-locale/stats/synthese/regions", () => {
+    it("Retourne les stats par région sans authentification", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/synthese/regions");
 
-        const ml1Id = new ObjectId();
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("regions");
+      expect(response.data).toHaveProperty("period");
+      expect(Array.isArray(response.data.regions)).toBe(true);
+    });
 
-        await organisationsDb().insertOne({
-          _id: ml1Id,
-          nom: "ML Test",
-          ml_id: 7,
-          type: "MISSION_LOCALE",
-          created_at: new Date("2025-01-01"),
-          adresse: { region: "11" },
-          activated_at: new Date("2025-02-01"),
-        });
+    it("Accepte le paramètre period", async () => {
+      const response = await httpClient.get("/api/v1/mission-locale/stats/synthese/regions?period=30days");
 
-        await missionLocaleStatsDb().insertOne({
-          _id: new ObjectId(),
-          mission_locale_id: ml1Id,
-          computed_day: currentDate,
-          created_at: new Date(),
-          stats: {
-            total: 100,
-            a_traiter: 30,
-            traite: 70,
-            rdv_pris: 20,
-            nouveau_projet: 15,
-            deja_accompagne: 10,
-            contacte_sans_retour: 25,
-            injoignables: 0,
-            coordonnees_incorrectes: 5,
-            autre: 5,
-            autre_avec_contact: 0,
-            deja_connu: 10,
-            mineur: 0,
-            mineur_a_traiter: 0,
-            mineur_traite: 0,
-            mineur_rdv_pris: 0,
-            mineur_nouveau_projet: 0,
-            mineur_deja_accompagne: 0,
-            mineur_contacte_sans_retour: 0,
-            mineur_injoignables: 0,
-            mineur_coordonnees_incorrectes: 0,
-            mineur_autre: 0,
-            mineur_autre_avec_contact: 0,
-            rqth: 0,
-            rqth_a_traiter: 0,
-            rqth_traite: 0,
-            rqth_rdv_pris: 0,
-            rqth_nouveau_projet: 0,
-            rqth_deja_accompagne: 0,
-            rqth_contacte_sans_retour: 0,
-            rqth_injoignables: 0,
-            rqth_coordonnees_incorrectes: 0,
-            rqth_autre: 0,
-            rqth_autre_avec_contact: 0,
-            abandon: 0,
-          },
-        });
+      expect(response.status).toBe(200);
+      expect(response.data.period).toBe("30days");
+    });
+  });
+});
 
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=all");
+describe("Mission Locale Stats Routes - Admin", () => {
+  useNock();
+  useMongo();
 
-        expect(response.status).toBe(200);
-        expect(response.data).toHaveProperty("regions");
-        expect(response.data.regions).toBeInstanceOf(Array);
-      });
+  let requestAsOrganisation: RequestAsOrganisationFunc;
+  let httpClient: AxiosInstance;
 
-      it("Doit valider le paramètre period", async () => {
-        const response = await httpClient.get("/api/v1/mission-locale/stats/regions?period=invalid");
+  const ML_ID_ADMIN = new ObjectId();
+  const ML_ID_ADMIN_ARA = new ObjectId();
+  const ML_DATA_ADMIN = { ml_id: 611, nom: "ML ADMIN TEST", type: "MISSION_LOCALE" as const };
+  const ML_DATA_ADMIN_ARA = { ml_id: 613, nom: "ML ADMIN ARA", type: "MISSION_LOCALE" as const };
 
-        expect(response.status).toBe(400);
-      });
+  beforeEach(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+    requestAsOrganisation = app.requestAsOrganisation;
+
+    await regionsDb().insertMany([
+      {
+        _id: new ObjectId(),
+        code: "11",
+        nom: "Île-de-France",
+      },
+      {
+        _id: new ObjectId(),
+        code: "84",
+        nom: "Auvergne-Rhône-Alpes",
+      },
+    ]);
+
+    await organisationsDb().insertMany([
+      {
+        _id: ML_ID_ADMIN,
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "11" },
+        ...ML_DATA_ADMIN,
+      },
+      {
+        _id: ML_ID_ADMIN_ARA,
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "84" },
+        ...ML_DATA_ADMIN_ARA,
+      },
+    ]);
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const statsBase = {
+      abandon: 0,
+      mineur: 0,
+      mineur_a_traiter: 0,
+      mineur_traite: 0,
+      mineur_rdv_pris: 0,
+      mineur_nouveau_projet: 0,
+      mineur_deja_accompagne: 0,
+      mineur_contacte_sans_retour: 0,
+      mineur_injoignables: 0,
+      mineur_coordonnees_incorrectes: 0,
+      mineur_autre: 0,
+      mineur_autre_avec_contact: 0,
+      rqth: 0,
+      rqth_a_traiter: 0,
+      rqth_traite: 0,
+      rqth_rdv_pris: 0,
+      rqth_nouveau_projet: 0,
+      rqth_deja_accompagne: 0,
+      rqth_contacte_sans_retour: 0,
+      rqth_injoignables: 0,
+      rqth_coordonnees_incorrectes: 0,
+      rqth_autre: 0,
+      rqth_autre_avec_contact: 0,
+    };
+
+    await missionLocaleStatsDb().insertMany([
+      {
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID_ADMIN,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 50,
+          a_traiter: 20,
+          traite: 30,
+          rdv_pris: 10,
+          nouveau_projet: 5,
+          deja_accompagne: 5,
+          contacte_sans_retour: 5,
+          injoignables: 2,
+          coordonnees_incorrectes: 2,
+          autre: 1,
+          autre_avec_contact: 1,
+          deja_connu: 4,
+          ...statsBase,
+        },
+      },
+      {
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID_ADMIN_ARA,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 80,
+          a_traiter: 30,
+          traite: 50,
+          rdv_pris: 15,
+          nouveau_projet: 10,
+          deja_accompagne: 8,
+          contacte_sans_retour: 7,
+          injoignables: 5,
+          coordonnees_incorrectes: 3,
+          autre: 2,
+          autre_avec_contact: 2,
+          deja_connu: 6,
+          ...statsBase,
+        },
+      },
+    ]);
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/national/rupturants", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/national/rupturants");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne les stats des rupturants pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/rupturants"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("timeSeries");
+      expect(response.data).toHaveProperty("summary");
+      expect(response.data).toHaveProperty("evaluationDate");
+      expect(response.data).toHaveProperty("period");
+      expect(response.data.summary).toHaveProperty("a_traiter");
+      expect(response.data.summary).toHaveProperty("traites");
+      expect(response.data.summary).toHaveProperty("total");
+    });
+
+    it("Accepte le paramètre period", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/rupturants?period=3months"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.period).toBe("3months");
+    });
+
+    it("Filtre par région quand le paramètre region est fourni", async () => {
+      const responseIDF = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/rupturants?region=11"
+      );
+
+      expect(responseIDF.status).toBe(200);
+      expect(responseIDF.data.summary.total).toBe(50);
+
+      const responseARA = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/rupturants?region=84"
+      );
+
+      expect(responseARA.status).toBe(200);
+      expect(responseARA.data.summary.total).toBe(80);
+    });
+
+    it("Retourne les stats de toutes les régions sans le paramètre region", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/rupturants"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.summary.total).toBe(130);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/national/dossiers-traites", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/national/dossiers-traites");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne les détails des dossiers traités pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("details");
+      expect(response.data).toHaveProperty("evaluationDate");
+      expect(response.data).toHaveProperty("period");
+      expect(response.data.details).toHaveProperty("rdv_pris");
+      expect(response.data.details).toHaveProperty("nouveau_projet");
+      expect(response.data.details).toHaveProperty("deja_accompagne");
+      expect(response.data.details).toHaveProperty("contacte_sans_retour");
+      expect(response.data.details).toHaveProperty("injoignables");
+    });
+
+    it("Accepte le paramètre period", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites?period=all"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.period).toBe("all");
+    });
+
+    it("Filtre par région quand le paramètre region est fourni", async () => {
+      const responseIDF = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites?region=11"
+      );
+
+      expect(responseIDF.status).toBe(200);
+      expect(responseIDF.data.details.rdv_pris.current).toBe(10);
+
+      const responseARA = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites?region=84"
+      );
+
+      expect(responseARA.status).toBe(200);
+      expect(responseARA.data.details.rdv_pris.current).toBe(15);
+    });
+
+    it("Retourne les stats de toutes les régions sans le paramètre region", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.details.rdv_pris.current).toBe(25);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/national/couverture-regions", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/national/couverture-regions");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne la couverture par région pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/couverture-regions"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("regions");
+      expect(response.data).toHaveProperty("period");
+      expect(Array.isArray(response.data.regions)).toBe(true);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/traitement/ml", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/traitement/ml");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne les stats de traitement par ML pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("data");
+      expect(response.data).toHaveProperty("pagination");
+      expect(response.data).toHaveProperty("period");
+      expect(response.data.pagination).toHaveProperty("page");
+      expect(response.data.pagination).toHaveProperty("limit");
+      expect(response.data.pagination).toHaveProperty("total");
+      expect(response.data.pagination).toHaveProperty("totalPages");
+    });
+
+    it("Accepte les paramètres de pagination", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml?page=1&limit=5"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.pagination.page).toBe(1);
+      expect(response.data.pagination.limit).toBe(5);
+    });
+
+    it("Accepte les paramètres de tri", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml?sort_by=nom&sort_order=asc"
+      );
+
+      expect(response.status).toBe(200);
+    });
+
+    it("Filtre par région quand le paramètre region est fourni", async () => {
+      const responseIDF = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml?region=11"
+      );
+
+      expect(responseIDF.status).toBe(200);
+      expect(responseIDF.data.data.length).toBe(1);
+      expect(responseIDF.data.data[0].nom).toBe("ML ADMIN TEST");
+
+      const responseARA = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml?region=84"
+      );
+
+      expect(responseARA.status).toBe(200);
+      expect(responseARA.data.data.length).toBe(1);
+      expect(responseARA.data.data[0].nom).toBe("ML ADMIN ARA");
+    });
+
+    it("Retourne les MLs de toutes les régions sans le paramètre region", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/ml"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.data.length).toBe(2);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/traitement/regions", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/traitement/regions");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne les stats de traitement par région pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/regions"
+      );
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.data)).toBe(true);
+    });
+
+    it("Accepte le paramètre period", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/traitement/regions?period=30days"
+      );
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("GET /api/v1/admin/mission-locale/stats/accompagnement-conjoint", () => {
+    it("Requiert une authentification", async () => {
+      const response = await httpClient.get("/api/v1/admin/mission-locale/stats/accompagnement-conjoint");
+      expectUnauthorizedError(response);
+    });
+
+    it("Retourne les stats d'accompagnement conjoint pour un admin", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toHaveProperty("cfaPartenaires");
+      expect(response.data).toHaveProperty("mlConcernees");
+      expect(response.data).toHaveProperty("regionsActives");
+      expect(response.data).toHaveProperty("totalJeunesRupturants");
+      expect(response.data).toHaveProperty("totalDossiersPartages");
+      expect(response.data).toHaveProperty("totalDossiersTraites");
+      expect(response.data).toHaveProperty("pourcentageTraites");
+      expect(response.data).toHaveProperty("motifs");
+      expect(response.data).toHaveProperty("statutsTraitement");
+      expect(response.data).toHaveProperty("dejaConnu");
+      expect(response.data).toHaveProperty("evaluationDate");
+    });
+
+    it("Retourne les motifs correctement structurés", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.motifs).toHaveProperty("mobilite");
+      expect(response.data.motifs).toHaveProperty("logement");
+      expect(response.data.motifs).toHaveProperty("sante");
+      expect(response.data.motifs).toHaveProperty("finance");
+      expect(response.data.motifs).toHaveProperty("administratif");
+      expect(response.data.motifs).toHaveProperty("reorientation");
+      expect(response.data.motifs).toHaveProperty("recherche_emploi");
+      expect(response.data.motifs).toHaveProperty("autre");
+    });
+
+    it("Retourne les statuts de traitement correctement structurés", async () => {
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.statutsTraitement).toHaveProperty("rdv_pris");
+      expect(response.data.statutsTraitement).toHaveProperty("nouveau_projet");
+      expect(response.data.statutsTraitement).toHaveProperty("deja_accompagne");
+      expect(response.data.statutsTraitement).toHaveProperty("contacte_sans_retour");
+      expect(response.data.statutsTraitement).toHaveProperty("injoignables");
+      expect(response.data.statutsTraitement).toHaveProperty("coordonnees_incorrectes");
+      expect(response.data.statutsTraitement).toHaveProperty("autre");
+    });
+
+    it("Accepte le paramètre region", async () => {
+      const responseIDF = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint?region=11"
+      );
+
+      expect(responseIDF.status).toBe(200);
+      expect(responseIDF.data).toHaveProperty("totalJeunesRupturants");
+      expect(responseIDF.data).toHaveProperty("statutsTraitement");
+
+      const responseARA = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/accompagnement-conjoint?region=84"
+      );
+
+      expect(responseARA.status).toBe(200);
+      expect(responseARA.data).toHaveProperty("totalJeunesRupturants");
+      expect(responseARA.data).toHaveProperty("statutsTraitement");
     });
   });
 });

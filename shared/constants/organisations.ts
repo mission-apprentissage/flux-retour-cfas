@@ -1,4 +1,4 @@
-import { sortAlphabeticallyBy } from "../utils";
+import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
 export const ORGANISATION_TYPE = {
   ORGANISME_FORMATION: "ORGANISME_FORMATION",

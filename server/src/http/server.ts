@@ -124,6 +124,7 @@ import config from "@/config";
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import {
+  blockDREETSDDETS,
   requireAdministrator,
   requireEffectifOrganismePermission,
   requireMissionLocale,
@@ -131,6 +132,7 @@ import {
   requireOrganismePermission,
   returnResult,
   requireFranceTravail,
+  requireIndicateursMlAccess,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -151,6 +153,7 @@ import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import armlAuthentRoutes from "./routes/organisations.routes/arml/arml.routes";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
+import indicateursMlRoutes from "./routes/organisations.routes/indicateurs-ml/indicateurs-ml.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
@@ -512,12 +515,14 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
+        blockDREETSDDETS,
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
         "/indicateurs/organismes/:type",
+        blockDREETSDDETS,
         returnResult(async (req, res) => {
           const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
           const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
@@ -902,6 +907,7 @@ function setupRoutes(app: Application) {
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
       .use("/arml", requireARML, armlAuthentRoutes())
       .use("/france-travail", requireFranceTravail, franceTravailAuthentRoutes())
+      .use("/indicateurs-ml", requireIndicateursMlAccess, indicateursMlRoutes())
   );
 
   /********************************

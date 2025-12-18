@@ -7,6 +7,7 @@ import {
   updateMissionLocaleEffectifApi,
 } from "shared/models";
 import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
+import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -15,6 +16,8 @@ import {
   activateMissionLocale,
   activateOrganisme,
   getAllMlFromOrganisations,
+  getMissionLocaleDetail,
+  getMissionLocaleMembers,
   getMissionsLocalesStatsAdmin,
   getMissionsLocalesStatsAdminById,
   getMlFromOrganisations,
@@ -22,6 +25,14 @@ import {
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
+import {
+  getRupturantsStats,
+  getDossiersTraitesStats,
+  getCouvertureRegionsStats,
+  getTraitementStatsByMissionLocale,
+  getSuiviTraitementByRegion,
+  getAccompagnementConjointStats,
+} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -99,7 +110,89 @@ export default () => {
     returnResult(activateOrganismeAtDate)
   );
 
+  router.get(
+    "/stats/national/rupturants",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+        region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
+      }),
+    }),
+    returnResult(getRupturantsRoute)
+  );
+
+  router.get(
+    "/stats/national/dossiers-traites",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+        region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
+      }),
+    }),
+    returnResult(getDossiersTraitesRoute)
+  );
+
+  router.get(
+    "/stats/national/couverture-regions",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getCouvertureRegionsRoute)
+  );
+
+  router.get(
+    "/stats/traitement/ml",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+        region: z.string().optional(),
+        page: z.coerce.number().min(1).optional().default(1),
+        limit: z.coerce.number().min(1).max(100).optional().default(10),
+        sort_by: z.string().optional().default("total_jeunes"),
+        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+        search: z.string().optional(),
+      }),
+    }),
+    returnResult(getTraitementMLRoute)
+  );
+
+  router.get(
+    "/stats/traitement/regions",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getTraitementRegionsRoute)
+  );
+
+  router.get(
+    "/stats/accompagnement-conjoint",
+    validateRequestMiddleware({
+      query: z.object({
+        region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
+      }),
+    }),
+    returnResult(getAccompagnementConjointRoute)
+  );
+
   router.get("/:id", returnResult(getMl));
+  router.get("/:id/detail", returnResult(getMlDetail));
+  router.get("/:id/membres", returnResult(getMlMembres));
   router.get(
     "/:id/stats",
     validateRequestMiddleware({
@@ -252,4 +345,63 @@ export const activateOrganismeAtDate = async (req) => {
   for (const organisme of organismes) {
     await activateOrganisme(new Date(date), organisme._id);
   }
+};
+
+const getRupturantsRoute = async (req) => {
+  const { period, region, ml_id } = req.query;
+  return await getRupturantsStats(
+    (period as StatsPeriod) || "30days",
+    region as string | undefined,
+    ml_id as string | undefined
+  );
+};
+
+const getDossiersTraitesRoute = async (req) => {
+  const { period, region, ml_id } = req.query;
+  return await getDossiersTraitesStats(
+    (period as StatsPeriod) || "30days",
+    region as string | undefined,
+    ml_id as string | undefined
+  );
+};
+
+const getCouvertureRegionsRoute = async (req) => {
+  const { period } = req.query;
+  return await getCouvertureRegionsStats((period as StatsPeriod) || "30days");
+};
+
+const getTraitementMLRoute = async (req) => {
+  const { period, region, page, limit, sort_by, sort_order, search } = req.query;
+  return await getTraitementStatsByMissionLocale({
+    period: (period as StatsPeriod) || "30days",
+    region: region as string | undefined,
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    sort_by: (sort_by as string) || "total_jeunes",
+    sort_order: (sort_order as "asc" | "desc") || "desc",
+    search: search as string | undefined,
+  });
+};
+
+const getTraitementRegionsRoute = async () => {
+  return await getSuiviTraitementByRegion();
+};
+
+const getAccompagnementConjointRoute = async (req) => {
+  const { region, ml_id } = req.query;
+  return await getAccompagnementConjointStats(region as string | undefined, ml_id as string | undefined);
+};
+
+const getMlDetail = async (req) => {
+  const id = req.params.id;
+  return getMissionLocaleDetail(new ObjectId(id));
+};
+
+const getMlMembres = async (req) => {
+  const id = req.params.id;
+  const organisationMl = await getMlFromOrganisations(id);
+  if (!organisationMl) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
+  }
+  return getMissionLocaleMembers(new ObjectId(id));
 };

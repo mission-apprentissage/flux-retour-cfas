@@ -1103,14 +1103,11 @@ function getForbiddenErrorText(ctx: AuthContext): string {
     case "TETE_DE_RESEAU":
       return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre réseau.";
 
-    case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
-      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre région.";
-    case "DDETS":
-      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre département.";
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre région.";
     case "ACADEMIE":
       return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre académie.";
   }
@@ -1138,7 +1135,6 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
         "réseau"
       );
 
-    case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
@@ -1146,12 +1142,6 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
       return (
         organisme.organismesFormateurs.some((organisme) => !organisme.region?.includes(organisation.code_region)) &&
         "région"
-      );
-    case "DDETS":
-      return (
-        organisme.organismesFormateurs.some(
-          (organisme) => !organisme.departement?.includes(organisation.code_departement)
-        ) && "département"
       );
     case "ACADEMIE":
       return (

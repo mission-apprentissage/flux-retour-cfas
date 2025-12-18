@@ -1,0 +1,20 @@
+.franceLogo {
+  display: block;
+  object-fit: contain;
+}
+
+.tableContainer {
+  margin-top: 16px;
+}
+
+.chartsRow {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.rupturantsContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
