@@ -13,9 +13,10 @@ import styles from "./MLSuiviTraitementTab.module.css";
 interface MLSuiviTraitementTabProps {
   mlId: string;
   noData?: boolean;
+  hasCfaCollaboration?: boolean;
 }
 
-export function MLSuiviTraitementTab({ mlId, noData }: MLSuiviTraitementTabProps) {
+export function MLSuiviTraitementTab({ mlId, noData, hasCfaCollaboration }: MLSuiviTraitementTabProps) {
   const [period, setPeriod] = useState<Period>("30days");
 
   return (
@@ -29,7 +30,7 @@ export function MLSuiviTraitementTab({ mlId, noData }: MLSuiviTraitementTabProps
       <div className={styles.chartsContainer}>
         {!noData && <RupturantsSection period={period} mlId={mlId} fullWidth />}
         <DossiersTraitesSection period={period} mlId={mlId} fullWidth noData={noData} />
-        <AccompagnementConjointSection mlId={mlId} compact noData={noData} />
+        {hasCfaCollaboration && <AccompagnementConjointSection mlId={mlId} compact noData={noData} />}
       </div>
     </div>
   );

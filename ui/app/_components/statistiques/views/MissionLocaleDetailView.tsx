@@ -106,7 +106,13 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
               tabs={[
                 {
                   label: "Suivi traitement",
-                  content: <MLSuiviTraitementTab mlId={mlId} noData={data?.traites_count === 0} />,
+                  content: (
+                    <MLSuiviTraitementTab
+                      mlId={mlId}
+                      noData={data?.traites_count === 0}
+                      hasCfaCollaboration={data?.has_cfa_collaboration}
+                    />
+                  ),
                 },
                 {
                   label: "Équipe",
