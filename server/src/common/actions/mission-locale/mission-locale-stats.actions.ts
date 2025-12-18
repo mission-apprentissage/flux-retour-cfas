@@ -310,11 +310,14 @@ async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
     .toArray();
 }
 
+// Borne inférieure pour limiter les scans de collection
+const STATS_START_DATE = new Date("2025-02-01T00:00:00.000Z");
+
 async function getEngagementStatsByRegion(evaluationDate: Date, startDate: Date) {
   const allEngagementStats = await missionLocaleStatsDb()
     .aggregate(
       [
-        { $match: { computed_day: { $in: [evaluationDate, startDate] } } },
+        { $match: { computed_day: { $in: [evaluationDate, startDate], $gte: STATS_START_DATE } } },
         ...buildOrgLookupPipeline({ checkActivation: true }),
         {
           $group: {
@@ -360,75 +363,50 @@ async function getEngagementStatsByRegion(evaluationDate: Date, startDate: Date)
   return engagementByRegionDate;
 }
 
-interface RegionTraitementStats {
-  _id: string;
-  a_traiter: number;
-  traites: number;
-}
-
-async function getTraitementStatsByPeriod(endDate: Date, startDate?: Date): Promise<RegionTraitementStats[]> {
-  const matchCondition = startDate ? { $lte: endDate, $gte: startDate } : { $lte: endDate };
-
-  return (await missionLocaleStatsDb()
+async function getTraitementStatsByRegion(evaluationDate: Date, startDate: Date) {
+  const allStats = (await missionLocaleStatsDb()
     .aggregate(
       [
-        { $match: { computed_day: matchCondition } },
-        ...buildOrgLookupPipeline({ checkActivation: false }),
-        { $sort: { computed_day: -1 as const } },
         {
-          $group: {
-            _id: { mission_locale_id: "$mission_locale_id", region: "$ml.adresse.region" },
-            latest_day: { $first: "$computed_day" },
-            a_traiter: { $first: "$stats.a_traiter" },
-            traites: { $first: "$stats.traite" },
+          $match: {
+            computed_day: { $in: [evaluationDate, startDate], $gte: STATS_START_DATE },
           },
         },
+        ...buildOrgLookupPipeline({ checkActivation: false }),
         {
           $group: {
-            _id: "$_id.region",
-            a_traiter: { $sum: "$a_traiter" },
-            traites: { $sum: "$traites" },
+            _id: { region: "$ml.adresse.region", date: "$computed_day" },
+            a_traiter: { $sum: "$stats.a_traiter" },
+            traites: { $sum: "$stats.traite" },
           },
         },
       ],
       { allowDiskUse: true }
     )
-    .toArray()) as RegionTraitementStats[];
-}
-
-async function getTraitementStatsByRegion(evaluationDate: Date, startDate: Date) {
-  const [allTraitementStats, allTraitementStatsPrevious] = await Promise.all([
-    getTraitementStatsByPeriod(evaluationDate),
-    getTraitementStatsByPeriod(startDate),
-  ]);
+    .toArray()) as Array<{ _id: { region: string; date: Date }; a_traiter: number; traites: number }>;
 
   const traitementByRegionDate = new Map<
     string,
     { current: { a_traiter: number; traites: number }; previous: { a_traiter: number; traites: number } }
   >();
 
-  allTraitementStats.forEach((stat) => {
-    const regionCode = stat._id;
-    if (!traitementByRegionDate.has(regionCode)) {
-      traitementByRegionDate.set(regionCode, {
-        current: { a_traiter: 0, traites: 0 },
-        previous: { a_traiter: 0, traites: 0 },
-      });
-    }
-    const entry = traitementByRegionDate.get(regionCode)!;
-    entry.current = { a_traiter: stat.a_traiter, traites: stat.traites };
-  });
+  allStats.forEach((stat) => {
+    const regionCode = stat._id.region;
+    const isCurrent = stat._id.date.getTime() === evaluationDate.getTime();
 
-  allTraitementStatsPrevious.forEach((stat) => {
-    const regionCode = stat._id;
     if (!traitementByRegionDate.has(regionCode)) {
       traitementByRegionDate.set(regionCode, {
         current: { a_traiter: 0, traites: 0 },
         previous: { a_traiter: 0, traites: 0 },
       });
     }
+
     const entry = traitementByRegionDate.get(regionCode)!;
-    entry.previous = { a_traiter: stat.a_traiter, traites: stat.traites };
+    if (isCurrent) {
+      entry.current = { a_traiter: stat.a_traiter, traites: stat.traites };
+    } else {
+      entry.previous = { a_traiter: stat.a_traiter, traites: stat.traites };
+    }
   });
 
   return traitementByRegionDate;
@@ -1230,53 +1208,21 @@ export const getAccompagnementConjointStats = async (
   };
 };
 
-async function countEngagedMlAtDate(date: Date): Promise<number> {
-  const [result] = await missionLocaleStatsDb()
-    .aggregate(
-      [
-        { $match: { computed_day: date } },
-        ...buildOrgLookupPipeline({ checkActivation: true }),
-        {
-          $match: {
-            "stats.total": { $ne: 0 },
-            $expr: { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, ENGAGEMENT_THRESHOLD] },
-          },
-        },
-        { $count: "count" },
-      ],
-      { allowDiskUse: true }
-    )
-    .toArray();
-
-  return result?.count || 0;
-}
-
-async function getNationalEngagementStats(evaluationDate: Date, startDate: Date) {
-  const [engagedMlCount, previousEngagedMlCount] = await Promise.all([
-    countEngagedMlAtDate(evaluationDate),
-    countEngagedMlAtDate(startDate),
-  ]);
-
-  return { engagedMlCount, previousEngagedMlCount };
-}
-
 export async function getDeploymentStats(period: StatsPeriod = "30days") {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const [summary, regional, engagement] = await Promise.all([
-    getSummaryStats(evaluationDate, period),
-    getRegionalStats(period),
-    getNationalEngagementStats(evaluationDate, startDate),
-  ]);
+  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+
+  const engagedMlCount = regional.regions.reduce((sum, r) => sum + r.ml_engagees, 0);
+  const previousEngagedMlCount = regional.regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
 
   return {
     summary: {
       mlCount: summary.mlCount,
       activatedMlCount: summary.activatedMlCount,
       previousActivatedMlCount: summary.previousActivatedMlCount,
-      engagedMlCount: engagement.engagedMlCount,
-      previousEngagedMlCount: engagement.previousEngagedMlCount,
+      engagedMlCount,
+      previousEngagedMlCount,
       date: summary.date,
     },
     regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
