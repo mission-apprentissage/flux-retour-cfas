@@ -15,7 +15,6 @@ interface FiltreOrganismeRegionProps {
 
 function isOrganisationOperateurPublicRegion(organisation): organisation is IOrganisationOperateurPublicRegion {
   return (
-    organisation.type === "DREETS" ||
     organisation.type === "DRAAF" ||
     organisation.type === "CONSEIL_REGIONAL" ||
     organisation.type === "CARIF_OREF_REGIONAL" ||
@@ -29,7 +28,7 @@ const FiltreOrganismeRegion = (props: FiltreOrganismeRegionProps) => {
   const organisation = auth.organisation;
   const regions = props.value;
 
-  if (["DDETS", "ACADEMIE"].includes(organisation.type)) return null;
+  if (organisation.type === "ACADEMIE") return null;
   if (isOrganisationOperateurPublicRegion(organisation)) {
     return <FilterInfoLock value={REGIONS_BY_CODE[organisation.code_region]?.nom} />;
   }

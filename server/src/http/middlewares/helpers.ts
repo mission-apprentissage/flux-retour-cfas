@@ -50,6 +50,14 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   next();
 }
 
+export function blockDREETSDDETS(req: Request, _res: Response, next: NextFunction) {
+  const blockedTypes = [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
+  if (blockedTypes.includes(req.user.organisation.type as (typeof blockedTypes)[number])) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+  next();
+}
+
 export async function requireMissionLocale(req: Request, res: Response, next: NextFunction) {
   const user = req.user as AuthContext;
   ensureValidUser(user);
@@ -145,11 +153,6 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
   ensureValidUser(req.user);
 
   switch (req.user.organisation.type) {
-    case ORGANISATION_TYPE.DREETS:
-      res.locals.academie_list = getAcademieListByRegion(
-        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
-      );
-      break;
     case ORGANISATION_TYPE.DRAFPIC:
       res.locals.academie_list = getAcademieListByRegion(
         (req.user.organisation as IOrganisationOperateurPublicRegion).code_region

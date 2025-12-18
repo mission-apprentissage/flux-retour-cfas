@@ -16,7 +16,7 @@ const FiltreOrganismeAcademie = (props: FiltreOrganismeAcademieProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
   const organisation = auth.organisation;
-  const isHidden = ["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "DRAFPIC"].includes(organisation.type);
+  const isHidden = ["DRAAF", "CONSEIL_REGIONAL", "DRAFPIC"].includes(organisation.type);
   const academies = props.value;
 
   if (isHidden) return null;
