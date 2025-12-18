@@ -300,11 +300,10 @@ const getTraitementMLRoute = async (req, { locals }) => {
     throw Boom.forbidden("Accès non autorisé à cette région");
   }
 
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
-
   return await getTraitementStatsByMissionLocale({
     period: (period as StatsPeriod) || "30days",
-    region: targetRegion as string | undefined,
+    region: region as string | undefined,
+    regions: !region && userRegions.length > 0 ? userRegions : undefined,
     page: Number(page) || 1,
     limit: Number(limit) || 10,
     sort_by: (sort_by as string) || "total_jeunes",

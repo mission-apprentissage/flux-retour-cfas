@@ -673,6 +673,7 @@ export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<
 interface TraitementMLParams {
   period: StatsPeriod;
   region?: string;
+  regions?: string[];
   page: number;
   limit: number;
   sort_by: string;
@@ -681,7 +682,7 @@ interface TraitementMLParams {
 }
 
 export const getTraitementStatsByMissionLocale = async (params: TraitementMLParams) => {
-  const { period, region, page, limit, sort_by, sort_order, search } = params;
+  const { period, region, regions, page, limit, sort_by, sort_order, search } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = calculateStartDate(period, evaluationDate);
 
@@ -699,11 +700,17 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
   const sortDirection = sort_order === "desc" ? -1 : 1;
   const skip = (page - 1) * limit;
 
+  const regionFilter = region
+    ? { "adresse.region": region }
+    : regions?.length
+      ? { "adresse.region": { $in: regions } }
+      : {};
+
   const pipeline = [
     {
       $match: {
         type: "MISSION_LOCALE",
-        ...(region && { "adresse.region": region }),
+        ...regionFilter,
         ...(search && { nom: { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
