@@ -51,8 +51,9 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }
   };
 
-  const buildMonthLabel = (month: string, count?: number) => {
+  const buildMonthLabel = (month: string, count?: number, section?: SelectedSection) => {
     if (month === "plus-de-180-j") {
+      const showEnAbandon = !isCfaPage && section !== "deja-traite";
       return {
         labelElement: (
           <>
@@ -60,6 +61,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
               {isCfaPage ? (
                 <>
                   +180j {count !== undefined ? ` (${count})` : ""} | <i> Durée légale rupture de contrat</i>
+                </>
+              ) : showEnAbandon ? (
+                <>
+                  +180j | <i>En abandon</i>
                 </>
               ) : (
                 <>+180j</>
@@ -127,13 +132,13 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   useEffect(() => {
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
-        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month);
+        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month, undefined, "a-traiter");
         setActiveAnchor(anchorFromLabel(firstLabel.labelString));
       } else if (selectedSection === "deja-traite" && sortedDataTraite.length > 0) {
-        const label = buildMonthLabel(sortedDataTraite[0].month);
+        const label = buildMonthLabel(sortedDataTraite[0].month, undefined, "deja-traite");
         setActiveAnchor(anchorFromLabel(label.labelString));
       } else if (selectedSection === "injoignable" && groupedInjoignable.length > 0) {
-        const label = buildMonthLabel(groupedInjoignable[0].month);
+        const label = buildMonthLabel(groupedInjoignable[0].month, undefined, "injoignable");
         setActiveAnchor(anchorFromLabel(label.labelString));
       }
     }
@@ -156,7 +161,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = buildMonthLabel(monthItem.month, monthItem.data.length);
+        const label = buildMonthLabel(monthItem.month, monthItem.data.length, section);
         const anchorId = anchorFromLabel(label.labelString);
         const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
