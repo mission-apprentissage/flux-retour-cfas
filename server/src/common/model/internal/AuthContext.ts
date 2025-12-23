@@ -9,9 +9,9 @@ export interface AuthContext<I = IOrganisation> {
   prenom: string;
   email: string;
   organisation_id: ObjectId;
-  account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "CONFIRMED";
+  account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "PENDING_PROFILE_COMPLETION" | "CONFIRMED";
   has_accept_cgu_version: string;
-
+  auth_method: "password" | "proconnect";
   // populated via $lookup
   organisation: I;
 

@@ -36,6 +36,11 @@ const config = {
       jwtSecret: env.get("MNA_TDB_AUTH_PASSWORD_JWT_SECRET").asString(),
       expiresIn: "1h",
     },
+    proconnect: {
+      clientId: env.get("MNA_TDB_AUTH_PROCONNECT_CLIENT_ID").required().asString(),
+      clientSecret: env.get("MNA_TDB_AUTH_PROCONNECT_CLIENT_SECRET").required().asString(),
+      issuer: env.get("MNA_TDB_AUTH_PROCONNECT_ISSUER").required().asString(),
+    },
   },
   log: {
     type: env.get("MNA_TDB_LOG_TYPE").default("json").asString(),
