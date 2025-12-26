@@ -4,7 +4,7 @@ import type { IEffectif, IEffectifV2, IOrganisme } from "shared/models";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
-// import { createMissionLocaleSnapshotV2 } from "@/common/actions/mission-locale/mission-locale.actions.v2";
+import { createMissionLocaleSnapshotV2 } from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import parentLogger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
@@ -35,7 +35,7 @@ async function ingestDossier(
     date_transmission,
   });
   await updateParcoursPersonV2(person._id, effectifV2);
-  // await createMissionLocaleSnapshotV2(effectifV2, person, formation);
+  await createMissionLocaleSnapshotV2(effectifV2, person, formation);
   return effectifV2;
 }
 
