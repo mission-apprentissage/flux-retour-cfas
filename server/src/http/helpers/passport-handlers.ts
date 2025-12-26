@@ -15,7 +15,7 @@ import { proconnectSessionsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
-export const authMiddleware = (_req, res) => {
+export const authMiddleware = () => {
   passport.use(
     "jwtStrategy2",
     new JWTStrategy(
@@ -30,7 +30,7 @@ export const authMiddleware = (_req, res) => {
             case "pwd":
               return passwordAuthMiddleware(jwtPayload, done);
             case "proconnect":
-              return proconnectAuthMiddleware(jwtPayload, done, res);
+              return proconnectAuthMiddleware(jwtPayload, done);
             default:
               throw Boom.unauthorized("Méthode d'authentification non supportée");
           }

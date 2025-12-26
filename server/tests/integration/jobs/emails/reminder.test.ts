@@ -189,5 +189,6 @@ async function createUser(user: { email: string; createdAt: string }) {
     password: testPasswordHash,
     has_accept_cgu_version: "v0.1",
     organisation_id: userOrganisme._id,
+    auth_method: "password",
   });
 }

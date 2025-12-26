@@ -9,6 +9,6 @@ export function generateHexKey(size = 32): string {
   const buffer = crypto.randomBytes(size);
   return buffer.toString("hex");
 }
-function base64url(buffer: Buffer<ArrayBufferLike>): string {
+function base64url(buffer): string {
   return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }

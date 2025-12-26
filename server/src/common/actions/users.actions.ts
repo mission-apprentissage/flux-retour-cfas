@@ -70,7 +70,7 @@ const updateUserPassword = async (userId: ObjectId, password: string) => {
 
 export const authenticate = async (email: string, password: string) => {
   const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
+  if (!user || !user.password) {
     return null;
   }
   if (compare(password, user.password)) {
