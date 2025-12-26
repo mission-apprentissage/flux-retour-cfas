@@ -42,6 +42,8 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
       formateur_uai: dossier.etablissement_formateur_uai,
     },
     draft: true,
+    organisme_formateur_id: organismeFormateur?._id,
+    organisme_responsable_id: organismeResponsable?._id,
   };
 
   const result = await formationV2Db().findOneAndUpdate(
@@ -52,8 +54,6 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
       "identifiant.responsable_uai": data.identifiant.responsable_uai,
       "identifiant.formateur_siret": data.identifiant.formateur_siret,
       "identifiant.formateur_uai": data.identifiant.formateur_uai,
-      organisme_formateur_id: organismeFormateur?._id,
-      organisme_responsable_id: organismeResponsable?._id,
     },
     {
       $setOnInsert: {

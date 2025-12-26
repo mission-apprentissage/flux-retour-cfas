@@ -13,6 +13,7 @@ import { getPriorityLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.u
 import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
+import { matchesSearchTerm } from "../utils/searchUtils";
 
 import { EffectifPriorityBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
@@ -23,6 +24,34 @@ type EffectifsPriorityTableProps = {
   hadEffectifsPrioritaires?: boolean;
   listType?: IMissionLocaleEffectifList;
 };
+
+function CfaBadge() {
+  return (
+    <span
+      className="fr-badge"
+      style={{
+        backgroundColor: "#ECECFE",
+        color: "#161616",
+        fontSize: "12px",
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+      }}
+    >
+      <div
+        style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          backgroundColor: "#E1000F",
+          flexShrink: 0,
+        }}
+      />
+      CFA
+    </span>
+  );
+}
 
 function PriorityBadge({
   priorityData,
@@ -59,7 +88,7 @@ export function EffectifsPriorityTable({
 
   const columns = useMemo(() => {
     return [
-      { label: "", dataKey: "name", width: 200 },
+      { label: "", dataKey: "name", width: 250 },
       { label: "", dataKey: "formation", width: "auto" },
       { label: "", dataKey: "badge", width: 250 },
       { label: "", dataKey: "arrow", width: 40 },
@@ -68,11 +97,7 @@ export function EffectifsPriorityTable({
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return priorityData;
-    return priorityData.filter(
-      (effectif) =>
-        effectif.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        effectif.prenom.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return priorityData.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm));
   }, [priorityData, searchTerm]);
 
   const dataToShow = searchTerm
@@ -92,7 +117,12 @@ export function EffectifsPriorityTable({
               <EffectifPriorityBadge effectif={effectif} />
             </div>
           ),
-          name: <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>,
+          name: (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {effectif.acc_conjoint && <CfaBadge />}
+              <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>
+            </div>
+          ),
           formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
           arrow: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
         },

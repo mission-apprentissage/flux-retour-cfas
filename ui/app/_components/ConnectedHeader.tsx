@@ -19,12 +19,10 @@ export function ConnectedHeader() {
         return "Mes organismes";
       case ORGANISATION_TYPE.TETE_DE_RESEAU:
         return "Mon réseau";
-      case ORGANISATION_TYPE.DREETS:
       case ORGANISATION_TYPE.DRAAF:
       case ORGANISATION_TYPE.CONSEIL_REGIONAL:
       case ORGANISATION_TYPE.CARIF_OREF_REGIONAL:
       case ORGANISATION_TYPE.DRAFPIC:
-      case ORGANISATION_TYPE.DDETS:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
       case ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL:
@@ -108,21 +106,37 @@ export function ConnectedHeader() {
           },
         });
       }
+    } else if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+      baseItems.push({
+        text: "Suivi des indicateurs",
+        isActive: pathname?.startsWith("/suivi-des-indicateurs"),
+        linkProps: {
+          href: "/suivi-des-indicateurs",
+          target: "_self",
+        },
+      });
     } else if (
       [
         ORGANISATION_TYPE.TETE_DE_RESEAU,
-        ORGANISATION_TYPE.DREETS,
         ORGANISATION_TYPE.DRAAF,
         ORGANISATION_TYPE.CONSEIL_REGIONAL,
         ORGANISATION_TYPE.CARIF_OREF_REGIONAL,
         ORGANISATION_TYPE.DRAFPIC,
-        ORGANISATION_TYPE.DDETS,
         ORGANISATION_TYPE.ACADEMIE,
         ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
         ORGANISATION_TYPE.CARIF_OREF_NATIONAL,
         ORGANISATION_TYPE.ADMINISTRATEUR,
       ].includes(organisationType || "")
     ) {
+      if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
+        baseItems.push({
+          text: "Suivi des indicateurs",
+          linkProps: {
+            href: "/admin/suivi-des-indicateurs",
+            target: "_self",
+          },
+        });
+      }
       baseItems.push({
         text: "Mon tableau de bord",
         linkProps: {
@@ -144,11 +158,7 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
-      if (
-        [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DRAFPIC, ORGANISATION_TYPE.ACADEMIE].includes(
-          organisationType || ""
-        )
-      ) {
+      if ([ORGANISATION_TYPE.DRAFPIC, ORGANISATION_TYPE.ACADEMIE].includes(organisationType || "")) {
         baseItems.push({
           text: "Vœux Affelnet",
           linkProps: {
@@ -166,6 +176,14 @@ export function ConnectedHeader() {
       });
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
+        text: "Suivi des indicateurs",
+        isActive: pathname?.startsWith("/suivi-des-indicateurs"),
+        linkProps: {
+          href: "/suivi-des-indicateurs",
+          target: "_self",
+        },
+      });
+      baseItems.push({
         text: "Vue d'ensemble",
         isActive: pathname === "/arml",
         linkProps: {
@@ -181,6 +199,15 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
+    } else if (organisationType === ORGANISATION_TYPE.FRANCE_TRAVAIL) {
+      baseItems.push({
+        text: "Accueil",
+        isActive: pathname === "/france-travail",
+        linkProps: {
+          href: "/france-travail",
+          target: "_self",
+        },
+      });
     }
 
     const aideMenuLinks: Array<{
@@ -192,17 +219,6 @@ export function ConnectedHeader() {
       text: string;
     }> = [];
 
-    if ([ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS].includes(organisationType || "")) {
-      aideMenuLinks.push({
-        linkProps: {
-          href: "https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op",
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        text: "Kit de déploiement DREETS/DDETS",
-      });
-    }
-
     aideMenuLinks.push({
       linkProps: {
         href: CRISP_FAQ,
@@ -212,7 +228,11 @@ export function ConnectedHeader() {
       text: "Centre d'aide",
     });
 
-    if (organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && organisationType !== ORGANISATION_TYPE.ARML) {
+    if (
+      organisationType !== ORGANISATION_TYPE.MISSION_LOCALE &&
+      organisationType !== ORGANISATION_TYPE.ARML &&
+      organisationType !== ORGANISATION_TYPE.FRANCE_TRAVAIL
+    ) {
       aideMenuLinks.push({
         linkProps: {
           href: "/referencement-organisme",
@@ -240,10 +260,12 @@ export function ConnectedHeader() {
       });
     }
 
-    baseItems.push({
-      text: "Aide et ressources",
-      menuLinks: aideMenuLinks,
-    });
+    if (organisationType !== ORGANISATION_TYPE.DREETS && organisationType !== ORGANISATION_TYPE.DDETS) {
+      baseItems.push({
+        text: "Aide et ressources",
+        menuLinks: aideMenuLinks,
+      });
+    }
 
     return baseItems;
   };

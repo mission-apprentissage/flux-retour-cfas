@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 import {
   ACADEMIES_BY_CODE,
-  DEPARTEMENTS_BY_CODE,
   getOrganisationLabel,
   IOrganisationCreate,
   IOrganisationJson,
@@ -36,6 +35,8 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
   }
 
   switch (organisation.type) {
+    case "FRANCE_TRAVAIL":
+      return `Votre périmètre correspond au périmètre ${organisation.nom} de France Travail`;
     case "MISSION_LOCALE":
       return `Votre périmètre correspond à la mission locale ${organisation.nom}`;
     case "ARML":
@@ -47,17 +48,12 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     case "TETE_DE_RESEAU":
       return `Votre périmètre correspond aux organismes du réseau ${organisation.reseau}`;
 
-    case "DREETS":
     case "DRAAF":
     case "DRAFPIC":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
       return `Votre périmètre correspond aux organismes de la région ${
         REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region
-      }`;
-    case "DDETS":
-      return `Votre périmètre correspond aux organismes du département ${
-        DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement
       }`;
     case "ACADEMIE":
       return `Votre périmètre correspond aux organismes de l'académie de ${
@@ -67,6 +63,8 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Votre périmètre contient tous les organismes nationaux";
+    default:
+      return "";
   }
 }
 

@@ -4,12 +4,14 @@ import { ObjectId } from "mongodb";
 import {
   getAcademieListByRegion,
   IEffectif,
+  IOrganisationFranceTravail,
   IOrganisationOperateurPublicAcademie,
   IOrganisationOperateurPublicRegion,
   ORGANISATION_TYPE,
   PermissionOrganisme,
 } from "shared";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { effectifsDb, effectifsDECADb, organisationsDb } from "@/common/model/collections";
@@ -48,6 +50,14 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   next();
 }
 
+export function blockDREETSDDETS(req: Request, _res: Response, next: NextFunction) {
+  const blockedTypes = [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
+  if (blockedTypes.includes(req.user.organisation.type as (typeof blockedTypes)[number])) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+  next();
+}
+
 export async function requireMissionLocale(req: Request, res: Response, next: NextFunction) {
   const user = req.user as AuthContext;
   ensureValidUser(user);
@@ -75,6 +85,21 @@ export async function requireARML(req: Request, res: Response, next: NextFunctio
   });
 
   res.locals.arml = orga;
+  next();
+}
+
+export async function requireFranceTravail(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+  if (user.organisation.type !== "FRANCE_TRAVAIL") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = (await organisationsDb().findOne({
+    _id: new ObjectId(user.organisation._id),
+  })) as IOrganisationFranceTravail;
+
+  res.locals.franceTravail = orga;
   next();
 }
 
@@ -128,11 +153,6 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
   ensureValidUser(req.user);
 
   switch (req.user.organisation.type) {
-    case ORGANISATION_TYPE.DREETS:
-      res.locals.academie_list = getAcademieListByRegion(
-        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
-      );
-      break;
     case ORGANISATION_TYPE.DRAFPIC:
       res.locals.academie_list = getAcademieListByRegion(
         (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
@@ -144,5 +164,34 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
     default:
       throw Boom.forbidden("Accès non autorisé");
   }
+  next();
+}
+
+export async function requireIndicateursMlAccess(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+
+  const allowedTypes = [
+    ORGANISATION_TYPE.ARML,
+    ORGANISATION_TYPE.DREETS,
+    ORGANISATION_TYPE.DDETS,
+    ORGANISATION_TYPE.ADMINISTRATEUR,
+  ];
+
+  if (!allowedTypes.includes(user.organisation.type as (typeof allowedTypes)[number])) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  const orga = await organisationsDb().findOne({
+    _id: new ObjectId(user.organisation._id),
+  });
+
+  if (!orga) {
+    throw Boom.notFound("Organisation non trouvée");
+  }
+
+  res.locals.organisation = orga;
+  res.locals.regions = getRegionsFromOrganisation(orga as OrganisationWithRegions);
+
   next();
 }

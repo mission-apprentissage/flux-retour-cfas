@@ -2,7 +2,12 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
-import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
+  organisationsDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import {
   updateEffectifMissionLocaleSnapshotAtMLActivation,
@@ -163,8 +168,20 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
     {
       $lookup: {
         from: "missionLocaleStats",
-        localField: "_id",
-        foreignField: "mission_locale_id",
+        let: { ml_id: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$mission_locale_id", "$$ml_id"] },
+            },
+          },
+          {
+            $sort: { computed_day: -1 },
+          },
+          {
+            $limit: 1,
+          },
+        ],
         as: "stats",
       },
     },
@@ -189,14 +206,31 @@ export const getMissionsLocalesStatsAdmin = async (arml: Array<string>) => {
       },
     },
     {
+      $addFields: {
+        stats: {
+          $ifNull: [
+            "$stats.stats",
+            {
+              total: 0,
+              a_traiter: 0,
+              traite: 0,
+              sans_statut: 0,
+              a_contacter: 0,
+              autres: 0,
+            },
+          ],
+        },
+      },
+    },
+    {
       $project: {
         _id: 1,
-        nom: 1,
+        nom: { $trim: { input: "$nom" } },
         code_postal: "$adresse.code_postal",
         activated_at: 1,
         arml_id: 1,
         arml: "$arml.nom",
-        stats: "$stats.stats",
+        stats: 1,
       },
     },
   ];
@@ -263,4 +297,103 @@ export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleI
       },
     }
   );
+};
+
+export interface IMissionLocaleMember {
+  _id: ObjectId;
+  civility: string;
+  nom: string;
+  prenom: string;
+  telephone: string;
+  email: string;
+  last_traitement_at: Date | null;
+}
+
+export interface IMissionLocaleDetail {
+  ml: IOrganisationMissionLocale;
+  activated_at: Date | null;
+  last_activity_at: Date | null;
+  has_cfa_collaboration: boolean;
+  traites_count: number;
+}
+
+export const getMissionLocaleMembers = async (missionLocaleId: ObjectId): Promise<IMissionLocaleMember[]> => {
+  const users = await usersMigrationDb()
+    .find({
+      organisation_id: missionLocaleId,
+      account_status: "CONFIRMED",
+    })
+    .toArray();
+
+  const mlEffectifs = await missionLocaleEffectifsDb()
+    .find({ mission_locale_id: missionLocaleId }, { projection: { _id: 1 } })
+    .toArray();
+
+  const mlEffectifIds = mlEffectifs.map((e) => e._id);
+
+  const membersWithActivity = await Promise.all(
+    users.map(async (user) => {
+      const lastLog = await missionLocaleEffectifsLogDb()
+        .find({
+          mission_locale_effectif_id: { $in: mlEffectifIds },
+          created_by: user._id,
+        })
+        .sort({ created_at: -1 })
+        .limit(1)
+        .toArray();
+
+      return {
+        _id: user._id,
+        civility: user.civility || "",
+        nom: user.nom || "",
+        prenom: user.prenom || "",
+        telephone: user.telephone || "",
+        email: user.email || "",
+        last_traitement_at: lastLog.length > 0 ? lastLog[0].created_at : null,
+      };
+    })
+  );
+
+  return membersWithActivity;
+};
+
+export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise<IMissionLocaleDetail> => {
+  const ml = (await organisationsDb().findOne({
+    _id: missionLocaleId,
+    type: "MISSION_LOCALE",
+  })) as IOrganisationMissionLocale | null;
+
+  if (!ml) {
+    throw new Error(`Mission Locale not found: ${missionLocaleId}`);
+  }
+
+  const mlEffectifs = await missionLocaleEffectifsDb()
+    .find(
+      { mission_locale_id: missionLocaleId },
+      { projection: { _id: 1, situation: 1, "effectif_snapshot.organisme_id": 1 } }
+    )
+    .toArray();
+
+  const mlEffectifIds = mlEffectifs.map((e) => e._id);
+
+  const lastLog = await missionLocaleEffectifsLogDb()
+    .find({ mission_locale_effectif_id: { $in: mlEffectifIds } })
+    .sort({ created_at: -1 })
+    .limit(1)
+    .toArray();
+
+  const hasCfaCollaboration = await missionLocaleEffectifsDb().countDocuments({
+    mission_locale_id: missionLocaleId,
+    "organisme_data.acc_conjoint": true,
+  });
+
+  const traitesCount = mlEffectifs.filter((e) => e.situation != null).length;
+
+  return {
+    ml,
+    activated_at: ml.activated_at || null,
+    last_activity_at: lastLog.length > 0 ? lastLog[0].created_at : null,
+    has_cfa_collaboration: hasCfaCollaboration > 0,
+    traites_count: traitesCount,
+  };
 };

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
-import { getEmailInfos, TemplateName, TemplatePayloads } from "@/common/services/mailer/mailer";
+import { getEmailInfos, SendEmailOptions, TemplateName, TemplatePayloads } from "@/common/services/mailer/mailer";
 import { generateHtml } from "@/common/utils/emailsUtils";
 import { mailer } from "@/services";
 
@@ -120,13 +120,14 @@ export async function sendStoredEmail<T extends TemplateName>(
   recipient: string,
   templateName: T,
   payload: TemplatePayloads[T],
-  template: any
+  template: any,
+  options?: SendEmailOptions
 ): Promise<void> {
   const emailToken = uuidv4();
   try {
     template.data.token = emailToken;
     await addEmail(recipient, emailToken, templateName, payload);
-    const messageId = await mailer.sendEmailMessage(recipient, template);
+    const messageId = await mailer.sendEmailMessage(recipient, template, options);
     await addEmailMessageId(emailToken, messageId);
   } catch (err: any) {
     logger.error({ err, template: templateName }, "error sending email");

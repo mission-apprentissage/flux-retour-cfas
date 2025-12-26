@@ -1,0 +1,58 @@
+.suiviSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.suiviHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.suiviTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #000000;
+}
+
+.suiviSubtitle {
+  font-size: 16px;
+  margin: 0;
+  color: #000000;
+}
+
+.suiviContent {
+  border: 1px solid #6a6af4;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.suiviBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.suiviBlockTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #000000;
+}
+
+.suiviValue {
+  background-color: #eeeeee;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 14px;
+  color: #161616;
+}
+
+.badgeText {
+  font-size: 12px;
+  font-weight: 700;
+}

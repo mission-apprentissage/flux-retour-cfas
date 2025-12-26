@@ -1,0 +1,55 @@
+.headerContainer {
+  margin-bottom: 2rem;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 16px;
+}
+
+.title {
+  color: var(--text-title-blue-france);
+  margin-bottom: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--background-contrast-info);
+  color: var(--text-label-blue-france);
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.description {
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.filterContainer {
+  margin: 2rem 0;
+}
+
+.infoContainer {
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+}
+
+.infoText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #3a3a3a;
+  margin-bottom: 1.5rem;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2860 / 605;
+  margin: 0 auto;
+}

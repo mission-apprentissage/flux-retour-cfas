@@ -223,3 +223,31 @@ function determineNewStatutFromHistorique(
 
   return buildEffectifStatus(params, evaluationDate ?? new Date());
 }
+
+export const getCurrentAndNextStatus = (
+  parcours?: Array<{ date: Date | string; valeur: any }>,
+  now = new Date()
+): { current: { date: Date; valeur: any } | null; next: { date: Date; valeur: any } | null } => {
+  if (!parcours || parcours.length === 0) {
+    return { current: null, next: null };
+  }
+
+  let current: { date: Date; valeur: any } | null = null;
+  let next: { date: Date; valeur: any } | null = null;
+
+  for (let i = 0; i < parcours.length; i++) {
+    const sDate = new Date(parcours[i].date);
+    if (sDate <= now) {
+      current = { date: sDate, valeur: parcours[i].valeur };
+      next = parcours[i + 1] ? { date: new Date(parcours[i + 1].date), valeur: parcours[i + 1].valeur } : null;
+    } else {
+      if (!current) {
+        current = null;
+        next = { date: sDate, valeur: parcours[i].valeur };
+      }
+      break;
+    }
+  }
+
+  return { current, next };
+};

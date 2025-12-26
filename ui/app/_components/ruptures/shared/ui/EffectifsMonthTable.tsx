@@ -11,7 +11,9 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatMonthAndYear, anchorFromLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.utils";
 import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
-import { EffectifPriorityBadge, EffectifStatusBadge } from "./EffectifStatusBadge";
+import { matchesSearchTerm } from "../utils/searchUtils";
+
+import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 import notificationStyles from "./NotificationBadge.module.css";
 
@@ -39,14 +41,14 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     ),
     name: (
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadge effectif={effectif} isHeader />}
+        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />}
         <div className={notificationStyles.badgeContainer}>
           {isCfaPage && effectif.unread_by_current_user && (
             <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
           )}
-          <div
-            className={`fr-text--bold ${styles.monthTableNameContainer}`}
-          >{`${effectif.nom} ${effectif.prenom}`}</div>
+          <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
+            {`${effectif.nom} ${effectif.prenom}`}
+          </div>
         </div>
       </div>
     ),
@@ -57,10 +59,19 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
 
 function buildMonthLabel(month: string) {
   if (month === "plus-de-180-j") {
-    return { labelElement: "+ de 180j | En abandon", labelString: month };
+    return {
+      labelElement: "+ de 180j | En abandon",
+      labelString: month,
+      downloadLabel: "+ de 180j",
+    };
   }
 
-  return { labelElement: formatMonthAndYear(month), labelString: month };
+  const formattedMonth = formatMonthAndYear(month);
+  return {
+    labelElement: formattedMonth,
+    labelString: month,
+    downloadLabel: formattedMonth,
+  };
 }
 
 export const EffectifsMonthTable = memo(function EffectifsMonthTable({
@@ -75,7 +86,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const pathname = usePathname();
   const mlId = params?.id as string | undefined;
   const isCfaPage = pathname && pathname.startsWith("/cfa");
-  const { labelElement, labelString } = buildMonthLabel(monthItem.month);
+  const { labelElement, labelString, downloadLabel } = buildMonthLabel(monthItem.month);
   const anchorId = anchorFromLabel(labelString);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -102,9 +113,9 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
       case API_EFFECTIF_LISTE.INJOIGNABLE:
         return [
-          { label: "Apprenant", dataKey: "name", width: 300 },
+          { label: "Apprenant", dataKey: "name", width: 200 },
           { label: "Formation", dataKey: "formation", width: 300 },
-          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "Statut", dataKey: "badge", width: 320 },
           { label: "", dataKey: "icon", width: 10 },
         ];
 
@@ -116,11 +127,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const columns: ColumnData[] = getColumns(listType);
 
   const filteredData = searchTerm
-    ? monthItem.data.filter(
-        (effectif) =>
-          effectif.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          effectif.prenom.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? monthItem.data.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm))
     : monthItem.data;
 
   const dataToShow = searchTerm
@@ -178,7 +185,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
                   iconPosition="right"
                   onClick={() => onDownloadMonth(monthItem.month, listType)}
                 >
-                  Ruptures en {labelString}
+                  Ruptures en {downloadLabel}
                 </Button>
               )}
             </div>

@@ -1,0 +1,27 @@
+.radioOption {
+  margin-bottom: 0;
+}
+
+.textareaWrapper {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: 2rem;
+}
+
+.formContainer {
+  padding: 24px;
+  border: 1px solid var(--border-default-blue-france);
+}
+
+.errorMessage {
+  color: red;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.formActions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}

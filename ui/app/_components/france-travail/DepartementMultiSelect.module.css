@@ -1,0 +1,80 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.selectButton {
+  width: 100%;
+  text-align: left;
+  padding-right: 2.5rem;
+  position: relative;
+  cursor: pointer;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.selectButton:hover {
+  background-color: var(--background-default-grey-hover);
+}
+
+.selectButton:focus {
+  outline: 2px solid var(--border-active-blue-france);
+  outline-offset: 2px;
+}
+
+.placeholder {
+  color: var(--text-disabled-grey);
+}
+
+.icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.iconOpen {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  background: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  box-shadow: var(--overlap-shadow);
+  z-index: 1000;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.dropdownContent {
+  padding: 0.25rem 0;
+}
+
+.option {
+  padding: 0.125rem 0.5rem;
+}
+
+.option:hover {
+  background-color: var(--background-default-grey-hover);
+}
+
+.option :global(.fr-fieldset) {
+  margin-bottom: 0;
+}
+
+.option :global(.fr-fieldset__element) {
+  margin-bottom: 0;
+}

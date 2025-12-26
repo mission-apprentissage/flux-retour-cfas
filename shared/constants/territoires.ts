@@ -2782,3 +2782,30 @@ export const ACADEMIES_SORTED = sortAlphabeticallyBy("nom", Object.values(ACADEM
 });
 
 export const BASSINS_EMPLOI_SORTED = sortAlphabeticallyBy("nom", BASSINS_EMPLOI);
+
+export const REGION_CODES_WITH_SVG = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "06",
+  "11",
+  "24",
+  "27",
+  "28",
+  "32",
+  "44",
+  "52",
+  "53",
+  "75",
+  "76",
+  "84",
+  "93",
+  "94",
+] as const;
+
+export type IRegionCodeWithSVG = (typeof REGION_CODES_WITH_SVG)[number];
+
+export const REGIONS_WITH_SVG_SORTED = REGIONS_SORTED.filter((region) =>
+  (REGION_CODES_WITH_SVG as readonly string[]).includes(region.code)
+);

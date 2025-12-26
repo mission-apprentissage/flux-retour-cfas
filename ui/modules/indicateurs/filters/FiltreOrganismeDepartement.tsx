@@ -1,12 +1,11 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { DEPARTEMENTS_BY_CODE, DEPARTEMENTS_SORTED } from "shared";
+import { DEPARTEMENTS_SORTED } from "shared";
 
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
-import FilterInfoLock from "../FilterInfoLock";
 
 interface FiltreOrganismeDepartementProps {
   value: string[];
@@ -21,9 +20,6 @@ const FiltreOrganismeDepartement = (props: FiltreOrganismeDepartementProps) => {
 
   const configDepartements = useMemo(() => {
     switch (organisation.type) {
-      case "DDETS":
-        return [];
-      case "DREETS":
       case "DRAAF":
       case "CONSEIL_REGIONAL":
       case "CARIF_OREF_REGIONAL":
@@ -35,14 +31,6 @@ const FiltreOrganismeDepartement = (props: FiltreOrganismeDepartementProps) => {
         return DEPARTEMENTS_SORTED;
     }
   }, []);
-
-  if (organisation.type === "DDETS") {
-    return (
-      <FilterInfoLock
-        value={`${organisation.code_departement} - ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom}`}
-      />
-    );
-  }
 
   return (
     <div>

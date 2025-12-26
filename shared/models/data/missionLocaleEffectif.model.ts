@@ -11,6 +11,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ mission_locale_id: 1, effectif_id: 1 }, { unique: true }],
   [{ "organisme_data.acc_conjoint_by": 1, "organisme_data.has_unread_notification": 1 }, {}],
   [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint_by": 1 }, {}],
+  [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint": 1 }, {}],
 ];
 
 export enum SITUATION_ENUM {

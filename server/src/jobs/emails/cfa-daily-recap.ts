@@ -114,17 +114,22 @@ export async function sendCfaDailyRecap() {
               continue;
             }
 
-            await sendEmail(user.email, "cfa_daily_recap", {
-              cfa: {
-                nom: user.nom,
-                prenom: user.prenom,
+            await sendEmail(
+              user.email,
+              "cfa_daily_recap",
+              {
+                cfa: {
+                  nom: user.nom,
+                  prenom: user.prenom,
+                },
+                mission_locale: {
+                  nom: mlData.mission_locale.nom,
+                },
+                effectifs_count: mlData.effectifs_count,
+                jeunes,
               },
-              mission_locale: {
-                nom: mlData.mission_locale.nom,
-              },
-              effectifs_count: mlData.effectifs_count,
-              jeunes,
-            });
+              { noreply: true }
+            );
 
             logger.info(
               {

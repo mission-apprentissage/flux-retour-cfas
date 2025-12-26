@@ -22,6 +22,8 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
+import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
@@ -477,6 +479,8 @@ const createOrUpdateEffectif = async (
       effectifDb = await lockEffectif(effectifDb);
     }
 
+    await createMissionLocaleSnapshot(effectifDb);
+    await createFranceTravailEffectifSnapshot(effectifDb);
     return { upsertedEffectif: effectifDb, itemProcessingInfos };
   } catch (err) {
     // Le code d'erreur 11000 correspond à une duplication d'index unique

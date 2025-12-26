@@ -47,6 +47,7 @@ export const dossierApprenantSchemaV3Base = z.object({
   contrat_date_fin: primitivesV1.contrat.date_fin.optional(),
   contrat_date_rupture: primitivesV1.contrat.date_rupture.optional(),
 
+  custom_statut_apprenant: primitivesV3.custom_statut_apprenant.optional(),
   // V3 FIELDS
   // OPTIONAL FIELDS
   has_nir: primitivesV3.apprenant.has_nir.optional(),

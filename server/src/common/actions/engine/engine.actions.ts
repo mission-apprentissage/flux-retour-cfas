@@ -225,6 +225,8 @@ export const mapEffectifQueueToEffectif = (
       dernier_organisme_uai:
         "dernier_organisme_uai" in dossierApprenant ? dossierApprenant.dernier_organisme_uai?.toString() : null,
       type_cfa: "type_cfa" in dossierApprenant ? dossierApprenant.type_cfa : null,
+      custom_statut_apprenant:
+        "custom_statut_apprenant" in dossierApprenant ? dossierApprenant.custom_statut_apprenant : null,
     },
     contrats,
     formation: {

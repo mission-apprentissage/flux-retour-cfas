@@ -8,7 +8,7 @@ export const categoriesCompteInscription = [
     value: "operateur_public",
   },
   {
-    text: "Une structure des Missions locales",
+    text: "Une structure des Missions Locales",
     value: "missions_locales",
   },
   {
@@ -18,6 +18,10 @@ export const categoriesCompteInscription = [
   {
     text: "Un membre du Réseau des CARIF OREF",
     value: "carif_oref",
+  },
+  {
+    text: "Une structure régionale de France Travail",
+    value: "france_travail",
   },
   {
     text: "Autre organisation",

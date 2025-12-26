@@ -50,7 +50,7 @@ export default function MissionLocaleAdminEditClient({ id }: { id: string }) {
 
         {missionLocaleData && (
           <Box flex="1">
-            <h6>Mission locale {missionLocaleData.nom}</h6>
+            <h6>Mission Locale {missionLocaleData.nom}</h6>
           </Box>
         )}
 

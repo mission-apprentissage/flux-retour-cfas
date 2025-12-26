@@ -51,13 +51,24 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }
   };
 
-  const buildMonthLabel = (month: string) => {
+  const buildMonthLabel = (month: string, count?: number, section?: SelectedSection) => {
     if (month === "plus-de-180-j") {
+      const showEnAbandon = !isCfaPage && section !== "deja-traite";
       return {
         labelElement: (
           <>
             <span>
-              + de 180j | <i> En abandon</i>
+              {isCfaPage ? (
+                <>
+                  +180j {count !== undefined ? ` (${count})` : ""} | <i> Durée légale rupture de contrat</i>
+                </>
+              ) : showEnAbandon ? (
+                <>
+                  +180j | <i>En abandon</i>
+                </>
+              ) : (
+                <>+180j</>
+              )}
             </span>
           </>
         ),
@@ -104,6 +115,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     }, 0);
   };
 
+  const countUnreadNotificationsForMonth = (monthItem: MonthItem): number => {
+    return monthItem.data.filter((effectif) => effectif.unread_by_current_user === true).length;
+  };
+
   const unreadNotificationsTraite = useMemo(() => {
     return countUnreadNotifications(sortedDataTraite);
   }, [sortedDataTraite]);
@@ -117,13 +132,13 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   useEffect(() => {
     if (!activeAnchor) {
       if (selectedSection === "a-traiter" && groupedDataATraiter.length > 0) {
-        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month);
+        const firstLabel = buildMonthLabel(groupedDataATraiter[0].month, undefined, "a-traiter");
         setActiveAnchor(anchorFromLabel(firstLabel.labelString));
       } else if (selectedSection === "deja-traite" && sortedDataTraite.length > 0) {
-        const label = buildMonthLabel(sortedDataTraite[0].month);
+        const label = buildMonthLabel(sortedDataTraite[0].month, undefined, "deja-traite");
         setActiveAnchor(anchorFromLabel(label.labelString));
       } else if (selectedSection === "injoignable" && groupedInjoignable.length > 0) {
-        const label = buildMonthLabel(groupedInjoignable[0].month);
+        const label = buildMonthLabel(groupedInjoignable[0].month, undefined, "injoignable");
         setActiveAnchor(anchorFromLabel(label.labelString));
       }
     }
@@ -146,14 +161,26 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = buildMonthLabel(monthItem.month);
+        const label = buildMonthLabel(monthItem.month, monthItem.data.length, section);
         const anchorId = anchorFromLabel(label.labelString);
+        const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
           monthItem.data.length > 0 ? (
-            <strong>
-              {label.labelElement}
-              {` (${monthItem.data.length})`}
-            </strong>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <strong>
+                {monthItem.month === "plus-de-180-j" ? (
+                  label.labelElement
+                ) : (
+                  <>
+                    {label.labelElement}
+                    {` (${monthItem.data.length})`}
+                  </>
+                )}
+              </strong>
+              {isCfaPage && section === "deja-traite" && unreadCount > 0 && (
+                <span className={notificationStyles.notificationDot} />
+              )}
+            </span>
           ) : (
             label.labelElement
           );

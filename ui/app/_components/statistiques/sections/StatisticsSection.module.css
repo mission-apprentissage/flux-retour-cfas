@@ -1,0 +1,101 @@
+.section {
+  background-color: #f6f6f6;
+  padding: 32px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  margin-bottom: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.headerWrap h2 {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.controls {
+  flex-shrink: 0;
+}
+
+.headerColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.headerColumn h2 {
+  margin-bottom: 0 !important;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.full {
+  width: 100%;
+}
+
+.twoThirds {
+  width: 100%;
+}
+
+.oneThird {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .twoThirds {
+    width: 66.66%;
+  }
+
+  .oneThird {
+    width: 33.33%;
+  }
+}
+
+.controlsWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.controlsBelowLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.exportError {
+  margin-bottom: 16px;
+}
+
+.tabsContainer {
+  margin-top: 16px;
+}
+
+.tabsContainer :global(.fr-tabs__panel) {
+  padding-left: 0;
+  padding-right: 0;
+}

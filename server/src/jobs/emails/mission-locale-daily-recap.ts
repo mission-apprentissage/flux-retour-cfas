@@ -78,18 +78,23 @@ export async function sendMissionLocaleDailyRecap() {
 
       for (const cfaData of stats.effectifs_acc_conjoint) {
         for (const user of users) {
-          await sendEmail(user.email, "mission_locale_daily_recap", {
-            recipient: {
-              nom: user.nom,
-              prenom: user.prenom,
+          await sendEmail(
+            user.email,
+            "mission_locale_daily_recap",
+            {
+              recipient: {
+                nom: user.nom,
+                prenom: user.prenom,
+              },
+              cfa: cfaData.cfa,
+              effectifs_count: cfaData.effectifs_count,
+              mission_locale: {
+                id: ml.ml_id,
+                nom: ml.nom,
+              },
             },
-            cfa: cfaData.cfa,
-            effectifs_count: cfaData.effectifs_count,
-            mission_locale: {
-              id: ml.ml_id,
-              nom: ml.nom,
-            },
-          });
+            { noreply: true }
+          );
 
           logger.info(
             {

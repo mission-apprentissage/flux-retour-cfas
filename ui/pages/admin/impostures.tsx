@@ -9,6 +9,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
 import SearchBySIRETForm from "@/modules/auth/inscription/components/SearchBySIRETForm";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
+import { InscriptionFranceTravail } from "@/modules/auth/inscription/InscriptionFranceTravail";
 import { InscriptionMissionLocale } from "@/modules/auth/inscription/InscriptionMissionLocale";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
@@ -71,6 +72,10 @@ function ImposturesPage() {
             Mission Locale
           </Heading>
           <InscriptionMissionLocale setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            France travail
+          </Heading>
+          <InscriptionFranceTravail setOrganisation={setOrganisation} />
         </Box>
       </Container>
     </SimplePage>

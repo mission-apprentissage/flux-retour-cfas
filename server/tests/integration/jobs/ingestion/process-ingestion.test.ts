@@ -181,6 +181,7 @@ describe("Processus d'ingestion", () => {
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
             courriel: "johndoe@example.org",
+            custom_statut_apprenant: null,
             telephone: "0123456789",
             adresse: {
               code_postal: "75001",
@@ -365,6 +366,7 @@ describe("Processus d'ingestion", () => {
               code_postal: null,
             },
             courriel: null,
+            custom_statut_apprenant: null,
             historique_statut: [
               {
                 valeur_statut: 2,
@@ -613,6 +615,7 @@ describe("Processus d'ingestion", () => {
             has_nir: true,
             sexe: "F",
             courriel: null,
+            custom_statut_apprenant: null,
             date_rqth: null,
             dernier_organisme_uai: null,
             derniere_situation: null,

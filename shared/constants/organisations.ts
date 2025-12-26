@@ -1,4 +1,4 @@
-import { sortAlphabeticallyBy } from "../utils";
+import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
 export const ORGANISATION_TYPE = {
   ORGANISME_FORMATION: "ORGANISME_FORMATION",
@@ -15,6 +15,7 @@ export const ORGANISATION_TYPE = {
   ADMINISTRATEUR: "ADMINISTRATEUR",
   MISSION_LOCALE: "MISSION_LOCALE",
   ARML: "ARML",
+  FRANCE_TRAVAIL: "FRANCE_TRAVAIL",
 };
 
 export const ORGANISATIONS_NATIONALES_MAP = {

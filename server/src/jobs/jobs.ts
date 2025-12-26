@@ -1,6 +1,6 @@
 import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate, substractDaysUTC } from "shared/utils";
+import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
@@ -48,10 +48,12 @@ import {
   updateMLLogWithType,
 } from "./hydrate/effectifsV2/hydrate-effectif-v2";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
+import { hydrateInscritSansContrat } from "./hydrate/france-travail/hydrate-france-travail";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
+  hydrateDailyMissionLocaleStats,
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleEffectifDateRupture,
   hydrateMissionLocaleOrganisation,
@@ -71,6 +73,7 @@ import { hydrateOrganismesFormationsCount } from "./hydrate/organismes/hydrate-o
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "./hydrate/organismes/organisme-cleanup";
 import { populateReseauxCollection } from "./hydrate/reseaux/hydrate-reseaux";
+import { hydrateRomeSecteurActivites } from "./hydrate/rome/hydrate-rome";
 import {
   computeDailyTransmissions,
   forceHydrateAllTransmissions,
@@ -280,7 +283,7 @@ export async function setupJobProcessor() {
             {
               query: {
                 annee_scolaire: { $in: getAnneesScolaireListFromDate(evaluationDate) },
-                updated_at: { $lt: substractDaysUTC(evaluationDate, 7) },
+                updated_at: { $lt: subtractDaysUTC(evaluationDate, 7) },
                 ...(organismeId ? { organisme_id: organismeId } : {}),
               },
             },
@@ -587,6 +590,21 @@ export async function setupJobProcessor() {
       "tmp:migration:set-ml-data-from-log": {
         handler: async () => {
           return setMLDataFromLog();
+        },
+      },
+      "tmp:hydrate:rome-secteur-activites": {
+        handler: async () => {
+          return hydrateRomeSecteurActivites();
+        },
+      },
+      "tmp:hydrate:inscrit-sans-contrat": {
+        handler: async () => {
+          return hydrateInscritSansContrat();
+        },
+      },
+      "tmp:hydrate:timeseries-stats-ml": {
+        handler: async () => {
+          return hydrateDailyMissionLocaleStats();
         },
       },
     },

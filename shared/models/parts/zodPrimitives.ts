@@ -493,6 +493,10 @@ export const primitivesV3 = {
         description: "Type de CFA",
       })
   ),
+  custom_statut_apprenant: z.coerce.string().openapi({
+    description: "Champ libre décrivant le statut de l'apprenant",
+    example: "Mon Statut",
+  }),
 };
 
 export const zBooleanStringSchema = z.preprocess((v) => {

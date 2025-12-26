@@ -29,7 +29,23 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {
     // Tout a false pour les missions locales
     // Cela assure aucun accès potentiels aux autres apis
-
+    case "FRANCE_TRAVAIL": {
+      return {
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
+        effectifsNominatifs: {
+          apprenant: false,
+          apprenti: false,
+          inscritSansContrat: false,
+          rupturant: false,
+          abandon: false,
+          inconnu: false,
+        },
+        manageEffectifs: false,
+        configurerModeTransmission: false,
+      };
+    }
     case "MISSION_LOCALE": {
       return {
         viewContacts: false,
@@ -130,7 +146,23 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "DREETS":
+    case "DREETS": {
+      return {
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
+        effectifsNominatifs: {
+          apprenant: false,
+          apprenti: false,
+          inscritSansContrat: false,
+          rupturant: false,
+          abandon: false,
+          inconnu: false,
+        },
+        manageEffectifs: false,
+        configurerModeTransmission: false,
+      };
+    }
     case "DRAAF":
     case "DRAFPIC": {
       const sameRegion = { region: { $in: [organisation.code_region] } };
@@ -170,17 +202,16 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
       };
     }
     case "DDETS": {
-      const sameDepartement = { departement: { $in: [organisation.code_departement] } };
       return {
-        viewContacts: sameDepartement,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: sameDepartement,
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
         effectifsNominatifs: {
           apprenant: false,
           apprenti: false,
-          inscritSansContrat: sameDepartement,
-          rupturant: sameDepartement,
-          abandon: sameDepartement,
+          inscritSansContrat: false,
+          rupturant: false,
+          abandon: false,
           inconnu: false,
         },
         manageEffectifs: false,
