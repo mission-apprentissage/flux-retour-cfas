@@ -10,6 +10,7 @@ import {
 
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import logger from "@/common/logger";
 import {
   effectifV2Db,
@@ -21,7 +22,7 @@ import {
   personV2Db,
 } from "@/common/model/collections";
 import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
-import { normalisePersonIdentifiant, updateParcoursPersonV2 } from "@/jobs/ingestion/person/person.ingestion";
+import { updateParcoursPersonV2 } from "@/jobs/ingestion/person/person.ingestion";
 
 export const hydratePersonV2Parcours = async () => {
   const BULK_SIZE = 100;
