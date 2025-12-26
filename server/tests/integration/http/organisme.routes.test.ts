@@ -360,6 +360,7 @@ describe("Routes /organismes/:id", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: profilsPermissionByLabel["OF cible"]._id,
+            auth_method: "password",
           },
           {
             _id: new ObjectId(),
@@ -377,6 +378,7 @@ describe("Routes /organismes/:id", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: profilsPermissionByLabel["OF cible"]._id,
+            auth_method: "password",
           },
         ]),
       ]);

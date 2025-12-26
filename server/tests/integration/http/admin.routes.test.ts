@@ -174,6 +174,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
           {
             _id: new ObjectId(),
@@ -191,6 +192,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
         ]),
       ]);
@@ -292,6 +294,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
           {
             _id: new ObjectId(),
@@ -309,6 +312,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
         ]),
         effectifsDb().insertMany([
@@ -385,6 +389,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
           {
             _id: new ObjectId(),
@@ -402,6 +407,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
         ]),
         effectifsDb().insertMany([
@@ -498,6 +504,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
           {
             _id: new ObjectId(),
@@ -515,6 +522,7 @@ describe("Routes administrateur", () => {
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
             organisation_id: new ObjectId(id(1)),
+            auth_method: "password",
           },
         ]),
         // Insertion des effectifs en doublon sur les 2 organismes avec les plus récents sur l'organisme sans UAI

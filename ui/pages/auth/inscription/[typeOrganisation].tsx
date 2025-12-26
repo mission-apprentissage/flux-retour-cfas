@@ -9,7 +9,6 @@ import { CategorieCompteInscription } from "@/modules/auth/inscription/categorie
 import { SetterOrganisation } from "@/modules/auth/inscription/common";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
 import { InscriptionFranceTravail } from "@/modules/auth/inscription/InscriptionFranceTravail";
-import { InscriptionML } from "@/modules/auth/inscription/InscriptionML";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
@@ -46,9 +45,6 @@ const RegisterConfigurationOrganisationPage = () => {
         )}
         {typeOrganisation === "organisme_formation" && (
           <InscriptionOF organisation={organisation} setOrganisation={setOrganisation as SetterOrganisation} />
-        )}
-        {typeOrganisation === "missions_locales" && (
-          <InscriptionML organisation={organisation} setOrganisation={setOrganisation as SetterOrganisation} />
         )}
         {typeOrganisation === "operateur_public" && (
           <InscriptionOperateurPublic setOrganisation={setOrganisation as SetterOrganisation} />

@@ -23,7 +23,7 @@ import {
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendEmail } from "@/common/services/mailer/mailer";
-import { generateKey } from "@/common/utils/cryptoUtils";
+import { generateHexKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
@@ -148,7 +148,7 @@ export async function inviteUserToOrganisation(
         : "Cet utilisateur est déjà présent dans une autre organisation. Si vous pensez que c'est une erreur, merci de contacter le support."
     );
   }
-  const invitationToken = generateKey(50, "hex");
+  const invitationToken = generateHexKey(50);
   await invitationsDb().insertOne({
     _id: new ObjectId(),
     organisation_id,

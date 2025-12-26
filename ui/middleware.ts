@@ -5,7 +5,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { publicConfig } from "./config.public";
 
 export const config = {
-  matcher: ["/:path*"],
+  matcher: "/((?!api|static|.*\\..*|_next).*)",
 };
 
 const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
@@ -59,6 +59,24 @@ function handlePublicPaths(
   }
 }
 
+function handleProfileCompletion(
+  pathname: string,
+  session: AuthContext | null,
+  request: NextRequest,
+  requestNextData: { request: { headers: Headers } }
+): NextResponse | undefined {
+  if (!session) {
+    return NextResponse.next(requestNextData);
+  }
+
+  if (session.account_status === "PENDING_PROFILE_COMPLETION") {
+    if (pathname === "/auth/pro-connect/profil") {
+      return NextResponse.next(requestNextData);
+    }
+    return NextResponse.redirect(new URL("/auth/pro-connect/profil", request.url));
+  }
+}
+
 function redirectToHome(
   session: AuthContext | null,
   request: NextRequest,
@@ -97,6 +115,12 @@ export async function middleware(request: NextRequest) {
 
   if (publicPath) {
     return publicPath;
+  }
+
+  const profileCompletion = handleProfileCompletion(pathname, session, request, requestNextData);
+
+  if (profileCompletion) {
+    return profileCompletion;
   }
 
   if (pathname === "/") {

@@ -140,6 +140,7 @@ describe("cleanupOrganismes", () => {
       civility: "Monsieur",
       organisation_id: orgWithUser._id,
       account_status: "CONFIRMED",
+      auth_method: "password",
     });
   });
 
