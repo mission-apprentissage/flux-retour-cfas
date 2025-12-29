@@ -7,8 +7,8 @@ import { PromisePool } from "@supercharge/promise-pool";
 import AdmZip from "adm-zip";
 import axios from "axios";
 import { WithoutId } from "mongodb";
+import sax from "sax";
 import { IRncp } from "shared/models/data/rncp.model";
-import XmlStream from "xml-stream";
 
 import parentLogger from "@/common/logger";
 import { rncpDb } from "@/common/model/collections";
@@ -93,49 +93,100 @@ export async function hydrateRNCP() {
     }
   };
 
-  // Create XML stream parser
+  // Create SAX parser
+  const saxStream = sax.createStream(true, {});
   const stream = createReadStream(tempXmlFilePath);
-  const xml = new XmlStream(stream);
 
-  // Collect elements as arrays to handle single vs multiple items
-  xml.collect("ROME");
-  xml.preserve("NOUVELLE_CERTIFICATION", true);
+  // State for tracking current element
+  let currentFiche: any = null;
+  let currentPath: string[] = [];
+  let currentText = "";
+  let romeList: any[] = [];
 
-  // Process each FICHE element
-  xml.on("endElement: FICHE", async (fiche: any) => {
-    try {
-      const rncpDoc: WithoutId<IRncp> = {
-        rncp: fiche.NUMERO_FICHE,
-        nouveaux_rncp: fiche?.NOUVELLE_CERTIFICATION?.$children,
-        niveau: fiche.NOMENCLATURE_EUROPE?.NIVEAU
-          ? parseInt((fiche.NOMENCLATURE_EUROPE.NIVEAU as string).substring(3))
-          : undefined,
-        intitule: fiche.INTITULE,
-        etat_fiche: fiche.ETAT_FICHE,
-        actif: fiche.ACTIF === "Oui",
-        romes: fiche.CODES_ROME?.ROME?.map((rome: any) => rome.CODE) ?? [],
-      };
-      batch.push(rncpDoc);
+  saxStream.on("opentag", (node) => {
+    currentPath.push(node.name);
+    currentText = "";
 
-      // Process batch when it reaches the batch size
-      if (batch.length >= batchSize) {
-        xml.pause(); // Pause the stream while processing
-        const currentBatch = [...batch];
-        batch = [];
-        await processBatch(currentBatch);
-        xml.resume(); // Resume the stream
-      }
-    } catch (error) {
-      logger.error({ error }, "Erreur lors du traitement d'une fiche");
-      throw error;
+    if (node.name === "FICHE") {
+      currentFiche = {};
+      romeList = [];
+    } else if (node.name === "ROME") {
+      romeList.push({});
     }
   });
 
-  // Handle end of stream
+  saxStream.on("text", (text) => {
+    currentText += text;
+  });
+
+  saxStream.on("closetag", (tagName) => {
+    const path = currentPath.join(".");
+
+    if (currentFiche) {
+      // Capture text content for specific fields
+      if (tagName === "NUMERO_FICHE") {
+        currentFiche.NUMERO_FICHE = currentText.trim();
+      } else if (tagName === "NOUVELLE_CERTIFICATION") {
+        if (!currentFiche.NOUVELLE_CERTIFICATION) {
+          currentFiche.NOUVELLE_CERTIFICATION = [];
+        }
+        const value = currentText.trim();
+        if (value) {
+          currentFiche.NOUVELLE_CERTIFICATION.push(value);
+        }
+      } else if (tagName === "NIVEAU" && path.includes("NOMENCLATURE_EUROPE")) {
+        currentFiche.NIVEAU = currentText.trim();
+      } else if (tagName === "INTITULE") {
+        currentFiche.INTITULE = currentText.trim();
+      } else if (tagName === "ETAT_FICHE") {
+        currentFiche.ETAT_FICHE = currentText.trim();
+      } else if (tagName === "ACTIF") {
+        currentFiche.ACTIF = currentText.trim();
+      } else if (tagName === "CODE" && path.includes("CODES_ROME.ROME")) {
+        if (romeList.length > 0) {
+          romeList[romeList.length - 1].CODE = currentText.trim();
+        }
+      }
+    }
+
+    // When FICHE closes, process it
+    if (tagName === "FICHE" && currentFiche) {
+      const rncpDoc: WithoutId<IRncp> = {
+        rncp: currentFiche.NUMERO_FICHE,
+        nouveaux_rncp: currentFiche.NOUVELLE_CERTIFICATION ?? [],
+        niveau: currentFiche.NIVEAU ? parseInt(currentFiche.NIVEAU.substring(3)) : undefined,
+        intitule: currentFiche.INTITULE,
+        etat_fiche: currentFiche.ETAT_FICHE,
+        actif: currentFiche.ACTIF === "Oui",
+        romes: romeList.map((rome) => rome.CODE).filter(Boolean),
+      };
+
+      batch.push(rncpDoc);
+      currentFiche = null;
+    }
+
+    currentPath.pop();
+    currentText = "";
+  });
+
+  // Handle batching with backpressure
+  let isPaused = false;
+  saxStream.on("closetag", async (tagName) => {
+    if (tagName === "FICHE" && batch.length >= batchSize && !isPaused) {
+      isPaused = true;
+      stream.pause();
+      const currentBatch = [...batch];
+      batch = [];
+      await processBatch(currentBatch);
+      stream.resume();
+      isPaused = false;
+    }
+  });
+
+  // Handle end of stream and errors
   await new Promise<void>((resolve, reject) => {
-    xml.on("end", async () => {
+    saxStream.on("end", async () => {
       try {
-        // Process remaining items in batch
         await processBatch(batch);
         logger.info({ count: processedCount }, "import des fiches rncp terminé");
         resolve();
@@ -144,10 +195,17 @@ export async function hydrateRNCP() {
       }
     });
 
-    xml.on("error", (error: Error) => {
+    saxStream.on("error", (error: Error) => {
       logger.error({ error }, "Erreur lors du parsing XML");
       reject(error);
     });
+
+    stream.on("error", (error: Error) => {
+      logger.error({ error }, "Erreur lors de la lecture du fichier");
+      reject(error);
+    });
+
+    stream.pipe(saxStream);
   });
 
   // Clean up temp XML file

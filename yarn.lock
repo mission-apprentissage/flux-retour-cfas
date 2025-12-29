@@ -5495,6 +5495,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/sax@npm:^1.2.7":
+  version: 1.2.7
+  resolution: "@types/sax@npm:1.2.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: 7ece5fbb5d9c8fc76ab0de2f99d705edf92f18e701d4f9d9b0647275e32eb65e656c1badf9dfaa12f4e1ff3e250561c8c9cfe79e8b5f33dd1417ac0f1804f6cc
+  languageName: node
+  linkType: hard
+
 "@types/semver@npm:^7.5.0":
   version: 7.5.0
   resolution: "@types/semver@npm:7.5.0"
@@ -6610,15 +6619,6 @@ __metadata:
     buffers: ~0.1.1
     chainsaw: ~0.1.0
   checksum: b4699fda9e2c2981e74a46b0115cf0d472eda9b68c0e9d229ef494e92f29ce81acf0a834415094cffcc340dfee7c4ef8ce5d048c65c18067a7ed850323f777af
-  languageName: node
-  linkType: hard
-
-"bindings@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "bindings@npm:1.5.0"
-  dependencies:
-    file-uri-to-path: 1.0.0
-  checksum: 65b6b48095717c2e6105a021a7da4ea435aa8d3d3cd085cb9e85bcb6e5773cf318c4745c3f7c504412855940b585bdf9b918236612a1c7a7942491de176f1ae7
   languageName: node
   linkType: hard
 
@@ -10030,13 +10030,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-uri-to-path@npm:1.0.0":
-  version: 1.0.0
-  resolution: "file-uri-to-path@npm:1.0.0"
-  checksum: b648580bdd893a008c92c7ecc96c3ee57a5e7b6c4c18a9a09b44fb5d36d79146f8e442578bc0e173dc027adf3987e254ba1dfd6e3ec998b7c282873010502144
-  languageName: node
-  linkType: hard
-
 "filelist@npm:^1.0.4":
   version: 1.0.4
   resolution: "filelist@npm:1.0.4"
@@ -11295,17 +11288,6 @@ __metadata:
   dependencies:
     safer-buffer: ">= 2.1.2 < 3.0.0"
   checksum: 3f60d47a5c8fc3313317edfd29a00a692cc87a19cac0159e2ce711d0ebc9019064108323b5e493625e25594f11c6236647d8e256fbe7a58f4a3b33b89e6d30bf
-  languageName: node
-  linkType: hard
-
-"iconv@npm:^2.1.4":
-  version: 2.3.5
-  resolution: "iconv@npm:2.3.5"
-  dependencies:
-    nan: ^2.14.0
-    node-gyp: latest
-    safer-buffer: ^2.1.2
-  checksum: cc37510641cce06ad1444e21e77bcb3871e5171a3dbc41b512250051892e2455673a8b480cd2b0255ec771f1c4098990d3404abe9cc146a4cb0fe1b90efaeb61
   languageName: node
   linkType: hard
 
@@ -14931,15 +14913,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.19.0":
-  version: 2.24.0
-  resolution: "nan@npm:2.24.0"
-  dependencies:
-    node-gyp: latest
-  checksum: ab4080188a2fe2bef0a1f3ce5c65a6c3d71fa23be08f4e0696dc256c5030c809d11569d5bcf28810148a7b0029c195c592b98b7b22c5e9e7e9aa0e71905a63b8
-  languageName: node
-  linkType: hard
-
 "nano-css@npm:^5.3.1":
   version: 5.6.0
   resolution: "nano-css@npm:5.6.0"
@@ -15181,17 +15154,6 @@ __metadata:
   dependencies:
     lodash: ^4.17.21
   checksum: e8c856c04a1645062112a72e59a98b203505ed5111ff84a3a5f40611afa229b578c7d50f1e6a7f17aa62baeea4a640d2e2f61f63afc05423aa267af10977fb2b
-  languageName: node
-  linkType: hard
-
-"node-expat@npm:^2.3.1":
-  version: 2.4.1
-  resolution: "node-expat@npm:2.4.1"
-  dependencies:
-    bindings: ^1.5.0
-    nan: ^2.19.0
-    node-gyp: latest
-  checksum: efde88a48361261f2b9a7cc0b9ff17862a64b47f6d2604a626032ca59c8e31975cbc2d68485322aaa6052bc90dbf04133ff36c7c6a5c458db9e116631291ed20
   languageName: node
   linkType: hard
 
@@ -17262,18 +17224,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^1.0.31":
-  version: 1.1.14
-  resolution: "readable-stream@npm:1.1.14"
-  dependencies:
-    core-util-is: ~1.0.0
-    inherits: ~2.0.1
-    isarray: 0.0.1
-    string_decoder: ~0.10.x
-  checksum: 17dfeae3e909945a4a1abc5613ea92d03269ef54c49288599507fc98ff4615988a1c39a999dcf9aacba70233d9b7040bc11a5f2bfc947e262dedcc0a8b32b5a0
-  languageName: node
-  linkType: hard
-
 "readable-stream@npm:^2.0.0, readable-stream@npm:^2.0.2, readable-stream@npm:^2.0.5, readable-stream@npm:~2.3.6":
   version: 2.3.8
   resolution: "readable-stream@npm:2.3.8"
@@ -17904,7 +17854,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0, safer-buffer@npm:^2.0.2, safer-buffer@npm:^2.1.0, safer-buffer@npm:^2.1.2, safer-buffer@npm:~2.1.0":
+"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0, safer-buffer@npm:^2.0.2, safer-buffer@npm:^2.1.0, safer-buffer@npm:~2.1.0":
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
@@ -17925,6 +17875,13 @@ __metadata:
   bin:
     sass: sass.js
   checksum: e38fa3992c99aa0270cc7577c9b38f576907a11ea01571d8e4ff2cb11b00606b33f650344d21082aba1c9ef6588ca088a5b84f82a8f8c32f9865c3159161ab89
+  languageName: node
+  linkType: hard
+
+"sax@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "sax@npm:1.4.3"
+  checksum: 136a202eee9364f312fb1c6abadb045ef430a7468853f804758d8f2dc8d2560801245620e2bfd4ead2e332c025bef50865271974d142a0c26f69d5fc3de9baf1
   languageName: node
   linkType: hard
 
@@ -18130,6 +18087,7 @@ __metadata:
     "@types/lodash-es": ^4.17.12
     "@types/multer": ^1.4.12
     "@types/node": ^22.7.5
+    "@types/sax": ^1.2.7
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
@@ -18181,6 +18139,7 @@ __metadata:
     passport-localapikey: 0.0.3
     randexp: 0.5.3
     rate-limiter-flexible: ^2.4.2
+    sax: ^1.4.3
     sha512crypt-node: 1.0.2
     shared: "workspace:*"
     stream-chain: ^2.2.5
@@ -18193,7 +18152,6 @@ __metadata:
     uuid: 8.3.2
     vitest: ^2.1.4
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
-    xml-stream: ^0.4.5
     zod: ^3.23.8
   languageName: unknown
   linkType: soft
@@ -20869,17 +20827,6 @@ __metadata:
   bin:
     xlsx: ./bin/xlsx.njs
   checksum: d6a7cce81cdf5f832311feaef08c8918cb51cdaac235efd29c7f6caf881f7aa797aa51cdbcb583a491ba82d1e7c2b97f92ed082eda754de05731a4558768e68d
-  languageName: node
-  linkType: hard
-
-"xml-stream@npm:^0.4.5":
-  version: 0.4.5
-  resolution: "xml-stream@npm:0.4.5"
-  dependencies:
-    iconv: ^2.1.4
-    node-expat: ^2.3.1
-    readable-stream: ^1.0.31
-  checksum: 7594e51cc520552959d079d74041913be382eeaef16979cf21a5cc17b0335cb56880f39271886445f7275c435e2753cc50deb014f20efb21d34960768e794e90
   languageName: node
   linkType: hard
 
