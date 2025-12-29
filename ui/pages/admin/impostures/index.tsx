@@ -2,7 +2,7 @@ import { Heading, Container, Text, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { IOrganisationCreate } from "shared";
 
-import { _post, _put, _delete } from "@/common/httpClient";
+import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
@@ -13,6 +13,8 @@ import { InscriptionFranceTravail } from "@/modules/auth/inscription/Inscription
 import { InscriptionMissionLocale } from "@/modules/auth/inscription/InscriptionMissionLocale";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
+
+import { ARMLSelect } from "./ARMLSelect";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -38,7 +40,7 @@ function ImposturesPage() {
         </Heading>
 
         <Text>
-          Cette page permet de vous faire passer pour un membre d’une organisation quelconque à des fins de test.
+          Cette page permet de vous faire passer pour un membre d&apos;une organisation quelconque à des fins de test.
         </Text>
 
         <Box maxW="fit-content">
@@ -57,7 +59,7 @@ function ImposturesPage() {
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
             Organisme de formation
           </Heading>
-          Pour connaître des SIRET d’OFA, voir le{" "}
+          Pour connaître des SIRET d&apos;OFA, voir le{" "}
           <Link
             href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
             color="action-high-blue-france"
@@ -72,6 +74,10 @@ function ImposturesPage() {
             Mission Locale
           </Heading>
           <InscriptionMissionLocale setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            ARML
+          </Heading>
+          <ARMLSelect setOrganisation={setOrganisation} />
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
             France travail
           </Heading>
