@@ -1423,6 +1423,10 @@ export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPAR
   {} as Record<IDepartmentCode, IDepartement>
 );
 
+export function getDepartementCodesFromRegions(regionCodes: string[]): string[] {
+  return DEPARTEMENTS.filter((dept) => regionCodes.includes(dept.region.code)).map((dept) => dept.code);
+}
+
 const ACADEMIES = [
   { nom: "Étranger", code: "00", id: "ETRANGER" },
   { nom: "Paris", code: "01", id: "PARIS" },
