@@ -1,3 +1,4 @@
+import { createReadStream } from "node:fs";
 import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -5,9 +6,9 @@ import { join } from "node:path";
 import { PromisePool } from "@supercharge/promise-pool";
 import AdmZip from "adm-zip";
 import axios from "axios";
-import { XMLParser } from "fast-xml-parser";
 import { WithoutId } from "mongodb";
 import { IRncp } from "shared/models/data/rncp.model";
+import XmlStream from "xml-stream";
 
 import parentLogger from "@/common/logger";
 import { rncpDb } from "@/common/model/collections";
@@ -61,53 +62,94 @@ export async function hydrateRNCP() {
   if (!entry) {
     throw new Error("Fichier non trouvé. Le format a dû changer");
   }
-  const zipData = entry.getData();
-  unlink(tempZipFilePath);
 
-  const parser = new XMLParser({
-    isArray(tagName, jPath) {
-      // force un tableau plutôt qu'un objet si jamais un seul élément
-      return ["FICHES.FICHE.CODES_ROME.ROME", "FICHES.FICHE.NOUVELLE_CERTIFICATION"].includes(jPath);
-    },
-  });
-  logger.info("parsing du xml");
-  const parsedContent = parser.parse(zipData);
+  // Extract XML to a temporary file instead of loading into memory
+  const tempXmlFilePath = join(tmpdir(), "fiches-rncp.xml");
+  await writeFile(tempXmlFilePath, entry.getData());
+  await unlink(tempZipFilePath);
 
-  const fichesRNCP: WithoutId<IRncp>[] = parsedContent.FICHES.FICHE.map((fiche): WithoutId<IRncp> => {
-    return {
-      rncp: fiche.NUMERO_FICHE,
-      nouveaux_rncp: fiche.NOUVELLE_CERTIFICATION,
-      niveau: fiche.NOMENCLATURE_EUROPE.NIVEAU
-        ? parseInt((fiche.NOMENCLATURE_EUROPE.NIVEAU as string).substring(3))
-        : undefined,
-      intitule: fiche.INTITULE,
-      etat_fiche: fiche.ETAT_FICHE,
-      actif: fiche.ACTIF === "Oui",
-      // certains RNCP n'ont pas de ROME => undefined
-      romes: fiche.CODES_ROME?.ROME?.map((rome) => rome.CODE) ?? [],
-    };
-  });
+  logger.info("Streaming et parsing du XML");
 
-  logger.info({ count: fichesRNCP.length }, "import des fiches rncp");
+  // Process XML in streaming mode to avoid loading entire file in memory
+  let processedCount = 0;
+  const batchSize = 100;
+  let batch: WithoutId<IRncp>[] = [];
 
-  await PromisePool.for(fichesRNCP)
-    .withConcurrency(50)
-    .handleError(async (error) => {
+  const processBatch = async (currentBatch: WithoutId<IRncp>[]) => {
+    if (currentBatch.length === 0) return;
+
+    await PromisePool.for(currentBatch)
+      .withConcurrency(50)
+      .handleError(async (error) => {
+        throw error;
+      })
+      .process(async ({ rncp, ...fiche }) => {
+        await rncpDb().updateOne({ rncp }, { $set: stripEmptyFields({ ...fiche }) }, { upsert: true });
+      });
+
+    processedCount += currentBatch.length;
+    if (processedCount % 1000 === 0) {
+      logger.info({ count: processedCount }, "fiches traitées");
+    }
+  };
+
+  // Create XML stream parser
+  const stream = createReadStream(tempXmlFilePath);
+  const xml = new XmlStream(stream);
+
+  // Collect elements as arrays to handle single vs multiple items
+  xml.collect("ROME");
+  xml.preserve("NOUVELLE_CERTIFICATION", true);
+
+  // Process each FICHE element
+  xml.on("endElement: FICHE", async (fiche: any) => {
+    try {
+      const rncpDoc: WithoutId<IRncp> = {
+        rncp: fiche.NUMERO_FICHE,
+        nouveaux_rncp: fiche?.NOUVELLE_CERTIFICATION?.$children,
+        niveau: fiche.NOMENCLATURE_EUROPE?.NIVEAU
+          ? parseInt((fiche.NOMENCLATURE_EUROPE.NIVEAU as string).substring(3))
+          : undefined,
+        intitule: fiche.INTITULE,
+        etat_fiche: fiche.ETAT_FICHE,
+        actif: fiche.ACTIF === "Oui",
+        romes: fiche.CODES_ROME?.ROME?.map((rome: any) => rome.CODE) ?? [],
+      };
+      batch.push(rncpDoc);
+
+      // Process batch when it reaches the batch size
+      if (batch.length >= batchSize) {
+        xml.pause(); // Pause the stream while processing
+        const currentBatch = [...batch];
+        batch = [];
+        await processBatch(currentBatch);
+        xml.resume(); // Resume the stream
+      }
+    } catch (error) {
+      logger.error({ error }, "Erreur lors du traitement d'une fiche");
       throw error;
-    })
-    .process(async ({ rncp, ...fiche }) => {
-      await rncpDb().updateOne(
-        {
-          rncp,
-        },
-        {
-          $set: stripEmptyFields({
-            ...fiche,
-          }),
-        },
-        {
-          upsert: true,
-        }
-      );
+    }
+  });
+
+  // Handle end of stream
+  await new Promise<void>((resolve, reject) => {
+    xml.on("end", async () => {
+      try {
+        // Process remaining items in batch
+        await processBatch(batch);
+        logger.info({ count: processedCount }, "import des fiches rncp terminé");
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
+
+    xml.on("error", (error: Error) => {
+      logger.error({ error }, "Erreur lors du parsing XML");
+      reject(error);
+    });
+  });
+
+  // Clean up temp XML file
+  await unlink(tempXmlFilePath).catch(() => {});
 }
