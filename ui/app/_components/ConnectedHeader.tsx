@@ -25,7 +25,6 @@ export function ConnectedHeader() {
       case ORGANISATION_TYPE.DRAFPIC:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
-      case ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL:
       case ORGANISATION_TYPE.CARIF_OREF_NATIONAL:
       case ORGANISATION_TYPE.ADMINISTRATEUR:
         return "Tous les organismes";
@@ -123,7 +122,6 @@ export function ConnectedHeader() {
         ORGANISATION_TYPE.CARIF_OREF_REGIONAL,
         ORGANISATION_TYPE.DRAFPIC,
         ORGANISATION_TYPE.ACADEMIE,
-        ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
         ORGANISATION_TYPE.CARIF_OREF_NATIONAL,
         ORGANISATION_TYPE.ADMINISTRATEUR,
       ].includes(organisationType || "")

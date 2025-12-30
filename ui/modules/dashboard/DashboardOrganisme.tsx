@@ -1149,9 +1149,7 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
         "académie"
       );
 
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
-      return false;
     case "ADMINISTRATEUR":
       return false;
     default:

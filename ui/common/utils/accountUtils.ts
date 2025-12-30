@@ -23,7 +23,6 @@ export function getAccountLabel(auth: AuthContext): string {
     case "ARML":
       return auth.organisation.nom ? `${typeItem.nom} ${auth.organisation.nom}` : typeItem.nom;
     case "ORGANISME_FORMATION":
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return typeItem.nom;
     case "DREETS":

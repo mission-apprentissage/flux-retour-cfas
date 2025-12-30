@@ -28,7 +28,6 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
     case "ARML":
       return "Mon territoire";
 
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
@@ -275,7 +274,6 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
     case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
     case "ARML":

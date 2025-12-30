@@ -24,7 +24,6 @@ function getDashboardComponent(organisationType: IOrganisationType) {
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return <DashboardTransverse />;
