@@ -2,17 +2,8 @@ import { zUai } from "api-alternance-sdk/internal";
 import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
-import {
-  PermissionScope,
-  assertUnreachable,
-  entries,
-  getAnneesScolaireListFromDate,
-  SIRET_REGEX,
-  ORGANISATIONS_NATIONALES_MAP,
-  ORGANISATION_TYPE,
-} from "shared";
+import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate, SIRET_REGEX } from "shared";
 import { IEffectif } from "shared/models/data/effectifs.model";
-import { IOrganisation, IOrganisationOperateurPublicNational } from "shared/models/data/organisations.model";
 
 import { escapeRegExp } from "@/common/utils/regexUtils";
 
@@ -72,24 +63,6 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
     return acc;
   }, {});
 }
-
-const getDefaultFormationNiveaux = (organisation: IOrganisationOperateurPublicNational) => {
-  if (!organisation) {
-    return [];
-  }
-  if (organisation.type !== ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL) {
-    return [];
-  }
-
-  switch (organisation.nom) {
-    case ORGANISATIONS_NATIONALES_MAP.EDUC_NATIONALE:
-      return ["3", "4"];
-    case ORGANISATIONS_NATIONALES_MAP.ENSEIGNEMENT_SUP:
-      return ["5", "6", "7", "8"];
-    default:
-      return [];
-  }
-};
 
 const buildFilterDate = (filter) => {
   const value = filter["date"];
@@ -174,11 +147,10 @@ const buildFilterFormationAnnee = (filter) => {
   return { "formation.annee": { $in: value } };
 };
 
-const buildFilterFormationNiveau = (filter, organisation) => {
-  const defaultValue = getDefaultFormationNiveaux(organisation);
+const buildFilterFormationNiveau = (filter) => {
   const value = filter["formation_niveaux"];
   if (!value) {
-    return defaultValue.length ? { "formation.niveau": { $in: defaultValue } } : {};
+    return {};
   }
   return { "formation.niveau": { $in: value } };
 };
@@ -201,8 +173,7 @@ const buildFilterFormationSecteurProfessionnels = (filter) => {
 
 export function buildEffectifMongoFilters(
   filters: FullEffectifsFilters,
-  perimetre: PermissionScope | boolean,
-  organisation?: IOrganisation
+  perimetre: PermissionScope | boolean
 ): Filter<IEffectif>[] {
   const perimetreFilter = buildEffectifPerimetreMongoFilters(perimetre);
 
@@ -216,7 +187,7 @@ export function buildEffectifMongoFilters(
     ...buildFilterOrganismeReseaux(filters),
     ...buildFilterApprenantTrancheAge(filters),
     ...buildFilterFormationAnnee(filters),
-    ...buildFilterFormationNiveau(filters, organisation),
+    ...buildFilterFormationNiveau(filters),
     ...buildFilterFormationCfd(filters),
     ...buildFilterFormationSecteurProfessionnels(filters),
   };
