@@ -76,9 +76,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const isAllowedToShowFilterDepartement = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
-      case "DRAAF":
       case "CONSEIL_REGIONAL":
-      case "DRAFPIC":
       case "ACADEMIE":
       case "ADMINISTRATEUR":
         return true;
@@ -102,9 +100,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const isAllowedToShowFilterUAI = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
-      case "DRAAF":
       case "CONSEIL_REGIONAL":
-      case "DRAFPIC":
       case "ACADEMIE":
       case "ADMINISTRATEUR":
       case "ORGANISME_FORMATION":

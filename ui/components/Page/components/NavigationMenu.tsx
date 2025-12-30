@@ -20,9 +20,7 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
     case "TETE_DE_RESEAU":
       return "Mon réseau";
 
-    case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "DRAFPIC":
     case "ACADEMIE":
     case "ARML":
       return "Mon territoire";
@@ -140,20 +138,6 @@ function NavBarTransverse(): React.ReactElement {
           </NavItem>
           <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
           <NavItem to="/indicateurs">Mes indicateurs</NavItem>
-          {organisationType === ORGANISATION_TYPE.DRAFPIC && (
-            <NavItem
-              to="/voeux-affelnet"
-              onClick={() =>
-                trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
-                  organisation_type: organisation ? organisation.type : "",
-                  organisation_code_region:
-                    organisation && "code_region" in organisation ? organisation.code_region : "",
-                })
-              }
-            >
-              Vœux Affelnet
-            </NavItem>
-          )}
           <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
           <MenuQuestions />
         </>
@@ -266,9 +250,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 
     case "TETE_DE_RESEAU":
     case "DREETS":
-    case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
     case "ADMINISTRATEUR":

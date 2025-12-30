@@ -98,8 +98,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
               );
 
             case "DREETS":
-            case "DRAFPIC":
-            case "DRAAF":
               return (
                 <>
                   <Text fontSize="20px" fontWeight="bold">

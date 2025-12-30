@@ -685,9 +685,7 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
     case "TETE_DE_RESEAU":
       return "Les organismes de mon réseau";
 
-    case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "DRAFPIC":
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 

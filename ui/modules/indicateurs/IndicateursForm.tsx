@@ -444,17 +444,7 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOr
         </>
       );
       break;
-    case "DRAAF":
-      text = (
-        <>
-          Retrouvez ici les indicateurs et les organismes de formation <Text as="strong">de votre territoire</Text>{" "}
-          uniquement. Vous avez la possibilité de télécharger les listes <Text as="strong">nominatives</Text> pour les
-          jeunes en formation sans contrat, rupturants et sorties d&apos;apprentissage.
-        </>
-      );
-      break;
     case "CONSEIL_REGIONAL":
-    case "DRAFPIC":
     case "ACADEMIE":
       text = (
         <>
