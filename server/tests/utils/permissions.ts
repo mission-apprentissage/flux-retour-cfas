@@ -101,18 +101,6 @@ export const profilsPermissionByLabel = {
     code_region: "76",
     created_at,
   },
-  "DRAAF même région": {
-    _id: new ObjectId(id(10)),
-    type: "DRAAF",
-    code_region: ofCible.region,
-    created_at,
-  },
-  "DRAAF autre région": {
-    _id: new ObjectId(id(11)),
-    type: "DRAAF",
-    code_region: "76",
-    created_at,
-  },
   "Conseil Régional même région": {
     _id: new ObjectId(id(12)),
     type: "CONSEIL_REGIONAL",
@@ -122,18 +110,6 @@ export const profilsPermissionByLabel = {
   "Conseil Régional autre région": {
     _id: new ObjectId(id(13)),
     type: "CONSEIL_REGIONAL",
-    code_region: "76",
-    created_at,
-  },
-  "DRAFPIC régional même région": {
-    _id: new ObjectId(id(16)),
-    type: "DRAFPIC",
-    code_region: ofCible.region,
-    created_at,
-  },
-  "DRAFPIC régional autre région": {
-    _id: new ObjectId(id(17)),
-    type: "DRAFPIC",
     code_region: "76",
     created_at,
   },
