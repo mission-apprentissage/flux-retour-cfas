@@ -82,6 +82,8 @@ function redirectToHome(
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAAF":
+    case "DRAFPIC":
       return NextResponse.redirect(new URL("/decommissionnement", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
@@ -155,7 +157,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirection des utilisateurs décommissionnés vers la page de décommissionnement
-  const decommissionedTypes = ["OPERATEUR_PUBLIC_NATIONAL", "CARIF_OREF_NATIONAL", "CARIF_OREF_REGIONAL"];
+  const decommissionedTypes = [
+    "OPERATEUR_PUBLIC_NATIONAL",
+    "CARIF_OREF_NATIONAL",
+    "CARIF_OREF_REGIONAL",
+    "DRAAF",
+    "DRAFPIC",
+  ];
   if (decommissionedTypes.includes(session?.organisation?.type ?? "") && pathname !== "/decommissionnement") {
     return NextResponse.redirect(new URL("/decommissionnement", request.url));
   }

@@ -48,8 +48,6 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     case "TETE_DE_RESEAU":
       return `Votre périmètre correspond aux organismes du réseau ${organisation.reseau}`;
 
-    case "DRAAF":
-    case "DRAFPIC":
     case "CONSEIL_REGIONAL":
       return `Votre périmètre correspond aux organismes de la région ${
         REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region

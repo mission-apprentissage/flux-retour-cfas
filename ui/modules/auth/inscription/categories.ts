@@ -4,7 +4,7 @@ export const categoriesCompteInscription = [
     value: "organisme_formation",
   },
   {
-    text: "Un opérateur public (D(R)(I)EETS, DDETS, DRAAF, DGEFP, Académie, Conseil régional…)",
+    text: "Un opérateur public (D(R)(I)EETS, DDETS, DGEFP, Académie, Conseil régional…)",
     value: "operateur_public",
   },
   {

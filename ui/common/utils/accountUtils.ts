@@ -26,8 +26,6 @@ export function getAccountLabel(auth: AuthContext): string {
     case "ADMINISTRATEUR":
       return typeItem.nom;
     case "DREETS":
-    case "DRAAF":
-    case "DRAFPIC":
     case "CONSEIL_REGIONAL":
     case "ACADEMIE": {
       const codeAcademie = (auth.organisation as IOrganisationOperateurPublicAcademieJson).code_academie;

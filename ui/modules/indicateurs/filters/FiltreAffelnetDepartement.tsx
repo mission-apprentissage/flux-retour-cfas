@@ -5,7 +5,6 @@ import {
   DEPARTEMENTS_BY_CODE,
   DEPARTEMENTS_SORTED,
   IOrganisationOperateurPublicAcademie,
-  IOrganisationOperateurPublicRegion,
   ORGANISATION_TYPE,
 } from "shared";
 
@@ -25,12 +24,6 @@ const FiltreAffelnetDepartement = (props: FiltreAffelnetDepartementProps) => {
   const organisation = auth.organisation as any;
 
   const configDepartements = useMemo(() => {
-    if (organisation.type === "DRAFPIC") {
-      return DEPARTEMENTS_SORTED.filter(
-        (departement) => departement.region.code === (organisation as IOrganisationOperateurPublicRegion).code_region
-      );
-    }
-
     if (organisation.type === ORGANISATION_TYPE.ACADEMIE) {
       return DEPARTEMENTS_SORTED.filter((departement) =>
         ACADEMIES_DEPARTEMENT_MAP[(organisation as IOrganisationOperateurPublicAcademie).code_academie].includes(
