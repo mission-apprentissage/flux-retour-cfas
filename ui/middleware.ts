@@ -80,6 +80,8 @@ function redirectToHome(
     case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "CARIF_OREF_REGIONAL":
       return NextResponse.redirect(new URL("/decommissionnement", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
@@ -152,8 +154,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirection des utilisateurs OPERATEUR_PUBLIC_NATIONAL vers la page de décommissionnement
-  if (session?.organisation?.type === "OPERATEUR_PUBLIC_NATIONAL" && pathname !== "/decommissionnement") {
+  // Redirection des utilisateurs décommissionnés vers la page de décommissionnement
+  const decommissionedTypes = ["OPERATEUR_PUBLIC_NATIONAL", "CARIF_OREF_NATIONAL", "CARIF_OREF_REGIONAL"];
+  if (decommissionedTypes.includes(session?.organisation?.type ?? "") && pathname !== "/decommissionnement") {
     return NextResponse.redirect(new URL("/decommissionnement", request.url));
   }
 
