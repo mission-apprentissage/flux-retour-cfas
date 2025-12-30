@@ -5495,6 +5495,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/sax@npm:^1.2.7":
+  version: 1.2.7
+  resolution: "@types/sax@npm:1.2.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: 7ece5fbb5d9c8fc76ab0de2f99d705edf92f18e701d4f9d9b0647275e32eb65e656c1badf9dfaa12f4e1ff3e250561c8c9cfe79e8b5f33dd1417ac0f1804f6cc
+  languageName: node
+  linkType: hard
+
 "@types/semver@npm:^7.5.0":
   version: 7.5.0
   resolution: "@types/semver@npm:7.5.0"
@@ -17869,6 +17878,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "sax@npm:1.4.3"
+  checksum: 136a202eee9364f312fb1c6abadb045ef430a7468853f804758d8f2dc8d2560801245620e2bfd4ead2e332c025bef50865271974d142a0c26f69d5fc3de9baf1
+  languageName: node
+  linkType: hard
+
 "saxes@npm:^5.0.1":
   version: 5.0.1
   resolution: "saxes@npm:5.0.1"
@@ -18071,6 +18087,7 @@ __metadata:
     "@types/lodash-es": ^4.17.12
     "@types/multer": ^1.4.12
     "@types/node": ^22.7.5
+    "@types/sax": ^1.2.7
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
@@ -18122,6 +18139,7 @@ __metadata:
     passport-localapikey: 0.0.3
     randexp: 0.5.3
     rate-limiter-flexible: ^2.4.2
+    sax: ^1.4.3
     sha512crypt-node: 1.0.2
     shared: "workspace:*"
     stream-chain: ^2.2.5

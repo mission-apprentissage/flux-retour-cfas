@@ -2,6 +2,7 @@ import { Heading, Container, Text, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { IOrganisationCreate } from "shared";
 
+import { ARMLSelect } from "@/app/_components/admin/impostures/ARMLSelect";
 import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
@@ -13,8 +14,6 @@ import { InscriptionFranceTravail } from "@/modules/auth/inscription/Inscription
 import { InscriptionMissionLocale } from "@/modules/auth/inscription/InscriptionMissionLocale";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
-
-import { ARMLSelect } from "./ARMLSelect";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
