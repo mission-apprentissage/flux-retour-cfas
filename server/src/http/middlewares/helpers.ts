@@ -2,11 +2,9 @@ import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
 import {
-  getAcademieListByRegion,
   IEffectif,
   IOrganisationFranceTravail,
   IOrganisationOperateurPublicAcademie,
-  IOrganisationOperateurPublicRegion,
   ORGANISATION_TYPE,
   PermissionOrganisme,
 } from "shared";
@@ -153,11 +151,6 @@ export function requireOrganismeRegional(req: Request, res: Response, next: Next
   ensureValidUser(req.user);
 
   switch (req.user.organisation.type) {
-    case ORGANISATION_TYPE.DRAFPIC:
-      res.locals.academie_list = getAcademieListByRegion(
-        (req.user.organisation as IOrganisationOperateurPublicRegion).code_region
-      );
-      break;
     case ORGANISATION_TYPE.ACADEMIE:
       res.locals.academie_list = [(req.user.organisation as IOrganisationOperateurPublicAcademie).code_academie];
       break;
