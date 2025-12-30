@@ -146,12 +146,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                 </>
               );
 
-            case "OPERATEUR_PUBLIC_NATIONAL":
-              return (
-                <Text fontSize="20px" fontWeight="bold">
-                  {organisation.nom}
-                </Text>
-              );
             case "CARIF_OREF_NATIONAL":
               return (
                 <>

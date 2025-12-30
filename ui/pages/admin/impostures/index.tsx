@@ -47,7 +47,7 @@ function ImposturesPage() {
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
             Opérateur public
           </Heading>
-          <InscriptionOperateurPublic setOrganisation={setOrganisation} />
+          <InscriptionOperateurPublic setOrganisation={setOrganisation} showOrganisationNationale />
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
             CARIF OREF
           </Heading>
