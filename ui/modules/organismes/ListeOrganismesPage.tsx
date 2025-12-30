@@ -692,7 +692,6 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";

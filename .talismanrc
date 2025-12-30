@@ -89,6 +89,8 @@ fileignoreconfig:
   checksum: 33a6cf49d1ab20dbbf9b500e5a4d3009c231a7ffdb51e7b4a8515b222317cb1a
 - filename: server/src/db/migrations/20251029160433-fix-acc-conjoint-by-missing.ts
   checksum: 50b4531854636bf4ccb95c8a5a2b90fdb88f54b15b4490b071b970deae6a23c0
+- filename: ui/app/_components/ServiceDiscontinuedPage.tsx
+  checksum: 60b43d0e18382923db1ab106290d10f6200068fd0af0fab4d5c8e375ca1cc4ae
 scopeconfig:
 - scope: node
 custom_patterns:

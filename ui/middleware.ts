@@ -5,7 +5,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { publicConfig } from "./config.public";
 
 export const config = {
-  matcher: ["/:path*"],
+  matcher: "/((?!api|static|.*\\..*|_next).*)",
 };
 
 const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
@@ -79,6 +79,8 @@ function redirectToHome(
     case "DREETS":
     case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return NextResponse.redirect(new URL("/decommissionnement", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
@@ -148,6 +150,11 @@ export async function middleware(request: NextRequest) {
     if (isRestrictedPath) {
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     }
+  }
+
+  // Redirection des utilisateurs OPERATEUR_PUBLIC_NATIONAL vers la page de décommissionnement
+  if (session?.organisation?.type === "OPERATEUR_PUBLIC_NATIONAL" && pathname !== "/decommissionnement") {
+    return NextResponse.redirect(new URL("/decommissionnement", request.url));
   }
 
   if (pathname === "/parametres") {

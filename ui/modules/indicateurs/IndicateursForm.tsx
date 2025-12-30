@@ -464,7 +464,6 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOr
         </>
       );
       break;
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
       break;
     case "ADMINISTRATEUR":

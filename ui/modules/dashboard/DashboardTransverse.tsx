@@ -59,7 +59,6 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
       return `Votre périmètre correspond aux organismes de l'académie de ${
         ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie
       }`;
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Votre périmètre contient tous les organismes nationaux";

@@ -1,7 +1,6 @@
 import { Collection, ObjectId } from "mongodb";
 import {
   Acl,
-  IOrganisation,
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecFormation,
@@ -120,8 +119,7 @@ export async function getIndicateursEffectifsParDepartementGenerique(
   filters: DateFilters & TerritoireFilters,
   acl: Acl,
   db: Collection<any>,
-  decaMode: boolean = false,
-  organisation?: IOrganisation
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
   const indicateurs = await db
     .aggregate([
@@ -131,7 +129,7 @@ export async function getIndicateursEffectifsParDepartementGenerique(
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
           },
           buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs, organisation)
+          ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs)
         ),
       },
       ...buildIndicateursEffectifsPipeline("$_computed.organisme.departement", filters.date),
@@ -397,7 +395,7 @@ export async function getIndicateursEffectifsParOrganismeGenerique(
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
           buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs, ctx.organisation),
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
           }
@@ -466,7 +464,7 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
           buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs, ctx.organisation),
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
           }
@@ -649,7 +647,7 @@ export async function getOrganismeIndicateursEffectifsGenerique(
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
           buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs, ctx.organisation)
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
         ),
       },
       ...buildIndicateursEffectifsPipeline(null, filters.date),
