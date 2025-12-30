@@ -1,0 +1,156 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.welcomeBanner {
+  text-align: center;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  font-family: Marianne, arial, sans-serif;
+  color: #000091;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: Marianne, arial, sans-serif;
+  color: #000000;
+  margin-top: 16px;
+}
+
+.mainContent {
+  background-color: #f5f5fe;
+  padding: 40px 60px;
+  text-align: center;
+  max-width: 815px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  align-items: center;
+}
+
+.icon {
+  color: var(--blue-france-sun-113-625);
+  font-size: 32px;
+}
+
+.mainTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #161616;
+  font-family: Marianne, arial, sans-serif;
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.paragraph {
+  color: #3a3a3a;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.contactsSection {
+  border-top: 1px solid #dddddd;
+  padding-top: 26px;
+  width: 100%;
+}
+
+.contactsTitle {
+  font-weight: 700;
+  color: #161616;
+  margin-bottom: 24px;
+}
+
+.contactsGrid {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contactCard {
+  border: 1px solid #dddddd;
+  padding: 24px;
+  min-width: 280px;
+  min-height: 160px;
+  flex: 1;
+  border-bottom: 3px solid var(--blue-france-sun-113-625);
+  background-color: #ffffff;
+  position: relative;
+}
+
+.contactCardContent {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.contactCardIcon {
+  color: var(--blue-france-sun-113-625);
+  font-size: 24px;
+}
+
+.contactCardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.contactCardBadge {
+  color: #6e445a;
+  background-color: #fee7fc;
+}
+
+.contactCardName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue-france-sun-113-625);
+}
+
+.contactCardEmail {
+  color: var(--blue-france-sun-113-625);
+  font-size: 14px;
+}
+
+.contactCardMailIcon {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  color: var(--blue-france-sun-113-625);
+  font-size: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .mainContent {
+    padding: 24px 16px;
+    max-width: 100%;
+  }
+
+  .contactsGrid {
+    flex-direction: column;
+  }
+
+  .contactCard {
+    min-width: 100%;
+  }
+}
