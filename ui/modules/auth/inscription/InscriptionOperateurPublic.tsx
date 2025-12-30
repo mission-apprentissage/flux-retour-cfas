@@ -16,27 +16,34 @@ import { InscriptionOrganistionChildProps } from "./common";
 const typesOrganisationBase = [
   { label: "D(R)(I)EETS", value: "DREETS" },
   { label: "DDETS", value: "DDETS" },
-  { label: "DRAAF", value: "DRAAF" },
   { label: "Académie", value: "ACADEMIE" },
   { label: "Conseil régional", value: "CONSEIL_REGIONAL" },
-  { label: "DRAFPIC", value: "DRAFPIC" },
 ] as const;
 
-const organisationNationale = { label: "Organisation nationale", value: "OPERATEUR_PUBLIC_NATIONAL" } as const;
+const typesOrganisationDecommissioned = [
+  { label: "DRAAF (décommissionné)", value: "DRAAF" },
+  { label: "DRAFPIC (décommissionné)", value: "DRAFPIC" },
+  {
+    label: "Organisation nationale (décommissionné)",
+    value: "OPERATEUR_PUBLIC_NATIONAL",
+  },
+] as const;
 
-type TypeOrganisation = (typeof typesOrganisationBase)[number]["value"] | "OPERATEUR_PUBLIC_NATIONAL";
+type TypeOrganisation =
+  | (typeof typesOrganisationBase)[number]["value"]
+  | (typeof typesOrganisationDecommissioned)[number]["value"]
+  | "OPERATEUR_PUBLIC_NATIONAL";
 
 interface InscriptionOperateurPublicProps extends InscriptionOrganistionChildProps {
   showOrganisationNationale?: boolean;
+  showDecommissioned?: boolean;
 }
 
 export const InscriptionOperateurPublic = ({
   setOrganisation,
-  showOrganisationNationale = false,
+  showDecommissioned = false,
 }: InscriptionOperateurPublicProps) => {
-  const typesOrganisation = showOrganisationNationale
-    ? [...typesOrganisationBase, organisationNationale]
-    : typesOrganisationBase;
+  const typesOrganisation = [...typesOrganisationBase, ...(showDecommissioned ? typesOrganisationDecommissioned : [])];
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
 
   return (
@@ -92,14 +99,14 @@ export const InscriptionOperateurPublic = ({
           </Select>
         </FormControl>
       )}
-      {["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DRAFPIC"].includes(typeOrganisation as string) && (
+      {["DREETS", "CONSEIL_REGIONAL", "DRAAF", "DRAFPIC"].includes(typeOrganisation as string) && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
             placeholder="Sélectionner un territoire"
             onChange={(e) =>
               setOrganisation({
-                type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "DRAFPIC",
+                type: typeOrganisation as "DREETS" | "CONSEIL_REGIONAL" | "DRAAF" | "DRAFPIC",
                 code_region: e.target.value as IRegionCode,
               })
             }
