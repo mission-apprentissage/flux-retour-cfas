@@ -687,12 +687,10 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
 
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
 

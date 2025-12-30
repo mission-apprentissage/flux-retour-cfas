@@ -22,9 +22,7 @@ function getDashboardComponent(organisationType: IOrganisationType) {
     case "TETE_DE_RESEAU":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return <DashboardTransverse />;
   }

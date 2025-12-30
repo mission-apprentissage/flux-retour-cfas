@@ -454,7 +454,6 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOr
       );
       break;
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
     case "ACADEMIE":
       text = (
@@ -463,8 +462,6 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOr
           uniquement.
         </>
       );
-      break;
-    case "CARIF_OREF_NATIONAL":
       break;
     case "ADMINISTRATEUR":
       text = (

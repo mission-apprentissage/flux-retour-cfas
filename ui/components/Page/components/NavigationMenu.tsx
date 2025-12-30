@@ -22,13 +22,11 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
 
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
     case "ACADEMIE":
     case "ARML":
       return "Mon territoire";
 
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
 
@@ -270,11 +268,9 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
     case "ARML":
       // fourre-tout, mais on pourra avoir des différences plus tard

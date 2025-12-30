@@ -23,7 +23,6 @@ function FiltreOrganismeDepartements(props: FiltreOrganismeDepartementsProps) {
     switch (organisation.type) {
       case "DRAAF":
       case "CONSEIL_REGIONAL":
-      case "CARIF_OREF_REGIONAL":
       case "DRAFPIC":
         return DEPARTEMENTS_SORTED.filter((departement) => departement.region.code === organisation.code_region);
       case "ACADEMIE":

@@ -117,15 +117,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
                 </>
               );
-            case "CARIF_OREF_REGIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    CARIF OREF
-                  </Text>
-                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
-                </>
-              );
             case "DDETS":
               return (
                 <>
@@ -146,15 +137,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                 </>
               );
 
-            case "CARIF_OREF_NATIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    CARIF OREF
-                  </Text>
-                  <Text>Territoire : National</Text>
-                </>
-              );
             case "ADMINISTRATEUR":
               return (
                 <Text fontSize="20px" fontWeight="bold">

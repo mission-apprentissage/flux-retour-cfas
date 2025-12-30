@@ -21,11 +21,9 @@ export function ConnectedHeader() {
         return "Mon réseau";
       case ORGANISATION_TYPE.DRAAF:
       case ORGANISATION_TYPE.CONSEIL_REGIONAL:
-      case ORGANISATION_TYPE.CARIF_OREF_REGIONAL:
       case ORGANISATION_TYPE.DRAFPIC:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
-      case ORGANISATION_TYPE.CARIF_OREF_NATIONAL:
       case ORGANISATION_TYPE.ADMINISTRATEUR:
         return "Tous les organismes";
       default:
@@ -119,10 +117,8 @@ export function ConnectedHeader() {
         ORGANISATION_TYPE.TETE_DE_RESEAU,
         ORGANISATION_TYPE.DRAAF,
         ORGANISATION_TYPE.CONSEIL_REGIONAL,
-        ORGANISATION_TYPE.CARIF_OREF_REGIONAL,
         ORGANISATION_TYPE.DRAFPIC,
         ORGANISATION_TYPE.ACADEMIE,
-        ORGANISATION_TYPE.CARIF_OREF_NATIONAL,
         ORGANISATION_TYPE.ADMINISTRATEUR,
       ].includes(organisationType || "")
     ) {
