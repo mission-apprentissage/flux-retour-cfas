@@ -434,8 +434,6 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
       return `DRAAF ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
-    case "CARIF_OREF_REGIONAL":
-      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "DRAFPIC":
       return `DRAFPIC ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "DDETS":
@@ -445,8 +443,12 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
+
     case "CARIF_OREF_NATIONAL":
-      return "CARIF OREF National";
+      return "CARIF OREF national";
+
+    case "CARIF_OREF_REGIONAL":
+      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom ?? organisation.code_region}`;
 
     case "ADMINISTRATEUR":
       return "ADMINISTRATEUR";

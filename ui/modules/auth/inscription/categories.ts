@@ -16,10 +16,6 @@ export const categoriesCompteInscription = [
     value: "tete_de_reseau",
   },
   {
-    text: "Un membre du Réseau des CARIF OREF",
-    value: "carif_oref",
-  },
-  {
     text: "Une structure régionale de France Travail",
     value: "france_travail",
   },

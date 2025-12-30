@@ -54,16 +54,16 @@ export function ServiceDiscontinuedPage({ userName, organisationLabel }: Service
         </div>
 
         <h2 className={styles.mainTitle}>
-          Le Tableau de bord de l&apos;apprentissage
+          Le Tableau de Bord de l&apos;Apprentissage
           <br />
           se renouvelle
         </h2>
 
         <div className={styles.textContent}>
           <p className={styles.paragraph}>
-            Le Tableau de bord de l&apos;apprentissage évolue pour servir au mieux les publics en apprentissage. Depuis
-            le mois de décembre 2025, le Tableau de bord de l&apos;apprentissage est devenu un outil opérationnel de
-            mise en relation des CFA et du service public à l&apos;emploi (Missions locales et France Travail) pour
+            Le Tableau de Bord de l&apos;Apprentissage évolue pour servir au mieux les publics en apprentissage. Depuis
+            le mois de décembre 2025, le Tableau de Bord de l&apos;Apprentissage est devenu un outil opérationnel de
+            mise en relation des CFA et du Service Public à l&apos;Emploi (Missions Locales et France Travail) pour
             collaborer main dans la main dans le suivi des jeunes en apprentissage.
           </p>
 

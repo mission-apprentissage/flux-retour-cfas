@@ -78,10 +78,8 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       case "TETE_DE_RESEAU":
       case "DRAAF":
       case "CONSEIL_REGIONAL":
-      case "CARIF_OREF_REGIONAL":
       case "DRAFPIC":
       case "ACADEMIE":
-      case "CARIF_OREF_NATIONAL":
       case "ADMINISTRATEUR":
         return true;
 
@@ -93,7 +91,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const isAllowedToShowFilterRegions = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
-      case "CARIF_OREF_NATIONAL":
       case "ADMINISTRATEUR":
         return true;
 
@@ -107,10 +104,8 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       case "TETE_DE_RESEAU":
       case "DRAAF":
       case "CONSEIL_REGIONAL":
-      case "CARIF_OREF_REGIONAL":
       case "DRAFPIC":
       case "ACADEMIE":
-      case "CARIF_OREF_NATIONAL":
       case "ADMINISTRATEUR":
       case "ORGANISME_FORMATION":
         return true;

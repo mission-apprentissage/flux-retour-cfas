@@ -182,8 +182,7 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL": {
+    case "CONSEIL_REGIONAL": {
       const sameRegion = { region: { $in: [organisation.code_region] } };
       return {
         viewContacts: sameRegion,
@@ -236,12 +235,13 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
+    case "CARIF_OREF_REGIONAL":
+    case "OPERATEUR_PUBLIC_NATIONAL":
       return {
-        viewContacts: true,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: true,
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
         effectifsNominatifs: {
           apprenant: false,
           apprenti: false,

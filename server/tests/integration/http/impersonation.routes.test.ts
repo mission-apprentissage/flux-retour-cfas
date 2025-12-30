@@ -42,14 +42,11 @@ describe("POST /api/v1/admin/impersonate - démarre une imposture d'organisation
       "DRAAF autre région": false,
       "Conseil Régional même région": false,
       "Conseil Régional autre région": false,
-      "CARIF OREF régional même région": false,
-      "CARIF OREF régional autre région": false,
       "DDETS même département": false,
       "DDETS autre département": false,
       "Académie même académie": false,
       "Académie autre académie": false,
       "Opérateur public national": false,
-      "CARIF OREF national": false,
       Administrateur: true,
     };
     testPermissions(accesOrganisme, async (organisation, allowed) => {
@@ -89,14 +86,11 @@ describe("DELETE /api/v1/admin/impersonate - arrête l'imposture d'organisation"
       "DRAAF autre région": false,
       "Conseil Régional même région": false,
       "Conseil Régional autre région": false,
-      "CARIF OREF régional même région": false,
-      "CARIF OREF régional autre région": false,
       "DDETS même département": false,
       "DDETS autre département": false,
       "Académie même académie": false,
       "Académie autre académie": false,
       "Opérateur public national": false,
-      "CARIF OREF national": false,
       Administrateur: true,
     };
     testPermissions(accesOrganisme, async (organisation, allowed) => {

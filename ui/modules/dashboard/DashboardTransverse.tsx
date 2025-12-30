@@ -51,7 +51,6 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     case "DRAAF":
     case "DRAFPIC":
     case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
       return `Votre périmètre correspond aux organismes de la région ${
         REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region
       }`;
@@ -59,7 +58,6 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
       return `Votre périmètre correspond aux organismes de l'académie de ${
         ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie
       }`;
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Votre périmètre contient tous les organismes nationaux";
     default:

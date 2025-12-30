@@ -96,14 +96,11 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 0,
         "Conseil Régional même région": 1,
         "Conseil Régional autre région": 0,
-        "CARIF OREF régional même région": 1,
-        "CARIF OREF régional autre région": 0,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": 1,
         "Académie autre académie": 0,
-        "Opérateur public national": 1,
-        "CARIF OREF national": 1,
+        "Opérateur public national": false,
         Administrateur: 1,
       };
       testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
@@ -163,14 +160,11 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 4,
         "Conseil Régional même région": 4,
         "Conseil Régional autre région": 4,
-        "CARIF OREF régional même région": 4,
-        "CARIF OREF régional autre région": 4,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": 4,
         "Académie autre académie": 4,
-        "Opérateur public national": 4,
-        "CARIF OREF national": 4,
+        "Opérateur public national": false,
         Administrateur: 4,
       };
       testPermissions(accesOrganisme, async (organisation, nbOrganismes) => {
@@ -285,14 +279,11 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 0,
         "Conseil Régional même région": 1,
         "Conseil Régional autre région": 0,
-        "CARIF OREF régional même région": 1,
-        "CARIF OREF régional autre région": 0,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": 1,
         "Académie autre académie": 0,
-        "Opérateur public national": 1,
-        "CARIF OREF national": 1,
+        "Opérateur public national": false,
         Administrateur: 1,
       };
       testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
@@ -418,14 +409,11 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": emptyResult,
         "Conseil Régional même région": false,
         "Conseil Régional autre région": false,
-        "CARIF OREF régional même région": false,
-        "CARIF OREF régional autre région": false,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": effectifResultWithContact,
         "Académie autre académie": emptyResult,
         "Opérateur public national": false,
-        "CARIF OREF national": false,
         Administrateur: effectifResult,
       };
       testPermissions(accesOrganisme, async (organisation, expectedPermission) => {
@@ -462,14 +450,11 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": false,
         "Conseil Régional même région": false,
         "Conseil Régional autre région": false,
-        "CARIF OREF régional même région": false,
-        "CARIF OREF régional autre région": false,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": false,
         "Académie autre académie": false,
         "Opérateur public national": false,
-        "CARIF OREF national": false,
         Administrateur: emptyResult,
       };
       testPermissions(accesOrganisme, async (organisation, expectedPermission) => {

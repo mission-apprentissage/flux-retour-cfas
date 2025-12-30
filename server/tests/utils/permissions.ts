@@ -125,18 +125,6 @@ export const profilsPermissionByLabel = {
     code_region: "76",
     created_at,
   },
-  "CARIF OREF régional même région": {
-    _id: new ObjectId(id(14)),
-    type: "CARIF_OREF_REGIONAL",
-    code_region: ofCible.region,
-    created_at,
-  },
-  "CARIF OREF régional autre région": {
-    _id: new ObjectId(id(15)),
-    type: "CARIF_OREF_REGIONAL",
-    code_region: "76",
-    created_at,
-  },
   "DRAFPIC régional même région": {
     _id: new ObjectId(id(16)),
     type: "DRAFPIC",
@@ -177,11 +165,6 @@ export const profilsPermissionByLabel = {
     _id: new ObjectId(id(22)),
     type: "OPERATEUR_PUBLIC_NATIONAL",
     nom: "Ministère de la Justice",
-    created_at,
-  },
-  "CARIF OREF national": {
-    _id: new ObjectId(id(23)),
-    type: "CARIF_OREF_NATIONAL",
     created_at,
   },
   Administrateur: {
