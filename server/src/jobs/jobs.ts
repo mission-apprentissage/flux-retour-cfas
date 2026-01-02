@@ -37,6 +37,16 @@ import {
   hydrateEffectifsLieuDeFormation,
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "./hydrate/effectifs/update-effectifs-lieu-de-formation";
+import {
+  deduplicateMissionLocaleEffectif,
+  hydrateMissionLocaleEffectifWithEffectifV2,
+  hydrateMissionLocaleEffectifWithPersonV2,
+  hydrateOrganismeFormationV2,
+  hydratePersonV2Parcours,
+  setMLDataFromLog,
+  updateEffectifV2,
+  updateMLLogWithType,
+} from "./hydrate/effectifsV2/hydrate-effectif-v2";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
 import { hydrateInscritSansContrat } from "./hydrate/france-travail/hydrate-france-travail";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -537,9 +547,49 @@ export async function setupJobProcessor() {
           return softDeleteDoublonEffectifML();
         },
       },
+      "tmp:hydrate:person-effectif-v2": {
+        handler: async () => {
+          return hydratePersonV2Parcours();
+        },
+      },
+      "tmp:hydrate:person-ml-effectif-v2": {
+        handler: async () => {
+          return hydrateMissionLocaleEffectifWithPersonV2();
+        },
+      },
+      "tmp:deduplicate:mission-locale-effectif": {
+        handler: async () => {
+          return deduplicateMissionLocaleEffectif();
+        },
+      },
+      "tmp:hydrate:update-effectif-v2": {
+        handler: async () => {
+          return updateEffectifV2();
+        },
+      },
+      "tmp:hydrate:ml-v2": {
+        handler: async () => {
+          return hydrateMissionLocaleEffectifWithEffectifV2();
+        },
+      },
+      "tmp:hydrate:formation-organisme-v2": {
+        handler: async () => {
+          return hydrateOrganismeFormationV2();
+        },
+      },
+      "tmp:migrate:update-ml-log-with-type": {
+        handler: async () => {
+          return updateMLLogWithType();
+        },
+      },
       "tmp:migration:dedoublon-organisation": {
         handler: async () => {
           return deleteOrganisationWithoutUser();
+        },
+      },
+      "tmp:migration:set-ml-data-from-log": {
+        handler: async () => {
+          return setMLDataFromLog();
         },
       },
       "tmp:hydrate:rome-secteur-activites": {

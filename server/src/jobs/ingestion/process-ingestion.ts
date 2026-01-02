@@ -209,7 +209,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
           },
         }
       );
-      await createMissionLocaleSnapshot(upsertedEffectif);
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {

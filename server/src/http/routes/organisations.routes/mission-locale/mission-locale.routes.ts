@@ -18,7 +18,7 @@ import {
   getEffectifFromMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   setEffectifMissionLocaleData,
-} from "@/common/actions/mission-locale/mission-locale.actions";
+} from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
