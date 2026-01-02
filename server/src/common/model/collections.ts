@@ -29,6 +29,7 @@ import opcosDescriptor, { IOpcos } from "shared/models/data/opco/opcos.model";
 import opcosRncpDescriptor, { IOpcoRncp } from "shared/models/data/opco/opcosRncp.model";
 import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
+import proconnectSessionsModelDescriptor, { IProconnectSession } from "shared/models/data/proconnectSessions.model";
 import regionsModelDescriptor, { IRegion } from "shared/models/data/regions.model";
 import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
@@ -54,6 +55,7 @@ export const modelDescriptors = [
   formationsCatalogueModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
+  proconnectSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
   invitationsModelDescriptor,
   invitationsArchiveModelDescriptor,
@@ -89,6 +91,8 @@ export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
+export const proconnectSessionsDb = () =>
+  getDbCollection<IProconnectSession>(proconnectSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
 export const invitationsArchiveDb = () =>

@@ -56,6 +56,7 @@ describe("Password", () => {
         email: "user@example.org",
         password: testPasswordHash,
         organisation_id: new ObjectId(id(1)),
+        auth_method: "password",
       });
       const response = await httpClient.post("/api/v1/password/forgotten-password", {
         email: "user@example.org",

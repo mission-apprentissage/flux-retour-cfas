@@ -209,5 +209,6 @@ async function createUserWithStatus(accountStatus: IUsersMigration["account_stat
     password: testPasswordHash,
     has_accept_cgu_version: "v0.1",
     organisation_id: new ObjectId(organisationId || id(1)),
+    auth_method: "password",
   });
 }

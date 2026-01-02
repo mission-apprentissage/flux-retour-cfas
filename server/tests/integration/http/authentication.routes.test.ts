@@ -28,6 +28,7 @@ const testUser: IUsersMigration = {
   password: testPasswordHash,
   has_accept_cgu_version: "v0.1",
   organisation_id: new ObjectId(id(1)),
+  auth_method: "password",
 };
 
 let app: Awaited<ReturnType<typeof initTestApp>>;

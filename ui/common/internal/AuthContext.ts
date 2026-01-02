@@ -9,7 +9,7 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
   email: string;
   telephone: string;
   organisation_id: string;
-  account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "CONFIRMED";
+  account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "PENDING_PROFILE_COMPLETION" | "CONFIRMED";
   has_accept_cgu_version: string;
   organisation: IOrganisation;
 
