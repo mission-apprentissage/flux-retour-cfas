@@ -64,10 +64,10 @@ export default function QuestionsReponses() {
                 title: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
                 content: (
                   <Box>
-                    Différentes institutions (Conseil Régional, DREETS, DRAAF, Carif Oref, Académie, DGEFP) consultent
-                    le tableau de bord de l&apos;apprentissage quotidiennement pour suivre l’évolution des effectifs.
-                    Ces données les éclairent notamment pour attribuer des subventions, pour mettre en place des plans
-                    d’actions d’accompagnement des jeunes sans contrat ou pour définir les politiques publiques d’aide à
+                    Différentes institutions (DREETS, Académie, DGEFP) consultent le tableau de bord de
+                    l&apos;apprentissage quotidiennement pour suivre l&apos;évolution des effectifs. Ces données les
+                    éclairent notamment pour attribuer des subventions, pour mettre en place des plans d’actions
+                    d’accompagnement des jeunes sans contrat ou pour définir les politiques publiques d’aide à
                     l’apprentissage.
                   </Box>
                 ),
@@ -94,8 +94,8 @@ export default function QuestionsReponses() {
                 content: (
                   <Box>
                     <Text>
-                      Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
-                      la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
+                      Des institutions qui pilotent l&apos;apprentissage nationalement ou territorialement comme la
+                      DREETS et l&apos;Académie par exemple.
                     </Text>
                   </Box>
                 ),
