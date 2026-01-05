@@ -163,24 +163,6 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "CONSEIL_REGIONAL": {
-      const sameRegion = { region: { $in: [organisation.code_region] } };
-      return {
-        viewContacts: sameRegion,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: sameRegion,
-        effectifsNominatifs: {
-          apprenant: false,
-          apprenti: false,
-          inscritSansContrat: false,
-          rupturant: false,
-          abandon: false,
-          inconnu: false,
-        },
-        manageEffectifs: false,
-        configurerModeTransmission: false,
-      };
-    }
     case "DDETS": {
       return {
         viewContacts: false,
@@ -221,6 +203,7 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "DRAAF":
     case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
       return {
         viewContacts: false,
         infoTransmissionEffectifs: false,
