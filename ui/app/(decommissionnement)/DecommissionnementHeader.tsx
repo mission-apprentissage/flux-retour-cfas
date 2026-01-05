@@ -11,6 +11,7 @@ import { getOrganisationLabel, IOrganisationCreate } from "shared";
 
 import { _post } from "@/common/httpClient";
 
+import { Impersonate } from "../_components/Impersonate";
 import { useAuth } from "../_context/UserContext";
 
 function LogoutMenu() {
@@ -78,7 +79,7 @@ export function DecommissionnementHeader() {
       }}
       id="fr-header-decommissionnement"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
-      quickAccessItems={[<LogoutMenu key="logout-menu" />]}
+      quickAccessItems={[<Impersonate key="impersonate" />, <LogoutMenu key="logout-menu" />]}
     />
   );
 }
