@@ -15,6 +15,7 @@ import {
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import parentLogger from "@/common/logger";
 import {
   effectifsDb,
   effectifsQueueDb,
@@ -434,9 +435,23 @@ export const hydrateMissionLocaleStats = async () => {
   yesterday.setDate(yesterday.getDate() - 1);
 
   for (const ml of mls) {
-    await createOrUpdateMissionLocaleStats(ml._id, today);
-    await createOrUpdateMissionLocaleStats(ml._id, yesterday);
+    try {
+      await createOrUpdateMissionLocaleStats(ml._id, today);
+      await createOrUpdateMissionLocaleStats(ml._id, yesterday);
+    } catch (error) {
+      captureException(error);
+    }
   }
+
+  const mlWithStats = await missionLocaleStatsDb().countDocuments({ computed_day: today });
+  const missingCount = mls.length - mlWithStats;
+
+  parentLogger.info({
+    event: "hydrate_mission_locale_stats_completed",
+    total_ml: mls.length,
+    ml_with_stats: mlWithStats,
+    missing_count: missingCount,
+  });
 };
 
 export const hydrateDailyMissionLocaleStats = async () => {
