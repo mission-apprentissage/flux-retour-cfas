@@ -20,7 +20,6 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
     case "TETE_DE_RESEAU":
       return "Mon réseau";
 
-    case "CONSEIL_REGIONAL":
     case "ACADEMIE":
     case "ARML":
       return "Mon territoire";
@@ -250,7 +249,6 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 
     case "TETE_DE_RESEAU":
     case "DREETS":
-    case "CONSEIL_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
     case "ADMINISTRATEUR":

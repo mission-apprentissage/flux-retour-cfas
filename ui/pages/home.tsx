@@ -20,7 +20,6 @@ function getDashboardComponent(organisationType: IOrganisationType) {
       return <DashboardOwnOrganisme />;
     }
     case "TETE_DE_RESEAU":
-    case "CONSEIL_REGIONAL":
     case "ADMINISTRATEUR":
       return <DashboardTransverse />;
   }
