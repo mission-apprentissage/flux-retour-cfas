@@ -63,8 +63,6 @@ fileignoreconfig:
   checksum: 3bcfa6a077baaf2011d152e3a0c44175f2a44d6f83c4486575cccc3f93f4b2e4
 - filename: ui/modules/dashboard/IndicateursOrganisme.tsx
   checksum: 60ea265023cfe6901c8223a7414bf4c2382a0890f5a549e4b1803010af72af42
-- filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
-  checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
 - filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
   checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx

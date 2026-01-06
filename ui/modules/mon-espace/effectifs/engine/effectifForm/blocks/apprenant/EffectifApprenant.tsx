@@ -12,7 +12,7 @@ import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal"
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(({ apprenant, modeSifa }: { apprenant: any; modeSifa: boolean }) => {
+export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {
   const organisme = useRecoilValue<Organisme | null | undefined>(organismeAtom);
 
   if (!organisme) return null;
@@ -97,7 +97,7 @@ export const EffectifApprenant = memo(({ apprenant, modeSifa }: { apprenant: any
             name="apprenant.type_cfa"
             onApplyAll={async () => {
               if (confirm("Êtes-vous sûr de vouloir appliquer ce paramètre à tous les effectifs ?"))
-                await _put(`/api/v1/organismes/${organisme._id}/effectifs${modeSifa ? "?sifa=true" : ""}`, {
+                await _put(`/api/v1/organismes/${organisme._id}/effectifs`, {
                   "apprenant.type_cfa": apprenant.type_cfa,
                 });
             }}

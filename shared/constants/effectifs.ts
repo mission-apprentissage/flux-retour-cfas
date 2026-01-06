@@ -45,33 +45,6 @@ export enum MOTIF_SUPPRESSION {
   Doublon = "DOUBLON",
 }
 
-export const MOTIF_SUPPRESSION_LABEL = [
-  {
-    id: MOTIF_SUPPRESSION.MauvaiseManip,
-    label: "J’ai fait une mauvaise manipulation",
-  },
-  {
-    id: MOTIF_SUPPRESSION.RetourScolaire,
-    label: "L’apprenant a changé d’avis et est de retour en voie scolaire",
-  },
-  {
-    id: MOTIF_SUPPRESSION.ChangementCfa,
-    label: "L’apprenant a changé d’avis et est parti dans un autre organisme de formation",
-  },
-  {
-    id: MOTIF_SUPPRESSION.RefusCandidature,
-    label: "Refus de candidature",
-  },
-  {
-    id: MOTIF_SUPPRESSION.Doublon,
-    label: "Cet apprenant apparaît en double",
-  },
-  {
-    id: MOTIF_SUPPRESSION.Autre,
-    label: "Autre raison",
-  },
-];
-
 export const SOURCE_APPRENANT = {
   FICHIER: "FICHIER",
   ERP: "ERP",

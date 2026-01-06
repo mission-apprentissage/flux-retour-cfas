@@ -14,7 +14,7 @@ import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 
-import { effectifFromDecaAtom, effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
+import { effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
 import EffectifsTable from "../mon-espace/effectifs/engine/effectifsTable/EffectifsTable";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 
@@ -35,7 +35,6 @@ const DEFAULT_PAGINATION: IPaginationFilters = {
 function EffectifsPage(props: EffectifsPageProps) {
   const router = useRouter();
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
-  const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
 
   const [pagination, setPagination] = useState<IPaginationFilters>(DEFAULT_PAGINATION);
   const [search, setSearch] = useState<string>("");
@@ -95,7 +94,7 @@ function EffectifsPage(props: EffectifsPageProps) {
     setPagination(zodPagination);
   }, [router.query]);
 
-  const { data, isFetching, refetch } = useQuery(
+  const { data, isFetching } = useQuery(
     ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
     async () => {
       const { page, limit, sort, order } = pagination;
@@ -114,16 +113,14 @@ function EffectifsPage(props: EffectifsPageProps) {
         },
       });
 
-      const { fromDECA, total, filters: returnedFilters, organismesEffectifs } = response;
+      const { total, filters: returnedFilters, organismesEffectifs } = response;
 
       setCurrentEffectifsState(
         organismesEffectifs.reduce((acc, { id, validation_errors }) => {
-          acc.set(id, { validation_errors, requiredSifa: [] });
+          acc.set(id, { validation_errors });
           return acc;
         }, new Map())
       );
-
-      setEffectifFromDecaState(fromDECA);
 
       return { total, filters: returnedFilters, organismesEffectifs };
     },
@@ -264,9 +261,7 @@ function EffectifsPage(props: EffectifsPageProps) {
             availableFilters={data?.filters || {}}
             resetFilters={resetFilters}
             isFetching={isFetching}
-            modeSifa={false}
             canEdit={false}
-            refetch={refetch}
           />
         </Box>
       </Container>

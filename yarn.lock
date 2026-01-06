@@ -8138,15 +8138,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns-tz@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "date-fns-tz@npm:2.0.1"
-  peerDependencies:
-    date-fns: 2.x
-  checksum: 2d2bb3d67f1ac876a7bd3bbe027aba61347d21c74f20a3f014c53d6057a7a1653ed3021c2d9271dc24411ab38f82763fec362c4f24e944465172cd80ee8c4b5f
-  languageName: node
-  linkType: hard
-
 "date-fns@npm:^2.28.0, date-fns@npm:^2.30.0":
   version: 2.30.0
   resolution: "date-fns@npm:2.30.0"
@@ -18230,7 +18221,6 @@ __metadata:
     api-alternance-sdk: ^2.10.2
     bson: ^5.5.1
     date-fns: ^2.30.0
-    date-fns-tz: ^2.0.1
     libphonenumber-js: ^1.12.8
     lodash-es: ^4.17.21
     mongodb: ^5.9.2

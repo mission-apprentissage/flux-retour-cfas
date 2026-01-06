@@ -23,8 +23,6 @@ export const typesOrganismesIndicateurs = [
   ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE as "uai_non_determine",
 ] as const;
 
-export const typesSIFA = ["sifa"];
-
 export type TypeOrganismesIndicateurs = (typeof typesOrganismesIndicateurs)[number];
 
 export const typesAffelnet = ["affelnet_concretise", "affelnet", "affelnet_non_concretise"];

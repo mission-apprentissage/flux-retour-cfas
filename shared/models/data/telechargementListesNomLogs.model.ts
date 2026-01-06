@@ -7,7 +7,6 @@ import {
   typesEffectifNominatif,
   typesMissionLocale,
   typesOrganismesIndicateurs,
-  typesSIFA,
   typesARML,
   typesFranceTravail,
 } from "../../constants";
@@ -20,7 +19,6 @@ const extendedTypesEffectifNominatif = [
   ...typesEffectifNominatif,
   ...typesOrganismesIndicateurs.map((type) => `organismes_${type}`),
   ...typesAffelnet,
-  ...typesSIFA,
   ...typesMissionLocale,
   ...typesARML,
   ...typesFranceTravail,
