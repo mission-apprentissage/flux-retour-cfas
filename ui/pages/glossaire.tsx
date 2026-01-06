@@ -135,10 +135,9 @@ export default function Glossaire() {
                 <Flex gap="2" flexDirection="column" alignItems="left">
                   <Text as="p">
                     Enquête annuelle obligatoire recensant tous les apprentis inscrits au 31 décembre de chaque année en
-                    centre de formation des apprentis (CFA) ou en section d’apprentissage (SA). Elle est produite par la
-                    Direction de l’évaluation, de la prospective et de la performance (DEPP) au Ministère de l’éducation
-                    nationale et de la jeunesse. Le Tableau de bord de l’apprentissage propose aux CFA une
-                    fonctionnalité (onglet “Mon enquête SIFA”) permettant de faciliter le remplissage de cette enquête.
+                    centre de formation des apprentis (CFA) ou en section d&apos;apprentissage (SA). Elle est produite
+                    par la Direction de l&apos;évaluation, de la prospective et de la performance (DEPP) au Ministère de
+                    l&apos;éducation nationale et de la jeunesse.
                   </Text>
                 </Flex>
               </Td>

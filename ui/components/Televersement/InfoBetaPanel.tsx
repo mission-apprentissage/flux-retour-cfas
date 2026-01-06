@@ -65,9 +65,12 @@ export default function InfoBetaPanel() {
               format .xls (Fichier &gt; Exporter vers &gt; Excel)
             </ListItem>
             <ListItem>
-              Aujourd’hui, le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas de
-              répondre à l’enquête annuelle SIFA. Cependant, cela facilitera la préparation du fichier nécessaire à
-              cette enquête (voir l’onglet “Mon enquête SIFA”).
+              Le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas de répondre à
+              l&apos;enquête annuelle SIFA sur la{" "}
+              <Link href="https://sifa.depp.education.fr" isExternal display="inline">
+                plateforme officielle SIFA
+              </Link>
+              .
             </ListItem>
           </UnorderedList>
         </Text>
