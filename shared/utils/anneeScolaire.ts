@@ -1,6 +1,3 @@
-import { endOfYear, subYears } from "date-fns";
-import { zonedTimeToUtc } from "date-fns-tz";
-
 const AUGUST_MONTH_INDEX = 7;
 
 /**
@@ -83,14 +80,4 @@ export function getAnneesScolaireListFromDate(date: Date): string[] {
 export function getAnneeScolaireFromDate(date: Date): string {
   const year = date.getUTCFullYear();
   return date.getUTCMonth() < AUGUST_MONTH_INDEX ? `${year - 1}-${year}` : `${year}-${year + 1}`;
-}
-
-/**
- * Retourne la date de l'instantané SIFA. (exemple : 31 décembre 2023 si pendant l'année scolaire 2023-2024)
- */
-export function getSIFADate(date: Date): Date {
-  return zonedTimeToUtc(
-    date.getUTCMonth() < AUGUST_MONTH_INDEX ? subYears(endOfYear(date), 1) : endOfYear(date),
-    "UTC"
-  );
 }
