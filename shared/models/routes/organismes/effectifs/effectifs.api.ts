@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 export const zGetEffectifsForOrganismeApi = {
-  sifa: z.coerce.boolean().optional(),
-  only_sifa_missing_fields: z.coerce.boolean().optional(),
   formation_libelle_long: z.array(z.string()).optional(),
   statut_courant: z.array(z.string()).optional(),
   annee_scolaire: z.array(z.string()).optional(),
