@@ -25,9 +25,7 @@ export const plausibleGoals = [
   "clic_homepage_envoi_message",
   "clic_homepage_voeux_affelnet",
 
-  // Page SIFA
-  "clic_depot_plateforme_sifa",
-  "clic_toggle_sifa_données_manquantes",
+  // FAQ
   "clic_sifa_faq",
 
   // Téléchargements
@@ -43,11 +41,7 @@ export const plausibleGoals = [
   "telechargement_liste_of_a_fiabiliser",
   "telechargement_liste_of_fiables",
 
-  // - Page SIFA
-  "telechargement_sifa",
-  "telechargement_fichier_instruction_sifa",
-
-  // - Page SIFA ou Page Effectifs
+  // - Page Effectifs
   "clic_verifier_doublons_effectifs",
 
   // - Page Effectifs Doublons
