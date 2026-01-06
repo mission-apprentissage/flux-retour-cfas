@@ -84,6 +84,7 @@ function redirectToHome(
     case "CARIF_OREF_REGIONAL":
     case "DRAAF":
     case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
       return NextResponse.redirect(new URL("/decommissionnement", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
@@ -163,6 +164,7 @@ export async function middleware(request: NextRequest) {
     "CARIF_OREF_REGIONAL",
     "DRAAF",
     "DRAFPIC",
+    "CONSEIL_REGIONAL",
   ];
   if (decommissionedTypes.includes(session?.organisation?.type ?? "") && pathname !== "/decommissionnement") {
     return NextResponse.redirect(new URL("/decommissionnement", request.url));

@@ -48,8 +48,17 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   next();
 }
 
-export function blockDREETSDDETS(req: Request, _res: Response, next: NextFunction) {
-  const blockedTypes = [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
+export function requireIndicateursOrganismesAccess(req: Request, _res: Response, next: NextFunction) {
+  const blockedTypes = [
+    ORGANISATION_TYPE.DREETS,
+    ORGANISATION_TYPE.DDETS,
+    ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
+    ORGANISATION_TYPE.CARIF_OREF_NATIONAL,
+    ORGANISATION_TYPE.CARIF_OREF_REGIONAL,
+    ORGANISATION_TYPE.DRAAF,
+    ORGANISATION_TYPE.DRAFPIC,
+    ORGANISATION_TYPE.CONSEIL_REGIONAL,
+  ];
   if (blockedTypes.includes(req.user.organisation.type as (typeof blockedTypes)[number])) {
     throw Boom.forbidden("Accès non autorisé");
   }

@@ -1101,10 +1101,8 @@ function getForbiddenErrorText(ctx: AuthContext): string {
       return "Vous n’avez pas accès aux données de cet organisme.";
 
     case "TETE_DE_RESEAU":
-      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre réseau.";
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre réseau.";
 
-    case "CONSEIL_REGIONAL":
-      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre région.";
     case "ACADEMIE":
       return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre académie.";
   }
@@ -1132,11 +1130,6 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
         "réseau"
       );
 
-    case "CONSEIL_REGIONAL":
-      return (
-        organisme.organismesFormateurs.some((organisme) => !organisme.region?.includes(organisation.code_region)) &&
-        "région"
-      );
     case "ACADEMIE":
       return (
         organisme.organismesFormateurs.some((organisme) => !organisme.academie?.includes(organisation.code_academie)) &&

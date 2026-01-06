@@ -106,15 +106,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                   <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
                 </>
               );
-            case "CONSEIL_REGIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    Conseil régional
-                  </Text>
-                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
-                </>
-              );
             case "DDETS":
               return (
                 <>

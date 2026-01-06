@@ -17,7 +17,6 @@ const typesOrganisationBase = [
   { label: "D(R)(I)EETS", value: "DREETS" },
   { label: "DDETS", value: "DDETS" },
   { label: "Académie", value: "ACADEMIE" },
-  { label: "Conseil régional", value: "CONSEIL_REGIONAL" },
 ] as const;
 
 const typesOrganisationDecommissioned = [
@@ -27,6 +26,7 @@ const typesOrganisationDecommissioned = [
     label: "Organisation nationale (décommissionné)",
     value: "OPERATEUR_PUBLIC_NATIONAL",
   },
+  { label: "Conseil régional (décommissionné)", value: "CONSEIL_REGIONAL" },
 ] as const;
 
 type TypeOrganisation =

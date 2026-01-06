@@ -26,7 +26,6 @@ export function getAccountLabel(auth: AuthContext): string {
     case "ADMINISTRATEUR":
       return typeItem.nom;
     case "DREETS":
-    case "CONSEIL_REGIONAL":
     case "ACADEMIE": {
       const codeAcademie = (auth.organisation as IOrganisationOperateurPublicAcademieJson).code_academie;
       return `${typeItem.nom} ${codeAcademie ? getAcademieByCode(codeAcademie)?.nom : ""}`;
