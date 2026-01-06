@@ -123,7 +123,7 @@ import config from "@/config";
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import {
-  blockDREETSDDETS,
+  requireIndicateursOrganismesAccess,
   requireAdministrator,
   requireEffectifOrganismePermission,
   requireMissionLocale,
@@ -514,14 +514,14 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
-        blockDREETSDDETS,
+        requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
         "/indicateurs/organismes/:type",
-        blockDREETSDDETS,
+        requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
           const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
           const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);

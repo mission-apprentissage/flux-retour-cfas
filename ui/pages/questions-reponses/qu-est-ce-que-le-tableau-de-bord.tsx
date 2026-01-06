@@ -160,10 +160,10 @@ export default function QuestCeQueLeTdb() {
                         organismes de formation et la capacité de développement.
                         <br />
                         <br />
-                        Cette méthodologie permet aussi d’inclure tout au long du processus celles et ceux qui sont
-                        concernés, que ce soit les organismes de formation ou les institutions (DREETS, DRAAF, Conseils
-                        Régionaux, Académies, Carif Oref, etc). Aussi si vous avez des retours à faire concernant le{" "}
-                        {PRODUCT_NAME} , l’équipe est à votre écoute,
+                        Cette méthodologie permet aussi d&apos;inclure tout au long du processus celles et ceux qui sont
+                        concernés, que ce soit les organismes de formation ou les institutions (DREETS, Académies, etc).
+                        Aussi si vous avez des retours à faire concernant le {PRODUCT_NAME} , l’équipe est à votre
+                        écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
                         <Link
@@ -192,11 +192,10 @@ export default function QuestCeQueLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Différentes institutions (Conseil Régional, DREETS, DRAAF, Carif Oref, Académie, DGEFP)
-                        consultent le {PRODUCT_NAME} quotidiennement pour suivre l’évolution des effectifs. Ces données
-                        les éclairent notamment pour attribuer des subventions, pour mettre en place des plans d’actions
-                        d’accompagnement des jeunes sans contrat ou pour définir les politiques publiques d’aide à
-                        l’apprentissage.
+                        Différentes institutions (DREETS, Académie, DGEFP) consultent le {PRODUCT_NAME} quotidiennement
+                        pour suivre l&apos;évolution des effectifs. Ces données les éclairent notamment pour attribuer
+                        des subventions, pour mettre en place des plans d’actions d’accompagnement des jeunes sans
+                        contrat ou pour définir les politiques publiques d’aide à l’apprentissage.
                       </Text>
                     </Box>
                   ),
@@ -249,8 +248,8 @@ export default function QuestCeQueLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
-                        la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
+                        Des institutions qui pilotent l&apos;apprentissage nationalement ou territorialement comme la
+                        DREETS et l&apos;Académie par exemple.
                       </Text>
                     </Box>
                   ),

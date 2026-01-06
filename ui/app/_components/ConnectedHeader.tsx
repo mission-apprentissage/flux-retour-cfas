@@ -19,7 +19,6 @@ export function ConnectedHeader() {
         return "Mes organismes";
       case ORGANISATION_TYPE.TETE_DE_RESEAU:
         return "Mon réseau";
-      case ORGANISATION_TYPE.CONSEIL_REGIONAL:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
       case ORGANISATION_TYPE.ADMINISTRATEUR:
@@ -111,12 +110,9 @@ export function ConnectedHeader() {
         },
       });
     } else if (
-      [
-        ORGANISATION_TYPE.TETE_DE_RESEAU,
-        ORGANISATION_TYPE.CONSEIL_REGIONAL,
-        ORGANISATION_TYPE.ACADEMIE,
-        ORGANISATION_TYPE.ADMINISTRATEUR,
-      ].includes(organisationType || "")
+      [ORGANISATION_TYPE.TETE_DE_RESEAU, ORGANISATION_TYPE.ACADEMIE, ORGANISATION_TYPE.ADMINISTRATEUR].includes(
+        organisationType || ""
+      )
     ) {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({

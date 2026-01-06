@@ -444,7 +444,6 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOr
         </>
       );
       break;
-    case "CONSEIL_REGIONAL":
     case "ACADEMIE":
       text = (
         <>

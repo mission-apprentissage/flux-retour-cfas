@@ -65,9 +65,9 @@ export default function CommentFonctionneLeTdb() {
                     <Box>
                       <Text>
                         Pour simplifier les démarches de collecte de données, qui étaient auparavant effectuées par
-                        chacune des administrations (Académie, DREETS, DRAAF, Carif Oref, etc), le tableau de bord
-                        agrège les données depuis les ERP des établissements de formation. les données utiles
-                        directement via l’ERP de l’établissement.
+                        chacune des administrations (Académie, DREETS, etc), le tableau de bord agrège les données
+                        depuis les ERP des établissements de formation. les données utiles directement via l’ERP de
+                        l’établissement.
                         <br />
                         <br />
                         L’ERP est le logiciel utilisé par les établissements pour effectuer le suivi de leurs effectifs
@@ -190,10 +190,10 @@ export default function CommentFonctionneLeTdb() {
                         organismes de formation et la capacité de développement.
                         <br />
                         <br />
-                        Cette méthodologie permet aussi d’inclure tout au long du processus celles et ceux qui sont
-                        concernés, que ce soit les organismes de formation ou les institutions (DREETS, DRAAF, Conseils
-                        Régionaux, Académies, Carif Oref, etc). Aussi si vous avez des retours à faire concernant le{" "}
-                        {PRODUCT_NAME} , l’équipe est à votre écoute,
+                        Cette méthodologie permet aussi d&apos;inclure tout au long du processus celles et ceux qui sont
+                        concernés, que ce soit les organismes de formation ou les institutions (DREETS, Académies, etc).
+                        Aussi si vous avez des retours à faire concernant le {PRODUCT_NAME} , l’équipe est à votre
+                        écoute,
                         <br />
                         n’hésitez pas à nous contacter :{" "}
                         <Link
@@ -375,8 +375,8 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
-                        la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
+                        Des institutions qui pilotent l&apos;apprentissage nationalement ou territorialement comme la
+                        DREETS et l&apos;Académie par exemple.
                       </Text>
                     </Box>
                   ),
@@ -547,8 +547,8 @@ export default function CommentFonctionneLeTdb() {
                           ou bien encore Excellence pro ou CGE (conférence des grandes écoles);
                         </ListItem>
                         <ListItem>
-                          Les utilisateurs pilotes : DREETS, DGEFP, Académies, Conseils Régionaux, Carif Oref, DRAAF,
-                          acteurs locaux et nationaux de l’apprentissage;
+                          Les utilisateurs pilotes : DREETS, DGEFP, Académies, acteurs locaux et nationaux de
+                          l&apos;apprentissage;
                         </ListItem>
                         <ListItem>
                           L’équipe du tableau de bord, dont les membres sont des utilisateurs administrateurs afin de
