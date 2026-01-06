@@ -30,22 +30,14 @@ export const effectifStateSelector = selectorFamily({
         // eslint-disable-next-line no-undef
         const newEffectifsState = new Map<any, any>(JSON.parse(JSON.stringify(Array.from(prevEffectifsState))));
         const validation_errors: any[] = [];
-        const {
-          validation_errors: prevValidationErrors,
-          requiredSifa: prevRequiredSifa,
-        }: { validation_errors: any[]; requiredSifa: any[] } = newEffectifsState.get(effectifId);
+        const { validation_errors: prevValidationErrors }: { validation_errors: any[] } =
+          newEffectifsState.get(effectifId);
         for (const validation_error of prevValidationErrors) {
           if (!inputNames.includes(validation_error.fieldName)) {
             validation_errors.push(validation_error);
           }
         }
-        const requiredSifa: any[] = [];
-        for (const currentRequiredSifa of prevRequiredSifa) {
-          if (!inputNames.includes(currentRequiredSifa)) {
-            requiredSifa.push(currentRequiredSifa);
-          }
-        }
-        newEffectifsState.set(effectifId, { validation_errors, requiredSifa });
+        newEffectifsState.set(effectifId, { validation_errors });
 
         return newEffectifsState;
       });
@@ -54,9 +46,8 @@ export const effectifStateSelector = selectorFamily({
     (effectifId) =>
     ({ get }) => {
       const effectifsState: any = get(effectifsStateAtom);
-      const { validation_errors, requiredSifa } = effectifsState.get(effectifId) ?? {
+      const { validation_errors } = effectifsState.get(effectifId) ?? {
         validation_errors: [],
-        requiredSifa: [],
       };
       const validationErrorsByBlock: {
         statuts: any[];
@@ -85,34 +76,7 @@ export const effectifStateSelector = selectorFamily({
         }
       }
 
-      const requiredSifaByBlock: {
-        statuts: any[];
-        apprenant: any[];
-        formation: any[];
-        contrats: any[];
-        lieu_de_formation: any[];
-      } = {
-        statuts: [],
-        apprenant: [],
-        formation: [],
-        contrats: [],
-        lieu_de_formation: [],
-      };
-      for (const currentRequiredSifa of requiredSifa) {
-        if (currentRequiredSifa.includes("lieu_de_formation")) {
-          requiredSifaByBlock.lieu_de_formation.push(currentRequiredSifa);
-        } else if (currentRequiredSifa.includes("contrats")) {
-          requiredSifaByBlock.contrats.push(currentRequiredSifa);
-        } else if (currentRequiredSifa.includes("apprenant.historique_statut")) {
-          requiredSifaByBlock.statuts.push(currentRequiredSifa);
-        } else if (currentRequiredSifa.includes("formation.")) {
-          requiredSifaByBlock.formation.push(currentRequiredSifa);
-        } else {
-          requiredSifaByBlock.apprenant.push(currentRequiredSifa);
-        }
-      }
-
-      return { validation_errors, validationErrorsByBlock, requiredSifa, requiredSifaByBlock };
+      return { validation_errors, validationErrorsByBlock };
     },
 });
 

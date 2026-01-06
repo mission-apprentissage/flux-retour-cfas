@@ -1,17 +1,12 @@
 import get from "lodash.get";
 import { DateTime } from "luxon";
-import { requiredApprenantAdresseFieldsSifa, requiredFieldsSifa } from "shared";
 
 import { findDefinition } from "./utils";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
-export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme }) => {
+export const initFields = ({ effectifForm, schema, canEdit, organisme }) => {
   const createField = createFieldFactory({
-    modeSifa,
     schema,
-    requiredFieldsSifa: effectifForm.apprenant.adresse.complete.value
-      ? requiredFieldsSifa
-      : [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa],
   });
   const fields = {};
   const isAPITransmission = organisme.mode_de_transmission === "API";
@@ -24,7 +19,7 @@ export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme 
 
   let historique_statut: any[] = [];
   let showAddStatut = true;
-  if ((modeSifa && !!effectifForm.apprenant.historique_statut.value.length) || !canEdit || isAPITransmission) {
+  if (!!effectifForm.apprenant.historique_statut.value.length || !canEdit || isAPITransmission) {
     historique_statut = effectifForm.apprenant.historique_statut.value;
     showAddStatut = false;
   } else {
@@ -72,7 +67,7 @@ export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme 
 
   let contrats: any[] = [];
   let showAddContrat = true;
-  if ((modeSifa && !!effectifForm.contrats.value.length) || !canEdit || isAPITransmission) {
+  if (!!effectifForm.contrats.value.length || !canEdit || isAPITransmission) {
     contrats = effectifForm.contrats.value;
     showAddContrat = false;
   } else {
@@ -242,7 +237,7 @@ export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme 
 };
 
 const createFieldFactory =
-  ({ schema, modeSifa, requiredFieldsSifa }) =>
+  ({ schema }) =>
   ({ name, data, forceFieldDefinition = null }) => {
     const fieldSchema = findDefinition({ name: forceFieldDefinition || name, schema });
     if (!fieldSchema) throw new Error(`Field ${name} is not defined.`);
@@ -255,11 +250,6 @@ const createFieldFactory =
       value = value ? `${value}` : "";
     }
 
-    if (modeSifa && requiredFieldsSifa.includes(name)) {
-      fieldSchema.required = true;
-      if (!value) fieldSchema.warning = "Donnée requise par SIFA. Veuillez la compléter.";
-    }
-
     return {
       minLength: data.minLength,
       maxLength: data.maxLength,
@@ -268,7 +258,7 @@ const createFieldFactory =
       pattern: data.pattern,
       enum: data.enum,
       ...fieldSchema,
-      locked: modeSifa ? false : true,
+      locked: true,
       success: !isEmptyValue(data?.value),
       description: fieldSchema.showInfo ? data.description : fieldSchema.description,
       example: data.example,
