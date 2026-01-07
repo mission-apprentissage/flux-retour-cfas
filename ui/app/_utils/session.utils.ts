@@ -10,7 +10,7 @@ export async function getSession(): Promise<AuthContext | null> {
     if (!sessionRaw) {
       return null;
     }
-    const decoded = atob(sessionRaw);
+    const decoded = Buffer.from(sessionRaw, "base64").toString("utf-8");
     return JSON.parse(decoded) as AuthContext;
   } catch (error) {
     return null;

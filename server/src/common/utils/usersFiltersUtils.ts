@@ -1,3 +1,5 @@
+import { getDepartementCodesFromRegions } from "shared/constants/territoires";
+
 import { UsersFiltersParams } from "../validation/usersFiltersSchema";
 
 export const parseStringToArray = (value: string | undefined): string[] => {
@@ -149,12 +151,15 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   }
 
   if (regionValues.length > 0) {
+    const departementCodesFromRegions = getDepartementCodesFromRegions(regionValues);
+
     orgAndFilters.push({
       $or: [
         { "organisation.code_region": { $in: regionValues } },
         { "organisation.adresse.region": { $in: regionValues } },
         { "organisation.organisme.adresse.region": { $in: regionValues } },
         { "organisation.region_list": { $in: regionValues } },
+        { "organisation.code_departement": { $in: departementCodesFromRegions } },
       ],
     });
   }

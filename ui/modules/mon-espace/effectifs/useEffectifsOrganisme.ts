@@ -5,7 +5,7 @@ import { organismeAtom } from "@/hooks/organismeAtoms";
 import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 
 // version qui renvoie l'organisme une fois enregistré dans recoil
-// utilisé pour les pages effectifs et enquete-sifa
+// utilisé pour les pages effectifs
 export function useEffectifsOrganismeOrganisation() {
   const { organisme } = useOrganisationOrganisme();
   const [organismeState, setOrganisme] = useRecoilState(organismeAtom);

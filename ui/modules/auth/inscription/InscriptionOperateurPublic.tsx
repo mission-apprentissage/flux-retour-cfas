@@ -13,45 +13,37 @@ import {
 
 import { InscriptionOrganistionChildProps } from "./common";
 
-const typesOrganisation = [
-  {
-    label: "D(R)(I)EETS",
-    value: "DREETS",
-  },
-  {
-    label: "DDETS",
-    value: "DDETS",
-  },
-  {
-    label: "DRAAF",
-    value: "DRAAF",
-  },
-  {
-    label: "Académie",
-    value: "ACADEMIE",
-  },
-  {
-    label: "Conseil régional",
-    value: "CONSEIL_REGIONAL",
-  },
-  {
-    label: "Organisation nationale",
-    value: "OPERATEUR_PUBLIC_NATIONAL",
-  },
-  {
-    label: "DRAFPIC",
-    value: "DRAFPIC",
-  },
-  // TODO, pas pris en compte pour l'instant, car il faut pouvoir enregistrer l'utilisateur / envoyer un mail
-  // {
-  //   label: "Autre opérateur public",
-  //   value: "AUTRE",
-  // },
+const typesOrganisationBase = [
+  { label: "D(R)(I)EETS", value: "DREETS" },
+  { label: "DDETS", value: "DDETS" },
+  { label: "Académie", value: "ACADEMIE" },
 ] as const;
 
-type TypeOrganisation = (typeof typesOrganisation)[number]["value"];
+const typesOrganisationDecommissioned = [
+  { label: "DRAAF (décommissionné)", value: "DRAAF" },
+  { label: "DRAFPIC (décommissionné)", value: "DRAFPIC" },
+  {
+    label: "Organisation nationale (décommissionné)",
+    value: "OPERATEUR_PUBLIC_NATIONAL",
+  },
+  { label: "Conseil régional (décommissionné)", value: "CONSEIL_REGIONAL" },
+] as const;
 
-export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
+type TypeOrganisation =
+  | (typeof typesOrganisationBase)[number]["value"]
+  | (typeof typesOrganisationDecommissioned)[number]["value"]
+  | "OPERATEUR_PUBLIC_NATIONAL";
+
+interface InscriptionOperateurPublicProps extends InscriptionOrganistionChildProps {
+  showOrganisationNationale?: boolean;
+  showDecommissioned?: boolean;
+}
+
+export const InscriptionOperateurPublic = ({
+  setOrganisation,
+  showDecommissioned = false,
+}: InscriptionOperateurPublicProps) => {
+  const typesOrganisation = [...typesOrganisationBase, ...(showDecommissioned ? typesOrganisationDecommissioned : [])];
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
 
   return (
@@ -107,14 +99,14 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
           </Select>
         </FormControl>
       )}
-      {["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DRAFPIC"].includes(typeOrganisation as string) && (
+      {["DREETS", "CONSEIL_REGIONAL", "DRAAF", "DRAFPIC"].includes(typeOrganisation as string) && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
             placeholder="Sélectionner un territoire"
             onChange={(e) =>
               setOrganisation({
-                type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "DRAFPIC",
+                type: typeOrganisation as "DREETS" | "CONSEIL_REGIONAL" | "DRAAF" | "DRAFPIC",
                 code_region: e.target.value as IRegionCode,
               })
             }

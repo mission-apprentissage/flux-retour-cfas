@@ -98,30 +98,10 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
               );
 
             case "DREETS":
-            case "DRAFPIC":
-            case "DRAAF":
               return (
                 <>
                   <Text fontSize="20px" fontWeight="bold">
                     {organisation.type}
-                  </Text>
-                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
-                </>
-              );
-            case "CONSEIL_REGIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    Conseil régional
-                  </Text>
-                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
-                </>
-              );
-            case "CARIF_OREF_REGIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    CARIF OREF
                   </Text>
                   <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
                 </>
@@ -146,21 +126,6 @@ function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson 
                 </>
               );
 
-            case "OPERATEUR_PUBLIC_NATIONAL":
-              return (
-                <Text fontSize="20px" fontWeight="bold">
-                  {organisation.nom}
-                </Text>
-              );
-            case "CARIF_OREF_NATIONAL":
-              return (
-                <>
-                  <Text fontSize="20px" fontWeight="bold">
-                    CARIF OREF
-                  </Text>
-                  <Text>Territoire : National</Text>
-                </>
-              );
             case "ADMINISTRATEUR":
               return (
                 <Text fontSize="20px" fontWeight="bold">

@@ -127,11 +127,19 @@ const effectifsTableColumnsDefs = [
         );
       }
 
-      const historiqueSorted = statut.parcours.sort(
-        (a, b) => new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime()
-      );
-      const current = [...historiqueSorted].pop();
+      const now = new Date();
+      const current = [...statut.parcours]
+        .filter((s) => new Date(s.date) <= now)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .at(-1);
 
+      if (!current) {
+        return (
+          <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
+            Aucun statut
+          </Text>
+        );
+      }
       return (
         <VStack alignItems="start" spacing={0}>
           <Text>{getStatut(current.valeur)}</Text>

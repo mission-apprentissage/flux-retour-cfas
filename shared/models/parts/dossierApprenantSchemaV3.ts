@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { primitivesV1, primitivesV3 } from "./zodPrimitives";
+import { extensions, primitivesV1, primitivesV3 } from "./zodPrimitives";
 
 export const stripModelAdditionalKeys = (validationSchema: any, data: any) => {
   const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
@@ -33,8 +33,8 @@ export const dossierApprenantSchemaV3Base = z.object({
 
   // OPTIONAL FIELDS
   ine_apprenant: primitivesV1.apprenant.ine.optional(),
-  email_contact: primitivesV1.apprenant.email.optional(),
-  tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
+  email_contact: extensions.emailWithFallback().optional(),
+  tel_apprenant: z.preprocess((v) => (v ? String(v) : null), z.string().nullable()).nullish(),
   // The following field is missing in V3
   // siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
   libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
@@ -54,7 +54,7 @@ export const dossierApprenantSchemaV3Base = z.object({
   adresse_apprenant: primitivesV3.apprenant.adresse.optional(),
 
   code_postal_apprenant: primitivesV3.apprenant.code_postal.optional(),
-  code_postal_de_naissance_apprenant: primitivesV3.apprenant.code_postal.optional(),
+  code_postal_de_naissance_apprenant: z.coerce.string().optional(),
   code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
   code_commune_insee_de_naissance_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
 
@@ -83,14 +83,14 @@ export const dossierApprenantSchemaV3Base = z.object({
   contrat_date_fin_4: primitivesV1.contrat.date_fin.optional(),
   contrat_date_rupture_4: primitivesV1.contrat.date_rupture.optional(),
   cause_rupture_contrat_4: primitivesV3.contrat.cause_rupture.optional(),
-  siret_employeur: primitivesV3.employeur.siret.optional(),
-  siret_employeur_2: primitivesV3.employeur.siret.optional(),
-  siret_employeur_3: primitivesV3.employeur.siret.optional(),
-  siret_employeur_4: primitivesV3.employeur.siret.optional(),
+  siret_employeur: extensions.siretWithFallback().optional(),
+  siret_employeur_2: extensions.siretWithFallback().optional(),
+  siret_employeur_3: extensions.siretWithFallback().optional(),
+  siret_employeur_4: extensions.siretWithFallback().optional(),
   formation_presentielle: primitivesV3.formation.presentielle.optional(),
   // These two fields should have been required but sometimes, it is missing in YMAG
-  duree_theorique_formation: primitivesV3.formation.duree_theorique.optional(), // Legacy, but still in use by ERPs and Excel import.
-  duree_theorique_formation_mois: primitivesV3.formation.duree_theorique_mois.optional(), // The new field.
+  duree_theorique_formation: extensions.numberOrNull(1, 4),
+  duree_theorique_formation_mois: extensions.numberOrNull(1, 48),
 
   // REQUIRED FIELDS
   date_inscription_formation: primitivesV3.formation.date_inscription,
@@ -102,7 +102,7 @@ export const dossierApprenantSchemaV3Base = z.object({
   etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai,
   etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret,
   etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai.optional(),
-  etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret.optional(),
+  etablissement_lieu_de_formation_siret: z.coerce.string().optional(),
   etablissement_lieu_de_formation_adresse: primitivesV1.etablissement_lieu_de_formation.adresse.optional(),
   etablissement_lieu_de_formation_code_postal: primitivesV1.etablissement_lieu_de_formation.code_postal.optional(),
 

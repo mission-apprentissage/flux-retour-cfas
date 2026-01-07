@@ -263,9 +263,9 @@ export const mapEffectifQueueToEffectif = (
       // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
       // en mettant dans le bon champ.
       duree_theorique_mois:
-        "duree_theorique_formation_mois" in dossierApprenant
+        dossierApprenant.duree_theorique_formation_mois != null
           ? dossierApprenant.duree_theorique_formation_mois
-          : "duree_theorique_formation" in dossierApprenant && dossierApprenant.duree_theorique_formation
+          : dossierApprenant.duree_theorique_formation != null
             ? dossierApprenant.duree_theorique_formation * 12
             : undefined,
       formation_presentielle:

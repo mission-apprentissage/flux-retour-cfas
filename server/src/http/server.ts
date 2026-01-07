@@ -100,7 +100,6 @@ import {
 } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
-import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
@@ -124,7 +123,7 @@ import config from "@/config";
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import {
-  blockDREETSDDETS,
+  requireIndicateursOrganismesAccess,
   requireAdministrator,
   requireEffectifOrganismePermission,
   requireMissionLocale,
@@ -515,14 +514,14 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
-        blockDREETSDDETS,
+        requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
         "/indicateurs/organismes/:type",
-        blockDREETSDDETS,
+        requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
           const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
           const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
@@ -570,23 +569,6 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           await deleteOldestDuplicates(res.locals.organismeId);
-        })
-      )
-      .get(
-        "/sifa-export",
-        requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
-          const organismeId = res.locals.organismeId;
-          const organisme = await getOrganismeById(organismeId);
-          const filters = await validateFullZodObjectSchema(req.query, { type: z.enum(["csv", "xlsx"]) });
-
-          const { file, effectifsIds, extension } = await generateSifa(organismeId as any as ObjectId, filters.type);
-          res.attachment(
-            `tdb-donnees-sifa-${organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}-${new Date().toISOString().split("T")[0]}.${extension}`
-          );
-
-          await createTelechargementListeNomLog("sifa", effectifsIds, new Date(), req.user?._id, organismeId);
-          return file;
         })
       )
       .put(
@@ -679,7 +661,7 @@ function setupRoutes(app: Application) {
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl, req.user.organisation);
+        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
       })
     )
     .get(

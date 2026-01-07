@@ -143,10 +143,6 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "hydrate:transmission-daily", queued });
 
-  await addJob({ name: "hydrate:mission-locale-not-activated-effectif", queued });
-
-  await addJob({ name: "hydrate:mission-locale-stats", queued });
-
   // # Mise à jour des effectifs DECA
   await addJob({ name: "hydrate:contrats-deca-raw", queued });
 
@@ -220,6 +216,13 @@ export async function setupJobProcessor() {
             "Validation des constantes de territoires": {
               cron_string: "5 4 1 * *",
               handler: validationTerritoires,
+            },
+            "Nettoie et met à jour les statistiques des Missions Locales": {
+              cron_string: "30 4 * * *",
+              handler: async () => {
+                await updateNotActivatedMissionLocaleEffectifSnapshot();
+                await hydrateMissionLocaleStats();
+              },
             },
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {

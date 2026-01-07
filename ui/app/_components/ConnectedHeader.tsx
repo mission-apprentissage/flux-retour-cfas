@@ -19,14 +19,8 @@ export function ConnectedHeader() {
         return "Mes organismes";
       case ORGANISATION_TYPE.TETE_DE_RESEAU:
         return "Mon réseau";
-      case ORGANISATION_TYPE.DRAAF:
-      case ORGANISATION_TYPE.CONSEIL_REGIONAL:
-      case ORGANISATION_TYPE.CARIF_OREF_REGIONAL:
-      case ORGANISATION_TYPE.DRAFPIC:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
-      case ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL:
-      case ORGANISATION_TYPE.CARIF_OREF_NATIONAL:
       case ORGANISATION_TYPE.ADMINISTRATEUR:
         return "Tous les organismes";
       default:
@@ -116,17 +110,9 @@ export function ConnectedHeader() {
         },
       });
     } else if (
-      [
-        ORGANISATION_TYPE.TETE_DE_RESEAU,
-        ORGANISATION_TYPE.DRAAF,
-        ORGANISATION_TYPE.CONSEIL_REGIONAL,
-        ORGANISATION_TYPE.CARIF_OREF_REGIONAL,
-        ORGANISATION_TYPE.DRAFPIC,
-        ORGANISATION_TYPE.ACADEMIE,
-        ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
-        ORGANISATION_TYPE.CARIF_OREF_NATIONAL,
-        ORGANISATION_TYPE.ADMINISTRATEUR,
-      ].includes(organisationType || "")
+      [ORGANISATION_TYPE.TETE_DE_RESEAU, ORGANISATION_TYPE.ACADEMIE, ORGANISATION_TYPE.ADMINISTRATEUR].includes(
+        organisationType || ""
+      )
     ) {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
@@ -158,7 +144,7 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
-      if ([ORGANISATION_TYPE.DRAFPIC, ORGANISATION_TYPE.ACADEMIE].includes(organisationType || "")) {
+      if (organisationType === ORGANISATION_TYPE.ACADEMIE) {
         baseItems.push({
           text: "Vœux Affelnet",
           linkProps: {

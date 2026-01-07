@@ -1,6 +1,5 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Divider, HStack, Input, InputGroup, InputRightElement, Switch, Text } from "@chakra-ui/react";
-import { UseQueryResult } from "@tanstack/react-query";
 import { Row } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import { IPaginationFilters } from "shared/models/routes/pagination";
@@ -31,8 +30,6 @@ interface EffectifsTableProps {
   resetFilters: () => void;
   isFetching: boolean;
   canEdit?: boolean;
-  modeSifa?: boolean;
-  refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
 }
 
 const EffectifsTable = ({
@@ -49,8 +46,6 @@ const EffectifsTable = ({
   resetFilters,
   isFetching,
   canEdit,
-  modeSifa,
-  refetch,
 }: EffectifsTableProps) => {
   const [localSearch, setLocalSearch] = useState(search || "");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
@@ -168,9 +163,7 @@ const EffectifsTable = ({
         enableRowExpansion={true}
         onTableChange={onTableChange}
         isLoading={isFetching}
-        renderSubComponent={(row: Row<any>) => (
-          <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />
-        )}
+        renderSubComponent={(row: Row<any>) => <EffectifTableDetails row={row} canEdit={canEdit} />}
       />
     </Box>
   );

@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { Acl } from "shared/constants/permissions";
-import { IOrganisation, type IndicateursEffectifsAvecFormation } from "shared/models";
+import { type IndicateursEffectifsAvecFormation } from "shared/models";
 
 import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -18,14 +18,10 @@ import {
 
 export const buildDECAFilter = (decaMode) => (decaMode ? { is_deca_compatible: true } : {});
 
-export const getIndicateursEffectifsParDepartement = async (
-  filters: DateFilters & TerritoireFilters,
-  acl: Acl,
-  organisation?: IOrganisation
-) => {
+export const getIndicateursEffectifsParDepartement = async (filters: DateFilters & TerritoireFilters, acl: Acl) => {
   const [indicateursEffectifs, indicateursEffectifsDeca] = await Promise.all([
-    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false, organisation),
-    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true, organisation),
+    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false),
+    getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true),
   ]);
 
   const indicateurs = [...indicateursEffectifs, ...indicateursEffectifsDeca];

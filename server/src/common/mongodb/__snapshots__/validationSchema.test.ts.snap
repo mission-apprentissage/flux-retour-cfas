@@ -21020,7 +21020,6 @@ exports[`validation-schema > should create validation schema for telechargementL
         "affelnet_concretise",
         "affelnet",
         "affelnet_non_concretise",
-        "sifa",
         "ml_a_traiter",
         "ml_traite",
         "ml_injoignable",
