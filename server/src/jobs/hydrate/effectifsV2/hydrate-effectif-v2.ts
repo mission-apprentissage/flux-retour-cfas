@@ -9,7 +9,6 @@ import {
 } from "shared/models/data/missionLocaleEffectifLog.model";
 
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
-import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import logger from "@/common/logger";
 import {
@@ -23,6 +22,7 @@ import {
 } from "@/common/model/collections";
 import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 import { updateParcoursPersonV2 } from "@/jobs/ingestion/person/person.ingestion";
+import { findOrganismeWithStats } from "@/jobs/ingestion/process-ingestion";
 
 export const hydratePersonV2Parcours = async () => {
   const BULK_SIZE = 100;
@@ -458,6 +458,9 @@ export const hydrateMissionLocaleEffectifWithEffectifV2 = async () => {
 export const hydrateOrganismeFormationV2 = async () => {
   const cursor = formationV2Db().find({});
   let data: Array<any> = [];
+  let count = 0;
+  const all = await formationV2Db().countDocuments();
+  const startTime = Date.now();
 
   while (await cursor.hasNext()) {
     const formation = await cursor.next();
@@ -467,17 +470,21 @@ export const hydrateOrganismeFormationV2 = async () => {
     let organismeResponsable;
 
     if (formation.identifiant.formateur_siret && formation.identifiant.formateur_uai) {
-      organismeFormateur = await getOrganismeByUAIAndSIRET(
+      const { organisme, stats: _statsFormateur } = await findOrganismeWithStats(
         formation?.identifiant.formateur_uai,
         formation?.identifiant.formateur_siret
       );
+
+      organismeFormateur = organisme;
     }
 
     if (formation.identifiant.responsable_siret && formation.identifiant.responsable_uai) {
-      organismeResponsable = await getOrganismeByUAIAndSIRET(
+      const { organisme, stats: _statsResponsable } = await findOrganismeWithStats(
         formation?.identifiant.responsable_siret,
         formation?.identifiant.responsable_uai
       );
+
+      organismeResponsable = organisme;
     }
 
     if (formation) {
@@ -496,6 +503,29 @@ export const hydrateOrganismeFormationV2 = async () => {
 
     if (data.length >= 500) {
       await formationV2Db().bulkWrite(data);
+      count += data.length;
+
+      const elapsedTime = Date.now() - startTime;
+      const elapsedSeconds = Math.floor(elapsedTime / 1000);
+      const avgTimePerItem = elapsedTime / count;
+      const remainingItems = all - count;
+      const estimatedRemainingTime = avgTimePerItem * remainingItems;
+      const estimatedRemainingSeconds = Math.floor(estimatedRemainingTime / 1000);
+
+      const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}h ${minutes}m ${secs}s`;
+      };
+
+      logger.info(`Hydratation des organismes formation V2: ${count} formations traitées`);
+      console.log(
+        `Hydratation des organismes formation V2: ${count}/${all} formations traitées (${((count / all) * 100).toFixed(2)}%)`
+      );
+      console.log(
+        `Temps écoulé: ${formatTime(elapsedSeconds)} - Temps estimé restant: ${formatTime(estimatedRemainingSeconds)}`
+      );
       data = [];
     }
   }
@@ -601,6 +631,9 @@ export const setMLDataFromLog = async () => {
 export const updateEffectifV2 = async () => {
   const cursor = effectifV2Db().find();
   let data: Array<any> = [];
+  let count = 0;
+  const all = await effectifV2Db().countDocuments();
+  const startTime = Date.now();
 
   const processEffectif = async ({
     formation_id,
@@ -633,13 +666,6 @@ export const updateEffectifV2 = async () => {
       {
         $set: {
           "_computed.session": certif,
-          "informations_personnelles.email": "dummy@dummy.com", // TODO enlever
-          "informations_personnelles.telephone": "0123456789", // TODO enlever
-          "responsable_apprenant.email1": "dummy1@dummy.com", // TODO enlever
-          "responsable_apprenant.email2": "dummy2@dummy.com", // TODO enlever
-          "referent_handicap.nom": "Dummy", // TODO enlever
-          "referent_handicap.prenom": "Dumms", // TODO enlever
-          "referent_handicap.email": "dummy3@dummy.com", // TODO enlever
         },
       }
     );
@@ -659,12 +685,37 @@ export const updateEffectifV2 = async () => {
 
     if (data.length >= 500) {
       await Promise.allSettled(data.map(processEffectif));
+      count += data.length;
+
+      const elapsedTime = Date.now() - startTime;
+      const elapsedSeconds = Math.floor(elapsedTime / 1000);
+      const avgTimePerItem = elapsedTime / count;
+      const remainingItems = all - count;
+      const estimatedRemainingTime = avgTimePerItem * remainingItems;
+      const estimatedRemainingSeconds = Math.floor(estimatedRemainingTime / 1000);
+
+      const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}h ${minutes}m ${secs}s`;
+      };
+
+      logger.info(`Mise à jour des effectifs V2: ${count} effectifs traités`);
+      console.log(
+        `Mise à jour des effectifs V2: ${count}/${all} effectifs traités (${((count / all) * 100).toFixed(2)}%)`
+      );
+      console.log(
+        `Temps écoulé: ${formatTime(elapsedSeconds)} - Temps estimé restant: ${formatTime(estimatedRemainingSeconds)}`
+      );
       data = [];
     }
   }
 
   if (data.length > 0) {
     await Promise.allSettled(data.map(processEffectif));
+    count += data.length;
+    logger.info(`Mise à jour des effectifs V2 terminée: ${count}/${all} effectifs traités`);
     data = [];
   }
 };

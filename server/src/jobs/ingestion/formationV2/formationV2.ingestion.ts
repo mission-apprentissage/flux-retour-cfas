@@ -2,8 +2,9 @@ import { ObjectId } from "bson";
 import type { IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
-import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import { formationV2Db } from "@/common/model/collections";
+
+import { findOrganismeWithStats } from "../process-ingestion";
 
 export type IIngestFormationUsedFields =
   | "formation_cfd"
@@ -22,11 +23,11 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
     throw new Error("Impossible d'ingérer la formation : ni le cfd ni le rncp ne sont fournis");
   }
 
-  const organismeFormateur = await getOrganismeByUAIAndSIRET(
+  const { organisme: organismeFormateur, stats: _statsFormateur } = await findOrganismeWithStats(
     dossier.etablissement_formateur_uai,
     dossier.etablissement_formateur_siret
   );
-  const organismeResponsable = await getOrganismeByUAIAndSIRET(
+  const { organisme: organismeResponsable, stats: _statsResponsable } = await findOrganismeWithStats(
     dossier.etablissement_responsable_uai,
     dossier.etablissement_responsable_siret
   );

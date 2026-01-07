@@ -32,7 +32,7 @@ import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.act
 import { getMissionLocaleByMLId, getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
-import { createOrUpdateMissionLocaleStats, createOrUpdateMissionLocaleStatsV2 } from "./mission-locale-stats.actions";
+import { createOrUpdateMissionLocaleStatsV2 } from "./mission-locale-stats.actions";
 
 // const DATE_START = new Date("2025-01-01");
 /**
@@ -438,9 +438,11 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
   let fields: Record<string, object>[] = [];
   switch (visibility) {
     case "MISSION_LOCALE":
-      return addMissionLocaleFieldTraitementStatus();
+      fields = addMissionLocaleFieldTraitementStatus();
+      break;
     case "ORGANISME_FORMATION":
-      return addOrganismeFieldTraitementStatus();
+      fields = addOrganismeFieldTraitementStatus();
+      break;
   }
 
   return [commonFields, ...fields];
@@ -2030,7 +2032,7 @@ export const setEffectifMissionLocaleData = async (
     { upsert: true, returnDocument: "after" }
   );
   await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
-  await createOrUpdateMissionLocaleStats(missionLocaleId);
+  await createOrUpdateMissionLocaleStatsV2(missionLocaleId);
   return updated;
 };
 

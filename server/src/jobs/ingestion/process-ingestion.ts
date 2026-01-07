@@ -494,7 +494,7 @@ const createOrUpdateEffectif = async (
   }
 };
 
-async function findOrganismeWithStats(
+export async function findOrganismeWithStats(
   uai_etablissement: string,
   siret_etablissement?: string,
   projection = {}
