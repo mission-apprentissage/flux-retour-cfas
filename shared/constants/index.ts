@@ -10,7 +10,6 @@ export * from "./organisations";
 export * from "./pays";
 export * from "./permissions";
 export * from "./plausible-goals";
-export * from "./sifa";
 export * from "./support";
 export * from "./territoires";
 export * from "./validations";

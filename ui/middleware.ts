@@ -5,7 +5,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { publicConfig } from "./config.public";
 
 export const config = {
-  matcher: ["/:path*"],
+  matcher: "/((?!api|static|.*\\..*|_next).*)",
 };
 
 const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
@@ -79,6 +79,13 @@ function redirectToHome(
     case "DREETS":
     case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "CARIF_OREF_REGIONAL":
+    case "DRAAF":
+    case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
+      return NextResponse.redirect(new URL("/decommissionnement", request.url));
     case "ORGANISME_FORMATION":
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
@@ -148,6 +155,19 @@ export async function middleware(request: NextRequest) {
     if (isRestrictedPath) {
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     }
+  }
+
+  // Redirection des utilisateurs décommissionnés vers la page de décommissionnement
+  const decommissionedTypes = [
+    "OPERATEUR_PUBLIC_NATIONAL",
+    "CARIF_OREF_NATIONAL",
+    "CARIF_OREF_REGIONAL",
+    "DRAAF",
+    "DRAFPIC",
+    "CONSEIL_REGIONAL",
+  ];
+  if (decommissionedTypes.includes(session?.organisation?.type ?? "") && pathname !== "/decommissionnement") {
+    return NextResponse.redirect(new URL("/decommissionnement", request.url));
   }
 
   if (pathname === "/parametres") {

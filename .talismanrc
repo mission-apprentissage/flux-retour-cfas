@@ -63,8 +63,6 @@ fileignoreconfig:
   checksum: 3bcfa6a077baaf2011d152e3a0c44175f2a44d6f83c4486575cccc3f93f4b2e4
 - filename: ui/modules/dashboard/IndicateursOrganisme.tsx
   checksum: 60ea265023cfe6901c8223a7414bf4c2382a0890f5a549e4b1803010af72af42
-- filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
-  checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
 - filename: ui/modules/mon-espace/organismes/organismesTable/OrganismesColumns.tsx
   checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: ui/modules/organismes/ListeOrganismesPage.tsx
@@ -89,6 +87,8 @@ fileignoreconfig:
   checksum: 33a6cf49d1ab20dbbf9b500e5a4d3009c231a7ffdb51e7b4a8515b222317cb1a
 - filename: server/src/db/migrations/20251029160433-fix-acc-conjoint-by-missing.ts
   checksum: 50b4531854636bf4ccb95c8a5a2b90fdb88f54b15b4490b071b970deae6a23c0
+- filename: ui/app/_components/ServiceDiscontinuedPage.tsx
+  checksum: 60b43d0e18382923db1ab106290d10f6200068fd0af0fab4d5c8e375ca1cc4ae
 scopeconfig:
 - scope: node
 custom_patterns:

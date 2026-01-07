@@ -1,3 +1,4 @@
+import { createReadStream } from "node:fs";
 import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -5,8 +6,8 @@ import { join } from "node:path";
 import { PromisePool } from "@supercharge/promise-pool";
 import AdmZip from "adm-zip";
 import axios from "axios";
-import { XMLParser } from "fast-xml-parser";
 import { WithoutId } from "mongodb";
+import sax from "sax";
 import { IRncp } from "shared/models/data/rncp.model";
 
 import parentLogger from "@/common/logger";
@@ -61,53 +62,152 @@ export async function hydrateRNCP() {
   if (!entry) {
     throw new Error("Fichier non trouvé. Le format a dû changer");
   }
-  const zipData = entry.getData();
-  unlink(tempZipFilePath);
 
-  const parser = new XMLParser({
-    isArray(tagName, jPath) {
-      // force un tableau plutôt qu'un objet si jamais un seul élément
-      return ["FICHES.FICHE.CODES_ROME.ROME", "FICHES.FICHE.NOUVELLE_CERTIFICATION"].includes(jPath);
-    },
+  // Extract XML to a temporary file instead of loading into memory
+  const tempXmlFilePath = join(tmpdir(), "fiches-rncp.xml");
+  await writeFile(tempXmlFilePath, entry.getData());
+  await unlink(tempZipFilePath);
+
+  logger.info("Streaming et parsing du XML");
+
+  // Process XML in streaming mode to avoid loading entire file in memory
+  let processedCount = 0;
+  const batchSize = 100;
+  let batch: WithoutId<IRncp>[] = [];
+
+  const processBatch = async (currentBatch: WithoutId<IRncp>[]) => {
+    if (currentBatch.length === 0) return;
+
+    await PromisePool.for(currentBatch)
+      .withConcurrency(50)
+      .handleError(async (error) => {
+        throw error;
+      })
+      .process(async ({ rncp, ...fiche }) => {
+        await rncpDb().updateOne({ rncp }, { $set: stripEmptyFields({ ...fiche }) }, { upsert: true });
+      });
+
+    processedCount += currentBatch.length;
+    if (processedCount % 1000 === 0) {
+      logger.info({ count: processedCount }, "fiches traitées");
+    }
+  };
+
+  // Create SAX parser
+  const saxStream = sax.createStream(true, {});
+  const stream = createReadStream(tempXmlFilePath);
+
+  // State for tracking current element
+  let currentFiche: any = null;
+  let currentPath: string[] = [];
+  let currentText = "";
+  let romeList: any[] = [];
+
+  saxStream.on("opentag", (node) => {
+    currentPath.push(node.name);
+    currentText = "";
+
+    if (node.name === "FICHE") {
+      currentFiche = {};
+      romeList = [];
+    } else if (node.name === "ROME") {
+      romeList.push({});
+    }
   });
-  logger.info("parsing du xml");
-  const parsedContent = parser.parse(zipData);
 
-  const fichesRNCP: WithoutId<IRncp>[] = parsedContent.FICHES.FICHE.map((fiche): WithoutId<IRncp> => {
-    return {
-      rncp: fiche.NUMERO_FICHE,
-      nouveaux_rncp: fiche.NOUVELLE_CERTIFICATION,
-      niveau: fiche.NOMENCLATURE_EUROPE.NIVEAU
-        ? parseInt((fiche.NOMENCLATURE_EUROPE.NIVEAU as string).substring(3))
-        : undefined,
-      intitule: fiche.INTITULE,
-      etat_fiche: fiche.ETAT_FICHE,
-      actif: fiche.ACTIF === "Oui",
-      // certains RNCP n'ont pas de ROME => undefined
-      romes: fiche.CODES_ROME?.ROME?.map((rome) => rome.CODE) ?? [],
-    };
+  saxStream.on("text", (text) => {
+    currentText += text;
   });
 
-  logger.info({ count: fichesRNCP.length }, "import des fiches rncp");
+  saxStream.on("closetag", (tagName) => {
+    const path = currentPath.join(".");
 
-  await PromisePool.for(fichesRNCP)
-    .withConcurrency(50)
-    .handleError(async (error) => {
-      throw error;
-    })
-    .process(async ({ rncp, ...fiche }) => {
-      await rncpDb().updateOne(
-        {
-          rncp,
-        },
-        {
-          $set: stripEmptyFields({
-            ...fiche,
-          }),
-        },
-        {
-          upsert: true,
+    if (currentFiche) {
+      // Capture text content for specific fields
+      if (tagName === "NUMERO_FICHE") {
+        currentFiche.NUMERO_FICHE = currentText.trim();
+      } else if (tagName === "NOUVELLE_CERTIFICATION") {
+        if (!currentFiche.NOUVELLE_CERTIFICATION) {
+          currentFiche.NOUVELLE_CERTIFICATION = [];
         }
-      );
+        const value = currentText.trim();
+        if (value) {
+          currentFiche.NOUVELLE_CERTIFICATION.push(value);
+        }
+      } else if (tagName === "NIVEAU" && path.includes("NOMENCLATURE_EUROPE")) {
+        currentFiche.NIVEAU = currentText.trim();
+      } else if (tagName === "INTITULE") {
+        currentFiche.INTITULE = currentText.trim();
+      } else if (tagName === "ETAT_FICHE") {
+        currentFiche.ETAT_FICHE = currentText.trim();
+      } else if (tagName === "ACTIF") {
+        currentFiche.ACTIF = currentText.trim();
+      } else if (tagName === "CODE" && path.includes("CODES_ROME.ROME")) {
+        if (romeList.length > 0) {
+          romeList[romeList.length - 1].CODE = currentText.trim();
+        }
+      }
+    }
+
+    // When FICHE closes, process it
+    if (tagName === "FICHE" && currentFiche) {
+      const rncpDoc: WithoutId<IRncp> = {
+        rncp: currentFiche.NUMERO_FICHE,
+        nouveaux_rncp: currentFiche.NOUVELLE_CERTIFICATION ?? [],
+        niveau: currentFiche.NIVEAU ? parseInt(currentFiche.NIVEAU.substring(3)) : undefined,
+        intitule: currentFiche.INTITULE,
+        etat_fiche: currentFiche.ETAT_FICHE,
+        actif: currentFiche.ACTIF === "Oui",
+        romes: romeList.map((rome) => rome.CODE).filter(Boolean),
+      };
+
+      batch.push(rncpDoc);
+      currentFiche = null;
+    }
+
+    currentPath.pop();
+    currentText = "";
+  });
+
+  // Handle batching with backpressure
+  let isPaused = false;
+  saxStream.on("closetag", async (tagName) => {
+    if (tagName === "FICHE" && batch.length >= batchSize && !isPaused) {
+      isPaused = true;
+      stream.pause();
+      const currentBatch = [...batch];
+      batch = [];
+      await processBatch(currentBatch);
+      stream.resume();
+      isPaused = false;
+    }
+  });
+
+  // Handle end of stream and errors
+  await new Promise<void>((resolve, reject) => {
+    saxStream.on("end", async () => {
+      try {
+        await processBatch(batch);
+        logger.info({ count: processedCount }, "import des fiches rncp terminé");
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
+
+    saxStream.on("error", (error: Error) => {
+      logger.error({ error }, "Erreur lors du parsing XML");
+      reject(error);
+    });
+
+    stream.on("error", (error: Error) => {
+      logger.error({ error }, "Erreur lors de la lecture du fichier");
+      reject(error);
+    });
+
+    stream.pipe(saxStream);
+  });
+
+  // Clean up temp XML file
+  await unlink(tempXmlFilePath).catch(() => {});
 }

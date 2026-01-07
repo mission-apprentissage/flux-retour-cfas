@@ -20,11 +20,6 @@ const FiltreOrganismeDepartement = (props: FiltreOrganismeDepartementProps) => {
 
   const configDepartements = useMemo(() => {
     switch (organisation.type) {
-      case "DRAAF":
-      case "CONSEIL_REGIONAL":
-      case "CARIF_OREF_REGIONAL":
-      case "DRAFPIC":
-        return DEPARTEMENTS_SORTED.filter((departement) => departement.region.code === organisation.code_region);
       case "ACADEMIE":
         return DEPARTEMENTS_SORTED.filter((departement) => departement.academie.code === organisation.code_academie);
       default:

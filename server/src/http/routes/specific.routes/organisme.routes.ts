@@ -1,13 +1,5 @@
 import { ObjectId } from "bson";
-import { compact, get } from "lodash-es";
-import {
-  STATUT_APPRENANT,
-  getAnneeScolaireFromDate,
-  getAnneesScolaireListFromDate,
-  getSIFADate,
-  requiredApprenantAdresseFieldsSifa,
-  requiredFieldsSifa,
-} from "shared";
+import { getAnneeScolaireFromDate } from "shared";
 import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
 import { WithPagination } from "shared/models/routes/pagination";
 
@@ -61,94 +53,6 @@ const computeSearch = (search?: string | null) => {
     : {};
 };
 
-const matchOrgaAndAnneScolaire = (sifa: boolean, organismeId: ObjectId) => ({
-  organisme_id: organismeId,
-  ...(sifa && {
-    annee_scolaire: {
-      $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
-    },
-  }),
-});
-
-const computeSifaMissingFieldsFilter = () => {
-  return [
-    {
-      $match: {
-        $or: [
-          ...[...requiredFieldsSifa].map((field) => {
-            return {
-              [field]: null,
-            };
-          }),
-          {
-            $and: [
-              { "apprenant.adresse.complete": null },
-              {
-                $or: requiredApprenantAdresseFieldsSifa.map((field) => {
-                  return {
-                    [field]: null,
-                  };
-                }),
-              },
-            ],
-          },
-        ],
-      },
-    },
-  ];
-};
-
-const addSifaFilter = (sifa: boolean, only_sifa_missing_fields: boolean, currentDate: Date) => {
-  return sifa
-    ? [
-        {
-          $addFields: {
-            dernierStatut: {
-              $arrayElemAt: [
-                {
-                  $filter: {
-                    input: "$_computed.statut.parcours",
-                    as: "statut",
-                    cond: {
-                      $lte: ["$$statut.date", currentDate],
-                    },
-                  },
-                },
-                -1,
-              ],
-            },
-          },
-        },
-        {
-          $match: {
-            $or: [
-              {
-                "dernierStatut.valeur": STATUT_APPRENANT.APPRENTI,
-              },
-              {
-                "dernierStatut.valeur": STATUT_APPRENANT.RUPTURANT,
-              },
-            ],
-          },
-        },
-        ...(only_sifa_missing_fields ? computeSifaMissingFieldsFilter() : []),
-      ]
-    : [];
-};
-
-const computeSifaAggregation = (sifa: boolean, only_sifa_missing_fields: boolean, organismeId: ObjectId) => {
-  const currentDate = sifa ? getSIFADate(new Date()) : new Date();
-
-  return [
-    {
-      $match: {
-        ...matchOrgaAndAnneScolaire(sifa, organismeId),
-      },
-    },
-    ...addSifaFilter(sifa, only_sifa_missing_fields, currentDate),
-  ];
-};
-
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   options: WithPagination<typeof zGetEffectifsForOrganismeApi>
@@ -157,8 +61,6 @@ export async function getOrganismeEffectifs(
   const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
 
   const {
-    sifa = false,
-    only_sifa_missing_fields = false,
     search,
     formation_libelle_long,
     statut_courant,
@@ -180,6 +82,7 @@ export async function getOrganismeEffectifs(
   const searchConditions = computeSearch(search);
 
   const matchConditions = {
+    organisme_id: organismeId,
     ...formationConditions,
     ...statutConditions,
     ...anneeScolaireConditions,
@@ -189,7 +92,11 @@ export async function getOrganismeEffectifs(
   const sortConditions = computeSort(sort, order);
 
   const pipeline = [
-    ...computeSifaAggregation(sifa, only_sifa_missing_fields, organismeId),
+    {
+      $match: {
+        organisme_id: organismeId,
+      },
+    },
     {
       $facet: {
         allFilters: [
@@ -219,13 +126,6 @@ export async function getOrganismeEffectifs(
             $count: "count",
           },
         ],
-        missingRequiredFieldsCount: [
-          { $match: matchConditions },
-          ...computeSifaMissingFieldsFilter(),
-          {
-            $count: "count",
-          },
-        ],
       },
     },
     {
@@ -238,7 +138,6 @@ export async function getOrganismeEffectifs(
         },
         results: "$results",
         total: { $arrayElemAt: ["$totalCount.count", 0] },
-        missingRequiredFieldsCount: { $arrayElemAt: ["$missingRequiredFieldsCount.count", 0] },
       },
     },
   ];
@@ -258,23 +157,11 @@ export async function getOrganismeEffectifs(
     historique_statut: effectif.apprenant.historique_statut,
     statut: effectif._computed?.statut,
     transmitted_at: effectif.transmitted_at,
-    ...(sifa
-      ? {
-          requiredSifa: compact(
-            [
-              ...(!effectif.apprenant.adresse?.complete
-                ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
-                : requiredFieldsSifa),
-            ].map((fieldName) => (!get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined))
-          ),
-        }
-      : {}),
   }));
 
   return {
     fromDECA: isDeca,
     total: data?.total || 0,
-    missingRequiredFieldsTotal: data?.missingRequiredFieldsCount || 0,
     filters: {
       ...data?.filters,
       annee_scolaire: Array.from(
@@ -285,13 +172,17 @@ export async function getOrganismeEffectifs(
   };
 }
 
-async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = false) {
+async function getAllOrganismeEffectifsIds(organismeId: ObjectId) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
   const isDeca = !organisme?.is_transmission_target;
   const db = isDeca ? effectifsDECADb() : effectifsDb();
 
   const pipeline = [
-    ...computeSifaAggregation(sifa, false, organismeId),
+    {
+      $match: {
+        organisme_id: organismeId,
+      },
+    },
     {
       $project: {
         id: { $toString: "$_id" },
@@ -309,13 +200,12 @@ async function getAllOrganismeEffectifsIds(organismeId: ObjectId, sifa = false) 
 
 export async function updateOrganismeEffectifs(
   organismeId: ObjectId,
-  sifa = false,
   update: {
     "apprenant.type_cfa"?: string | undefined;
   }
 ) {
   if (!update["apprenant.type_cfa"]) return;
-  const { fromDECA, organismesEffectifs } = await getAllOrganismeEffectifsIds(organismeId, sifa);
+  const { fromDECA, organismesEffectifs } = await getAllOrganismeEffectifsIds(organismeId);
 
   !fromDECA &&
     (await effectifsDb().updateMany(

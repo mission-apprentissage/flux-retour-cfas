@@ -48,7 +48,7 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }: Effec
         <div className={`fr-grid-row ${styles.coordonneesGrid}`}>
           <div className="fr-col-12 fr-col-md-6">
             <p className={styles.sectionTitle}>Coordonnées</p>
-            <p>{formatPhoneNumber(effectif.telephone_corrected || effectif.telephone)}</p>
+            <p>{formatPhoneNumber(effectif.telephone_corrected || effectif.telephone) || "-"}</p>
             <p>{effectif.courriel || ""}</p>
           </div>
 
@@ -94,7 +94,7 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }: Effec
           <div className={styles.contactCfaSection}>
             <p className={styles.sectionTitle}>Coordonnées de l&apos;accompagnant du jeune dans ce CFA</p>
             <p>
-              {effectif.contact_cfa.telephone && `${formatPhoneNumber(effectif.contact_cfa.telephone)}  `}
+              {effectif.contact_cfa.telephone && `${formatPhoneNumber(effectif.contact_cfa.telephone) || "-"}  `}
               {effectif.contact_cfa.email}
             </p>
           </div>

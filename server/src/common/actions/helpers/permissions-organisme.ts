@@ -163,44 +163,6 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "DRAAF":
-    case "DRAFPIC": {
-      const sameRegion = { region: { $in: [organisation.code_region] } };
-      return {
-        viewContacts: sameRegion,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: sameRegion,
-        effectifsNominatifs: {
-          apprenant: false,
-          apprenti: false,
-          inscritSansContrat: sameRegion,
-          rupturant: sameRegion,
-          abandon: sameRegion,
-          inconnu: false,
-        },
-        manageEffectifs: false,
-        configurerModeTransmission: false,
-      };
-    }
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL": {
-      const sameRegion = { region: { $in: [organisation.code_region] } };
-      return {
-        viewContacts: sameRegion,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: sameRegion,
-        effectifsNominatifs: {
-          apprenant: false,
-          apprenti: false,
-          inscritSansContrat: false,
-          rupturant: false,
-          abandon: false,
-          inconnu: false,
-        },
-        manageEffectifs: false,
-        configurerModeTransmission: false,
-      };
-    }
     case "DDETS": {
       return {
         viewContacts: false,
@@ -236,12 +198,16 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
         configurerModeTransmission: false,
       };
     }
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
+    case "CARIF_OREF_REGIONAL":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "DRAAF":
+    case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
       return {
-        viewContacts: true,
-        infoTransmissionEffectifs: true,
-        indicateursEffectifs: true,
+        viewContacts: false,
+        infoTransmissionEffectifs: false,
+        indicateursEffectifs: false,
         effectifsNominatifs: {
           apprenant: false,
           apprenti: false,

@@ -4,11 +4,11 @@ import {
   getAnneeScolaireFromDate,
   getAnneeScolaireListFromDateRange,
   getAnneesScolaireListFromDate,
-  getSIFADate,
 } from "./anneeScolaire";
 
 describe("getAnneesScolaireListFromDateRange()", () => {
   [
+    { start: "2025-01-01", end: "2026-01-02", expected: ["2024-2025", "2025-2025", "2025-2026", "2026-2026"] },
     { start: "2020-09-01", end: "2020-09-30", expected: ["2020-2020", "2020-2021"] },
     { start: "2025-01-01", end: "2025-07-31", expected: ["2024-2025", "2025-2025"] },
     { start: "2025-01-01", end: "2025-08-02", expected: ["2024-2025", "2025-2025", "2025-2026"] },
@@ -125,24 +125,6 @@ describe("getAnneeScolaireFromDate()", () => {
   ].forEach(({ date, expected }) => {
     it(`returns ${expected} for ${date}`, () => {
       expect(getAnneeScolaireFromDate(new Date(`${date}T00:00:00Z`))).toStrictEqual(expected);
-    });
-  });
-});
-
-describe("getSIFADate()", () => {
-  [
-    { date: "2020-09-01", expected: "2020" },
-    { date: "2021-01-10", expected: "2020" },
-    { date: "2021-07-31", expected: "2020" },
-    { date: "2021-08-01", expected: "2021" },
-    { date: "2021-10-01", expected: "2021" },
-    { date: "2021-12-31", expected: "2021" },
-    { date: "2022-03-01", expected: "2021" },
-    { date: "2022-07-31", expected: "2021" },
-    { date: "2022-08-01", expected: "2022" },
-  ].forEach(({ date, expected }) => {
-    it(`returns Date(${expected}-12-31) for ${date}`, () => {
-      expect(getSIFADate(new Date(`${date}T00:00:00Z`))).toStrictEqual(new Date(`${expected}-12-31T23:59:59.999Z`));
     });
   });
 });

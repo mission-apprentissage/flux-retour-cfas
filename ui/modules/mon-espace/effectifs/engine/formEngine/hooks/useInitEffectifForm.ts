@@ -7,7 +7,7 @@ import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifFormSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/effectifFormSchema";
 import { initFields } from "@/modules/mon-espace/effectifs/engine/formEngine/initFields";
 
-export const useInitEffectifForm = ({ controller, modeSifa, canEdit }) => {
+export const useInitEffectifForm = ({ controller, canEdit }) => {
   const effectifId = useRecoilValue<any>(effectifIdAtom);
   const organisme = useRecoilValue<any>(organismeAtom);
 
@@ -16,7 +16,7 @@ export const useInitEffectifForm = ({ controller, modeSifa, canEdit }) => {
     async () => {
       if (!effectifId) return null;
       const effectifForm = await _get(`/api/v1/effectif/${effectifId}`);
-      const fields = initFields({ effectifForm, schema: effectifFormSchema, modeSifa, canEdit, organisme });
+      const fields = initFields({ effectifForm, schema: effectifFormSchema, canEdit, organisme });
       controller.setFields(fields);
       return effectifForm;
     },

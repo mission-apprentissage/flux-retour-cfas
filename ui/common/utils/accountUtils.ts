@@ -23,14 +23,9 @@ export function getAccountLabel(auth: AuthContext): string {
     case "ARML":
       return auth.organisation.nom ? `${typeItem.nom} ${auth.organisation.nom}` : typeItem.nom;
     case "ORGANISME_FORMATION":
-    case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return typeItem.nom;
     case "DREETS":
-    case "DRAAF":
-    case "DRAFPIC":
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
     case "ACADEMIE": {
       const codeAcademie = (auth.organisation as IOrganisationOperateurPublicAcademieJson).code_academie;
       return `${typeItem.nom} ${codeAcademie ? getAcademieByCode(codeAcademie)?.nom : ""}`;

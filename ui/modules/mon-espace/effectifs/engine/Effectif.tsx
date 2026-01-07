@@ -10,24 +10,15 @@ import { useInitEffectifForm } from "./formEngine/hooks/useInitEffectifForm";
 import { useEffectifForm } from "./formEngine/useEffectifForm";
 
 interface EffectifProps {
-  modeSifa: boolean;
   canEdit: boolean;
   parcours: Statut["parcours"];
-  refetch: any;
   transmissionDate: Date | null;
 }
 
-const Effectif = React.memo(function EffectifMemo({
-  modeSifa = false,
-  canEdit = false,
-  parcours,
-  refetch,
-  transmissionDate,
-}: EffectifProps) {
+const Effectif = React.memo(function EffectifMemo({ canEdit = false, parcours, transmissionDate }: EffectifProps) {
   const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
   const { isLoading } = useInitEffectifForm({
     controller: effectifFormController,
-    modeSifa,
     canEdit,
   });
   useAutoSave({ controller: effectifFormController });
@@ -40,7 +31,7 @@ const Effectif = React.memo(function EffectifMemo({
     <>
       {/* @ts-expect-error */}
       <EffectifFormControllerContext.Provider value={effectifFormController}>
-        <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} transmissionDate={transmissionDate} />
+        <EffectifForm parcours={parcours} transmissionDate={transmissionDate} />
       </EffectifFormControllerContext.Provider>
     </>
   );

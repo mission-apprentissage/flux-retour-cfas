@@ -1,17 +1,19 @@
 import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { getDomTomISOCountryCodeFromPhoneNumber } from "shared/utils/phone";
 
-export function formatPhoneNumber(phone: string | undefined | null): string {
-  if (!phone) return "";
+export function formatPhoneNumber(phone: string | undefined | null): string | null {
+  if (!phone) return null;
 
   try {
-    const phoneNumber = parsePhoneNumberWithError(phone, "FR");
+    const countryCode = getDomTomISOCountryCodeFromPhoneNumber(phone);
+    const phoneNumber = parsePhoneNumberWithError(phone, countryCode);
 
     if (phoneNumber && phoneNumber.isValid()) {
       return phoneNumber.formatNational();
     }
 
-    return phone;
+    return null;
   } catch {
-    return phone;
+    return null;
   }
 }

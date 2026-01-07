@@ -2,6 +2,7 @@ import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Flex, Button, useDisclosure
 import { useRef, useEffect, useState } from "react";
 import { DuplicateEffectifDetail, getStatut } from "shared";
 
+import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { getNestedValue } from "@/common/utils/misc";
 import { ScrollShadowBox } from "@/components/ScrollShadowBox/ScrollShadowBox";
@@ -24,7 +25,11 @@ const personalDetails = [
   { label: "Numéro INE", key: "apprenant.ine" },
   { label: "Date de naissance", key: "apprenant.date_de_naissance", isDate: true },
   { label: "Courriel", key: "apprenant.courriel" },
-  { label: "Téléphone", key: "apprenant.telephone" },
+  {
+    label: "Téléphone",
+    key: "apprenant.telephone",
+    render: (duplicate: DuplicateEffectifDetail) => formatPhoneNumber(duplicate.apprenant?.telephone) || "-",
+  },
   { label: "Identifiant ERP", key: "id_erp_apprenant" },
   { label: "Année scolaire", key: "_id.annee_scolaire" },
 ];

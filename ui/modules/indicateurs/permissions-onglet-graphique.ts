@@ -6,13 +6,7 @@ export function canViewOngletIndicateursVueGraphique(organisationType: IOrganisa
       return false;
 
     case "TETE_DE_RESEAU":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
-    case "DRAFPIC":
     case "ACADEMIE":
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return true;
 

@@ -4,7 +4,7 @@ export const categoriesCompteInscription = [
     value: "organisme_formation",
   },
   {
-    text: "Un opérateur public (D(R)(I)EETS, DDETS, DRAAF, DGEFP, Académie, Conseil régional…)",
+    text: "Un opérateur public (D(R)(I)EETS, DDETS, DGEFP, Académie…)",
     value: "operateur_public",
   },
   {
@@ -14,10 +14,6 @@ export const categoriesCompteInscription = [
   {
     text: "Un réseau d'organismes de formation",
     value: "tete_de_reseau",
-  },
-  {
-    text: "Un membre du Réseau des CARIF OREF",
-    value: "carif_oref",
   },
   {
     text: "Une structure régionale de France Travail",

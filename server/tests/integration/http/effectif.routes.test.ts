@@ -66,20 +66,13 @@ describe("Routes diverses", () => {
         "Tête de réseau autre réseau": false,
         "DREETS même région": false,
         "DREETS autre région": false,
-        "DRAFPIC régional même région": false,
-        "DRAFPIC régional autre région": false,
-        "DRAAF même région": false,
-        "DRAAF autre région": false,
         "Conseil Régional même région": false,
         "Conseil Régional autre région": false,
-        "CARIF OREF régional même région": false,
-        "CARIF OREF régional autre région": false,
         "DDETS même département": false,
         "DDETS autre département": false,
         "Académie même académie": false,
         "Académie autre académie": false,
         "Opérateur public national": false,
-        "CARIF OREF national": false,
       };
       testPermissions(accesOrganisme, async (organisation, allowed) => {
         const response = await requestAsOrganisation(organisation, "delete", `/api/v1/effectif/${effectifId}`);

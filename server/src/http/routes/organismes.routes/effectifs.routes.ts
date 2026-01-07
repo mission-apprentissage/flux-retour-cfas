@@ -28,7 +28,7 @@ export default () => {
       const updated = await validateFullZodObjectSchema(req.body, {
         "apprenant.type_cfa": primitivesV3.type_cfa.optional(),
       });
-      await updateOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true", updated);
+      await updateOrganismeEffectifs(res.locals.organismeId, updated);
     })
   );
   return router;

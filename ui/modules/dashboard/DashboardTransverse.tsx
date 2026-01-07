@@ -2,13 +2,7 @@ import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
-import {
-  ACADEMIES_BY_CODE,
-  getOrganisationLabel,
-  IOrganisationCreate,
-  IOrganisationJson,
-  REGIONS_BY_CODE,
-} from "shared";
+import { ACADEMIES_BY_CODE, getOrganisationLabel, IOrganisationCreate, IOrganisationJson } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
@@ -48,19 +42,10 @@ function getPerimetreDescription(organisation: IOrganisationJson | null): string
     case "TETE_DE_RESEAU":
       return `Votre périmètre correspond aux organismes du réseau ${organisation.reseau}`;
 
-    case "DRAAF":
-    case "DRAFPIC":
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
-      return `Votre périmètre correspond aux organismes de la région ${
-        REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region
-      }`;
     case "ACADEMIE":
       return `Votre périmètre correspond aux organismes de l'académie de ${
         ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie
       }`;
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Votre périmètre contient tous les organismes nationaux";
     default:

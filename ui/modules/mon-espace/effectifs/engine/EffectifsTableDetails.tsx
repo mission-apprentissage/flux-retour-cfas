@@ -5,7 +5,7 @@ import { useSetRecoilState } from "recoil";
 import { effectifIdAtom } from "./atoms";
 import Effectif from "./Effectif";
 
-const EffectifTableDetails = ({ row, modeSifa = false, canEdit = false, refetch }) => {
+const EffectifTableDetails = ({ row, canEdit = false }) => {
   const queryClient = useQueryClient();
   const prevEffectifId = useRef(null);
   const setEffectifId = useSetRecoilState(effectifIdAtom);
@@ -23,11 +23,9 @@ const EffectifTableDetails = ({ row, modeSifa = false, canEdit = false, refetch 
 
   return (
     <Effectif
-      modeSifa={modeSifa}
       canEdit={canEdit}
       parcours={row?.original?.statut?.parcours || []}
       transmissionDate={row?.original?.transmitted_at || null}
-      refetch={refetch}
     />
   );
 };
