@@ -59,9 +59,12 @@ export const EffectifForm = memo(
     const effectifId = useRecoilValue<any>(effectifIdAtom);
     const { validationErrorsByBlock } = useRecoilValue<any>(effectifStateSelector(effectifId));
     const values = useRecoilValue<any>(valuesSelector);
-    const sortedParcours = [...parcours].reverse();
-    const currentStatus = sortedParcours[0];
-    const historyStatus = sortedParcours.slice(1);
+    const now = new Date();
+    const pastStatuses = [...parcours]
+      .filter((s) => new Date(s.date) <= now)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const currentStatus = pastStatuses.at(-1);
+    const historyStatus = pastStatuses.slice(0, -1).reverse();
     const computeTransmissionDate = (d: Date | null) => {
       return d ? prettyPrintDate(d) : "plus de 2 semaines";
     };
@@ -83,7 +86,7 @@ export const EffectifForm = memo(
                   validationErrors={validationErrorsByBlock.statuts}
                 >
                   <VStack align="stretch" spacing={4} px={2} py={3}>
-                    {parcours.length > 0 ? (
+                    {currentStatus ? (
                       <>
                         <HStack justifyContent="space-between">
                           <Text fontSize={14}>Statut actuel</Text>
