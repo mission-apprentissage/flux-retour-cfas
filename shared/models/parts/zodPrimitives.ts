@@ -36,6 +36,47 @@ const sixMonthAgo = subDays(new Date(), 30 * 6);
 const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 
 export const extensions = {
+  emailWithFallback: () =>
+    z.preprocess(
+      (v: any) => (v ? String(v).trim() : v),
+      z
+        .string()
+        .transform((val) => {
+          const emailResult = z.string().email().safeParse(val);
+          if (emailResult.success) {
+            return emailResult.data;
+          }
+          return val;
+        })
+        .describe("Email avec fallback sur string si invalide")
+    ),
+
+  siretWithFallback: () =>
+    z.preprocess(
+      (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
+      z
+        .string()
+        .transform((val) => {
+          const siretResult = z.string().regex(SIRET_REGEX).safeParse(val);
+          if (siretResult.success) {
+            return siretResult.data;
+          }
+          return val;
+        })
+        .describe("SIRET avec fallback sur string si invalide")
+    ),
+
+  numberOrNull: (min?: number, max?: number) =>
+    z.preprocess((v: any) => {
+      if (v === null || v === undefined || v === "") return null;
+      const num = Number(v);
+      if (isNaN(num)) return null;
+      if (!Number.isInteger(num)) return null;
+      if (min !== undefined && num < min) return null;
+      if (max !== undefined && num > max) return null;
+      return num;
+    }, z.number().int().nullable()),
+
   phone: () =>
     z.coerce
       .string()
