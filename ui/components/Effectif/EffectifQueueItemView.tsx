@@ -4,6 +4,8 @@ import { SOURCE_APPRENANT, TD_MANUEL_ELEMENT_LINK } from "shared";
 import { dossierApprenantSchemaV3Base } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
 
+import { formatPhoneNumber } from "@/app/_utils/phone.utils";
+
 import { InfoTooltip } from "../Tooltip/InfoTooltip";
 
 import { ErrorMessages } from "./EffectifErrorsMessage";
@@ -160,7 +162,9 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
                 </Td>
                 <Td fontWeight="bold" width="40%" whiteSpace="normal" wordBreak="break-word">
                   {validationErrorFormated[rowItem.value] ? <WarningTwoIcon color="#CE0500" mr={1} /> : null}
-                  {effectifQueueItem[rowItem.value]}
+                  {rowItem.value === "tel_apprenant"
+                    ? formatPhoneNumber(effectifQueueItem[rowItem.value]) || "-"
+                    : effectifQueueItem[rowItem.value]}
                   {validationErrorFormated[rowItem.value] ? (
                     <InfoTooltip
                       headerComponent={() => <Text>{rowItem.value}</Text>}
