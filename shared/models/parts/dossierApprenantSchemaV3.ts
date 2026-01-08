@@ -33,8 +33,8 @@ export const dossierApprenantSchemaV3Base = z.object({
 
   // OPTIONAL FIELDS
   ine_apprenant: primitivesV1.apprenant.ine.optional(),
-  email_contact: extensions.emailWithFallback().optional(),
-  tel_apprenant: z.preprocess((v) => (v ? String(v) : null), z.string().nullable()).nullish(),
+  email_contact: primitivesV1.apprenant.email.optional(),
+  tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
   // The following field is missing in V3
   // siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
   libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
