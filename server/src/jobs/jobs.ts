@@ -133,9 +133,6 @@ const dailyJobs = async (queued: boolean) => {
 
   await addJob({ name: "hydrate:transmission-daily", queued });
 
-  // # Mise à jour des effectifs DECA
-  await addJob({ name: "hydrate:contrats-deca-raw", queued });
-
   return 0;
 };
 
@@ -212,6 +209,16 @@ export async function setupJobProcessor() {
               handler: async () => {
                 await updateNotActivatedMissionLocaleEffectifSnapshot();
                 await hydrateMissionLocaleStats();
+              },
+            },
+            "hydrate:contrats-deca-raw": {
+              cron_string: "30 10 * * 7",
+              handler: async () => {
+                if (config.env !== "production") {
+                  logger.warn("hydrate:contrats-deca-raw job can only be run in production environment");
+                  return 0;
+                }
+                return hydrateDecaRaw();
               },
             },
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
