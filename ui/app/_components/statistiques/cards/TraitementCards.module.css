@@ -1,0 +1,51 @@
+.tooltipWrapper {
+  font-size: 12px;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tooltipHeaderIcon {
+  color: #000091;
+}
+
+.tooltipHeaderTitle {
+  font-weight: 700;
+}
+
+.tooltipContent {
+  font-weight: 500;
+}
+
+.tooltipText {
+  font-size: 12px;
+  margin: 0;
+}
+
+.tooltipTextSpaced {
+  font-size: 12px;
+  margin: 12px 0 0 0;
+}
+
+.bulletList {
+  padding: 0;
+  margin: 8px 0;
+}
+
+.bulletItem {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulletDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
