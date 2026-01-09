@@ -54,6 +54,23 @@ export const DOSSIERS_TRAITES_LABELS = {
   autre: "Autre",
 } as const;
 
+export const DOSSIERS_TRAITES_DESCRIPTIONS = {
+  rdv_pris:
+    "La Mission Locale a réussi à contacter le jeune et à convenir d'un rendez-vous pour commencer ou poursuivre un accompagnement.",
+  nouveau_projet:
+    "Le jeune a un nouveau projet en cours. Soit il a retrouvé un nouveau contrat. Soit il est en cours de rescolarisation.\nCe jeune ne nécessite pas d'accompagnement de la Mission Locale.",
+  contacte_sans_retour:
+    "Le jeune a été contacté une fois par la Mission Locale mais n'a pas donné de réponse. La Mission Locale a prévu de relancer la démarche de contact d'ici peu.",
+  deja_accompagne:
+    "La Mission Locale a réussi à contacter le jeune et sait qu'il est déjà accompagné par le service public à l'emploi, soit dans la structure soit dans une autre (autre antenne MiLo ou France Travail).",
+  injoignables:
+    "La Mission Locale a tenté de contacter le jeune à plusieurs reprises et de différentes manières mais n'a jamais obtenu de réponse.\nElle marque ce dossier comme traité mais le jeune sera resté injoignable.",
+  coordonnees_incorrectes:
+    "La Mission Locale a tenté de contacter le jeune mais les coordonnées fournies par le CFA sont incorrectes et par conséquent ne lui permettent pas d'atteindre ce jeune.\nMalheureusement la Mission Locale n'a pas la possibilité de chercher d'autre moyen de le contacter.",
+  autre:
+    "NB : Cette catégorie de traitement de dossier a vocation à être supprimée dans la démarche d'amélioration continue du service du Tableau de bord de l'apprentissage.\nUne Mission Locale peut marquer un dossier comme traité avec le motif \"Autre\" (auquel s'ajoute parfois un commentaire). Ce motif couvre principalement des cas exceptionnels comme des déménagements, des décès, des situations socio-professionnelles trop spéciales.\nPour améliorer nos synthèses vous retrouvez actuellement la prise en compte de la raison pour limiter l'utilisation de cette catégorie \"Autre\".",
+} as const;
+
 export const RUPTURANTS_COLORS = {
   a_traiter: COLOR_PALETTE.ML_INACTIVE,
   traites: "#00A95F",
