@@ -3,7 +3,18 @@
 import { ChartsTooltipContainer, useAxesTooltip, useItemTooltip } from "@mui/x-charts/ChartsTooltip";
 import type { ChartsTooltipContainerProps } from "@mui/x-charts/ChartsTooltip";
 
+import { DOSSIERS_TRAITES_DESCRIPTIONS, DOSSIERS_TRAITES_LABELS } from "../constants";
+
 import styles from "./ChartTooltip.module.css";
+
+const getDescriptionFromLabel = (label: string): string | null => {
+  const entries = Object.entries(DOSSIERS_TRAITES_LABELS) as [keyof typeof DOSSIERS_TRAITES_DESCRIPTIONS, string][];
+  const found = entries.find(([, value]) => value === label);
+  if (found) {
+    return DOSSIERS_TRAITES_DESCRIPTIONS[found[0]];
+  }
+  return null;
+};
 
 export function ItemChartTooltip(props: ChartsTooltipContainerProps) {
   const tooltipData = useItemTooltip();
@@ -16,6 +27,7 @@ export function ItemChartTooltip(props: ChartsTooltipContainerProps) {
   const rawValue = tooltipData.formattedValue || tooltipData.value;
   const displayValue = typeof rawValue === "number" ? rawValue.toLocaleString("fr-FR") : String(rawValue);
   const displayColor = tooltipData.color;
+  const description = getDescriptionFromLabel(displayLabel);
 
   return (
     <ChartsTooltipContainer trigger="item" {...props}>
@@ -27,6 +39,16 @@ export function ItemChartTooltip(props: ChartsTooltipContainerProps) {
           </div>
           <span className={styles.tooltipValue}>{displayValue}</span>
         </div>
+        {description && (
+          <p className={styles.tooltipDescription}>
+            {description.split("\n").map((line, index) => (
+              <span key={index}>
+                {line}
+                {index < description.split("\n").length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        )}
       </div>
     </ChartsTooltipContainer>
   );

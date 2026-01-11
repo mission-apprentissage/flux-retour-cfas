@@ -109,7 +109,7 @@ interface StatsAggregationOptions {
 
 const DEFAULT_STATS_OPTIONS: StatsAggregationOptions = {
   includeInjoignableInContacte: true,
-  includeAutreAvecContactInRepondu: true,
+  includeAutreAvecContactInRepondu: false,
   accompagneUsesNouveauProjet: false,
 };
 
@@ -538,18 +538,12 @@ export const getTraitementStats = async (
               "$latest_stats.deja_accompagne",
               "$latest_stats.contacte_sans_retour",
               "$injoignables",
-              "$autre_avec_contact",
             ],
           },
         },
         total_repondu: {
           $sum: {
-            $add: [
-              "$latest_stats.rdv_pris",
-              "$latest_stats.nouveau_projet",
-              "$latest_stats.deja_accompagne",
-              "$autre_avec_contact",
-            ],
+            $add: ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet", "$latest_stats.deja_accompagne"],
           },
         },
         total_accompagne: {

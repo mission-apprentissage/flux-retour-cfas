@@ -77,6 +77,20 @@ export const extensions = {
       return num;
     }, z.number().int().nullable()),
 
+  codePostalOrNull: () =>
+    z.preprocess((v: any) => {
+      if (v === null || v === undefined || v === "") return null;
+      const str = String(v).trim().padStart(5, "0");
+      return CODE_POSTAL_REGEX.test(str) ? str : null;
+    }, z.string().nullable()),
+
+  siretOrNull: () =>
+    z.preprocess((v: any) => {
+      if (v === null || v === undefined || v === "") return null;
+      const str = String(v).replace(/[\s.-]+/g, "");
+      return SIRET_REGEX.test(str) ? str : null;
+    }, z.string().nullable()),
+
   phone: () =>
     z.coerce
       .string()
