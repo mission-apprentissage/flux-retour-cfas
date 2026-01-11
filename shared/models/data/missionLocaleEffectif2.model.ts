@@ -10,7 +10,10 @@ import { zPersonV2 } from "./v2/person.v2.model";
 const collectionName = "missionLocaleEffectif2";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ mission_locale_id: 1, effectif_id: 1 }, { unique: true }],
+  [{ mission_locale_id: 1, effectifV2_id: 1 }, { unique: true }],
+  [{ "organisme_data.acc_conjoint_by": 1, "organisme_data.has_unread_notification": 1 }, {}],
+  [{ "computed.formation.organisme_formateur_id": 1, "organisme_data.acc_conjoint_by": 1 }, {}],
+  [{ "computed.formation.organisme_formateur_id": 1, "organisme_data.acc_conjoint": 1 }, {}],
 ];
 
 export enum SITUATION_ENUM {
@@ -93,6 +96,7 @@ const zMissionLocaleEffectif2 = z.object({
       probleme_type: zProblemeTypeEnum.nullish(),
       probleme_detail: z.string().nullish(),
       created_at: z.date().nullish(),
+      read_by: z.array(zObjectId).default([]).describe("Liste des IDs des utilisateurs CFA qui ont lu ce log"),
     })
     .nullish(),
   organisme_data: z
@@ -104,6 +108,15 @@ const zMissionLocaleEffectif2 = z.object({
       motif: z.array(zAccConjointMotifEnum).nullish(),
       commentaires: z.string().nullish(),
       reponse_at: z.date({ description: "Date de réponse au formulaire par le CFA" }).nullish(),
+      created_by: zObjectId.nullish(),
+      has_unread_notification: z
+        .boolean()
+        .default(false)
+        .describe(
+          "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
+        )
+        .nullish(),
+      acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
     })
     .nullish(),
   effectif_choice: z
@@ -141,6 +154,7 @@ const zMissionLocaleEffectif2 = z.object({
     .object({
       organisme: z
         .object({
+          id: zObjectId.nullish(),
           ml_beta_activated_at: z.date().nullish(),
         })
         .nullish(),

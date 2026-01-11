@@ -31,7 +31,7 @@ async function ingestDossier(
     dossier,
     adresse,
     person_id: person._id,
-    formation_id: formation._id,
+    formation: formation,
     date_transmission,
   });
   await updateParcoursPersonV2(person._id, effectifV2);

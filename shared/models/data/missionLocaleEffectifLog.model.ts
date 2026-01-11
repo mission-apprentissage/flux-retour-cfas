@@ -39,6 +39,14 @@ const zMissionLocaleEffectifOrganismeLogCreate = z.object({
   created_by: zObjectId.nullish(),
   mission_locale_effectif_id: zObjectId,
   mission_locale_effectif_2_id: zObjectId.nullish(),
+  has_unread_notification: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
+    )
+    .nullish(),
+  acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
 });
 
 export const zMissionLocaleEffectifMLLog = zBase.merge(zMissionLocaleEffectifMLLogCreate);

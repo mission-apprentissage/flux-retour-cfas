@@ -2,7 +2,7 @@ import Boom from "boom";
 import { formatISO } from "date-fns";
 import { isEqual } from "lodash-es";
 import { ObjectId } from "mongodb";
-import type { IEffectifV2 } from "shared/models";
+import type { IEffectifV2, IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { effectifV2Db } from "@/common/model/collections";
@@ -56,7 +56,7 @@ export type IIngestEffectifV2Params = {
   dossier: Pick<IDossierApprenantSchemaV3, IIngestEffectifUsedFields>;
   adresse: IEffectifV2["adresse"];
   person_id: ObjectId;
-  formation_id: ObjectId;
+  formation: IFormationV2;
   date_transmission: Date;
 };
 
@@ -145,7 +145,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     _id: new ObjectId(),
     identifiant: {
       person_id: input.person_id,
-      formation_id: input.formation_id,
+      formation_id: input.formation._id,
     },
   };
 
@@ -203,10 +203,11 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     date_fin: input.dossier.date_fin_formation ?? null,
   });
 
+  const computedFormation = getCurrentSession(input.formation, input.dossier.date_entree_formation);
   const computed: IEffectifV2["_computed"] = {
     statut: buildEffectifStatus(
       {
-        session: updateFields.session,
+        session: computedFormation ?? updateFields.session,
         contrats: contrats.reduce((acc, contrat) => {
           acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
           return acc;
@@ -216,6 +217,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
       new Date()
     ),
     session: formation ?? null,
+    formation: computedFormation,
   };
 
   const result = await effectifV2Db().findOneAndUpdate(
@@ -279,4 +281,26 @@ export async function updateComputedStatut(effectif: IEffectifV2, now: Date) {
   if (op !== null) {
     throw Boom.internal("ensureStatutIsUpToDate: too many iterations", { effectifId: effectif._id });
   }
+}
+
+function getCurrentSession(formation: IFormationV2, date_debut: Date) {
+  if (!date_debut) {
+    return null;
+  }
+
+  const currentSessionIndex = formation?.computed?.formation.sessions
+    ?.sort((a, b) => {
+      return new Date(a.debut).getTime() - new Date(b.debut).getTime();
+    })
+    .findIndex((s) => s.debut >= date_debut);
+
+  if (currentSessionIndex === undefined || currentSessionIndex === -1) {
+    return;
+  }
+
+  if (currentSessionIndex === 0) {
+    return;
+  }
+
+  return formation?.computed?.formation.sessions?.[currentSessionIndex - 1];
 }

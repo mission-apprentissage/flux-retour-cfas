@@ -45,6 +45,8 @@ import {
   hydratePersonV2Parcours,
   setMLDataFromLog,
   updateEffectifV2,
+  updateEffectifV2ComputedFormation,
+  updateEffectifV2ComputedStatut,
   updateMLLogWithType,
 } from "./hydrate/effectifsV2/hydrate-effectif-v2";
 import { hydrateFormationV2 } from "./hydrate/formations/hydrate-formation-v2";
@@ -608,6 +610,16 @@ export async function setupJobProcessor() {
       "tmp:hydrate:timeseries-stats-ml": {
         handler: async () => {
           return hydrateDailyMissionLocaleStats();
+        },
+      },
+      "tmp:hydrate:eff-v2-computed-formation": {
+        handler: async () => {
+          return updateEffectifV2ComputedFormation();
+        },
+      },
+      "tmp:hydrate:eff-v2-computed-statut": {
+        handler: async () => {
+          return updateEffectifV2ComputedStatut();
         },
       },
     },

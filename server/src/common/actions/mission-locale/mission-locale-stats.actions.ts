@@ -38,7 +38,6 @@ import {
   TIME_SERIES_POINTS_COUNT,
   withMissionLocaleFilter,
 } from "./mission-locale-stats.helpers";
-import { computeMissionLocaleStats } from "./mission-locale.actions";
 import { computeMissionLocaleStatsV2 } from "./mission-locale.actions.v2";
 
 export type { StatsPeriod } from "shared/models/data/nationalStats.model";
@@ -47,7 +46,7 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
   const dateToUse = normalizeToUTCDay(date ?? new Date());
 
   const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const mlStats = await computeMissionLocaleStats(ml, dateToUse);
+  const mlStats = await computeMissionLocaleStatsV2(ml, dateToUse);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
@@ -59,31 +58,6 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
         stats: mlStats,
         updated_at: new Date(),
         computed_day: dateToUse,
-      },
-      $setOnInsert: {
-        mission_locale_id: ml._id,
-        created_at: new Date(),
-        _id: new ObjectId(),
-      },
-    },
-    {
-      upsert: true,
-    }
-  );
-};
-
-export const createOrUpdateMissionLocaleStatsV2 = async (missionLocaleId: ObjectId) => {
-  const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const mlStats = await computeMissionLocaleStatsV2(ml);
-
-  await missionLocaleStatsDb().findOneAndUpdate(
-    {
-      mission_locale_id: missionLocaleId,
-    },
-    {
-      $set: {
-        stats: mlStats,
-        updated_at: new Date(),
       },
       $setOnInsert: {
         mission_locale_id: ml._id,

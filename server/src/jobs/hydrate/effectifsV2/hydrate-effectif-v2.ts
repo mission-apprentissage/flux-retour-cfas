@@ -2,6 +2,7 @@ import fs from "fs";
 
 import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
+import { formatISO } from "date-fns";
 import { IEffectifV2, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import {
   IMissionLocaleEffectifMLLog,
@@ -23,6 +24,7 @@ import {
 import { getEffectifCertification } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
 import { updateParcoursPersonV2 } from "@/jobs/ingestion/person/person.ingestion";
 import { findOrganismeWithStats } from "@/jobs/ingestion/process-ingestion";
+import { buildEffectifStatus } from "@/jobs/ingestion/status/effectif_status.builder";
 
 export const hydratePersonV2Parcours = async () => {
   const BULK_SIZE = 100;
@@ -590,6 +592,7 @@ export const setMLDataFromLog = async () => {
                   probleme_type: logML?.probleme_type,
                   probleme_detail: logML?.probleme_detail,
                   created_at: logML?.created_at,
+                  read_by: logML?.read_by || [],
                 }
               : null,
             organisme_data: logCFA
@@ -599,13 +602,14 @@ export const setMLDataFromLog = async () => {
                   motif: logCFA?.motif,
                   commentaires: logCFA?.commentaires,
                   reponse_at: logCFA?.created_at,
+                  created_by: logCFA?.created_by,
+                  has_unread_notification: logCFA?.has_unread_notification || false,
+                  acc_conjoint_by: logCFA?.acc_conjoint_by || null,
                 }
               : null,
           },
         }
       );
-
-      // console.log(d)
     } catch (err) {
       console.log(`Erreur lors de la mise à jour de l'effectifV2 ${effv2Id}: ${err}`);
       console.log(JSON.stringify(err, null, 2));
@@ -649,6 +653,28 @@ export const updateEffectifV2 = async () => {
       return;
     }
 
+    const computeSession = () => {
+      const debutSession = effectif?.session?.debut;
+      if (!debutSession) {
+        return;
+      }
+      const currentSessionIndex = formation?.computed?.formation.sessions
+        ?.sort((a, b) => {
+          return new Date(a.debut).getTime() - new Date(b.debut).getTime(); // tr
+        })
+        .findIndex((s) => s.debut >= debutSession);
+
+      if (currentSessionIndex === undefined || currentSessionIndex === -1) {
+        return;
+      }
+
+      if (currentSessionIndex === 0) {
+        return;
+      }
+
+      return formation?.computed?.formation.sessions?.[currentSessionIndex - 1] || null;
+    };
+
     const person = await personV2Db().findOne({ _id: person_id });
     if (!person) {
       return;
@@ -661,11 +687,26 @@ export const updateEffectifV2 = async () => {
       date_fin: effectif.session.fin ?? null,
     });
 
+    const computedSession = computeSession();
+
+    const statut = buildEffectifStatus(
+      {
+        session: computedSession ?? effectif.session,
+        contrats: Object.values(effectif.contrats).reduce((acc, contrat) => {
+          acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
+          return acc;
+        }, {}),
+        exclusion: effectif.exclusion,
+      },
+      new Date()
+    );
     await effectifV2Db().updateOne(
       { _id: effectif._id },
       {
         $set: {
           "_computed.session": certif,
+          "_computed.statut": statut,
+          "_computed.formation": computedSession,
         },
       }
     );
@@ -717,5 +758,158 @@ export const updateEffectifV2 = async () => {
     count += data.length;
     logger.info(`Mise à jour des effectifs V2 terminée: ${count}/${all} effectifs traités`);
     data = [];
+  }
+};
+
+export const updateEffectifV2ComputedFormation = async () => {
+  const cursor = effectifV2Db().find({});
+  let data: Array<any> = [];
+  let count = 0;
+
+  const all = await effectifV2Db().countDocuments();
+  const startTime = Date.now();
+
+  const processEffectif = async (eff2: IEffectifV2) => {
+    const formation = await formationV2Db().findOne({ _id: eff2?.identifiant.formation_id });
+    const debutSession = eff2?.session?.debut;
+    if (!debutSession) {
+      return;
+    }
+    const currentSessionIndex = formation?.computed?.formation.sessions
+      ?.sort((a, b) => {
+        return new Date(a.debut).getTime() - new Date(b.debut).getTime(); // tr
+      })
+      .findIndex((s) => s.debut >= debutSession);
+
+    if (currentSessionIndex === undefined || currentSessionIndex === -1) {
+      return;
+    }
+
+    if (currentSessionIndex === 0) {
+      return;
+    }
+
+    await effectifV2Db().updateOne(
+      { _id: eff2._id },
+      {
+        $set: {
+          "_computed.formation": formation?.computed?.formation.sessions?.[currentSessionIndex - 1] || null,
+        },
+      }
+    );
+  };
+
+  while (await cursor.hasNext()) {
+    const eff2 = await cursor.next();
+
+    if (!eff2) continue;
+
+    data.push(eff2);
+
+    if (data.length >= 500) {
+      await Promise.allSettled(data.map(processEffectif));
+      count += data.length;
+
+      const elapsedTime = Date.now() - startTime;
+      const elapsedSeconds = Math.floor(elapsedTime / 1000);
+      const avgTimePerItem = elapsedTime / count;
+      const remainingItems = all - count;
+      const estimatedRemainingTime = avgTimePerItem * remainingItems;
+      const estimatedRemainingSeconds = Math.floor(estimatedRemainingTime / 1000);
+
+      const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}h ${minutes}m ${secs}s`;
+      };
+
+      logger.info(`Hydratation des organismes formation V2: ${count} formations traitées`);
+      console.log(
+        `Hydratation des organismes formation V2: ${count}/${all} formations traitées (${((count / all) * 100).toFixed(2)}%)`
+      );
+      console.log(
+        `Temps écoulé: ${formatTime(elapsedSeconds)} - Temps estimé restant: ${formatTime(estimatedRemainingSeconds)}`
+      );
+      data = [];
+    }
+  }
+
+  if (data.length > 0) {
+    await Promise.allSettled(data.map(processEffectif));
+  }
+};
+
+export const updateEffectifV2ComputedStatut = async () => {
+  const cursor = effectifV2Db().find();
+  let data: Array<any> = [];
+  let count = 0;
+
+  const all = await effectifV2Db().countDocuments();
+  const startTime = Date.now();
+
+  const processEffectif = async (eff2: IEffectifV2) => {
+    const computed: IEffectifV2["_computed"] = {
+      statut: buildEffectifStatus(
+        {
+          session: eff2._computed?.formation ?? eff2.session,
+          contrats: Object.values(eff2.contrats).reduce((acc, contrat) => {
+            acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
+            return acc;
+          }, {}),
+          exclusion: eff2.exclusion,
+        },
+        new Date()
+      ),
+    };
+
+    await effectifV2Db().updateOne(
+      { _id: eff2._id },
+      {
+        $set: {
+          "_computed.statut": computed.statut,
+        },
+      }
+    );
+  };
+
+  while (await cursor.hasNext()) {
+    const eff2 = await cursor.next();
+
+    if (!eff2) continue;
+
+    data.push(eff2);
+
+    if (data.length >= 500) {
+      await Promise.allSettled(data.map(processEffectif));
+      count += data.length;
+
+      const elapsedTime = Date.now() - startTime;
+      const elapsedSeconds = Math.floor(elapsedTime / 1000);
+      const avgTimePerItem = elapsedTime / count;
+      const remainingItems = all - count;
+      const estimatedRemainingTime = avgTimePerItem * remainingItems;
+      const estimatedRemainingSeconds = Math.floor(estimatedRemainingTime / 1000);
+
+      const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}h ${minutes}m ${secs}s`;
+      };
+
+      logger.info(`Hydratation des organismes formation V2: ${count} formations traitées`);
+      console.log(
+        `Hydratation des organismes formation V2: ${count}/${all} formations traitées (${((count / all) * 100).toFixed(2)}%)`
+      );
+      console.log(
+        `Temps écoulé: ${formatTime(elapsedSeconds)} - Temps estimé restant: ${formatTime(estimatedRemainingSeconds)}`
+      );
+      data = [];
+    }
+  }
+
+  if (data.length > 0) {
+    await Promise.allSettled(data.map(processEffectif));
   }
 };

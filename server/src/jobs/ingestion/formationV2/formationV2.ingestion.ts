@@ -2,7 +2,7 @@ import { ObjectId } from "bson";
 import type { IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
-import { formationV2Db } from "@/common/model/collections";
+import { formationAPIV2Db, formationV2Db } from "@/common/model/collections";
 
 import { findOrganismeWithStats } from "../process-ingestion";
 
@@ -32,19 +32,50 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
     dossier.etablissement_responsable_siret
   );
 
+  const identifiant = {
+    cfd: dossier.formation_cfd ?? null,
+    rncp: dossier.formation_rncp ?? null,
+    responsable_siret: dossier.etablissement_responsable_siret,
+    responsable_uai: dossier.etablissement_responsable_uai,
+    formateur_siret: dossier.etablissement_formateur_siret,
+    formateur_uai: dossier.etablissement_formateur_uai,
+  };
+
+  const formationExisting = await formationV2Db().findOne({
+    "identifiant.cfd": identifiant.cfd,
+    "identifiant.rncp": identifiant.rncp,
+    "identifiant.responsable_siret": identifiant.responsable_siret,
+    "identifiant.responsable_uai": identifiant.responsable_uai,
+    "identifiant.formateur_siret": identifiant.formateur_siret,
+    "identifiant.formateur_uai": identifiant.formateur_uai,
+  });
+
+  if (formationExisting) {
+    return formationExisting;
+  }
+
+  const { _id, ...apiFormation } = await formationAPIV2Db().findOne({
+    "certification.valeur.identifiant.cfd": identifiant.cfd,
+    "certification.valeur.identifiant.rncp": identifiant.rncp,
+    "responsable.organisme?.identifiant.siret": organismeResponsable?.siret,
+    "responsable.organisme?.identifiant.uai": organismeResponsable?.uai,
+    "formateur.organisme?.identifiant.siret": organismeFormateur?.siret,
+    "formateur.organisme?.identifiant.uai": organismeFormateur?.uai,
+  });
+
   const data: IFormationV2 = {
     _id: new ObjectId(),
-    identifiant: {
-      cfd: dossier.formation_cfd ?? null,
-      rncp: dossier.formation_rncp ?? null,
-      responsable_siret: dossier.etablissement_responsable_siret,
-      responsable_uai: dossier.etablissement_responsable_uai,
-      formateur_siret: dossier.etablissement_formateur_siret,
-      formateur_uai: dossier.etablissement_formateur_uai,
-    },
+    identifiant: identifiant,
     draft: true,
     organisme_formateur_id: organismeFormateur?._id,
     organisme_responsable_id: organismeResponsable?._id,
+    fiabilisation: {
+      responsable_siret: organismeResponsable?.siret ?? null,
+      responsable_uai: organismeResponsable?.uai ?? null,
+      formateur_siret: organismeFormateur?.siret ?? null,
+      formateur_uai: organismeFormateur?.uai ?? null,
+    },
+    computed: { formation: apiFormation },
   };
 
   const result = await formationV2Db().findOneAndUpdate(
