@@ -32,7 +32,7 @@ function getDaysBetween({ start, end }: { start: Date; end: Date }): string[] {
 function buildEffectifParcours(
   effectif: Pick<IEffectifV2, "session" | "contrats" | "exclusion">
 ): IEffectifComputedStatut["parcours"] {
-  const parcoursRaw = new Map<string, StatutApprenant>();
+  const parcoursRaw = new Map<string, StatutApprenant | "APPRENTI_AVEC_RUPTURE">();
 
   const contrats = Object.values(effectif.contrats);
   const startDate = min([effectif.session.debut, ...contrats.map((c) => c.date_debut)]);
@@ -56,7 +56,7 @@ function buildEffectifParcours(
       start: contrat.date_debut,
       end: lastDay,
     }).forEach((day) => {
-      parcoursRaw.set(day, STATUT_APPRENANT.APPRENTI);
+      parcoursRaw.set(day, contrat.rupture?.date_rupture ? "APPRENTI_AVEC_RUPTURE" : STATUT_APPRENANT.APPRENTI);
     });
   }
 
@@ -71,25 +71,29 @@ function buildEffectifParcours(
 
   let consecutiveDaysWithoutContrat = 0;
   let hasContract = false;
-  for (const day of days) {
+  for (const [index, day] of days.entries()) {
     const statut = parcoursRaw.get(day);
+    const previousStatut = index > 0 ? parcoursRaw.get(days[index - 1]) : null;
     if (!statut) {
       throw Boom.internal("buildEffectifParcours: unexpected error");
     }
 
-    if (statut === STATUT_APPRENANT.APPRENTI) {
+    if (statut === STATUT_APPRENANT.APPRENTI || statut === "APPRENTI_AVEC_RUPTURE") {
       hasContract = true;
       consecutiveDaysWithoutContrat = 0;
       continue;
     }
 
     consecutiveDaysWithoutContrat += 1;
-
     if (statut === STATUT_APPRENANT.INSCRIT) {
       if (hasContract) {
         parcoursRaw.set(
           day,
-          consecutiveDaysWithoutContrat > 180 ? STATUT_APPRENANT.ABANDON : STATUT_APPRENANT.RUPTURANT
+          consecutiveDaysWithoutContrat > 180
+            ? STATUT_APPRENANT.ABANDON
+            : previousStatut === "APPRENTI_AVEC_RUPTURE" || previousStatut === STATUT_APPRENANT.RUPTURANT
+              ? STATUT_APPRENANT.RUPTURANT
+              : STATUT_APPRENANT.INTER_CONTRAT
         );
       } else {
         parcoursRaw.set(day, consecutiveDaysWithoutContrat > 90 ? STATUT_APPRENANT.ABANDON : STATUT_APPRENANT.INSCRIT);
@@ -102,8 +106,14 @@ function buildEffectifParcours(
   const parcours: IEffectifComputedStatut["parcours"] = [];
 
   let currentStatut: StatutApprenant | null = null;
+
+  const getDayParcours = (d: string) => {
+    const p = parcoursRaw.get(d);
+    return p === "APPRENTI_AVEC_RUPTURE" ? STATUT_APPRENANT.APPRENTI : p;
+  };
+
   for (const day of days) {
-    const statut = parcoursRaw.get(day);
+    const statut = getDayParcours(day);
     if (!statut) {
       throw Boom.internal("buildEffectifParcours: unexpected error");
     }
@@ -119,6 +129,5 @@ function buildEffectifParcours(
 
     currentStatut = statut;
   }
-
   return parcours;
 }
