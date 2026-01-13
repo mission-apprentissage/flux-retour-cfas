@@ -253,6 +253,7 @@ export function convertOrganismeToExport(
 
 export const traitementMLExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
+  { label: "Département", key: "departement_nom", width: 25 },
   { label: "Mission Locale", key: "nom", width: 40 },
   { label: "SIRET", key: "siret", xlsxType: "string", width: 15 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },
