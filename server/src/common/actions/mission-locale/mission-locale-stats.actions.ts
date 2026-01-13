@@ -15,7 +15,7 @@ import { calculatePercentage } from "shared/utils/stats";
 
 import logger from "@/common/logger";
 import {
-  missionLocaleEffectifsDb,
+  missionLocaleEffectifs2Db,
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
@@ -1071,15 +1071,26 @@ const STATUTS_TRAITEMENT_PIPELINE = [
   {
     $group: {
       _id: null,
-      rdv_pris: buildCountIf("$situation", "RDV_PRIS"),
-      nouveau_projet: buildCountIf("$situation", "NOUVEAU_PROJET"),
-      deja_accompagne: buildCountIf("$situation", "DEJA_ACCOMPAGNE"),
-      contacte_sans_retour: buildCountIf("$situation", "CONTACTE_SANS_RETOUR"),
-      injoignables: buildCountIf("$situation", "INJOIGNABLE_APRES_RELANCES"),
-      coordonnees_incorrectes: buildCountIf("$situation", "COORDONNEES_INCORRECT"),
-      autre: buildCountIf("$situation", "AUTRE"),
+      rdv_pris: buildCountIf("$mission_locale_data.situation", "RDV_PRIS"),
+      nouveau_projet: buildCountIf("$mission_locale_data.situation", "NOUVEAU_PROJET"),
+      deja_accompagne: buildCountIf("$mission_locale_data.situation", "DEJA_ACCOMPAGNE"),
+      contacte_sans_retour: buildCountIf("$mission_locale_data.situation", "CONTACTE_SANS_RETOUR"),
+      injoignables: buildCountIf("$mission_locale_data.situation", "INJOIGNABLE_APRES_RELANCES"),
+      coordonnees_incorrectes: buildCountIf("$mission_locale_data.situation", "COORDONNEES_INCORRECT"),
+      autre: buildCountIf("$mission_locale_data.situation", "AUTRE"),
       total_traites: {
-        $sum: { $cond: [{ $and: [{ $ne: ["$situation", null] }, { $ne: ["$situation", ""] }] }, 1, 0] },
+        $sum: {
+          $cond: [
+            {
+              $and: [
+                { $ne: ["$mission_locale_data.situation", null] },
+                { $ne: ["$mission_locale_data.situation", ""] },
+              ],
+            },
+            1,
+            0,
+          ],
+        },
       },
     },
   },
@@ -1123,11 +1134,11 @@ export const getAccompagnementConjointStats = async (
       ? { mission_locale_id: { $in: await getMissionLocaleIdsByRegion(region) } }
       : {};
 
-  const [accConjointStats] = await missionLocaleEffectifsDb()
+  const [accConjointStats] = await missionLocaleEffectifs2Db()
     .aggregate([
       {
         $match: {
-          "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
+          "computed.formation.organisme_formateur_id": { $in: cfaPilotesOids },
           "organisme_data.acc_conjoint": true,
           ...missionLocaleFilter,
         },
@@ -1136,7 +1147,7 @@ export const getAccompagnementConjointStats = async (
         $facet: {
           dossiersPartages: [{ $count: "count" }],
           mlConcernees: [{ $group: { _id: "$mission_locale_id" } }, { $count: "count" }],
-          cfaPartenaires: [{ $group: { _id: "$effectif_snapshot.organisme_id" } }, { $count: "count" }],
+          cfaPartenaires: [{ $group: { _id: "$computed.formation.organisme_formateur_id" } }, { $count: "count" }],
           motifs: MOTIFS_PIPELINE,
           statutsTraitement: STATUTS_TRAITEMENT_PIPELINE,
           dejaConnu: [
@@ -1153,8 +1164,8 @@ export const getAccompagnementConjointStats = async (
     ])
     .toArray();
 
-  const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
-    "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
+  const totalJeunesRupturants = await missionLocaleEffectifs2Db().countDocuments({
+    "computed.formation.organisme_formateur_id": { $in: cfaPilotesOids },
     ...missionLocaleFilter,
   });
 
