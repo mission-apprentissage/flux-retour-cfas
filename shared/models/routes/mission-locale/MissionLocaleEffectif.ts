@@ -56,6 +56,16 @@ const zEffectifMissionLocale = z
           commune: z.string().nullish(),
         })
         .nullish(),
+      contacts_from_referentiel: z
+        .array(
+          z.object({
+            email: z.string(),
+            confirmation_referentiel: z.boolean(),
+            sources: z.array(z.string()),
+          })
+        )
+        .describe("Contacts email du CFA")
+        .optional(),
     }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
