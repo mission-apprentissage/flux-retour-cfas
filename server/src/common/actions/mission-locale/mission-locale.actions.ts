@@ -520,6 +520,19 @@ const addMissionLocaleFieldTraitementStatus = () => {
     $eq: ["$organisme_data.acc_conjoint", true],
   };
 
+  const RUPTURE_MOINS_DE_180_JOURS_CONDITION = {
+    $gte: [
+      "$date_rupture",
+      {
+        $dateSubtract: {
+          startDate: new Date(),
+          unit: "day",
+          amount: 180,
+        },
+      },
+    ],
+  };
+
   const A_RISQUE_CONDITION = {
     $and: [
       {
@@ -528,6 +541,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
       {
         $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
       },
+      RUPTURE_MOINS_DE_180_JOURS_CONDITION,
     ],
   };
 
