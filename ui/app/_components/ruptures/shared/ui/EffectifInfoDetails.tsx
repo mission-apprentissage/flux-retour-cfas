@@ -138,6 +138,16 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }: Effec
                 <p>Cause de rupture : {c.cause_rupture || "non renseignée"}</p>
               </div>
             ))}
+
+            {effectif.organisme?.contacts_from_referentiel &&
+              effectif.organisme.contacts_from_referentiel.length > 0 && (
+                <div className={styles.contractItem}>
+                  <p className={styles.contractLabel}>Email de l&apos;organisme de formation</p>
+                  {effectif.organisme.contacts_from_referentiel.map((contact, idx) => (
+                    <p key={idx}>{contact.email}</p>
+                  ))}
+                </div>
+              )}
           </div>
         )}
       </div>
