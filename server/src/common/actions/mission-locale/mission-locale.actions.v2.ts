@@ -2108,27 +2108,27 @@ export const setEffectifMissionLocaleData = async (
   const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
 
   const setObject = {
-    situation,
-    deja_connu,
-    ...(situation_autre !== undefined ? { situation_autre } : {}),
-    ...(commentaires !== undefined ? { commentaires } : {}),
-    ...(probleme_type !== undefined ? { probleme_type } : {}),
-    ...(probleme_detail !== undefined ? { probleme_detail } : {}),
+    "mission_locale_data.situation": situation,
+    "mission_locale_data.deja_connu": deja_connu,
+    ...(situation_autre !== undefined ? { "mission_locale_data.situation_autre": situation_autre } : {}),
+    ...(commentaires !== undefined ? { "mission_locale_data.commentaires": commentaires } : {}),
+    ...(probleme_type !== undefined ? { "mission_locale_data.probleme_type": probleme_type } : {}),
+    ...(probleme_detail !== undefined ? { "mission_locale_data.probleme_detail": probleme_detail } : {}),
   };
 
   const effectif = await missionLocaleEffectifs2Db().findOne({
     mission_locale_id: missionLocaleId,
-    effectif_id: new ObjectId(effectifId),
+    effectifV2_id: new ObjectId(effectifId),
   });
-
+  console.log("========= EFF FOUND", effectif);
   const updated = await missionLocaleEffectifs2Db().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
-      effectif_id: new ObjectId(effectifId),
+      effectifV2_id: new ObjectId(effectifId),
     },
     {
       $set: {
-        ...setObject, // TODO mise a jour situation
+        ...setObject,
         updated_at: new Date(),
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
@@ -2244,7 +2244,7 @@ export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, 
   const results = await missionLocaleEffectifs2Db().updateMany(
     {
       _id: { $ne: mlEffectifId },
-      effectif_id: effectifId,
+      effectifV2_id: effectifId,
     },
     {
       $set: {

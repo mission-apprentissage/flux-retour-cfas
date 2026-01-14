@@ -54,7 +54,7 @@ export async function ingestFormationV2(dossier: IIngestFormationV2Params): Prom
     return formationExisting;
   }
 
-  const { _id, ...apiFormation } = await formationAPIV2Db().findOne({
+  const apiFormation = await formationAPIV2Db().findOne({
     "certification.valeur.identifiant.cfd": identifiant.cfd,
     "certification.valeur.identifiant.rncp": identifiant.rncp,
     "responsable.organisme?.identifiant.siret": organismeResponsable?.siret,

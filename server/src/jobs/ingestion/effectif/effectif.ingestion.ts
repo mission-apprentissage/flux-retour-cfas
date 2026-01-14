@@ -288,7 +288,7 @@ function getCurrentSession(formation: IFormationV2, date_debut: Date) {
     return null;
   }
 
-  const currentSessionIndex = formation?.computed?.formation.sessions
+  const currentSessionIndex = formation?.computed?.formation?.sessions
     ?.sort((a, b) => {
       return new Date(a.debut).getTime() - new Date(b.debut).getTime();
     })

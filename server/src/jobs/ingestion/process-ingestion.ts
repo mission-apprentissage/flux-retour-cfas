@@ -196,7 +196,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
         {
           $set: {
             effectif_id: upsertedEffectif._id,
-            effectifv2_id: effectifv2?._id,
+            effectifV2_id: effectifv2?._id,
             organisme_id: organisme._id,
             updated_at: currentDate,
             processed_at: currentDate,
