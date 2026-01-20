@@ -52,13 +52,25 @@ export function EffectifInfoDetails({ effectif, infosOpen, setInfosOpen }: Effec
             <p>{effectif.courriel || ""}</p>
           </div>
 
-          {effectif.formation?.referent_handicap && (
+          {(effectif.responsable_mail1 || effectif.responsable_mail2) && (
             <div className="fr-col-12 fr-col-md-6">
               <p className={styles.sectionTitle}>Responsable légal</p>
-              <p>
-                {effectif.formation?.referent_handicap?.prenom} {effectif.formation?.referent_handicap?.nom}
-              </p>
-              <p>{effectif.formation?.referent_handicap?.email}</p>
+              {effectif.responsable_mail1 && <p>{effectif.responsable_mail1}</p>}
+              {effectif.responsable_mail2 && <p>{effectif.responsable_mail2}</p>}
+            </div>
+          )}
+
+          {(effectif.formation?.referent_handicap?.nom ||
+            effectif.formation?.referent_handicap?.prenom ||
+            effectif.formation?.referent_handicap?.email) && (
+            <div className="fr-col-12 fr-col-md-6">
+              <p className={styles.sectionTitle}>Référent handicap</p>
+              {(effectif.formation?.referent_handicap?.prenom || effectif.formation?.referent_handicap?.nom) && (
+                <p>
+                  {effectif.formation?.referent_handicap?.prenom} {effectif.formation?.referent_handicap?.nom}
+                </p>
+              )}
+              {effectif.formation?.referent_handicap?.email && <p>{effectif.formation?.referent_handicap?.email}</p>}
             </div>
           )}
         </div>
