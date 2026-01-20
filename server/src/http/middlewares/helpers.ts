@@ -35,7 +35,7 @@ export function returnResult<TParams = any, TQuery = any, TBody = any, TLocals e
 
 // helpers
 function ensureValidUser(user: AuthContext) {
-  if (user.account_status !== "CONFIRMED") {
+  if (user.account_status !== "CONFIRMED" && user.account_status !== "PENDING_PROFILE_COMPLETION") {
     throw Boom.forbidden("Accès non autorisé");
   }
 }
@@ -67,6 +67,7 @@ export function requireIndicateursOrganismesAccess(req: Request, _res: Response,
 
 export async function requireMissionLocale(req: Request, res: Response, next: NextFunction) {
   const user = req.user as AuthContext;
+  console.log(user);
   ensureValidUser(user);
   if (user.organisation.type !== "MISSION_LOCALE") {
     throw Boom.forbidden("Accès non autorisé");

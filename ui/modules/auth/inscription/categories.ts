@@ -9,7 +9,7 @@ export const categoriesCompteInscription = [
   },
   {
     text: "Une structure des Missions Locales",
-    value: "missions_locales",
+    value: "missions-locales",
   },
   {
     text: "Un réseau d'organismes de formation",

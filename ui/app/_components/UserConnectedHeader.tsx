@@ -20,8 +20,15 @@ export const UserConnectedHeader = () => {
   const open = Boolean(anchorEl);
 
   const logout = async () => {
-    await _post("/api/v1/auth/logout");
-    window.location.href = "/";
+    switch (user?.auth_method) {
+      case "proconnect":
+        //window.location.href = "http://localhost:5001/api/v1/auth/proconnect/logout";
+        window.location.href = "/api/v1/auth/proconnect/logout";
+        break;
+      default:
+        await _post("/api/v1/auth/logout");
+        window.location.href = "/";
+    }
   };
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

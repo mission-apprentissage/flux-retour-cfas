@@ -20,7 +20,7 @@ const contentSecurityPolicy = `
       script-src 'self' 'unsafe-inline' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat  ${process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval' " : ""};
       script-src-attr 'none';
       style-src 'self' https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat https://plugins.crisp.chat https://sentry.apprentissage.beta.gouv.fr ${
+      connect-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat https://plugins.crisp.chat https://sentry.apprentissage.beta.gouv.fr  https://fca.integ01.dev-agentconnect.fr https://auth.agentconnect.gouv.fr ${
         process.env.NEXT_PUBLIC_ENV === "local" ? "http://localhost:5001/" : ""
       };
       upgrade-insecure-requests;
@@ -28,7 +28,7 @@ const contentSecurityPolicy = `
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["shared"],
+  transpilePackages: ["shared", "@codegouvfr/react-dsfr"],
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
   outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),

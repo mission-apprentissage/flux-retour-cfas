@@ -19,7 +19,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 export const zUsersMigration = z.object({
   _id: zObjectId,
   email: z.string().describe("Email utilisateur"),
-  password: z.string().describe("Le mot de passe hashé"),
+  password: z.string().optional().describe("Le mot de passe hashé"),
   civility: z.enum(["Madame", "Monsieur"]).describe("civilité"),
   nom: z.string().describe("Le nom de l'utilisateur"),
   prenom: z.string().describe("Le prénom de l'utilisateur"),
@@ -69,6 +69,7 @@ export const zUsersMigration = z.object({
     )
     .optional(),
   unsubscribe: z.boolean().optional().describe("unsubscribe email"),
+  auth_method: z.enum(["proconnect", "password"]).describe("Indique si l'utilisateur se connecte via ProConnect"),
 });
 
 export type IUsersMigration = z.output<typeof zUsersMigration>;
