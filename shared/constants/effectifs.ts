@@ -7,6 +7,7 @@ export const STATUT_APPRENANT = {
   APPRENTI: "APPRENTI",
   RUPTURANT: "RUPTURANT",
   FIN_DE_FORMATION: "FIN_DE_FORMATION",
+  INTER_CONTRAT: "INTER_CONTRAT",
 } as const;
 
 export type StatutApprenant = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
@@ -20,6 +21,7 @@ export const STATUT_NAME: { [key in StatutApprenant]: string } = {
   APPRENTI: "Apprenti",
   RUPTURANT: "Rupture de contrat",
   FIN_DE_FORMATION: "Fin de formation",
+  INTER_CONTRAT: "Intercontrat",
 };
 
 export function getStatut(statut: StatutApprenant): string {

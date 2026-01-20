@@ -721,7 +721,7 @@ describe("ingestEffectifV2", () => {
               { date: nov24, valeur: "APPRENTI" },
               {
                 date: addDays(aout25, 1),
-                valeur: "RUPTURANT",
+                valeur: "INTER_CONTRAT",
               },
               {
                 date: new Date("2026-02-28T00:00:00.000Z"),
