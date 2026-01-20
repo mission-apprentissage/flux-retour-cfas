@@ -80,21 +80,6 @@ export async function requireMissionLocale(req: Request, res: Response, next: Ne
   next();
 }
 
-export async function requireARML(req: Request, res: Response, next: NextFunction) {
-  const user = req.user as AuthContext;
-  ensureValidUser(user);
-  if (user.organisation.type !== "ARML") {
-    throw Boom.forbidden("Accès non autorisé");
-  }
-
-  const orga = await organisationsDb().findOne({
-    _id: new ObjectId(user.organisation._id),
-  });
-
-  res.locals.arml = orga;
-  next();
-}
-
 export async function requireFranceTravail(req: Request, res: Response, next: NextFunction) {
   const user = req.user as AuthContext;
   ensureValidUser(user);
