@@ -110,12 +110,6 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Gestion des utilisateurs
               </MenuItem>,
-              <MenuItem key="admin-mission-locale" component="a" href="/admin/mission-locale" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
-                </ListItemIcon>
-                Gestion des missions locales
-              </MenuItem>,
               <MenuItem key="admin-reseaux" component="a" href="/admin/reseaux" onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
