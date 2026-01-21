@@ -71,14 +71,15 @@ function redirectToHome(
     case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
     case "ARML":
-      return NextResponse.redirect(new URL("/arml", request.url));
+    case "DREETS":
+    case "DDETS":
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
+    case "ADMINISTRATEUR":
+      return NextResponse.redirect(new URL("/admin/suivi-des-indicateurs", request.url));
     case "ACADEMIE":
       return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     case "FRANCE_TRAVAIL":
       return NextResponse.redirect(new URL("/france-travail", request.url));
-    case "DREETS":
-    case "DDETS":
-      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
     case "CARIF_OREF_REGIONAL":

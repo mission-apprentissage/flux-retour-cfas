@@ -520,6 +520,19 @@ const addMissionLocaleFieldTraitementStatus = () => {
     $eq: ["$organisme_data.acc_conjoint", true],
   };
 
+  const RUPTURE_MOINS_DE_180_JOURS_CONDITION = {
+    $gte: [
+      "$date_rupture",
+      {
+        $dateSubtract: {
+          startDate: new Date(),
+          unit: "day",
+          amount: 180,
+        },
+      },
+    ],
+  };
+
   const A_RISQUE_CONDITION = {
     $and: [
       {
@@ -528,6 +541,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
       {
         $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
       },
+      RUPTURE_MOINS_DE_180_JOURS_CONDITION,
     ],
   };
 
@@ -614,7 +628,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             telephone: "$effectif_snapshot.apprenant.telephone",
             telephone_corrected: "$effectif_choice.telephone",
             autorisation_contact: "$effectif_choice.confirmation",
-            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
+            responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
+            responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
             rqth: "$effectif_snapshot.apprenant.rqth",
             a_traiter: "$a_traiter",
             injoignable: "$injoignable",
@@ -667,7 +682,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             telephone: "$effectif_snapshot.apprenant.telephone",
             telephone_corrected: "$effectif_choice.telephone",
             autorisation_contact: "$effectif_choice.confirmation",
-            responsable_mail: "$effectif_snapshot.apprenant.responsable_mail1",
+            responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
+            responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
             rqth: "$effectif_snapshot.apprenant.rqth",
             a_traiter: "$a_traiter",
             transmitted_at: "$effectif_snapshot.transmitted_at",

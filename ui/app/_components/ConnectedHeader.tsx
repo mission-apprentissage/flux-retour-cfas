@@ -117,6 +117,7 @@ export function ConnectedHeader() {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
           text: "Suivi des indicateurs",
+          isActive: pathname?.startsWith("/admin/suivi-des-indicateurs"),
           linkProps: {
             href: "/admin/suivi-des-indicateurs",
             target: "_self",
@@ -166,22 +167,6 @@ export function ConnectedHeader() {
         isActive: pathname?.startsWith("/suivi-des-indicateurs"),
         linkProps: {
           href: "/suivi-des-indicateurs",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Vue d'ensemble",
-        isActive: pathname === "/arml",
-        linkProps: {
-          href: "/arml",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Missions Locales",
-        isActive: pathname?.startsWith("/arml/missions-locales"),
-        linkProps: {
-          href: "/arml/missions-locales",
           target: "_self",
         },
       });

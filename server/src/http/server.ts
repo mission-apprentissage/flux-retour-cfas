@@ -127,7 +127,6 @@ import {
   requireAdministrator,
   requireEffectifOrganismePermission,
   requireMissionLocale,
-  requireARML,
   requireOrganismePermission,
   returnResult,
   requireFranceTravail,
@@ -150,7 +149,6 @@ import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes"
 import usersAdmin from "./routes/admin.routes/users.routes";
 import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
-import armlAuthentRoutes from "./routes/organisations.routes/arml/arml.routes";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 import indicateursMlRoutes from "./routes/organisations.routes/indicateurs-ml/indicateurs-ml.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
@@ -887,7 +885,6 @@ function setupRoutes(app: Application) {
         })
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
-      .use("/arml", requireARML, armlAuthentRoutes())
       .use("/france-travail", requireFranceTravail, franceTravailAuthentRoutes())
       .use("/indicateurs-ml", requireIndicateursMlAccess, indicateursMlRoutes())
   );

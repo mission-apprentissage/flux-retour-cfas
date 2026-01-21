@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import {
   IAccompagnementConjointStats,
@@ -1420,6 +1421,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     {
       $project: {
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
+        departement_code: { $ifNull: ["$ml.adresse.departement", null] },
         nom: { $trim: { input: "$ml.nom" } },
         siret: { $ifNull: ["$ml.siret", null] },
         total_jeunes: 1,
@@ -1431,7 +1433,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         ...buildDetailFieldsProjection(),
       },
     },
-    { $sort: { region_nom: 1 as const, nom: 1 as const } },
+    { $sort: { region_nom: 1 as const, departement_code: 1 as const, nom: 1 as const } },
   ];
 
   const regionPipeline = [
@@ -1472,10 +1474,19 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     { $sort: { region_nom: 1 as const } },
   ];
 
-  const [mlData, regionData] = await Promise.all([
+  const [mlDataRaw, regionData] = await Promise.all([
     missionLocaleStatsDb().aggregate(mlPipeline, { allowDiskUse: true }).toArray(),
     missionLocaleStatsDb().aggregate(regionPipeline, { allowDiskUse: true }).toArray(),
   ]);
+
+  const mlData = mlDataRaw.map((ml) => {
+    const deptCode = ml.departement_code as string | null;
+    const departement = deptCode ? DEPARTEMENTS_BY_CODE[deptCode as keyof typeof DEPARTEMENTS_BY_CODE] : null;
+    return {
+      ...ml,
+      departement_nom: departement?.nom ?? "Département inconnu",
+    };
+  });
 
   return {
     mlData,
