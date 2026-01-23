@@ -19348,7 +19348,15 @@ exports[`validation-schema > should create validation schema for organisations >
           "description": "Date de création en base de données",
         },
         "email": {
-          "bsonType": "string",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "description": "Email de la mission locale",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
           "description": "Email de la mission locale",
         },
         "ml_id": {
@@ -19360,15 +19368,24 @@ exports[`validation-schema > should create validation schema for organisations >
           "description": "Nom de la mission locale",
         },
         "siret": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "N° SIRET",
         },
         "site_web": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Site web de la mission locale",
         },
         "telephone": {
-          "bsonType": "string",
+          "bsonType": [
+            "string",
+            "null",
+          ],
           "description": "Téléphone de la mission locale",
         },
         "type": {
