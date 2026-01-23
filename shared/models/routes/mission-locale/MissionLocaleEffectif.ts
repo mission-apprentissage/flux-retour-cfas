@@ -27,6 +27,7 @@ const zApprenantPick = zApprenant
     courriel: true,
     rqth: true,
     responsable_mail1: true,
+    responsable_mail2: true,
   })
   .extend({
     telephone_corrected: z.string().nullish(),
