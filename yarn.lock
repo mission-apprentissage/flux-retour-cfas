@@ -6099,6 +6099,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"api-alternance-sdk@npm:2.14.0":
+  version: 2.14.0
+  resolution: "api-alternance-sdk@npm:2.14.0"
+  dependencies:
+    jose: ^6.0.12
+    lru-cache: ^11.1.0
+    luhn: ^2.4.1
+    luxon: ^3.7.1
+    microdiff: ^1.5.0
+    openapi3-ts: ^4.5.0
+    safe-stable-stringify: ^2.5.0
+    zod: ^3.25.76
+  checksum: c8ef2767d9cc41c5bc44c49d9bd36e1398e2bb6119929ae32cde7f7daeca3f48c3a0ba938713b194b12223d93b5f0b5535cf821aaa0d85199a0669290bbc1cac
+  languageName: node
+  linkType: hard
+
 "api-alternance-sdk@npm:^2.10.2":
   version: 2.10.2
   resolution: "api-alternance-sdk@npm:2.10.2"
@@ -12131,6 +12147,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.0.12":
+  version: 6.1.3
+  resolution: "jose@npm:6.1.3"
+  checksum: 7f51c7e77f82b70ef88ede9fd1760298bc0ffbf143b9d94f78c08462987ae61864535c1856bc6c26d335f857c7d41f4fffcc29134212c19ea929ce34a4c790f0
+  languageName: node
+  linkType: hard
+
 "joycon@npm:^3.0.1":
   version: 3.1.1
   resolution: "joycon@npm:3.1.1"
@@ -13228,6 +13251,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^11.1.0":
+  version: 11.2.4
+  resolution: "lru-cache@npm:11.2.4"
+  checksum: cb8cf72b80a506593f51880bd5a765380d6d8eb82e99b2fbb2f22fe39e5f2f641d47a2509e74cc294617f32a4e90ae8f6214740fe00bc79a6178854f00419b24
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^6.0.0":
   version: 6.0.0
   resolution: "lru-cache@npm:6.0.0"
@@ -13262,6 +13292,13 @@ __metadata:
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
   checksum: f290fe5788c8e51e748744f05092160d4be12150dca70f9fadc0d233e53d60ce86acd82e7d909a114730a136a77e56f0d3ebac6141bbb82fd310969a4704825b
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.7.1":
+  version: 3.7.2
+  resolution: "luxon@npm:3.7.2"
+  checksum: fc115fd6a7acc2adb7df3476d20c672beb2985d2a034294282f2c31de8c07f29a15460f5a2b7dd0107797be0dab545ddbc64862662b059fb18c1931a726064f4
   languageName: node
   linkType: hard
 
@@ -15771,6 +15808,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi3-ts@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "openapi3-ts@npm:4.5.0"
+  dependencies:
+    yaml: ^2.8.0
+  checksum: 3a8609c8b00aed06dbc2fb8d203f86405ea3e45d7988432d2d0e4db7aa81b85ef3136d0acfaa7fcd47dadbf749d0e9f14d1b2f6ec79c9b2d174b02489f788aac
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.9.3":
   version: 0.9.3
   resolution: "optionator@npm:0.9.3"
@@ -18082,7 +18128,7 @@ __metadata:
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
-    api-alternance-sdk: ^2.10.2
+    api-alternance-sdk: 2.14.0
     axios: ^1.7.9
     axios-cache-interceptor: ^1.6.2
     axios-retry: ^4.5.0
@@ -20873,6 +20919,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yaml@npm:^2.8.0":
+  version: 2.8.2
+  resolution: "yaml@npm:2.8.2"
+  bin:
+    yaml: bin.mjs
+  checksum: 5ffd9f23bc7a450129cbd49dcf91418988f154ede10c83fd28ab293661ac2783c05da19a28d76a22cbd77828eae25d4bd7453f9a9fe2d287d085d72db46fd105
+  languageName: node
+  linkType: hard
+
 "yaml@npm:~2.5.0":
   version: 2.5.1
   resolution: "yaml@npm:2.5.1"
@@ -21044,6 +21099,13 @@ __metadata:
   version: 3.24.1
   resolution: "zod@npm:3.24.1"
   checksum: dcd5334725b29555593c186fd6505878bb7ccb4f5954f728d2de24bf71f9397492d83bdb69d5b8a376eb500a02273ae0691b57deb1eb8718df3f64c77cc5534a
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.25.76":
+  version: 3.25.76
+  resolution: "zod@npm:3.25.76"
+  checksum: c9a403a62b329188a5f6bd24d5d935d2bba345f7ab8151d1baa1505b5da9f227fb139354b043711490c798e91f3df75991395e40142e6510a4b16409f302b849
   languageName: node
   linkType: hard
 
