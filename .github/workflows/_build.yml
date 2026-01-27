@@ -13,7 +13,6 @@ on:
         options:
           - recette
           - preprod
-          - demo
 
 jobs:
   npm-packages-check:
