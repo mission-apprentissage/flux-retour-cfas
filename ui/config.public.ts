@@ -2,7 +2,7 @@ interface PublicConfig {
   sentry_dsn: string;
   baseUrl: string;
   host: string;
-  env: "local" | "recette" | "production" | "preview" | "preprod" | "demo";
+  env: "local" | "recette" | "production" | "preview" | "preprod";
   version: string;
   matomo: {
     url: string;
@@ -111,24 +111,6 @@ function getLocalPublicConfig(): PublicConfig {
   };
 }
 
-function getDemoPublicConfig(): PublicConfig {
-  const host = "tableau-de-bord-demo.apprentissage.beta.gouv.fr";
-
-  return {
-    sentry_dsn: SENTRY_DSN,
-    env: "demo",
-    host,
-    baseUrl: `https://${host}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "",
-      jsTrackerFile: "",
-      disableCookies: true,
-    },
-    version: getVersion(),
-  };
-}
-
 function getVersion(): string {
   const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -147,7 +129,6 @@ function getEnv(): PublicConfig["env"] {
     case "preprod":
     case "preview":
     case "local":
-    case "demo":
       return env;
     default:
       throw new Error(`Invalid NEXT_PUBLIC_ENV env-vars ${env}`);
@@ -166,8 +147,6 @@ function getPublicConfig(): PublicConfig {
       return getPreviewPublicConfig();
     case "local":
       return getLocalPublicConfig();
-    case "demo":
-      return getDemoPublicConfig();
   }
 }
 
