@@ -28,6 +28,11 @@ const zContrat = z.object({
     .nullable(),
 });
 
+const _zCertification = z.unknown().superRefine((val, ctx) => {
+  const r = zCertification.safeParse(val);
+  if (!r.success) ctx.addIssue({ code: z.ZodIssueCode.custom, message: r.error?.message ?? "Invalid certification" });
+});
+
 export type IContratV2 = z.output<typeof zContrat>;
 
 export const zEffectifV2 = z.object({
@@ -111,7 +116,7 @@ export const zEffectifV2 = z.object({
 
   _computed: z.object({
     statut: zEffectifComputedStatut,
-    session: zCertification.nullish(),
+    session: _zCertification.nullish(),
     formation: z.any().optional(),
   }),
 });
