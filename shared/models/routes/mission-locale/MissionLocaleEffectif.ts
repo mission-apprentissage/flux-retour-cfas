@@ -11,19 +11,12 @@ import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
 import { zContrat } from "../../data/effectifs/contrat.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
-import {
-  zMissionLocaleEffectifMLLog,
-  zMissionLocaleEffectifOrganismeLog,
-} from "../../data/missionLocaleEffectifLog.model";
+import { zMissionLocaleEffectifMLLog } from "../../data/missionLocaleEffectifLog.model";
 
-export const zMissionLocaleEffectifLogWithUnread = z.discriminatedUnion("type", [
-  zMissionLocaleEffectifMLLog.extend({
-    unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
-  }),
-  zMissionLocaleEffectifOrganismeLog.extend({
-    unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
-  }),
-]);
+const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifMLLog.extend({
+  unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
+});
+
 const zApprenantPick = zApprenant
   .pick({
     nom: true,

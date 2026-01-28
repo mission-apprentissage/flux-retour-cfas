@@ -1227,6 +1227,7 @@ export const getEffectifFromMissionLocaleId = async (
         let: { mission_locale_effectif_id: "$_id" },
         pipeline: [
           { $match: { $expr: { $eq: ["$mission_locale_effectif_2_id", "$$mission_locale_effectif_id"] } } },
+          { $match: { $expr: { $eq: ["$type", "MISSION_LOCALE"] } } },
           {
             $sort: { created_at: 1 },
           },
