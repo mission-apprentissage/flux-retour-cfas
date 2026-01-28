@@ -30,7 +30,20 @@ export const zFormationV2 = z.object({
   }),
   organisme_formateur_id: zObjectId.nullish(),
   organisme_responsable_id: zObjectId.nullish(),
+  fiabilisation: z
+    .object({
+      responsable_siret: z.string().nullable(),
+      responsable_uai: z.string().nullable(),
+      formateur_siret: z.string().nullable(),
+      formateur_uai: z.string().nullable(),
+    })
+    .optional(),
   draft: z.boolean(),
+  computed: z
+    .object({
+      formation: z.any().optional(),
+    })
+    .optional(),
 });
 
 export type IFormationV2 = z.output<typeof zFormationV2>;

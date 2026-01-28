@@ -15,6 +15,7 @@ export const createEffectifMissionLocaleLog = (
   }
   return missionLocaleEffectifsLogDb().insertOne({
     _id: new ObjectId(),
+    type: "MISSION_LOCALE",
     mission_locale_effectif_id: missionLocaleEffectifId,
     created_at: new Date(),
     created_by: user._id,

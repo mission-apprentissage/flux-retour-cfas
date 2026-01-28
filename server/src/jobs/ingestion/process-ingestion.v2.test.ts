@@ -266,6 +266,13 @@ describe("process-ingestion.v2", () => {
       draft: true,
       organisme_formateur_id: null,
       organisme_responsable_id: null,
+      fiabilisation: {
+        responsable_siret: null,
+        responsable_uai: null,
+        formateur_siret: null,
+        formateur_uai: null,
+      },
+      computed: { formation: null },
     });
 
     const effectifs = await effectifV2Db().find({}).toArray();
@@ -314,6 +321,7 @@ describe("process-ingestion.v2", () => {
       },
       _computed: {
         session: null,
+        formation: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
