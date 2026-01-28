@@ -1,21 +1,22 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { API_EFFECTIF_LISTE, IMissionLocaleEffectif } from "shared/models";
+import { API_EFFECTIF_LISTE } from "shared/models";
+import { IMissionLocale2Effectif } from "shared/models/data/missionLocaleEffectif2.model";
 import { updateMissionLocaleEffectifOrganismeApi } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 import { z } from "zod";
 
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
-} from "@/common/actions/mission-locale/mission-locale.actions";
+} from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import {
   setEffectifMissionLocaleDataFromOrganisme,
   markEffectifNotificationAsRead,
-} from "@/common/actions/organismes/mission-locale.actions";
+} from "@/common/actions/organismes/mission-locale.actions.v2";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { missionLocaleEffectifs2Db } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
@@ -52,9 +53,9 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
 
   const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifOrganismeApi);
 
-  const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
-    effectif_id: new ObjectId(effectifId),
-    "effectif_snapshot.organisme_id": new ObjectId(organisme._id),
+  const effectif: IMissionLocale2Effectif | null = await missionLocaleEffectifs2Db().findOne({
+    effectifV2_id: new ObjectId(effectifId),
+    "computed.formation.organisme_formateur_id": new ObjectId(organisme._id),
   });
 
   if (!effectif) {

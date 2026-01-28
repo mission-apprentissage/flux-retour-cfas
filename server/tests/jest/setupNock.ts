@@ -47,6 +47,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
         id: 211,
         nom: "JEUNES HAUTES-ALPES",
         siret: "18053700300048",
+        code: "05000",
         localisation: {
           geopoint: {
             coordinates: [6.0895089, 44.5622719],
@@ -130,6 +131,7 @@ const communes: Record<string, IApiResponse<IApiGetRoutes["/geographie/v1/commun
         id: 609,
         nom: "DE PARIS",
         siret: "53132862300149",
+        code: "75018",
         localisation: {
           geopoint: {
             coordinates: [2.3740736, 48.8848179],

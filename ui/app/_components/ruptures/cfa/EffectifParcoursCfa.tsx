@@ -58,7 +58,7 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     });
   }
 
-  if ("organisme_data" in effectif) {
+  if (eff.organisme_data) {
     const reponseDate = eff.organisme_data.reponse_at;
     const date = reponseDate instanceof Date ? reponseDate : new Date(reponseDate);
 
@@ -84,7 +84,7 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
   }
 
   if (
-    "organisme_data" in effectif &&
+    eff.organisme_data &&
     eff.organisme_data?.acc_conjoint === true &&
     "mission_locale_logs" in effectif &&
     eff.mission_locale_logs
