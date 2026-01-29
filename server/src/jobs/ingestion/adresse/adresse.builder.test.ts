@@ -149,6 +149,7 @@ describe("buildAdresse", () => {
       id: 609,
       nom: "DE PARIS",
       siret: "53132862300149",
+      code: "75018",
       localisation: {
         geopoint: {
           type: "Point",

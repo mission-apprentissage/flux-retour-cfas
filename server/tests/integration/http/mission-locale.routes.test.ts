@@ -4,7 +4,7 @@ import { it, expect, describe, beforeEach } from "vitest";
 
 import {
   effectifsQueueDb,
-  missionLocaleEffectifsDb,
+  missionLocaleEffectifs2Db,
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
@@ -61,14 +61,14 @@ describe("Mission Locale Routes", () => {
         date_entree_formation: new Date("2025-09-01"),
         date_fin_formation: new Date("2026-08-01"),
       });
-
-      await effectifsQueueDb().insertOne({
+      const { insertedId } = await effectifsQueueDb().insertOne({
         _id: new ObjectId(),
         created_at: new Date(),
         ...payload,
       });
 
       await processEffectifsQueue();
+      await effectifsQueueDb().findOne({ _id: insertedId });
       const res = await requestAsOrganisation(
         ML_DATA,
         "get",
@@ -80,7 +80,7 @@ describe("Mission Locale Routes", () => {
 
   describe("Effectif traité avant l'activation du  CFA", () => {
     beforeEach(async () => {
-      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifs2Db().deleteMany({});
       await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
         date: new Date("2025-01-01").toISOString(),
         missionLocaleId: ML_ID.toString(),
@@ -106,8 +106,8 @@ describe("Mission Locale Routes", () => {
       });
       await processEffectifsQueue();
 
-      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
-      EFFECTIF_ID = effQ?.effectif_id as ObjectId;
+      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectifV2_id: 1 } });
+      EFFECTIF_ID = effQ?.effectifV2_id as ObjectId;
 
       await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, {
         situation: "RDV_PRIS",
@@ -136,7 +136,7 @@ describe("Mission Locale Routes", () => {
 
   describe("CFA activé", async () => {
     beforeEach(async () => {
-      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifs2Db().deleteMany({});
       await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/mission-locale/activate", {
         date: new Date("2025-01-01").toISOString(),
         missionLocaleId: ML_ID.toString(),
@@ -171,8 +171,8 @@ describe("Mission Locale Routes", () => {
         ...payload,
       });
       await processEffectifsQueue();
-      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
-      EFFECTIF_ID = effQ?.effectif_id as ObjectId;
+      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectifV2_id: 1 } });
+      EFFECTIF_ID = effQ?.effectifV2_id as ObjectId;
     });
 
     it("La ML ne doit pas voir l'effectif", async () => {
@@ -195,8 +195,8 @@ describe("Mission Locale Routes", () => {
     });
 
     it("Le CFA ne voit pas l'effectif qui a retrouvé un nouveau contrat", async () => {
-      await missionLocaleEffectifsDb().updateOne(
-        { effectif_id: EFFECTIF_ID },
+      await missionLocaleEffectifs2Db().updateOne(
+        { effectifV2_id: EFFECTIF_ID },
         {
           $set: {
             current_status: {
@@ -226,7 +226,6 @@ describe("Mission Locale Routes", () => {
             acc_conjoint: false,
           }
         );
-
         expect(res.status).toBe(200);
 
         const res2 = await requestAsOrganisation(

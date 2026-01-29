@@ -3,7 +3,7 @@ import { ObjectId } from "bson";
 import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
 import {
-  missionLocaleEffectifsDb,
+  missionLocaleEffectifs2Db,
   missionLocaleEffectifsLogDb,
   organisationsDb,
   usersMigrationDb,
@@ -72,9 +72,9 @@ export const setEffectifMissionLocaleDataAdmin = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { situation, situation_autre, commentaires, deja_connu } = data;
+  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
 
-  const mlEff = await missionLocaleEffectifsDb().findOne({
+  const mlEff = await missionLocaleEffectifs2Db().findOne({
     effectif_id: new ObjectId(effectifId),
     mission_locale_id: new ObjectId(missionLocaleId),
   });
@@ -84,15 +84,17 @@ export const setEffectifMissionLocaleDataAdmin = async (
   }
 
   const setObject = {
-    situation,
-    deja_connu,
-    ...(situation_autre !== undefined ? { situation_autre } : {}),
-    ...(commentaires !== undefined ? { commentaires } : {}),
+    "mission_locale_data.situation": situation,
+    "mission_locale_data.deja_connu": deja_connu,
+    ...(situation_autre !== undefined ? { "mission_locale_data.situation_autre": situation_autre } : {}),
+    ...(commentaires !== undefined ? { "mission_locale_data.commentaires": commentaires } : {}),
+    ...(probleme_type !== undefined ? { "mission_locale_data.probleme_type": probleme_type } : {}),
+    ...(probleme_detail !== undefined ? { "mission_locale_data.probleme_detail": probleme_detail } : {}),
   };
 
   await createEffectifMissionLocaleLog(mlEff?._id, setObject, user);
 
-  const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+  const updated = await missionLocaleEffectifs2Db().findOneAndUpdate(
     {
       effectif_id: new ObjectId(effectifId),
       mission_locale_id: new ObjectId(missionLocaleId),
@@ -116,7 +118,7 @@ export const resetEffectifMissionLocaleDataAdmin = async (
   effectifId: ObjectId,
   user: AuthContext
 ) => {
-  const mlEff = await missionLocaleEffectifsDb().findOne({
+  const mlEff = await missionLocaleEffectifs2Db().findOne({
     effectif_id: new ObjectId(effectifId),
     mission_locale_id: new ObjectId(missionLocaleId),
   });
@@ -132,11 +134,13 @@ export const resetEffectifMissionLocaleDataAdmin = async (
       situation_autre: undefined,
       commentaires: undefined,
       deja_connu: undefined,
+      probleme_type: undefined,
+      probleme_detail: undefined,
     },
     user
   );
 
-  await missionLocaleEffectifsDb().updateOne(
+  await missionLocaleEffectifs2Db().updateOne(
     {
       effectif_id: new ObjectId(effectifId),
       mission_locale_id: new ObjectId(missionLocaleId),
@@ -146,10 +150,12 @@ export const resetEffectifMissionLocaleDataAdmin = async (
         updated_at: new Date(),
       },
       $unset: {
-        situation: 1,
-        situation_autre: 1,
-        deja_connu: 1,
-        commentaires: 1,
+        "mission_locale_data.situation": 1,
+        "mission_locale_data.situation_autre": 1,
+        "mission_locale_data.deja_connu": 1,
+        "mission_locale_data.commentaires": 1,
+        "mission_locale_data.probleme_type": 1,
+        "mission_locale_data.probleme_detail": 1,
       },
     }
   );
@@ -278,7 +284,7 @@ export const activateOrganisme = async (date: Date, organisme_id: ObjectId) => {
 };
 
 export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organismeId: ObjectId) => {
-  return missionLocaleEffectifsDb().updateMany(
+  return missionLocaleEffectifs2Db().updateMany(
     { "effectif_snapshot.organisme_id": organismeId },
     {
       $set: {
@@ -289,7 +295,7 @@ export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organis
 };
 
 export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
-  return missionLocaleEffectifsDb().updateMany(
+  return missionLocaleEffectifs2Db().updateMany(
     { mission_locale_id: missionLocaleId },
     {
       $set: {
@@ -325,7 +331,7 @@ export const getMissionLocaleMembers = async (missionLocaleId: ObjectId): Promis
     })
     .toArray();
 
-  const mlEffectifs = await missionLocaleEffectifsDb()
+  const mlEffectifs = await missionLocaleEffectifs2Db()
     .find({ mission_locale_id: missionLocaleId }, { projection: { _id: 1 } })
     .toArray();
 
@@ -367,10 +373,10 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     throw new Error(`Mission Locale not found: ${missionLocaleId}`);
   }
 
-  const mlEffectifs = await missionLocaleEffectifsDb()
+  const mlEffectifs = await missionLocaleEffectifs2Db()
     .find(
       { mission_locale_id: missionLocaleId },
-      { projection: { _id: 1, situation: 1, "effectif_snapshot.organisme_id": 1 } }
+      { projection: { _id: 1, "mission_locale_data.situation": 1, "effectif_snapshot.organisme_id": 1 } }
     )
     .toArray();
 
@@ -382,12 +388,12 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     .limit(1)
     .toArray();
 
-  const hasCfaCollaboration = await missionLocaleEffectifsDb().countDocuments({
+  const hasCfaCollaboration = await missionLocaleEffectifs2Db().countDocuments({
     mission_locale_id: missionLocaleId,
     "organisme_data.acc_conjoint": true,
   });
 
-  const traitesCount = mlEffectifs.filter((e) => e.situation != null).length;
+  const traitesCount = mlEffectifs.filter((e) => e.mission_locale_data?.situation != null).length;
 
   return {
     ml,

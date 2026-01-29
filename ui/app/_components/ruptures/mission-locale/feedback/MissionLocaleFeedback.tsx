@@ -3,7 +3,7 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { IUpdateMissionLocaleEffectif, SITUATION_LABEL_ENUM, PROBLEME_TYPE_ENUM, SITUATION_ENUM } from "shared";
-import { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
+import { IMissionLocaleEffectifMLLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
@@ -14,7 +14,7 @@ import notificationStyles from "../../shared/ui/NotificationBadge.module.css";
 interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
-  logs?: Array<IMissionLocaleEffectifLog & { unread_by_current_user?: boolean }> | null;
+  logs?: Array<IMissionLocaleEffectifMLLog & { unread_by_current_user?: boolean }> | null;
   isNouveauContrat?: boolean;
 }
 
@@ -24,6 +24,7 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
   // pour gerer les effectifs legacy sans logs
   if (!sortedLogs.length && situation?.situation) {
     const virtualLog = {
+      type: "MISSION_LOCALE" as const,
       _id: { toString: () => "virtual-log" } as any,
       created_at: new Date(),
       mission_locale_effectif_id: "virtual" as any,
