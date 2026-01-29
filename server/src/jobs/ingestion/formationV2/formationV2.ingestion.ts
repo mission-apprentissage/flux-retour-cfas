@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import type { IFormationV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 

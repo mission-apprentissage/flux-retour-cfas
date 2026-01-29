@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
 
 import { brevoMissionLocaleListDb } from "@/common/model/collections";

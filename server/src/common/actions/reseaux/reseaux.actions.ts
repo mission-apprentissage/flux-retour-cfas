@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 
 import { reseauxDb } from "@/common/model/collections";
 

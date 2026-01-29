@@ -1,5 +1,4 @@
-import { ObjectId } from "bson";
-import { WithoutId } from "mongodb";
+import { ObjectId, WithoutId } from "mongodb";
 import { IEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 

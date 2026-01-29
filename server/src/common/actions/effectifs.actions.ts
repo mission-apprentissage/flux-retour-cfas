@@ -72,7 +72,7 @@ const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErro
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated.value;
@@ -124,7 +124,7 @@ export const lockEffectif = async (effectif: IEffectif) => {
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated.value as IEffectif;

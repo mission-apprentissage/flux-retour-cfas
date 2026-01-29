@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { getAcademieById } from "shared/constants";
 
 import logger from "@/common/logger";

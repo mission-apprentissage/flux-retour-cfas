@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
@@ -35,7 +35,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
   if (!updated.value) {
     throw new Error("Effectif not found or update failed");
@@ -75,7 +75,7 @@ export const markEffectifNotificationAsRead = async (organismeId: ObjectId, effe
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated;

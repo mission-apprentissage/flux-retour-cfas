@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 
 import { romeSecteurActivitesDb } from "@/common/model/collections";
 

@@ -498,7 +498,7 @@ export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMig
         ...data,
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated.value;

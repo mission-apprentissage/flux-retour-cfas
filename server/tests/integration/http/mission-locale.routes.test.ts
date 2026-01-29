@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axiosist";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import {

@@ -35,7 +35,7 @@ export async function getPersonV2FromIdentifiant(input: {
         identifiant: normalizedIdentifiant,
       },
     },
-    { returnDocument: "after", upsert: true }
+    { returnDocument: "after", upsert: true, includeResultMetadata: true }
   );
 
   return person.value;

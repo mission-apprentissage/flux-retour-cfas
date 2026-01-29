@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import {

@@ -1,6 +1,6 @@
 import Boom from "boom";
-import { ObjectId } from "bson";
 import express from "express";
+import { ObjectId } from "mongodb";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectif } from "shared/models";
 import { updateMissionLocaleEffectifOrganismeApi } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 import { z } from "zod";

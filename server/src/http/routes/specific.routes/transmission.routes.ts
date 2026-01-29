@@ -1,5 +1,5 @@
-import { ObjectId } from "bson";
 import express from "express";
+import { ObjectId } from "mongodb";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { z } from "zod";
 

@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { IEffectif, IMissionLocaleEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";

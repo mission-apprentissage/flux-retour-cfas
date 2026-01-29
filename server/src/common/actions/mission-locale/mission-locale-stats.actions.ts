@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import {
@@ -68,6 +68,7 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
     },
     {
       upsert: true,
+      includeResultMetadata: true,
     }
   );
 };

@@ -134,7 +134,7 @@ const updateEffectifToAbandon = async (effectif, abandonDate) => {
           updated_at: new Date(),
         },
       },
-      { returnDocument: "after", bypassDocumentValidation: true }
+      { returnDocument: "after", bypassDocumentValidation: true, includeResultMetadata: true }
     );
   } catch (err) {
     logger.error(err);
