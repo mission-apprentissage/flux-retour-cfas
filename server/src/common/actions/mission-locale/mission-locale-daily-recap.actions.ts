@@ -1,7 +1,7 @@
 import { subHours } from "date-fns";
 import { IOrganisationMissionLocale } from "shared/models";
 
-import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { missionLocaleEffectifs2Db, organisationsDb } from "@/common/model/collections";
 
 export interface IMissionLocaleEffectifsAccConjoint {
   cfa: {
@@ -59,7 +59,7 @@ export async function getMissionLocaleEffectifsAccConjointLast24h(
     {
       $group: {
         _id: {
-          organisme_id: "$effectif_snapshot.organisme_id",
+          organisme_id: "$computed.formation.organisme_formateur_id",
           nom: "$organisme_info.nom",
           siret: "$organisme_info.siret",
         },
@@ -83,7 +83,7 @@ export async function getMissionLocaleEffectifsAccConjointLast24h(
     },
   ];
 
-  const results = await missionLocaleEffectifsDb().aggregate(aggregationPipeline).toArray();
+  const results = await missionLocaleEffectifs2Db().aggregate(aggregationPipeline).toArray();
 
   const effectifs_acc_conjoint = results as IMissionLocaleEffectifsAccConjoint[];
   const total = effectifs_acc_conjoint.reduce((sum, item) => sum + item.effectifs_count, 0);
