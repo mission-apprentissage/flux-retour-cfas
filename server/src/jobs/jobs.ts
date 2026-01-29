@@ -26,7 +26,7 @@ import {
   hydrateVoeuxEffectifsRelations,
   hydrateAcademieInVoeux,
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
-import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
+import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "./hydrate/deca/hydrate-deca-raw";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -265,6 +265,11 @@ export async function setupJobProcessor() {
             return 0;
           }
           return hydrateDecaRaw();
+        },
+      },
+      "hydrate:mission-locale-from-deca": {
+        handler: async () => {
+          return hydrateDecaFromExistingEffectifs();
         },
       },
       "organisme:cleanup": {

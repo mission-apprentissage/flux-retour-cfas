@@ -14,11 +14,11 @@ import { cyrb53Hash, getYearFromDate } from "shared/utils";
 import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
+import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
-import { __dirname } from "@/common/utils/esmUtils";
 import config from "@/config";
 import {
   fiabilisationEffectifFormation,
@@ -29,18 +29,39 @@ const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
 const client = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
 
-export async function hydrateDecaRaw() {
-  let count = { created: 0, updated: 0 };
-  let totalCount = 0;
-  let organismeIds = new Set<string>();
+interface IProcessingStats {
+  created: number;
+  updated: number;
+  organismesId: Set<string>;
+}
 
-  const processBuffer = async (buffer) => {
+function createEmptyStats(): IProcessingStats {
+  return {
+    created: 0,
+    updated: 0,
+    organismesId: new Set(),
+  };
+}
+
+function mergeStats(target: IProcessingStats, source: IProcessingStats): void {
+  target.created += source.created;
+  target.updated += source.updated;
+  for (const id of source.organismesId) {
+    target.organismesId.add(id);
+  }
+}
+
+export async function hydrateDecaRaw() {
+  const totalStats = createEmptyStats();
+  let totalCount = 0;
+
+  const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
     const results = await Promise.allSettled(buffer);
-    results.forEach((result) => {
+    for (const result of results) {
       if (result.status === "fulfilled") {
-        organismeIds = new Set([...organismeIds, ...result.value.organismesId]);
+        mergeStats(totalStats, result.value);
       }
-    });
+    }
     totalCount += buffer.length;
   };
 
@@ -57,19 +78,9 @@ export async function hydrateDecaRaw() {
 
     const cursor = client.db().collection<IRawBalDeca>(config.mongodb.decaDbCollectionBal).find(query);
 
-    let promiseArray: Array<any> = [];
+    let promiseArray: Promise<IProcessingStats>[] = [];
     for await (const document of cursor) {
-      promiseArray.push(
-        new Promise((res, rej) => {
-          totalCount++;
-          try {
-            res(updateEffectifDeca(document, count));
-          } catch (e) {
-            rej(`Échec de la mise à jour du document ${document._id}: ${e}`);
-            //logger.error(`Échec de la mise à jour du document ${document._id}: ${e}`);
-          }
-        })
-      );
+      promiseArray.push(updateEffectifDeca(document));
 
       if (promiseArray.length === 100) {
         await processBuffer(promiseArray);
@@ -79,11 +90,10 @@ export async function hydrateDecaRaw() {
 
     if (promiseArray.length > 0) {
       await processBuffer(promiseArray);
-      promiseArray = [];
     }
 
     if (totalCount > 0) {
-      await updateOrganismesLastEffectifUpdate(organismeIds);
+      await updateOrganismesLastEffectifUpdate(totalStats.organismesId);
     } else {
       logger.error("No documents found matching the criteria.");
     }
@@ -91,17 +101,48 @@ export async function hydrateDecaRaw() {
     logger.error(`Échec de la mise à jour des effectifs: ${err}`);
     captureException(err);
   } finally {
-    logger.info(
-      `Mise à jour des effectifs deca terminée. Sur ${totalCount}, ${count.created} créés, ${count.updated} mis à jour.`
-    );
+    await client.close();
+    logger.info(`DECA terminé: ${totalCount} traités, ${totalStats.created} créés, ${totalStats.updated} mis à jour`);
+  }
+}
+
+export async function hydrateDecaFromExistingEffectifs() {
+  let mlUpserted = 0;
+  let totalProcessed = 0;
+
+  const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
+  const DECA_RUPTURE_DATE_FIN = new Date("2026-02-28");
+
+  logger.info(
+    `DECA→ML one-shot: période ${DECA_RUPTURE_DATE_DEBUT.toISOString().split("T")[0]} - ${DECA_RUPTURE_DATE_FIN.toISOString().split("T")[0]}`
+  );
+
+  try {
+    const cursor = effectifsDECADb().find({
+      "contrats.date_rupture": { $gte: DECA_RUPTURE_DATE_DEBUT, $lte: DECA_RUPTURE_DATE_FIN },
+    });
+
+    for await (const effectif of cursor) {
+      const mlResult = await createMissionLocaleSnapshot(effectif);
+      if (mlResult?.upserted) mlUpserted++;
+      totalProcessed++;
+
+      if (totalProcessed % 1000 === 0) {
+        logger.info(`DECA→ML: ${totalProcessed} traités, ${mlUpserted} ajoutés`);
+      }
+    }
+  } catch (err) {
+    logger.error(`Échec du traitement: ${err}`);
+    captureException(err);
+  } finally {
+    logger.info(`DECA→ML terminé: ${totalProcessed} analysés, ${mlUpserted} ajoutés`);
   }
 }
 
 async function upsertEffectifDeca(
   effectif: WithoutId<IEffectifDECA>,
-  count: { created: number; updated: number },
   retry: boolean = true
-) {
+): Promise<{ created: boolean }> {
   const effectifFound = await checkIfEffectifExists<IEffectifDECA>(effectif, effectifsDECADb());
 
   if (!effectifFound) {
@@ -109,31 +150,25 @@ async function upsertEffectifDeca(
       const id = new ObjectId();
       await effectifsDECADb().insertOne({ ...effectif, _id: id });
       await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id?.toString());
-      // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
-      //await createMissionLocaleSnapshot({ ...effectif, _id: id });
-
-      count.created++;
+      await createMissionLocaleSnapshot({ ...effectif, _id: id });
+      return { created: true };
     } catch (err) {
       // Le code d'erreur 11000 correspond à une duplication d'index unique
       // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
       if (retry && err instanceof MongoError && err.code === 11000) {
-        return upsertEffectifDeca(effectif, count, false);
-      } else {
-        throw err;
+        return upsertEffectifDeca(effectif, false);
       }
+      throw err;
     }
-  } else {
-    const transmitted_at = new Date();
-    await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: { ...effectif, transmitted_at } });
-
-    // Désactivation temporaire de la tâche de mise à jour des effectifs DECA pour maitriser les effets de bords du correctif BAL
-    //await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
-
-    count.updated++;
   }
+
+  const transmitted_at = new Date();
+  await effectifsDECADb().updateOne({ _id: effectifFound._id }, { $set: { ...effectif, transmitted_at } });
+  await createMissionLocaleSnapshot({ ...effectif, _id: effectifFound._id, transmitted_at });
+  return { created: false };
 }
 
-async function updateEffectifDeca(document: IRawBalDeca, count: { created: number; updated: number }) {
+async function updateEffectifDeca(document: IRawBalDeca): Promise<IProcessingStats> {
   return Sentry.startSpan(
     {
       name: "DECA Update Effectif",
@@ -141,14 +176,22 @@ async function updateEffectifDeca(document: IRawBalDeca, count: { created: numbe
       forceTransaction: true,
     },
     async () => {
+      const stats = createEmptyStats();
       const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
-      const organismesId = new Set<string>();
+
       for (const newDocument of newDocuments) {
-        await upsertEffectifDeca(newDocument, count);
-        organismesId.add(newDocument.organisme_id.toString());
+        const result = await upsertEffectifDeca(newDocument);
+
+        if (result.created) {
+          stats.created++;
+        } else {
+          stats.updated++;
+        }
+
+        stats.organismesId.add(newDocument.organisme_id.toString());
       }
 
-      return { count, organismesId };
+      return stats;
     }
   );
 }
