@@ -89,6 +89,8 @@ fileignoreconfig:
   checksum: 50b4531854636bf4ccb95c8a5a2b90fdb88f54b15b4490b071b970deae6a23c0
 - filename: ui/app/_components/ServiceDiscontinuedPage.tsx
   checksum: 60b43d0e18382923db1ab106290d10f6200068fd0af0fab4d5c8e375ca1cc4ae
+- filename: server/tests/integration/jobs/ingestion/mission-locale-deca.test.ts
+  checksum: ad09b6b7ccd4ff4386277d9f2029105c80c1af6018e29295fb4ad70807078827
 scopeconfig:
 - scope: node
 custom_patterns:
