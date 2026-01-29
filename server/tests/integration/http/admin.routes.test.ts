@@ -653,7 +653,7 @@ describe("Routes administrateur", () => {
     });
 
     it("Vérifie qu'on renvoie une exception si aucun organisme en base", async () => {
-      const response = await httpClient.post(`/api/v1/admin/organismes/${new ObjectId(18)}/parametrage-transmission`);
+      const response = await httpClient.post(`/api/v1/admin/organismes/${new ObjectId()}/parametrage-transmission`);
       expect(response.status).toBe(401);
     });
 
