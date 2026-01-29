@@ -35,7 +35,7 @@ function addEmailMessageId(token, messageId) {
         "emails.$.error": 1,
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 
@@ -50,7 +50,7 @@ function addEmailError(token, e) {
         },
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 
@@ -62,7 +62,7 @@ export async function markEmailAsDelivered(messageId) {
         "emails.$.error": 1,
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 
@@ -76,7 +76,7 @@ export async function markEmailAsFailed(messageId, type) {
         },
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 
@@ -88,7 +88,7 @@ export async function markEmailAsOpened(token) {
         "emails.$.openDate": new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 
@@ -100,7 +100,7 @@ export async function unsubscribeUser(id) {
         unsubscribe: true,
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 }
 

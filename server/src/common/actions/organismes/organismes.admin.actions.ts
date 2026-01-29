@@ -1,5 +1,5 @@
-import { ObjectId } from "bson";
 import escapeStringRegexp from "escape-string-regexp";
+import { ObjectId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import { OrganismeSupportInfo } from "shared/models";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";

@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { it, expect, describe } from "vitest";
 
 import { buildEffectifMongoFilters, buildEffectifPerimetreMongoFilters } from "./effectifs-filters";

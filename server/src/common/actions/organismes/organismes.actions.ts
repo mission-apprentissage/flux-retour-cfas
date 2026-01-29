@@ -76,7 +76,7 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) 
         updated_at: new Date(),
       },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated.value as WithId<IOrganisme>;
@@ -106,7 +106,8 @@ export const updateOrganismeTransmission = async (
         updated_at: new Date(),
       },
       ...(source ? { $addToSet: { erps: source } } : {}),
-    }
+    },
+    { includeResultMetadata: true }
   );
 
   if (source_organisme_id) {
@@ -172,7 +173,7 @@ export const updateEffectifsCount = async (organisme_id: ObjectId) => {
         effectifs_current_year_count: totalCurrentYear,
       },
     },
-    { bypassDocumentValidation: true }
+    { bypassDocumentValidation: true, includeResultMetadata: true }
   );
 };
 
@@ -220,7 +221,7 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organismeId },
     { $set: { api_key: uuidv4() } },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   if (!updated.value) {

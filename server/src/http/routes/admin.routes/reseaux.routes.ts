@@ -91,7 +91,7 @@ export default () => {
         {
           $push: { organismes_ids: organismeObjectId },
         },
-        { returnDocument: "after" }
+        { returnDocument: "after", includeResultMetadata: true }
       );
 
       if (!result.value) {
@@ -135,7 +135,7 @@ export default () => {
         const result = await reseauxDb().findOneAndUpdate(
           { _id: new ObjectId(id as string) },
           { $pull: { organismes_ids: organismeId as ObjectId } },
-          { returnDocument: "after" }
+          { returnDocument: "after", includeResultMetadata: true }
         );
 
         if (!result.value) {

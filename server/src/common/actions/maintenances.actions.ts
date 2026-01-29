@@ -44,7 +44,7 @@ export const updateMaintenanceMessage = async (_id: string | ObjectId, data: Par
     {
       $set: data,
     },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: true }
   );
 
   return updated.value;

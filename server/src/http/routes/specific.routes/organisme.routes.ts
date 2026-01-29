@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { getAnneeScolaireFromDate } from "shared";
 import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
 import { WithPagination } from "shared/models/routes/pagination";

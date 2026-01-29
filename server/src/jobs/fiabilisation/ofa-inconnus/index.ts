@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";

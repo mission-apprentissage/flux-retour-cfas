@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 
 import { missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";

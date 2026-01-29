@@ -1,6 +1,6 @@
 import Boom from "boom";
-import { ObjectId } from "bson";
 import { differenceInYears } from "date-fns";
+import { ObjectId } from "mongodb";
 import type { Document } from "mongodb";
 import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 import { API_EFFECTIF_LISTE, IEffectif, IPersonV2 } from "shared/models";
@@ -883,7 +883,7 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, w
           person_id: person?._id || null,
         },
       },
-      { upsert: upsertCondition }
+      { upsert: upsertCondition, includeResultMetadata: true }
     );
     withDedupe && (await dedupeFranceTravailEffectifSnapshots(effectif._id, person?._id || null));
   } catch (e) {

@@ -1,6 +1,6 @@
 import Boom from "boom";
-import { ObjectId } from "bson";
 import express from "express";
+import { ObjectId } from "mongodb";
 import { StatsPeriod, zStatsPeriod } from "shared/models/data/nationalStats.model";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 import { z } from "zod";

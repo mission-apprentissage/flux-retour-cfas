@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
 
 import {
@@ -103,7 +103,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
         updated_at: new Date(),
       },
     },
-    { upsert: true, returnDocument: "after" }
+    { upsert: true, returnDocument: "after", includeResultMetadata: true }
   );
 
   await createOrUpdateMissionLocaleStats(missionLocaleId);

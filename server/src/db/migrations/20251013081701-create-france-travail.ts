@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import { REGIONS } from "shared/constants";
 
 import { organisationsDb } from "@/common/model/collections";

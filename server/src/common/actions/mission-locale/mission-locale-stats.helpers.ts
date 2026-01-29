@@ -5,7 +5,7 @@
  * MongoDB utilisés pour calculer les statistiques des Missions Locales.
  */
 
-import { ObjectId } from "bson";
+import { ObjectId } from "mongodb";
 import type { IAggregatedStats, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculatePercentage } from "shared/utils/stats";

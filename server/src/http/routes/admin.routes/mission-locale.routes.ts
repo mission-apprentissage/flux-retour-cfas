@@ -1,6 +1,6 @@
 import Boom from "boom";
-import { ObjectId } from "bson";
 import express from "express";
+import { ObjectId } from "mongodb";
 import {
   IOrganisationMissionLocale,
   IUpdateMissionLocaleEffectif,

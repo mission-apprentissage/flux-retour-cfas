@@ -1,7 +1,6 @@
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
-import { ObjectId } from "bson";
-import { AggregationCursor } from "mongodb";
+import { ObjectId, AggregationCursor } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import {
   IEffectif,
@@ -2179,7 +2178,7 @@ export const setEffectifMissionLocaleData = async (
           : {}),
       },
     },
-    { upsert: true, returnDocument: "after" }
+    { upsert: true, returnDocument: "after", includeResultMetadata: true }
   );
   await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
   await createOrUpdateMissionLocaleStats(missionLocaleId);
@@ -2298,7 +2297,7 @@ export const createMissionLocaleSnapshot = async (effectif: IEffectif | IEffecti
           },
         },
       },
-      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)) }
+      { upsert: !!(mlFilter && rupturantFilter && (ageFilter || rqthFilter)), includeResultMetadata: true }
     );
 
     if (mongoInfo.lastErrorObject?.n > 0) {
