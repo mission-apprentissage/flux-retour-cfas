@@ -1,9 +1,9 @@
 import { IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
-import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { missionLocaleEffectifs2Db, organisationsDb } from "@/common/model/collections";
 
-import { missionLocaleBaseAggregation } from "./mission-locale.actions";
+import { missionLocaleBaseAggregation } from "./mission-locale.actions.v2";
 
 export interface IMissionLocaleEffectifsStats {
   effectifs_prioritaire: number;
@@ -64,7 +64,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
     },
   ];
 
-  const result = await missionLocaleEffectifsDb().aggregate(aggregationPipeline).next();
+  const result = await missionLocaleEffectifs2Db().aggregate(aggregationPipeline).next();
 
   if (!result) {
     return {

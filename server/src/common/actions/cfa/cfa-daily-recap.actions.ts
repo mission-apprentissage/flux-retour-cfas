@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import {
-  missionLocaleEffectifsDb,
+  missionLocaleEffectifs2Db,
   missionLocaleEffectifsLogDb,
   organisationsDb,
   usersMigrationDb,
@@ -79,14 +79,14 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
     {
       $match: {
         _id: { $in: effectifIds },
-        "effectif_snapshot.organisme_id": { $in: cfaOrganismeIds },
+        "computed.formation.organisme_formateur_id": { $in: cfaOrganismeIds },
         soft_deleted: { $ne: true },
       },
     },
     {
       $lookup: {
         from: "organismes",
-        localField: "effectif_snapshot.organisme_id",
+        localField: "computed.formation.organisme_formateur_id",
         foreignField: "_id",
         as: "cfa_info",
       },
@@ -114,7 +114,7 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
     {
       $group: {
         _id: {
-          cfa_id: "$effectif_snapshot.organisme_id",
+          cfa_id: "$computed.formation.organisme_formateur_id",
           cfa_nom: "$cfa_info.nom",
           cfa_siret: "$cfa_info.siret",
           ml_id: "$mission_locale_id",
@@ -163,7 +163,7 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
     },
   ];
 
-  const results = await missionLocaleEffectifsDb().aggregate(aggregationPipeline).toArray();
+  const results = await missionLocaleEffectifs2Db().aggregate(aggregationPipeline).toArray();
   return results as ICfaDailyStats[];
 }
 
@@ -227,7 +227,7 @@ export async function getJeunesForCfaMl(
 
   const query: any = {
     _id: { $in: effectifIds },
-    "effectif_snapshot.organisme_id": cfaOrganismeId,
+    "computed.formation.organisme_formateur_id": cfaOrganismeId,
     mission_locale_id: missionLocaleId,
     soft_deleted: { $ne: true },
   };
@@ -236,19 +236,19 @@ export async function getJeunesForCfaMl(
     query["organisme_data.acc_conjoint_by"] = reponseBy;
   }
 
-  const effectifs = await missionLocaleEffectifsDb()
+  const effectifs = await missionLocaleEffectifs2Db()
     .find(query, {
       projection: {
-        "effectif_snapshot.apprenant.nom": 1,
-        "effectif_snapshot.apprenant.prenom": 1,
+        "computed.person.identifiant.nom": 1,
+        "computed.person.identifiant.prenom": 1,
       },
     })
     .toArray();
 
   return effectifs
     .map((effectif) => ({
-      nom: effectif.effectif_snapshot?.apprenant?.nom || "",
-      prenom: effectif.effectif_snapshot?.apprenant?.prenom || "",
+      nom: effectif.computed?.person?.identifiant?.nom || "",
+      prenom: effectif.computed?.person?.identifiant?.prenom || "",
     }))
     .filter((jeune) => jeune.nom && jeune.prenom);
 }
