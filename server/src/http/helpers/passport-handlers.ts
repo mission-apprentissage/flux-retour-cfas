@@ -7,9 +7,11 @@ import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
 
 import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
+import { refreshProConnectToken } from "@/common/actions/proconnect.actions";
 import { findSessionByToken } from "@/common/actions/sessions.actions";
 import { getUserByEmail } from "@/common/actions/users.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { proconnectSessionsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
@@ -23,57 +25,15 @@ export const authMiddleware = () => {
       },
       async (jwtPayload, done) => {
         try {
-          const { exp } = jwtPayload;
-          if (Date.now() > exp * 1000) {
-            throw Boom.unauthorized("Vous n'êtes pas connecté");
+          const { amr } = jwtPayload;
+          switch (amr) {
+            case "pwd":
+              return passwordAuthMiddleware(jwtPayload, done);
+            case "proconnect":
+              return proconnectAuthMiddleware(jwtPayload, done);
+            default:
+              throw Boom.unauthorized("Méthode d'authentification non supportée");
           }
-          const user = await getUserByEmail(jwtPayload.email);
-          if (!user) {
-            throw Boom.unauthorized("Vous n'êtes pas connecté");
-          }
-
-          if (user.account_status !== "CONFIRMED") {
-            throw Boom.forbidden("Votre compte n'est pas encore validé.");
-          }
-
-          let impersonating;
-
-          if (jwtPayload.impersonatedOrganisation) {
-            impersonating = true;
-            user.organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
-          }
-          const organisation =
-            jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
-
-          const acl = await getAcl(organisation);
-
-          const ctx: AuthContext = {
-            _id: user._id,
-            civility: user.civility,
-            nom: user.nom,
-            prenom: user.prenom,
-            email: user.email,
-            organisation_id: user.organisation_id,
-            account_status: user.account_status,
-            has_accept_cgu_version: "",
-            impersonating,
-            organisation,
-            last_connection: user.last_connection,
-            created_at: user.created_at,
-            fonction: user.fonction,
-            password_updated_at: user.password_updated_at,
-            telephone: user.telephone,
-            acl,
-          };
-
-          if (user.has_accept_cgu_version) {
-            ctx.has_accept_cgu_version = user.has_accept_cgu_version;
-          }
-
-          if ("username" in user && typeof user.username === "string") {
-            ctx.username = user.username;
-          }
-          done(null, ctx);
         } catch (err) {
           done(err);
         }
@@ -93,13 +53,113 @@ export const authMiddleware = () => {
       const ctx: AuthContext = req.user;
       Sentry.setUser({
         ip: req.ip,
-        id: ctx._id.toString(),
+        id: ctx._id?.toString(),
         username: ctx.email,
         segment: "jwt-2",
       });
       next();
     },
   ]);
+};
+
+const formatAuthContext = (user, organisation, acl, impersonating = false) => {
+  const ctx: AuthContext = {
+    _id: user._id,
+    civility: user.civility,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    organisation_id: user.organisation_id,
+    account_status: user.account_status,
+    has_accept_cgu_version: "",
+    impersonating,
+    organisation,
+    last_connection: user.last_connection,
+    created_at: user.created_at,
+    fonction: user.fonction,
+    password_updated_at: user.password_updated_at,
+    telephone: user.telephone,
+    acl,
+    auth_method: user.auth_method,
+  };
+  if (user.has_accept_cgu_version) {
+    ctx.has_accept_cgu_version = user.has_accept_cgu_version;
+  }
+  if ("username" in user && typeof user.username === "string") {
+    ctx.username = user.username;
+  }
+
+  return ctx;
+};
+
+export const passwordAuthMiddleware = async (payload, done) => {
+  try {
+    const { exp } = payload;
+    if (Date.now() > exp * 1000) {
+      throw Boom.unauthorized("Vous n'êtes pas connecté");
+    }
+    const user = await getUserByEmail(payload.email);
+    if (!user) {
+      throw Boom.unauthorized("Vous n'êtes pas connecté");
+    }
+    if (user.account_status !== "CONFIRMED") {
+      throw Boom.forbidden("Votre compte n'est pas encore validé.");
+    }
+    let impersonating;
+    if (payload.impersonatedOrganisation) {
+      impersonating = true;
+      user.organisation_id = new ObjectId(payload.impersonatedOrganisation._id);
+    }
+    const organisation =
+      payload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
+    const acl = await getAcl(organisation);
+    const ctx = formatAuthContext(user, organisation, acl, impersonating);
+    done(null, ctx);
+  } catch (err) {
+    done(err);
+  }
+};
+
+export const proconnectAuthMiddleware = async (payload, done) => {
+  try {
+    const { exp, email } = payload;
+
+    if (Date.now() > exp * 1000) {
+      throw Boom.unauthorized("Vous n'êtes pas connecté");
+    }
+
+    const pcSession = await proconnectSessionsDb().findOne({ email });
+    if (!pcSession) {
+      throw Boom.unauthorized("Vous n'êtes pas connecté");
+    }
+
+    const { expires_at } = pcSession;
+    if (expires_at < new Date()) {
+      await refreshProConnectToken(email, pcSession.refresh_token);
+    }
+
+    const user = await getUserByEmail(payload.email);
+    let ctx: AuthContext | Pick<AuthContext, "account_status" | "organisation" | "organisation_id"> | null = null;
+    // TODO récupération de la mission locale associée
+    if (!user) {
+      // Mock pour le développement local
+      // const orgaId = await organisationsDb().findOne({ type: "MISSION_LOCALE" }, { limit: 1, projection: { _id: 1 } });
+      // const organisation = await getOrganisationById(orgaId!._id);
+      // ctx = {
+      //   account_status: "PENDING_PROFILE_COMPLETION",
+      //   email: email,
+      //   organisation: organisation,
+      //   organisation_id: organisation?._id,
+      // };
+    } else {
+      const organisation = await getOrganisationById(user.organisation_id);
+      const acl = await getAcl(organisation);
+      ctx = formatAuthContext(user, organisation, acl);
+    }
+    done(null, ctx);
+  } catch (err) {
+    done(err);
+  }
 };
 
 export const checkPasswordToken = () => {

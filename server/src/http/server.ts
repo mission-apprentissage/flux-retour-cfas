@@ -156,6 +156,7 @@ import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.route
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
 import franceTravailPublicRoutes from "./routes/public.routes/france-travail.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
+import proConnectAuthRoutes from "./routes/public.routes/proconnect.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
@@ -271,6 +272,7 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
+    .use("/api/v1/auth/proconnect", proConnectAuthRoutes())
     .use(
       "/api/doc",
       swaggerUi.serve,

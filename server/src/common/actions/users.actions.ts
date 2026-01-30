@@ -35,6 +35,23 @@ export const createUser = async (user: UserRegistration, organisationId: ObjectI
     ...user,
     password: hash(user.password),
     organisation_id: organisationId,
+    auth_method: "password",
+  });
+
+  return insertedId;
+};
+
+export const createUserProConnect = async (user: Omit<UserRegistration, "password">, organisationId: ObjectId) => {
+  const insertedId = new ObjectId();
+  await usersMigrationDb().insertOne({
+    _id: insertedId,
+    account_status: "CONFIRMED",
+    connection_history: [],
+    emails: [],
+    created_at: getCurrentTime(),
+    ...user,
+    organisation_id: organisationId,
+    auth_method: "proconnect",
   });
 
   return insertedId;
@@ -53,7 +70,7 @@ const updateUserPassword = async (userId: ObjectId, password: string) => {
 
 export const authenticate = async (email: string, password: string) => {
   const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
+  if (!user || !user.password) {
     return null;
   }
   if (compare(password, user.password)) {

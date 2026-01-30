@@ -57,6 +57,7 @@ export async function initTestApp() {
         password: testPasswordHash,
         has_accept_cgu_version: "v0.1",
         organisation_id: organisationId,
+        auth_method: "password",
       });
 
       const sessionToken = await createSession(userEmail);
