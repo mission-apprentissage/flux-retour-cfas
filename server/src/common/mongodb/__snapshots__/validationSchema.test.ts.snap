@@ -1159,6 +1159,7 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
                 "APPRENTI",
                 "RUPTURANT",
                 "FIN_DE_FORMATION",
+                "INTER_CONTRAT",
               ],
             },
             "parcours": {
@@ -1179,6 +1180,7 @@ exports[`validation-schema > should create validation schema for effectifV2 > ef
                       "APPRENTI",
                       "RUPTURANT",
                       "FIN_DE_FORMATION",
+                      "INTER_CONTRAT",
                     ],
                   },
                 },
@@ -1721,6 +1723,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "INTER_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -1741,6 +1744,7 @@ exports[`validation-schema > should create validation schema for effectifs > eff
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "INTER_CONTRAT",
                             ],
                           },
                         },
@@ -4520,6 +4524,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "INTER_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -4540,6 +4545,7 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "INTER_CONTRAT",
                             ],
                           },
                         },
@@ -7368,6 +7374,7 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                         "APPRENTI",
                         "RUPTURANT",
                         "FIN_DE_FORMATION",
+                        "INTER_CONTRAT",
                       ],
                     },
                     "parcours": {
@@ -7388,6 +7395,7 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
                               "APPRENTI",
                               "RUPTURANT",
                               "FIN_DE_FORMATION",
+                              "INTER_CONTRAT",
                             ],
                           },
                         },
@@ -10293,6 +10301,7 @@ exports[`validation-schema > should create validation schema for franceTravailEf
                 "APPRENTI",
                 "RUPTURANT",
                 "FIN_DE_FORMATION",
+                "INTER_CONTRAT",
               ],
             },
             {
@@ -10480,6 +10489,7 @@ exports[`validation-schema > should create validation schema for franceTravailEf
                             "APPRENTI",
                             "RUPTURANT",
                             "FIN_DE_FORMATION",
+                            "INTER_CONTRAT",
                           ],
                         },
                         "parcours": {
@@ -10500,6 +10510,7 @@ exports[`validation-schema > should create validation schema for franceTravailEf
                                   "APPRENTI",
                                   "RUPTURANT",
                                   "FIN_DE_FORMATION",
+                                  "INTER_CONTRAT",
                                 ],
                               },
                             },
@@ -13536,6 +13547,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                 "APPRENTI",
                 "RUPTURANT",
                 "FIN_DE_FORMATION",
+                "INTER_CONTRAT",
               ],
             },
             {
@@ -13776,6 +13788,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                                 "APPRENTI",
                                 "RUPTURANT",
                                 "FIN_DE_FORMATION",
+                                "INTER_CONTRAT",
                               ],
                             },
                             "parcours": {
@@ -13796,6 +13809,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                                       "APPRENTI",
                                       "RUPTURANT",
                                       "FIN_DE_FORMATION",
+                                      "INTER_CONTRAT",
                                     ],
                                   },
                                 },
@@ -16572,6 +16586,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                                 "APPRENTI",
                                 "RUPTURANT",
                                 "FIN_DE_FORMATION",
+                                "INTER_CONTRAT",
                               ],
                             },
                             "parcours": {
@@ -16592,6 +16607,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                                       "APPRENTI",
                                       "RUPTURANT",
                                       "FIN_DE_FORMATION",
+                                      "INTER_CONTRAT",
                                     ],
                                   },
                                 },
