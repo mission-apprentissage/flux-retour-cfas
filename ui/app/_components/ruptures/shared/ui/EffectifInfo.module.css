@@ -111,3 +111,48 @@
 .highlightText {
   margin: 0;
 }
+
+/* DECA Source Info */
+.decaInfoContainer {
+  margin-top: 8px;
+  padding: 16px;
+  background-color: white;
+}
+
+.decaBadgeNouveau {
+  background-color: #e3e3fd !important;
+  color: #6a6af4 !important;
+}
+
+.decaInfoHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.decaInfoText {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-default-grey);
+  font-style: italic;
+}
+
+.decaAccordionToggle,
+.decaAccordionToggle:hover,
+.decaAccordionToggle:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-action-high-blue-france);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.decaAccordionContent {
+  margin: 12px 0 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-default-grey);
+}
