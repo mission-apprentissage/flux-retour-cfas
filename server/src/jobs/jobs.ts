@@ -43,6 +43,7 @@ import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalog
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
+  backfillIdentifiantNormalise,
   hydrateDailyMissionLocaleStats,
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleEffectifDateRupture,
@@ -550,6 +551,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-duplication": {
         handler: async () => {
           return softDeleteDoublonEffectifML();
+        },
+      },
+      "tmp:migration:ml-identifiant-normalise": {
+        handler: async () => {
+          return backfillIdentifiantNormalise();
         },
       },
       "tmp:migration:dedoublon-organisation": {

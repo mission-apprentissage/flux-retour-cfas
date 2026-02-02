@@ -18556,6 +18556,33 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         },
       ],
     },
+    "identifiant_normalise": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_de_naissance": {
+              "bsonType": "date",
+            },
+            "nom": {
+              "bsonType": "string",
+            },
+            "prenom": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "nom",
+            "prenom",
+            "date_de_naissance",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "mission_locale_id": {
       "bsonType": "objectId",
     },

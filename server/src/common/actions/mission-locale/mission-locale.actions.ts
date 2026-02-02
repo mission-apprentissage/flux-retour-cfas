@@ -29,6 +29,7 @@ import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
+import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
@@ -2261,6 +2262,16 @@ export const createMissionLocaleSnapshot = async (
     effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
     effectif._computed?.statut?.parcours.slice(-1)[0];
 
+  // Calcul de l'identifiant normalisé pour la détection de doublons
+  const normalizedIdentifiant =
+    effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance
+      ? normalisePersonIdentifiant({
+          nom: effectif.apprenant.nom,
+          prenom: effectif.apprenant.prenom,
+          date_de_naissance: effectif.apprenant.date_de_naissance,
+        })
+      : null;
+
   const ageFilter = effectif?.apprenant?.date_de_naissance
     ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
     : false;
@@ -2306,11 +2317,11 @@ export const createMissionLocaleSnapshot = async (
   const preFilter = !!(rupturantFilter && (ageFilter || rqthFilter) && decaFilter);
 
   let duplicateFilter = true;
-  if (preFilter) {
+  if (preFilter && normalizedIdentifiant) {
     const existingEffectif = await missionLocaleEffectifsDb().findOne({
-      "effectif_snapshot.apprenant.nom": effectif.apprenant.nom,
-      "effectif_snapshot.apprenant.prenom": effectif.apprenant.prenom,
-      "effectif_snapshot.apprenant.date_de_naissance": effectif.apprenant.date_de_naissance,
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
       soft_deleted: { $ne: true },
     });
     duplicateFilter = !existingEffectif;
@@ -2356,6 +2367,7 @@ export const createMissionLocaleSnapshot = async (
           },
           ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
         },
+        ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
       },
     },
     { upsert: shouldUpsert }

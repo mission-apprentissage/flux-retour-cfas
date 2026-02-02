@@ -14,6 +14,7 @@ import {
   getAllEffectifForMissionLocaleCursor,
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import {
   effectifsDb,
@@ -473,5 +474,69 @@ export const hydrateDailyMissionLocaleStats = async () => {
     });
 
     await Promise.allSettled(mapped.map((fn) => fn()));
+  }
+};
+
+export const backfillIdentifiantNormalise = async () => {
+  const BATCH_SIZE = 1000;
+
+  type BatchItem = {
+    updateOne: {
+      filter: { _id: ObjectId };
+      update: { $set: { identifiant_normalise: { nom: string; prenom: string; date_de_naissance: Date } } };
+    };
+  };
+
+  let batch: BatchItem[] = [];
+
+  const processBatch = async (currentBatch: BatchItem[]) => {
+    if (currentBatch.length === 0) {
+      return;
+    }
+
+    try {
+      return await missionLocaleEffectifsDb().bulkWrite(currentBatch);
+    } catch (e) {
+      captureException(e);
+    }
+  };
+
+  const cursor = missionLocaleEffectifsDb().find({
+    identifiant_normalise: { $exists: false },
+    "effectif_snapshot.apprenant.nom": { $exists: true, $ne: null },
+    "effectif_snapshot.apprenant.prenom": { $exists: true, $ne: null },
+    "effectif_snapshot.apprenant.date_de_naissance": { $exists: true, $ne: null },
+  });
+
+  while (await cursor.hasNext()) {
+    const doc = await cursor.next();
+    if (!doc) continue;
+
+    const apprenant = doc.effectif_snapshot?.apprenant;
+    if (!apprenant?.nom || !apprenant?.prenom || !apprenant?.date_de_naissance) continue;
+
+    batch.push({
+      updateOne: {
+        filter: { _id: doc._id },
+        update: {
+          $set: {
+            identifiant_normalise: normalisePersonIdentifiant({
+              nom: apprenant.nom,
+              prenom: apprenant.prenom,
+              date_de_naissance: apprenant.date_de_naissance,
+            }),
+          },
+        },
+      },
+    });
+
+    if (batch.length >= BATCH_SIZE) {
+      await processBatch(batch);
+      batch = [];
+    }
+  }
+
+  if (batch.length > 0) {
+    await processBatch(batch);
   }
 };

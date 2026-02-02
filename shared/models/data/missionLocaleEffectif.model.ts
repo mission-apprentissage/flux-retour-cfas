@@ -12,6 +12,15 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "organisme_data.acc_conjoint_by": 1, "organisme_data.has_unread_notification": 1 }, {}],
   [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint_by": 1 }, {}],
   [{ "effectif_snapshot.organisme_id": 1, "organisme_data.acc_conjoint": 1 }, {}],
+  [
+    {
+      "identifiant_normalise.nom": 1,
+      "identifiant_normalise.prenom": 1,
+      "identifiant_normalise.date_de_naissance": 1,
+      soft_deleted: 1,
+    },
+    {},
+  ],
 ];
 
 export enum SITUATION_ENUM {
@@ -150,6 +159,13 @@ const zMissionLocaleEffectif = z.object({
           activated_at: z.date().nullish(),
         })
         .nullish(),
+    })
+    .nullish(),
+  identifiant_normalise: z
+    .object({
+      nom: z.string(),
+      prenom: z.string(),
+      date_de_naissance: z.date(),
     })
     .nullish(),
 });
