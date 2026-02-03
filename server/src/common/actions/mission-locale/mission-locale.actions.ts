@@ -668,6 +668,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
             date_rupture: "$date_rupture",
             mission_locale_organisation: "$mission_locale_organisation",
             mission_locale_logs: "$ml_logs",
+            deca_feedback: "$deca_feedback",
           },
         },
       ];
@@ -2150,7 +2151,7 @@ export const setEffectifMissionLocaleData = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
+  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail, deca_feedback } = data;
 
   const setObject = {
     situation,
@@ -2160,6 +2161,16 @@ export const setEffectifMissionLocaleData = async (
     ...(probleme_type !== undefined ? { probleme_type } : {}),
     ...(probleme_detail !== undefined ? { probleme_detail } : {}),
   };
+
+  const decaFeedbackObject = deca_feedback
+    ? {
+        deca_feedback: {
+          differences_remarquees: deca_feedback.differences_remarquees,
+          pret_recevoir_deca: deca_feedback.pret_recevoir_deca,
+          responded_by: user._id,
+        },
+      }
+    : {};
 
   const effectif = await missionLocaleEffectifsDb().findOne({
     mission_locale_id: missionLocaleId,
@@ -2174,6 +2185,7 @@ export const setEffectifMissionLocaleData = async (
     {
       $set: {
         ...setObject,
+        ...decaFeedbackObject,
         updated_at: new Date(),
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
