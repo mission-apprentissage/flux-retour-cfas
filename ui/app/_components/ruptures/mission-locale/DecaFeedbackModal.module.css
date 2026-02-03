@@ -1,0 +1,142 @@
+.container {
+  padding: 0.5rem 0;
+}
+
+.intro {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  color: var(--text-default-grey);
+}
+
+@media (max-width: 600px) {
+  .intro {
+    font-size: 18px;
+    margin-bottom: 1rem;
+  }
+}
+
+.arrow {
+  color: var(--blue-france-sun-113-625);
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.questionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .questionsGrid {
+    gap: 1rem;
+  }
+}
+
+.questionRow {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .questionRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+.questionLabel {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .questionLabel {
+    font-size: 14px;
+  }
+}
+
+.answerContainer {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.answerContainer :global(.fr-fieldset) {
+  margin-bottom: 0;
+}
+
+.answerContainer :global(.fr-fieldset__legend) {
+  display: none;
+}
+
+.scaleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.scaleButtons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.scaleButton {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-default-grey);
+}
+
+.scaleButtonActive,
+.scaleButtonActive:hover,
+.scaleButtonActive:active {
+  background: var(--blue-france-sun-113-625) !important;
+  color: white !important;
+  border-color: var(--blue-france-sun-113-625) !important;
+}
+
+.scaleGradient {
+  height: 0.6rem;
+  border-radius: 0.125rem;
+  background: linear-gradient(to right, #e1000f, #ffca00, #18753c);
+}
+
+.scaleLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .scaleLabels {
+    font-size: 0.7rem;
+  }
+}
+
+.scaleLabels span {
+  max-width: 45%;
+}
+
+.scaleLabels span:last-child {
+  text-align: right;
+}
+
+.notice {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .notice {
+    margin-top: 1rem;
+  }
+}
