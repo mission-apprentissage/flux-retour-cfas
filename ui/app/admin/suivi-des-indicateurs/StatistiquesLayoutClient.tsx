@@ -4,6 +4,7 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { REGIONS_BY_CODE, REGION_CODES_WITH_SVG, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
+import { DecaAlert } from "@/app/_components/statistiques/ui/DecaAlert";
 import { FranceIcon } from "@/app/_components/statistiques/ui/FranceIcon";
 import { FranceMapSVG } from "@/app/_components/statistiques/ui/FranceMapSVG";
 import { RegionSVG } from "@/app/_components/statistiques/ui/RegionSVG";
@@ -167,6 +168,10 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
         <div className={styles.bannerContent}>
           <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions Locales sur le service</h1>
         </div>
+      </div>
+
+      <div className="fr-container fr-mt-2w fr-mb-3w">
+        <DecaAlert />
       </div>
 
       <div className={styles.mainContainer}>

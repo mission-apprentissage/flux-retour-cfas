@@ -3,7 +3,7 @@
 import Grid from "@mui/material/Grid2";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   API_EFFECTIF_LISTE,
   IEffecifMissionLocale,
@@ -11,6 +11,7 @@ import {
   IUpdateOrganismeFormationEffectif,
   SITUATION_ENUM,
 } from "shared";
+import { IDecaFeedbackApi } from "shared/models/routes/mission-locale/MissionLocaleEffectif";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -18,12 +19,21 @@ import { useAuth } from "@/app/_context/UserContext";
 import { _post, _put } from "@/common/httpClient";
 
 import { EffectifParcoursCfa } from "../../cfa/EffectifParcoursCfa";
+import { DecaFeedbackModal } from "../../mission-locale";
 import { EffectifParcoursMissionLocale } from "../../mission-locale/EffectifParcoursMissionLocale";
+import { shouldShowDecaFeedback as checkShouldShowDecaFeedback } from "../utils";
 
 import { EffectifDetailDisplay } from "./EffectifDetailDisplay";
 import { RightColumnSkeleton } from "./RightColumnSkeleton";
 
 const REDIRECTION_DELAY = 1500;
+
+interface PendingFormData {
+  effectifId: string;
+  formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif;
+  goNext: boolean;
+  nextId?: string;
+}
 
 export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
   const router = useRouter();
@@ -33,8 +43,11 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
   const queryClient = useQueryClient();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [showDecaFeedbackModal, setShowDecaFeedbackModal] = useState(false);
+  const pendingFormDataRef = useRef<PendingFormData | null>(null);
 
   const isCfaPage = pathname?.startsWith("/cfa/");
+  const shouldShowDecaFeedback = data?.effectif ? checkShouldShowDecaFeedback(data.effectif) : false;
   const orgType = pathname && pathname.startsWith("/cfa") ? "cfa" : "mission-locale";
 
   function computeRedirectUrl(
@@ -62,11 +75,13 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
       formData,
       goNext,
       nextId,
+      decaFeedback,
     }: {
       effectifId: string;
       formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif;
       goNext: boolean;
       nextId?: string;
+      decaFeedback?: IDecaFeedbackApi;
     }) => {
       const organismeId = user?.organisation?.organisme_id;
 
@@ -81,6 +96,7 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
             missionLocaleData.situation === SITUATION_ENUM.AUTRE ? missionLocaleData.situation_autre : "",
           commentaires: missionLocaleData.commentaires,
           deja_connu: missionLocaleData.deja_connu,
+          ...(decaFeedback && { deca_feedback: decaFeedback }),
         });
         return { result, goNext, nextId };
       }
@@ -91,18 +107,15 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     onSuccess: (mutationData) => {
       setSaveStatus("success");
 
-      if (mutationData.goNext || mutationData.nextId) {
-        const targetUrl = computeRedirectUrl(mutationData.goNext, mutationData.nextId, nomListe, data?.total);
-        setTimeout(() => {
-          queryClient.invalidateQueries(["effectif"]);
-          router.push(targetUrl);
-        }, REDIRECTION_DELAY);
-      } else {
-        setTimeout(() => {
-          queryClient.invalidateQueries(["effectif"]);
-          router.push(`/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`);
-        }, REDIRECTION_DELAY);
-      }
+      const targetUrl =
+        mutationData.goNext || mutationData.nextId
+          ? computeRedirectUrl(mutationData.goNext, mutationData.nextId, nomListe, data?.total)
+          : `/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`;
+
+      setTimeout(() => {
+        queryClient.invalidateQueries(["effectif"]);
+        router.push(targetUrl);
+      }, REDIRECTION_DELAY);
     },
     onError: () => {
       setSaveStatus("error");
@@ -115,12 +128,37 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
     effectifId: string,
     nextId?: string
   ) {
-    updateEffectifMutation.mutate({
-      effectifId,
-      formData,
-      goNext,
-      nextId,
-    });
+    if (shouldShowDecaFeedback && !isCfaPage) {
+      pendingFormDataRef.current = { effectifId, formData, goNext, nextId };
+      setShowDecaFeedbackModal(true);
+    } else {
+      updateEffectifMutation.mutate({
+        effectifId,
+        formData,
+        goNext,
+        nextId,
+      });
+    }
+  }
+
+  function handleDecaFeedbackSubmit(decaFeedback: IDecaFeedbackApi) {
+    if (pendingFormDataRef.current) {
+      const { effectifId, formData, goNext, nextId } = pendingFormDataRef.current;
+      setShowDecaFeedbackModal(false);
+      pendingFormDataRef.current = null;
+      updateEffectifMutation.mutate({
+        effectifId,
+        formData,
+        goNext,
+        nextId,
+        decaFeedback,
+      });
+    }
+  }
+
+  function handleDecaFeedbackClose() {
+    setShowDecaFeedbackModal(false);
+    pendingFormDataRef.current = null;
   }
 
   const backUrl = `${pathname && pathname.startsWith("/cfa") ? "/cfa" : "/mission-locale"}?statut=${nomListe}&rupture=${data?.effectif.date_rupture}`;
@@ -169,6 +207,15 @@ export default function EffectifDetail({ data }: { data: IEffecifMissionLocale |
           )}
         </SuspenseWrapper>
       </Grid>
+
+      {data && (
+        <DecaFeedbackModal
+          isOpen={showDecaFeedbackModal}
+          onSubmit={handleDecaFeedbackSubmit}
+          onClose={handleDecaFeedbackClose}
+          isSubmitting={updateEffectifMutation.isLoading}
+        />
+      )}
     </Grid>
   );
 }
