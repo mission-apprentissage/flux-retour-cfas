@@ -33,6 +33,13 @@ const zApprenantPick = zApprenant
     telephone_corrected: z.string().nullish(),
   });
 
+export const decaFeedbackApi = z.object({
+  differences_remarquees: z.boolean(),
+  pret_recevoir_deca: z.number().min(0).max(5),
+});
+
+export type IDecaFeedbackApi = z.infer<typeof decaFeedbackApi>;
+
 export const updateMissionLocaleEffectifApi = {
   situation: zSituationEnum.optional(),
   situation_autre: zMissionLocaleEffectif.zod.shape.situation_autre.optional(),
@@ -40,6 +47,7 @@ export const updateMissionLocaleEffectifApi = {
   deja_connu: z.boolean().nullish(),
   probleme_type: zProblemeTypeEnum.optional(),
   probleme_detail: z.string().optional(),
+  deca_feedback: decaFeedbackApi.optional(),
 };
 
 const zEffectifMissionLocale = z
@@ -109,6 +117,11 @@ const zEffectifMissionLocale = z
         email: z.string().nullish(),
         telephone: z.string().nullish(),
         activated_at: z.date().nullish(),
+      })
+      .nullish(),
+    deca_feedback: decaFeedbackApi
+      .extend({
+        responded_by: zObjectId,
       })
       .nullish(),
   })

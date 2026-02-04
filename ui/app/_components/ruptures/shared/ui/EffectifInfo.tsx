@@ -5,7 +5,7 @@ import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { IEffecifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
@@ -49,6 +49,61 @@ const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
   );
 };
 
+const computeTransmissionDate = (date: Date | null | undefined) => {
+  return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
+};
+
+const DecaSourceInfo = ({
+  dateRupture,
+  transmittedAt,
+}: {
+  dateRupture: IEffecifMissionLocale["effectif"]["date_rupture"];
+  transmittedAt: Date | null | undefined;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={styles.decaInfoContainer}>
+      <Notice
+        className={styles.noticeContainer}
+        style={{ backgroundColor: "white" }}
+        title="Date de la rupture du contrat d'apprentissage :"
+        description={formatDate(dateRupture) ? `le ${formatDate(dateRupture)}` : "non renseignée"}
+      />
+      <p className={styles.transmissionInfo}>
+        Données transmises par l&apos;API DECA {computeTransmissionDate(transmittedAt)}
+      </p>
+      <div className={styles.decaInfoHeader}>
+        <span className={`fr-badge ${styles.decaBadgeNouveau}`}>NOUVEAU</span>
+        <span className={styles.decaInfoText}>
+          Ce dossier et ses informations remontent directement depuis la base de données <strong>DECA</strong> et non
+          depuis le logiciel du CFA.
+        </span>
+      </div>
+      <a
+        href="#"
+        className={styles.decaAccordionToggle}
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }}
+        aria-expanded={isOpen}
+      >
+        <span className="ri-information-line fr-icon--sm" aria-hidden="true" />
+        DECA ?
+        <span className={`fr-icon-arrow-${isOpen ? "up" : "down"}-s-line`} aria-hidden="true" />
+      </a>
+      {isOpen && (
+        <p className={styles.decaAccordionContent}>
+          DECA (Dépôt des contrats en alternance) : base de donnée qui stocke les contrats d&apos;apprentissage des
+          secteurs privé et public déposés par les 11 opérateurs de compétences (OPCO) et les agents en
+          DDETS/D(R)(I)EETS.
+        </p>
+      )}
+    </div>
+  );
+};
+
 export function EffectifInfo({
   effectif,
   isAdmin = false,
@@ -67,25 +122,27 @@ export function EffectifInfo({
   const [infosOpen, setInfosOpen] = useState(false);
   const isPrioritaire = effectif.prioritaire && (effectif.a_traiter || effectif.injoignable);
 
-  const computeTransmissionDate = (date: Date | null | undefined) => {
-    return date ? `le ${formatDate(date)}` : "il y a plus de deux semaines";
-  };
-
-  const handleContactFormSuccess = (shouldContinue?: boolean) => {
-    setEffectifUpdated(true);
-
-    if (shouldContinue) {
-      if (nextEffectifId && pathname) {
-        const pathSegments = pathname.split("/");
-        pathSegments[pathSegments.length - 1] = nextEffectifId;
-        const newPath = pathSegments.join("/");
-        router.push(newPath);
+  const navigateAfterSuccess = useCallback(
+    (shouldContinue: boolean) => {
+      if (shouldContinue) {
+        if (nextEffectifId && pathname) {
+          const pathSegments = pathname.split("/");
+          pathSegments[pathSegments.length - 1] = nextEffectifId;
+          const newPath = pathSegments.join("/");
+          router.push(newPath);
+        } else {
+          router.push("/");
+        }
       } else {
         router.push("/");
       }
-    } else {
-      router.push("/");
-    }
+    },
+    [nextEffectifId, pathname, router]
+  );
+
+  const handleContactFormSuccess = (shouldContinue?: boolean) => {
+    setEffectifUpdated(true);
+    navigateAfterSuccess(shouldContinue ?? false);
   };
 
   const showContactForm = shouldShowContactForm(user.organisation.type, effectif, effectifUpdated);
@@ -127,25 +184,25 @@ export function EffectifInfo({
             </h3>
             {!effectif.nouveau_contrat && (
               <>
-                <Notice
-                  className={styles.noticeContainer}
-                  style={{
-                    backgroundColor: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
-                  }}
-                  title="Date de la rupture du contrat d'apprentissage :"
-                  description={
-                    formatDate(effectif.date_rupture) ? `le ${formatDate(effectif.date_rupture)}` : "non renseignée"
-                  }
-                />
-                <p className={styles.transmissionInfo}>
-                  {effectif.source === "DECA" ? (
-                    <span>
-                      Données transmises par l&apos;API DECA {computeTransmissionDate(effectif.transmitted_at)}
-                    </span>
-                  ) : (
-                    <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
-                  )}
-                </p>
+                {effectif.source === "DECA" ? (
+                  <DecaSourceInfo dateRupture={effectif.date_rupture} transmittedAt={effectif.transmitted_at} />
+                ) : (
+                  <>
+                    <Notice
+                      className={styles.noticeContainer}
+                      style={{
+                        backgroundColor: isPrioritaire ? "var(--red-marianne-975-75)" : "white",
+                      }}
+                      title="Date de la rupture du contrat d'apprentissage :"
+                      description={
+                        formatDate(effectif.date_rupture) ? `le ${formatDate(effectif.date_rupture)}` : "non renseignée"
+                      }
+                    />
+                    <p className={styles.transmissionInfo}>
+                      <span>Données transmises par le CFA {computeTransmissionDate(effectif.transmitted_at)}</span>
+                    </p>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -174,7 +231,7 @@ export function EffectifInfo({
         <MissionLocaleFeedback
           situation={effectif.situation}
           visibility={user.organisation.type}
-          logs={effectif.mission_locale_logs as any}
+          logs={effectif.mission_locale_logs}
           isNouveauContrat={effectif.nouveau_contrat ?? undefined}
         />
       )}

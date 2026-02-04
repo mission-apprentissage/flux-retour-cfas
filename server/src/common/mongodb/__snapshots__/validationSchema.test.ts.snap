@@ -13555,6 +13555,38 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       ],
     },
+    "deca_feedback": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "differences_remarquees": {
+              "bsonType": "bool",
+              "description": "L'utilisateur a remarqué des différences avec les dossiers non-DECA",
+            },
+            "pret_recevoir_deca": {
+              "bsonType": "number",
+              "description": "Score 0-5 de disposition à recevoir d'autres dossiers DECA",
+              "maximum": 5,
+              "minimum": 0,
+            },
+            "responded_by": {
+              "bsonType": "objectId",
+              "description": "ID de l'utilisateur qui a répondu au feedback",
+            },
+          },
+          "required": [
+            "differences_remarquees",
+            "pret_recevoir_deca",
+            "responded_by",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "deja_connu": {
       "bsonType": [
         "bool",
@@ -18549,6 +18581,33 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "not_supported",
             "error",
             "pending",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "identifiant_normalise": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_de_naissance": {
+              "bsonType": "date",
+            },
+            "nom": {
+              "bsonType": "string",
+            },
+            "prenom": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "nom",
+            "prenom",
+            "date_de_naissance",
           ],
         },
         {

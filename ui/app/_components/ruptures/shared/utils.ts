@@ -45,3 +45,10 @@ export const shouldShowContactForm = (
 
   return false;
 };
+
+export const shouldShowDecaFeedback = (effectif: {
+  source?: string | null;
+  deca_feedback?: unknown | null;
+}): boolean => {
+  return effectif.source === "DECA" && !effectif.deca_feedback;
+};

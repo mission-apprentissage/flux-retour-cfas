@@ -26,7 +26,7 @@ import {
   hydrateVoeuxEffectifsRelations,
   hydrateAcademieInVoeux,
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
-import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
+import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "./hydrate/deca/hydrate-deca-raw";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -43,6 +43,7 @@ import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalog
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import {
+  backfillIdentifiantNormalise,
   hydrateDailyMissionLocaleStats,
   hydrateMissionLocaleAdresse,
   hydrateMissionLocaleEffectifDateRupture,
@@ -265,6 +266,11 @@ export async function setupJobProcessor() {
             return 0;
           }
           return hydrateDecaRaw();
+        },
+      },
+      "hydrate:mission-locale-from-deca": {
+        handler: async () => {
+          return hydrateDecaFromExistingEffectifs();
         },
       },
       "organisme:cleanup": {
@@ -545,6 +551,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-duplication": {
         handler: async () => {
           return softDeleteDoublonEffectifML();
+        },
+      },
+      "tmp:migration:ml-identifiant-normalise": {
+        handler: async () => {
+          return backfillIdentifiantNormalise();
         },
       },
       "tmp:migration:dedoublon-organisation": {

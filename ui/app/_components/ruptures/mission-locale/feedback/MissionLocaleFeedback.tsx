@@ -14,7 +14,7 @@ import notificationStyles from "../../shared/ui/NotificationBadge.module.css";
 interface MissionLocaleFeedbackProps {
   situation: IUpdateMissionLocaleEffectif;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
-  logs?: Array<IMissionLocaleEffectifLog & { unread_by_current_user?: boolean }> | null;
+  logs?: Array<IMissionLocaleEffectifLog & { unread_by_current_user?: boolean | null }> | null;
   isNouveauContrat?: boolean;
 }
 
