@@ -44,6 +44,7 @@
     "axios": "^1.11.0",
     "chakra-ui-markdown-renderer": "4.1.0",
     "chart.js": "^4.4.5",
+    "crisp-sdk-web": "^1.0.27",
     "date-fns": "^2.30.0",
     "formik": "^2.4.6",
     "framer-motion": "^7.10.3",

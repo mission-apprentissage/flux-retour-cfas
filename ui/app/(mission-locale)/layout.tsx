@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import dynamic from "next/dynamic";
 
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
-import { CrispChat } from "../_components/CrispChat";
 import { Footer } from "../_components/Footer";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
+  const CrispChatNoSSR = dynamic(() => import("../_components/CrispChat").then((mod) => mod.CrispChat));
 
   return (
     <Providers>
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
           {children}
         </div>
         <Footer />
-        <CrispChat />
+        <CrispChatNoSSR />
       </UserContextProvider>
     </Providers>
   );

@@ -20,7 +20,7 @@ const contentSecurityPolicy = `
       script-src 'self' 'unsafe-inline' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat  ${process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval' " : ""};
       script-src-attr 'none';
       style-src 'self' https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat https://plugins.crisp.chat https://sentry.apprentissage.beta.gouv.fr ${
+      connect-src 'self' https://plausible.io https://stats.beta.gouv.fr https://client.crisp.chat https://plugins.crisp.chat wss://client.relay.crisp.chat https://sentry.apprentissage.beta.gouv.fr ${
         process.env.NEXT_PUBLIC_ENV === "local" ? "http://localhost:5001/" : ""
       };
       upgrade-insecure-requests;
