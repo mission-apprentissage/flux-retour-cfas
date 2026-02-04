@@ -1,7 +1,7 @@
 import { siretFixtures } from "api-alternance-sdk/fixtures";
 import { addDays } from "date-fns";
 import { ObjectId } from "mongodb";
-import type { IEffectifV2, IFormationV2 } from "shared/models";
+import type { IEffectifV2 } from "shared/models";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { effectifV2Db } from "@/common/model/collections";
@@ -62,7 +62,7 @@ describe("ingestEffectifV2", () => {
         date_fin_formation: aout26,
       },
       person_id: new ObjectId(),
-      formation: { _id: new ObjectId() } as IFormationV2,
+      formation_id: new ObjectId(),
       date_transmission: now,
       adresse: paris,
     });
@@ -101,7 +101,6 @@ describe("ingestEffectifV2", () => {
       derniere_transmission: now,
       _computed: {
         session: null,
-        formation: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -157,7 +156,6 @@ describe("ingestEffectifV2", () => {
       derniere_transmission: lastWeek,
       _computed: {
         session: null,
-        formation: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -183,7 +181,7 @@ describe("ingestEffectifV2", () => {
         email_contact: "test@test.com",
       },
       person_id: existingEffectif.identifiant.person_id,
-      formation: { _id: existingEffectif.identifiant.formation_id } as IFormationV2,
+      formation_id: existingEffectif.identifiant.formation_id,
       date_transmission: now,
       adresse: paris,
     });
@@ -245,7 +243,6 @@ describe("ingestEffectifV2", () => {
         derniere_transmission: lastWeek,
         _computed: {
           session: null,
-          formation: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -403,7 +400,7 @@ describe("ingestEffectifV2", () => {
         date_fin_formation: aout26,
       },
       person_id: person1,
-      formation: { _id: formation1 } as IFormationV2,
+      formation_id: formation1,
       date_transmission: now,
       adresse: marseille,
     });
@@ -431,7 +428,6 @@ describe("ingestEffectifV2", () => {
         session: { debut: aout24, fin: aout25 },
         _computed: {
           session: null,
-          formation: null,
           statut: {
             en_cours: "ABANDON",
             parcours: [
@@ -527,7 +523,6 @@ describe("ingestEffectifV2", () => {
       derniere_transmission: lastWeek,
       _computed: {
         session: null,
-        formation: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -553,7 +548,7 @@ describe("ingestEffectifV2", () => {
         ...updatedDossier,
       },
       person_id: existingEffectif.identifiant.person_id,
-      formation: { _id: existingEffectif.identifiant.formation_id } as IFormationV2,
+      formation_id: existingEffectif.identifiant.formation_id,
       date_transmission: now,
       adresse: paris,
     });
@@ -604,7 +599,6 @@ describe("ingestEffectifV2", () => {
       derniere_transmission: now,
       _computed: {
         session: null,
-        formation: null,
         statut: {
           en_cours: "ABANDON",
           parcours: [
@@ -625,7 +619,7 @@ describe("ingestEffectifV2", () => {
         date_fin_formation: aout26,
       },
       person_id: commonEffectif.identifiant.person_id,
-      formation: { _id: commonEffectif.identifiant.formation_id } as IFormationV2,
+      formation_id: commonEffectif.identifiant.formation_id,
       date_transmission: now,
       adresse: paris,
     };
@@ -720,7 +714,6 @@ describe("ingestEffectifV2", () => {
         },
         _computed: {
           session: null,
-          formation: null,
           statut: {
             en_cours: "APPRENTI",
             parcours: [

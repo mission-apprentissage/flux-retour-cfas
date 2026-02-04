@@ -71,7 +71,7 @@ const apiFormationsFixtures = [
   }),
 ];
 
-const expectedFormations: Omit<IFormationV2, "_id" | "computed">[] = [
+const expectedFormations: Omit<IFormationV2, "_id">[] = [
   {
     identifiant: {
       cfd: null,
@@ -162,7 +162,7 @@ describe("hydrateFormationV2", () => {
     });
 
     const formations = await formationV2Db()
-      .find({}, { projection: { _id: 0, computed: 0 }, sort })
+      .find({}, { projection: { _id: 0 }, sort })
       .toArray();
 
     expect(formations).toEqual(expectedFormations);
@@ -179,9 +179,7 @@ describe("hydrateFormationV2", () => {
       include_archived: "true",
     });
 
-    const formations = await formationV2Db()
-      .find({}, { projection: { computed: 0 }, sort })
-      .toArray();
+    const formations = await formationV2Db().find({}, { sort }).toArray();
 
     expect(formations).toEqual(initialFormations);
   });

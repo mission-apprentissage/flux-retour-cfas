@@ -2,7 +2,7 @@ import { AnyBulkWriteOperation, ObjectId } from "mongodb";
 import { IFormationV2 } from "shared/models";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { formationAPIV2Db, formationV2Db } from "@/common/model/collections";
+import { formationV2Db } from "@/common/model/collections";
 
 export async function hydrateFormationV2() {
   const cursor = apiAlternanceClient.formation.recherche({
@@ -11,46 +11,28 @@ export async function hydrateFormationV2() {
   });
 
   for await (const page of cursor) {
-    const ops: AnyBulkWriteOperation<IFormationV2>[] = page.map((formation) => {
-      return {
-        updateOne: {
-          filter: {
-            "identifiant.cfd": formation.certification.valeur.identifiant.cfd,
-            "identifiant.rncp": formation.certification.valeur.identifiant.rncp,
-            "identifiant.responsable_siret": formation.responsable.organisme?.identifiant.siret ?? null,
-            "identifiant.responsable_uai": formation.responsable.organisme?.identifiant.uai ?? null,
-            "identifiant.formateur_siret": formation.formateur.organisme?.identifiant.siret ?? null,
-            "identifiant.formateur_uai": formation.formateur.organisme?.identifiant.uai ?? null,
-          },
-          update: {
-            $set: {
-              draft: false,
-              computed: { formation },
-            },
-            $setOnInsert: {
-              _id: new ObjectId(),
-            },
-          },
-          upsert: true,
+    const ops: AnyBulkWriteOperation<IFormationV2>[] = page.map((formation) => ({
+      updateOne: {
+        filter: {
+          "identifiant.cfd": formation.certification.valeur.identifiant.cfd,
+          "identifiant.rncp": formation.certification.valeur.identifiant.rncp,
+          "identifiant.responsable_siret": formation.responsable.organisme?.identifiant.siret ?? null,
+          "identifiant.responsable_uai": formation.responsable.organisme?.identifiant.uai ?? null,
+          "identifiant.formateur_siret": formation.formateur.organisme?.identifiant.siret ?? null,
+          "identifiant.formateur_uai": formation.formateur.organisme?.identifiant.uai ?? null,
         },
-      };
-    });
-
-    const ops2 = page.map((formation) => {
-      return {
-        updateOne: {
-          filter: { "identifiant.cle_ministere_educatif": formation.identifiant.cle_ministere_educatif },
-          update: {
-            $set: { ...formation },
-            $setOnInsert: {
-              _id: new ObjectId(),
-            },
+        update: {
+          $set: {
+            draft: false,
           },
-          upsert: true,
+          $setOnInsert: {
+            _id: new ObjectId(),
+          },
         },
-      };
-    });
+        upsert: true,
+      },
+    }));
 
-    await Promise.allSettled([formationV2Db().bulkWrite(ops), formationAPIV2Db().bulkWrite(ops2)]);
+    await formationV2Db().bulkWrite(ops);
   }
 }

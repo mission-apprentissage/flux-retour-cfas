@@ -21,9 +21,6 @@ import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
-import missionLocaleEffectif2Descriptor, {
-  IMissionLocale2Effectif,
-} from "shared/models/data/missionLocaleEffectif2.model";
 import missionLocaleEffectifLogDescriptor, {
   IMissionLocaleEffectifLog,
 } from "shared/models/data/missionLocaleEffectifLog.model";
@@ -45,7 +42,6 @@ import transmissionDailyReportDescriptor, {
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
-import formationAPIV2ModelDescriptor from "shared/models/data/v2/formationAPI.v2.model";
 import organismesV2ModelDescriptor, { IOrganismeV2 } from "shared/models/data/v2/organisme.v2.model";
 import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
 import transmissionV2Descriptor, { ITransmissionV2 } from "shared/models/data/v2/transmission.v2.model";
@@ -79,7 +75,6 @@ export const modelDescriptors = [
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
-  missionLocaleEffectif2Descriptor,
   regionsModelDescriptor,
   brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
@@ -88,7 +83,6 @@ export const modelDescriptors = [
   missionLocaleStatsDescriptor,
   franceTravailEffectifDescriptor,
   romeSecteurActivitesDescriptor,
-  formationAPIV2ModelDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -119,9 +113,6 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
-
-export const missionLocaleEffectifs2Db = () =>
-  getDbCollection<IMissionLocale2Effectif>(missionLocaleEffectif2Descriptor.collectionName);
 export const missionLocaleStatsDb = () =>
   getDbCollection<IMissionLocaleStats>(missionLocaleStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>
@@ -146,5 +137,3 @@ export const personV2Db = () => getDbCollection<IPersonV2>(personV2ModelDescript
 export const formationV2Db = () => getDbCollection<IFormationV2>(formationV2ModelDescriptor.collectionName);
 export const effectifV2Db = () => getDbCollection<IEffectifV2>(effectifsV2ModelDescriptor.collectionName);
 export const transmissionV2Db = () => getDbCollection<ITransmissionV2>(transmissionV2Descriptor.collectionName);
-
-export const formationAPIV2Db = () => getDbCollection<any>(formationAPIV2ModelDescriptor.collectionName);

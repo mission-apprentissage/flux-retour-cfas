@@ -3,11 +3,11 @@ import { ObjectId } from "bson";
 import express from "express";
 import {
   API_EFFECTIF_LISTE,
+  IMissionLocaleEffectif,
   IOrganisationMissionLocale,
   SITUATION_LABEL_ENUM,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
-import { IMissionLocale2Effectif } from "shared/models/data/missionLocaleEffectif2.model";
 import {
   effectifMissionLocaleListe,
   effectifsParMoisFiltersMissionLocaleAPISchema,
@@ -18,9 +18,9 @@ import {
   getEffectifFromMissionLocaleId,
   getEffectifsListByMisisonLocaleId,
   setEffectifMissionLocaleData,
-} from "@/common/actions/mission-locale/mission-locale.actions.v2";
+} from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { missionLocaleEffectifs2Db } from "@/common/model/collections";
+import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
@@ -40,8 +40,9 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
   const user = req.user;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifApi);
-  const effectif: IMissionLocale2Effectif | null = await missionLocaleEffectifs2Db().findOne({
-    effectifV2_id: new ObjectId(effectifId),
+
+  const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
+    effectif_id: new ObjectId(effectifId),
     mission_locale_id: new ObjectId(missionLocale._id),
   });
 

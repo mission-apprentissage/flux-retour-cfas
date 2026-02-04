@@ -143,8 +143,6 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
     date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
     annee_scolaire: anneeScolaire,
     id_erp_apprenant: faker.string.uuid(),
-    formation_cfd: getRandomFormationCfd(),
-    formation_rncp: getRandomRncpFormation(),
     date_inscription_formation,
     date_entree_formation,
     date_fin_formation,

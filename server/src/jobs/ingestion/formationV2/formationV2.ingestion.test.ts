@@ -35,15 +35,8 @@ describe("ingestFormationV2", () => {
         formateur_uai: dossier.etablissement_formateur_uai,
       },
       draft: true,
-      fiabilisation: {
-        responsable_siret: null,
-        responsable_uai: null,
-        formateur_siret: null,
-        formateur_uai: null,
-      },
       organisme_formateur_id: null,
       organisme_responsable_id: null,
-      computed: { formation: null },
     });
 
     expect(await formationV2Db().find({}).toArray()).toEqual([result]);
@@ -165,13 +158,6 @@ describe("ingestFormationV2", () => {
       draft: true,
       organisme_formateur_id: null,
       organisme_responsable_id: null,
-      fiabilisation: {
-        responsable_siret: null,
-        responsable_uai: null,
-        formateur_siret: null,
-        formateur_uai: null,
-      },
-      computed: { formation: null },
     }).toEqual(result);
 
     expect(await formationV2Db().countDocuments()).toBe(existingFormations.length + 1);

@@ -117,7 +117,6 @@ export const zEffectifV2 = z.object({
   _computed: z.object({
     statut: zEffectifComputedStatut,
     session: _zCertification.nullish(),
-    formation: z.any().optional(),
   }),
 });
 

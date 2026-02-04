@@ -471,13 +471,6 @@ export const getAllARML = async (): Promise<IOrganisationARML[]> => {
   return organisations;
 };
 
-export const getMissionLocaleByMLId = async (ml_id?: number | null): Promise<IOrganisationMissionLocale | null> => {
-  if (!ml_id) {
-    return null;
-  }
-  return organisationsDb().findOne<IOrganisationMissionLocale>({ type: "MISSION_LOCALE", ml_id });
-};
-
 export const getAllFranceTravail = async (): Promise<IOrganisationFranceTravail[]> => {
   const organisations = await organisationsDb().find<IOrganisationFranceTravail>({ type: "FRANCE_TRAVAIL" }).toArray();
   if (!organisations) {
