@@ -685,6 +685,8 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
     case "TETE_DE_RESEAU":
       return "Les organismes de mon réseau";
 
+    case "DREETS":
+    case "DDETS":
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 
@@ -692,6 +694,6 @@ function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
       return "Tous les organismes";
 
     default:
-      throw new Error(`Type ’${type}’ inconnu`);
+      throw new Error(`Type '${type}' inconnu`);
   }
 }

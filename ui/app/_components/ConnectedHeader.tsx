@@ -19,6 +19,8 @@ export function ConnectedHeader() {
         return "Mes organismes";
       case ORGANISATION_TYPE.TETE_DE_RESEAU:
         return "Mon réseau";
+      case ORGANISATION_TYPE.DREETS:
+      case ORGANISATION_TYPE.DDETS:
       case ORGANISATION_TYPE.ACADEMIE:
         return "Mon territoire";
       case ORGANISATION_TYPE.ADMINISTRATEUR:
@@ -100,19 +102,14 @@ export function ConnectedHeader() {
           },
         });
       }
-    } else if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
-      baseItems.push({
-        text: "Suivi des indicateurs",
-        isActive: pathname?.startsWith("/suivi-des-indicateurs"),
-        linkProps: {
-          href: "/suivi-des-indicateurs",
-          target: "_self",
-        },
-      });
     } else if (
-      [ORGANISATION_TYPE.TETE_DE_RESEAU, ORGANISATION_TYPE.ACADEMIE, ORGANISATION_TYPE.ADMINISTRATEUR].includes(
-        organisationType || ""
-      )
+      [
+        ORGANISATION_TYPE.TETE_DE_RESEAU,
+        ORGANISATION_TYPE.DREETS,
+        ORGANISATION_TYPE.DDETS,
+        ORGANISATION_TYPE.ACADEMIE,
+        ORGANISATION_TYPE.ADMINISTRATEUR,
+      ].includes(organisationType || "")
     ) {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
@@ -120,6 +117,16 @@ export function ConnectedHeader() {
           isActive: pathname?.startsWith("/admin/suivi-des-indicateurs"),
           linkProps: {
             href: "/admin/suivi-des-indicateurs",
+            target: "_self",
+          },
+        });
+      }
+      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+        baseItems.push({
+          text: "Suivi des indicateurs",
+          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
+          linkProps: {
+            href: "/suivi-des-indicateurs",
             target: "_self",
           },
         });
@@ -145,7 +152,7 @@ export function ConnectedHeader() {
           target: "_self",
         },
       });
-      if (organisationType === ORGANISATION_TYPE.ACADEMIE) {
+      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
         baseItems.push({
           text: "Vœux Affelnet",
           linkProps: {
@@ -190,6 +197,17 @@ export function ConnectedHeader() {
       text: string;
     }> = [];
 
+    if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+      aideMenuLinks.push({
+        linkProps: {
+          href: "https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op",
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        text: "Kit de déploiement DREETS/DDETS",
+      });
+    }
+
     aideMenuLinks.push({
       linkProps: {
         href: CRISP_FAQ,
@@ -231,12 +249,10 @@ export function ConnectedHeader() {
       });
     }
 
-    if (organisationType !== ORGANISATION_TYPE.DREETS && organisationType !== ORGANISATION_TYPE.DDETS) {
-      baseItems.push({
-        text: "Aide et ressources",
-        menuLinks: aideMenuLinks,
-      });
-    }
+    baseItems.push({
+      text: "Aide et ressources",
+      menuLinks: aideMenuLinks,
+    });
 
     return baseItems;
   };

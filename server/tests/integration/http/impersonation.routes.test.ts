@@ -149,17 +149,37 @@ it("End to end - imposture d'organisation", async () => {
     acl: {
       configurerModeTransmission: false,
       effectifsNominatifs: {
-        abandon: false,
+        abandon: {
+          region: {
+            $in: ["53"],
+          },
+        },
         apprenant: false,
         apprenti: false,
         inconnu: false,
-        inscritSansContrat: false,
-        rupturant: false,
+        inscritSansContrat: {
+          region: {
+            $in: ["53"],
+          },
+        },
+        rupturant: {
+          region: {
+            $in: ["53"],
+          },
+        },
       },
-      indicateursEffectifs: false,
-      infoTransmissionEffectifs: false,
+      indicateursEffectifs: {
+        region: {
+          $in: ["53"],
+        },
+      },
+      infoTransmissionEffectifs: true,
       manageEffectifs: false,
-      viewContacts: false,
+      viewContacts: {
+        region: {
+          $in: ["53"],
+        },
+      },
     },
   });
 

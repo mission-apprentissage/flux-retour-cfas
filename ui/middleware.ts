@@ -71,8 +71,6 @@ function redirectToHome(
     case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
     case "ARML":
-    case "DREETS":
-    case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ADMINISTRATEUR":
       return NextResponse.redirect(new URL("/admin/suivi-des-indicateurs", request.url));
@@ -147,15 +145,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/home", request.url));
     }
     return NextResponse.next(requestNextData);
-  }
-
-  const isDreetsOrDdets = session?.organisation?.type === "DREETS" || session?.organisation?.type === "DDETS";
-  if (isDreetsOrDdets) {
-    const restrictedPaths = ["/home", "/organismes", "/indicateurs", "/national/indicateurs", "/voeux-affelnet"];
-    const isRestrictedPath = restrictedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-    if (isRestrictedPath) {
-      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
-    }
   }
 
   // Redirection des utilisateurs décommissionnés vers la page de décommissionnement

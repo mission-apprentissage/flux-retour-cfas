@@ -21,6 +21,8 @@ function FiltreOrganismeDepartements(props: FiltreOrganismeDepartementsProps) {
 
   const configDepartements = useMemo(() => {
     switch (organisation.type) {
+      case "DREETS":
+        return DEPARTEMENTS_SORTED.filter((departement) => departement.region.code === organisation.code_region);
       case "ACADEMIE":
         return DEPARTEMENTS_SORTED.filter((departement) => departement.academie.code === organisation.code_academie);
       default:
