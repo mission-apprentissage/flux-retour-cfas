@@ -7843,6 +7843,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"crisp-sdk-web@npm:^1.0.27":
+  version: 1.0.27
+  resolution: "crisp-sdk-web@npm:1.0.27"
+  checksum: 0110f0ac89c02d820ee4feb3357c792c7bb8d28bff2ddcfd01be9901738f0ca9897bcce3a1a384a3145126e68c08c869c0f809ba00012194fc2d718817c4c929
+  languageName: node
+  linkType: hard
+
 "cron-parser@npm:^5.1.0":
   version: 5.1.0
   resolution: "cron-parser@npm:5.1.0"
@@ -19914,6 +19921,7 @@ __metadata:
     axios: ^1.11.0
     chakra-ui-markdown-renderer: 4.1.0
     chart.js: ^4.4.5
+    crisp-sdk-web: ^1.0.27
     date-fns: ^2.30.0
     dotenv: ^16.4.5
     formik: ^2.4.6
