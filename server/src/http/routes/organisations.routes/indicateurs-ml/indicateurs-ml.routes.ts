@@ -332,6 +332,12 @@ const getTraitementRegionsRoute = async (req, { locals }) => {
 const getTraitementExportRoute = async (req, { locals }) => {
   const { region } = req.query;
   const userRegions = locals.regions as string[];
+  const organisation = locals.organisation as { type: string };
+
+  // DREETS/DDETS n'ont pas accès à l'export Excel
+  if (organisation.type === "DREETS" || organisation.type === "DDETS") {
+    throw Boom.forbidden("Accès non autorisé à l'export");
+  }
 
   if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
     throw Boom.forbidden("Accès non autorisé à cette région");
