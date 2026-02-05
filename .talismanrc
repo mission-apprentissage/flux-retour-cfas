@@ -91,6 +91,8 @@ fileignoreconfig:
   checksum: 60b43d0e18382923db1ab106290d10f6200068fd0af0fab4d5c8e375ca1cc4ae
 - filename: server/tests/integration/jobs/ingestion/mission-locale-deca.test.ts
   checksum: ad09b6b7ccd4ff4386277d9f2029105c80c1af6018e29295fb4ad70807078827
+- filename: ui/pages/docs/kit-deploiement-tba-op.tsx
+  checksum: 55ffbfcaf20a5f5ce64c1eae9bf58be9792e16cdd00a322d698ebb5420e5153b
 scopeconfig:
 - scope: node
 custom_patterns:

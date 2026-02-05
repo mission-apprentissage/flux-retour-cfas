@@ -147,16 +147,17 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
       };
     }
     case "DREETS": {
+      const sameRegion = { region: { $in: [organisation.code_region] } };
       return {
-        viewContacts: false,
-        infoTransmissionEffectifs: false,
-        indicateursEffectifs: false,
+        viewContacts: sameRegion,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: sameRegion,
         effectifsNominatifs: {
           apprenant: false,
           apprenti: false,
-          inscritSansContrat: false,
-          rupturant: false,
-          abandon: false,
+          inscritSansContrat: sameRegion,
+          rupturant: sameRegion,
+          abandon: sameRegion,
           inconnu: false,
         },
         manageEffectifs: false,
@@ -164,16 +165,17 @@ export async function getAcl(organisation: IOrganisation): Promise<Acl> {
       };
     }
     case "DDETS": {
+      const sameDepartement = { departement: { $in: [organisation.code_departement] } };
       return {
-        viewContacts: false,
-        infoTransmissionEffectifs: false,
-        indicateursEffectifs: false,
+        viewContacts: sameDepartement,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: sameDepartement,
         effectifsNominatifs: {
           apprenant: false,
           apprenti: false,
-          inscritSansContrat: false,
-          rupturant: false,
-          abandon: false,
+          inscritSansContrat: sameDepartement,
+          rupturant: sameDepartement,
+          abandon: sameDepartement,
           inconnu: false,
         },
         manageEffectifs: false,

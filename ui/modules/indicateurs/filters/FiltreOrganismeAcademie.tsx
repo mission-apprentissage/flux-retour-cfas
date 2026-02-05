@@ -16,7 +16,10 @@ const FiltreOrganismeAcademie = (props: FiltreOrganismeAcademieProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
   const organisation = auth.organisation;
+  const isHidden = ["DREETS", "DDETS"].includes(organisation.type);
   const academies = props.value;
+
+  if (isHidden) return null;
 
   if (organisation.type === "ACADEMIE") {
     return <FilterInfoLock value={`Académie de ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom}`} />;

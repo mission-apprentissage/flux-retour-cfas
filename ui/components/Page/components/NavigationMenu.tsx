@@ -20,6 +20,8 @@ function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): str
     case "TETE_DE_RESEAU":
       return "Mon réseau";
 
+    case "DREETS":
+    case "DDETS":
     case "ACADEMIE":
     case "ARML":
       return "Mon territoire";
@@ -120,16 +122,15 @@ function NavBarTransverse(): React.ReactElement {
           <MenuQuestions />
         </>
       );
-    case ORGANISATION_TYPE.DREETS:
-    case ORGANISATION_TYPE.DDETS:
-      return <NavItem to="/suivi-des-indicateurs">Suivi des indicateurs</NavItem>;
     default:
       return (
         <>
           {organisationType === "ADMINISTRATEUR" && (
             <NavItem to="/admin/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
           )}
-          {organisationType === ORGANISATION_TYPE.ARML && (
+          {(organisationType === ORGANISATION_TYPE.ARML ||
+            organisationType === ORGANISATION_TYPE.DREETS ||
+            organisationType === ORGANISATION_TYPE.DDETS) && (
             <NavItem to="/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
           )}
           <NavItem to="/home" exactMatch>
@@ -137,6 +138,20 @@ function NavBarTransverse(): React.ReactElement {
           </NavItem>
           <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
           <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+          {organisationType === ORGANISATION_TYPE.DREETS && (
+            <NavItem
+              to="/voeux-affelnet"
+              onClick={() =>
+                trackPlausibleEvent("clic_homepage_voeux_affelnet", undefined, {
+                  organisation_type: organisation ? organisation.type : "",
+                  organisation_code_region:
+                    organisation && "code_region" in organisation ? organisation.code_region : "",
+                })
+              }
+            >
+              Vœux Affelnet
+            </NavItem>
+          )}
           <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
           <MenuQuestions />
         </>
@@ -279,6 +294,17 @@ const MenuQuestions = () => {
           </Text>
         </MenuButton>
         <MenuList>
+          {(organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) && (
+            <MenuItem
+              as="a"
+              href="https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackPlausibleEvent("clic_homepage_kit_deploiement")}
+            >
+              Kit de déploiement DREETS/DDETS
+            </MenuItem>
+          )}
           <MenuItem
             as="a"
             href={CRISP_FAQ}
@@ -286,7 +312,7 @@ const MenuQuestions = () => {
             rel="noopener noreferrer"
             onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
           >
-            Centre d’aide
+            Centre d&apos;aide
           </MenuItem>
           {organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && (
             <MenuItem
