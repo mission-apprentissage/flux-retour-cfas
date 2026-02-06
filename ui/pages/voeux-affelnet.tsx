@@ -9,7 +9,8 @@ const PageVoeuxAffelnet = () => {
   const { organisationType } = useAuth();
   const router = useRouter();
 
-  const isUnauthorized = organisationType !== ORGANISATION_TYPE.ACADEMIE;
+  const isUnauthorized =
+    organisationType !== ORGANISATION_TYPE.DREETS && organisationType !== ORGANISATION_TYPE.ACADEMIE;
 
   useEffect(() => {
     if (isUnauthorized) {

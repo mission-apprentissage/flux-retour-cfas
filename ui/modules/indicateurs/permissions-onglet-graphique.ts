@@ -6,6 +6,8 @@ export function canViewOngletIndicateursVueGraphique(organisationType: IOrganisa
       return false;
 
     case "TETE_DE_RESEAU":
+    case "DREETS":
+    case "DDETS":
     case "ACADEMIE":
     case "ADMINISTRATEUR":
       return true;

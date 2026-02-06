@@ -1098,13 +1098,19 @@ function getForbiddenErrorText(ctx: AuthContext): string {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION":
-      return "Vous n’avez pas accès aux données de cet organisme.";
+      return "Vous n'avez pas accès aux données de cet organisme.";
 
     case "TETE_DE_RESEAU":
       return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre réseau.";
 
+    case "DREETS":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre région.";
+
+    case "DDETS":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre département.";
+
     case "ACADEMIE":
-      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre académie.";
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre académie.";
   }
   return "";
 }
@@ -1128,6 +1134,19 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
       return (
         organisme.organismesFormateurs.some((organisme) => !organisme.reseaux?.includes(organisation.reseau)) &&
         "réseau"
+      );
+
+    case "DREETS":
+      return (
+        organisme.organismesFormateurs.some((organisme) => !organisme.region?.includes(organisation.code_region)) &&
+        "région"
+      );
+
+    case "DDETS":
+      return (
+        organisme.organismesFormateurs.some(
+          (organisme) => !organisme.departement?.includes(organisation.code_departement)
+        ) && "département"
       );
 
     case "ACADEMIE":
