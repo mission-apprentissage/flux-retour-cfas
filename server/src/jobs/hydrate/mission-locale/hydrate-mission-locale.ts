@@ -1,7 +1,7 @@
 import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
-import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { IEffectif, IOrganisationARML, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
@@ -49,14 +49,33 @@ export const hydrateMissionLocaleOrganisation = async () => {
     const missionLocale = await organisationsDb().findOne({ ml_id: ml.id });
 
     if (!missionLocale) {
-      await organisationsDb().insertOne({
+      let arml: IOrganisationARML | null = null;
+
+      const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, ml.localisation.cp);
+
+      if (rest.region) {
+        arml = (await organisationsDb().findOne({
+          type: "ARML",
+          region_list: { $in: [rest.region] },
+        })) as IOrganisationARML | null;
+      }
+
+      const toInsert = {
         _id: new ObjectId(),
-        type: "MISSION_LOCALE",
+        type: "MISSION_LOCALE" as const,
         created_at: currentDate,
         ml_id: ml.id,
         nom: ml.nom,
-        siret: ml.siret,
-      });
+        siret: ml.siret ?? undefined,
+        adresse: {
+          ...rest,
+        },
+        email: ml.contact?.email ?? undefined,
+        telephone: ml.contact?.telephone ?? undefined,
+        site_web: ml.contact?.siteWeb ?? undefined,
+        arml_id: arml ? arml._id : undefined,
+      };
+      await organisationsDb().insertOne(toInsert);
 
       await hydrateMissionLocaleSnapshot(ml.id);
     }
