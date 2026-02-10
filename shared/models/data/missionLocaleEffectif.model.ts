@@ -168,19 +168,6 @@ const zMissionLocaleEffectif = z.object({
       date_de_naissance: z.date(),
     })
     .nullish(),
-  deca_feedback: z
-    .object({
-      differences_remarquees: z
-        .boolean()
-        .describe("L'utilisateur a remarqué des différences avec les dossiers non-DECA"),
-      pret_recevoir_deca: z
-        .number()
-        .min(0)
-        .max(5)
-        .describe("Score 0-5 de disposition à recevoir d'autres dossiers DECA"),
-      responded_by: zObjectId.describe("ID de l'utilisateur qui a répondu au feedback"),
-    })
-    .nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;
