@@ -17,7 +17,6 @@ import { validateModels } from "./db/schemaValidation";
 import { sendCfaDailyRecap } from "./emails/cfa-daily-recap";
 import { sendMissionLocaleDailyRecap } from "./emails/mission-locale-daily-recap";
 import { sendMissionLocaleWeeklyRecap } from "./emails/mission-locale-weekly-recap";
-import { sendReminderEmails } from "./emails/reminder";
 import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { updateOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/updateFiabilisation";
@@ -399,11 +398,11 @@ export async function setupJobProcessor() {
       "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis": {
         handler: async (job) => transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours),
       },
-      "send-reminder-emails": {
+      /*"send-reminder-emails": {
         handler: async () => {
           return sendReminderEmails();
         },
-      },
+      },*/
       "send-mission-locale-weekly-recap": {
         handler: async () => {
           return sendMissionLocaleWeeklyRecap();
