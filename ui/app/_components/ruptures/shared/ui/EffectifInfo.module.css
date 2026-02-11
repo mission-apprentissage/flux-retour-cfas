@@ -119,11 +119,6 @@
   background-color: white;
 }
 
-.decaBadgeNouveau {
-  background-color: #e3e3fd !important;
-  color: #6a6af4 !important;
-}
-
 .decaInfoHeader {
   display: flex;
   align-items: center;
