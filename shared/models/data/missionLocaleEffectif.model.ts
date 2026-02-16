@@ -4,6 +4,7 @@ import { zObjectId } from "zod-mongodb-schema";
 
 import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 import { zEffectifDECA } from "./effectifsDECA.model";
+import { zWhatsAppContact } from "./whatsappContact.model";
 
 const collectionName = "missionLocaleEffectif";
 
@@ -21,6 +22,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
     {},
   ],
+  [{ "whatsapp_contact.phone_normalized": 1 }, { sparse: true }],
+  [{ "whatsapp_contact.message_id": 1 }, { sparse: true }],
 ];
 
 export enum SITUATION_ENUM {
@@ -31,11 +34,8 @@ export enum SITUATION_ENUM {
   COORDONNEES_INCORRECT = "COORDONNEES_INCORRECT",
   INJOIGNABLE_APRES_RELANCES = "INJOIGNABLE_APRES_RELANCES",
   NOUVEAU_CONTRAT = "NOUVEAU_CONTRAT",
+  NE_SOUHAITE_PAS_ETRE_RECONTACTE = "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
   AUTRE = "AUTRE",
-}
-
-export enum API_SITUATION_ENUM {
-  NON_TRAITE = "NON_TRAITE",
 }
 
 export enum SITUATION_LABEL_ENUM {
@@ -46,6 +46,7 @@ export enum SITUATION_LABEL_ENUM {
   COORDONNEES_INCORRECT = "Coordonnées incorrectes",
   INJOIGNABLE_APRES_RELANCES = "Injoignable après plusieurs tentatives",
   NOUVEAU_CONTRAT = "Ce jeune a retrouvé un contrat d'apprentissage",
+  NE_SOUHAITE_PAS_ETRE_RECONTACTE = "Ne souhaite pas être recontacté (WhatsApp)",
   AUTRE = "Autre situation / retour",
 }
 
@@ -90,6 +91,13 @@ const zMissionLocaleEffectif = z.object({
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
   date_rupture: z.date().nullish(),
+  identifiant_normalise: z
+    .object({
+      nom: z.string(),
+      prenom: z.string(),
+      date_de_naissance: z.date(),
+    })
+    .nullish(),
   situation: zSituationEnum.nullish(),
   situation_autre: z.string().nullish(),
   created_at: z.date(),
@@ -115,8 +123,7 @@ const zMissionLocaleEffectif = z.object({
         .default(false)
         .describe(
           "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
-        )
-        .nullish(),
+        ),
       acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
     })
     .nullish(),
@@ -143,6 +150,9 @@ const zMissionLocaleEffectif = z.object({
       .nullish(),
   }),
   soft_deleted: z.boolean().nullish(),
+  a_traiter: z.boolean().nullish(),
+  injoignable: z.boolean().nullish(),
+  nouveau_contrat: z.boolean().nullish(),
   current_status: z.object({
     value: zStatutApprenantEnum.nullish(),
     date: z.date().nullish(),
@@ -161,13 +171,17 @@ const zMissionLocaleEffectif = z.object({
         .nullish(),
     })
     .nullish(),
-  identifiant_normalise: z
-    .object({
-      nom: z.string(),
-      prenom: z.string(),
-      date_de_naissance: z.date(),
-    })
-    .nullish(),
+  whatsapp_contact: zWhatsAppContact.nullish(),
+  whatsapp_callback_requested: z
+    .boolean()
+    .default(false)
+    .describe("L'effectif a demandé à être recontacté via WhatsApp"),
+  whatsapp_callback_requested_at: z.date().nullish(),
+  whatsapp_no_help_responded: z
+    .boolean()
+    .default(false)
+    .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp"),
+  whatsapp_no_help_responded_at: z.date().nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

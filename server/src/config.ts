@@ -95,6 +95,13 @@ const config = {
   },
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
+    whatsapp: {
+      enabled: env.get("MNA_TDB_WHATSAPP_ENABLED").default("false").asBool(),
+      webhookSecret: env.get("MNA_TDB_BREVO_WHATSAPP_WEBHOOK_SECRET").asString(),
+      testPhoneOverride: env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").asString(),
+      senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").asString(),
+      templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").asInt(),
+    },
   },
 };
 
