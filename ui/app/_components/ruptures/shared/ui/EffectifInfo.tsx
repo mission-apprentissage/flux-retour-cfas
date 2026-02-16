@@ -74,7 +74,6 @@ const DecaSourceInfo = ({
         Données transmises par l&apos;API DECA {computeTransmissionDate(transmittedAt)}
       </p>
       <div className={styles.decaInfoHeader}>
-        <span className={`fr-badge ${styles.decaBadgeNouveau}`}>NOUVEAU</span>
         <span className={styles.decaInfoText}>
           Ce dossier et ses informations remontent directement depuis la base de données <strong>DECA</strong> et non
           depuis le logiciel du CFA.
