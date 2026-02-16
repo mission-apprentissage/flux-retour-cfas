@@ -12360,6 +12360,12 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
     "_id": {
       "bsonType": "objectId",
     },
+    "a_traiter": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+    },
     "brevo": {
       "additionalProperties": false,
       "bsonType": "object",
@@ -17561,8 +17567,20 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         },
       ],
     },
+    "injoignable": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+    },
     "mission_locale_id": {
       "bsonType": "objectId",
+    },
+    "nouveau_contrat": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
     },
     "organisme_data": {
       "anyOf": [
@@ -17595,15 +17613,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
             },
             "has_unread_notification": {
-              "anyOf": [
-                {
-                  "bsonType": "bool",
-                  "description": "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
+              "bsonType": "bool",
               "description": "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML",
             },
             "motif": {
@@ -17688,6 +17698,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "COORDONNEES_INCORRECT",
             "INJOIGNABLE_APRES_RELANCES",
             "NOUVEAU_CONTRAT",
+            "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
           ],
         },
@@ -17710,6 +17721,202 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "updated_at": {
       "bsonType": "date",
+    },
+    "whatsapp_callback_requested": {
+      "bsonType": "bool",
+      "description": "L'effectif a demandé à être recontacté via WhatsApp",
+    },
+    "whatsapp_callback_requested_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "whatsapp_contact": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "brevo_visitor_id": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "conversation_state": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "initial_sent",
+                    "callback_requested",
+                    "closed",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "last_message_sent_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "message_id": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "ID du message Brevo",
+            },
+            "message_status": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "pending",
+                    "sent",
+                    "delivered",
+                    "read",
+                    "failed",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "messages_history": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "additionalProperties": false,
+                    "bsonType": "object",
+                    "properties": {
+                      "brevo_message_id": {
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
+                      },
+                      "content": {
+                        "bsonType": "string",
+                      },
+                      "direction": {
+                        "bsonType": "string",
+                        "enum": [
+                          "outbound",
+                          "inbound",
+                        ],
+                      },
+                      "sent_at": {
+                        "bsonType": "date",
+                      },
+                    },
+                    "required": [
+                      "direction",
+                      "content",
+                      "sent_at",
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "opted_out": {
+              "bsonType": "bool",
+            },
+            "opted_out_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "phone_normalized": {
+              "bsonType": "string",
+            },
+            "status_updated_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "user_response": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "callback",
+                    "no_help",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "user_response_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "user_response_raw": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Texte brut de la réponse utilisateur",
+            },
+          },
+          "required": [
+            "phone_normalized",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "whatsapp_no_help_responded": {
+      "bsonType": "bool",
+      "description": "L'effectif a indiqué ne pas vouloir d'aide via WhatsApp",
+    },
+    "whatsapp_no_help_responded_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
   },
   "required": [
@@ -17801,6 +18008,7 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "COORDONNEES_INCORRECT",
             "INJOIGNABLE_APRES_RELANCES",
             "NOUVEAU_CONTRAT",
+            "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
           ],
         },
