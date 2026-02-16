@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo } from "react";
-import { IEffecifMissionLocale, SITUATION_ENUM } from "shared";
+import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
@@ -15,6 +15,10 @@ const TIMELINE_EVENTS = {
   DOSSIER_PARTAGE_PAR_CFA: "DOSSIER_PARTAGE_PAR_CFA",
   NOUVEAU_CONTRAT: "NOUVEAU_CONTRAT",
   NOUVEAU_PROJET: "NOUVEAU_PROJET",
+  WHATSAPP_ENVOYE: "WHATSAPP_ENVOYE",
+  WHATSAPP_ECHEC: "WHATSAPP_ECHEC",
+  WHATSAPP_CALLBACK: "WHATSAPP_CALLBACK",
+  WHATSAPP_NO_HELP: "WHATSAPP_NO_HELP",
 } as const;
 
 const EVENT_LABELS = {
@@ -24,7 +28,15 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.DOSSIER_PARTAGE_PAR_CFA]: "Dossier partagé par le CFA",
   [TIMELINE_EVENTS.NOUVEAU_CONTRAT]: "Le jeune a débuté un nouveau contrat",
   [TIMELINE_EVENTS.NOUVEAU_PROJET]: "Nouveau projet en cours",
+  [TIMELINE_EVENTS.WHATSAPP_ENVOYE]: "Message WhatsApp envoyé",
+  [TIMELINE_EVENTS.WHATSAPP_ECHEC]: "Échec de l'envoi du message WhatsApp",
+  [TIMELINE_EVENTS.WHATSAPP_CALLBACK]: "Le jeune a indiqué vouloir être recontacté par la Mission locale",
+  [TIMELINE_EVENTS.WHATSAPP_NO_HELP]: "Le jeune a indiqué ne pas vouloir être recontacté par la Mission locale",
 } as const;
+
+const WhatsAppIcon = ({ color }: { color: string }) => (
+  <i className="ri-whatsapp-fill" style={{ color, fontSize: "20px" }} aria-hidden="true" />
+);
 
 type TimelineEventType = (typeof TIMELINE_EVENTS)[keyof typeof TIMELINE_EVENTS];
 
@@ -36,13 +48,12 @@ interface TimelineEvent {
 }
 
 interface EffectifParcoursMissionLocaleProps {
-  effectif: IEffecifMissionLocale["effectif"];
+  effectif: IEffectifMissionLocale["effectif"];
   className?: string;
 }
 
-const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"]): TimelineEvent[] => {
+const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]): TimelineEvent[] => {
   const events: TimelineEvent[] = [];
-  const eff = effectif as any;
 
   if (effectif.date_rupture) {
     const ruptureDate = effectif.date_rupture?.date || effectif.date_rupture;
@@ -53,8 +64,9 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     });
   }
 
-  if ("organisme_data" in effectif && eff.organisme_data?.acc_conjoint === true && eff.organisme_data?.reponse_at) {
-    const partageDate = eff.organisme_data.reponse_at;
+  const organismeData = effectif.organisme_data;
+  if (organismeData?.acc_conjoint === true && organismeData?.reponse_at) {
+    const partageDate = organismeData.reponse_at;
     const date = partageDate instanceof Date ? partageDate : new Date(partageDate);
 
     events.push({
@@ -64,8 +76,8 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     });
   }
 
-  if ("mission_locale_logs" in effectif && eff.mission_locale_logs && eff.mission_locale_logs.length > 0) {
-    eff.mission_locale_logs.forEach((log: any) => {
+  if (effectif.mission_locale_logs && effectif.mission_locale_logs.length > 0) {
+    effectif.mission_locale_logs.forEach((log) => {
       if (log.created_at && log.situation) {
         const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
 
@@ -98,10 +110,34 @@ const buildTimelineMissionLocale = (effectif: IEffecifMissionLocale["effectif"])
     });
   }
 
-  if ("situation" in effectif && eff.situation?.situation) {
-    const currentSituation = eff.situation;
+  if (effectif.whatsapp_contact?.last_message_sent_at) {
+    const sentDate = new Date(effectif.whatsapp_contact.last_message_sent_at);
+    const isFailed = effectif.whatsapp_contact.message_status === "failed";
+    const eventType = isFailed ? TIMELINE_EVENTS.WHATSAPP_ECHEC : TIMELINE_EVENTS.WHATSAPP_ENVOYE;
+    events.push({
+      date: sentDate,
+      type: eventType,
+      label: EVENT_LABELS[eventType],
+    });
 
-    const alreadyInLogs = eff.mission_locale_logs?.some((log: any) => log.situation === currentSituation.situation);
+    if (effectif.whatsapp_contact.user_response_at && effectif.whatsapp_contact.user_response) {
+      const responseDate = new Date(effectif.whatsapp_contact.user_response_at);
+      const responseType =
+        effectif.whatsapp_contact.user_response === "callback"
+          ? TIMELINE_EVENTS.WHATSAPP_CALLBACK
+          : TIMELINE_EVENTS.WHATSAPP_NO_HELP;
+      events.push({
+        date: responseDate,
+        type: responseType,
+        label: EVENT_LABELS[responseType],
+      });
+    }
+  }
+
+  if (effectif.situation?.situation) {
+    const currentSituation = effectif.situation;
+
+    const alreadyInLogs = effectif.mission_locale_logs?.some((log) => log.situation === currentSituation.situation);
 
     if (!alreadyInLogs) {
       // Utiliser la date actuelle car la situation n'a pas de date
@@ -162,6 +198,18 @@ const getIcon = (type: TimelineEventType) => {
   }
   if (type === TIMELINE_EVENTS.NOUVEAU_PROJET) {
     return <Image src="/images/parcours-dossier-traite.svg" alt="Nouveau projet" width={18} height={18} />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_ENVOYE) {
+    return <WhatsAppIcon color="var(--text-disabled-grey)" />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_ECHEC) {
+    return <WhatsAppIcon color="#CE0500" />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_CALLBACK) {
+    return <WhatsAppIcon color="#6A6AF4" />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_NO_HELP) {
+    return <WhatsAppIcon color="#CE0500" />;
   }
   return (
     <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--text-disabled-grey)" }} />

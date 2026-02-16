@@ -6,7 +6,7 @@ import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import React, { useCallback, useState } from "react";
-import { IEffecifMissionLocale } from "shared";
+import { IEffectifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate, getMonthYearFromDate } from "@/app/_utils/date.utils";
@@ -57,7 +57,7 @@ const DecaSourceInfo = ({
   dateRupture,
   transmittedAt,
 }: {
-  dateRupture: IEffecifMissionLocale["effectif"]["date_rupture"];
+  dateRupture: IEffectifMissionLocale["effectif"]["date_rupture"];
   transmittedAt: Date | null | undefined;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -110,7 +110,7 @@ export function EffectifInfo({
   setIsEditable,
   nextEffectifId,
 }: {
-  effectif: IEffecifMissionLocale["effectif"];
+  effectif: IEffectifMissionLocale["effectif"];
   isAdmin?: boolean;
   setIsEditable?: (isEditable: boolean) => void;
   nextEffectifId?: string;
@@ -227,12 +227,14 @@ export function EffectifInfo({
         <ContactForm effectifId={effectif.id.toString()} onSuccess={handleContactFormSuccess} effectif={effectif} />
       )}
 
-      {effectif.situation && (
+      {(effectif.situation || effectif.whatsapp_contact?.last_message_sent_at) && (
         <MissionLocaleFeedback
           situation={effectif.situation}
           visibility={user.organisation.type}
           logs={effectif.mission_locale_logs}
           isNouveauContrat={effectif.nouveau_contrat ?? undefined}
+          whatsappContact={effectif.whatsapp_contact}
+          prenom={effectif.prenom}
         />
       )}
 

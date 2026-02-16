@@ -22,8 +22,18 @@ export function getAge(dateString) {
 export function getMonthYearFromDate(dateString) {
   if (!dateString) return "Non renseigné";
   const date = new Date(dateString);
-  date.setMonth(date.getMonth());
   return date.toLocaleString("fr-FR", { month: "long", year: "numeric" });
+}
+
+export function formatDateWithTime(dateString) {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function formatMonthAndYear(dateString: string) {

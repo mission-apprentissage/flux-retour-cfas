@@ -4,21 +4,81 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { IUpdateMissionLocaleEffectif, SITUATION_LABEL_ENUM, PROBLEME_TYPE_ENUM, SITUATION_ENUM } from "shared";
 import { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
+import { IWhatsAppContact } from "shared/models/data/whatsappContact.model";
 
-import { formatDate } from "@/app/_utils/date.utils";
+import { formatDate, formatDateWithTime } from "@/app/_utils/date.utils";
 
 import { calculateDaysSince, formatContactTimeText } from "../../shared";
 import styles from "../../shared/ui/Feedback.module.css";
 import notificationStyles from "../../shared/ui/NotificationBadge.module.css";
+import badgeStyles from "../../shared/ui/WhatsAppBadge.module.css";
 
 interface MissionLocaleFeedbackProps {
-  situation: IUpdateMissionLocaleEffectif;
+  situation?: IUpdateMissionLocaleEffectif | null;
   visibility: "ORGANISME_FORMATION" | "MISSION_LOCALE" | "ADMINISTRATEUR";
   logs?: Array<IMissionLocaleEffectifLog & { unread_by_current_user?: boolean | null }> | null;
   isNouveauContrat?: boolean;
+  whatsappContact?: IWhatsAppContact | null;
+  prenom?: string;
 }
 
-export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauContrat }: MissionLocaleFeedbackProps) {
+function WhatsAppFeedbackBlock({ whatsappContact, prenom }: { whatsappContact: IWhatsAppContact; prenom: string }) {
+  const userResponse = whatsappContact.user_response;
+
+  return (
+    <div className={styles.feedbackContainer}>
+      <p>
+        <b>
+          Le Tableau de bord de l&apos;apprentissage a envoyé un message Whatsapp à {prenom} pour lui demander si
+          il/elle souhaitait être recontacté.
+        </b>
+      </p>
+
+      {userResponse === "callback" && (
+        <>
+          <Tag>Souhaite être recontacté par la Mission locale ✅</Tag>
+          <p className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`}>
+            <i className="ri-whatsapp-line fr-icon--sm" aria-hidden="true" />
+            DISPONIBLE
+          </p>
+        </>
+      )}
+
+      {userResponse === "no_help" && (
+        <>
+          <Tag>Ne souhaite pas être recontacté par la Mission locale ❌</Tag>
+          <p className={`fr-badge ${badgeStyles.whatsappBadgeNoHelp}`}>
+            <i className="ri-whatsapp-line fr-icon--sm" aria-hidden="true" />
+            NE SOUHAITE PAS ÊTRE RECONTACTÉ·E
+          </p>
+          <p>
+            <b>Le dossier a été classé comme traité automatiquement</b>
+          </p>
+        </>
+      )}
+
+      {whatsappContact.opted_out && (
+        <p className={`fr-badge ${badgeStyles.whatsappBadgeNoHelp}`}>
+          <i className="fr-icon-smartphone-fill fr-icon--sm" aria-hidden="true" />
+          DÉSINSCRIT (STOP)
+        </p>
+      )}
+
+      {!userResponse && !whatsappContact.opted_out && (
+        <p style={{ color: "var(--text-mention-grey)", fontStyle: "italic" }}>Pas encore de réponse</p>
+      )}
+    </div>
+  );
+}
+
+export function MissionLocaleFeedback({
+  visibility,
+  logs,
+  situation,
+  isNouveauContrat,
+  whatsappContact,
+  prenom,
+}: MissionLocaleFeedbackProps) {
   let sortedLogs = logs?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || [];
 
   // pour gerer les effectifs legacy sans logs
@@ -71,6 +131,19 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
                     <div className={styles.feedbackContainer}>
                       <p className="fr-mb-0">
                         <b>Ce jeune est resté injoignable.</b>
+                      </p>
+                    </div>
+                  );
+                }
+
+                if (log.situation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE) {
+                  return (
+                    <div className={styles.feedbackContainer}>
+                      <p className="fr-mb-0">
+                        <b>Ce jeune ne souhaite pas être recontacté (réponse via WhatsApp).</b>
+                      </p>
+                      <p className="fr-mb-0">
+                        <b>Le dossier a été classé comme traité automatiquement.</b>
                       </p>
                     </div>
                   );
@@ -150,15 +223,54 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
   };
 
   const missionLocaleLayout = () => {
+    type TimelineEntry =
+      | { type: "log"; date: Date; log: (typeof sortedLogs)[number]; index: number }
+      | { type: "whatsapp"; date: Date };
+
+    const entries: TimelineEntry[] = sortedLogs.map((log, index) => ({
+      type: "log" as const,
+      date: new Date(log.created_at),
+      log,
+      index,
+    }));
+
+    if (whatsappContact?.last_message_sent_at) {
+      entries.push({
+        type: "whatsapp",
+        date: new Date(whatsappContact.last_message_sent_at),
+      });
+    }
+
+    entries.sort((a, b) => b.date.getTime() - a.date.getTime());
+
     return (
       <>
-        {sortedLogs.map((log, index) => {
+        {entries.map((entry, entryIndex) => {
+          if (entry.type === "whatsapp") {
+            const whatsappDate = new Date(whatsappContact!.last_message_sent_at!);
+            return (
+              <div key="whatsapp-event">
+                <h6 className="fr-mb-2v">
+                  Le {formatDateWithTime(whatsappDate)}
+                  {formatContactTimeText(calculateDaysSince(whatsappDate))}
+                </h6>
+                <WhatsAppFeedbackBlock whatsappContact={whatsappContact!} prenom={prenom || "ce jeune"} />
+              </div>
+            );
+          }
+
+          const { log, index } = entry;
+
           if (!log.situation || !SITUATION_LABEL_ENUM[log.situation]) {
             return null;
           }
 
+          if (log.situation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE) {
+            return null;
+          }
+
           return (
-            <div key={log._id?.toString() || index}>
+            <div key={log._id?.toString() || entryIndex}>
               <h6 className="fr-mb-2v">
                 {log._id?.toString() === "virtual-log"
                   ? "Situation actuelle"
@@ -268,7 +380,9 @@ export function MissionLocaleFeedback({ visibility, logs, situation, isNouveauCo
     );
   };
 
-  if (!sortedLogs.length && !situation?.situation) {
+  const hasWhatsApp = whatsappContact?.last_message_sent_at;
+
+  if (!sortedLogs.length && !situation?.situation && !hasWhatsApp) {
     return null;
   }
 

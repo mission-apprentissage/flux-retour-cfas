@@ -8,7 +8,7 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Formik, Form, FormikHelpers } from "formik";
 import { useState } from "react";
-import { SITUATION_ENUM, PROBLEME_TYPE_ENUM, IEffecifMissionLocale } from "shared";
+import { SITUATION_ENUM, PROBLEME_TYPE_ENUM, IEffectifMissionLocale } from "shared";
 
 import {
   useRecordContact,
@@ -32,7 +32,7 @@ interface FormValues {
 
 interface ContactFormProps {
   effectifId: string;
-  effectif?: IEffecifMissionLocale["effectif"];
+  effectif?: IEffectifMissionLocale["effectif"];
   onSuccess: (shouldContinue?: boolean) => void;
 }
 
@@ -82,7 +82,7 @@ const validate = (values: FormValues, isNouveauContrat: boolean) => {
   return errors;
 };
 
-const hasMultipleContactAttempts = (effectif: IEffecifMissionLocale["effectif"]): boolean => {
+const hasMultipleContactAttempts = (effectif: IEffectifMissionLocale["effectif"]): boolean => {
   if (!effectif?.mission_locale_logs) return false;
 
   const contactAttempts = effectif.mission_locale_logs.filter(

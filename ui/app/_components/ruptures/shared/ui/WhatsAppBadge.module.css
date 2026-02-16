@@ -1,0 +1,15 @@
+.whatsappBadgeCallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #6a6af4;
+  color: white;
+}
+
+.whatsappBadgeNoHelp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #ffe9e6;
+  color: #ce0500;
+}
