@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { IEffecifMissionLocale } from "shared/models/routes/mission-locale/MissionLocaleEffectif";
+import { IEffectifMissionLocale } from "shared/models/routes/mission-locale/MissionLocaleEffectif";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate, getAge } from "@/app/_utils/date.utils";
@@ -11,7 +11,7 @@ import styles from "./EffectifInfoDetails.module.css";
 import { MissionLocaleContact } from "./MissionLocaleContact";
 
 interface EffectifInfoDetailsProps {
-  effectif: IEffecifMissionLocale["effectif"];
+  effectif: IEffectifMissionLocale["effectif"];
   infosOpen: boolean;
   setInfosOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }

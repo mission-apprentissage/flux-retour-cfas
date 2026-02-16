@@ -1,7 +1,7 @@
 "use client";
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
+import { IOrganisme, IEffectifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
@@ -9,7 +9,7 @@ import { MOTIF_LABELS } from "../shared/constants";
 import styles from "../shared/ui/Feedback.module.css";
 import { ProblematiquesJeune } from "../shared/ui/ProblematiquesJeune";
 
-type EffectifWithContacts = (IEffecifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
+type EffectifWithContacts = (IEffectifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
   organisme?: {
     contacts_from_referentiel?: IOrganisme["contacts_from_referentiel"];
   };

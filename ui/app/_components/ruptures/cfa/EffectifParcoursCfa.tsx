@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo } from "react";
-import { IEffecifMissionLocale, SITUATION_ENUM } from "shared";
+import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
@@ -41,13 +41,12 @@ interface TimelineEvent {
 }
 
 interface EffectifParcoursProps {
-  effectif: IEffecifMissionLocale["effectif"];
+  effectif: IEffectifMissionLocale["effectif"];
   className?: string;
 }
 
-const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEvent[] => {
+const buildTimeline = (effectif: IEffectifMissionLocale["effectif"]): TimelineEvent[] => {
   const events: TimelineEvent[] = [];
-  const eff = effectif as any;
 
   if (effectif.date_rupture) {
     const ruptureDate = effectif.date_rupture?.date || effectif.date_rupture;
@@ -58,23 +57,23 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     });
   }
 
-  if ("organisme_data" in effectif) {
-    const reponseDate = eff.organisme_data.reponse_at;
+  if (effectif.organisme_data?.reponse_at) {
+    const reponseDate = effectif.organisme_data.reponse_at;
     const date = reponseDate instanceof Date ? reponseDate : new Date(reponseDate);
 
-    if (eff.organisme_data.rupture === false) {
+    if (effectif.organisme_data.rupture === false) {
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
       });
-    } else if (eff.organisme_data.rupture === true && eff.organisme_data.acc_conjoint === false) {
+    } else if (effectif.organisme_data.rupture === true && effectif.organisme_data.acc_conjoint === false) {
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA_SUIVI,
         label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA_SUIVI],
       });
-    } else if (eff.organisme_data.rupture === true && eff.organisme_data.acc_conjoint === true) {
+    } else if (effectif.organisme_data.rupture === true && effectif.organisme_data.acc_conjoint === true) {
       events.push({
         date,
         type: TIMELINE_EVENTS.TRAITE_CFA_PARTAGE,
@@ -83,13 +82,8 @@ const buildTimeline = (effectif: IEffecifMissionLocale["effectif"]): TimelineEve
     }
   }
 
-  if (
-    "organisme_data" in effectif &&
-    eff.organisme_data?.acc_conjoint === true &&
-    "mission_locale_logs" in effectif &&
-    eff.mission_locale_logs
-  ) {
-    eff.mission_locale_logs.forEach((log: any) => {
+  if (effectif.organisme_data?.acc_conjoint === true && effectif.mission_locale_logs) {
+    effectif.mission_locale_logs.forEach((log) => {
       if (log.created_at && log.situation) {
         const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
 
