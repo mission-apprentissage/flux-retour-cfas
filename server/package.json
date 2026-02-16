@@ -61,6 +61,7 @@
     "joi-password": "^4.2.0",
     "json2csv": "5.0.7",
     "jsonwebtoken": "8.5.1",
+    "libphonenumber-js": "^1.12.36",
     "lil-http-terminator": "^1.2.3",
     "lodash-es": "4.17.21",
     "luxon": "^2.5.2",
