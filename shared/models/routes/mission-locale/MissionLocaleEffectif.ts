@@ -5,7 +5,9 @@ import { SourceApprenantEnum } from "shared/constants/effectifs";
 import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
+  zAccConjointMotifEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
+import { zWhatsAppContact } from "shared/models/data/whatsappContact.model";
 
 import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
@@ -84,6 +86,23 @@ const zEffectifMissionLocale = z
     situation: z.object(updateMissionLocaleEffectifApi).nullish(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),
+    whatsapp_callback_requested: z.boolean().describe("L'effectif a demandé à être recontacté via WhatsApp").nullish(),
+    whatsapp_no_help_responded: z
+      .boolean()
+      .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp")
+      .nullish(),
+    whatsapp_contact: zWhatsAppContact.nullish(),
+    organisme_data: z
+      .object({
+        rupture: z.boolean().nullish(),
+        acc_conjoint: z.boolean().nullish(),
+        motif: z.array(zAccConjointMotifEnum).nullish(),
+        commentaires: z.string().nullish(),
+        reponse_at: z.date().nullish(),
+        has_unread_notification: z.boolean().nullish(),
+        acc_conjoint_by: zObjectId.nullish(),
+      })
+      .nullish(),
     mineur: z.boolean().nullish(),
     presque_6_mois: z.boolean().nullish(),
     acc_conjoint: z.boolean().nullish(),
@@ -114,15 +133,15 @@ const zEffectifMissionLocale = z
   })
   .merge(zApprenantPick);
 
-const zPrevIousNext = z.object({ id: z.string(), nom: z.string(), prenom: z.string() });
+const zPreviousNext = z.object({ id: z.string(), nom: z.string(), prenom: z.string() });
 
 const zResponseEffectifMissionLocale = z.object({
   effectif: zEffectifMissionLocale,
-  previous: zPrevIousNext.nullish(),
-  next: zPrevIousNext.nullish(),
+  previous: zPreviousNext.nullish(),
+  next: zPreviousNext.nullish(),
   currentIndex: z.number(),
   total: z.number(),
 });
 
-export type IEffecifMissionLocale = z.infer<typeof zResponseEffectifMissionLocale>;
+export type IEffectifMissionLocale = z.infer<typeof zResponseEffectifMissionLocale>;
 export type IUpdateMissionLocaleEffectif = z.output<z.ZodObject<typeof updateMissionLocaleEffectifApi>>;
