@@ -65,6 +65,11 @@ async function getEligibleEffectifs() {
 }
 
 export async function sendWhatsAppInjoignables({ dryRun }: SendWhatsAppInjoignablesOptions) {
+  if (config.env !== "production") {
+    logger.warn("whatsapp:send-injoignables can only be run in production environment");
+    return 0;
+  }
+
   logger.info({ dryRun }, "Début du job tmp:whatsapp:send-injoignables");
 
   if (!config.brevo.whatsapp?.enabled) {

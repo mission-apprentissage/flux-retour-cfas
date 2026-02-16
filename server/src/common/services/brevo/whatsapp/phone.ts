@@ -2,7 +2,6 @@ import { parsePhoneNumberWithError, CountryCode } from "libphonenumber-js";
 import { getDomTomISOCountryCodeFromPhoneNumber } from "shared/utils/phone";
 
 import logger from "@/common/logger";
-import config from "@/config";
 
 /**
  * Masque un numéro de téléphone pour les logs
@@ -34,13 +33,8 @@ export function normalizePhoneNumber(phone: string | null | undefined): string |
 }
 
 /**
- * Retourne le numéro cible
+ * Retourne le numéro cible normalisé
  */
 export function getTargetPhone(effectifPhone: string): string | null {
-  const testOverride = config.brevo.whatsapp?.testPhoneOverride;
-  if (testOverride && config.env !== "production") {
-    logger.info("Using test phone override for WhatsApp");
-    return normalizePhoneNumber(testOverride);
-  }
   return normalizePhoneNumber(effectifPhone);
 }

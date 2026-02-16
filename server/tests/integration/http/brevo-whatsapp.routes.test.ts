@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 import { AxiosInstance } from "axiosist";
-import { it, describe, beforeEach, expect, vi } from "vitest";
+import { afterEach, it, describe, beforeEach, expect, vi } from "vitest";
 
 import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -9,19 +9,43 @@ import { initTestApp } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
+const TEST_WEBHOOK_SECRET = "test-webhook-secret";
+
 let httpClient: AxiosInstance;
+let originalEnv: string;
+let originalWebhookSecret: string | undefined;
 
 function signPayload(payload: object, secret: string): string {
   const body = JSON.stringify(payload);
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
 
+function postWebhook(client: AxiosInstance, payload: object) {
+  const signature = signPayload(payload, TEST_WEBHOOK_SECRET);
+  return client.post("/api/webhooks/brevo/whatsapp", payload, {
+    headers: { "X-Brevo-Signature": signature },
+  });
+}
+
 describe("Brevo WhatsApp Webhook Routes", () => {
   useMongo();
 
   beforeEach(async () => {
+    originalEnv = config.env;
+    originalWebhookSecret = config.brevo.whatsapp?.webhookSecret;
+    (config as any).env = "production";
+    if (config.brevo.whatsapp) {
+      (config.brevo.whatsapp as any).webhookSecret = TEST_WEBHOOK_SECRET;
+    }
     const app = await initTestApp();
     httpClient = app.httpClient;
+  });
+
+  afterEach(() => {
+    (config as any).env = originalEnv;
+    if (config.brevo.whatsapp) {
+      (config.brevo.whatsapp as any).webhookSecret = originalWebhookSecret;
+    }
   });
 
   describe("POST /api/webhooks/brevo/whatsapp", () => {
@@ -44,7 +68,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         },
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -56,7 +80,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         messageId: "brevo-msg-123",
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -68,7 +92,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         messageId: "brevo-msg-456",
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -80,7 +104,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         messageId: "brevo-msg-789",
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -93,7 +117,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         message: { text: "oui", id: "legacy-msg-1" },
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -105,7 +129,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         data: { foo: "bar" },
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -117,7 +141,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         // messages manquant
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -140,96 +164,54 @@ describe("Brevo WhatsApp Webhook Routes", () => {
         },
       };
 
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload);
+      const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
     });
 
     it("retourne 200 pour un body vide", async () => {
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", {});
+      const response = await postWebhook(httpClient, {});
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
+    });
+
+    it("retourne 403 hors production", async () => {
+      (config as any).env = "local";
+      const app = await initTestApp();
+
+      const response = await app.httpClient.post("/api/webhooks/brevo/whatsapp", {});
+
+      expect(response.status).toBe(403);
     });
   });
 
   describe("Signature verification", () => {
     it("rejette la requête si le secret est configuré mais le header manquant", async () => {
-      const originalSecret = config.brevo.whatsapp?.webhookSecret;
+      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", {
+        event: "delivered",
+        messageId: "msg-1",
+      });
 
-      try {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = "test-secret";
-        }
-
-        const app = await initTestApp();
-        const client = app.httpClient;
-
-        const response = await client.post("/api/webhooks/brevo/whatsapp", {
-          event: "delivered",
-          messageId: "msg-1",
-        });
-
-        expect(response.status).toBe(401);
-      } finally {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = originalSecret;
-        }
-      }
+      expect(response.status).toBe(401);
     });
 
     it("accepte la requête avec une signature valide", async () => {
-      const secret = "test-webhook-secret";
-      const originalSecret = config.brevo.whatsapp?.webhookSecret;
+      const payload = { event: "delivered", messageId: "msg-signed" };
+      const response = await postWebhook(httpClient, payload);
 
-      try {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = secret;
-        }
-
-        const app = await initTestApp();
-        const client = app.httpClient;
-
-        const payload = { event: "delivered", messageId: "msg-signed" };
-        const signature = signPayload(payload, secret);
-
-        const response = await client.post("/api/webhooks/brevo/whatsapp", payload, {
-          headers: { "X-Brevo-Signature": signature },
-        });
-
-        expect(response.status).toBe(200);
-      } finally {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = originalSecret;
-        }
-      }
+      expect(response.status).toBe(200);
     });
 
     it("rejette la requête avec une signature invalide", async () => {
-      const secret = "test-webhook-secret";
-      const originalSecret = config.brevo.whatsapp?.webhookSecret;
+      const payload = { event: "delivered", messageId: "msg-bad-sig" };
 
-      try {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = secret;
-        }
+      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload, {
+        headers: { "X-Brevo-Signature": "invalid-signature" },
+      });
 
-        const app = await initTestApp();
-        const client = app.httpClient;
-
-        const payload = { event: "delivered", messageId: "msg-bad-sig" };
-
-        const response = await client.post("/api/webhooks/brevo/whatsapp", payload, {
-          headers: { "X-Brevo-Signature": "invalid-signature" },
-        });
-
-        expect(response.status).toBe(401);
-      } finally {
-        if (config.brevo.whatsapp) {
-          (config.brevo.whatsapp as any).webhookSecret = originalSecret;
-        }
-      }
+      expect(response.status).toBe(401);
     });
   });
 });

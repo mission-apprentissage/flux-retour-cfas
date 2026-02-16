@@ -102,6 +102,11 @@ function verifyBrevoSignature(req: express.Request, res: express.Response, next:
 export default () => {
   const router = express.Router();
 
+  if (config.env !== "production") {
+    router.post("/", (_req, res) => res.status(403).json({ error: "WhatsApp webhooks only available in production" }));
+    return router;
+  }
+
   /**
    * Webhook pour recevoir les événements WhatsApp de Brevo
    *
