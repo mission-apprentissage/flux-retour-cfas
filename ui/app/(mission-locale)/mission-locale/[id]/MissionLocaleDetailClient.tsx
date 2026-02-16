@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { API_EFFECTIF_LISTE, IEffecifMissionLocale } from "shared";
+import { API_EFFECTIF_LISTE, IEffectifMissionLocale } from "shared";
 
 import EffectifDetail from "@/app/_components/ruptures/shared/ui/EffectifDetail";
-import { _get, _post } from "@/common/httpClient";
+import { _get } from "@/common/httpClient";
 
 export default function MissionLocaleDetailClient({ id }: { id: string }) {
   const searchParams = useSearchParams();
@@ -15,7 +15,7 @@ export default function MissionLocaleDetailClient({ id }: { id: string }) {
     ["effectif", id, nomListe],
     async () => {
       if (!id) return null;
-      return await _get<IEffecifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
+      return await _get<IEffectifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
         params: {
           nom_liste: nomListe,
         },

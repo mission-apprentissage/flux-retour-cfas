@@ -16,7 +16,7 @@ import {
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
-  getEffectifsListByMisisonLocaleId,
+  getEffectifsListByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -82,7 +82,7 @@ const exportEffectifMissionLocale = async (req, res) => {
       data: Array<Record<string, string>>;
     }> = [];
     for (const type of types) {
-      let effectifsList = (await getEffectifsListByMisisonLocaleId(missionLocale, { type, month })) as Array<
+      let effectifsList = (await getEffectifsListByMissionLocaleId(missionLocale, { type, month })) as Array<
         Record<string, string>
       >;
 

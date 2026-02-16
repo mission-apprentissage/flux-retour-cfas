@@ -93,4 +93,38 @@ export const TRAITEMENT_SEGMENTS = [
 
 export type TraitementSegmentKey = (typeof TRAITEMENT_SEGMENTS)[number]["key"];
 
+export const WHATSAPP_RESPONSE_COLORS = {
+  callback: COLOR_PALETTE.GREEN_DARK,
+  no_help: COLOR_PALETTE.YELLOW,
+  no_response: COLOR_PALETTE.GREY_LIGHT,
+  opted_out: COLOR_PALETTE.RED_DARK,
+} as const;
+
+export const WHATSAPP_RESPONSE_LABELS = {
+  callback: "Demande de rappel",
+  no_help: "Ne souhaite pas d'aide",
+  no_response: "Pas de réponse",
+  opted_out: "Désinscrit (STOP)",
+} as const;
+
+export const WHATSAPP_OUTCOMES_COLORS = {
+  rdv_pris: COLOR_PALETTE.GREEN_DARK,
+  nouveau_projet: COLOR_PALETTE.GREEN_LIGHT,
+  deja_accompagne: "#6A6AF4",
+  injoignable: COLOR_PALETTE.RED_LIGHT,
+  coordonnees_incorrect: COLOR_PALETTE.PINK_LIGHT,
+  autre: COLOR_PALETTE.GREY_LIGHT,
+  en_attente: COLOR_PALETTE.GREY_NEUTRAL,
+} as const;
+
+export const WHATSAPP_OUTCOMES_LABELS = {
+  rdv_pris: "RDV pris",
+  nouveau_projet: "Nouveau projet",
+  deja_accompagne: "Déjà accompagné",
+  injoignable: "Injoignable",
+  coordonnees_incorrect: "Coordonnées incorrectes",
+  autre: "Autre",
+  en_attente: "En attente de traitement",
+} as const;
+
 export const STATS_LAUNCH_DATE_LABEL = "février 2025";

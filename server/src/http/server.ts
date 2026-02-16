@@ -162,6 +162,7 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import erpRoutes from "./routes/specific.routes/erps.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
+import brevoWhatsappWebhook from "./routes/webhooks.routes/brevo-whatsapp.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -186,7 +187,15 @@ export default async function createServer(): Promise<Application> {
     app.use(cors({ credentials: true, origin: config.publicUrl }));
   }
 
-  app.use(bodyParser.json({ limit: config.bodyParserLimit }));
+  app.use(
+    bodyParser.json({
+      limit: config.bodyParserLimit,
+      verify: (req: any, _res, buf) => {
+        // Conserver le body brut pour la vérification HMAC des webhooks
+        req.rawBody = buf;
+      },
+    })
+  );
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
@@ -271,6 +280,7 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
+    .use("/api/webhooks/brevo/whatsapp", brevoWhatsappWebhook())
     .use(
       "/api/doc",
       swaggerUi.serve,

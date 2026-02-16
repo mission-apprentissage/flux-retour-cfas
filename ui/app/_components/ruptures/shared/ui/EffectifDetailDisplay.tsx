@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  IEffecifMissionLocale,
+  IEffectifMissionLocale,
   IEffectifOrganismeFormation,
   IUpdateMissionLocaleEffectif,
   IUpdateOrganismeFormationEffectif,
@@ -43,7 +43,7 @@ function validateCfaForm(cfaFormData: IUpdateOrganismeFormationEffectif): boolea
 }
 
 interface EffectifDetailDisplayProps {
-  effectifPayload: IEffecifMissionLocale | IEffectifOrganismeFormation;
+  effectifPayload: IEffectifMissionLocale | IEffectifOrganismeFormation;
   saveStatus: "idle" | "loading" | "success" | "error";
   onSave: (goNext: boolean, formData: IUpdateMissionLocaleEffectif | IUpdateOrganismeFormationEffectif) => void;
   isAdmin?: boolean;

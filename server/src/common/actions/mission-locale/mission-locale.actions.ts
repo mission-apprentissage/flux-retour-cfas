@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
@@ -25,6 +26,7 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
@@ -113,46 +115,42 @@ const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
   type: "MISSION_LOCALE" | "ORGANISME_FORMATION"
 ) => {
-  const missionLocaleCondition = () => {
+  // Cases identical between ML and OF
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.INJOIGNABLE:
+      return [{ $match: { a_traiter: false, injoignable: true } }];
+    case API_EFFECTIF_LISTE.TRAITE:
+      return [{ $match: { a_traiter: false, injoignable: false } }];
+    case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: true },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [
+              { a_traiter: false },
+              { injoignable: false },
+              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
+            ],
+          },
+        },
+      ];
+  }
+
+  if (type === "MISSION_LOCALE") {
     switch (nom_liste) {
-      case API_EFFECTIF_LISTE.INJOIGNABLE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: true,
-            },
-          },
-        ];
       case API_EFFECTIF_LISTE.A_TRAITER:
-        return [
-          {
-            $match: {
-              a_traiter: true,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.TRAITE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: false,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
-        return [
-          {
-            $match: {
-              $and: [
-                { a_traiter: false },
-                { injoignable: true },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
-            },
-          },
-        ];
+        return [{ $match: { a_traiter: true } }];
       case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
       case API_EFFECTIF_LISTE.PRIORITAIRE:
         return [
@@ -165,62 +163,11 @@ const matchTraitementEffectifPipelineMl = (
             },
           },
         ];
-      case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
-        return [
-          {
-            $match: {
-              $and: [
-                { a_traiter: false },
-                { injoignable: false },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
-            },
-          },
-        ];
     }
-  };
-
-  const organismeCondition = () => {
+  } else {
     switch (nom_liste) {
-      case API_EFFECTIF_LISTE.INJOIGNABLE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: true,
-            },
-          },
-        ];
       case API_EFFECTIF_LISTE.A_TRAITER:
-        return [
-          {
-            $match: {
-              a_traiter: true,
-              nouveau_contrat: false,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.TRAITE:
-        return [
-          {
-            $match: {
-              a_traiter: false,
-              injoignable: false,
-            },
-          },
-        ];
-      case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
-        return [
-          {
-            $match: {
-              $and: [
-                { a_traiter: false },
-                { injoignable: true },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
-            },
-          },
-        ];
+        return [{ $match: { a_traiter: true, nouveau_contrat: false } }];
       case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
       case API_EFFECTIF_LISTE.PRIORITAIRE:
         return [
@@ -234,26 +181,7 @@ const matchTraitementEffectifPipelineMl = (
             },
           },
         ];
-      case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
-        return [
-          {
-            $match: {
-              $and: [
-                { a_traiter: false },
-                { injoignable: false },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
-            },
-          },
-        ];
     }
-  };
-
-  switch (type) {
-    case "MISSION_LOCALE":
-      return missionLocaleCondition();
-    case "ORGANISME_FORMATION":
-      return organismeCondition();
   }
 };
 
@@ -523,6 +451,10 @@ const addMissionLocaleFieldTraitementStatus = () => {
     $eq: ["$organisme_data.acc_conjoint", true],
   };
 
+  const WHATSAPP_CALLBACK_CONDITION = {
+    $eq: ["$whatsapp_callback_requested", true],
+  };
+
   const RUPTURE_MOINS_DE_180_JOURS_CONDITION = {
     $gte: [
       "$date_rupture",
@@ -539,7 +471,13 @@ const addMissionLocaleFieldTraitementStatus = () => {
   const A_RISQUE_CONDITION = {
     $and: [
       {
-        $or: [RQTH_CONDITION, PRESQUE_6_MOIS_CONDITION, MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+        $or: [
+          RQTH_CONDITION,
+          PRESQUE_6_MOIS_CONDITION,
+          MINEUR_CONDITION,
+          ACCOMPAGNEMENT_CONJOINT_CONDITION,
+          WHATSAPP_CALLBACK_CONDITION,
+        ],
       },
       {
         $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
@@ -566,6 +504,9 @@ const addMissionLocaleFieldTraitementStatus = () => {
         },
         a_risque_accompagnement_conjoint: {
           $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
+        },
+        a_risque_whatsapp_callback: {
+          $cond: [WHATSAPP_CALLBACK_CONDITION, true, false],
         },
         a_risque_presque_6_mois_avec_cfa: {
           $cond: [
@@ -616,111 +557,68 @@ const addMissionLocaleFieldTraitementStatus = () => {
 };
 
 const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
-  switch (visibility) {
-    case "MISSION_LOCALE":
-      return [
+  const baseProjection = {
+    id: "$effectif_snapshot._id",
+    nom: "$effectif_snapshot.apprenant.nom",
+    prenom: "$effectif_snapshot.apprenant.prenom",
+    date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+    adresse: "$effectif_snapshot.apprenant.adresse",
+    formation: "$effectif_snapshot.formation",
+    courriel: "$effectif_snapshot.apprenant.courriel",
+    telephone: "$effectif_snapshot.apprenant.telephone",
+    telephone_corrected: "$effectif_choice.telephone",
+    autorisation_contact: "$effectif_choice.confirmation",
+    responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
+    responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
+    rqth: "$effectif_snapshot.apprenant.rqth",
+    a_traiter: "$a_traiter",
+    transmitted_at: "$effectif_snapshot.transmitted_at",
+    source: "$effectif_snapshot.source",
+    organisme: "$organisme",
+    contrats: "$effectif_snapshot.contrats",
+    "situation.situation": "$situation",
+    "situation.situation_autre": "$situation_autre",
+    "situation.deja_connu": "$deja_connu",
+    "situation.commentaires": "$commentaires",
+    contacts_tdb: "$tdb_users",
+    contact_cfa: {
+      $cond: [
         {
-          $project: {
-            id: "$effectif_snapshot._id",
-            nom: "$effectif_snapshot.apprenant.nom",
-            prenom: "$effectif_snapshot.apprenant.prenom",
-            date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-            adresse: "$effectif_snapshot.apprenant.adresse",
-            formation: "$effectif_snapshot.formation",
-            courriel: "$effectif_snapshot.apprenant.courriel",
-            telephone: "$effectif_snapshot.apprenant.telephone",
-            telephone_corrected: "$effectif_choice.telephone",
-            autorisation_contact: "$effectif_choice.confirmation",
-            responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
-            responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
-            rqth: "$effectif_snapshot.apprenant.rqth",
-            a_traiter: "$a_traiter",
-            injoignable: "$injoignable",
-            transmitted_at: "$effectif_snapshot.transmitted_at",
-            source: "$effectif_snapshot.source",
-            organisme: "$organisme",
-            contrats: "$effectif_snapshot.contrats",
-            "situation.situation": "$situation",
-            "situation.situation_autre": "$situation_autre",
-            "situation.deja_connu": "$deja_connu",
-            "situation.commentaires": "$commentaires",
-            contacts_tdb: "$tdb_users",
-            contact_cfa: {
-              $cond: [
-                {
-                  $and: [
-                    { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
-                    { $ne: [{ $ifNull: ["$contact_cfa_user", null] }, null] },
-                  ],
-                },
-                "$contact_cfa_user",
-                null,
-              ],
-            },
-            prioritaire: "$a_risque",
-            a_contacter: "$a_contacter",
-            mineur: "$a_risque_mineur",
-            presque_6_mois: "$a_risque_presque_6_mois",
-            acc_conjoint: "$a_risque_accompagnement_conjoint",
-            nouveau_contrat: "$nouveau_contrat",
-            current_status: "$current_status",
-            organisme_data: "$organisme_data",
-            date_rupture: "$date_rupture",
-            mission_locale_organisation: "$mission_locale_organisation",
-            mission_locale_logs: "$ml_logs",
-          },
+          $and: [
+            { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+            { $ne: [{ $ifNull: ["$contact_cfa_user", null] }, null] },
+          ],
         },
-      ];
-    case "ORGANISME_FORMATION":
-      return [
-        {
-          $project: {
-            id: "$effectif_snapshot._id",
-            nom: "$effectif_snapshot.apprenant.nom",
-            prenom: "$effectif_snapshot.apprenant.prenom",
-            date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-            adresse: "$effectif_snapshot.apprenant.adresse",
-            formation: "$effectif_snapshot.formation",
-            courriel: "$effectif_snapshot.apprenant.courriel",
-            telephone: "$effectif_snapshot.apprenant.telephone",
-            telephone_corrected: "$effectif_choice.telephone",
-            autorisation_contact: "$effectif_choice.confirmation",
-            responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
-            responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
-            rqth: "$effectif_snapshot.apprenant.rqth",
-            a_traiter: "$a_traiter",
-            transmitted_at: "$effectif_snapshot.transmitted_at",
-            source: "$effectif_snapshot.source",
-            organisme: "$organisme",
-            contrats: "$effectif_snapshot.contrats",
-            "situation.situation": "$situation",
-            "situation.situation_autre": "$situation_autre",
-            "situation.deja_connu": "$deja_connu",
-            "situation.commentaires": "$commentaires",
-            contacts_tdb: "$tdb_users",
-            contact_cfa: {
-              $cond: [
-                {
-                  $and: [
-                    { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
-                    { $ne: [{ $ifNull: ["$contact_cfa_user", null] }, null] },
-                  ],
-                },
-                "$contact_cfa_user",
-                null,
-              ],
-            },
-            nouveau_contrat: "$nouveau_contrat",
-            current_status: "$current_status",
-            organisme_data: "$organisme_data",
-            date_rupture: "$date_rupture",
-            mission_locale_organisation: "$mission_locale_organisation",
-            mission_locale_logs: "$ml_logs",
-            unread_by_current_user: "$unread_by_current_user",
-          },
-        },
-      ];
-  }
+        "$contact_cfa_user",
+        null,
+      ],
+    },
+    nouveau_contrat: "$nouveau_contrat",
+    current_status: "$current_status",
+    organisme_data: "$organisme_data",
+    date_rupture: "$date_rupture",
+    mission_locale_organisation: "$mission_locale_organisation",
+    mission_locale_logs: "$ml_logs",
+  };
+
+  const specificFields =
+    visibility === "MISSION_LOCALE"
+      ? {
+          injoignable: "$injoignable",
+          prioritaire: "$a_risque",
+          a_contacter: "$a_contacter",
+          whatsapp_callback_requested: "$whatsapp_callback_requested",
+          whatsapp_no_help_responded: "$whatsapp_no_help_responded",
+          whatsapp_contact: "$whatsapp_contact",
+          mineur: "$a_risque_mineur",
+          presque_6_mois: "$a_risque_presque_6_mois",
+          acc_conjoint: "$a_risque_accompagnement_conjoint",
+        }
+      : {
+          unread_by_current_user: "$unread_by_current_user",
+        };
+
+  return [{ $project: { ...baseProjection, ...specificFields } }];
 };
 
 const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
@@ -728,11 +626,13 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.A_TRAITER:
     case API_EFFECTIF_LISTE.INJOIGNABLE:
     case API_EFFECTIF_LISTE.TRAITE:
+    case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
       return { date_rupture: -1 };
     case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
+        a_risque_whatsapp_callback: -1,
         a_risque_presque_6_mois_avec_cfa: -1,
         a_risque_mineur_avec_cfa: -1,
         a_risque_rqth_avec_cfa: -1,
@@ -904,8 +804,7 @@ export const getOrCreateMissionLocaleById = async (id: number) => {
   const allMl = await apiAlternanceClient.geographie.listMissionLocales({});
   const ml: IMissionLocale | undefined = allMl.find((ml) => ml.id === id);
   if (!ml) {
-    Boom.notFound(`Mission locale with id ${id} not found`);
-    return;
+    throw Boom.notFound(`Mission locale with id ${id} not found`);
   }
 
   const orga = await organisationsDb().insertOne({
@@ -1331,7 +1230,7 @@ export const getEffectifFromMissionLocaleId = async (
   return { effectif, ...next };
 };
 
-export const getEffectifsListByMisisonLocaleId = (
+export const getEffectifsListByMissionLocaleId = (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
@@ -1508,6 +1407,8 @@ export const getEffectifARisqueByMissionLocaleId = async (
               presque_6_mois: "$a_risque_presque_6_mois",
               acc_conjoint: "$a_risque_accompagnement_conjoint",
               rqth: "$effectif_snapshot.apprenant.rqth",
+              whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
+              whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
             },
           },
         ],
@@ -2185,6 +2086,15 @@ export const setEffectifMissionLocaleData = async (
     { upsert: true, returnDocument: "after" }
   );
   await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
+
+  // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"
+  if (setObject.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+    triggerWhatsAppIfEligible(updated.value, missionLocaleId).catch((error) => {
+      logger.error({ error, effectifId: effectifId }, "Failed to trigger WhatsApp");
+      captureException(error);
+    });
+  }
+
   await createOrUpdateMissionLocaleStats(missionLocaleId);
   return updated;
 };

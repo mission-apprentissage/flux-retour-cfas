@@ -15,6 +15,8 @@ export type EffectifData = {
   a_traiter: boolean;
   nouveau_contrat: boolean;
   unread_by_current_user?: boolean;
+  whatsapp_callback_requested?: boolean;
+  whatsapp_no_help_responded?: boolean;
 };
 
 export type EffectifPriorityData = EffectifData & {

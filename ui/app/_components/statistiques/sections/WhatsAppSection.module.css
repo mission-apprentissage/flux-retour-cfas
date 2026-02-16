@@ -1,0 +1,32 @@
+.kpiCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.kpiCards > div {
+  height: 140px;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 992px) {
+  .kpiCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .kpiCards {
+    grid-template-columns: 1fr;
+  }
+
+  .charts {
+    grid-template-columns: 1fr;
+  }
+}

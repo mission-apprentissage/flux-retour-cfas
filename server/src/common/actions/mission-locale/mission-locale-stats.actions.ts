@@ -1483,3 +1483,118 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     exportDate: evaluationDate,
   };
 };
+
+export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
+  const evaluationDate = normalizeToUTCDay(new Date());
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+
+  const matchFilter: Record<string, unknown> = {
+    "whatsapp_contact.last_message_sent_at": { $exists: true, $ne: null },
+  };
+
+  if (period !== "all") {
+    matchFilter["whatsapp_contact.last_message_sent_at"] = {
+      $gte: startDate,
+      $lte: evaluationDate,
+    };
+  }
+
+  const pipeline = [
+    { $match: matchFilter },
+    {
+      $facet: {
+        totalSent: [{ $count: "count" }],
+        responses: [
+          {
+            $match: {
+              "whatsapp_contact.user_response": { $in: ["callback", "no_help"] },
+            },
+          },
+          {
+            $group: {
+              _id: "$whatsapp_contact.user_response",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        callbackOutcomes: [
+          { $match: { whatsapp_callback_requested: true } },
+          { $group: { _id: "$situation", count: { $sum: 1 } } },
+        ],
+        optOuts: [{ $match: { "whatsapp_contact.opted_out": true } }, { $count: "count" }],
+        noResponse: [
+          {
+            $match: {
+              "whatsapp_contact.user_response": { $exists: false },
+              "whatsapp_contact.opted_out": { $ne: true },
+            },
+          },
+          { $count: "count" },
+        ],
+      },
+    },
+  ];
+
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
+
+  const totalSent = result?.totalSent?.[0]?.count || 0;
+  const callbackCount =
+    result?.responses?.find((r: { _id: string; count: number }) => r._id === "callback")?.count || 0;
+  const noHelpCount = result?.responses?.find((r: { _id: string; count: number }) => r._id === "no_help")?.count || 0;
+  const optOutsCount = result?.optOuts?.[0]?.count || 0;
+  const noResponseCount = result?.noResponse?.[0]?.count || 0;
+
+  const totalResponded = callbackCount + noHelpCount;
+  const responseRate = totalSent > 0 ? Math.round((totalResponded / totalSent) * 100) : 0;
+
+  const outcomesMap: Record<string, number> = {
+    rdv_pris: 0,
+    nouveau_projet: 0,
+    deja_accompagne: 0,
+    injoignable: 0,
+    coordonnees_incorrect: 0,
+    autre: 0,
+    en_attente: 0,
+  };
+
+  const situationMapping: Record<string, string> = {
+    RDV_PRIS: "rdv_pris",
+    NOUVEAU_PROJET: "nouveau_projet",
+    NOUVEAU_CONTRAT: "nouveau_projet",
+    DEJA_ACCOMPAGNE: "deja_accompagne",
+    CONTACTE_SANS_RETOUR: "en_attente",
+    INJOIGNABLE_APRES_RELANCES: "injoignable",
+    COORDONNEES_INCORRECT: "coordonnees_incorrect",
+    AUTRE: "autre",
+    NE_SOUHAITE_PAS_ETRE_RECONTACTE: "autre",
+  };
+
+  result?.callbackOutcomes?.forEach((outcome: { _id: string | null; count: number }) => {
+    if (!outcome._id) {
+      outcomesMap.en_attente += outcome.count;
+    } else {
+      const mapped = situationMapping[outcome._id];
+      if (mapped) {
+        outcomesMap[mapped] += outcome.count;
+      } else {
+        outcomesMap.autre += outcome.count;
+      }
+    }
+  });
+
+  return {
+    summary: {
+      totalSent,
+      responseRate,
+      callbackRequests: callbackCount,
+      optOuts: optOutsCount,
+    },
+    responseDistribution: {
+      callback: callbackCount,
+      no_help: noHelpCount,
+      no_response: noResponseCount,
+      opted_out: optOutsCount,
+    },
+    callbackOutcomes: outcomesMap,
+  };
+};

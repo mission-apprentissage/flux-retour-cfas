@@ -2,7 +2,7 @@
 
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useState } from "react";
-import { IOrganisme, IEffecifMissionLocale, IEffectifOrganismeFormation } from "shared";
+import { IOrganisme, IEffectifMissionLocale, IEffectifOrganismeFormation } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 
@@ -10,7 +10,7 @@ import { MOTIF_LABELS } from "../constants";
 
 import styles from "./Feedback.module.css";
 
-type EffectifWithContacts = (IEffecifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
+type EffectifWithContacts = (IEffectifMissionLocale["effectif"] | IEffectifOrganismeFormation["effectif"]) & {
   organisme?: {
     contacts_from_referentiel?: IOrganisme["contacts_from_referentiel"];
   };

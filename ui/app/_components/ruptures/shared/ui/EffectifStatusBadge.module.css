@@ -1,0 +1,40 @@
+.badgeTextSpacing {
+  margin-left: 5px;
+}
+
+.fontWeightNormal {
+  font-weight: 400;
+}
+
+.accConjointBadge {
+  background-color: #ececfe;
+  color: #161616;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.accConjointDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #e1000f;
+  flex-shrink: 0;
+}
+
+.badgesContainer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.badgesContainerWithMargin {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.mlTreatedBadge {
+  margin-left: 5px;
+}

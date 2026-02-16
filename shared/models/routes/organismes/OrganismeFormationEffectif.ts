@@ -52,12 +52,12 @@ const zEffectifOrganismeFormation = z
   })
   .merge(zApprenantPick);
 
-const zPrevIousNext = z.object({ id: z.string(), nom: z.string(), prenom: z.string() });
+const zPreviousNext = z.object({ id: z.string(), nom: z.string(), prenom: z.string() });
 
 const zResponseEffectifOrganismeFormation = z.object({
   effectif: zEffectifOrganismeFormation,
-  previous: zPrevIousNext.nullish(),
-  next: zPrevIousNext.nullish(),
+  previous: zPreviousNext.nullish(),
+  next: zPreviousNext.nullish(),
   currentIndex: z.number(),
   total: z.number(),
 });

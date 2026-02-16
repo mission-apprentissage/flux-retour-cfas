@@ -95,6 +95,10 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `${payload.effectifs_count} nouveau${payload.effectifs_count > 1 ? "x" : ""} jeune${payload.effectifs_count > 1 ? "s" : ""} à traiter de ${payload.cfa.nom}`,
   cfa_daily_recap: (payload) =>
     `La Mission Locale ${payload.mission_locale.nom} a du nouveau sur l'accompagnement de vos jeunes en rupture`,
+  whatsapp_callback_notification: (payload) =>
+    `📞 ${payload.effectif.prenom} ${payload.effectif.nom} souhaite être recontacté(e)`,
+  whatsapp_nohelp_notification: (payload) =>
+    `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -254,6 +258,30 @@ export type TemplatePayloads = {
       nom: string;
       prenom: string;
     }>;
+  };
+  whatsapp_callback_notification: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    effectif: {
+      prenom: string;
+      nom: string;
+    };
+    lien_fiche: string;
+    date_contacte_sans_retour: string;
+  };
+  whatsapp_nohelp_notification: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    effectif: {
+      prenom: string;
+      nom: string;
+    };
+    lien_fiche: string;
+    date_contacte_sans_retour: string;
   };
 };
 

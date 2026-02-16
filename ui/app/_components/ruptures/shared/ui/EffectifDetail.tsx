@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   API_EFFECTIF_LISTE,
-  IEffecifMissionLocale,
+  IEffectifMissionLocale,
   IUpdateMissionLocaleEffectif,
   IUpdateOrganismeFormationEffectif,
   SITUATION_ENUM,
@@ -25,7 +25,7 @@ import { RightColumnSkeleton } from "./RightColumnSkeleton";
 
 const REDIRECTION_DELAY = 1500;
 
-export default function EffectifDetail({ data }: { data: IEffecifMissionLocale | null }) {
+export default function EffectifDetail({ data }: { data: IEffectifMissionLocale | null }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

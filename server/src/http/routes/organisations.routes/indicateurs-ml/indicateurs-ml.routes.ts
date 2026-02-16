@@ -21,6 +21,7 @@ import {
   getSyntheseRegionsStats,
   getCouvertureRegionsStats,
   getTraitementExportData,
+  getWhatsAppStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { organisationsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -150,6 +151,16 @@ export default () => {
       }),
     }),
     returnResult(getCouvertureRegionsRoute)
+  );
+
+  router.get(
+    "/stats/whatsapp",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+      }),
+    }),
+    returnResult(getWhatsAppRoute)
   );
 
   router.get(
@@ -403,6 +414,17 @@ const getMlMembresRoute = async (req, { locals }) => {
   await verifyMlInRegions(id, userRegions);
 
   return getMissionLocaleMembers(new ObjectId(id));
+};
+
+const getWhatsAppRoute = async (req, { locals }) => {
+  const { period } = req.query;
+  const organisation = locals.organisation as { type: string };
+
+  if (organisation.type !== "ADMINISTRATEUR") {
+    throw Boom.forbidden("Accès réservé aux administrateurs");
+  }
+
+  return await getWhatsAppStats((period as StatsPeriod) || "all");
 };
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {
