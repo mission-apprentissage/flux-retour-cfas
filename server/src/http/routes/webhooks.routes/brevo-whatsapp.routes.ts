@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 import { captureException } from "@sentry/node";
 import express from "express";
 import { RateLimiterMemory } from "rate-limiter-flexible";
@@ -63,37 +61,19 @@ async function rateLimitMiddleware(req: express.Request, res: express.Response, 
   }
 }
 
-function verifyBrevoSignature(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const webhookSecret = config.brevo.whatsapp?.webhookSecret;
+function verifyWebhookToken(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const expectedToken = config.brevo.whatsapp?.webhookToken;
 
-  if (!webhookSecret) {
-    if (config.env === "production") {
-      logger.warn("WhatsApp webhook secret not configured in production");
-      return res.status(401).json({ error: "Webhook secret not configured" });
-    }
-    return next();
+  if (!expectedToken) {
+    logger.warn("WhatsApp webhook token not configured");
+    return res.status(401).json({ error: "Webhook token not configured" });
   }
 
-  const signature = req.headers["x-brevo-signature"] as string;
+  const token = req.query.token as string;
 
-  if (!signature) {
-    logger.warn("Missing X-Brevo-Signature header");
-    return res.status(401).json({ error: "Missing signature" });
-  }
-
-  const rawBody = (req as any).rawBody as Buffer | undefined;
-  if (!rawBody) {
-    logger.warn("Missing raw body for HMAC verification");
-    return res.status(401).json({ error: "Missing raw body" });
-  }
-  const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
-
-  const sigBuf = Buffer.from(signature);
-  const expectedBuf = Buffer.from(expectedSignature);
-
-  if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
-    logger.warn("Invalid webhook signature");
-    return res.status(401).json({ error: "Invalid signature" });
+  if (token !== expectedToken) {
+    logger.warn("Invalid WhatsApp webhook token");
+    return res.status(401).json({ error: "Invalid token" });
   }
 
   next();
@@ -115,7 +95,7 @@ export default () => {
    * 2. Événements de statut (delivered, read, failed)
    * 3. Format legacy "inbound"
    */
-  router.post("/", rateLimitMiddleware, verifyBrevoSignature, async (req, res) => {
+  router.post("/", rateLimitMiddleware, verifyWebhookToken, async (req, res) => {
     try {
       const body = req.body;
       const eventName = body.eventName || body.event;

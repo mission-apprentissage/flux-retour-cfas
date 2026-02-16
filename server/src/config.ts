@@ -99,7 +99,7 @@ const config = {
       enabled:
         env.get("MNA_TDB_ENV").required().asString() === "production" &&
         env.get("MNA_TDB_WHATSAPP_ENABLED").default("false").asBool(),
-      webhookSecret: env.get("MNA_TDB_BREVO_WHATSAPP_WEBHOOK_SECRET").asString(),
+      webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").asString(),
       senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").asString(),
       templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").asInt(),
     },

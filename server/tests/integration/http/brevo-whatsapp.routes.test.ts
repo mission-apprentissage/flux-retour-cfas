@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 import { AxiosInstance } from "axiosist";
 import { afterEach, it, describe, beforeEach, expect, vi } from "vitest";
 
@@ -9,22 +7,14 @@ import { initTestApp } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
-const TEST_WEBHOOK_SECRET = "test-webhook-secret";
+const TEST_WEBHOOK_TOKEN = "test-webhook-token";
 
 let httpClient: AxiosInstance;
 let originalEnv: string;
-let originalWebhookSecret: string | undefined;
-
-function signPayload(payload: object, secret: string): string {
-  const body = JSON.stringify(payload);
-  return crypto.createHmac("sha256", secret).update(body).digest("hex");
-}
+let originalWebhookToken: string | undefined;
 
 function postWebhook(client: AxiosInstance, payload: object) {
-  const signature = signPayload(payload, TEST_WEBHOOK_SECRET);
-  return client.post("/api/webhooks/brevo/whatsapp", payload, {
-    headers: { "X-Brevo-Signature": signature },
-  });
+  return client.post(`/api/webhooks/brevo/whatsapp?token=${TEST_WEBHOOK_TOKEN}`, payload);
 }
 
 describe("Brevo WhatsApp Webhook Routes", () => {
@@ -32,10 +22,10 @@ describe("Brevo WhatsApp Webhook Routes", () => {
 
   beforeEach(async () => {
     originalEnv = config.env;
-    originalWebhookSecret = config.brevo.whatsapp?.webhookSecret;
+    originalWebhookToken = config.brevo.whatsapp?.webhookToken;
     (config as any).env = "production";
     if (config.brevo.whatsapp) {
-      (config.brevo.whatsapp as any).webhookSecret = TEST_WEBHOOK_SECRET;
+      (config.brevo.whatsapp as any).webhookToken = TEST_WEBHOOK_TOKEN;
     }
     const app = await initTestApp();
     httpClient = app.httpClient;
@@ -44,7 +34,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
   afterEach(() => {
     (config as any).env = originalEnv;
     if (config.brevo.whatsapp) {
-      (config.brevo.whatsapp as any).webhookSecret = originalWebhookSecret;
+      (config.brevo.whatsapp as any).webhookToken = originalWebhookToken;
     }
   });
 
@@ -187,8 +177,8 @@ describe("Brevo WhatsApp Webhook Routes", () => {
     });
   });
 
-  describe("Signature verification", () => {
-    it("rejette la requête si le secret est configuré mais le header manquant", async () => {
+  describe("Token verification", () => {
+    it("rejette la requête sans token", async () => {
       const response = await httpClient.post("/api/webhooks/brevo/whatsapp", {
         event: "delivered",
         messageId: "msg-1",
@@ -197,21 +187,20 @@ describe("Brevo WhatsApp Webhook Routes", () => {
       expect(response.status).toBe(401);
     });
 
-    it("accepte la requête avec une signature valide", async () => {
+    it("rejette la requête avec un token invalide", async () => {
+      const response = await httpClient.post("/api/webhooks/brevo/whatsapp?token=invalid", {
+        event: "delivered",
+        messageId: "msg-1",
+      });
+
+      expect(response.status).toBe(401);
+    });
+
+    it("accepte la requête avec le bon token", async () => {
       const payload = { event: "delivered", messageId: "msg-signed" };
       const response = await postWebhook(httpClient, payload);
 
       expect(response.status).toBe(200);
-    });
-
-    it("rejette la requête avec une signature invalide", async () => {
-      const payload = { event: "delivered", messageId: "msg-bad-sig" };
-
-      const response = await httpClient.post("/api/webhooks/brevo/whatsapp", payload, {
-        headers: { "X-Brevo-Signature": "invalid-signature" },
-      });
-
-      expect(response.status).toBe(401);
     });
   });
 });
