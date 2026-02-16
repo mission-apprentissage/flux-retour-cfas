@@ -1,0 +1,177 @@
+<mjml>
+  <mj-head>
+    <mj-style>
+      .mobile-center {
+        text-align: left !important;
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mj-outlook-group-fix {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        body {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .mobile-section-padding > tbody > tr > td {
+          padding: 8px 2px 6px !important;
+        }
+
+        .mobile-wrapper-padding > tbody > tr > td {
+          padding: 0 1px 8px 1px !important;
+        }
+
+        .mobile-stack {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        table[role="presentation"] {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        .mobile-center {
+          text-align: center !important;
+        }
+
+        .mobile-text-center > tbody > tr > td {
+          text-align: center !important;
+        }
+
+        .mobile-button > tbody > tr > td {
+          text-align: center !important;
+          padding: 10px 20px !important;
+        }
+      }
+    </mj-style>
+  </mj-head>
+
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc" width="773px">
+    <%- include('./common/header.ejs'); %>
+
+    <mj-wrapper padding="0 20px 10px 20px" css-class="mobile-wrapper-padding">
+      <mj-section background-color="#ffffff" padding="30px 20px 10px" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-text font-weight="700" font-size="24px" line-height="32px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+            Bonjour <span style="color: #6A6AF4;"><%= data.recipient.prenom %> <%= data.recipient.nom %></span>,
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 20px 0" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-text font-size="16px" line-height="24px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+            Nous avons une information importante sur le dossier de
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="15px 20px 5px" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-text font-size="28px" font-weight="700" line-height="32px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+            <%= data.effectif.prenom %> <%= data.effectif.nom %>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 20px 10px" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-text font-size="20px" font-weight="700" line-height="28px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+            ne souhaite pas être recontacté·e ❌
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="5px 40px 5px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="0" />
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 40px 10px" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-text font-size="14px" font-weight="700" line-height="22px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+            Le <%= data.date_contacte_sans_retour %> vous avez indiqué avoir tenté de joindre <span style="color: #6A6AF4;"><%= data.effectif.prenom %> <%= data.effectif.nom %></span> mais il ou elle ne vous a pas répondu.
+          </mj-text>
+          <mj-text font-size="14px" line-height="22px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" padding-top="10px" align="center" css-class="mobile-center">
+            Nous lui avons envoyé un <u><strong>message automatique</strong> 📱</u> pour lui demander si il ou elle souhaitait être recontacté·e pour obtenir de l'aide.
+          </mj-text>
+          <mj-text font-size="14px" line-height="22px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" padding-top="10px" align="center" css-class="mobile-center">
+            <strong><span style="color: #6A6AF4;"><%= data.effectif.prenom %> <%= data.effectif.nom %></span></strong> a indiqué ne pas vouloir être recontacté·e ❌
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="10px 40px 10px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-wrapper background-color="#E3E3FD" padding="15px 20px">
+            <mj-text font-size="14px" line-height="22px" font-family="'Marianne', arial, sans-serif" color="#3A3A3A" align="center" css-class="mobile-center">
+              Son dossier est marqué automatiquement comme <strong>"Traité"</strong> dans votre interface du Tableau de bord.
+            </mj-text>
+          </mj-wrapper>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="15px 20px 25px" css-class="mobile-section-padding">
+        <mj-column width="512">
+          <mj-button
+            href="<%= data.lien_fiche %>"
+            background-color="#000091"
+            color="white"
+            font-size="16px"
+            font-weight="500"
+            line-height="24px"
+            font-family="'Marianne', arial, sans-serif"
+            inner-padding="12px 24px"
+            align="center"
+            text-align="center"
+            border-radius="0px"
+            width="auto"
+            css-class="mobile-button"
+          >
+            Accéder à son dossier →
+          </mj-button>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 40px 10px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-text font-size="13px" font-weight="700" line-height="20px" font-family="'Marianne', arial, sans-serif" color="#666666" css-class="mobile-center">
+            <u>À propos du message automatique 💬</u>
+          </mj-text>
+          <mj-text font-size="13px" line-height="20px" font-family="'Marianne', arial, sans-serif" color="#666666" padding-top="10px" css-class="mobile-center">
+            En ce moment l'équipe de Tableau de bord de l'apprentissage fait <strong>une phase de test</strong> pour aider les Missions locales à contacter ou relancer les jeunes qui ne répondent pas.
+          </mj-text>
+          <mj-text font-size="13px" line-height="20px" font-family="'Marianne', arial, sans-serif" color="#666666" padding-top="10px" css-class="mobile-center">
+            Cette phase de test consiste à envoyer un message automatique sur whatsapp aux jeunes qui n'ont pas répondu à votre premier contact. Ce message est envoyé dès que vous indiquez l'option "Contacté sans réponse" dans le suivi du jeune sur le dossier.
+          </mj-text>
+          <mj-text font-size="13px" line-height="20px" font-family="'Marianne', arial, sans-serif" color="#666666" padding-top="10px" css-class="mobile-center">
+            En fonction des résultats de cette phase de test, cette nouvelle fonctionnalité d'aide à la relance sera améliorée. Pour la moindre question ou suggestion, n'hésitez pas à nous contacter à l'adresse <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091; text-decoration: none;"><strong>tableaudebord@apprentissage.beta.gouv.fr</strong></a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="15px 20px" css-class="mobile-section-padding">
+        <mj-column>
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="10px 20px" css-class="mobile-divider"></mj-divider>
+          <mj-text font-size="12px" font-weight="400" line-height="20px" padding-bottom="15px" color="#3A3A3A" font-family="'Marianne', arial, sans-serif" align="left">
+            Ce courriel est généré automatiquement, vous ne pouvez pas y répondre. <br />Pour toute question écrivez-nous à <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091; text-decoration: none;">tableaudebord@apprentissage.beta.gouv.fr</a>
+          </mj-text>
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="10px 20px" css-class="mobile-divider"></mj-divider>
+          <mj-text font-size="12px" font-weight="700" line-height="20px" padding-bottom="15px" color="#3A3A3A" font-family="'Marianne', arial, sans-serif" align="left">
+            Ce service est développé par l'équipe du Tableau de bord de l'apprentissage conformément aux missions d'intérêt public du Ministère du Travail.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>
