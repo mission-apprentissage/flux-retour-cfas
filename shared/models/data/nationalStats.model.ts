@@ -298,4 +298,30 @@ const zTraitementExportResponse = z.object({
 
 export type ITraitementExportResponse = z.output<typeof zTraitementExportResponse>;
 
+const zWhatsAppStats = z.object({
+  summary: z.object({
+    totalSent: z.number(),
+    responseRate: z.number(),
+    callbackRequests: z.number(),
+    optOuts: z.number(),
+  }),
+  responseDistribution: z.object({
+    callback: z.number(),
+    no_help: z.number(),
+    no_response: z.number(),
+    opted_out: z.number(),
+  }),
+  callbackOutcomes: z.object({
+    rdv_pris: z.number(),
+    nouveau_projet: z.number(),
+    deja_accompagne: z.number(),
+    injoignable: z.number(),
+    coordonnees_incorrect: z.number(),
+    autre: z.number(),
+    en_attente: z.number(),
+  }),
+});
+
+export type IWhatsAppStats = z.output<typeof zWhatsAppStats>;
+
 export default { zod: zNationalStats };

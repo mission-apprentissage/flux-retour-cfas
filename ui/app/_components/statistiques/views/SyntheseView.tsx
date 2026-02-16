@@ -2,6 +2,7 @@
 
 import { DeploymentSection } from "../sections/DeploymentSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
+import { WhatsAppSection } from "../sections/WhatsAppSection";
 import commonStyles from "../ui/common.module.css";
 
 interface SyntheseViewProps {
@@ -24,6 +25,8 @@ export function SyntheseView({ showDetailColumn = true, isAdmin = false }: Synth
       <IdentificationSuiviSection showCharts={false} />
 
       <DeploymentSection showDetailColumn={showDetailColumn} isAdmin={isAdmin} />
+
+      {isAdmin && <WhatsAppSection />}
     </div>
   );
 }

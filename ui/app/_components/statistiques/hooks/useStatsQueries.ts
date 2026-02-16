@@ -9,6 +9,7 @@ import type {
   ITraitementMLStatsResponse,
   ITraitementRegionStats,
   ITraitementStatsResponse,
+  IWhatsAppStats,
 } from "shared/models/data/nationalStats.model";
 
 import { _get } from "@/common/httpClient";
@@ -96,6 +97,7 @@ export const statsQueryKeys = {
     ["stats", "accompagnement-conjoint", region, mlId] as const,
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
+  whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
 };
 
 export interface TraitementMLParams {
@@ -282,5 +284,16 @@ export function useMissionLocaleMembres(mlId: string) {
       ...STATS_QUERY_CONFIG,
       enabled: !!mlId,
     }
+  );
+}
+
+export function useWhatsAppStats(period: Period) {
+  return useQuery<IWhatsAppStats>(
+    statsQueryKeys.whatsapp(period),
+    () =>
+      _get("/api/v1/organisation/indicateurs-ml/stats/whatsapp", {
+        params: { period },
+      }),
+    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
 }

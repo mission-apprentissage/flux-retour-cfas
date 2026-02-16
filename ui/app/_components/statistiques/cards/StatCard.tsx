@@ -13,6 +13,7 @@ interface StatCardProps {
   loading: boolean;
   loadingPercentage?: boolean;
   tooltip?: React.ReactNode;
+  suffix?: string;
 }
 
 export function StatCard({
@@ -23,6 +24,7 @@ export function StatCard({
   loading,
   loadingPercentage = false,
   tooltip,
+  suffix,
 }: StatCardProps) {
   const percentage = variation || (previousValue !== undefined ? calculatePercentage(value || 0, previousValue) : null);
   const percentageColor =
@@ -47,6 +49,7 @@ export function StatCard({
             <>
               <div className={styles.cardValue}>
                 {value?.toLocaleString("fr-FR") || 0}
+                {suffix}
                 {tooltip && (
                   <span className={styles.tooltip}>
                     <Tooltip kind="hover" title={tooltip} />
