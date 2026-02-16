@@ -321,9 +321,17 @@ program
   .action(createJobAction("hydrate:effectifs:update_computed_statut"));
 
 program
+  .command("tmp:whatsapp:send-injoignables")
+  .description("Envoyer un WhatsApp aux effectifs injoignables (rupture < 3 mois, CONTACTE_SANS_RETOUR < 1 mois)")
+  .option("--dry-run", "Affiche le nombre d'effectifs éligibles sans envoyer", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:whatsapp:send-injoignables"));
+
+program
   .command("job:run")
   .description("Run a job")
   .requiredOption("-n, --name <string>", "Job name")
+  .option("--dry-run", "Run job in dry-run mode", false)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(({ name, ...options }) => {
     return createJobAction(name)(options);

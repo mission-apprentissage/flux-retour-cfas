@@ -79,6 +79,7 @@ import {
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
+import { sendWhatsAppInjoignables } from "./whatsapp/send-whatsapp-injoignables";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
@@ -575,6 +576,12 @@ export async function setupJobProcessor() {
       "tmp:hydrate:timeseries-stats-ml": {
         handler: async () => {
           return hydrateDailyMissionLocaleStats();
+        },
+      },
+      "tmp:whatsapp:send-injoignables": {
+        handler: async (job) => {
+          const dryRun = (job.payload as any)?.dryRun ?? false;
+          return sendWhatsAppInjoignables({ dryRun });
         },
       },
     },
