@@ -581,7 +581,8 @@ export async function setupJobProcessor() {
       "tmp:whatsapp:send-injoignables": {
         handler: async (job) => {
           const dryRun = (job.payload as any)?.dryRun ?? false;
-          return sendWhatsAppInjoignables({ dryRun });
+          const limit = (job.payload as any)?.limit;
+          return sendWhatsAppInjoignables({ dryRun, limit });
         },
       },
     },
