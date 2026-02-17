@@ -9,12 +9,7 @@ export {
   extractUserResponseText,
 } from "./messages";
 export { sendWhatsAppMessage, sendWhatsAppTemplate } from "./brevoApi";
-export {
-  updateWhatsAppContact,
-  getMissionLocaleInfo,
-  updateMessageStatus,
-  markEffectifAsCallbackRequested,
-} from "./database";
+export { updateWhatsAppContact, getMissionLocaleInfo, updateMessageStatus } from "./database";
 export { handleInboundWhatsAppMessage } from "./handlers";
 export { isEligibleForWhatsApp, triggerWhatsAppIfEligible } from "./eligibility";
 export { notifyMLUserOnCallback, notifyMLUserOnNoHelp } from "./notifications";

@@ -94,7 +94,7 @@ fileignoreconfig:
 - filename: ui/pages/docs/kit-deploiement-tba-op.tsx
   checksum: 55ffbfcaf20a5f5ce64c1eae9bf58be9792e16cdd00a322d698ebb5420e5153b
 - filename: server/tests/integration/common/services/brevo/whatsapp.test.ts
-  checksum: 15a9f80c7059ee89e0128ed4c5eae6ba58aafb3eb90ada1a2eda56b0ef5c3aad
+  checksum: ca81fa068c7a6291dd8fce5d997542a83bdaccb1a4b363277706e34c6aeb6e36
 scopeconfig:
 - scope: node
 custom_patterns:

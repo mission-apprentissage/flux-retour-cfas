@@ -12,7 +12,7 @@ import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
 import { sendWhatsAppMessage } from "./brevoApi";
-import { updateWhatsAppContact, getMissionLocaleInfo, markEffectifAsCallbackRequested } from "./database";
+import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
 import {
   buildCallbackMessage,
   buildNoHelpMessage,
@@ -69,10 +69,30 @@ async function handleStopMessage(
 
 /**
  * Traite les side effects d'une réponse callback (rappel souhaité)
+ * Nettoie les flags no_help si l'utilisateur a changé d'avis
  */
 async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
   const alreadyRequested = effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CALLBACK_REQUESTED;
-  await markEffectifAsCallbackRequested(effectif._id);
+
+  const now = new Date();
+  await missionLocaleEffectifsDb().updateOne(
+    { _id: effectif._id },
+    {
+      $set: {
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        a_traiter: false,
+        injoignable: true,
+        whatsapp_callback_requested: true,
+        whatsapp_callback_requested_at: now,
+        updated_at: now,
+      },
+      $unset: {
+        whatsapp_no_help_responded: "",
+        whatsapp_no_help_responded_at: "",
+      },
+    }
+  );
+
   if (!alreadyRequested) {
     await notifyMLUserOnCallback(effectif);
   }
@@ -80,8 +100,10 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
 
 /**
  * Traite les side effects d'une réponse no_help (pas d'aide souhaitée)
+ * Nettoie les flags callback si l'utilisateur a changé d'avis
  */
 async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  const now = new Date();
   await missionLocaleEffectifsDb().updateOne(
     { _id: effectif._id },
     {
@@ -90,8 +112,12 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
         injoignable: false,
         situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
         whatsapp_no_help_responded: true,
-        whatsapp_no_help_responded_at: new Date(),
-        updated_at: new Date(),
+        whatsapp_no_help_responded_at: now,
+        updated_at: now,
+      },
+      $unset: {
+        whatsapp_callback_requested: "",
+        whatsapp_callback_requested_at: "",
       },
     }
   );
@@ -100,7 +126,7 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
     _id: new ObjectId(),
     mission_locale_effectif_id: effectif._id,
     situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
-    created_at: new Date(),
+    created_at: now,
     created_by: null,
     read_by: [],
   });
