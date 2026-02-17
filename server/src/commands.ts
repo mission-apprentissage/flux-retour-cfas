@@ -324,6 +324,7 @@ program
   .command("tmp:whatsapp:send-injoignables")
   .description("Envoyer un WhatsApp aux effectifs injoignables (rupture < 3 mois, CONTACTE_SANS_RETOUR < 1 mois)")
   .option("--dry-run", "Affiche le nombre d'effectifs éligibles sans envoyer", false)
+  .option("-l, --limit <number>", "Limite le nombre d'envois", (value) => parseInt(value))
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:whatsapp:send-injoignables"));
 

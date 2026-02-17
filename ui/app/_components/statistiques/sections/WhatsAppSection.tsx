@@ -18,14 +18,19 @@ export function WhatsAppSection() {
         <div className={styles.kpiCards}>
           <StatCard label="Messages envoyés" value={data?.summary.totalSent} loading={isLoading} />
           <StatCard
+            label="Total de réponses"
+            value={data?.summary.totalResponses}
+            loading={isLoading}
+            tooltip="Demandes de rappel + refus d'aide + désinscriptions (STOP)"
+          />
+          <StatCard
             label="Taux de réponse"
             value={data?.summary.responseRate}
             suffix="%"
             loading={isLoading}
             tooltip="Pourcentage de jeunes ayant répondu au message WhatsApp (demande de rappel ou ne souhaite pas d'aide)"
           />
-          <StatCard label="Demandes de rappel" value={data?.summary.callbackRequests} loading={isLoading} />
-          <StatCard label="Désinscriptions (STOP)" value={data?.summary.optOuts} loading={isLoading} />
+          <StatCard label="Échecs d'envoi" value={data?.summary.failed} loading={isLoading} />
         </div>
 
         <div className={styles.charts}>

@@ -7,7 +7,7 @@ import config from "@/config";
 
 import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
-import { normalizePhoneNumber, getTargetPhone } from "./phone";
+import { maskPhone, normalizePhoneNumber, getTargetPhone } from "./phone";
 
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp
@@ -119,12 +119,20 @@ export async function triggerWhatsAppIfEligible(
     }
   );
 
+  const templateVars = {
+    phoneNumber: maskPhone(targetPhone),
+    prenom: prenom.length > 2 ? prenom.slice(0, 2) + "***" : "***",
+    missionLocale: missionLocaleInfo.nom,
+    templateId,
+  };
+
   if (result.success) {
     logger.info(
       {
         effectifId: effectif._id,
         missionLocaleId,
         messageId: result.messageId,
+        templateVars,
       },
       "WhatsApp initial message sent"
     );
@@ -134,6 +142,7 @@ export async function triggerWhatsAppIfEligible(
         effectifId: effectif._id,
         missionLocaleId,
         error: result.error,
+        templateVars,
       },
       "Failed to send WhatsApp initial message"
     );

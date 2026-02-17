@@ -302,8 +302,8 @@ const zWhatsAppStats = z.object({
   summary: z.object({
     totalSent: z.number(),
     responseRate: z.number(),
-    callbackRequests: z.number(),
-    optOuts: z.number(),
+    totalResponses: z.number(),
+    failed: z.number(),
   }),
   responseDistribution: z.object({
     callback: z.number(),

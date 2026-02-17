@@ -20,7 +20,6 @@ import {
   buildNoHelpMessage,
   buildStopConfirmationMessage,
   isEligibleForWhatsApp,
-  markEffectifAsCallbackRequested,
   notifyMLUserOnCallback,
   notifyMLUserOnNoHelp,
   handleInboundWhatsAppMessage,
@@ -232,41 +231,6 @@ describe("WhatsApp Service", () => {
         },
       } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForWhatsApp(effectif), false);
-    });
-  });
-
-  describe("markEffectifAsCallbackRequested (integration)", () => {
-    useMongo();
-
-    beforeEach(async () => {
-      // Désactiver la validation de schéma pour les tests avec des fixtures minimales
-      await getDatabase()
-        .command({ collMod: "missionLocaleEffectif", validationLevel: "off" })
-        .catch(() => {});
-      await missionLocaleEffectifsDb().deleteMany({});
-    });
-
-    it("met à jour whatsapp_callback_requested en base", async () => {
-      const effectifId = new ObjectId();
-      await missionLocaleEffectifsDb().insertOne(
-        {
-          _id: effectifId,
-          mission_locale_id: new ObjectId(),
-          effectif_id: new ObjectId(),
-          created_at: new Date(),
-          brevo: {},
-          current_status: {},
-          effectif_snapshot: {} as any,
-          whatsapp_callback_requested: false,
-        } as any,
-        { bypassDocumentValidation: true }
-      );
-
-      await markEffectifAsCallbackRequested(effectifId);
-
-      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
-      expect(updated?.whatsapp_callback_requested).toBe(true);
-      expect(updated?.whatsapp_callback_requested_at).toBeInstanceOf(Date);
     });
   });
 
@@ -488,13 +452,17 @@ describe("WhatsApp Service", () => {
       expect((effectif as any)?.injoignable).toBe(false);
     });
 
-    it("gère une réponse callback (1) : marque callback_requested + notification", async () => {
+    it("gère une réponse callback (1) : marque callback_requested + notification + reset situation", async () => {
       await handleInboundWhatsAppMessage("+33612345678", "1", "msg-callback", "visitor-123");
 
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_contact?.user_response).toBe("callback");
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CALLBACK_REQUESTED);
       expect(effectif?.whatsapp_callback_requested).toBe(true);
+      expect(effectif?.situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+      expect((effectif as any)?.a_traiter).toBe(false);
+      expect((effectif as any)?.injoignable).toBe(true);
+      expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
       expect(sendEmail).toHaveBeenCalledWith(
         "conseiller@ml.fr",
         "whatsapp_callback_notification",
@@ -503,7 +471,7 @@ describe("WhatsApp Service", () => {
       );
     });
 
-    it("gère une réponse no_help (2) : situation NE_SOUHAITE_PAS + notification", async () => {
+    it("gère une réponse no_help (2) : situation NE_SOUHAITE_PAS + notification + cleanup callback flags", async () => {
       await handleInboundWhatsAppMessage("+33612345678", "2", "msg-nohelp", "visitor-123");
 
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
@@ -512,6 +480,7 @@ describe("WhatsApp Service", () => {
       expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
       expect((effectif as any)?.a_traiter).toBe(false);
       expect(effectif?.whatsapp_no_help_responded).toBe(true);
+      expect(effectif?.whatsapp_callback_requested).toBeUndefined();
 
       // Vérifie qu'un log a été créé
       const logs = await missionLocaleEffectifsLogDb().find({ mission_locale_effectif_id: effectifId }).toArray();
@@ -519,6 +488,65 @@ describe("WhatsApp Service", () => {
       expect(noHelpLog).toBeDefined();
       expect(noHelpLog?.created_by).toBeNull();
 
+      expect(sendEmail).toHaveBeenCalledWith(
+        "conseiller@ml.fr",
+        "whatsapp_nohelp_notification",
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it("changement d'avis : no_help puis callback remet situation CONTACTE_SANS_RETOUR", async () => {
+      // D'abord no_help
+      await handleInboundWhatsAppMessage("+33612345678", "2", "msg-nohelp", "visitor-123");
+
+      let effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
+      expect(effectif?.whatsapp_no_help_responded).toBe(true);
+      expect((effectif as any)?.a_traiter).toBe(false);
+
+      vi.mocked(sendEmail).mockClear();
+
+      // Puis callback (changement d'avis)
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-callback", "visitor-123");
+
+      effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.user_response).toBe("callback");
+      expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CALLBACK_REQUESTED);
+      expect(effectif?.situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+      expect((effectif as any)?.a_traiter).toBe(false);
+      expect((effectif as any)?.injoignable).toBe(true);
+      expect(effectif?.whatsapp_callback_requested).toBe(true);
+      expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
+      expect(sendEmail).toHaveBeenCalledWith(
+        "conseiller@ml.fr",
+        "whatsapp_callback_notification",
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it("changement d'avis : callback puis no_help remet situation NE_SOUHAITE_PAS", async () => {
+      // D'abord callback
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-callback", "visitor-123");
+
+      let effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_callback_requested).toBe(true);
+      expect((effectif as any)?.injoignable).toBe(true);
+
+      vi.mocked(sendEmail).mockClear();
+
+      // Puis no_help (changement d'avis)
+      await handleInboundWhatsAppMessage("+33612345678", "2", "msg-nohelp", "visitor-123");
+
+      effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.user_response).toBe("no_help");
+      expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
+      expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
+      expect((effectif as any)?.a_traiter).toBe(false);
+      expect((effectif as any)?.injoignable).toBe(false);
+      expect(effectif?.whatsapp_no_help_responded).toBe(true);
+      expect(effectif?.whatsapp_callback_requested).toBeUndefined();
       expect(sendEmail).toHaveBeenCalledWith(
         "conseiller@ml.fr",
         "whatsapp_nohelp_notification",

@@ -11,6 +11,7 @@ const logger = parentLogger.child({
 
 interface SendWhatsAppInjoignablesOptions {
   dryRun: boolean;
+  limit?: number;
 }
 
 async function getEligibleEffectifs() {
@@ -64,7 +65,7 @@ async function getEligibleEffectifs() {
     .toArray();
 }
 
-export async function sendWhatsAppInjoignables({ dryRun }: SendWhatsAppInjoignablesOptions) {
+export async function sendWhatsAppInjoignables({ dryRun, limit }: SendWhatsAppInjoignablesOptions) {
   if (config.env !== "production") {
     logger.warn("whatsapp:send-injoignables can only be run in production environment");
     return 0;
@@ -89,10 +90,14 @@ export async function sendWhatsAppInjoignables({ dryRun }: SendWhatsAppInjoignab
 
   logger.info({ templateId: config.brevo.whatsapp.templateInjoignablesId }, "Configuration WhatsApp OK");
 
-  const eligibleEffectifs = await getEligibleEffectifs();
+  const allEligibleEffectifs = await getEligibleEffectifs();
+  const eligibleEffectifs = limit ? allEligibleEffectifs.slice(0, limit) : allEligibleEffectifs;
   const total = eligibleEffectifs.length;
 
-  logger.info({ total, dryRun }, `${total} effectifs éligibles trouvés`);
+  logger.info(
+    { total, totalEligible: allEligibleEffectifs.length, limit, dryRun },
+    `${total} effectifs à traiter (${allEligibleEffectifs.length} éligibles au total)`
+  );
 
   if (dryRun) {
     logger.info({ total }, "Mode dry-run : aucun message envoyé");
