@@ -1522,6 +1522,7 @@ export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
           { $group: { _id: "$situation", count: { $sum: 1 } } },
         ],
         optOuts: [{ $match: { "whatsapp_contact.opted_out": true } }, { $count: "count" }],
+        failed: [{ $match: { "whatsapp_contact.message_status": "failed" } }, { $count: "count" }],
         noResponse: [
           {
             $match: {
@@ -1542,6 +1543,7 @@ export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
     result?.responses?.find((r: { _id: string; count: number }) => r._id === "callback")?.count || 0;
   const noHelpCount = result?.responses?.find((r: { _id: string; count: number }) => r._id === "no_help")?.count || 0;
   const optOutsCount = result?.optOuts?.[0]?.count || 0;
+  const failedCount = result?.failed?.[0]?.count || 0;
   const noResponseCount = result?.noResponse?.[0]?.count || 0;
 
   const totalResponded = callbackCount + noHelpCount;
@@ -1582,12 +1584,14 @@ export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
     }
   });
 
+  const totalResponses = callbackCount + noHelpCount + optOutsCount;
+
   return {
     summary: {
       totalSent,
       responseRate,
-      callbackRequests: callbackCount,
-      optOuts: optOutsCount,
+      totalResponses,
+      failed: failedCount,
     },
     responseDistribution: {
       callback: callbackCount,
