@@ -99,9 +99,9 @@ const config = {
       enabled:
         env.get("MNA_TDB_ENV").required().asString() === "production" &&
         env.get("MNA_TDB_WHATSAPP_ENABLED").default("false").asBool(),
-      webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").asString(),
-      senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").asString(),
-      templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").asInt(),
+      webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").default("").asString(),
+      senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").default("").asString(),
+      templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").default("0").asInt(),
     },
   },
 };
