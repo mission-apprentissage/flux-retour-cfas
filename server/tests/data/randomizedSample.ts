@@ -171,20 +171,33 @@ export const createRandomRupturantDossierApprenantApiInputV3 = (params?: Partial
     contrat_date_fin,
   };
 };
-export const createRandomDossierApprenantApiInputV3WithFixedDates = (params?: Partial<IDossierApprenantSchemaV3>) => {
-  const dossier = createRandomDossierApprenantApiInputV3(params);
-  const [startYear] = dossier.annee_scolaire.split("-").map(Number);
 
-  // Set fixed dates
-  const contrat_date_debut = new Date(startYear, 7, 20); // August 20th
-  const contrat_date_rupture = new Date(startYear, 7, 25); // August 25th
-  const contrat_date_fin = new Date(startYear + 1, 5, 20); // June 20th of following year
+export const createRupturantEffectifPayload = (params?: Partial<IDossierApprenantSchemaV3>) => {
+  const now = new Date();
+  const DAY = 24 * 60 * 60 * 1000;
 
-  return {
-    ...dossier,
-    date_fin_formation: max([dossier.date_fin_formation, contrat_date_fin]),
+  const contrat_date_rupture = new Date(now.getTime() - 30 * DAY);
+  const contrat_date_debut = new Date(now.getTime() - 90 * DAY);
+  const contrat_date_fin = new Date(now.getTime() + 180 * DAY);
+
+  const date_entree_formation = new Date(contrat_date_debut.getTime() - 10 * DAY);
+  const date_inscription_formation = new Date(date_entree_formation);
+  const date_fin_formation = new Date(contrat_date_fin.getTime() + 60 * DAY);
+
+  const startYear =
+    date_entree_formation.getMonth() >= 8
+      ? date_entree_formation.getFullYear()
+      : date_entree_formation.getFullYear() - 1;
+
+  return createRandomDossierApprenantApiInputV3({
+    annee_scolaire: `${startYear}-${startYear + 1}`,
+    date_de_naissance_apprenant: new Date(now.getFullYear() - 20, 0, 1),
+    date_inscription_formation,
+    date_entree_formation,
+    date_fin_formation,
     contrat_date_debut,
     contrat_date_rupture,
     contrat_date_fin,
-  };
+    ...params,
+  });
 };
