@@ -1,6 +1,7 @@
 export type { WhatsAppSendResult, MissionLocaleInfo, WhatsAppTemplateParams } from "./types";
-export { maskPhone, normalizePhoneNumber, getTargetPhone } from "./phone";
+export { maskPhone, normalizePhoneNumber } from "./phone";
 export {
+  buildAutoReplyMessage,
   buildCallbackMessage,
   buildNoHelpMessage,
   buildStopConfirmationMessage,

@@ -9,6 +9,7 @@ import { maskPhone } from "./phone";
 import { WhatsAppSendResult, WhatsAppTemplateParams } from "./types";
 
 const BREVO_CONVERSATIONS_API = "https://api.brevo.com/v3/conversations";
+const BREVO_CONTACTS_API = "https://api.brevo.com/v3/contacts";
 const BREVO_WHATSAPP_API = "https://api.brevo.com/v3/whatsapp";
 
 const brevoClient = axios.create({ timeout: 10000 });
@@ -78,7 +79,7 @@ export async function upsertBrevoContact(phoneNumber: string, attributes: Record
 
   try {
     await brevoClient.post(
-      "https://api.brevo.com/v3/contacts",
+      BREVO_CONTACTS_API,
       {
         attributes: {
           ...attributes,

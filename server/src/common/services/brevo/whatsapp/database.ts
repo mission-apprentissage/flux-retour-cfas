@@ -26,6 +26,8 @@ export async function updateWhatsAppContact(
     user_response_raw: string;
     opted_out: boolean;
     opted_out_at: Date;
+    auto_reply_sent: boolean;
+    auto_reply_sent_at: Date;
   }>,
   historyEntries?: IWhatsAppMessageHistory | IWhatsAppMessageHistory[]
 ): Promise<void> {
@@ -71,7 +73,8 @@ export async function getMissionLocaleInfo(missionLocaleId: ObjectId): Promise<M
   return {
     nom: organisation.nom,
     telephone: organisation.telephone ?? undefined,
-    email: organisation.email ?? undefined,
+    site_web: organisation.site_web ?? undefined,
+    adresse: organisation.adresse?.commune ?? undefined,
   };
 }
 
@@ -95,20 +98,4 @@ export async function updateMessageStatus(messageId: string, status: "delivered"
   } else {
     logger.debug({ messageId, status }, "WhatsApp message status updated");
   }
-}
-
-/**
- * Met à jour l'effectif comme demandant un rappel (prioritaire)
- */
-export async function markEffectifAsCallbackRequested(effectifId: ObjectId): Promise<void> {
-  await missionLocaleEffectifsDb().updateOne(
-    { _id: effectifId },
-    {
-      $set: {
-        whatsapp_callback_requested: true,
-        whatsapp_callback_requested_at: new Date(),
-        updated_at: new Date(),
-      },
-    }
-  );
 }
