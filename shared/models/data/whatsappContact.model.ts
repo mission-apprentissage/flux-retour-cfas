@@ -21,11 +21,12 @@ export type IUserResponseType = z.infer<typeof zUserResponseType>;
 
 export const CONVERSATION_STATE = {
   INITIAL_SENT: "initial_sent",
+  USER_RESPONDED: "user_responded",
   CALLBACK_REQUESTED: "callback_requested",
   CLOSED: "closed",
 } as const;
 
-export const zConversationState = z.enum(["initial_sent", "callback_requested", "closed"]);
+export const zConversationState = z.enum(["initial_sent", "user_responded", "callback_requested", "closed"]);
 export type IConversationState = z.infer<typeof zConversationState>;
 
 export const zWhatsAppMessageHistory = z.object({
@@ -50,6 +51,8 @@ export const zWhatsAppContact = z.object({
   user_response_raw: z.string().nullish().describe("Texte brut de la réponse utilisateur"),
   opted_out: z.boolean().default(false),
   opted_out_at: z.date().nullish(),
+  auto_reply_sent: z.boolean().default(false),
+  auto_reply_sent_at: z.date().nullish(),
   messages_history: z.array(zWhatsAppMessageHistory).nullish(),
 });
 

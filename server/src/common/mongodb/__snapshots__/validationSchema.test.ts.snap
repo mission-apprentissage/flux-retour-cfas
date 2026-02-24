@@ -17774,6 +17774,19 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "additionalProperties": false,
           "bsonType": "object",
           "properties": {
+            "auto_reply_sent": {
+              "bsonType": "bool",
+            },
+            "auto_reply_sent_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
             "brevo_visitor_id": {
               "bsonType": [
                 "string",
@@ -17786,6 +17799,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "bsonType": "string",
                   "enum": [
                     "initial_sent",
+                    "user_responded",
                     "callback_requested",
                     "closed",
                   ],
