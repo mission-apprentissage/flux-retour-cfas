@@ -31,10 +31,3 @@ export function normalizePhoneNumber(phone: string | null | undefined): string |
     return null;
   }
 }
-
-/**
- * Retourne le numéro cible normalisé
- */
-export function getTargetPhone(effectifPhone: string): string | null {
-  return normalizePhoneNumber(effectifPhone);
-}

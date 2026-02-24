@@ -14,6 +14,7 @@ import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/
 import { sendWhatsAppMessage } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
 import {
+  buildAutoReplyMessage,
   buildCallbackMessage,
   buildNoHelpMessage,
   buildStopConfirmationMessage,
@@ -241,10 +242,53 @@ export async function handleInboundWhatsAppMessage(
   const responseType = parseUserResponse(text);
   if (!responseType) {
     logger.info({ effectifId: effectif._id }, "Unrecognized user response");
+
+    const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
+
+    if (!effectif.whatsapp_contact?.auto_reply_sent) {
+      const locked = await missionLocaleEffectifsDb().findOneAndUpdate(
+        { _id: effectif._id, "whatsapp_contact.auto_reply_sent": { $ne: true } },
+        { $set: { "whatsapp_contact.auto_reply_sent": true, "whatsapp_contact.auto_reply_sent_at": now } },
+        { returnDocument: "after", includeResultMetadata: false }
+      );
+
+      if (locked) {
+        const autoReplyMessage = buildAutoReplyMessage(missionLocaleInfo);
+        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage);
+        if (result.success) {
+          historyEntries.push({
+            direction: "outbound",
+            content: autoReplyMessage,
+            sent_at: new Date(),
+            brevo_message_id: result.messageId,
+          });
+        } else {
+          try {
+            await missionLocaleEffectifsDb().updateOne(
+              { _id: effectif._id },
+              {
+                $set: {
+                  "whatsapp_contact.auto_reply_sent": false,
+                  "whatsapp_contact.auto_reply_sent_at": null,
+                },
+              }
+            );
+          } catch (rollbackError) {
+            logger.error({ effectifId: effectif._id, rollbackError }, "Failed to rollback auto_reply_sent flag");
+          }
+        }
+      }
+    }
+
     await updateWhatsAppContact(
       effectif._id,
-      { user_response_raw: text, message_status: "read", status_updated_at: now },
-      inboundHistory
+      {
+        user_response_raw: text,
+        message_status: "read",
+        status_updated_at: now,
+        conversation_state: CONVERSATION_STATE.USER_RESPONDED,
+      },
+      historyEntries
     );
     return;
   }

@@ -7,7 +7,7 @@ import config from "@/config";
 
 import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
-import { maskPhone, normalizePhoneNumber, getTargetPhone } from "./phone";
+import { maskPhone, normalizePhoneNumber } from "./phone";
 
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp
@@ -71,13 +71,7 @@ export async function triggerWhatsAppIfEligible(
   }
 
   const prenom = effectif.effectif_snapshot?.apprenant?.prenom || "";
-  const phone = effectif.effectif_snapshot?.apprenant?.telephone;
-  if (!phone) {
-    logger.warn({ effectifId: effectif._id }, "No phone number for WhatsApp");
-    return;
-  }
-  const targetPhone = getTargetPhone(phone);
-
+  const targetPhone = normalizePhoneNumber(effectif.effectif_snapshot?.apprenant?.telephone);
   if (!targetPhone) {
     logger.warn({ effectifId: effectif._id }, "Invalid phone number for WhatsApp");
     return;

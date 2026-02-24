@@ -7,7 +7,8 @@ export interface WhatsAppSendResult {
 export interface MissionLocaleInfo {
   nom: string;
   telephone?: string;
-  email?: string;
+  site_web?: string;
+  adresse?: string;
 }
 
 export interface WhatsAppTemplateParams {

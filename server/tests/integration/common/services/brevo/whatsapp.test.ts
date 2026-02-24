@@ -16,6 +16,7 @@ import {
   normalizePhoneNumber,
   parseUserResponse,
   isStopMessage,
+  buildAutoReplyMessage,
   buildCallbackMessage,
   buildNoHelpMessage,
   buildStopConfirmationMessage,
@@ -26,28 +27,21 @@ import {
   extractUserResponseText,
   updateMessageStatus,
   triggerWhatsAppIfEligible,
+  sendWhatsAppMessage,
 } from "@/common/services/brevo/whatsapp";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { useMongo } from "@tests/jest/setupMongo";
 
 vi.mock("@/common/services/mailer/mailer");
 
-// Mock axios pour les appels HTTP Brevo (sendWhatsAppMessage, sendWhatsAppTemplate, upsertBrevoContact)
-vi.mock("axios", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("axios")>();
-  const mockAxiosInstance = {
-    post: vi.fn().mockResolvedValue({ data: { messageId: "mock-msg-id" } }),
-    get: vi.fn().mockResolvedValue({ data: {} }),
-    interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
-    defaults: {},
-  };
+// Mock brevoApi pour les appels HTTP Brevo (sendWhatsAppMessage, sendWhatsAppTemplate, upsertBrevoContact)
+vi.mock("@/common/services/brevo/whatsapp/brevoApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/common/services/brevo/whatsapp/brevoApi")>();
   return {
     ...actual,
-    default: {
-      ...actual.default,
-      create: vi.fn(() => mockAxiosInstance),
-      post: vi.fn().mockResolvedValue({ data: { messageId: "mock-msg-id" } }),
-    },
+    sendWhatsAppMessage: vi.fn().mockResolvedValue({ success: true, messageId: "mock-msg-id" }),
+    sendWhatsAppTemplate: vi.fn().mockResolvedValue({ success: true, messageId: "mock-template-id" }),
+    upsertBrevoContact: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -161,6 +155,52 @@ describe("WhatsApp Service", () => {
 
       assert.ok(message.includes("prise en compte"));
       assert.ok(message.includes("plus de messages"));
+    });
+  });
+
+  describe("buildAutoReplyMessage", () => {
+    it("construit le message avec toutes les coordonnées", () => {
+      const message = buildAutoReplyMessage({
+        nom: "ML Paris",
+        telephone: "01 23 45 67 89",
+        site_web: "https://www.ml-paris.fr",
+        adresse: "Paris",
+      });
+
+      expect(message).toContain("Mission apprentissage");
+      expect(message).toContain("https://beta.gouv.fr/incubateurs/mission-apprentissage.html");
+      expect(message).toContain("Mission Locale *ML Paris*");
+      expect(message).toContain("à Paris");
+      expect(message).toContain("les appeler directement au 01 23 45 67 89");
+      expect(message).toContain("aller sur leur site web https://www.ml-paris.fr");
+    });
+
+    it("construit le message avec téléphone seul", () => {
+      const message = buildAutoReplyMessage({
+        nom: "ML Paris",
+        telephone: "01 23 45 67 89",
+      });
+
+      expect(message).toContain("les appeler directement au 01 23 45 67 89");
+      expect(message).not.toContain("site web");
+    });
+
+    it("construit le message avec site web seul", () => {
+      const message = buildAutoReplyMessage({
+        nom: "ML Paris",
+        site_web: "https://www.ml-paris.fr",
+      });
+
+      expect(message).toContain("aller sur leur site web https://www.ml-paris.fr");
+      expect(message).not.toContain("appeler");
+    });
+
+    it("omet les coordonnées manquantes", () => {
+      const message = buildAutoReplyMessage({ nom: "ML Paris" });
+
+      expect(message).toContain("Mission Locale *ML Paris*");
+      expect(message).not.toContain("appeler");
+      expect(message).not.toContain("site web");
     });
   });
 
@@ -336,6 +376,10 @@ describe("WhatsApp Service", () => {
           _id: missionLocaleId,
           type: "MISSION_LOCALE",
           nom: "ML Test",
+          telephone: "01 23 45 67 89",
+          email: "contact@ml-test.fr",
+          site_web: "https://www.ml-test.fr",
+          adresse: { commune: "Paris" },
           created_at: new Date(),
         } as any,
         { bypassDocumentValidation: true }
@@ -427,6 +471,83 @@ describe("WhatsApp Service", () => {
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_contact?.user_response_raw).toBe("bonjour");
       expect(effectif?.whatsapp_contact?.user_response).toBeUndefined();
+      expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.USER_RESPONDED);
+    });
+
+    it("envoie l'auto-reply avec coordonnées ML pour un message non reconnu", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-auto-1", "visitor-123");
+
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.auto_reply_sent).toBe(true);
+      expect(effectif?.whatsapp_contact?.auto_reply_sent_at).toBeInstanceOf(Date);
+
+      const autoReplyMsg = effectif?.whatsapp_contact?.messages_history?.find(
+        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      );
+      expect(autoReplyMsg).toBeDefined();
+      expect(autoReplyMsg?.content).toContain("ML Test");
+      expect(autoReplyMsg?.content).toContain("01 23 45 67 89");
+      expect(autoReplyMsg?.content).toContain("https://www.ml-test.fr");
+    });
+
+    it("n'envoie PAS l'auto-reply au deuxième message non reconnu", async () => {
+      // Premier message : auto-reply envoyé
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-first", "visitor-123");
+
+      const afterFirst = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      const autoReplyCountFirst = afterFirst?.whatsapp_contact?.messages_history?.filter(
+        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      ).length;
+      expect(autoReplyCountFirst).toBe(1);
+
+      // Deuxième message : pas d'auto-reply
+      await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-second", "visitor-123");
+
+      const afterSecond = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      const autoReplyCountSecond = afterSecond?.whatsapp_contact?.messages_history?.filter(
+        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      ).length;
+      expect(autoReplyCountSecond).toBe(1);
+    });
+
+    it("n'envoie PAS l'auto-reply pour une réponse callback (1)", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-callback-auto", "visitor-123");
+
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.auto_reply_sent).not.toBe(true);
+      expect(effectif?.whatsapp_contact?.user_response).toBe("callback");
+    });
+
+    it("n'envoie PAS l'auto-reply pour STOP", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "STOP", "msg-stop-auto", "visitor-123");
+
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.auto_reply_sent).not.toBe(true);
+      expect(effectif?.whatsapp_contact?.opted_out).toBe(true);
+    });
+
+    it("rollback auto_reply_sent si l'envoi échoue, et retry au message suivant", async () => {
+      // Premier message : envoi échoue → rollback
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "API error" });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-fail", "visitor-123");
+
+      const afterFail = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterFail?.whatsapp_contact?.auto_reply_sent).toBe(false);
+      const autoReplyAfterFail = afterFail?.whatsapp_contact?.messages_history?.filter(
+        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      );
+      expect(autoReplyAfterFail?.length ?? 0).toBe(0);
+
+      // Deuxième message : envoi réussit → auto-reply envoyé
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: true, messageId: "mock-retry-id" });
+      await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-retry", "visitor-123");
+
+      const afterRetry = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterRetry?.whatsapp_contact?.auto_reply_sent).toBe(true);
+      const autoReplyAfterRetry = afterRetry?.whatsapp_contact?.messages_history?.filter(
+        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      );
+      expect(autoReplyAfterRetry?.length).toBe(1);
     });
 
     it("déduplique les messages avec le même brevoMessageId", async () => {
