@@ -1058,6 +1058,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 injoignable: "$$ROOT.injoignable",
                 nouveau_contrat: "$nouveau_contrat",
                 situation: "$$ROOT.situation",
+                whatsapp_callback_requested: { $ifNull: ["$$ROOT.whatsapp_callback_requested", false] },
                 unread_by_current_user: {
                   $cond: [
                     {
