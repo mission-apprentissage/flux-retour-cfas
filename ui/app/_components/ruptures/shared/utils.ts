@@ -1,3 +1,11 @@
+import { MonthItem } from "@/common/types/ruptures";
+
+export const countWhatsappCallbackRequests = (months: MonthItem[]): number => {
+  return months.reduce((total, month) => {
+    return total + month.data.filter((effectif) => effectif.whatsapp_callback_requested === true).length;
+  }, 0);
+};
+
 export const isMissionLocaleUser = (userType: string): userType is "MISSION_LOCALE" => {
   return userType === "MISSION_LOCALE";
 };
