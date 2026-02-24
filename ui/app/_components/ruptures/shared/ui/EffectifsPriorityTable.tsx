@@ -136,6 +136,7 @@ export function EffectifsPriorityTable({
 
   return (
     <div
+      id={`priority-${listType}`}
       style={{
         padding: "16px",
         marginTop: "32px",

@@ -1,0 +1,6 @@
+.sideMenuCallbackHint {
+  display: block;
+  color: var(--text-default-error);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
