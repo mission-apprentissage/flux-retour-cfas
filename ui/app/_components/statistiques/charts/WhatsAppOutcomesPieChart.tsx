@@ -53,7 +53,16 @@ export function WhatsAppOutcomesPieChart({ data, loading }: WhatsAppOutcomesPieC
       <h3 className={styles.title}>Suivi après demande de rappel</h3>
       <div className={styles.chartSection}>
         <PieChart
-          series={[{ data: pieData, highlightScope: { highlight: "item" } }]}
+          series={[
+            {
+              data: pieData,
+              highlightScope: { highlight: "item" },
+              valueFormatter: (item) => {
+                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+              },
+            },
+          ]}
           height={280}
           margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
           slots={{ legend: () => null, tooltip: ItemChartTooltip }}

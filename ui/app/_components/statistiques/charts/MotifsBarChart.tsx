@@ -176,6 +176,7 @@ export function MotifsBarChart({ data, loading }: MotifsBarChartProps) {
 
   const xLabels = chartData.map((d) => d.motif);
   const values = chartData.map((d) => d.value);
+  const total = values.reduce((sum, v) => sum + v, 0);
   const maxValue = Math.max(...values);
   const yAxisMax = Math.ceil(maxValue * 1.2) || 1;
 
@@ -206,6 +207,11 @@ export function MotifsBarChart({ data, loading }: MotifsBarChartProps) {
             type: "bar",
             data: values,
             color: BAR_COLOR,
+            valueFormatter: (value) => {
+              if (value === null) return "";
+              const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+              return `${value.toLocaleString("fr-FR")} (${pct}%)`;
+            },
           },
         ]}
         height={350}

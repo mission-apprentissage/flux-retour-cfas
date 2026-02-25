@@ -61,6 +61,10 @@ export function DetailsDossiersTraitesPieChart({
               {
                 data: pieData,
                 highlightScope: { highlight: "item" },
+                valueFormatter: (item) => {
+                  const pct = data.total > 0 ? Math.round((item.value / data.total) * 100) : 0;
+                  return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+                },
               },
             ]}
             height={250}
