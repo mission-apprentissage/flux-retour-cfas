@@ -123,11 +123,22 @@ function StatutsTraitementPieChart({
     return <Skeleton height="250px" width="100%" />;
   }
 
+  const total = stats?.totalDossiersTraites || 0;
+
   return (
     <div className={styles.pieChartContainer}>
       <div className={styles.pieChartWrapper}>
         <PieChart
-          series={[{ data: pieData, highlightScope: { highlight: "item" } }]}
+          series={[
+            {
+              data: pieData,
+              highlightScope: { highlight: "item" },
+              valueFormatter: (item) => {
+                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+              },
+            },
+          ]}
           height={200}
           margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
           slots={{ legend: () => null, tooltip: ItemChartTooltip }}

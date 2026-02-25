@@ -34,6 +34,10 @@ export function DejaConnuMiniChart({ dejaConnu, total, loading }: DejaConnuMiniC
               ],
               innerRadius: 0,
               outerRadius: 20,
+              valueFormatter: (item) => {
+                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+              },
             },
           ]}
           height={50}

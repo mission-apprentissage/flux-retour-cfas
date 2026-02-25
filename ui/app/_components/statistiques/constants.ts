@@ -37,8 +37,8 @@ export function getVariationColorFromString(variation: string): string {
 export const DOSSIERS_TRAITES_COLORS = {
   rdv_pris: COLOR_PALETTE.GREEN_DARK,
   nouveau_projet: COLOR_PALETTE.GREEN_LIGHT,
-  contacte_sans_retour: COLOR_PALETTE.YELLOW,
   deja_accompagne: "#6A6AF4",
+  contacte_sans_retour: COLOR_PALETTE.YELLOW,
   injoignables: COLOR_PALETTE.RED_LIGHT,
   coordonnees_incorrectes: COLOR_PALETTE.PINK_LIGHT,
   autre: COLOR_PALETTE.GREY_LIGHT,
@@ -47,8 +47,8 @@ export const DOSSIERS_TRAITES_COLORS = {
 export const DOSSIERS_TRAITES_LABELS = {
   rdv_pris: "Rendez-vous pris",
   nouveau_projet: "Nouveau projet",
-  contacte_sans_retour: "À recontacter",
   deja_accompagne: "Déjà suivi par le service public à l'emploi",
+  contacte_sans_retour: "À recontacter",
   injoignables: "Injoignables",
   coordonnees_incorrectes: "Mauvaises coordonnées",
   autre: "Autre",
@@ -59,10 +59,10 @@ export const DOSSIERS_TRAITES_DESCRIPTIONS = {
     "La Mission Locale a réussi à contacter le jeune et à convenir d'un rendez-vous pour commencer ou poursuivre un accompagnement.",
   nouveau_projet:
     "Le jeune a un nouveau projet en cours. Soit il a retrouvé un nouveau contrat. Soit il est en cours de rescolarisation.\nCe jeune ne nécessite pas d'accompagnement de la Mission Locale.",
-  contacte_sans_retour:
-    "Le jeune a été contacté une fois par la Mission Locale mais n'a pas donné de réponse. La Mission Locale a prévu de relancer la démarche de contact d'ici peu.",
   deja_accompagne:
     "La Mission Locale a réussi à contacter le jeune et sait qu'il est déjà accompagné par le service public à l'emploi, soit dans la structure soit dans une autre (autre antenne MiLo ou France Travail).",
+  contacte_sans_retour:
+    "Le jeune a été contacté une fois par la Mission Locale mais n'a pas donné de réponse. La Mission Locale a prévu de relancer la démarche de contact d'ici peu.",
   injoignables:
     "La Mission Locale a tenté de contacter le jeune à plusieurs reprises et de différentes manières mais n'a jamais obtenu de réponse.\nElle marque ce dossier comme traité mais le jeune sera resté injoignable.",
   coordonnees_incorrectes:
