@@ -9,6 +9,7 @@ export interface IMissionLocaleEffectifsStats {
   effectifs_prioritaire: number;
   effectifs_a_traiter: number;
   effectifs_a_recontacter: number;
+  effectifs_whatsapp_callback: number;
   total: number;
 }
 
@@ -23,6 +24,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
       effectifs_prioritaire: 0,
       effectifs_a_traiter: 0,
       effectifs_a_recontacter: 0,
+      effectifs_whatsapp_callback: 0,
       total: 0,
     };
   }
@@ -60,6 +62,20 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
         effectifs_a_recontacter: {
           $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }, 1, 0] },
         },
+        effectifs_whatsapp_callback: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$whatsapp_callback_requested", true] },
+                  { $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
       },
     },
   ];
@@ -71,6 +87,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
       effectifs_prioritaire: 0,
       effectifs_a_traiter: 0,
       effectifs_a_recontacter: 0,
+      effectifs_whatsapp_callback: 0,
       total: 0,
     };
   }
@@ -81,6 +98,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
     effectifs_prioritaire: result.effectifs_prioritaire || 0,
     effectifs_a_traiter: result.effectifs_a_traiter || 0,
     effectifs_a_recontacter: result.effectifs_a_recontacter || 0,
+    effectifs_whatsapp_callback: result.effectifs_whatsapp_callback || 0,
     total,
   };
 }
