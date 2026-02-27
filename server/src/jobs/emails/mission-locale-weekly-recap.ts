@@ -96,6 +96,7 @@ export async function sendMissionLocaleWeeklyRecap() {
             effectifs_prioritaire: stats.effectifs_prioritaire,
             effectifs_a_traiter: stats.effectifs_a_traiter,
             effectifs_a_recontacter: stats.effectifs_a_recontacter,
+            effectifs_whatsapp_callback: stats.effectifs_whatsapp_callback,
             total: stats.total,
             date_debut: dateDebut,
             date_fin: dateFin,

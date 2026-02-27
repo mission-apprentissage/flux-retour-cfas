@@ -222,6 +222,7 @@ export type TemplatePayloads = {
     effectifs_prioritaire: number;
     effectifs_a_traiter: number;
     effectifs_a_recontacter: number;
+    effectifs_whatsapp_callback: number;
     total: number;
     date_debut: string;
     date_fin: string;

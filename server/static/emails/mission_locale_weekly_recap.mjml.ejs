@@ -177,6 +177,70 @@
         </mj-column>
       </mj-section>
 
+      <% if (data.effectifs_whatsapp_callback > 0) { %>
+      <mj-section background-color="#ffffff" padding="10px 20px 15px" css-class="mobile-section-padding">
+        <mj-column width="100%">
+          <mj-table padding="0" width="100%">
+            <tr>
+              <td style="background-color: #F5F5FE; border-radius: 8px; padding: 20px; width: 100%;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
+                  <tr>
+                    <td style="padding-bottom: 12px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
+                        <tr>
+                          <td style="vertical-align: top;">
+                            <span style="background-color: #6a6af4; padding: 2px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px; line-height: 24px; color: #ffffff; font-size: 14px; font-weight: 600; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;">
+                              <img src="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/icons/Logos/whatsapp-line.svg" width="14" height="14" style="filter: brightness(0) invert(1); vertical-align: middle;" alt="" />
+                              DISPONIBLE
+                            </span>
+                          </td>
+                          <td style="text-align: right; vertical-align: top;">
+                            <a href="<%= utils.getPublicUrl(`/mission-locale?statut=injoignable_prioritaire`) %>" style="background-color: #000091; color: white; font-size: 16px; font-weight: 400; line-height: 24px; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; padding: 8px 12px; text-decoration: none; display: inline-block;">
+                              Voir <%= data.effectifs_whatsapp_callback === 1 ? 'le jeune' : `les ${data.effectifs_whatsapp_callback} jeunes` %> →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 16px;">
+                      <p style="margin: 0; font-size: 18px; font-weight: 700; color: #161616; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; padding-left: 5px;">
+                        <span style="font-size: 24px;"><%= data.effectifs_whatsapp_callback %></span> jeune<%= data.effectifs_whatsapp_callback > 1 ? 's' : '' %> <%= data.effectifs_whatsapp_callback > 1 ? 'veulent' : 'veut' %> être recontacté<%= data.effectifs_whatsapp_callback > 1 ? 's' : '' %>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #D1D1FA; border-radius: 8px;">
+                        <tr>
+                          <td style="width: 45%; vertical-align: middle; padding: 10px;">
+                            <img
+                              src="<%= utils.getPublicUrl(`/images/emails/screen-ml-recontacter.png`) %>"
+                              alt="Capture d'écran de l'onglet À recontacter"
+                              style="width: 100%; max-width: 240px; border-radius: 6px; display: block;"
+                            />
+                          </td>
+                          <td style="width: 55%; vertical-align: middle; padding: 10px 15px;">
+                            <p style="margin: 0; font-size: 14px; font-weight: 500; color: #000091; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; line-height: 20px;">
+                              Retrouvez-les dans votre onglet "À recontacter"
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </mj-table>
+        </mj-column>
+        <mj-column width="100%">
+          <mj-divider border-color="#DDDDDD" border-width="1px" padding="20px 20px 0 20px" css-class="mobile-divider"></mj-divider>
+        </mj-column>
+      </mj-section>
+      <% } %>
+
       <mj-section background-color="#ffffff" padding="20px 20px 15px" css-class="mobile-section-padding">
         <mj-column width="50%" vertical-align="top" css-class="mobile-stack">
           <mj-text font-size="14px" font-weight="600" color="#755348" padding-bottom="4px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-tag-center">
@@ -269,7 +333,7 @@
             </span>
           </mj-text>
           <mj-text font-size="18px" font-weight="700" color="#161616"  align="left" padding="8px 0 0 25px" font-family="'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" css-class="mobile-center mobile-text-left-indent">
-            <span style="font-size: 24px"><%= data.effectifs_a_recontacter %></span> dossier<%= data.effectifs_a_recontacter > 1 ? 's' : '' %> à recontacter
+            <span style="font-size: 24px"><%= data.effectifs_a_recontacter %></span> jeune<%= data.effectifs_a_recontacter > 1 ? 's' : '' %> à recontacter
           </mj-text>
         </mj-column>
         <mj-column width="50%" vertical-align="bottom" css-class="mobile-stack">
