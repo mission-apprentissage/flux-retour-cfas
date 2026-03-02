@@ -18,9 +18,11 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       "identifiant_normalise.nom": 1,
       "identifiant_normalise.prenom": 1,
       "identifiant_normalise.date_de_naissance": 1,
-      soft_deleted: 1,
     },
-    {},
+    {
+      unique: true,
+      partialFilterExpression: { "identifiant_normalise.nom": { $exists: true } },
+    },
   ],
   [{ "whatsapp_contact.phone_normalized": 1 }, { sparse: true }],
   [{ "whatsapp_contact.message_id": 1 }, { sparse: true }],
