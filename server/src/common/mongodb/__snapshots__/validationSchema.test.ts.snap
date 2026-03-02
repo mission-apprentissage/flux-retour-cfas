@@ -19647,16 +19647,16 @@ exports[`validation-schema > should create validation schema for organismes > or
         },
       ],
     },
+    "has_transmission_errors": {
+      "bsonType": "bool",
+      "description": "Indique si cet organisme a une transmissions d'effectif en erreur",
+    },
     "is_allowed_deca": {
       "bsonType": [
         "bool",
         "null",
       ],
       "description": "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)",
-    },
-    "has_transmission_errors": {
-      "bsonType": "bool",
-      "description": "Indique si cet organisme a une transmissions d'effectif en erreur",
     },
     "is_transmission_target": {
       "bsonType": [
