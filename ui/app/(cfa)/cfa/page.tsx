@@ -1,4 +1,7 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
+
+import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboardSkeleton";
 
 import CfaClient from "./CfaClient";
 
@@ -7,5 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default function CfaPage() {
-  return <CfaClient />;
+  return (
+    <Suspense fallback={<CfaDashboardSkeleton />}>
+      <CfaClient />
+    </Suspense>
+  );
 }

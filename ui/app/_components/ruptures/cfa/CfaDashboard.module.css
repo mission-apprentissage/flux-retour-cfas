@@ -1,0 +1,29 @@
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-mention-grey);
+}
+
+.ageHighlight {
+  color: var(--text-title-blue-france);
+  font-weight: 700;
+}
+
+.infoIcon {
+  position: relative;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.infoIcon i {
+  color: var(--text-title-blue-france);
+}
