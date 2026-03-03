@@ -1,16 +1,19 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { notFound } from "next/navigation";
 
-export default function ErrorComponent() {
+export default function ErrorComponent({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div className="fr-container">
-      <div style={{ textAlign: "center", padding: "2rem" }}>
-        <h1 className="fr-h1">Une erreur est survenue</h1>
-        <p className="fr-text">Impossible de traiter votre demande pour le moment.</p>
-        <Button onClick={() => notFound()}>Retour</Button>
-      </div>
+    <div className="fr-container fr-py-4w">
+      <Alert
+        severity="error"
+        title="Une erreur est survenue"
+        description="Impossible de traiter votre demande pour le moment."
+      />
+      <Button priority="secondary" className="fr-mt-2w" onClick={reset}>
+        Réessayer
+      </Button>
     </div>
   );
 }
