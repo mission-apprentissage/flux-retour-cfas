@@ -1,38 +1,33 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 
-import CfaHeader from "@/app/_components/cfa/CfaHeader";
-import { EffectifsListView } from "@/app/_components/ruptures/mission-locale/EffectifsListView";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { CfaDashboard } from "@/app/_components/ruptures/cfa/CfaDashboard";
+import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboardSkeleton";
 import { useAuth } from "@/app/_context/UserContext";
 import { _get } from "@/common/httpClient";
-
-import { MonthsData } from "../../../common/types/ruptures";
+import type { ICfaRupturesResponse } from "@/common/types/cfaRuptures";
 
 export default function CfaClient() {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const statut = searchParams?.get("statut");
-  const ruptureDate = searchParams?.get("date_rupture");
+  const organismeId = user?.organisation?.organisme_id;
 
-  const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month-user-cfa", user?.organisation?.organisme_id],
-    () => _get(`/api/v1/organismes/${user?.organisation?.organisme_id}/mission-locale/effectifs-per-month`),
+  const { data, isLoading } = useQuery<ICfaRupturesResponse>(
+    ["cfa-effectifs-ruptures", organismeId],
+    () => _get(`/api/v1/organismes/${organismeId}/cfa/effectifs-ruptures`),
     {
-      suspense: true,
+      enabled: !!organismeId,
       useErrorBoundary: true,
     }
   );
 
+  if (!data || isLoading) {
+    return <CfaDashboardSkeleton />;
+  }
+
   return (
     <div className="fr-container">
-      <CfaHeader />
-      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <EffectifsListView data={data} initialStatut={statut} initialRuptureDate={ruptureDate} />}
-      </SuspenseWrapper>
+      <CfaDashboard data={data} />
     </div>
   );
 }

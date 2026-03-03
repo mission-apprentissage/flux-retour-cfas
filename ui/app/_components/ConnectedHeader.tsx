@@ -45,7 +45,7 @@ export function ConnectedHeader() {
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
       if (user?.organisation?.ml_beta_activated_at) {
         baseItems.push({
-          text: "Mon tableau de bord",
+          text: "Effectifs en ruptures",
           linkProps: {
             href: "/cfa",
             target: "_self",
