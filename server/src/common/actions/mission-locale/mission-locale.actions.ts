@@ -39,11 +39,16 @@ import config from "@/config";
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
+import {
+  DATE_START_RUPTURES,
+  EFF_RUPTURE_AGE_FILTER,
+  createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
+  matchDernierStatutRupturantPipeline,
+} from "../shared/rupture-pipeline.utils";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 
-const DATE_START = new Date("2025-01-01");
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
 /**
@@ -72,7 +77,7 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
   {
     $match: {
       "apprenant.adresse.mission_locale_id": missionLocaleId,
-      annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
+      annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
     },
   },
 ];
@@ -96,27 +101,7 @@ export const getAllEffectifForMissionLocaleCursor = (
  *    MissionLocaleEffectifDb
  */
 
-/**
- * Filtre constant pour les missions locales
- */
-const EFF_MISSION_LOCALE_FILTER = [
-  {
-    $match: {
-      $or: [
-        {
-          "effectif_snapshot.apprenant.date_de_naissance": {
-            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
-          },
-        },
-        { "effectif_snapshot.apprenant.rqth": true },
-      ],
-      soft_deleted: { $ne: true },
-      "effectif_snapshot.apprenant.date_de_naissance": {
-        $lte: new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
-      },
-    },
-  },
-];
+export const EFF_MISSION_LOCALE_FILTER = EFF_RUPTURE_AGE_FILTER;
 
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
@@ -192,15 +177,7 @@ const matchTraitementEffectifPipelineMl = (
   }
 };
 
-const createDernierStatutFieldPipelineML = () => [
-  {
-    $addFields: {
-      dernierStatutDureeInDay: {
-        $dateDiff: { startDate: "$date_rupture", endDate: new Date(), unit: "day" },
-      },
-    },
-  },
-];
+export const createDernierStatutFieldPipelineML = createDernierStatutFieldPipelineShared;
 
 /**
  * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
@@ -222,20 +199,7 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-/**
- * Création du match sur les dernier statuts
- * @param statut Liste de statuts à matcher
- * @returns Un obet match
- */
-const matchDernierStatutPipelineMl = (): any => {
-  const match = {
-    $match: {
-      "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-      date_rupture: { $lte: new Date() },
-    },
-  };
-  return match;
-};
+export const matchDernierStatutPipelineMl = matchDernierStatutRupturantPipeline;
 
 /**
  * Création du filtre sur la mission locale concerné
@@ -248,7 +212,7 @@ const generateOrganisationMatchStage = async (
   const matchStage = [
     {
       $match: {
-        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
+        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
       },
     },
     ...matchFromJointOrganisme(organisation.type),
