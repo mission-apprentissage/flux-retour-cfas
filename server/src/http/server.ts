@@ -152,6 +152,7 @@ import emails from "./routes/emails.routes";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 import indicateursMlRoutes from "./routes/organisations.routes/indicateurs-ml/indicateurs-ml.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
+import cfaOrganismeRoutes from "./routes/organismes.routes/cfa.routes";
 import effectifsOrganismeRoutes from "./routes/organismes.routes/effectifs.routes";
 import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-locale.routes";
 import franceTravailPublicRoutes from "./routes/public.routes/france-travail.routes";
@@ -658,6 +659,7 @@ function setupRoutes(app: Application) {
       )
       .use("/transmission", transmissionRoutes())
       .use("/effectifs", effectifsOrganismeRoutes())
+      .use("/cfa", requireOrganismePermission("manageEffectifs"), cfaOrganismeRoutes())
       .use("/mission-locale", requireOrganismePermission("manageEffectifs"), missionLocaleOrganismeRoutes())
   );
 
