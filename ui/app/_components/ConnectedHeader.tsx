@@ -52,6 +52,13 @@ export function ConnectedHeader() {
           },
         });
         baseItems.push({
+          text: "Tous mes effectifs",
+          linkProps: {
+            href: "/cfa/effectifs",
+            target: "_self",
+          },
+        });
+        baseItems.push({
           text: "Paramètres",
           linkProps: {
             href: "/cfa/parametres",
