@@ -29,16 +29,18 @@ export function CfaCollaborationBadge({ status, effectifId }: CfaCollaborationBa
     case "contacte_par_ml":
       return (
         <span className={styles.contacteBadge}>
-          <i className={`fr-icon-message-2-fill fr-icon--sm `} />
+          <i className="fr-icon-message-2-fill fr-icon--sm" />
           Contacté par la ML
         </span>
       );
     case "traite_par_ml":
       return (
         <span className={styles.traiteBadge}>
-          <i className={`fr-icon-success-fill fr-icon--sm `} />
+          <i className="fr-icon-success-fill fr-icon--sm" />
           Traité par la ML
         </span>
       );
+    default:
+      return null;
   }
 }
