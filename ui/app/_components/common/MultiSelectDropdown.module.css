@@ -35,10 +35,6 @@
   color: var(--text-action-high-blue-france);
 }
 
-.displayText {
-  color: var(--text-default-grey);
-}
-
 .icon {
   position: absolute;
   right: 0.75rem;

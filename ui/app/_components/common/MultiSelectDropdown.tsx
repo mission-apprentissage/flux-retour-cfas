@@ -19,13 +19,8 @@ interface MultiSelectDropdownProps {
   getDisplayText?: (selected: string[], options: Option[], placeholder: string) => string;
 }
 
-function defaultDisplayText(selected: string[], options: Option[], placeholder: string): string {
-  if (selected.length === 0) return placeholder;
-  if (selected.length === 1) return options.find((opt) => opt.value === selected[0])?.label || placeholder;
-  if (selected.length <= 3) {
-    return selected.map((v) => options.find((opt) => opt.value === v)?.label || v).join(", ");
-  }
-  return `${selected.length} sélectionnés`;
+function defaultDisplayText(_selected: string[], _options: Option[], placeholder: string): string {
+  return placeholder;
 }
 
 export function MultiSelectDropdown({
@@ -59,7 +54,6 @@ export function MultiSelectDropdown({
   };
 
   const displayText = getDisplayText(value, options, placeholder);
-  const isPlaceholder = value.length === 0;
 
   return (
     <div className={styles.container} ref={dropdownRef}>
@@ -72,7 +66,7 @@ export function MultiSelectDropdown({
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
-          <span className={isPlaceholder ? styles.placeholder : styles.displayText}>{displayText}</span>
+          <span className={styles.placeholder}>{displayText}</span>
           <span className={`fr-icon-arrow-down-s-line ${styles.icon} ${isOpen ? styles.iconOpen : ""}`} />
         </button>
 
