@@ -27,61 +27,6 @@
   color: var(--text-mention-grey);
 }
 
-.nameCell {
-  display: inline-flex;
-  align-items: baseline;
-  width: fit-content;
-}
-
-.nameText,
-.nameText:hover,
-.nameText:visited {
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 24px;
-  text-decoration: underline;
-  background-image: none;
-  color: inherit;
-  display: inline;
-}
-
-.formationCell {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 24px;
-  gap: 4px;
-}
-
-.formationNiveau {
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 100%;
-  color: var(--text-mention-grey);
-}
-
-.dateRuptureCell {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  gap: 4px;
-}
-
-.dateRuptureDate {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 100%;
-  text-transform: uppercase;
-}
-
-.dateRuptureJours {
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 100%;
-  color: var(--text-mention-grey);
-}
-
 .noticeBox {
   background: var(--background-default-grey);
   border: 1px solid var(--border-default-grey);
@@ -134,53 +79,16 @@
   border-radius: 4px;
 }
 
-.sortableHeader {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-}
-
-.sortIconWrapper {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.25rem;
-}
-
-.sortIcon {
-  font-size: 14px;
-}
-
-.sortIconActive {
-  color: var(--text-title-grey);
-}
-
-.sortIconInactive {
-  color: var(--text-mention-grey);
-}
-
-.collabCell {
+.ruptureToggleDisabled {
   display: flex;
-  justify-content: center;
-  white-space: nowrap;
-  min-width: 200px;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: not-allowed;
 }
 
-.nowrapCell {
-  white-space: nowrap;
-}
-
-.dateCell {
-  white-space: nowrap;
-  text-align: center;
-}
-
-.centerHeader {
-  text-align: center;
-}
-
-.collabHeader {
-  white-space: nowrap;
-  min-width: 240px;
+.toggleRootDisabled {
+  margin-bottom: 0;
+  pointer-events: none;
 }
 
 .moreButton {

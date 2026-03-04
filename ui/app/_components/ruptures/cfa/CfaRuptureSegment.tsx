@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
+import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -11,6 +11,8 @@ import type { CfaRuptureSegmentKey, ICfaRuptureEffectif } from "@/common/types/c
 import { CFA_DEFAULT_ITEMS_TO_SHOW, COLLAB_STATUS_ORDER, SEGMENT_LABELS } from "@/common/types/cfaRuptures";
 
 import notificationStyles from "../shared/ui/NotificationBadge.module.css";
+import sharedStyles from "../shared/ui/SortableTable.module.css";
+import { DateRuptureCell, SortableHeader } from "../shared/ui/SortableTableParts";
 
 import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
 import styles from "./CfaRuptureSegment.module.css";
@@ -28,50 +30,6 @@ const SEGMENTS_WITH_NOTICE: CfaRuptureSegmentKey[] = ["46_90j", "91_180j"];
 const NOTICE_TITLE = "Les jeunes ci-dessous peuvent avoir déjà été contactés par une Mission Locale";
 const NOTICE_CONTENT =
   "Pour favoriser les chances des jeunes à retrouver un contrat, le Tableau de bord de l'apprentissage transmet les dossiers des jeunes en rupture depuis + de 45 jours directement aux Missions Locales.";
-
-function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
-  const iconClass = isSorted === "desc" ? "fr-icon-arrow-down-line" : "fr-icon-arrow-up-line";
-  return (
-    <span className={styles.sortIconWrapper}>
-      <i className={`${iconClass} ${styles.sortIcon} ${isSorted ? styles.sortIconActive : styles.sortIconInactive}`} />
-    </span>
-  );
-}
-
-function SortableHeader({
-  label,
-  sortKey,
-  currentSort,
-  currentDir,
-  onSort,
-  afterLabel,
-}: {
-  label: string;
-  sortKey: SortKey;
-  currentSort: SortKey;
-  currentDir: SortDir;
-  onSort: (key: SortKey) => void;
-  afterLabel?: React.ReactNode;
-}) {
-  return (
-    <span className={styles.sortableHeader} onClick={() => onSort(sortKey)}>
-      {label}
-      {afterLabel}
-      <SortIcon isSorted={currentSort === sortKey ? currentDir : false} />
-    </span>
-  );
-}
-
-function DateRuptureCell({ dateStr, jours }: { dateStr: string; jours: number }) {
-  const date = new Date(dateStr);
-  const formatted = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
-  return (
-    <div className={styles.dateRuptureCell}>
-      <span className={styles.dateRuptureDate}>{formatted}</span>
-      <span className={styles.dateRuptureJours}>Il y a {jours} jours</span>
-    </div>
-  );
-}
 
 function sortEffectifs(effectifs: ICfaRuptureEffectif[], sortKey: SortKey, sortDir: SortDir): ICfaRuptureEffectif[] {
   return [...effectifs].sort((a, b) => {
@@ -150,7 +108,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
       currentDir={sortDir}
       onSort={handleSort}
     />,
-    <div key="date" className={styles.centerHeader}>
+    <div key="date" className={sharedStyles.centerHeader}>
       <SortableHeader
         label="Date de rupture"
         sortKey="date_rupture"
@@ -159,7 +117,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
         onSort={handleSort}
       />
     </div>,
-    <div key="collab" className={styles.collabHeader}>
+    <div key="collab" className={sharedStyles.collabHeader}>
       <SortableHeader
         label="Collaboration avec la ML ?"
         sortKey="collab_status"
@@ -174,25 +132,35 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
   ];
 
   const data = displayed.map((e) => [
-    <div key={e.id} className={`${notificationStyles.badgeContainer} ${styles.nameCell}`}>
+    <div key={e.id} className={`${notificationStyles.badgeContainer} ${sharedStyles.nameCell}`}>
       {e.has_unread_notification && (
         <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
       )}
-      <Link href={`/cfa/${e.id}`} className={styles.nameText}>
+      <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
         {e.prenom} {e.nom}
       </Link>
     </div>,
-    <div key={`rupture-${e.id}`} className={styles.nowrapCell}>
-      <Badge severity="error">En rupture</Badge>
+    <div key={`rupture-${e.id}`} className={sharedStyles.nowrapCell}>
+      <div className={styles.ruptureToggleDisabled}>
+        <span className={sharedStyles.ruptureLabel}>En rupture</span>
+        <ToggleSwitch
+          inputTitle="Statut rupture"
+          checked={true}
+          onChange={() => {}}
+          label=""
+          showCheckedHint={false}
+          classes={{ root: styles.toggleRootDisabled }}
+        />
+      </div>
     </div>,
-    <div key={`formation-${e.id}`} className={styles.formationCell}>
+    <div key={`formation-${e.id}`} className={sharedStyles.formationCell}>
       <span>{e.libelle_formation}</span>
-      {e.formation_niveau_libelle && <span className={styles.formationNiveau}>{e.formation_niveau_libelle}</span>}
+      {e.formation_niveau_libelle && <span className={sharedStyles.formationNiveau}>{e.formation_niveau_libelle}</span>}
     </div>,
-    <div key={`date-${e.id}`} className={styles.dateCell}>
+    <div key={`date-${e.id}`} className={sharedStyles.dateCell}>
       <DateRuptureCell dateStr={e.date_rupture} jours={e.jours_depuis_rupture} />
     </div>,
-    <div key={`collab-${e.id}`} className={styles.collabCell}>
+    <div key={`collab-${e.id}`} className={sharedStyles.collabCell}>
       <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />
     </div>,
     <Button

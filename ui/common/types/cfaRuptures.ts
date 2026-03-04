@@ -1,6 +1,9 @@
 export type {
   CfaCollaborationStatus,
+  CfaEffectifSource,
   CfaRuptureSegmentKey,
+  ICfaEffectif,
+  ICfaEffectifsResponse,
   ICfaRuptureEffectif,
   ICfaRuptureSegment,
   ICfaRupturesResponse,
@@ -32,3 +35,8 @@ export const COLLAB_STATUS_ORDER: Record<CfaCollaborationStatus, number> = {
 };
 
 export const CFA_DEFAULT_ITEMS_TO_SHOW = 10;
+
+export const EN_RUPTURE_OPTIONS = [
+  { value: "oui", label: "Oui" },
+  { value: "non", label: "Non" },
+];

@@ -13,9 +13,8 @@ import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
   DATE_START_RUPTURES,
-  EFF_RUPTURE_AGE_FILTER,
+  buildEffRuptureAgeFilter,
   createDernierStatutFieldPipeline,
-  matchDernierStatutRupturantPipeline,
 } from "../shared/rupture-pipeline.utils";
 
 const SEGMENT_ORDER: CfaRuptureSegmentKey[] = ["moins_45j", "46_90j", "91_180j"];
@@ -53,13 +52,45 @@ export async function getCfaEffectifsEnRupture(
   organisation: IOrganisationOrganismeFormation,
   isAllowedDeca: boolean
 ): Promise<ICfaRuptureSegment[]> {
+  const now = new Date();
   const pipeline = [
     ...buildCfaOrganismeMatchStages(organisation, isAllowedDeca),
-    ...EFF_RUPTURE_AGE_FILTER,
+    ...buildEffRuptureAgeFilter(),
+    // Normalize date_rupture: use cfa_rupture_declaration.date_rupture as fallback
+    {
+      $addFields: {
+        date_rupture: {
+          $ifNull: ["$date_rupture", "$cfa_rupture_declaration.date_rupture"],
+        },
+      },
+    },
     ...createDernierStatutFieldPipeline(),
-    matchDernierStatutRupturantPipeline(),
+    // Include both system-detected ruptures AND CFA-declared ruptures
+    {
+      $match: {
+        $or: [
+          {
+            "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+            date_rupture: { $lte: now },
+          },
+          {
+            cfa_rupture_declaration: { $exists: true },
+          },
+        ],
+      },
+    },
     { $match: { dernierStatutDureeInDay: { $lte: 180 } } },
-    { $match: { "current_status.value": { $ne: STATUT_APPRENANT.APPRENTI } } },
+    // Exclude effectifs who have since become APPRENTI again,
+    // but only for system-detected ruptures (not CFA manual declarations,
+    // where the ERP may not have updated the status yet)
+    {
+      $match: {
+        $or: [
+          { cfa_rupture_declaration: { $exists: true } },
+          { "current_status.value": { $ne: STATUT_APPRENANT.APPRENTI } },
+        ],
+      },
+    },
     {
       $addFields: {
         collab_status: {

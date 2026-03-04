@@ -4,12 +4,12 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useMemo, useState } from "react";
 
+import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
 import type { CfaCollaborationStatus, ICfaRuptureEffectif, ICfaRuptureSegment } from "@/common/types/cfaRuptures";
 import { COLLAB_STATUS_LABELS } from "@/common/types/cfaRuptures";
 
 import { matchesSearchTerm } from "../shared/utils/searchUtils";
 
-import { CfaMultiSelect } from "./CfaMultiSelect";
 import { CfaRuptureSegment } from "./CfaRuptureSegment";
 import styles from "./CfaRupturesList.module.css";
 
@@ -84,7 +84,7 @@ export function CfaRupturesList({ segments }: CfaRupturesListProps) {
         <div className={styles.filtersRow}>
           <span className={styles.filterLabel}>Filtrer</span>
           <div className={`${styles.selectField} ${styles.selectFieldWide}`}>
-            <CfaMultiSelect
+            <MultiSelectDropdown
               options={collabOptions}
               value={collabStatuses}
               onChange={(v) => setCollabStatuses(v as CfaCollaborationStatus[])}
@@ -93,7 +93,7 @@ export function CfaRupturesList({ segments }: CfaRupturesListProps) {
           </div>
 
           <div className={`${styles.selectField} ${styles.selectFieldWide}`}>
-            <CfaMultiSelect
+            <MultiSelectDropdown
               options={formationOptions}
               value={formations}
               onChange={setFormations}

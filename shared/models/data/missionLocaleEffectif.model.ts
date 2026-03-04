@@ -197,6 +197,13 @@ const zMissionLocaleEffectif = z.object({
       responded_by: zObjectId.describe("ID de l'utilisateur qui a répondu au feedback"),
     })
     .nullish(),
+  cfa_rupture_declaration: z
+    .object({
+      date_rupture: z.date({ description: "Date de rupture déclarée par le CFA" }),
+      declared_at: z.date({ description: "Date de la déclaration" }),
+      declared_by: zObjectId.describe("ID de l'utilisateur CFA qui a déclaré la rupture"),
+    })
+    .nullish(),
 });
 
 export type IMissionLocaleEffectif = z.output<typeof zMissionLocaleEffectif>;

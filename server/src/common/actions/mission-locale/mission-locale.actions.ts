@@ -41,7 +41,7 @@ import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions"
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
   DATE_START_RUPTURES,
-  EFF_RUPTURE_AGE_FILTER,
+  buildEffRuptureAgeFilter,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
   matchDernierStatutRupturantPipeline,
 } from "../shared/rupture-pipeline.utils";
@@ -101,7 +101,7 @@ export const getAllEffectifForMissionLocaleCursor = (
  *    MissionLocaleEffectifDb
  */
 
-export const EFF_MISSION_LOCALE_FILTER = EFF_RUPTURE_AGE_FILTER;
+export const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
@@ -853,7 +853,7 @@ export const missionLocaleBaseAggregation = async (
 ) => {
   return [
     ...(await generateOrganisationMatchStage(organisation)),
-    ...EFF_MISSION_LOCALE_FILTER,
+    ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
@@ -982,7 +982,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
 
   const organismeMissionLocaleAggregation: any[] = [
     ...(await generateOrganisationMatchStage(organisation)),
-    ...EFF_MISSION_LOCALE_FILTER,
+    ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
@@ -1416,7 +1416,7 @@ const getEffectifMissionLocaleEligibleToBrevoAggregation = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => [
   ...(await generateOrganisationMatchStage(organisation)),
-  ...EFF_MISSION_LOCALE_FILTER,
+  ...buildEffMissionLocaleFilter(),
   ...filterByDernierStatutPipelineMl(),
   ...addFieldFromActivationDate(),
   ...filterByActivationDatePipelineMl(),
