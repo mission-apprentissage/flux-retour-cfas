@@ -1,0 +1,116 @@
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-mention-grey);
+}
+
+.filtersSection {
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+  padding: 32px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: var(--text-title-blue-france);
+}
+
+.cardCount {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--text-mention-grey);
+}
+
+.searchField {
+  max-width: 500px;
+  margin-bottom: 1rem;
+}
+
+.searchField :global(.fr-search-bar) input {
+  background-color: #ececfe;
+}
+
+.filtersRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  max-width: 1100px;
+}
+
+.filterLabel {
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--text-title-blue-france);
+  white-space: nowrap;
+  padding-bottom: 0.625rem;
+}
+
+.selectField {
+  flex: 1;
+  min-width: 150px;
+}
+
+.selectFieldWide {
+  flex: 1.5;
+  min-width: 260px;
+}
+
+.tagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.resetButton {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.resetButton:hover {
+  text-decoration: none;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .filtersRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
