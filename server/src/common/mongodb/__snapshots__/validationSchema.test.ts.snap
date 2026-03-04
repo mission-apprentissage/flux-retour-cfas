@@ -12430,6 +12430,36 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "cfa_rupture_declaration": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_rupture": {
+              "bsonType": "date",
+              "description": "Date de rupture déclarée par le CFA",
+            },
+            "declared_at": {
+              "bsonType": "date",
+              "description": "Date de la déclaration",
+            },
+            "declared_by": {
+              "bsonType": "objectId",
+              "description": "ID de l'utilisateur CFA qui a déclaré la rupture",
+            },
+          },
+          "required": [
+            "date_rupture",
+            "declared_at",
+            "declared_by",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "commentaires": {
       "bsonType": "string",
     },
