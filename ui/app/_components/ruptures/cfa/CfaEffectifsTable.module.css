@@ -35,12 +35,21 @@
   pointer-events: none;
 }
 
-.plus25Disabled {
+.plus25Badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--background-contrast-grey);
   color: var(--text-mention-grey);
-  font-size: 12px;
-  font-style: italic;
-  white-space: normal;
-  max-width: 260px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.plus25Tooltip {
+  text-transform: none;
 }
 
 .moreButton {
