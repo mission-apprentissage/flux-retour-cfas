@@ -3,16 +3,36 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
-import type { ICfaRupturesResponse } from "@/common/types/cfaRuptures";
+import type { ICfaEffectifsResponse, ICfaRupturesResponse } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaDashboard.module.css";
 import { CfaRupturesList } from "./CfaRupturesList";
 
 interface CfaDashboardProps {
   data: ICfaRupturesResponse;
+  organismeId: string;
+  searchInput: string;
+  onSearchChange: (value: string) => void;
+  searchData: ICfaEffectifsResponse | undefined;
+  isSearchLoading: boolean;
+  searchSort: string;
+  searchOrder: "asc" | "desc";
+  onSearchSort: (sortKey: string) => void;
+  onPageChange: (page: number) => void;
 }
 
-export function CfaDashboard({ data }: CfaDashboardProps) {
+export function CfaDashboard({
+  data,
+  organismeId,
+  searchInput,
+  onSearchChange,
+  searchData,
+  isSearchLoading,
+  searchSort,
+  searchOrder,
+  onSearchSort,
+  onPageChange,
+}: CfaDashboardProps) {
   return (
     <div>
       <div className={styles.header}>
@@ -36,7 +56,18 @@ export function CfaDashboard({ data }: CfaDashboardProps) {
           .
         </p>
       </div>
-      <CfaRupturesList segments={data} />
+      <CfaRupturesList
+        segments={data}
+        organismeId={organismeId}
+        searchInput={searchInput}
+        onSearchChange={onSearchChange}
+        searchData={searchData}
+        isSearchLoading={isSearchLoading}
+        searchSort={searchSort}
+        searchOrder={searchOrder}
+        onSearchSort={onSearchSort}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }

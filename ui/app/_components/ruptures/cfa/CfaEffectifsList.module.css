@@ -16,40 +16,12 @@
   margin-bottom: 2rem;
 }
 
-.card {
-  background: var(--background-raised-grey);
-  border-radius: 4px;
-  padding: 32px;
-}
-
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.cardTitle {
-  margin: 0;
-  font-weight: 700;
-  font-size: 32px;
-  line-height: 40px;
-  color: var(--text-title-blue-france);
-}
-
-.cardCount {
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 28px;
-  color: var(--text-mention-grey);
-}
-
 .searchField {
   max-width: 500px;
   margin-bottom: 1rem;
 }
 
-.searchField :global(.fr-search-bar) input {
+.searchField :global(.fr-input) {
   background-color: #ececfe;
 }
 
@@ -100,12 +72,6 @@
 
 .resetButton:hover {
   text-decoration: none;
-}
-
-.paginationContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
 }
 
 @media (max-width: 768px) {
