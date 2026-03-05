@@ -42,7 +42,9 @@ export function DateRuptureCell({ dateStr, jours }: { dateStr: string; jours?: n
   return (
     <div className={styles.dateRuptureCell}>
       <span className={styles.dateRuptureDate}>{formatted}</span>
-      <span className={styles.dateRuptureJours}>Il y a {diffDays} jours</span>
+      <span className={styles.dateRuptureJours}>
+        {diffDays === 0 ? "Aujourd'hui" : diffDays === 1 ? "Il y a 1 jour" : `Il y a ${diffDays} jours`}
+      </span>
     </div>
   );
 }
