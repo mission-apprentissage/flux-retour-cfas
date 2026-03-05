@@ -57,3 +57,37 @@
   border: 1px solid var(--border-default-grey);
   border-radius: 4px;
 }
+
+.alertRow,
+.alertRow td {
+  padding: 0 !important;
+}
+
+.alertBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: var(--background-contrast-grey);
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
+.alertBox i {
+  color: var(--text-mention-grey);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.alertTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-default-grey);
+}
+
+.alertDescription {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
