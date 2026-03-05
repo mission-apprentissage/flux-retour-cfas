@@ -113,6 +113,37 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectifs[0].nom).toBe("DUPONT");
     });
 
+    it("filtre par recherche multi-mots (prénom + nom)", async () => {
+      await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
+      await insertEffectif({ apprenant: { nom: "MARTIN", prenom: "Pierre" } });
+
+      const result = await getCfaEffectifs(organisation, false, { ...defaultParams, search: "Jean DUPONT" });
+
+      expect(result.pagination.total).toBe(1);
+      expect(result.effectifs[0].nom).toBe("DUPONT");
+      expect(result.effectifs[0].prenom).toBe("Jean");
+    });
+
+    it("filtre par recherche multi-mots dans l'ordre inverse (nom + prénom)", async () => {
+      await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
+      await insertEffectif({ apprenant: { nom: "MARTIN", prenom: "Pierre" } });
+
+      const result = await getCfaEffectifs(organisation, false, { ...defaultParams, search: "DUPONT Jean" });
+
+      expect(result.pagination.total).toBe(1);
+      expect(result.effectifs[0].nom).toBe("DUPONT");
+    });
+
+    it("filtre par recherche partielle multi-mots", async () => {
+      await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
+      await insertEffectif({ apprenant: { nom: "MARTIN", prenom: "Pierre" } });
+
+      const result = await getCfaEffectifs(organisation, false, { ...defaultParams, search: "Jea DUP" });
+
+      expect(result.pagination.total).toBe(1);
+      expect(result.effectifs[0].nom).toBe("DUPONT");
+    });
+
     it("filtre par en_rupture=oui", async () => {
       const ruptureEffectif = await insertEffectif({ apprenant: { nom: "RUPTURE", prenom: "Test" } });
       await insertEffectif({ apprenant: { nom: "NORMAL", prenom: "Test" } });

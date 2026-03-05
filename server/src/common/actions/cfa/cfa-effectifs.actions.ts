@@ -276,13 +276,24 @@ export async function getCfaEffectifs(
   const filterConditions: Record<string, unknown>[] = [];
 
   if (search) {
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    filterConditions.push({
-      $or: [
-        { "apprenant.nom": { $regex: escaped, $options: "i" } },
-        { "apprenant.prenom": { $regex: escaped, $options: "i" } },
-      ],
-    });
+    const words = search
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
+
+    if (words.length > 0) {
+      const wordConditions = words.map((word) => {
+        const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return {
+          $or: [
+            { "apprenant.nom": { $regex: escaped, $options: "i" } },
+            { "apprenant.prenom": { $regex: escaped, $options: "i" } },
+          ],
+        };
+      });
+
+      filterConditions.push(wordConditions.length === 1 ? wordConditions[0] : { $and: wordConditions });
+    }
   }
 
   if (en_rupture === "oui") {
