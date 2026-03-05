@@ -1,7 +1,8 @@
 "use client";
 
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useState } from "react";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import { useCallback, useState } from "react";
 
 const modal = createModal({
   id: "declare-rupture-cfa",
@@ -32,10 +33,12 @@ export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDecla
     }
   };
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setDateRupture("");
     setStatus("idle");
-  };
+  }, []);
+
+  useIsModalOpen(modal, { onConceal: resetState });
 
   const buttons =
     status === "error"
@@ -82,6 +85,7 @@ export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDecla
           id="date-rupture-input"
           className="fr-input"
           type="date"
+          max={new Date().toLocaleDateString("fr-CA")}
           value={dateRupture}
           onChange={(e) => setDateRupture(e.target.value)}
         />
