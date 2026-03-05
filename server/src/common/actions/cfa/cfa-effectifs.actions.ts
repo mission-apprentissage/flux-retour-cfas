@@ -485,8 +485,12 @@ export async function declareCfaEffectifRupture(
   } catch (error) {
     if (error instanceof MongoServerError && error.code === 11000) {
       const filter = normalizedIdentifiant
-        ? { identifiant_normalise: normalizedIdentifiant, soft_deleted: { $ne: true } }
-        : { effectif_id: new ObjectId(effectifId) };
+        ? {
+            identifiant_normalise: normalizedIdentifiant,
+            mission_locale_id: mlOrganisation._id,
+            soft_deleted: { $ne: true },
+          }
+        : { effectif_id: new ObjectId(effectifId), mission_locale_id: mlOrganisation._id };
 
       await missionLocaleEffectifsDb().updateOne(filter, {
         $set: {

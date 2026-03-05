@@ -69,6 +69,9 @@ export default () => {
   router.get(
     "/effectif/:id",
     returnResult(async (req, { locals }) => {
+      if (!ObjectId.isValid(req.params.id)) {
+        throw Boom.badRequest("ID effectif invalide");
+      }
       const { organismeId } = await getOrganismeWithDeca(locals);
       const { source } = await validateFullZodObjectSchema(req.query, zCfaEffectifDetailQuery);
       return await getCfaEffectifDetail(organismeId, req.params.id, source);
@@ -78,6 +81,9 @@ export default () => {
   router.post(
     "/effectif/:id/declare-rupture",
     returnResult(async (req, { locals }) => {
+      if (!ObjectId.isValid(req.params.id)) {
+        throw Boom.badRequest("ID effectif invalide");
+      }
       const { organismeId } = await getOrganismeWithDeca(locals);
       const { date_rupture, source } = await validateFullZodObjectSchema(req.body, zDeclareRuptureBody);
       const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
