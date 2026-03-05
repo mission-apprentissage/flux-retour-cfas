@@ -1,7 +1,8 @@
 "use client";
 
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useCallback, useMemo, useState } from "react";
@@ -11,6 +12,7 @@ import { useAuth } from "@/app/_context/UserContext";
 import type { CfaCollaborationStatus, ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
 import { COLLAB_STATUS_LABELS, DECA_TOOLTIP_TEXT, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
 
+import cardStyles from "./CfaCardSection.module.css";
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
 import styles from "./CfaEffectifsList.module.css";
 import { CfaEffectifsTable } from "./CfaEffectifsTable";
@@ -42,7 +44,7 @@ export function CfaEffectifsList({
 }: CfaEffectifsListProps) {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
-  const declareMutation = useDeclareCfaRupture();
+  const { mutateAsync: declareRupture } = useDeclareCfaRupture();
   const [selectedEffectif, setSelectedEffectif] = useState<ICfaEffectif | null>(null);
 
   const handleToggleRupture = useCallback((effectif: ICfaEffectif) => {
@@ -58,7 +60,7 @@ export function CfaEffectifsList({
     async (dateRupture: string) => {
       if (!organismeId || !selectedEffectif) return;
       try {
-        await declareMutation.mutateAsync({
+        await declareRupture({
           organismeId,
           effectifId: selectedEffectif.id,
           dateRupture,
@@ -68,7 +70,7 @@ export function CfaEffectifsList({
         // Error is handled by the modal (status === "error" state)
       }
     },
-    [organismeId, selectedEffectif, declareMutation]
+    [organismeId, selectedEffectif, declareRupture]
   );
 
   const collabStatuses = useMemo(
@@ -125,18 +127,22 @@ export function CfaEffectifsList({
 
       <div className={styles.filtersSection}>
         <div className={styles.searchField}>
-          <SearchBar
+          <Input
             label="Rechercher"
-            renderInput={({ className, id }) => (
-              <input
-                id={id}
-                className={className}
-                placeholder="Rechercher un jeune par nom ou prénom"
-                type="search"
-                value={searchInput}
-                onChange={(e) => onSearchChange(e.target.value)}
+            hideLabel
+            nativeInputProps={{
+              placeholder: "Rechercher un jeune par nom ou prénom",
+              type: "search",
+              value: searchInput,
+              onChange: (e) => onSearchChange(e.target.value),
+            }}
+            addon={
+              <Button
+                iconId={searchInput ? "fr-icon-close-line" : "fr-icon-search-line"}
+                title={searchInput ? "Effacer la recherche" : "Rechercher"}
+                onClick={searchInput ? () => onSearchChange("") : undefined}
               />
-            )}
+            }
           />
         </div>
 
@@ -247,10 +253,10 @@ export function CfaEffectifsList({
       </div>
 
       {data && (
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Tous mes effectifs</h3>
-            <span className={styles.cardCount}>
+        <section className={cardStyles.card}>
+          <div className={cardStyles.cardHeader}>
+            <h3 className={cardStyles.cardTitle}>Tous mes effectifs</h3>
+            <span className={cardStyles.cardCount}>
               {data.pagination.total} effectif{data.pagination.total !== 1 ? "s" : ""}
             </span>
           </div>
@@ -264,7 +270,7 @@ export function CfaEffectifsList({
           />
 
           {data.pagination.totalPages > 1 && (
-            <div className={styles.paginationContainer}>
+            <div className={cardStyles.paginationContainer}>
               <Pagination
                 key={data.pagination.page}
                 count={data.pagination.totalPages}
