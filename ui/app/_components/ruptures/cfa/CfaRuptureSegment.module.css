@@ -1,0 +1,98 @@
+.segment {
+  margin-bottom: 2rem;
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+  padding: 32px;
+}
+
+.segmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.segmentTitle {
+  margin: 0;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: var(--text-title-blue-france);
+}
+
+.segmentCount {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--text-mention-grey);
+}
+
+.noticeBox {
+  background: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  border-radius: 0.25rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.noticeTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+}
+
+.noticeTitle i {
+  color: var(--text-mention-grey);
+}
+
+.noticeContent {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.emptyMessage {
+  color: var(--text-mention-grey);
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.expandContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.expandButton {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: underline;
+  padding: 8px 12px 8px 16px;
+  gap: 8px;
+  background: var(--background-alt-grey);
+  border: 1px solid var(--border-default-grey);
+  border-radius: 4px;
+}
+
+.ruptureToggleDisabled {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: not-allowed;
+}
+
+.toggleRootDisabled {
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+.moreButton {
+  background: var(--background-alt-grey);
+  border: 1px solid var(--border-default-grey);
+  border-radius: 4px;
+}

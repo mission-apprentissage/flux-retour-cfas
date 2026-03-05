@@ -1,11 +1,13 @@
 import { ObjectId } from "bson";
-import { STATUT_APPRENANT } from "shared/constants";
+import { MongoServerError } from "mongodb";
+import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import { IEffectif } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
-import { effectifsDECADb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
-import { hydrateDecaFromExistingEffectifs } from "@/jobs/hydrate/deca/hydrate-deca-raw";
+import * as collectionsModule from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -360,128 +362,292 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     });
   });
 
-  describe("hydrateDecaFromExistingEffectifs", () => {
-    it("Traite les effectifs DECA avec ruptures dans la période définie", async () => {
-      const effectif1 = createBaseDecaEffectif({
-        contrats: [
-          {
-            siret: "12345678901234",
-            date_debut: new Date("2025-09-01"),
-            date_fin: new Date("2026-06-30"),
-            date_rupture: new Date("2025-12-01"),
-          },
-        ],
-        _computed: {
-          organisme: { uai: UAI, siret: SIRET, region: "11" },
-          statut: {
-            en_cours: STATUT_APPRENANT.RUPTURANT,
-            parcours: [
-              { date: new Date("2025-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
-              { date: new Date("2025-12-01"), valeur: STATUT_APPRENANT.RUPTURANT },
-            ],
-          },
-        },
-      });
+  const makeApprenant = (nom: string, prenom: string, age: number, mlId = ML_ID) => ({
+    nom,
+    prenom,
+    date_de_naissance: new Date(new Date().getFullYear() - age, 0, 1),
+    telephone: "0612345678",
+    courriel: `${prenom.toLowerCase()}.${nom.toLowerCase()}@example.com`,
+    historique_statut: [] as never[],
+    has_nir: false,
+    adresse: { code_postal: "75001", mission_locale_id: mlId },
+  });
 
-      const effectif2 = createBaseDecaEffectif({
+  const createBaseErpEffectif = (overrides: Partial<IEffectif> = {}): IEffectif => {
+    const dateRupture = new Date("2025-12-01");
+
+    return {
+      _id: new ObjectId(),
+      organisme_id: new ObjectId(),
+      id_erp_apprenant: "test-erp-id",
+      source: SOURCE_APPRENANT.ERP,
+      annee_scolaire: "2025-2026",
+      apprenant: makeApprenant("DUPONT", "Jean", 20),
+      formation: {
+        cfd: "50022137",
+        rncp: "RNCP12345",
+        periode: [2025, 2026],
+        date_fin: new Date("2026-06-30"),
+      },
+      contrats: [
+        {
+          siret: "12345678901234",
+          date_debut: new Date("2025-09-01"),
+          date_fin: new Date("2026-06-30"),
+          date_rupture: dateRupture,
+        },
+      ],
+      _computed: {
+        organisme: {
+          uai: UAI,
+          siret: SIRET,
+          region: "11",
+        },
+        statut: {
+          en_cours: STATUT_APPRENANT.RUPTURANT,
+          parcours: [
+            { date: new Date("2025-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
+            { date: dateRupture, valeur: STATUT_APPRENANT.RUPTURANT },
+          ],
+        },
+      },
+      created_at: new Date(),
+      updated_at: new Date(),
+      ...overrides,
+    } as IEffectif;
+  };
+
+  describe("Dedup ERP prioritaire", () => {
+    it("DECA inséré, puis ERP arrive pour même personne → DECA soft-deleted, ERP inséré", async () => {
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("DUPONT", "Jean", 20) });
+      const decaResult = await createMissionLocaleSnapshot(decaEffectif);
+      expect(decaResult?.upserted).toBe(true);
+
+      const erpEffectif = createBaseErpEffectif({
         _id: new ObjectId(),
-        apprenant: {
-          nom: "MARTIN",
-          prenom: "Marie",
-          date_de_naissance: new Date(new Date().getFullYear() - 22, 0, 1),
-          telephone: "0698765432",
-          courriel: "marie.martin@example.com",
-          historique_statut: [],
-          has_nir: false,
-          adresse: {
-            code_postal: "75002",
-            mission_locale_id: ML_ID,
-          },
-        },
-        contrats: [
-          {
-            siret: "12345678901234",
-            date_debut: new Date("2025-09-01"),
-            date_fin: new Date("2026-06-30"),
-            date_rupture: new Date("2025-12-10"),
-          },
-        ],
-        _computed: {
-          organisme: { uai: UAI, siret: SIRET, region: "11" },
-          statut: {
-            en_cours: STATUT_APPRENANT.RUPTURANT,
-            parcours: [
-              { date: new Date("2025-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
-              { date: new Date("2025-12-10"), valeur: STATUT_APPRENANT.RUPTURANT },
-            ],
-          },
-        },
+        apprenant: makeApprenant("DUPONT", "Jean", 20),
       });
+      const erpResult = await createMissionLocaleSnapshot(erpEffectif);
+      expect(erpResult?.upserted).toBe(true);
 
-      // Effectif hors période (avant 2025-11-01)
-      const effectif3 = createBaseDecaEffectif({
-        _id: new ObjectId(),
-        apprenant: {
-          nom: "DURAND",
-          prenom: "Pierre",
-          date_de_naissance: new Date(new Date().getFullYear() - 19, 0, 1),
-          telephone: "0611223344",
-          courriel: "pierre.durand@example.com",
-          historique_statut: [],
-          has_nir: false,
-          adresse: {
-            code_postal: "75003",
-            mission_locale_id: ML_ID,
-          },
-        },
-        contrats: [
-          {
-            siret: "12345678901234",
-            date_debut: new Date("2025-06-01"),
-            date_fin: new Date("2026-06-30"),
-            date_rupture: new Date("2025-09-15"),
-          },
-        ],
-        _computed: {
-          organisme: { uai: UAI, siret: SIRET, region: "11" },
-          statut: {
-            en_cours: STATUT_APPRENANT.RUPTURANT,
-            parcours: [
-              { date: new Date("2025-06-01"), valeur: STATUT_APPRENANT.APPRENTI },
-              { date: new Date("2025-09-15"), valeur: STATUT_APPRENANT.RUPTURANT },
-            ],
-          },
-        },
-      });
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
+      const softDeleted = allMlEffectifs.filter((e) => e.soft_deleted);
 
-      await effectifsDECADb().insertMany([effectif1, effectif2, effectif3]);
-
-      await hydrateDecaFromExistingEffectifs();
-
-      const mlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
-
-      expect(mlEffectifs.length).toBe(2);
-
-      const effectifIds = mlEffectifs.map((e) => e.effectif_id.toString());
-      expect(effectifIds).toContain(effectif1._id.toString());
-      expect(effectifIds).toContain(effectif2._id.toString());
-      expect(effectifIds).not.toContain(effectif3._id.toString());
+      expect(active.length).toBe(1);
+      expect(softDeleted.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpEffectif._id.toString());
+      expect((softDeleted[0].effectif_snapshot as IEffectifDECA)?.is_deca_compatible).toBe(true);
     });
 
-    it("Ne crée pas de doublon si l'effectif ML existe déjà", async () => {
-      const effectif = createBaseDecaEffectif();
+    it("ERP existe, puis DECA arrive pour même personne → DECA rejeté, ERP intact", async () => {
+      const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("MARTIN", "Marie", 22) });
+      const erpResult = await createMissionLocaleSnapshot(erpEffectif);
+      expect(erpResult?.upserted).toBe(true);
 
-      await effectifsDECADb().insertOne(effectif);
+      const decaEffectif = createBaseDecaEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("MARTIN", "Marie", 22),
+      });
+      const decaResult = await createMissionLocaleSnapshot(decaEffectif);
+      expect(decaResult?.upserted).toBe(false);
 
-      await hydrateDecaFromExistingEffectifs();
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
 
-      let mlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
-      expect(mlEffectifs.length).toBe(1);
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpEffectif._id.toString());
+    });
 
-      await hydrateDecaFromExistingEffectifs();
+    it("Deux DECA pour même personne → premier reste, second rejeté", async () => {
+      const deca1 = createBaseDecaEffectif({ apprenant: makeApprenant("DURAND", "Pierre", 19) });
+      const result1 = await createMissionLocaleSnapshot(deca1);
+      expect(result1?.upserted).toBe(true);
 
-      mlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
-      expect(mlEffectifs.length).toBe(1);
+      const deca2 = createBaseDecaEffectif({ _id: new ObjectId(), apprenant: makeApprenant("DURAND", "Pierre", 19) });
+      const result2 = await createMissionLocaleSnapshot(deca2);
+      expect(result2?.upserted).toBe(false);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(deca1._id.toString());
+    });
+
+    it("Deux ERP pour même personne, même ML → premier reste, second rejeté", async () => {
+      const erp1 = createBaseErpEffectif({ apprenant: makeApprenant("GARCIA", "Lucas", 20) });
+      const result1 = await createMissionLocaleSnapshot(erp1);
+      expect(result1?.upserted).toBe(true);
+
+      const erp2 = createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("GARCIA", "Lucas", 20) });
+      const result2 = await createMissionLocaleSnapshot(erp2);
+      expect(result2?.upserted).toBe(false);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erp1._id.toString());
+    });
+  });
+
+  describe("Race condition E11000", () => {
+    it("Insertion concurrente détectée via index unique → retourne upserted: false", async () => {
+      const realDb = missionLocaleEffectifsDb();
+      const e11000Error = new MongoServerError({ message: "E11000 duplicate key error" });
+      e11000Error.code = 11000;
+
+      // Mock missionLocaleEffectifsDb pour intercepter findOneAndUpdate
+      let findOneAndUpdateCallCount = 0;
+      const spy = vi.spyOn(collectionsModule, "missionLocaleEffectifsDb").mockImplementation(() => {
+        return new Proxy(realDb, {
+          get(target, prop) {
+            if (prop === "findOneAndUpdate") {
+              return async (...args: unknown[]) => {
+                findOneAndUpdateCallCount++;
+                if (findOneAndUpdateCallCount === 1) {
+                  throw e11000Error;
+                }
+                return (target.findOneAndUpdate as (...a: unknown[]) => unknown).apply(target, args);
+              };
+            }
+            const val = target[prop as keyof typeof target];
+            return typeof val === "function" ? val.bind(target) : val;
+          },
+        }) as any;
+      });
+
+      const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("MOREAU", "Alice", 20) });
+      const result = await createMissionLocaleSnapshot(erpEffectif);
+
+      // Doit retourner upserted: false sans throw
+      expect(result?.upserted).toBe(false);
+
+      spy.mockRestore();
+    });
+
+    it("Erreur non-E11000 après soft-delete → restaure le record soft-deleted et throw", async () => {
+      // D'abord insérer un DECA
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("LAMBERT", "Hugo", 21) });
+      const decaResult = await createMissionLocaleSnapshot(decaEffectif);
+      expect(decaResult?.upserted).toBe(true);
+
+      const realDb = missionLocaleEffectifsDb();
+
+      // Mock missionLocaleEffectifsDb pour intercepter findOneAndUpdate
+      let findOneAndUpdateCallCount = 0;
+      const spy = vi.spyOn(collectionsModule, "missionLocaleEffectifsDb").mockImplementation(() => {
+        return new Proxy(realDb, {
+          get(target, prop) {
+            if (prop === "findOneAndUpdate") {
+              return async (...args: unknown[]) => {
+                findOneAndUpdateCallCount++;
+                if (findOneAndUpdateCallCount === 1) {
+                  throw new Error("Simulated connection error");
+                }
+                return (target.findOneAndUpdate as (...a: unknown[]) => unknown).apply(target, args);
+              };
+            }
+            const val = target[prop as keyof typeof target];
+            return typeof val === "function" ? val.bind(target) : val;
+          },
+        }) as any;
+      });
+
+      // L'ERP va soft-delete le DECA mais l'upsert va échouer
+      const erpEffectif = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("LAMBERT", "Hugo", 21),
+      });
+      await expect(createMissionLocaleSnapshot(erpEffectif)).rejects.toThrow("Simulated connection error");
+
+      spy.mockRestore();
+
+      // Le record DECA doit être restauré (soft_deleted retiré)
+      const records = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(records.length).toBe(1);
+      expect(records[0].effectif_id.toString()).toBe(decaEffectif._id.toString());
+    });
+  });
+
+  describe("Dedup cross-ML (changement de mission locale)", () => {
+    const ML_ID_2 = 610;
+
+    beforeEach(async () => {
+      await organisationsDb().insertOne({
+        _id: new ObjectId(),
+        type: "MISSION_LOCALE",
+        nom: "DEUXIEME MISSION LOCALE",
+        created_at: new Date(),
+        ml_id: ML_ID_2,
+        email: "",
+        telephone: "",
+        site_web: "",
+      });
+    });
+
+    it("ERP dans ML-A, puis ERP pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("LEROY", "Sophie", 21) });
+      const result1 = await createMissionLocaleSnapshot(erpML1);
+      expect(result1?.upserted).toBe(true);
+
+      const erpML2 = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("LEROY", "Sophie", 21, ML_ID_2),
+      });
+      const result2 = await createMissionLocaleSnapshot(erpML2);
+      expect(result2?.upserted).toBe(true);
+
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
+      const softDeleted = allMlEffectifs.filter((e) => e.soft_deleted);
+
+      expect(active.length).toBe(1);
+      expect(softDeleted.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpML2._id.toString());
+    });
+
+    it("ERP dans ML-A, puis DECA pour même personne dans ML-B → DECA rejeté, ERP intact", async () => {
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("BERNARD", "Luc", 23) });
+      const result1 = await createMissionLocaleSnapshot(erpML1);
+      expect(result1?.upserted).toBe(true);
+
+      const decaML2 = createBaseDecaEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("BERNARD", "Luc", 23, ML_ID_2),
+      });
+      const result2 = await createMissionLocaleSnapshot(decaML2);
+      expect(result2?.upserted).toBe(false);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
+    });
+
+    it("DECA dans ML-A, puis DECA pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
+      const decaML1 = createBaseDecaEffectif({ apprenant: makeApprenant("PETIT", "Emma", 18) });
+      const result1 = await createMissionLocaleSnapshot(decaML1);
+      expect(result1?.upserted).toBe(true);
+
+      const decaML2 = createBaseDecaEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("PETIT", "Emma", 18, ML_ID_2),
+      });
+      const result2 = await createMissionLocaleSnapshot(decaML2);
+      expect(result2?.upserted).toBe(true);
+
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
+      const softDeleted = allMlEffectifs.filter((e) => e.soft_deleted);
+
+      expect(active.length).toBe(1);
+      expect(softDeleted.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(decaML2._id.toString());
     });
   });
 });

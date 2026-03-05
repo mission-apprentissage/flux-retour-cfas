@@ -18,9 +18,11 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       "identifiant_normalise.nom": 1,
       "identifiant_normalise.prenom": 1,
       "identifiant_normalise.date_de_naissance": 1,
-      soft_deleted: 1,
     },
-    {},
+    {
+      unique: true,
+      partialFilterExpression: { "identifiant_normalise.nom": { $exists: true } },
+    },
   ],
   [{ "whatsapp_contact.phone_normalized": 1 }, { sparse: true }],
   [{ "whatsapp_contact.message_id": 1 }, { sparse: true }],
@@ -193,6 +195,13 @@ const zMissionLocaleEffectif = z.object({
         .max(5)
         .describe("Score 0-5 de disposition à recevoir d'autres dossiers DECA"),
       responded_by: zObjectId.describe("ID de l'utilisateur qui a répondu au feedback"),
+    })
+    .nullish(),
+  cfa_rupture_declaration: z
+    .object({
+      date_rupture: z.date({ description: "Date de rupture déclarée par le CFA" }),
+      declared_at: z.date({ description: "Date de la déclaration" }),
+      declared_by: zObjectId.describe("ID de l'utilisateur CFA qui a déclaré la rupture"),
     })
     .nullish(),
 });

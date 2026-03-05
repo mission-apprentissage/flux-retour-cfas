@@ -30,7 +30,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
   }
 
   const aggregationPipeline = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     {
       $group: {
         _id: null,

@@ -45,14 +45,28 @@ export function ConnectedHeader() {
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
       if (user?.organisation?.ml_beta_activated_at) {
         baseItems.push({
-          text: "Mon tableau de bord",
+          text: "Effectifs en ruptures",
+          isActive:
+            pathname === "/cfa" ||
+            (pathname?.startsWith("/cfa/") &&
+              !pathname?.startsWith("/cfa/effectifs") &&
+              !pathname?.startsWith("/cfa/parametres")),
           linkProps: {
             href: "/cfa",
             target: "_self",
           },
         });
         baseItems.push({
+          text: "Tous mes effectifs",
+          isActive: pathname?.startsWith("/cfa/effectifs"),
+          linkProps: {
+            href: "/cfa/effectifs",
+            target: "_self",
+          },
+        });
+        baseItems.push({
           text: "Paramètres",
+          isActive: pathname?.startsWith("/cfa/parametres"),
           linkProps: {
             href: "/cfa/parametres",
             target: "_self",
