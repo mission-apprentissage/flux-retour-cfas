@@ -40,3 +40,6 @@ export const EN_RUPTURE_OPTIONS = [
   { value: "oui", label: "Oui" },
   { value: "non", label: "Non" },
 ];
+
+export const DECA_TOOLTIP_TEXT =
+  "DECA (Dépôt des contrats en alternance) : base de données qui stocke les contrats d'apprentissage des secteurs privé et public déposés par les 11 opérateurs de compétences (OPCO) et les agents en DDETS/D(R)(I)EETS.";

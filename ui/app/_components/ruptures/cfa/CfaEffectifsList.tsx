@@ -3,12 +3,13 @@
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useCallback, useMemo, useState } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
 import { useAuth } from "@/app/_context/UserContext";
 import type { CfaCollaborationStatus, ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
-import { COLLAB_STATUS_LABELS, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
+import { COLLAB_STATUS_LABELS, DECA_TOOLTIP_TEXT, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
 
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
 import styles from "./CfaEffectifsList.module.css";
@@ -64,7 +65,7 @@ export function CfaEffectifsList({
           source: selectedEffectif.source,
         });
       } catch {
-        alert("Une erreur est survenue lors de la déclaration de rupture. Veuillez réessayer.");
+        // Error is handled by the modal (status === "error" state)
       }
     },
     [organismeId, selectedEffectif, declareMutation]
@@ -113,7 +114,12 @@ export function CfaEffectifsList({
         <h1 className={styles.title}>Tous mes effectifs</h1>
         <p className={styles.subtitle}>
           Retrouvez ici la liste de tous les effectifs auxquels le Tableau de Bord a accès grâce à la connexion de votre
-          ERP et la base de données DECA.
+          ERP. Cette liste contient également les effectifs captés par la base de données{" "}
+          <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
+          <span style={{ marginLeft: "0.25rem" }}>
+            <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
+          </span>
+          .
         </p>
       </div>
 

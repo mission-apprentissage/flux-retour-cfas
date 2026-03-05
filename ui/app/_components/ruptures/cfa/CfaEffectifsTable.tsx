@@ -3,6 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
 
 import type { ICfaEffectif } from "@/common/types/cfaRuptures";
@@ -30,14 +31,25 @@ export function CfaEffectifsTable({ effectifs, sort, order, onSort, onToggleRupt
 
   const headers = [
     <SortableHeader key="nom" label="Prénom Nom" sortKey="nom" currentSort={sort} currentDir={order} onSort={onSort} />,
-    <SortableHeader
-      key="en_rupture"
-      label="En rupture ?"
-      sortKey="en_rupture"
-      currentSort={sort}
-      currentDir={order}
-      onSort={onSort}
-    />,
+    <span key="en_rupture">
+      <SortableHeader label="En rupture ?" sortKey="en_rupture" currentSort={sort} currentDir={order} onSort={onSort} />
+      <span style={{ marginLeft: "0.25rem" }}>
+        <Tooltip
+          kind="hover"
+          title={
+            <>
+              Sur la version actuelle du Tableau de bord vous ne pouvez pas supprimer le statut &quot;En rupture&quot;
+              sur le dossier d&apos;un jeune. Si le problème persiste ou que vous souhaitez nous faire part d&apos;une
+              recommandation{" "}
+              <a href="https://cfas.apprentissage.beta.gouv.fr/contact" target="_blank" rel="noopener noreferrer">
+                Écrivez-nous directement
+              </a>
+              , l&apos;équipe du service reste disponible.
+            </>
+          }
+        />
+      </span>
+    </span>,
     <SortableHeader
       key="formation"
       label="Formation"
@@ -120,9 +132,18 @@ export function CfaEffectifsTable({ effectifs, sort, order, onSort, onToggleRupt
       <div key={`date-${e.id}`} className={`${sharedStyles.dateCell} ${rowClass ?? ""}`}>
         {e.date_rupture ? <DateRuptureCell dateStr={e.date_rupture} /> : <span className={styles.emptyDate}>—</span>}
       </div>,
-      <div key={`collab-${e.id}`} className={`${sharedStyles.collabCell} ${rowClass ?? ""}`}>
+      <div key={`collab-${e.id}`} className={`${sharedStyles.collabCell} ${e.is_plus_25 ? "" : (rowClass ?? "")}`}>
         {e.is_plus_25 ? (
-          <span className={styles.plus25Disabled}>Collaboration non disponible pour les +25 ans</span>
+          <span className={styles.plus25Badge}>
+            <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" />
+            <span>+ de 25 ans</span>
+            <span className={styles.plus25Tooltip}>
+              <Tooltip
+                kind="hover"
+                title="Les Missions Locales s'occupent du public jeune uniquement sur la tranche des 16 à 25 ans. Les apprenants âgés de plus de 25 ans ne pourront pas être renvoyés aux services des Missions Locales et ne sont donc pas éligibles à la collaboration via le Tableau de bord."
+              />
+            </span>
+          </span>
         ) : e.collab_status ? (
           <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />
         ) : (
