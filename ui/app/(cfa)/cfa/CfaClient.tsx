@@ -1,38 +1,91 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
-import CfaHeader from "@/app/_components/cfa/CfaHeader";
-import { EffectifsListView } from "@/app/_components/ruptures/mission-locale/EffectifsListView";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { CfaDashboard } from "@/app/_components/ruptures/cfa/CfaDashboard";
+import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboardSkeleton";
+import { useCfaEffectifs, useCfaEffectifsRuptures } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
-import { _get } from "@/common/httpClient";
-
-import { MonthsData } from "../../../common/types/ruptures";
 
 export default function CfaClient() {
   const { user } = useAuth();
+  const organismeId = user?.organisation?.organisme_id;
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const statut = searchParams?.get("statut");
-  const ruptureDate = searchParams?.get("date_rupture");
 
-  const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month-user-cfa", user?.organisation?.organisme_id],
-    () => _get(`/api/v1/organismes/${user?.organisation?.organisme_id}/mission-locale/effectifs-per-month`),
-    {
-      suspense: true,
-      useErrorBoundary: true,
-    }
+  const urlSearch = searchParams?.get("search") || "";
+  const searchPage = Number(searchParams?.get("page")) || 1;
+  const searchSort = searchParams?.get("sort") || "nom";
+  const searchOrder = (searchParams?.get("order") || "asc") as "asc" | "desc";
+
+  const [searchInput, setSearchInput] = useState(urlSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      for (const [key, value] of Object.entries(updates)) {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      }
+      const qs = params.toString();
+      router.push(qs ? `/cfa?${qs}` : "/cfa", { scroll: false });
+    },
+    [searchParams, router]
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    if (debouncedSearch !== urlSearch) {
+      updateParams({ search: debouncedSearch || undefined, page: undefined });
+    }
+  }, [debouncedSearch, urlSearch, updateParams]);
+
+  const { data, isLoading } = useCfaEffectifsRuptures(organismeId);
+
+  const { data: searchData, isLoading: isSearchLoading } = useCfaEffectifs(debouncedSearch ? organismeId : undefined, {
+    page: searchPage,
+    limit: 20,
+    search: debouncedSearch || undefined,
+    sort: searchSort,
+    order: searchOrder,
+  });
+
+  if (!organismeId || !data || isLoading) {
+    return <CfaDashboardSkeleton />;
+  }
 
   return (
     <div className="fr-container">
-      <CfaHeader />
-      <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        {data && <EffectifsListView data={data} initialStatut={statut} initialRuptureDate={ruptureDate} />}
-      </SuspenseWrapper>
+      <CfaDashboard
+        data={data.segments}
+        isAllowedDeca={data.isAllowedDeca}
+        organismeId={organismeId}
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        searchData={searchData}
+        isSearchLoading={isSearchLoading || (!!searchInput && searchInput !== debouncedSearch)}
+        searchSort={searchSort}
+        searchOrder={searchOrder}
+        onSearchSort={(sortKey) => {
+          if (sortKey === searchSort) {
+            updateParams({ order: searchOrder === "asc" ? "desc" : "asc" });
+          } else {
+            updateParams({ sort: sortKey, order: "asc" });
+          }
+        }}
+        onPageChange={(page) => updateParams({ page: page > 1 ? String(page) : undefined })}
+      />
     </div>
   );
 }

@@ -10,14 +10,16 @@
 .selectButton {
   width: 100%;
   text-align: left;
+  padding-left: 1rem;
   padding-right: 2.5rem;
   position: relative;
   cursor: pointer;
-  background-color: var(--background-default-grey);
-  border: 1px solid var(--border-default-grey);
+  background-color: transparent;
+  border: 1px solid var(--border-action-high-blue-france);
   min-height: 2.5rem;
   display: flex;
   align-items: center;
+  font-size: 1rem;
 }
 
 .selectButton:hover {
@@ -30,7 +32,7 @@
 }
 
 .placeholder {
-  color: var(--text-disabled-grey);
+  color: var(--text-action-high-blue-france);
 }
 
 .icon {
@@ -40,6 +42,7 @@
   transform: translateY(-50%);
   transition: transform 0.2s ease;
   pointer-events: none;
+  color: var(--text-action-high-blue-france);
 }
 
 .iconOpen {
@@ -57,6 +60,7 @@
   z-index: 1000;
   max-height: 16rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dropdownContent {

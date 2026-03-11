@@ -1,0 +1,33 @@
+.card {
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+  padding: 32px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: var(--text-title-blue-france);
+}
+
+.cardCount {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--text-mention-grey);
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}

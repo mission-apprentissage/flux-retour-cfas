@@ -1,0 +1,8 @@
+.section {
+  margin-top: 2rem;
+}
+
+.loadingText {
+  color: var(--text-mention-grey);
+  font-style: italic;
+}
