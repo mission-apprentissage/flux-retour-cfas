@@ -5,7 +5,7 @@ import {
   CFA_COLLAB_STATUS,
   CfaRuptureSegmentKey,
   ICfaRuptureEffectif,
-  ICfaRuptureSegment,
+  ICfaRupturesResponse,
 } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
@@ -51,7 +51,7 @@ function buildCfaOrganismeMatchStages(organisation: IOrganisationOrganismeFormat
 export async function getCfaEffectifsEnRupture(
   organisation: IOrganisationOrganismeFormation,
   isAllowedDeca: boolean
-): Promise<ICfaRuptureSegment[]> {
+): Promise<ICfaRupturesResponse> {
   const now = new Date();
   const pipeline = [
     ...buildCfaOrganismeMatchStages(organisation, isAllowedDeca),
@@ -157,13 +157,16 @@ export async function getCfaEffectifsEnRupture(
     segmentMap.set(result._id, { effectifs: result.effectifs });
   }
 
-  return SEGMENT_ORDER.map((segment) => {
-    const data = segmentMap.get(segment);
-    const effectifs = data?.effectifs ?? [];
-    return {
-      segment,
-      count: effectifs.length,
-      effectifs,
-    };
-  });
+  return {
+    segments: SEGMENT_ORDER.map((segment) => {
+      const data = segmentMap.get(segment);
+      const effectifs = data?.effectifs ?? [];
+      return {
+        segment,
+        count: effectifs.length,
+        effectifs,
+      };
+    }),
+    isAllowedDeca,
+  };
 }

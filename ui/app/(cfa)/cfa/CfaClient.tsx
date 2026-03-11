@@ -68,7 +68,8 @@ export default function CfaClient() {
   return (
     <div className="fr-container">
       <CfaDashboard
-        data={data}
+        data={data.segments}
+        isAllowedDeca={data.isAllowedDeca}
         organismeId={organismeId}
         searchInput={searchInput}
         onSearchChange={setSearchInput}

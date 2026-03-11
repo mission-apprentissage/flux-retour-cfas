@@ -83,9 +83,10 @@ describe("getCfaEffectifsEnRupture", () => {
   it("retourne les 3 segments même vides", async () => {
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    expect(result).toHaveLength(3);
-    expect(result.map((s) => s.segment)).toEqual(["moins_45j", "46_90j", "91_180j"]);
-    expect(result.every((s) => s.count === 0)).toBe(true);
+    expect(result.segments).toHaveLength(3);
+    expect(result.segments.map((s) => s.segment)).toEqual(["moins_45j", "46_90j", "91_180j"]);
+    expect(result.segments.every((s) => s.count === 0)).toBe(true);
+    expect(result.isAllowedDeca).toBe(true);
   });
 
   it("segmente les ruptures par durée", async () => {
@@ -99,9 +100,9 @@ describe("getCfaEffectifsEnRupture", () => {
 
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    expect(result.find((s) => s.segment === "moins_45j")?.count).toBe(1);
-    expect(result.find((s) => s.segment === "46_90j")?.count).toBe(1);
-    expect(result.find((s) => s.segment === "91_180j")?.count).toBe(1);
+    expect(result.segments.find((s) => s.segment === "moins_45j")?.count).toBe(1);
+    expect(result.segments.find((s) => s.segment === "46_90j")?.count).toBe(1);
+    expect(result.segments.find((s) => s.segment === "91_180j")?.count).toBe(1);
   });
 
   it("exclut les ruptures de plus de 180 jours", async () => {
@@ -111,7 +112,7 @@ describe("getCfaEffectifsEnRupture", () => {
 
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    const totalCount = result.reduce((sum, s) => sum + s.count, 0);
+    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
     expect(totalCount).toBe(0);
   });
 
@@ -133,7 +134,7 @@ describe("getCfaEffectifsEnRupture", () => {
 
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    const totalCount = result.reduce((sum, s) => sum + s.count, 0);
+    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
     expect(totalCount).toBe(1);
   });
 
@@ -161,7 +162,7 @@ describe("getCfaEffectifsEnRupture", () => {
 
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    const totalCount = result.reduce((sum, s) => sum + s.count, 0);
+    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
     expect(totalCount).toBe(1);
   });
 
@@ -171,7 +172,7 @@ describe("getCfaEffectifsEnRupture", () => {
 
     const result = await getCfaEffectifsEnRupture(organisation, true);
 
-    const totalCount = result.reduce((sum, s) => sum + s.count, 0);
+    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
     expect(totalCount).toBe(0);
   });
 });

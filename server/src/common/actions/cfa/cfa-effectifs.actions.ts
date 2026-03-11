@@ -363,6 +363,7 @@ export async function getCfaEffectifs(
     filters: {
       formations: result.formations.map((f: { _id: string }) => f._id),
     },
+    isAllowedDeca,
   };
 }
 

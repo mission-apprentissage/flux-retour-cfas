@@ -73,6 +73,7 @@ export default function CfaEffectifsClient() {
     <div className="fr-container">
       <CfaEffectifsList
         data={data ?? null}
+        isAllowedDeca={data?.isAllowedDeca ?? false}
         searchInput={searchInput}
         onSearchChange={setSearchInput}
         sort={sort}

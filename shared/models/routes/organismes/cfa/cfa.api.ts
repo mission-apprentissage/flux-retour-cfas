@@ -39,7 +39,10 @@ export interface ICfaRuptureSegment {
   effectifs: ICfaRuptureEffectif[];
 }
 
-export type ICfaRupturesResponse = ICfaRuptureSegment[];
+export interface ICfaRupturesResponse {
+  segments: ICfaRuptureSegment[];
+  isAllowedDeca: boolean;
+}
 
 export type CfaEffectifSource = "effectifs" | "effectifsDECA";
 
@@ -67,4 +70,5 @@ export interface ICfaEffectifsResponse {
   filters: {
     formations: string[];
   };
+  isAllowedDeca: boolean;
 }

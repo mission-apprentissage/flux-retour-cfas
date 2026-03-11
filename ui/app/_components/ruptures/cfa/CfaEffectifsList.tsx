@@ -21,6 +21,7 @@ import { useDeclareCfaRupture } from "./hooks";
 
 interface CfaEffectifsListProps {
   data: ICfaEffectifsResponse | null;
+  isAllowedDeca: boolean;
   searchInput: string;
   onSearchChange: (value: string) => void;
   sort: string;
@@ -33,6 +34,7 @@ interface CfaEffectifsListProps {
 
 export function CfaEffectifsList({
   data,
+  isAllowedDeca,
   searchInput,
   onSearchChange,
   sort,
@@ -116,12 +118,17 @@ export function CfaEffectifsList({
         <h1 className={styles.title}>Tous mes effectifs</h1>
         <p className={styles.subtitle}>
           Retrouvez ici la liste de tous les effectifs auxquels le Tableau de Bord a accès grâce à la connexion de votre
-          ERP. Cette liste contient également les effectifs captés par la base de données{" "}
-          <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
-          <span style={{ marginLeft: "0.25rem" }}>
-            <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
-          </span>
-          .
+          ERP.
+          {isAllowedDeca && (
+            <>
+              {" "}
+              Cette liste contient également les effectifs captés par la base de données{" "}
+              <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
+              <span style={{ marginLeft: "0.25rem" }}>
+                <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
+              </span>
+            </>
+          )}
         </p>
       </div>
 

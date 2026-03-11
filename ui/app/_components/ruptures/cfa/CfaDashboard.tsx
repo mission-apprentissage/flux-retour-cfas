@@ -3,13 +3,14 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
-import type { ICfaEffectifsResponse, ICfaRupturesResponse } from "@/common/types/cfaRuptures";
+import type { ICfaEffectifsResponse, ICfaRuptureSegment } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaDashboard.module.css";
 import { CfaRupturesList } from "./CfaRupturesList";
 
 interface CfaDashboardProps {
-  data: ICfaRupturesResponse;
+  data: ICfaRuptureSegment[];
+  isAllowedDeca: boolean;
   organismeId: string;
   searchInput: string;
   onSearchChange: (value: string) => void;
@@ -23,6 +24,7 @@ interface CfaDashboardProps {
 
 export function CfaDashboard({
   data,
+  isAllowedDeca,
   organismeId,
   searchInput,
   onSearchChange,
@@ -48,11 +50,17 @@ export function CfaDashboard({
               />
             </span>
           </span>{" "}
-          en rupture de contrat classés par date de rupture signalée. Les données sont issues de votre ERP ainsi que de
-          la base de données <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
-          <span style={{ marginLeft: "0.25rem" }}>
-            <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
-          </span>
+          en rupture de contrat classés par date de rupture signalée. Les données sont issues de votre ERP
+          {isAllowedDeca && (
+            <>
+              {" "}
+              ainsi que de la base de données{" "}
+              <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
+              <span style={{ marginLeft: "0.25rem" }}>
+                <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
+              </span>
+            </>
+          )}
           .
         </p>
       </div>
