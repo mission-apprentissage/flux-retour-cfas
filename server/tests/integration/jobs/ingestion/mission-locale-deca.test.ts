@@ -3,10 +3,11 @@ import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import { it, expect, describe, beforeEach, vi } from "vitest";
+import { it, expect, describe, beforeAll, beforeEach, vi } from "vitest";
 
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import { effectifsDECADb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import { createIndexes } from "@/common/model/indexes";
 import { hydrateDecaFromExistingEffectifs } from "@/jobs/hydrate/deca/hydrate-deca-raw";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -139,6 +140,10 @@ const createBaseErpEffectif = (overrides: Partial<IEffectif> = {}): IEffectif =>
 
 describe("Filtrage DECA pour les snapshots Mission Locale", () => {
   useMongo();
+
+  beforeAll(async () => {
+    await createIndexes();
+  });
 
   beforeEach(async () => {
     vi.useFakeTimers();
