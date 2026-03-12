@@ -128,6 +128,12 @@ const zEffectifMissionLocale = z
         email: z.string().nullish(),
         telephone: z.string().nullish(),
         activated_at: z.date().nullish(),
+        adresse: z
+          .object({
+            commune: z.string().nullish(),
+            code_postal: z.string().nullish(),
+          })
+          .nullish(),
       })
       .nullish(),
   })

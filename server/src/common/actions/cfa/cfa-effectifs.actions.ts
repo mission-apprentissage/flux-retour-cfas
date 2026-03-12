@@ -14,7 +14,13 @@ import { v4 as uuidv4 } from "uuid";
 
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
-import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -40,11 +46,6 @@ function buildAgeFilter() {
   ];
 }
 
-/**
- * MongoDB $replaceAll chain to strip French diacritics.
- * Handles NFC/NFD Unicode differences between ERP and DECA sources.
- * Includes UPPERCASE variants because MongoDB $toLower only handles ASCII (A-Z).
- */
 function stripDiacritics(expr: Record<string, unknown>) {
   const replacements = [
     ["é", "e"],
@@ -367,28 +368,170 @@ export async function getCfaEffectifs(
   };
 }
 
-export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: string, source?: string) {
-  const mlEffectif = await missionLocaleEffectifsDb().findOne({
-    effectif_id: new ObjectId(effectifId),
-    "effectif_snapshot.organisme_id": organismeId,
-    soft_deleted: { $ne: true },
-  });
+function formatRawEffectif(
+  raw: { _id: ObjectId; apprenant?: any; formation?: any; contrats?: any; source?: any; transmitted_at?: any },
+  organisme: any
+) {
+  return {
+    id: raw._id,
+    nom: raw.apprenant?.nom,
+    prenom: raw.apprenant?.prenom,
+    date_de_naissance: raw.apprenant?.date_de_naissance,
+    adresse: raw.apprenant?.adresse,
+    telephone: raw.apprenant?.telephone,
+    courriel: raw.apprenant?.courriel,
+    rqth: raw.apprenant?.rqth,
+    responsable_mail1: raw.apprenant?.responsable_mail1,
+    responsable_mail2: raw.apprenant?.responsable_mail2,
+    formation: raw.formation,
+    contrats: raw.contrats,
+    source: raw.source,
+    transmitted_at: raw.transmitted_at,
+    a_traiter: false,
+    organisme,
+    date_rupture: null,
+    organisme_data: null,
+    mission_locale_organisation: null,
+    mission_locale_logs: [],
+  };
+}
 
+export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: string, userId?: ObjectId) {
+  const mlAggregation = [
+    {
+      $match: {
+        effectif_id: new ObjectId(effectifId),
+        "effectif_snapshot.organisme_id": organismeId,
+        soft_deleted: { $ne: true },
+      },
+    },
+    {
+      $lookup: {
+        from: "organismes",
+        let: { id: "$effectif_snapshot.organisme_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+          { $project: { nom: 1, raison_sociale: 1, adresse: 1 } },
+        ],
+        as: "organisme",
+      },
+    },
+    { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "organisations",
+        let: { mission_locale_id: "$mission_locale_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$mission_locale_id"] } } },
+          {
+            $project: {
+              _id: 1,
+              nom: 1,
+              email: 1,
+              telephone: 1,
+              activated_at: 1,
+              adresse: { commune: 1, code_postal: 1 },
+            },
+          },
+        ],
+        as: "mission_locale_organisation",
+      },
+    },
+    { $unwind: { path: "$mission_locale_organisation", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "missionLocaleEffectifLog",
+        let: { mission_locale_effectif_id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$mission_locale_effectif_id"] } } },
+          { $sort: { created_at: 1 } },
+          ...(userId
+            ? [
+                {
+                  $addFields: {
+                    unread_by_current_user: {
+                      $cond: [{ $not: [{ $in: [userId, { $ifNull: ["$read_by", []] }] }] }, true, false],
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
+        as: "ml_logs",
+      },
+    },
+    ...(userId
+      ? [
+          {
+            $addFields: {
+              unread_by_current_user: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ["$organisme_data.acc_conjoint_by", userId] },
+                      { $eq: ["$organisme_data.has_unread_notification", true] },
+                    ],
+                  },
+                  true,
+                  false,
+                ],
+              },
+            },
+          },
+        ]
+      : []),
+    {
+      $project: {
+        id: "$effectif_snapshot._id",
+        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
+        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
+        adresse: "$effectif_snapshot.apprenant.adresse",
+        telephone: "$effectif_snapshot.apprenant.telephone",
+        telephone_corrected: "$effectif_choice.telephone",
+        courriel: "$effectif_snapshot.apprenant.courriel",
+        rqth: "$effectif_snapshot.apprenant.rqth",
+        responsable_mail1: "$effectif_snapshot.apprenant.responsable_mail1",
+        responsable_mail2: "$effectif_snapshot.apprenant.responsable_mail2",
+        formation: "$effectif_snapshot.formation",
+        contrats: "$effectif_snapshot.contrats",
+        source: "$effectif_snapshot.source",
+        transmitted_at: "$effectif_snapshot.transmitted_at",
+        a_traiter: { $literal: false },
+        organisme: "$organisme",
+        organisme_data: "$organisme_data",
+        date_rupture: "$date_rupture",
+        mission_locale_organisation: "$mission_locale_organisation",
+        mission_locale_logs: "$ml_logs",
+        unread_by_current_user: "$unread_by_current_user",
+      },
+    },
+  ];
+
+  const mlEffectif = await missionLocaleEffectifsDb().aggregate(mlAggregation).next();
   if (mlEffectif) {
-    return { source: "missionLocaleEffectif" as const, data: mlEffectif };
+    return { effectif: mlEffectif, currentIndex: 0, total: 1 };
   }
 
-  const db = source === "effectifsDECA" ? effectifsDECADb() : effectifsDb();
-  const effectif = await db.findOne({
-    _id: new ObjectId(effectifId),
-    organisme_id: organismeId,
-  });
-
-  if (!effectif) {
-    throw Boom.notFound("Effectif not found");
+  const erpEffectif = await effectifsDb().findOne({ _id: new ObjectId(effectifId), organisme_id: organismeId });
+  if (erpEffectif) {
+    const organisme = await organismesDb().findOne(
+      { _id: erpEffectif.organisme_id },
+      { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
+    );
+    return { effectif: formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
   }
 
-  return { source: (source || "effectifs") as CfaEffectifSource, data: effectif };
+  const decaEffectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectifId), organisme_id: organismeId });
+  if (decaEffectif) {
+    const organisme = await organismesDb().findOne(
+      { _id: decaEffectif.organisme_id },
+      { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
+    );
+    return { effectif: formatRawEffectif(decaEffectif, organisme), currentIndex: 0, total: 1 };
+  }
+
+  throw Boom.notFound("Effectif not found");
 }
 
 export async function declareCfaEffectifRupture(
