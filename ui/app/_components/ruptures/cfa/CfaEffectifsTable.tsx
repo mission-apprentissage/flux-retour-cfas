@@ -120,7 +120,7 @@ export function CfaEffectifsTable({
                           {e.prenom} {e.nom}
                         </span>
                       ) : (
-                        <Link href={`/cfa/${e.id}?from=effectifs&source=${e.source}`} className={sharedStyles.nameText}>
+                        <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
                           {e.prenom} {e.nom}
                         </Link>
                       )}
@@ -204,7 +204,7 @@ export function CfaEffectifsTable({
                         size="small"
                         iconId="ri-more-2-fill"
                         title="Voir la fiche"
-                        linkProps={{ href: `/cfa/${e.id}?from=effectifs&source=${e.source}` }}
+                        linkProps={{ href: `/cfa/${e.id}` }}
                       />
                     )}
                   </td>
