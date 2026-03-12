@@ -2,7 +2,7 @@ import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { AggregationCursor } from "mongodb";
+import { AggregationCursor, MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import {
   IEffectif,
@@ -2227,19 +2227,6 @@ export const createMissionLocaleSnapshot = async (
 
   const preFilter = !!(rupturantFilter && (ageFilter || rqthFilter) && decaFilter);
 
-  let duplicateFilter = true;
-  if (preFilter && normalizedIdentifiant) {
-    const existingEffectif = await missionLocaleEffectifsDb().findOne({
-      "identifiant_normalise.nom": normalizedIdentifiant.nom,
-      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      soft_deleted: { $ne: true },
-    });
-    duplicateFilter = !existingEffectif;
-  }
-
-  const shouldUpsert = preFilter && duplicateFilter;
-
   const mlData = (await organisationsDb().findOne({
     type: "MISSION_LOCALE",
     ml_id: effectif.apprenant.adresse?.mission_locale_id,
@@ -2249,47 +2236,114 @@ export const createMissionLocaleSnapshot = async (
     return null;
   }
 
+  const isIncomingErp = effectif.source !== "DECA";
+
+  let duplicateFilter = true;
+  let replacedDecaId: ObjectId | null = null;
+  if (preFilter && normalizedIdentifiant) {
+    const existingEffectif = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      mission_locale_id: mlData._id,
+      soft_deleted: { $ne: true },
+    });
+
+    if (existingEffectif) {
+      // ERP peut remplacer un DECA existant (ERP prime sur DECA)
+      const existingIsDeca = existingEffectif.effectif_snapshot?.source === "DECA";
+      if (isIncomingErp && existingIsDeca) {
+        // Soft-delete le DECA AVANT l'insert pour libérer l'index unique
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: existingEffectif._id },
+          { $set: { soft_deleted: true, updated_at: new Date() } }
+        );
+        replacedDecaId = existingEffectif._id;
+        duplicateFilter = true;
+      } else {
+        duplicateFilter = false;
+      }
+    }
+  }
+
+  const shouldUpsert = preFilter && duplicateFilter;
+
   const date = new Date();
   const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
-  const mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
-    {
-      mission_locale_id: mlData._id,
-      effectif_id: effectif._id,
-    },
-    {
-      $set: {
-        current_status: {
-          value: currentStatus?.valeur,
-          date: currentStatus?.date,
-        },
+
+  let mongoInfo;
+  try {
+    mongoInfo = await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        mission_locale_id: mlData._id,
+        effectif_id: effectif._id,
       },
-      $setOnInsert: {
-        effectif_snapshot: { ...effectif, _id: effectif._id },
-        effectif_snapshot_date: date,
-        date_rupture: currentStatus?.date,
-        created_at: date,
-        brevo: {
-          token: uuidv4(),
-          token_created_at: date,
-        },
-        computed: {
-          organisme: {
-            ml_beta_activated_at: organisation?.ml_beta_activated_at,
+      {
+        $set: {
+          current_status: {
+            value: currentStatus?.valeur,
+            date: currentStatus?.date,
           },
-          ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
         },
-        ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
+        $setOnInsert: {
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: date,
+          date_rupture: currentStatus?.date,
+          created_at: date,
+          soft_deleted: false,
+          brevo: {
+            token: uuidv4(),
+            token_created_at: date,
+          },
+          computed: {
+            organisme: {
+              ml_beta_activated_at: organisation?.ml_beta_activated_at,
+            },
+            ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
+          },
+          ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
+        },
       },
-    },
-    { upsert: shouldUpsert }
-  );
+      { upsert: shouldUpsert }
+    );
+  } catch (err) {
+    // Duplicate key on identifiant_normalise unique index — concurrent insert for same person, skip
+    if (err instanceof MongoServerError && err.code === 11000) {
+      // Restaurer le DECA soft-deleted si l'insert ERP a échoué sur duplicate key
+      if (replacedDecaId) {
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: replacedDecaId },
+          { $set: { soft_deleted: false, updated_at: new Date() } }
+        );
+      }
+      logger.info(`Duplicate identifiant_normalise for effectif ${effectif._id}, skipping`);
+      return { upserted: false };
+    }
+    // Restaurer le DECA soft-deleted si l'upsert échoue pour éviter la perte de données
+    if (replacedDecaId) {
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: replacedDecaId },
+        { $set: { soft_deleted: false, updated_at: new Date() } }
+      );
+    }
+    throw err;
+  }
 
   const upsertedId = mongoInfo.lastErrorObject?.upserted;
 
   if (mongoInfo.lastErrorObject?.n > 0) {
     await createOrUpdateMissionLocaleStats(mlData._id);
     if (upsertedId) {
-      await checkMissionLocaleEffectifDoublon(new ObjectId(upsertedId), effectif._id);
+      // Si on a remplacé un DECA, merger les données utilisateur du DECA vers le nouveau keeper ERP
+      if (replacedDecaId) {
+        await mergeAndSoftDeleteDuplicates(new ObjectId(upsertedId), [replacedDecaId]);
+      }
+      await checkMissionLocaleEffectifDoublon(
+        new ObjectId(upsertedId),
+        effectif._id,
+        normalizedIdentifiant,
+        mlData._id
+      );
     }
   }
 
@@ -2372,20 +2426,120 @@ export const getMissionLocaleStat = async (
   return data;
 };
 
-export const checkMissionLocaleEffectifDoublon = async (mlEffectifId: ObjectId, effectifId: ObjectId) => {
-  const results = await missionLocaleEffectifsDb().updateMany(
-    {
-      _id: { $ne: mlEffectifId },
-      effectif_id: effectifId,
-    },
-    {
-      $set: {
-        soft_deleted: true,
-      },
-    }
-  );
+const MERGEABLE_FIELDS = [
+  "situation",
+  "situation_autre",
+  "commentaires",
+  "deja_connu",
+  "probleme_type",
+  "probleme_detail",
+  "organisme_data",
+  "whatsapp_contact",
+  "whatsapp_callback_requested",
+  "whatsapp_callback_requested_at",
+  "whatsapp_no_help_responded",
+  "whatsapp_no_help_responded_at",
+  "deca_feedback",
+  "effectif_choice",
+] as const;
 
-  if (results.modifiedCount > 0) {
-    logger.info(`Soft deleted ${results.modifiedCount} duplicates for effectif ${effectifId}`);
+/**
+ * Tri de priorité pour le keeper : source ERP > situation non-null > plus récent.
+ * ERP prime toujours sur DECA
+ * Note: source !== "DECA" couvre ERP, FICHIER, et les anciens records sans source (undefined).
+ * Tous sont considérés comme "non-DECA" et ont priorité sur DECA.
+ */
+export function sortKeeperPriority(
+  a: { situation?: string | null; effectif_snapshot?: { source?: string }; created_at: Date },
+  b: { situation?: string | null; effectif_snapshot?: { source?: string }; created_at: Date }
+): number {
+  const aIsErp = a.effectif_snapshot?.source !== "DECA";
+  const bIsErp = b.effectif_snapshot?.source !== "DECA";
+  if (aIsErp && !bIsErp) return -1;
+  if (!aIsErp && bIsErp) return 1;
+  if (a.situation && !b.situation) return -1;
+  if (!a.situation && b.situation) return 1;
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+}
+
+/**
+ * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
+ */
+export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicateIds: ObjectId[]) {
+  if (duplicateIds.length === 0) return;
+
+  const keeper = await missionLocaleEffectifsDb().findOne({ _id: keeperId });
+  if (!keeper) return;
+
+  const duplicates = await missionLocaleEffectifsDb()
+    .find({ _id: { $in: duplicateIds } })
+    .toArray();
+
+  const mergeUpdate: Record<string, unknown> = {};
+  for (const field of MERGEABLE_FIELDS) {
+    if (keeper[field] == null) {
+      const donor = duplicates.find((d) => d[field] != null);
+      if (donor) {
+        mergeUpdate[field] = donor[field];
+      }
+    }
+  }
+
+  if (Object.keys(mergeUpdate).length > 0) {
+    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, { $set: { ...mergeUpdate, updated_at: new Date() } });
+  }
+
+  await missionLocaleEffectifsDb().updateMany(
+    { _id: { $in: duplicateIds } },
+    { $set: { soft_deleted: true, updated_at: new Date() } }
+  );
+}
+
+export const checkMissionLocaleEffectifDoublon = async (
+  mlEffectifId: ObjectId,
+  effectifId: ObjectId,
+  normalizedIdentifiant?: { nom: string; prenom: string; date_de_naissance: Date } | null,
+  missionLocaleId?: ObjectId
+) => {
+  const effectifIdDuplicates = await missionLocaleEffectifsDb()
+    .find(
+      { _id: { $ne: mlEffectifId }, effectif_id: effectifId, soft_deleted: { $ne: true } },
+      { projection: { _id: 1 } }
+    )
+    .toArray();
+
+  if (effectifIdDuplicates.length > 0) {
+    const duplicateIds = effectifIdDuplicates.map((d) => d._id);
+    await mergeAndSoftDeleteDuplicates(mlEffectifId, duplicateIds);
+    logger.info(`Soft deleted ${duplicateIds.length} duplicates for effectif ${effectifId}`);
+  }
+
+  // Dedup par identifiant_normalise + mission_locale_id (même personne, même ML, effectif_id différent)
+  if (normalizedIdentifiant && missionLocaleId) {
+    const identityDuplicates = await missionLocaleEffectifsDb()
+      .find({
+        _id: { $ne: mlEffectifId },
+        "identifiant_normalise.nom": normalizedIdentifiant.nom,
+        "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+        "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+        mission_locale_id: missionLocaleId,
+        soft_deleted: { $ne: true },
+      })
+      .toArray();
+
+    if (identityDuplicates.length > 0) {
+      const keeper = await missionLocaleEffectifsDb().findOne({ _id: mlEffectifId });
+      if (keeper) {
+        const allDocs = [keeper, ...identityDuplicates];
+        allDocs.sort(sortKeeperPriority);
+
+        const finalKeeper = allDocs[0];
+        const duplicateIds = allDocs.slice(1).map((d) => d._id);
+        await mergeAndSoftDeleteDuplicates(finalKeeper._id, duplicateIds);
+        logger.info(
+          `Soft deleted ${duplicateIds.length} identity duplicates for ${normalizedIdentifiant.nom} ${normalizedIdentifiant.prenom}`
+        );
+      }
+    }
   }
 };

@@ -3,11 +3,20 @@ import { IPersonV2 } from "shared/models";
 
 import { personV2Db } from "@/common/model/collections";
 
+function normalizeDateToUTCMidnight(date: Date): Date {
+  const d = new Date(date);
+  if (d.getUTCHours() >= 22) {
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
 export function normalisePersonIdentifiant(input: IPersonV2["identifiant"]): IPersonV2["identifiant"] {
   return {
     nom: input.nom.trim().normalize().toUpperCase(),
     prenom: capitalize(input.prenom.trim().normalize()),
-    date_de_naissance: input.date_de_naissance,
+    date_de_naissance: normalizeDateToUTCMidnight(input.date_de_naissance),
   };
 }
 
