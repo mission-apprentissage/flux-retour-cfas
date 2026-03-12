@@ -237,39 +237,47 @@ describe("CFA Effectifs Actions", () => {
   });
 
   describe("getCfaEffectifDetail", () => {
-    it("retourne depuis missionLocaleEffectif si présent", async () => {
-      const effectif = await insertEffectif();
+    it("retourne les données depuis missionLocaleEffectif si présent", async () => {
+      const effectif = await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
       await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc(effectif) as any);
 
       const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
 
-      expect(result.source).toBe("missionLocaleEffectif");
+      expect(result.effectif.id).toEqual(effectif._id);
+      expect(result.effectif.nom).toBe("DUPONT");
+      expect(result.effectif.prenom).toBe("Jean");
+      expect(result.currentIndex).toBe(0);
+      expect(result.total).toBe(1);
     });
 
-    it("retourne depuis effectifs si pas de missionLocaleEffectif", async () => {
-      const effectif = await insertEffectif();
+    it("retourne les données depuis effectifs si pas de missionLocaleEffectif", async () => {
+      const effectif = await insertEffectif({ apprenant: { nom: "MARTIN", prenom: "Pierre" } });
 
       const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
 
-      expect(result.source).toBe("effectifs");
-      expect(result.data._id).toEqual(effectif._id);
+      expect(result.effectif.id).toEqual(effectif._id);
+      expect(result.effectif.nom).toBe("MARTIN");
+      expect(result.effectif.date_rupture).toBeNull();
     });
 
-    it("retourne depuis effectifsDECA si source spécifiée", async () => {
+    it("retourne les données depuis effectifsDECA si absent des autres collections", async () => {
       const decaEffectif = {
         _id: new ObjectId(),
         deca_raw_id: new ObjectId(),
         ...(await createSampleEffectif({
           organisme: sampleOrganisme,
           annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: { nom: "DURAND", prenom: "Marie" },
         })),
         organisme_id: organismeId,
       };
       await effectifsDECADb().insertOne(decaEffectif as any);
 
-      const result = await getCfaEffectifDetail(organismeId, decaEffectif._id.toString(), "effectifsDECA");
+      const result = await getCfaEffectifDetail(organismeId, decaEffectif._id.toString());
 
-      expect(result.source).toBe("effectifsDECA");
+      expect(result.effectif.id).toEqual(decaEffectif._id);
+      expect(result.effectif.nom).toBe("DURAND");
+      expect(result.effectif.date_rupture).toBeNull();
     });
 
     it("throw 404 si effectif non trouvé", async () => {
