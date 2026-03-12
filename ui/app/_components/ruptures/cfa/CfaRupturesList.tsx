@@ -226,15 +226,17 @@ export function CfaRupturesList({
         <p className={styles.infoBoxContent}>
           Différents paramètres peuvent expliquer pourquoi vous ne retrouvez pas un jeune dans la liste de vos effectifs
           en rupture comme par exemple :
-          <ul>
-            <li>
-              Un délai de mise à jour entre votre ERP et notre affichage <em>(maximum 24h de délai)</em>
-            </li>
-            <li>
-              Une donnée manquante ou renseignée avec une erreur dans l&apos;ERP{" "}
-              <em>(ex : date de rupture, date de fin de formation...)</em>
-            </li>
-          </ul>
+        </p>
+        <ul className={styles.infoBoxContent}>
+          <li>
+            Un délai de mise à jour entre votre ERP et notre affichage <em>(maximum 24h de délai)</em>
+          </li>
+          <li>
+            Une donnée manquante ou renseignée avec une erreur dans l&apos;ERP{" "}
+            <em>(ex : date de rupture, date de fin de formation...)</em>
+          </li>
+        </ul>
+        <p className={styles.infoBoxContent}>
           Vous pouvez toutefois retrouver vos effectifs et indiquer leur statut &quot;En rupture&quot; pour les afficher
           dans votre liste en allant dans l&apos;onglet <strong>Tous les effectifs</strong>.
         </p>
