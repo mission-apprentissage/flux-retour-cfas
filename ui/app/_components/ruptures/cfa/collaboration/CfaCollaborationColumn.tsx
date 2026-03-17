@@ -2,13 +2,13 @@
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
 import styles from "./CfaCollaborationDetail.module.css";
-import { useStartCollaboration } from "./hooks";
+import { CollaborationSentView } from "./CollaborationSentView";
 
 interface CfaCollaborationColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
@@ -37,23 +37,19 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
 }
 
 export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps) {
-  const [hasStarted, setHasStarted] = useState(false);
-
+  const router = useRouter();
   const ml = effectif.mission_locale_organisation;
   const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
-  const isCollabActive = collabAlreadyStarted || hasStarted;
-
-  const startCollabMutation = useStartCollaboration(String(effectif.id), () => setHasStarted(true));
 
   return (
     <div className={styles.collaborationColumn}>
-      <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>
+      {!collabAlreadyStarted && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
 
       {!effectif.date_rupture ? (
         <p className={styles.collabDisabledMessage}>
           La collaboration avec une Mission Locale n&apos;est possible que pour les jeunes en rupture de contrat.
         </p>
-      ) : !isCollabActive ? (
+      ) : !collabAlreadyStarted ? (
         <>
           {ml ? (
             <>
@@ -63,14 +59,9 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
                 </p>
                 <MlCard ml={ml} showInactiveMessage />
               </div>
-
               <div className={styles.collabCta}>
-                <Button
-                  priority="primary"
-                  onClick={() => startCollabMutation.mutate()}
-                  disabled={startCollabMutation.isLoading}
-                >
-                  {startCollabMutation.isLoading ? "Envoi en cours..." : "Démarrer une collaboration"}
+                <Button priority="primary" onClick={() => router.push(`/cfa/${String(effectif.id)}/collaboration`)}>
+                  Démarrer une collaboration
                 </Button>
               </div>
             </>
@@ -79,24 +70,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
           )}
         </>
       ) : (
-        <>
-          <p className={styles.collabQuestion}>Collaboration en cours avec la Mission Locale</p>
-
-          {ml && <MlCard ml={ml} />}
-
-          {effectif.organisme_data && (
-            <div className={styles.collabSummary}>
-              <p className={styles.collabSummaryLabel}>Détails de la collaboration</p>
-              {effectif.organisme_data.motif && effectif.organisme_data.motif.length > 0 && (
-                <p>Motifs : {effectif.organisme_data.motif.join(", ")}</p>
-              )}
-              {effectif.organisme_data.commentaires && <p>{effectif.organisme_data.commentaires}</p>}
-              {effectif.organisme_data.reponse_at && (
-                <p className={styles.suiviEventSubtext}>Envoyé le {formatDate(effectif.organisme_data.reponse_at)}</p>
-              )}
-            </div>
-          )}
-        </>
+        <CollaborationSentView effectif={effectif} />
       )}
     </div>
   );

@@ -5,12 +5,14 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Image from "next/image";
 import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
 
-import { formatDate } from "@/app/_utils/date.utils";
+import { useAuth } from "@/app/_context/UserContext";
+import { formatDate, formatRelativeDate } from "@/app/_utils/date.utils";
+import { getUserDisplayName, isCurrentUserId } from "@/app/_utils/user.utils";
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaCollaborationDetail.module.css";
 
-type EventIconType = "rupture" | "partage" | "traite" | "contacte-sans-reponse";
+type EventIconType = "rupture" | "partage" | "traite" | "contacte-sans-reponse" | "attente";
 
 interface TimelineEvent {
   date: Date;
@@ -27,17 +29,31 @@ function getEventIcon(icon: EventIconType) {
       return <Image src="/images/parcours-partage-mission-locale.svg" alt="" width={18} height={18} />;
     case "contacte-sans-reponse":
       return <Image src="/images/parcours-contacte-sans-reponse.svg" alt="" width={18} height={17} />;
+    case "attente":
+      return <span className={`fr-icon-time-fill fr-icon--sm ${styles.attenteIcon}`} aria-hidden="true" />;
     case "traite":
     default:
       return <Image src="/images/parcours-dossier-traite.svg" alt="" width={18} height={18} />;
   }
 }
 
+function formatTimelineDate(date: Date): string {
+  const relative = formatRelativeDate(date);
+  if (relative === "aujourd'hui") return "Aujourd'hui";
+  if (relative === "hier") return "Hier";
+  return formatDate(date);
+}
+
 function toDate(value: Date | string): Date {
   return value instanceof Date ? value : new Date(value as string);
 }
 
-function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"]): TimelineEvent[] {
+interface TimelineContext {
+  userName: string;
+  isCurrentUser: boolean;
+}
+
+function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"], ctx: TimelineContext): TimelineEvent[] {
   const events: TimelineEvent[] = [];
 
   if (effectif.date_rupture) {
@@ -58,11 +74,12 @@ function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"]): Timel
 
   if (effectif.organisme_data?.reponse_at && effectif.organisme_data.acc_conjoint === true) {
     const date = toDate(effectif.organisme_data.reponse_at);
+    const subtext = ctx.userName ? `Par ${ctx.userName}${ctx.isCurrentUser ? " (vous)" : ""}` : undefined;
 
     events.push({
       date,
       title: "Dossier envoyé par le CFA",
-      subtext: "Collaboration démarrée avec la Mission Locale",
+      subtext,
       icon: "partage",
     });
   }
@@ -95,7 +112,18 @@ function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"]): Timel
     });
   }
 
-  return events.sort((a, b) => b.date.getTime() - a.date.getTime());
+  if (effectif.organisme_data?.acc_conjoint === true) {
+    const hasTraite = events.some((e) => e.icon === "traite");
+    if (!hasTraite) {
+      events.push({
+        date: new Date(),
+        title: "Attente du retour de la Mission Locale...",
+        icon: "attente",
+      });
+    }
+  }
+
+  return events.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 interface CfaSuiviDossierColumnProps {
@@ -103,7 +131,12 @@ interface CfaSuiviDossierColumnProps {
 }
 
 export function CfaSuiviDossierColumn({ effectif }: CfaSuiviDossierColumnProps) {
-  const timeline = buildSuiviTimeline(effectif);
+  const { user } = useAuth();
+  const od = effectif.organisme_data;
+  const timeline = buildSuiviTimeline(effectif, {
+    userName: getUserDisplayName(user),
+    isCurrentUser: isCurrentUserId(od?.acc_conjoint_by, user?._id),
+  });
 
   return (
     <div className={styles.suiviColumn}>
@@ -133,12 +166,17 @@ export function CfaSuiviDossierColumn({ effectif }: CfaSuiviDossierColumnProps) 
       {timeline.length > 0 ? (
         <div className={styles.suiviTimeline}>
           {timeline.map((event, index) => (
-            <div key={`${event.title}-${index}`} className={styles.suiviEvent}>
+            <div
+              key={`${event.title}-${index}`}
+              className={`${styles.suiviEvent} ${event.icon === "attente" ? styles.suiviEventAttente : ""}`}
+            >
               <div className={styles.suiviEventIcon}>{getEventIcon(event.icon)}</div>
               <div className={styles.suiviEventBody}>
                 <div className={styles.suiviEventHeader}>
                   <p className={styles.suiviEventTitle}>{event.title}</p>
-                  <p className={styles.suiviEventDate}>{formatDate(event.date)}</p>
+                  {event.icon !== "attente" && (
+                    <p className={styles.suiviEventDate}>{formatTimelineDate(event.date)}</p>
+                  )}
                 </div>
                 {event.subtext && <p className={styles.suiviEventSubtext}>{event.subtext}</p>}
               </div>

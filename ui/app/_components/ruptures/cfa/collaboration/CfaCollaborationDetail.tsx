@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { IEffectifMissionLocale } from "shared";
 
 import { CfaCollaborationColumn } from "./CfaCollaborationColumn";
@@ -14,18 +14,13 @@ interface CfaCollaborationDetailProps {
 
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
-  const router = useRouter();
 
   return (
     <div className={styles.page}>
       <div className={styles.backLink}>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
-        >
+        <Link href="/cfa" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
           Retour à la liste
-        </button>
+        </Link>
       </div>
 
       <div className={styles.columns}>
