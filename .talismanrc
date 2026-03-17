@@ -95,6 +95,10 @@ fileignoreconfig:
   checksum: 55ffbfcaf20a5f5ce64c1eae9bf58be9792e16cdd00a322d698ebb5420e5153b
 - filename: server/tests/integration/common/services/brevo/whatsapp.test.ts
   checksum: 43cd343b5d20fff45dcc24f86885f7c10991ea8229ce7ad77a6e93e26cd5371b
+- filename: ui/app/_components/ruptures/cfa/collaboration/utils.test.ts
+  checksum: 28826c73f294a2392c6f2fd3c114e97b6f63f3ddee98c96efe22e29533550b61
+- filename: server/tests/integration/common/actions/mission-locale-organisme.actions.test.ts
+  checksum: 7b99641f06c918dade84589eca61fdb46d792a884580b74f30127a63133d9b4c
 scopeconfig:
 - scope: node
 custom_patterns:
