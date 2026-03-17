@@ -26,10 +26,6 @@ const zCfaEffectifsQuery = {
   formation: z.string().optional(),
 };
 
-const zCfaEffectifDetailQuery = {
-  source: z.enum(["effectifs", "effectifsDECA"]).optional(),
-};
-
 const zDeclareRuptureBody = zDeclareCfaRuptureApi.shape;
 
 async function getOrganismeWithDeca(locals: { organismeId: string }) {
@@ -50,6 +46,11 @@ async function getOrganismeWithDeca(locals: { organismeId: string }) {
   const organismeDoc = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_deca: 1 } });
 
   return { organisme, organismeId, isAllowedDeca: organismeDoc?.is_allowed_deca ?? false };
+}
+
+async function getCfaEffectifsRuptureHandler(_req, { locals }) {
+  const { organisme, isAllowedDeca } = await getOrganismeWithDeca(locals);
+  return await getCfaEffectifsEnRupture(organisme, isAllowedDeca);
 }
 
 export default () => {
@@ -73,8 +74,8 @@ export default () => {
         throw Boom.badRequest("ID effectif invalide");
       }
       const { organismeId } = await getOrganismeWithDeca(locals);
-      const { source } = await validateFullZodObjectSchema(req.query, zCfaEffectifDetailQuery);
-      return await getCfaEffectifDetail(organismeId, req.params.id, source);
+      const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+      return await getCfaEffectifDetail(organismeId, req.params.id, userId);
     })
   );
 
@@ -95,9 +96,4 @@ export default () => {
   );
 
   return router;
-};
-
-const getCfaEffectifsRuptureHandler = async (_req, { locals }) => {
-  const { organisme, isAllowedDeca } = await getOrganismeWithDeca(locals);
-  return await getCfaEffectifsEnRupture(organisme, isAllowedDeca);
 };

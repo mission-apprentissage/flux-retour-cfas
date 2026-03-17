@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { CfaContainer } from "../CfaContainer";
+
 import ParametresClient from "./ParametresClient";
 
 export const metadata: Metadata = {
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function ParametresPage() {
-  return <ParametresClient />;
+  return (
+    <CfaContainer>
+      <ParametresClient />
+    </CfaContainer>
+  );
 }

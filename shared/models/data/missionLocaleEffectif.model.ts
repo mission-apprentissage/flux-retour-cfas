@@ -64,6 +64,7 @@ export enum ACC_CONJOINT_MOTIF_ENUM {
   SANTE = "SANTE",
   FINANCE = "FINANCE",
   ADMINISTRATIF = "ADMINISTRATIF",
+  SOCIAL_FAMILIAL = "SOCIAL_FAMILIAL",
   REORIENTATION = "REORIENTATION",
   RECHERCHE_EMPLOI = "RECHERCHE_EMPLOI",
   AUTRE = "AUTRE",
@@ -87,6 +88,18 @@ export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
+
+export const zVerifiedInfo = z.object({
+  telephone: z.string().nullish(),
+  courriel: z.string().nullish(),
+  adresse_rue: z.string().nullish(),
+  adresse_code_postal: z.string().nullish(),
+  adresse_commune: z.string().nullish(),
+  formation_libelle: z.string().nullish(),
+  date_fin_formation: z.string().nullish(),
+});
+
+export type IVerifiedInfo = z.output<typeof zVerifiedInfo>;
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
@@ -127,6 +140,19 @@ const zMissionLocaleEffectif = z.object({
           "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
         ),
       acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
+      still_at_cfa: z.boolean().nullish().describe("Indique si le jeune est toujours en formation au CFA"),
+      commentaires_par_motif: z
+        .record(zAccConjointMotifEnum, z.string())
+        .nullish()
+        .describe("Commentaires libres par motif"),
+      cause_rupture: z.string().nullish().describe("Cause et circonstances de la rupture décrites par le CFA"),
+      referent_type: z.enum(["me", "other"]).nullish().describe("Type de référent CFA à contacter"),
+      referent_coordonnees: z
+        .string()
+        .nullish()
+        .describe("Coordonnées du référent CFA (snapshot figé au moment de l'envoi)"),
+      note_complementaire: z.string().nullish().describe("Note complémentaire facultative pour la ML"),
+      verified_info: zVerifiedInfo.nullish().describe("Informations vérifiées/corrigées par le CFA pour la ML"),
     })
     .nullish(),
   effectif_choice: z

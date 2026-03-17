@@ -120,7 +120,7 @@ export function CfaEffectifsTable({
                           {e.prenom} {e.nom}
                         </span>
                       ) : (
-                        <Link href={`/cfa/${e.id}?from=effectifs&source=${e.source}`} className={sharedStyles.nameText}>
+                        <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
                           {e.prenom} {e.nom}
                         </Link>
                       )}
@@ -129,7 +129,7 @@ export function CfaEffectifsTable({
                   <td>
                     <div className={`${sharedStyles.nowrapCell} ${rowClass ?? ""}`}>
                       {e.is_plus_25 ? (
-                        <div className={styles.ruptureToggleDisabled}>
+                        <div className={sharedStyles.ruptureToggleDisabled}>
                           <span className={sharedStyles.ruptureLabel}>{e.en_rupture ? "En rupture" : "Non"}</span>
                           <ToggleSwitch
                             inputTitle="Statut rupture"
@@ -137,7 +137,7 @@ export function CfaEffectifsTable({
                             onChange={() => {}}
                             label=""
                             showCheckedHint={false}
-                            classes={{ root: styles.toggleRootDisabled }}
+                            classes={{ root: sharedStyles.toggleRootDisabled }}
                           />
                         </div>
                       ) : (
@@ -199,12 +199,12 @@ export function CfaEffectifsTable({
                       <span />
                     ) : (
                       <Button
-                        className={styles.moreButton}
+                        className={sharedStyles.moreButton}
                         priority="tertiary no outline"
                         size="small"
                         iconId="ri-more-2-fill"
                         title="Voir la fiche"
-                        linkProps={{ href: `/cfa/${e.id}?from=effectifs&source=${e.source}` }}
+                        linkProps={{ href: `/cfa/${e.id}` }}
                       />
                     )}
                   </td>

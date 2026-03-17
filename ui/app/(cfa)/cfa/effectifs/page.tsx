@@ -3,6 +3,8 @@ import { Suspense } from "react";
 
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
 
+import { CfaContainer } from "../CfaContainer";
+
 import CfaEffectifsClient from "./CfaEffectifsClient";
 
 export const metadata: Metadata = {
@@ -11,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function CfaEffectifsPage() {
   return (
-    <Suspense fallback={<CfaEffectifsSkeleton />}>
-      <CfaEffectifsClient />
-    </Suspense>
+    <CfaContainer>
+      <Suspense fallback={<CfaEffectifsSkeleton />}>
+        <CfaEffectifsClient />
+      </Suspense>
+    </CfaContainer>
   );
 }

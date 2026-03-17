@@ -5,8 +5,8 @@ import { Skeleton } from "@mui/material";
 
 import type { ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
 
-import cardStyles from "./CfaCardSection.module.css";
 import { CfaEffectifsTable } from "./CfaEffectifsTable";
+import cardStyles from "./CfaRuptureSegment.module.css";
 import styles from "./CfaSearchResults.module.css";
 
 interface CfaSearchResultsProps {

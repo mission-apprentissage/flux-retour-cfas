@@ -40,3 +40,13 @@ export function formatMonthAndYear(dateString: string) {
   const date = new Date(dateString);
   return format(date, "MMMM yyyy", { locale: fr });
 }
+
+export function formatRelativeDate(date: Date | string): string {
+  const d = new Date(date);
+  const today = new Date();
+  const diffMs = today.setHours(0, 0, 0, 0) - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "aujourd'hui";
+  if (diffDays === 1) return "hier";
+  return `il y a ${diffDays} jours`;
+}

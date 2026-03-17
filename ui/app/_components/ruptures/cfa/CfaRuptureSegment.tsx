@@ -141,7 +141,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
       </Link>
     </div>,
     <div key={`rupture-${e.id}`} className={sharedStyles.nowrapCell}>
-      <div className={styles.ruptureToggleDisabled}>
+      <div className={sharedStyles.ruptureToggleDisabled}>
         <span className={sharedStyles.ruptureLabel}>En rupture</span>
         <ToggleSwitch
           inputTitle="Statut rupture"
@@ -149,7 +149,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
           onChange={() => {}}
           label=""
           showCheckedHint={false}
-          classes={{ root: styles.toggleRootDisabled }}
+          classes={{ root: sharedStyles.toggleRootDisabled }}
         />
       </div>
     </div>,
@@ -165,7 +165,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
     </div>,
     <Button
       key={`more-${e.id}`}
-      className={styles.moreButton}
+      className={sharedStyles.moreButton}
       priority="tertiary no outline"
       size="small"
       iconId="ri-more-2-fill"
@@ -175,10 +175,10 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
   ]);
 
   return (
-    <section className={styles.segment}>
-      <div className={styles.segmentHeader}>
-        <h3 className={styles.segmentTitle}>{SEGMENT_LABELS[segment]}</h3>
-        <span className={styles.segmentCount}>
+    <section className={`${styles.card} ${styles.cardWithMargin}`}>
+      <div className={styles.cardHeader}>
+        <h3 className={styles.cardTitle}>{SEGMENT_LABELS[segment]}</h3>
+        <span className={styles.cardCount}>
           {effectifs.length} effectif{effectifs.length !== 1 ? "s" : ""}
         </span>
       </div>

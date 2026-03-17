@@ -220,6 +220,7 @@ const zAccompagnementConjointMotifs = z.object({
   sante: z.number(),
   finance: z.number(),
   administratif: z.number(),
+  social_familial: z.number(),
   reorientation: z.number(),
   recherche_emploi: z.number(),
   autre: z.number(),

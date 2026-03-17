@@ -1,18 +1,21 @@
-.segment {
-  margin-bottom: 2rem;
+.card {
   background: var(--background-raised-grey);
   border-radius: 4px;
   padding: 32px;
 }
 
-.segmentHeader {
+.cardWithMargin {
+  margin-bottom: 2rem;
+}
+
+.cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
 }
 
-.segmentTitle {
+.cardTitle {
   margin: 0;
   font-weight: 700;
   font-size: 32px;
@@ -20,11 +23,17 @@
   color: var(--text-title-blue-france);
 }
 
-.segmentCount {
+.cardCount {
   font-weight: 500;
   font-size: 20px;
   line-height: 28px;
   color: var(--text-mention-grey);
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
 .noticeBox {
@@ -74,24 +83,6 @@
   text-decoration: underline;
   padding: 8px 12px 8px 16px;
   gap: 8px;
-  background: var(--background-alt-grey);
-  border: 1px solid var(--border-default-grey);
-  border-radius: 4px;
-}
-
-.ruptureToggleDisabled {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: not-allowed;
-}
-
-.toggleRootDisabled {
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
-.moreButton {
   background: var(--background-alt-grey);
   border: 1px solid var(--border-default-grey);
   border-radius: 4px;
