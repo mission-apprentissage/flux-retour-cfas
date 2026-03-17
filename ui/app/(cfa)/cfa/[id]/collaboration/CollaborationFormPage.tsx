@@ -50,7 +50,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   return (
     <>
-      <CollaborationForm effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
+      <CollaborationForm effectif={effectif!} onSuccess={handleSuccess} onCancel={() => router.back()} />
 
       {showModal && (
         <div className={styles.modalOverlay}>

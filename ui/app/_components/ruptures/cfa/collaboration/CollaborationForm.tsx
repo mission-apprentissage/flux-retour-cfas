@@ -135,12 +135,11 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
         return values.referent_details.trim();
       };
 
-      const verified_info: Record<string, string> = {};
-      for (const [key, value] of Object.entries(values.verified_info)) {
-        if (value?.trim()) {
-          verified_info[key] = value.trim();
-        }
-      }
+      const verified_info = Object.fromEntries(
+        Object.entries(values.verified_info)
+          .filter(([, value]) => value?.trim())
+          .map(([key, value]) => [key, value.trim()])
+      ) as VerifiedInfo;
 
       submitMutation.mutate({
         still_at_cfa: values.still_at_cfa,
