@@ -4,9 +4,6 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useState } from "react";
-import { ORGANISATION_TYPE } from "shared";
-
-import useAuth from "@/hooks/useAuth";
 
 import { useTraitementExport } from "../hooks/useTraitementExport";
 import { TraitementMLTable } from "../tables/TraitementMLTable";
@@ -31,10 +28,6 @@ export function SuiviTraitementSection({
 }: SuiviTraitementSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const [exportError, setExportError] = useState<string | null>(null);
-  const { organisationType } = useAuth();
-
-  const canExport = organisationType !== ORGANISATION_TYPE.DREETS && organisationType !== ORGANISATION_TYPE.DDETS;
-
   const { exportData, isExporting } = useTraitementExport({
     region,
     onError: (error) => setExportError(error.message),
@@ -44,17 +37,15 @@ export function SuiviTraitementSection({
   const controls = (
     <div className={styles.controlsWrapper}>
       <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
-      {canExport && (
-        <Button
-          iconId="fr-icon-download-line"
-          iconPosition="right"
-          priority="primary"
-          onClick={exportData}
-          disabled={isExporting}
-        >
-          {isExporting ? "Export en cours..." : "Exporter les données"}
-        </Button>
-      )}
+      <Button
+        iconId="fr-icon-download-line"
+        iconPosition="right"
+        priority="primary"
+        onClick={exportData}
+        disabled={isExporting}
+      >
+        {isExporting ? "Export en cours..." : "Exporter les données"}
+      </Button>
     </div>
   );
 

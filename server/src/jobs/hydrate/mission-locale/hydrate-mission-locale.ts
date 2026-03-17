@@ -12,6 +12,8 @@ import {
   checkMissionLocaleEffectifDoublon,
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
+  mergeAndSoftDeleteDuplicates,
+  sortKeeperPriority,
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
@@ -410,7 +412,50 @@ export const softDeleteDoublonEffectifML = async () => {
       .next();
 
     if (mlEff) {
-      checkMissionLocaleEffectifDoublon(mlEff._id, doc._id);
+      await checkMissionLocaleEffectifDoublon(mlEff._id, doc._id);
+    }
+  }
+
+  const identityDuplicates = await missionLocaleEffectifsDb()
+    .aggregate<{
+      _id: {
+        nom: string;
+        prenom: string;
+        date_de_naissance: Date;
+        mission_locale_id: ObjectId;
+      };
+      doc_ids: ObjectId[];
+    }>([
+      { $match: { soft_deleted: { $ne: true }, identifiant_normalise: { $ne: null } } },
+      {
+        $group: {
+          _id: {
+            nom: "$identifiant_normalise.nom",
+            prenom: "$identifiant_normalise.prenom",
+            date_de_naissance: "$identifiant_normalise.date_de_naissance",
+            mission_locale_id: "$mission_locale_id",
+          },
+          count: { $sum: 1 },
+          doc_ids: { $push: "$_id" },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+    ])
+    .toArray();
+
+  for (const group of identityDuplicates) {
+    const docs = await missionLocaleEffectifsDb()
+      .find({ _id: { $in: group.doc_ids } })
+      .toArray();
+
+    docs.sort(sortKeeperPriority);
+
+    const keeper = docs[0];
+    const toDelete = docs.slice(1);
+    const deleteIds = toDelete.map((d) => d._id);
+
+    if (deleteIds.length > 0) {
+      await mergeAndSoftDeleteDuplicates(keeper._id, deleteIds);
     }
   }
 };
