@@ -16,6 +16,7 @@ import type {
 import { COLLAB_STATUS_LABELS } from "@/common/types/cfaRuptures";
 
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
+import filterStyles from "./CfaFilters.module.css";
 import { CfaRuptureSegment } from "./CfaRuptureSegment";
 import styles from "./CfaRupturesList.module.css";
 import { CfaSearchResults } from "./CfaSearchResults";
@@ -115,8 +116,8 @@ export function CfaRupturesList({
 
   return (
     <div>
-      <div className={styles.filtersSection}>
-        <div className={styles.searchField}>
+      <div className={filterStyles.filtersSection}>
+        <div className={`${filterStyles.searchField} ${styles.searchFieldFix}`}>
           <Input
             label="Rechercher"
             hideLabel
@@ -138,9 +139,9 @@ export function CfaRupturesList({
 
         {!searchInput && (
           <>
-            <div className={styles.filtersRow}>
-              <span className={styles.filterLabel}>Filtrer</span>
-              <div className={`${styles.selectField} ${styles.selectFieldWide}`}>
+            <div className={`${filterStyles.filtersRow} ${styles.filtersRowNarrow}`}>
+              <span className={filterStyles.filterLabel}>Filtrer</span>
+              <div className={`${filterStyles.selectField} ${filterStyles.selectFieldWide} ${styles.selectFieldWider}`}>
                 <MultiSelectDropdown
                   options={collabOptions}
                   value={collabStatuses}
@@ -149,7 +150,7 @@ export function CfaRupturesList({
                 />
               </div>
 
-              <div className={`${styles.selectField} ${styles.selectFieldWide}`}>
+              <div className={`${filterStyles.selectField} ${filterStyles.selectFieldWide} ${styles.selectFieldWider}`}>
                 <MultiSelectDropdown
                   options={formationOptions}
                   value={formations}
@@ -160,7 +161,7 @@ export function CfaRupturesList({
             </div>
 
             {(collabStatuses.length > 0 || formations.length > 0) && (
-              <div className={styles.tagsRow}>
+              <div className={filterStyles.tagsRow}>
                 {collabStatuses.map((status) => (
                   <Tag
                     key={status}
@@ -185,7 +186,7 @@ export function CfaRupturesList({
                 ))}
                 <button
                   type="button"
-                  className={styles.resetButton}
+                  className={filterStyles.resetButton}
                   onClick={() => {
                     setCollabStatuses([]);
                     setFormations([]);

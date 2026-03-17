@@ -23,18 +23,6 @@
   opacity: 0.5;
 }
 
-.ruptureToggleDisabled {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: not-allowed;
-}
-
-.toggleRootDisabled {
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
 .plus25Badge {
   display: inline-flex;
   align-items: center;
@@ -50,12 +38,6 @@
 
 .plus25Tooltip {
   text-transform: none;
-}
-
-.moreButton {
-  background: var(--background-alt-grey);
-  border: 1px solid var(--border-default-grey);
-  border-radius: 4px;
 }
 
 .alertRow,

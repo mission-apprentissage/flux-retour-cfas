@@ -9,17 +9,12 @@ import { IEffectifMissionLocale } from "shared";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
+import { getInitials } from "@/app/_utils/user.utils";
 
 import styles from "./CfaCollaborationDetail.module.css";
 
 interface CfaEffectifInfoColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
-}
-
-function getInitials(nom?: string | null, prenom?: string | null): string {
-  const n = nom?.charAt(0)?.toUpperCase() || "";
-  const p = prenom?.charAt(0)?.toUpperCase() || "";
-  return n || p ? `${p}.${n}` : "?";
 }
 
 function formatAnnee(annee: number): string {

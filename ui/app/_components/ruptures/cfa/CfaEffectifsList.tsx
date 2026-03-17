@@ -12,11 +12,12 @@ import { useAuth } from "@/app/_context/UserContext";
 import type { CfaCollaborationStatus, ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
 import { COLLAB_STATUS_LABELS, DECA_TOOLTIP_TEXT, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
 
-import cardStyles from "./CfaCardSection.module.css";
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
 import styles from "./CfaEffectifsList.module.css";
 import { CfaEffectifsTable } from "./CfaEffectifsTable";
+import filterStyles from "./CfaFilters.module.css";
 import { CfaRuptureInfoModal, ruptureInfoModal } from "./CfaRuptureInfoModal";
+import cardStyles from "./CfaRuptureSegment.module.css";
 import { useDeclareCfaRupture } from "./hooks";
 
 interface CfaEffectifsListProps {
@@ -132,8 +133,8 @@ export function CfaEffectifsList({
         </p>
       </div>
 
-      <div className={styles.filtersSection}>
-        <div className={styles.searchField}>
+      <div className={filterStyles.filtersSection}>
+        <div className={filterStyles.searchField}>
           <Input
             label="Rechercher"
             hideLabel
@@ -153,10 +154,10 @@ export function CfaEffectifsList({
           />
         </div>
 
-        <div className={styles.filtersRow}>
-          <span className={styles.filterLabel}>Filtrer</span>
+        <div className={filterStyles.filtersRow}>
+          <span className={filterStyles.filterLabel}>Filtrer</span>
 
-          <div className={styles.selectField}>
+          <div className={filterStyles.selectField}>
             <MultiSelectDropdown
               options={EN_RUPTURE_OPTIONS}
               value={enRuptureValues}
@@ -165,7 +166,7 @@ export function CfaEffectifsList({
             />
           </div>
 
-          <div className={styles.selectFieldWide}>
+          <div className={filterStyles.selectFieldWide}>
             <MultiSelectDropdown
               options={collabOptions}
               value={collabStatuses}
@@ -179,7 +180,7 @@ export function CfaEffectifsList({
             />
           </div>
 
-          <div className={styles.selectFieldWide}>
+          <div className={filterStyles.selectFieldWide}>
             <MultiSelectDropdown
               options={formationOptions}
               value={formations}
@@ -195,7 +196,7 @@ export function CfaEffectifsList({
         </div>
 
         {hasActiveFilters && (
-          <div className={styles.tagsRow}>
+          <div className={filterStyles.tagsRow}>
             {enRuptureValues.map((v) => (
               <Tag
                 key={v}
@@ -243,7 +244,7 @@ export function CfaEffectifsList({
             ))}
             <button
               type="button"
-              className={styles.resetButton}
+              className={filterStyles.resetButton}
               onClick={() =>
                 onParamsChange({
                   en_rupture: undefined,
