@@ -6,6 +6,7 @@ import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { zWhatsAppContact } from "shared/models/data/whatsappContact.model";
 
@@ -101,6 +102,13 @@ const zEffectifMissionLocale = z
         reponse_at: z.date().nullish(),
         has_unread_notification: z.boolean().nullish(),
         acc_conjoint_by: zObjectId.nullish(),
+        still_at_cfa: z.boolean().nullish(),
+        commentaires_par_motif: z.record(zAccConjointMotifEnum, z.string()).nullish(),
+        cause_rupture: z.string().nullish(),
+        referent_type: z.enum(["me", "other"]).nullish(),
+        referent_coordonnees: z.string().nullish(),
+        note_complementaire: z.string().nullish(),
+        verified_info: zVerifiedInfo.nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),

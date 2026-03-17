@@ -1,10 +1,24 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
+import { IEffectifMissionLocale } from "shared";
+import { IVerifiedInfo } from "shared/models/data/missionLocaleEffectif.model";
+import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { _get, _put } from "@/common/httpClient";
+
+export type VerifiedInfo = { [K in keyof IVerifiedInfo]-?: string };
+
+type CollaborationFormPayload = Required<
+  Pick<
+    IUpdateMissionLocaleEffectifOrganisme,
+    "still_at_cfa" | "motif" | "commentaires_par_motif" | "cause_rupture" | "referent_type" | "referent_coordonnees"
+  >
+> & {
+  note_complementaire?: string;
+  verified_info: VerifiedInfo;
+};
 
 export function useCfaEffectifDetail(id: string) {
   const { user } = useAuth();
@@ -25,23 +39,29 @@ export function useCfaEffectifDetail(id: string) {
   );
 }
 
-export function useStartCollaboration(effectifId: string, onSuccess: () => void) {
+export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => void) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (payload: CollaborationFormPayload) => {
       const organismeId = user?.organisation?.organisme_id;
       return _put(`/api/v1/organismes/${organismeId}/mission-locale/effectif/${effectifId}`, {
         rupture: true,
         acc_conjoint: true,
-        motif: [] as ACC_CONJOINT_MOTIF_ENUM[],
-        commentaires: "",
+        motif: payload.motif,
+        still_at_cfa: payload.still_at_cfa,
+        commentaires_par_motif: payload.commentaires_par_motif,
+        cause_rupture: payload.cause_rupture,
+        referent_type: payload.referent_type,
+        referent_coordonnees: payload.referent_coordonnees,
+        note_complementaire: payload.note_complementaire || undefined,
+        verified_info: payload.verified_info,
       });
     },
     onSuccess: () => {
-      onSuccess();
       queryClient.invalidateQueries(["effectif"]);
+      onSuccess();
     },
   });
 }
