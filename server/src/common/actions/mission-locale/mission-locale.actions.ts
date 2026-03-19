@@ -2086,7 +2086,7 @@ export const setEffectifMissionLocaleData = async (
     },
     { upsert: true, returnDocument: "after" }
   );
-  await createEffectifMissionLocaleLog(updated.value?._id, setObject, user);
+  await createEffectifMissionLocaleLog(updated.value?._id, setObject, user, missionLocaleId);
 
   // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"
   if (setObject.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {

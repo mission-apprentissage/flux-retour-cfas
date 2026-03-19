@@ -34,6 +34,7 @@ import {
   createStatWithVariation,
   EMPTY_STATS,
   ENGAGEMENT_THRESHOLD,
+  getLatestStatsLowerBound,
   getMissionLocaleIdsByRegion,
   TIME_SERIES_POINTS_COUNT,
   withMissionLocaleFilter,
@@ -100,7 +101,10 @@ export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod 
 };
 
 const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
-  const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+  const matchFilter = withMissionLocaleFilter(
+    { computed_day: { $lte: endDate, $gte: getLatestStatsLowerBound(endDate) } },
+    missionLocaleIds
+  );
 
   const stats = await missionLocaleStatsDb()
     .aggregate([
@@ -476,7 +480,10 @@ export const getTraitementStats = async (
     },
   ];
 
-  const latestMatchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+  const latestMatchFilter = withMissionLocaleFilter(
+    { computed_day: { $lte: endDate, $gte: getLatestStatsLowerBound(endDate) } },
+    missionLocaleIds
+  );
   const firstMatchFilter = withMissionLocaleFilter(
     { computed_day: { $gte: startDate, $lte: endDate } },
     missionLocaleIds
@@ -560,7 +567,11 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$mission_locale_id", "$$ml_id"] }, { $lte: ["$computed_day", evaluationDate] }],
+                $and: [
+                  { $eq: ["$mission_locale_id", "$$ml_id"] },
+                  { $lte: ["$computed_day", evaluationDate] },
+                  { $gte: ["$computed_day", getLatestStatsLowerBound(evaluationDate)] },
+                ],
               },
             },
           },
@@ -674,44 +685,18 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         is_activated: { $ne: ["$activated_at", null] },
       },
     },
-    // Lookup effectifs pour dernière activité
-    {
-      $lookup: {
-        from: "missionLocaleEffectif",
-        localField: "_id",
-        foreignField: "mission_locale_id",
-        as: "effectif_ids",
-      },
-    },
-    {
-      $lookup: {
-        from: "missionLocaleEffectifLog",
-        let: { effectif_ids: "$effectif_ids._id" },
-        pipeline: [
-          { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
-          { $sort: { created_at: -1 as const } },
-          { $limit: 1 },
-          { $project: { created_at: 1 } },
-        ],
-        as: "last_log",
-      },
-    },
     {
       $addFields: {
-        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
         jours_depuis_activite_sort: {
           $cond: [
-            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            { $eq: [{ $ifNull: ["$derniere_activite", null] }, null] },
             -9999999,
             {
               $multiply: [
                 -1,
                 {
                   $floor: {
-                    $divide: [
-                      { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
-                      1000 * 60 * 60 * 24,
-                    ],
+                    $divide: [{ $subtract: [evaluationDate, "$derniere_activite"] }, 1000 * 60 * 60 * 24],
                   },
                 },
               ],
@@ -720,14 +705,11 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         },
         jours_depuis_activite: {
           $cond: [
-            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            { $eq: [{ $ifNull: ["$derniere_activite", null] }, null] },
             null,
             {
               $floor: {
-                $divide: [
-                  { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
-                  1000 * 60 * 60 * 24,
-                ],
+                $divide: [{ $subtract: [evaluationDate, "$derniere_activite"] }, 1000 * 60 * 60 * 24],
               },
             },
           ],
@@ -812,7 +794,7 @@ export const getSuiviTraitementByRegion = async () => {
   const pipeline = [
     {
       $match: {
-        computed_day: { $lte: evaluationDate },
+        computed_day: { $lte: evaluationDate, $gte: getLatestStatsLowerBound(evaluationDate) },
       },
     },
     { $sort: { computed_day: -1 as const } },
@@ -966,18 +948,27 @@ export const getAccompagnementConjointStats = async (
       {
         $match: {
           "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-          "organisme_data.acc_conjoint": true,
           ...missionLocaleFilter,
         },
       },
       {
         $facet: {
-          dossiersPartages: [{ $count: "count" }],
-          mlConcernees: [{ $group: { _id: "$mission_locale_id" } }, { $count: "count" }],
-          cfaPartenaires: [{ $group: { _id: "$effectif_snapshot.organisme_id" } }, { $count: "count" }],
-          motifs: MOTIFS_PIPELINE,
-          statutsTraitement: STATUTS_TRAITEMENT_PIPELINE,
+          totalJeunesRupturants: [{ $count: "count" }],
+          dossiersPartages: [{ $match: { "organisme_data.acc_conjoint": true } }, { $count: "count" }],
+          mlConcernees: [
+            { $match: { "organisme_data.acc_conjoint": true } },
+            { $group: { _id: "$mission_locale_id" } },
+            { $count: "count" },
+          ],
+          cfaPartenaires: [
+            { $match: { "organisme_data.acc_conjoint": true } },
+            { $group: { _id: "$effectif_snapshot.organisme_id" } },
+            { $count: "count" },
+          ],
+          motifs: [{ $match: { "organisme_data.acc_conjoint": true } }, ...MOTIFS_PIPELINE],
+          statutsTraitement: [{ $match: { "organisme_data.acc_conjoint": true } }, ...STATUTS_TRAITEMENT_PIPELINE],
           dejaConnu: [
+            { $match: { "organisme_data.acc_conjoint": true } },
             {
               $group: {
                 _id: null,
@@ -991,10 +982,7 @@ export const getAccompagnementConjointStats = async (
     ])
     .toArray();
 
-  const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
-    "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-    ...missionLocaleFilter,
-  });
+  const totalJeunesRupturants = accConjointStats?.totalJeunesRupturants[0]?.count || 0;
 
   const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
   const mlConcernees = accConjointStats?.mlConcernees[0]?.count || 0;
@@ -1168,7 +1156,7 @@ const buildPercentageField = (numerator: string, denominator: string) => ({
 });
 
 const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
-  { $match: { computed_day: { $lte: evaluationDate } } },
+  { $match: { computed_day: { $lte: evaluationDate, $gte: getLatestStatsLowerBound(evaluationDate) } } },
   { $sort: { computed_day: -1 as const } },
   { $group: { _id: "$mission_locale_id", latest_stats: { $first: "$stats" } } },
   { $lookup: { from: "organisations", localField: "_id", foreignField: "_id", as: "ml" } },
@@ -1177,27 +1165,6 @@ const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
     $match: {
       "ml.type": "MISSION_LOCALE",
       ...(region && { "ml.adresse.region": region }),
-    },
-  },
-  {
-    $lookup: {
-      from: "missionLocaleEffectif",
-      localField: "_id",
-      foreignField: "mission_locale_id",
-      as: "effectif_ids",
-    },
-  },
-  {
-    $lookup: {
-      from: "missionLocaleEffectifLog",
-      let: { effectif_ids: "$effectif_ids._id" },
-      pipeline: [
-        { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
-        { $sort: { created_at: -1 as const } },
-        { $limit: 1 },
-        { $project: { created_at: 1 } },
-      ],
-      as: "last_log",
     },
   },
 ];
@@ -1241,7 +1208,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
         autre: { $ifNull: ["$latest_stats.autre", 0] },
         deja_connu: { $ifNull: ["$latest_stats.deja_connu", 0] },
-        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
+        derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
       },
     },
     {
@@ -1264,7 +1231,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
 
   const regionPipeline = [
     ...basePipeline,
-    { $addFields: { derniere_activite_ml: { $arrayElemAt: ["$last_log.created_at", 0] } } },
+    { $addFields: { derniere_activite_ml: { $ifNull: ["$ml.derniere_activite", null] } } },
     {
       $group: {
         _id: "$ml.adresse.region",

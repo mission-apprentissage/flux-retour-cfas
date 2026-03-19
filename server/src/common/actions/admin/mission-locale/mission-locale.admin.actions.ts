@@ -90,7 +90,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
     ...(commentaires !== undefined ? { commentaires } : {}),
   };
 
-  await createEffectifMissionLocaleLog(mlEff?._id, setObject, user);
+  await createEffectifMissionLocaleLog(mlEff?._id, setObject, user, missionLocaleId);
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
@@ -133,7 +133,8 @@ export const resetEffectifMissionLocaleDataAdmin = async (
       commentaires: undefined,
       deja_connu: undefined,
     },
-    user
+    user,
+    missionLocaleId
   );
 
   await missionLocaleEffectifsDb().updateOne(

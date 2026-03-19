@@ -18606,6 +18606,10 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "derniere_activite": {
+          "bsonType": "date",
+          "description": "Date de la dernière activité d'un agent ML sur le site",
+        },
         "email": {
           "anyOf": [
             {
