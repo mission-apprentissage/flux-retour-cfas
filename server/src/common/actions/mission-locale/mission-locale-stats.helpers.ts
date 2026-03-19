@@ -24,11 +24,7 @@ export const TIME_SERIES_POINTS_COUNT = 6;
 export const ENGAGEMENT_THRESHOLD = 0.7;
 
 /** Stats par défaut quand aucune donnée n'est disponible */
-export const EMPTY_STATS: IAggregatedStats & {
-  total_contacte: number;
-  total_repondu: number;
-  total_accompagne: number;
-} = {
+export const EMPTY_STATS: IAggregatedStats = {
   total: 0,
   total_a_traiter: 0,
   total_traites: 0,
@@ -40,9 +36,6 @@ export const EMPTY_STATS: IAggregatedStats & {
   coordonnees_incorrectes: 0,
   autre: 0,
   deja_connu: 0,
-  total_contacte: 0,
-  total_repondu: 0,
-  total_accompagne: 0,
 };
 
 /**

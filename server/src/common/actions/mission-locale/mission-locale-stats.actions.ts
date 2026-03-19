@@ -5,7 +5,6 @@ import {
   IAccompagnementConjointStats,
   IAggregatedStats,
   IDetailsDossiersTraites,
-  INationalStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
   ITraitementStatsResponse,
@@ -40,8 +39,6 @@ import {
   withMissionLocaleFilter,
 } from "./mission-locale-stats.helpers";
 import { computeMissionLocaleStats } from "./mission-locale.actions";
-
-export type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
   const dateToUse = normalizeToUTCDay(date ?? new Date());
@@ -102,48 +99,7 @@ export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod 
   };
 };
 
-interface StatsAggregationOptions {
-  includeInjoignableInContacte?: boolean;
-  includeAutreAvecContactInRepondu?: boolean;
-  accompagneUsesNouveauProjet?: boolean;
-}
-
-const DEFAULT_STATS_OPTIONS: StatsAggregationOptions = {
-  includeInjoignableInContacte: true,
-  includeAutreAvecContactInRepondu: false,
-  accompagneUsesNouveauProjet: false,
-};
-
-const getLatestStatsPerML = async (
-  endDate: Date,
-  options: StatsAggregationOptions = DEFAULT_STATS_OPTIONS,
-  missionLocaleIds?: ObjectId[]
-) => {
-  const opts = { ...DEFAULT_STATS_OPTIONS, ...options };
-
-  const totalContacteAdd: string[] = [
-    "$latest_stats.rdv_pris",
-    "$latest_stats.nouveau_projet",
-    "$latest_stats.deja_accompagne",
-    "$latest_stats.contacte_sans_retour",
-  ];
-  if (opts.includeInjoignableInContacte) {
-    totalContacteAdd.push("$injoignables");
-  }
-
-  const totalReponduAdd: string[] = [
-    "$latest_stats.rdv_pris",
-    "$latest_stats.nouveau_projet",
-    "$latest_stats.deja_accompagne",
-  ];
-  if (opts.includeAutreAvecContactInRepondu) {
-    totalReponduAdd.push("$autre_avec_contact");
-  }
-
-  const totalAccompagneAdd: string[] = opts.accompagneUsesNouveauProjet
-    ? ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet"]
-    : ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"];
-
+const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
   const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
 
   const stats = await missionLocaleStatsDb()
@@ -157,36 +113,18 @@ const getLatestStatsPerML = async (
         },
       },
       {
-        $addFields: {
-          injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
-          autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
-        },
-      },
-      {
         $group: {
           _id: null,
           total: { $sum: "$latest_stats.total" },
           total_traites: { $sum: "$latest_stats.traite" },
           total_a_traiter: { $sum: "$latest_stats.a_traiter" },
-          total_contacte: {
-            $sum: {
-              $add: totalContacteAdd,
-            },
-          },
-          total_repondu: {
-            $sum: {
-              $add: totalReponduAdd,
-            },
-          },
-          total_accompagne: { $sum: { $add: totalAccompagneAdd } },
           rdv_pris: { $sum: "$latest_stats.rdv_pris" },
           nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
           deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
           contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
-          injoignables: { $sum: "$injoignables" },
+          injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
           coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
           autre: { $sum: "$latest_stats.autre" },
-          autre_avec_contact: { $sum: "$autre_avec_contact" },
           deja_connu: { $sum: "$latest_stats.deja_connu" },
         },
       },
@@ -194,18 +132,6 @@ const getLatestStatsPerML = async (
     .toArray();
 
   return stats;
-};
-
-const getLatestStatsPerMLWithOptions = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
-  return getLatestStatsPerML(
-    endDate,
-    {
-      includeInjoignableInContacte: false,
-      includeAutreAvecContactInRepondu: false,
-      accompagneUsesNouveauProjet: true,
-    },
-    missionLocaleIds
-  );
 };
 
 export const getCumulativeStatsForDates = async (dates: Date[], missionLocaleIds?: ObjectId[]) => {
@@ -455,12 +381,9 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
   };
 };
 
-export async function getStatsForPeriod(
-  endDate: Date,
-  missionLocaleIds?: ObjectId[]
-): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
+export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: ObjectId[]): Promise<IAggregatedStats> {
   try {
-    const stats = await getLatestStatsPerMLWithOptions(endDate, missionLocaleIds);
+    const stats = await getLatestStatsPerML(endDate, missionLocaleIds);
 
     if (stats.length === 0) {
       logger.warn(`[getStatsForPeriod] Aucune donnée disponible jusqu'à ${endDate.toISOString()}`);
@@ -481,9 +404,6 @@ export async function getStatsForPeriod(
       coordonnees_incorrectes: currentStats.coordonnees_incorrectes || 0,
       autre: currentStats.autre || 0,
       deja_connu: currentStats.deja_connu || 0,
-      total_contacte: currentStats.total_contacte || 0,
-      total_repondu: currentStats.total_repondu || 0,
-      total_accompagne: currentStats.total_accompagne || 0,
     };
   } catch (error) {
     logger.error(
@@ -585,61 +505,6 @@ export const getTraitementStats = async (
     },
     evaluationDate: endDate,
     period,
-  };
-};
-
-export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<INationalStats> => {
-  const evaluationDate = normalizeToUTCDay(new Date());
-
-  const endDate = evaluationDate;
-  const startDate = await calculateStartDateAsync(period, endDate);
-
-  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
-
-  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
-
-  const [currentStats, previousStats, regionalData, traitementData] = await Promise.all([
-    getStatsForPeriod(endDate),
-    getStatsForPeriod(startDate),
-    getRegionalStats(period),
-    getTraitementStats(period, evaluationDate),
-  ]);
-
-  const rupturantsSummary: IRupturantsSummary = {
-    a_traiter: createStatWithVariation(currentStats.total_a_traiter, previousStats.total_a_traiter),
-    traites: createStatWithVariation(currentStats.total_traites, previousStats.total_traites),
-    total: currentStats.total,
-  };
-
-  const detailsTraites: IDetailsDossiersTraites = {
-    rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
-    nouveau_projet: createStatWithVariation(currentStats.nouveau_projet, previousStats.nouveau_projet),
-    contacte_sans_retour: createStatWithVariation(
-      currentStats.contacte_sans_retour,
-      previousStats.contacte_sans_retour
-    ),
-    deja_accompagne: createStatWithVariation(currentStats.deja_accompagne, previousStats.deja_accompagne),
-    injoignables: createStatWithVariation(currentStats.injoignables, previousStats.injoignables),
-    coordonnees_incorrectes: createStatWithVariation(
-      currentStats.coordonnees_incorrectes,
-      previousStats.coordonnees_incorrectes
-    ),
-    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
-    deja_connu: currentStats.deja_connu,
-    total: currentStats.total_traites,
-  };
-
-  return {
-    rupturantsTimeSeries,
-    rupturantsSummary,
-    detailsTraites,
-    regional: regionalData,
-    evaluationDate: endDate,
-    period,
-    traitement: {
-      latest: traitementData.latest,
-      first: traitementData.first,
-    },
   };
 };
 
@@ -999,32 +864,6 @@ export const getSuiviTraitementByRegion = async () => {
   }));
 };
 
-export const getSyntheseStats = async (period: StatsPeriod = "30days") => {
-  const evaluationDate = normalizeToUTCDay(new Date());
-
-  const [summary, regional, traitement] = await Promise.all([
-    getSummaryStats(evaluationDate, period),
-    getRegionalStats(period),
-    getTraitementStats(period, evaluationDate),
-  ]);
-
-  return {
-    summary: {
-      mlCount: summary.mlCount,
-      activatedMlCount: summary.activatedMlCount,
-      previousActivatedMlCount: summary.previousActivatedMlCount,
-      date: summary.date,
-    },
-    regions: regional.regions,
-    traitement: {
-      latest: traitement.latest,
-      first: traitement.first,
-    },
-    evaluationDate,
-    period,
-  };
-};
-
 const buildCountIf = (field: string, value: string) => ({
   $sum: { $cond: [{ $eq: [field, value] }, 1, 0] },
 });
@@ -1086,7 +925,7 @@ const STATUTS_TRAITEMENT_PIPELINE = [
   },
 ];
 
-const getCfaPilotes = async () => {
+const getCfaPilotesOids = async () => {
   const cfaPilotes = (await organisationsDb()
     .find({
       type: "ORGANISME_FORMATION",
@@ -1094,11 +933,9 @@ const getCfaPilotes = async () => {
     })
     .toArray()) as IOrganisationOrganismeFormation[];
 
-  const cfaPilotesOids = cfaPilotes
+  return cfaPilotes
     .map((o) => (o.organisme_id ? new ObjectId(o.organisme_id) : null))
     .filter((id): id is ObjectId => id !== null);
-
-  return { cfaPilotes, cfaPilotesOids };
 };
 
 const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
@@ -1115,7 +952,7 @@ export const getAccompagnementConjointStats = async (
 ): Promise<IAccompagnementConjointStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const { cfaPilotesOids } = await getCfaPilotes();
+  const cfaPilotesOids = await getCfaPilotesOids();
   const regionsActives = await getRegionsActives(cfaPilotesOids);
 
   const missionLocaleFilter = mlId
