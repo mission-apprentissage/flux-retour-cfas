@@ -472,9 +472,7 @@ export const getTraitementStats = async (
           },
         },
         total_accompagne: {
-          $sum: {
-            $add: ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"],
-          },
+          $sum: "$latest_stats.rdv_pris",
         },
       },
     },
