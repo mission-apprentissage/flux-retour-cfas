@@ -49,6 +49,9 @@ const zOrganisationMissionLocaleCreate = z.object({
   telephone: z.string({ description: "Téléphone de la mission locale" }).nullish(),
   site_web: z.string({ description: "Site web de la mission locale" }).nullish(),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),
+  derniere_activite: z.coerce
+    .date({ description: "Date de la dernière activité d'un agent ML sur le site" })
+    .optional(),
   adresse: zAdresse.optional(),
   arml_id: zObjectId.optional().describe("Identifiant de l'ARML à laquelle la mission locale est rattachée"),
 });

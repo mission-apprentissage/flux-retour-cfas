@@ -135,18 +135,18 @@ export function TraitementCards({
             <TooltipHeader>Total jeunes accompagnés</TooltipHeader>
             <TooltipContent>
               <TooltipText>
-                Les jeunes accompagnés sont l&apos;ensemble des jeunes détectés par le Tableau de bord qui sont déjà
-                accompagnés par le service public ou qui ont obtenu un rendez-vous grâce à la mise en relation.
+                Les jeunes accompagnés sont l&apos;ensemble des jeunes détectés par le Tableau de bord qui ont obtenu un
+                rendez-vous grâce à la mise en relation.
               </TooltipText>
               <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
               <ul className={styles.bulletList}>
                 <BulletItem color={DOSSIERS_TRAITES_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.deja_accompagne}>
-                  Déjà suivi par le service public à l&apos;emploi
-                </BulletItem>
               </ul>
               <TooltipText spaced>sont exclus</TooltipText>
               <ul className={styles.bulletList}>
+                <BulletItem color={DOSSIERS_TRAITES_COLORS.deja_accompagne}>
+                  Déjà suivi par le service public à l&apos;emploi
+                </BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_COLORS.nouveau_projet}>Nouveau projet</BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_COLORS.contacte_sans_retour}>À recontacter</BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_COLORS.coordonnees_incorrectes}>Mauvaises coordonnées</BulletItem>
