@@ -5,7 +5,6 @@ import {
   IAccompagnementConjointStats,
   IAggregatedStats,
   IDetailsDossiersTraites,
-  INationalStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
   ITraitementStatsResponse,
@@ -35,13 +34,12 @@ import {
   createStatWithVariation,
   EMPTY_STATS,
   ENGAGEMENT_THRESHOLD,
+  getLatestStatsLowerBound,
   getMissionLocaleIdsByRegion,
   TIME_SERIES_POINTS_COUNT,
   withMissionLocaleFilter,
 } from "./mission-locale-stats.helpers";
 import { computeMissionLocaleStats } from "./mission-locale.actions";
-
-export type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
   const dateToUse = normalizeToUTCDay(date ?? new Date());
@@ -102,49 +100,11 @@ export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod 
   };
 };
 
-interface StatsAggregationOptions {
-  includeInjoignableInContacte?: boolean;
-  includeAutreAvecContactInRepondu?: boolean;
-  accompagneUsesNouveauProjet?: boolean;
-}
-
-const DEFAULT_STATS_OPTIONS: StatsAggregationOptions = {
-  includeInjoignableInContacte: true,
-  includeAutreAvecContactInRepondu: false,
-  accompagneUsesNouveauProjet: false,
-};
-
-const getLatestStatsPerML = async (
-  endDate: Date,
-  options: StatsAggregationOptions = DEFAULT_STATS_OPTIONS,
-  missionLocaleIds?: ObjectId[]
-) => {
-  const opts = { ...DEFAULT_STATS_OPTIONS, ...options };
-
-  const totalContacteAdd: string[] = [
-    "$latest_stats.rdv_pris",
-    "$latest_stats.nouveau_projet",
-    "$latest_stats.deja_accompagne",
-    "$latest_stats.contacte_sans_retour",
-  ];
-  if (opts.includeInjoignableInContacte) {
-    totalContacteAdd.push("$injoignables");
-  }
-
-  const totalReponduAdd: string[] = [
-    "$latest_stats.rdv_pris",
-    "$latest_stats.nouveau_projet",
-    "$latest_stats.deja_accompagne",
-  ];
-  if (opts.includeAutreAvecContactInRepondu) {
-    totalReponduAdd.push("$autre_avec_contact");
-  }
-
-  const totalAccompagneAdd: string[] = opts.accompagneUsesNouveauProjet
-    ? ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet"]
-    : ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"];
-
-  const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
+  const matchFilter = withMissionLocaleFilter(
+    { computed_day: { $lte: endDate, $gte: getLatestStatsLowerBound(endDate) } },
+    missionLocaleIds
+  );
 
   const stats = await missionLocaleStatsDb()
     .aggregate([
@@ -157,36 +117,18 @@ const getLatestStatsPerML = async (
         },
       },
       {
-        $addFields: {
-          injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
-          autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
-        },
-      },
-      {
         $group: {
           _id: null,
           total: { $sum: "$latest_stats.total" },
           total_traites: { $sum: "$latest_stats.traite" },
           total_a_traiter: { $sum: "$latest_stats.a_traiter" },
-          total_contacte: {
-            $sum: {
-              $add: totalContacteAdd,
-            },
-          },
-          total_repondu: {
-            $sum: {
-              $add: totalReponduAdd,
-            },
-          },
-          total_accompagne: { $sum: { $add: totalAccompagneAdd } },
           rdv_pris: { $sum: "$latest_stats.rdv_pris" },
           nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
           deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
           contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
-          injoignables: { $sum: "$injoignables" },
+          injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
           coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
           autre: { $sum: "$latest_stats.autre" },
-          autre_avec_contact: { $sum: "$autre_avec_contact" },
           deja_connu: { $sum: "$latest_stats.deja_connu" },
         },
       },
@@ -194,18 +136,6 @@ const getLatestStatsPerML = async (
     .toArray();
 
   return stats;
-};
-
-const getLatestStatsPerMLWithOptions = async (endDate: Date, missionLocaleIds?: ObjectId[]) => {
-  return getLatestStatsPerML(
-    endDate,
-    {
-      includeInjoignableInContacte: false,
-      includeAutreAvecContactInRepondu: false,
-      accompagneUsesNouveauProjet: true,
-    },
-    missionLocaleIds
-  );
 };
 
 export const getCumulativeStatsForDates = async (dates: Date[], missionLocaleIds?: ObjectId[]) => {
@@ -455,12 +385,9 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
   };
 };
 
-export async function getStatsForPeriod(
-  endDate: Date,
-  missionLocaleIds?: ObjectId[]
-): Promise<IAggregatedStats & { total_contacte: number; total_repondu: number; total_accompagne: number }> {
+export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: ObjectId[]): Promise<IAggregatedStats> {
   try {
-    const stats = await getLatestStatsPerMLWithOptions(endDate, missionLocaleIds);
+    const stats = await getLatestStatsPerML(endDate, missionLocaleIds);
 
     if (stats.length === 0) {
       logger.warn(`[getStatsForPeriod] Aucune donnée disponible jusqu'à ${endDate.toISOString()}`);
@@ -481,9 +408,6 @@ export async function getStatsForPeriod(
       coordonnees_incorrectes: currentStats.coordonnees_incorrectes || 0,
       autre: currentStats.autre || 0,
       deja_connu: currentStats.deja_connu || 0,
-      total_contacte: currentStats.total_contacte || 0,
-      total_repondu: currentStats.total_repondu || 0,
-      total_accompagne: currentStats.total_accompagne || 0,
     };
   } catch (error) {
     logger.error(
@@ -548,15 +472,16 @@ export const getTraitementStats = async (
           },
         },
         total_accompagne: {
-          $sum: {
-            $add: ["$latest_stats.rdv_pris", "$latest_stats.deja_accompagne"],
-          },
+          $sum: "$latest_stats.rdv_pris",
         },
       },
     },
   ];
 
-  const latestMatchFilter = withMissionLocaleFilter({ computed_day: { $lte: endDate } }, missionLocaleIds);
+  const latestMatchFilter = withMissionLocaleFilter(
+    { computed_day: { $lte: endDate, $gte: getLatestStatsLowerBound(endDate) } },
+    missionLocaleIds
+  );
   const firstMatchFilter = withMissionLocaleFilter(
     { computed_day: { $gte: startDate, $lte: endDate } },
     missionLocaleIds
@@ -585,61 +510,6 @@ export const getTraitementStats = async (
     },
     evaluationDate: endDate,
     period,
-  };
-};
-
-export const getNationalStats = async (period: StatsPeriod = "30days"): Promise<INationalStats> => {
-  const evaluationDate = normalizeToUTCDay(new Date());
-
-  const endDate = evaluationDate;
-  const startDate = await calculateStartDateAsync(period, endDate);
-
-  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
-
-  const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(evenlySpacedDates);
-
-  const [currentStats, previousStats, regionalData, traitementData] = await Promise.all([
-    getStatsForPeriod(endDate),
-    getStatsForPeriod(startDate),
-    getRegionalStats(period),
-    getTraitementStats(period, evaluationDate),
-  ]);
-
-  const rupturantsSummary: IRupturantsSummary = {
-    a_traiter: createStatWithVariation(currentStats.total_a_traiter, previousStats.total_a_traiter),
-    traites: createStatWithVariation(currentStats.total_traites, previousStats.total_traites),
-    total: currentStats.total,
-  };
-
-  const detailsTraites: IDetailsDossiersTraites = {
-    rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
-    nouveau_projet: createStatWithVariation(currentStats.nouveau_projet, previousStats.nouveau_projet),
-    contacte_sans_retour: createStatWithVariation(
-      currentStats.contacte_sans_retour,
-      previousStats.contacte_sans_retour
-    ),
-    deja_accompagne: createStatWithVariation(currentStats.deja_accompagne, previousStats.deja_accompagne),
-    injoignables: createStatWithVariation(currentStats.injoignables, previousStats.injoignables),
-    coordonnees_incorrectes: createStatWithVariation(
-      currentStats.coordonnees_incorrectes,
-      previousStats.coordonnees_incorrectes
-    ),
-    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
-    deja_connu: currentStats.deja_connu,
-    total: currentStats.total_traites,
-  };
-
-  return {
-    rupturantsTimeSeries,
-    rupturantsSummary,
-    detailsTraites,
-    regional: regionalData,
-    evaluationDate: endDate,
-    period,
-    traitement: {
-      latest: traitementData.latest,
-      first: traitementData.first,
-    },
   };
 };
 
@@ -695,7 +565,11 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$mission_locale_id", "$$ml_id"] }, { $lte: ["$computed_day", evaluationDate] }],
+                $and: [
+                  { $eq: ["$mission_locale_id", "$$ml_id"] },
+                  { $lte: ["$computed_day", evaluationDate] },
+                  { $gte: ["$computed_day", getLatestStatsLowerBound(evaluationDate)] },
+                ],
               },
             },
           },
@@ -809,44 +683,18 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         is_activated: { $ne: ["$activated_at", null] },
       },
     },
-    // Lookup effectifs pour dernière activité
-    {
-      $lookup: {
-        from: "missionLocaleEffectif",
-        localField: "_id",
-        foreignField: "mission_locale_id",
-        as: "effectif_ids",
-      },
-    },
-    {
-      $lookup: {
-        from: "missionLocaleEffectifLog",
-        let: { effectif_ids: "$effectif_ids._id" },
-        pipeline: [
-          { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
-          { $sort: { created_at: -1 as const } },
-          { $limit: 1 },
-          { $project: { created_at: 1 } },
-        ],
-        as: "last_log",
-      },
-    },
     {
       $addFields: {
-        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
         jours_depuis_activite_sort: {
           $cond: [
-            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            { $eq: [{ $ifNull: ["$derniere_activite", null] }, null] },
             -9999999,
             {
               $multiply: [
                 -1,
                 {
                   $floor: {
-                    $divide: [
-                      { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
-                      1000 * 60 * 60 * 24,
-                    ],
+                    $divide: [{ $subtract: [evaluationDate, "$derniere_activite"] }, 1000 * 60 * 60 * 24],
                   },
                 },
               ],
@@ -855,14 +703,11 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         },
         jours_depuis_activite: {
           $cond: [
-            { $eq: [{ $arrayElemAt: ["$last_log.created_at", 0] }, null] },
+            { $eq: [{ $ifNull: ["$derniere_activite", null] }, null] },
             null,
             {
               $floor: {
-                $divide: [
-                  { $subtract: [evaluationDate, { $arrayElemAt: ["$last_log.created_at", 0] }] },
-                  1000 * 60 * 60 * 24,
-                ],
+                $divide: [{ $subtract: [evaluationDate, "$derniere_activite"] }, 1000 * 60 * 60 * 24],
               },
             },
           ],
@@ -947,7 +792,7 @@ export const getSuiviTraitementByRegion = async () => {
   const pipeline = [
     {
       $match: {
-        computed_day: { $lte: evaluationDate },
+        computed_day: { $lte: evaluationDate, $gte: getLatestStatsLowerBound(evaluationDate) },
       },
     },
     { $sort: { computed_day: -1 as const } },
@@ -997,32 +842,6 @@ export const getSuiviTraitementByRegion = async () => {
     pourcentage_traites: r.pourcentage_traites,
     ml_actives: r.ml_actives,
   }));
-};
-
-export const getSyntheseStats = async (period: StatsPeriod = "30days") => {
-  const evaluationDate = normalizeToUTCDay(new Date());
-
-  const [summary, regional, traitement] = await Promise.all([
-    getSummaryStats(evaluationDate, period),
-    getRegionalStats(period),
-    getTraitementStats(period, evaluationDate),
-  ]);
-
-  return {
-    summary: {
-      mlCount: summary.mlCount,
-      activatedMlCount: summary.activatedMlCount,
-      previousActivatedMlCount: summary.previousActivatedMlCount,
-      date: summary.date,
-    },
-    regions: regional.regions,
-    traitement: {
-      latest: traitement.latest,
-      first: traitement.first,
-    },
-    evaluationDate,
-    period,
-  };
 };
 
 const buildCountIf = (field: string, value: string) => ({
@@ -1086,7 +905,7 @@ const STATUTS_TRAITEMENT_PIPELINE = [
   },
 ];
 
-const getCfaPilotes = async () => {
+const getCfaPilotesOids = async () => {
   const cfaPilotes = (await organisationsDb()
     .find({
       type: "ORGANISME_FORMATION",
@@ -1094,11 +913,9 @@ const getCfaPilotes = async () => {
     })
     .toArray()) as IOrganisationOrganismeFormation[];
 
-  const cfaPilotesOids = cfaPilotes
+  return cfaPilotes
     .map((o) => (o.organisme_id ? new ObjectId(o.organisme_id) : null))
     .filter((id): id is ObjectId => id !== null);
-
-  return { cfaPilotes, cfaPilotesOids };
 };
 
 const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
@@ -1115,7 +932,7 @@ export const getAccompagnementConjointStats = async (
 ): Promise<IAccompagnementConjointStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const { cfaPilotesOids } = await getCfaPilotes();
+  const cfaPilotesOids = await getCfaPilotesOids();
   const regionsActives = await getRegionsActives(cfaPilotesOids);
 
   const missionLocaleFilter = mlId
@@ -1129,18 +946,27 @@ export const getAccompagnementConjointStats = async (
       {
         $match: {
           "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-          "organisme_data.acc_conjoint": true,
           ...missionLocaleFilter,
         },
       },
       {
         $facet: {
-          dossiersPartages: [{ $count: "count" }],
-          mlConcernees: [{ $group: { _id: "$mission_locale_id" } }, { $count: "count" }],
-          cfaPartenaires: [{ $group: { _id: "$effectif_snapshot.organisme_id" } }, { $count: "count" }],
-          motifs: MOTIFS_PIPELINE,
-          statutsTraitement: STATUTS_TRAITEMENT_PIPELINE,
+          totalJeunesRupturants: [{ $count: "count" }],
+          dossiersPartages: [{ $match: { "organisme_data.acc_conjoint": true } }, { $count: "count" }],
+          mlConcernees: [
+            { $match: { "organisme_data.acc_conjoint": true } },
+            { $group: { _id: "$mission_locale_id" } },
+            { $count: "count" },
+          ],
+          cfaPartenaires: [
+            { $match: { "organisme_data.acc_conjoint": true } },
+            { $group: { _id: "$effectif_snapshot.organisme_id" } },
+            { $count: "count" },
+          ],
+          motifs: [{ $match: { "organisme_data.acc_conjoint": true } }, ...MOTIFS_PIPELINE],
+          statutsTraitement: [{ $match: { "organisme_data.acc_conjoint": true } }, ...STATUTS_TRAITEMENT_PIPELINE],
           dejaConnu: [
+            { $match: { "organisme_data.acc_conjoint": true } },
             {
               $group: {
                 _id: null,
@@ -1154,10 +980,7 @@ export const getAccompagnementConjointStats = async (
     ])
     .toArray();
 
-  const totalJeunesRupturants = await missionLocaleEffectifsDb().countDocuments({
-    "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-    ...missionLocaleFilter,
-  });
+  const totalJeunesRupturants = accConjointStats?.totalJeunesRupturants[0]?.count || 0;
 
   const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
   const mlConcernees = accConjointStats?.mlConcernees[0]?.count || 0;
@@ -1331,7 +1154,7 @@ const buildPercentageField = (numerator: string, denominator: string) => ({
 });
 
 const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
-  { $match: { computed_day: { $lte: evaluationDate } } },
+  { $match: { computed_day: { $lte: evaluationDate, $gte: getLatestStatsLowerBound(evaluationDate) } } },
   { $sort: { computed_day: -1 as const } },
   { $group: { _id: "$mission_locale_id", latest_stats: { $first: "$stats" } } },
   { $lookup: { from: "organisations", localField: "_id", foreignField: "_id", as: "ml" } },
@@ -1340,27 +1163,6 @@ const buildExportBasePipeline = (evaluationDate: Date, region?: string) => [
     $match: {
       "ml.type": "MISSION_LOCALE",
       ...(region && { "ml.adresse.region": region }),
-    },
-  },
-  {
-    $lookup: {
-      from: "missionLocaleEffectif",
-      localField: "_id",
-      foreignField: "mission_locale_id",
-      as: "effectif_ids",
-    },
-  },
-  {
-    $lookup: {
-      from: "missionLocaleEffectifLog",
-      let: { effectif_ids: "$effectif_ids._id" },
-      pipeline: [
-        { $match: { $expr: { $in: ["$mission_locale_effectif_id", "$$effectif_ids"] } } },
-        { $sort: { created_at: -1 as const } },
-        { $limit: 1 },
-        { $project: { created_at: 1 } },
-      ],
-      as: "last_log",
     },
   },
 ];
@@ -1404,7 +1206,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
         autre: { $ifNull: ["$latest_stats.autre", 0] },
         deja_connu: { $ifNull: ["$latest_stats.deja_connu", 0] },
-        derniere_activite: { $arrayElemAt: ["$last_log.created_at", 0] },
+        derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
       },
     },
     {
@@ -1427,7 +1229,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
 
   const regionPipeline = [
     ...basePipeline,
-    { $addFields: { derniere_activite_ml: { $arrayElemAt: ["$last_log.created_at", 0] } } },
+    { $addFields: { derniere_activite_ml: { $ifNull: ["$ml.derniere_activite", null] } } },
     {
       $group: {
         _id: "$ml.adresse.region",
