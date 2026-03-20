@@ -21,5 +21,22 @@ def register_routes(app, get_model):
         if model is None:
             return jsonify({"error": "Model not available"}), 503
         data = request_data.get("data")
+        if not isinstance(data, list) or len(data) == 0:
+            return jsonify({"error": "'data' must be a non-empty array"}), 400
+        required_fields = [
+            "apprenant.date_de_naissance",
+            "formation.date_inscription",
+            "formation.date_fin",
+            "formation.date_entree",
+            "contrat.date_debut",
+            "contrat.date_fin",
+            "contrat.date_rupture",
+        ]
+        for i, item in enumerate(data):
+            if not isinstance(item, dict):
+                return jsonify({"error": f"data[{i}] must be an object"}), 400
+            missing = [f for f in required_fields if f not in item]
+            if missing:
+                return jsonify({"error": f"data[{i}] missing fields: {missing}"}), 400
         result = model.score(data)
         return jsonify(result), 200
