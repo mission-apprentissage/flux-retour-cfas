@@ -109,8 +109,6 @@ services:
         limits:
           memory: 2g
     env_file: .env_server_classifier
-    volumes:
-      - /opt/app/data/classifier_hf_cache:/home/app/.cache/huggingface
     logging:
       driver: "fluentd"
       options:
