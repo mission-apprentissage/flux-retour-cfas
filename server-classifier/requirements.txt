@@ -1,0 +1,12 @@
+flask
+python-dotenv
+huggingface_hub[hf_xet]
+pandas>=2.2.2
+scikit-learn==1.6.1
+requests==2.32.3
+numpy>=2.1.0
+gunicorn
+datasets
+imbalanced-learn
+ruff
+pytest
