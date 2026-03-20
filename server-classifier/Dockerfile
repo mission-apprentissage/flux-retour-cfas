@@ -13,11 +13,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --prefer-binary --no-compile --no-deps \
-    -r requirements.txt \
-    && pip install --no-compile \
-    -r requirements.txt \
-    && rm -rf /root/.cache/pip/* /tmp/*
+RUN pip install --prefer-binary -r requirements.txt
 
 COPY . .
 
