@@ -36,8 +36,9 @@ def get_model(version=None):
         model = Classifier(version=version, token=HF_TOKEN)
         try:
             model.load_model()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Failed to load model version '%s': %s", version, e, exc_info=True)
+            model = None
     return model
 
 
