@@ -1,3 +1,4 @@
+import hmac
 import logging
 
 from flask import jsonify, request
@@ -16,8 +17,8 @@ def register_all_routes(app, get_model):
             return None
         if not CLASSIFIER_API_KEY:
             return None
-        api_key = request.headers.get("X-API-Key")
-        if api_key != CLASSIFIER_API_KEY:
+        api_key = request.headers.get("X-API-Key", "")
+        if not hmac.compare_digest(api_key, CLASSIFIER_API_KEY):
             return jsonify({"error": "Unauthorized"}), 401
 
     @app.before_request
