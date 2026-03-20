@@ -2,6 +2,7 @@ import logging
 
 from flask import Flask, jsonify
 
+from config import CLASSIFIER_API_KEY
 from model_manager import get_model, load_latest_model
 from routes import register_all_routes
 
@@ -15,6 +16,9 @@ def create_app():
         gunicorn_logger = logging.getLogger("gunicorn.error")
         app.logger.handlers = gunicorn_logger.handlers
         app.logger.setLevel(gunicorn_logger.level)
+
+    if not CLASSIFIER_API_KEY:
+        app.logger.warning("CLASSIFIER_API_KEY is not set — API authentication is disabled")
 
     load_latest_model()
     register_all_routes(app, get_model)
