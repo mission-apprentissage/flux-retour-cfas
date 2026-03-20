@@ -19,3 +19,4 @@
         docker_images:
           - mna_tdb_ui
           - mna_tdb_server
+          - mna_tdb_server_classifier
