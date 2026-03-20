@@ -3,7 +3,7 @@ import re
 
 from flask import jsonify, request
 
-from config import VERSION_PATTERN
+from config import MAX_BATCH_SIZE, VERSION_PATTERN
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,8 @@ def register_routes(app, get_model):
         data = request_data.get("data")
         if not isinstance(data, list) or len(data) == 0:
             return jsonify({"error": "'data' must be a non-empty array"}), 400
+        if len(data) > MAX_BATCH_SIZE:
+            return jsonify({"error": f"Batch size exceeds maximum of {MAX_BATCH_SIZE}"}), 400
         required_fields = [
             "apprenant.date_de_naissance",
             "formation.date_inscription",
