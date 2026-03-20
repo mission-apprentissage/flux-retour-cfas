@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "setup": ".bin/mna-tdb init:env",
-    "dev": "yarn services:start; yarn foreach:parallel run dev",
+    "dev": "yarn services:start; concurrently -n server,ui,classifier -c blue,green,yellow \"yarn server:dev\" \"yarn ui:dev\" \"yarn classifier:dev\"",
     "cli": "yarn workspace server cli",
     "seed": "./.bin/mna-tdb seed:apply",
     "deploy": "./.bin/mna-tdb deploy",
@@ -28,12 +28,14 @@
     "migration:create": "yarn cli migrations:create",
     "server:dev": "yarn workspace server dev",
     "ui:dev": "yarn workspace ui dev",
+    "classifier:install": "cd server-classifier && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt",
+    "classifier:dev": "cd server-classifier && .venv/bin/python main.py",
     "services:start": "docker compose up --remove-orphans -d",
     "services:stop": "docker compose down",
     "services:clean": "yarn services:stop; docker system prune --volumes",
     "seed:update": "./.bin/mna-tdb seed:update",
-    "lint": "eslint --ignore-path .gitignore --cache --ext .js,.jsx,.ts,.tsx .",
-    "lint:fix": "yarn lint --fix",
+    "lint": "eslint --ignore-path .gitignore --cache --ext .js,.jsx,.ts,.tsx . && (cd server-classifier && .venv/bin/ruff check . && .venv/bin/ruff format --check .)",
+    "lint:fix": "eslint --ignore-path .gitignore --cache --fix --ext .js,.jsx,.ts,.tsx . && (cd server-classifier && .venv/bin/ruff check --fix . && .venv/bin/ruff format .)",
     "prettier:fix": "prettier --write  -u .",
     "prettier:check": "prettier --check -u .",
     "release": "semantic-release",
@@ -41,7 +43,7 @@
     "postinstall": "husky install",
     "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
     "test": "vitest",
-    "test:ci": "yarn test --run",
+    "test:ci": "yarn test --run && cd server-classifier && .venv/bin/pytest -v",
     "test:watch": "yarn test --watch",
     "typecheck": "yarn foreach:parallel run typecheck",
     "typecheck:ci": "yarn foreach:ci run typecheck",
@@ -64,6 +66,7 @@
     "@types/node": "^22.7.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^9.2.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "^13.5.7",
     "eslint-config-prettier": "^9.1.0",
@@ -91,6 +94,10 @@
     "*.{js,jsx,ts,tsx}": [
       "eslint --ignore-path .gitignore --cache --fix",
       "prettier --write -u"
+    ],
+    "server-classifier/**/*.py": [
+      "cd server-classifier && .venv/bin/ruff check --fix",
+      "cd server-classifier && .venv/bin/ruff format"
     ],
     "*": [
       "prettier --write -u"
