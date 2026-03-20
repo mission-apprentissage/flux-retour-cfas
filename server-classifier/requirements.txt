@@ -8,5 +8,3 @@ numpy>=2.1.0
 gunicorn
 datasets
 imbalanced-learn
-ruff
-pytest
