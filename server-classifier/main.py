@@ -1,7 +1,9 @@
-from __init__ import create_app
-import os
-from dotenv import load_dotenv
 import logging
+import os
+
+from dotenv import load_dotenv
+
+from __init__ import create_app
 
 load_dotenv()
 

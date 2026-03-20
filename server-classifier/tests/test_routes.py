@@ -1,11 +1,13 @@
-import sys
 import os
+import sys
+
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from routes.health import register_routes
 from flask import Flask
+
+from routes.health import register_routes
 
 
 @pytest.fixture

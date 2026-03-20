@@ -1,6 +1,8 @@
 import logging
+
 from flask import request
-from . import health, model, inference
+
+from . import health, inference, model
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,9 @@
 import logging
+
 from huggingface_hub import HfApi
+
 from classifier import Classifier
-from config import HF_TOKEN, ORG_NAME, MODEL_VERSION
+from config import HF_TOKEN, MODEL_VERSION, ORG_NAME
 
 logger = logging.getLogger(__name__)
 model = None
@@ -47,6 +49,4 @@ def load_latest_model():
     latest_version = MODEL_VERSION  # pinned
     model = get_model(version=latest_version)
     if model is None or not hasattr(model, "classifier") or model.classifier is None:
-        raise RuntimeError(
-            f"Model '{latest_version}' loaded but classifier is not available."
-        )
+        raise RuntimeError(f"Model '{latest_version}' loaded but classifier is not available.")

@@ -1,21 +1,11 @@
-from datasets import Dataset, load_dataset
-import joblib
-from pathlib import Path
-from tempfile import mkdtemp, mkstemp
-from huggingface_hub import hf_hub_download, ModelCard, ModelCardData, EvalResult
-from huggingface_hub import HfApi
-from tqdm import tqdm
 import logging
-import numpy as np
+from pathlib import Path
+from tempfile import mkdtemp
+
+import joblib
 import pandas as pd
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.pipeline import make_pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
+from huggingface_hub import HfApi, hf_hub_download
+from tqdm import tqdm
 
 tqdm.pandas()
 logger = logging.getLogger(__name__)
@@ -40,9 +30,7 @@ class Classifier:
             api.delete_repo(repo_id=self.repo_id, token=self.token)
         except Exception:
             pass
-        api.create_repo(
-            repo_id=self.repo_id, token=self.token, repo_type="model", private=True
-        )
+        api.create_repo(repo_id=self.repo_id, token=self.token, repo_type="model", private=True)
         api.upload_folder(
             folder_path=local_repo,
             repo_id=self.repo_id,
@@ -54,9 +42,7 @@ class Classifier:
         return url
 
     def load_model(self):
-        model_dump = hf_hub_download(
-            repo_id=self.repo_id, filename=self.model_file, token=self.token
-        )
+        model_dump = hf_hub_download(repo_id=self.repo_id, filename=self.model_file, token=self.token)
         self.classifier = joblib.load(model_dump)
 
     def extract_features(self, data):
@@ -71,12 +57,8 @@ class Classifier:
         ]
         features = pd.DataFrame(data)[date_cols]
         today = pd.to_datetime("today", utc=True)
-        features = features.map(
-            lambda x: today - pd.to_datetime(str(x), utc=True, errors="coerce")
-        )
-        features = features.map(
-            lambda x: x.days if isinstance(x, pd.Timedelta) else 0
-        )
+        features = features.map(lambda x: today - pd.to_datetime(str(x), utc=True, errors="coerce"))
+        features = features.map(lambda x: x.days if isinstance(x, pd.Timedelta) else 0)
         return features
 
     def score(self, data):

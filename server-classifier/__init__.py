@@ -1,6 +1,8 @@
 import logging
+
 from flask import Flask, jsonify
-from model_manager import load_latest_model, get_model
+
+from model_manager import get_model, load_latest_model
 from routes import register_all_routes
 
 logger = logging.getLogger(__name__)
