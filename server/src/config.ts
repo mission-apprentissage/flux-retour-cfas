@@ -93,6 +93,10 @@ const config = {
     api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
     bearer_key: env.get("MNA_TDB_BAL_BEARER_KEY").asString(),
   },
+  classifier: {
+    endpoint: env.get("MNA_TDB_CLASSIFIER_ENDPOINT").default("http://server-classifier:8000").asString(),
+    apiKey: env.get("MNA_TDB_CLASSIFIER_API_KEY").default("").asString(),
+  },
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
     whatsapp: {
