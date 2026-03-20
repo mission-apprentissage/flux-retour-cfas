@@ -18,6 +18,8 @@ def register_routes(app, get_model):
         if version is not None and not re.match(VERSION_PATTERN, version):
             return jsonify({"error": "Invalid version format. Expected YYYY-MM-DD."}), 400
         model = get_model(version)
+        if model is None:
+            return jsonify({"error": "Model not available"}), 503
         data = request_data.get("data")
         result = model.score(data)
         return jsonify(result), 200

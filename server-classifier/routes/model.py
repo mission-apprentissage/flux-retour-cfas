@@ -17,6 +17,8 @@ def register_routes(app, get_model):
         if not re.match(VERSION_PATTERN, version):
             return jsonify({"error": "Invalid version format. Expected YYYY-MM-DD."}), 400
         model = get_model(version=version)
+        if model is None:
+            return jsonify({"error": f"Failed to load model version '{version}'"}), 503
         return jsonify({"model": model.version}), 200
 
     @app.route("/model/version", methods=["GET"])
