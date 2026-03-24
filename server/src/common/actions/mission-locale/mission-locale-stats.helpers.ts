@@ -24,11 +24,7 @@ export const TIME_SERIES_POINTS_COUNT = 6;
 export const ENGAGEMENT_THRESHOLD = 0.7;
 
 /** Stats par défaut quand aucune donnée n'est disponible */
-export const EMPTY_STATS: IAggregatedStats & {
-  total_contacte: number;
-  total_repondu: number;
-  total_accompagne: number;
-} = {
+export const EMPTY_STATS: IAggregatedStats = {
   total: 0,
   total_a_traiter: 0,
   total_traites: 0,
@@ -40,9 +36,6 @@ export const EMPTY_STATS: IAggregatedStats & {
   coordonnees_incorrectes: 0,
   autre: 0,
   deja_connu: 0,
-  total_contacte: 0,
-  total_repondu: 0,
-  total_accompagne: 0,
 };
 
 /**
@@ -189,10 +182,26 @@ export function createStatWithVariation(current: number, previous: number) {
 }
 
 /**
+ * Nombre de jours de lookback pour les requêtes "latest per ML".
+ * Les stats sont calculées quotidiennement pour toutes les MLs,
+ * donc 30 jours est une borne sûre même en cas de panne du job.
+ */
+const LATEST_STATS_LOOKBACK_DAYS = 30;
+
+export const getLatestStatsLowerBound = (referenceDate: Date): Date => {
+  const bound = new Date(referenceDate);
+  bound.setUTCDate(bound.getUTCDate() - LATEST_STATS_LOOKBACK_DAYS);
+  return normalizeToUTCDay(bound);
+};
+
+/**
  * Construit un pipeline pour les stats cumulatives jusqu'à une date donnée
  */
 export const buildCumulativeStatsPipeline = (targetDate: Date, missionLocaleIds?: ObjectId[]) => {
-  const matchFilter = withMissionLocaleFilter({ computed_day: { $lte: targetDate } }, missionLocaleIds);
+  const matchFilter = withMissionLocaleFilter(
+    { computed_day: { $lte: targetDate, $gte: getLatestStatsLowerBound(targetDate) } },
+    missionLocaleIds
+  );
 
   return [
     { $match: matchFilter },

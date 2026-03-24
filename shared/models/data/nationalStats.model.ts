@@ -9,8 +9,6 @@ const zStatWithVariation = z.object({
   variation: z.string(),
 });
 
-export type IStatWithVariation = z.output<typeof zStatWithVariation>;
-
 const zAggregatedStats = z.object({
   total: z.number(),
   total_a_traiter: z.number(),
@@ -79,58 +77,12 @@ const zRegionStats = z.object({
 
 export type IRegionStats = z.output<typeof zRegionStats>;
 
-const zRegionalStatsResponse = z.object({
-  regions: z.array(zRegionStats),
-});
-
-export type IRegionalStatsResponse = z.output<typeof zRegionalStatsResponse>;
-
-const zTraitementStats = z.object({
-  total: z.number(),
-  total_previous: z.number(),
-  total_contacte: z.number(),
-  total_contacte_previous: z.number(),
-  total_repondu: z.number(),
-  total_repondu_previous: z.number(),
-  total_accompagne: z.number(),
-  total_accompagne_previous: z.number(),
-});
-
-export type ITraitementStats = z.output<typeof zTraitementStats>;
-
-const zNationalStats = z.object({
-  rupturantsTimeSeries: z.array(zTimeSeriesPoint),
-  rupturantsSummary: zRupturantsSummary,
-  detailsTraites: zDetailsDossiersTraites,
-  regional: zRegionalStatsResponse,
-  evaluationDate: z.date(),
-  period: zStatsPeriod,
-  traitement: z.object({
-    latest: z.object({
-      total: z.number(),
-      total_contacte: z.number(),
-      total_repondu: z.number(),
-      total_accompagne: z.number(),
-    }),
-    first: z.object({
-      total: z.number(),
-      total_contacte: z.number(),
-      total_repondu: z.number(),
-      total_accompagne: z.number(),
-    }),
-  }),
-});
-
-export type INationalStats = z.output<typeof zNationalStats>;
-
 const zTraitementStatsData = z.object({
   total: z.number(),
   total_contacte: z.number(),
   total_repondu: z.number(),
   total_accompagne: z.number(),
 });
-
-export type ITraitementStatsData = z.output<typeof zTraitementStatsData>;
 
 const zTraitementStatsResponse = z.object({
   latest: zTraitementStatsData,
@@ -169,8 +121,6 @@ const zMissionLocaleTraitementStats = z.object({
   is_activated: z.boolean(),
 });
 
-export type IMissionLocaleTraitementStats = z.output<typeof zMissionLocaleTraitementStats>;
-
 const zTraitementMLStatsResponse = z.object({
   data: z.array(zMissionLocaleTraitementStats),
   pagination: z.object({
@@ -195,24 +145,6 @@ const zTraitementRegionStats = z.object({
 });
 
 export type ITraitementRegionStats = z.output<typeof zTraitementRegionStats>;
-
-const zSyntheseStats = z.object({
-  summary: z.object({
-    mlCount: z.number(),
-    activatedMlCount: z.number(),
-    previousActivatedMlCount: z.number(),
-    date: z.date(),
-  }),
-  regions: z.array(zRegionStats),
-  traitement: z.object({
-    latest: zTraitementStatsData,
-    first: zTraitementStatsData,
-  }),
-  evaluationDate: z.date(),
-  period: zStatsPeriod,
-});
-
-export type ISyntheseStats = z.output<typeof zSyntheseStats>;
 
 const zAccompagnementConjointMotifs = z.object({
   mobilite: z.number(),
@@ -324,5 +256,3 @@ const zWhatsAppStats = z.object({
 });
 
 export type IWhatsAppStats = z.output<typeof zWhatsAppStats>;
-
-export default { zod: zNationalStats };

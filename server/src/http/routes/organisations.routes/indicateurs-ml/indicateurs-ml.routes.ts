@@ -17,7 +17,6 @@ import {
   getAccompagnementConjointStats,
   getTraitementStats,
   getDeploymentStats,
-  getSyntheseStats,
   getSyntheseRegionsStats,
   getCouvertureRegionsStats,
   getTraitementExportData,
@@ -31,16 +30,6 @@ export type { OrganisationWithRegions };
 
 export default () => {
   const router = express.Router();
-
-  router.get(
-    "/synthese",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getSyntheseRoute)
-  );
 
   router.get(
     "/synthese/deployment",
@@ -199,19 +188,6 @@ export default () => {
   );
 
   return router;
-};
-
-const getSyntheseRoute = async (req, { locals }) => {
-  const { period } = req.query;
-  const regions = locals.regions as string[];
-
-  const stats = await getSyntheseStats((period as StatsPeriod) || "30days");
-
-  if (regions.length > 0) {
-    stats.regions = stats.regions.filter((r) => regions.includes(r.code));
-  }
-
-  return stats;
 };
 
 const getDeploymentRoute = async (req, { locals }) => {
