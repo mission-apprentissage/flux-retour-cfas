@@ -108,6 +108,18 @@
   margin-top: 16px;
 }
 
+.contactOpportunBlock {
+  background-color: var(--background-alt-blue-france);
+  padding: 16px;
+  margin-top: 0;
+  border-left: 4px solid var(--border-action-high-blue-france);
+}
+
+.contactOpportunText {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+}
+
 .highlightText {
   margin: 0;
 }

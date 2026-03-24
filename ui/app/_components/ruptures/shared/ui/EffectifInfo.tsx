@@ -18,7 +18,11 @@ import { shouldShowContactForm } from "../utils";
 import { ConfirmReset } from "./ConfirmReset";
 import styles from "./EffectifInfo.module.css";
 import { EffectifInfoDetails } from "./EffectifInfoDetails";
-import { EffectifDetailStatusBadge, EffectifPriorityBadgeList } from "./EffectifStatusBadge";
+import {
+  EffectifContactOpportunBadge,
+  EffectifDetailStatusBadge,
+  EffectifPriorityBadgeList,
+} from "./EffectifStatusBadge";
 import { ProblematiquesJeune } from "./ProblematiquesJeune";
 
 const StatusChangeInformation = ({ date }: { date?: Date | null }) => {
@@ -216,6 +220,15 @@ export function EffectifInfo({
           )}
         </div>
       </div>
+      {effectif.contact_opportun && (
+        <div className={styles.contactOpportunBlock}>
+          <EffectifContactOpportunBadge />
+          <p className={styles.contactOpportunText}>
+            Ce dossier est marqué « Contact opportun » car notre algorithme estime que ce jeune a une probabilité élevée
+            de répondre à votre appel. Votre retour après contact nous aidera à améliorer cette recommandation.
+          </p>
+        </div>
+      )}
       <EffectifInfoDetails effectif={effectif} infosOpen={infosOpen} setInfosOpen={setInfosOpen} />
 
       {user.organisation.type === "MISSION_LOCALE" && "organisme_data" in effectif && effectif.organisme_data ? (
