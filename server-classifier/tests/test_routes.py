@@ -11,7 +11,6 @@ from flask import Flask
 from routes import register_all_routes
 from routes.health import register_routes
 
-
 # --- Health routes ---
 
 
@@ -166,9 +165,7 @@ def test_auth_rejects_wrong_api_key():
     register_all_routes(app, lambda v=None: mock_model)
     client = app.test_client()
 
-    response = client.post(
-        "/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "wrong-key"}
-    )
+    response = client.post("/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "wrong-key"})
     assert response.status_code == 401
 
 
@@ -179,9 +176,7 @@ def test_auth_accepts_correct_api_key():
     register_all_routes(app, lambda v=None: mock_model)
     client = app.test_client()
 
-    response = client.post(
-        "/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "test-secret-key"}
-    )
+    response = client.post("/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "test-secret-key"})
     assert response.status_code == 200
 
 
