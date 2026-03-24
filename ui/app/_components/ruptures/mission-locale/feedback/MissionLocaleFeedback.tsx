@@ -9,6 +9,7 @@ import { IWhatsAppContact } from "shared/models/data/whatsappContact.model";
 import { formatDate, formatDateWithTime } from "@/app/_utils/date.utils";
 
 import { calculateDaysSince, formatContactTimeText } from "../../shared";
+import statusStyles from "../../shared/ui/EffectifStatusBadge.module.css";
 import styles from "../../shared/ui/Feedback.module.css";
 import notificationStyles from "../../shared/ui/NotificationBadge.module.css";
 import badgeStyles from "../../shared/ui/WhatsAppBadge.module.css";
@@ -38,7 +39,11 @@ function WhatsAppFeedbackBlock({ whatsappContact, prenom }: { whatsappContact: I
         <>
           <Tag>Souhaite être recontacté par la Mission locale ✅</Tag>
           <p className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`}>
-            <i className="ri-whatsapp-line fr-icon--sm" aria-hidden="true" />
+            <i className="ri-whatsapp-fill fr-icon--sm" aria-hidden="true" style={{ color: "#18753C" }} />
+            <span className={statusStyles.availabilityDot} aria-hidden="true">
+              <span className={statusStyles.availabilityDotOuter} />
+              <span className={statusStyles.availabilityDotInner} />
+            </span>
             DISPONIBLE
           </p>
         </>
