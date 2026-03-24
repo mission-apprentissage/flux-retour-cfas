@@ -11,6 +11,8 @@
 
 !/shared
 
+!/server-classifier
+
 !/ui
 /ui/.env
 /ui/.next

@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
+  IClassifierStats,
   IDetailsDossiersTraites,
   IRegionStats,
   IRupturantsSummary,
@@ -98,6 +99,7 @@ export const statsQueryKeys = {
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
+  classifier: (period: Period) => ["stats", "classifier", period] as const,
 };
 
 export interface TraitementMLParams {
@@ -292,6 +294,17 @@ export function useWhatsAppStats(period: Period) {
     statsQueryKeys.whatsapp(period),
     () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/whatsapp", {
+        params: { period },
+      }),
+    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
+  );
+}
+
+export function useClassifierStats(period: Period) {
+  return useQuery<IClassifierStats>(
+    statsQueryKeys.classifier(period),
+    () =>
+      _get("/api/v1/organisation/indicateurs-ml/stats/classifier", {
         params: { period },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA

@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
-import { it, expect, describe, beforeEach } from "vitest";
+import { SITUATION_ENUM } from "shared";
+import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import {
   effectifsQueueDb,
@@ -15,6 +16,16 @@ import { createRupturantEffectifPayload, createRandomOrganisme } from "@tests/da
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 import { initTestApp, RequestAsOrganisationFunc, expectUnauthorizedError } from "@tests/utils/testUtils";
+
+const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.85] });
+
+vi.mock("@/common/services/classifier/classifier", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/common/services/classifier/classifier")>();
+  return {
+    ...actual,
+    scoreEffectifs: (...args: unknown[]) => mockScoreEffectifs(...args),
+  };
+});
 
 const UAI = "0802004U";
 const SIRET = "77937827200016";
@@ -931,6 +942,183 @@ describe("Mission Locale Stats Routes - Admin", () => {
       expect(responseARA.status).toBe(200);
       expect(responseARA.data).toHaveProperty("totalJeunesRupturants");
       expect(responseARA.data).toHaveProperty("statutsTraitement");
+    });
+  });
+});
+
+describe("Classifier Feedback Routes", () => {
+  useNock();
+  useMongo();
+
+  const CF_ORGANISME_ID = new ObjectId();
+  const CF_ML_ID = new ObjectId();
+  const CF_ML_DATA = { ml_id: 609, nom: "ML CLASSIFIER TEST", type: "MISSION_LOCALE" as const };
+
+  let requestAsOrganisation: RequestAsOrganisationFunc;
+  let EFFECTIF_ID: ObjectId;
+
+  beforeEach(async () => {
+    const app = await initTestApp();
+    requestAsOrganisation = app.requestAsOrganisation;
+
+    await organisationsDb().insertOne({
+      _id: CF_ML_ID,
+      created_at: new Date(),
+      email: "",
+      telephone: "",
+      site_web: "",
+      ...CF_ML_DATA,
+    });
+
+    await organismesDb().insertOne({
+      _id: CF_ORGANISME_ID,
+      ...createRandomOrganisme({ uai: "0802004U", siret: "77937827200016" }),
+    });
+
+    // Create an effectif via the normal flow
+    const payload = createRupturantEffectifPayload({
+      etablissement_formateur_uai: "0802004U",
+      etablissement_formateur_siret: "77937827200016",
+      etablissement_responsable_uai: "0802004U",
+      etablissement_responsable_siret: "77937827200016",
+      code_postal_apprenant: "75001",
+    });
+
+    const { insertedId } = await effectifsQueueDb().insertOne({
+      _id: new ObjectId(),
+      created_at: new Date(),
+      ...payload,
+    });
+    await processEffectifsQueue();
+
+    const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
+    EFFECTIF_ID = effQ?.effectif_id as ObjectId;
+  });
+
+  describe("Classifier feedback via POST /effectif/:id", () => {
+    it("stocke le feedback dans classification_reponse_appel.feedback", async () => {
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: EFFECTIF_ID },
+        {
+          $set: {
+            classification_reponse_appel: { score: 0.85, model: "2026-03-16", scored_at: new Date() },
+          },
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        CF_ML_DATA,
+        "post",
+        `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+        {
+          classifier_feedback: {
+            meilleure_reactivite: true,
+            confiance_indice: 4,
+            utilite_indice: 3,
+          },
+        }
+      );
+
+      expect(res.status).toBe(200);
+
+      const doc = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+      expect(doc?.classification_reponse_appel?.feedback).toBeDefined();
+      expect(doc?.classification_reponse_appel?.feedback?.meilleure_reactivite).toBe(true);
+      expect(doc?.classification_reponse_appel?.feedback?.confiance_indice).toBe(4);
+      expect(doc?.classification_reponse_appel?.feedback?.utilite_indice).toBe(3);
+      expect(doc?.classification_reponse_appel?.feedback?.responded_at).toBeDefined();
+    });
+  });
+
+  describe("Contact opportun dans la réponse API", () => {
+    it("expose contact_opportun: true quand score >= 0.75 et pas mineur ni RQTH", async () => {
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: EFFECTIF_ID },
+        {
+          $set: {
+            classification_reponse_appel: { score: 0.85, model: "2026-03-16", scored_at: new Date() },
+          },
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        CF_ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs-per-month`
+      );
+
+      const allEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
+      const effectif = allEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
+      expect(effectif?.contact_opportun).toBe(true);
+    });
+
+    it("expose contact_opportun: false quand score < 0.75", async () => {
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: EFFECTIF_ID },
+        {
+          $set: {
+            classification_reponse_appel: { score: 0.3, model: "2026-03-16", scored_at: new Date() },
+          },
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        CF_ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs-per-month`
+      );
+
+      const allEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
+      const effectif = allEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
+      expect(effectif?.contact_opportun).toBe(false);
+    });
+
+    it("n'expose plus presque_6_mois dans la réponse", async () => {
+      const res = await requestAsOrganisation(
+        CF_ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs-per-month`
+      );
+
+      const allEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
+      if (allEffectifs.length > 0) {
+        expect(allEffectifs[0]).not.toHaveProperty("presque_6_mois");
+      }
+    });
+  });
+
+  describe("WhatsApp callback dans la liste à traiter", () => {
+    it("un effectif whatsapp_callback_requested apparaît dans le prioritaire à traiter mais pas dans les mois à traiter", async () => {
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: EFFECTIF_ID },
+        {
+          $set: {
+            situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+            whatsapp_callback_requested: true,
+          },
+        }
+      );
+
+      const res = await requestAsOrganisation(
+        CF_ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs-per-month`
+      );
+
+      // Doit apparaître dans le prioritaire (encart prioritaire de à traiter)
+      const prioritaireData = res.data.prioritaire?.effectifs ?? [];
+      const inPrioritaire = prioritaireData.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
+      expect(inPrioritaire).toBeDefined();
+
+      // Ne doit PAS apparaître dans les tableaux par mois de à traiter
+      const aTraiterEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
+      const inATraiterMois = aTraiterEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
+      expect(inATraiterMois).toBeUndefined();
+
+      // Doit aussi apparaître dans injoignable
+      const injoignableEffectifs = res.data.injoignable.flatMap((m: { data: unknown[] }) => m.data);
+      const inInjoignable = injoignableEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
+      expect(inInjoignable).toBeDefined();
     });
   });
 });

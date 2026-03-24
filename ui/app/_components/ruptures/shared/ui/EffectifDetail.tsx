@@ -20,6 +20,7 @@ import { _post, _put } from "@/common/httpClient";
 import { EffectifParcoursCfa } from "../../cfa/EffectifParcoursCfa";
 import { EffectifParcoursMissionLocale } from "../../mission-locale/EffectifParcoursMissionLocale";
 
+import { ClassifierFeedbackModal, feedbackModal } from "./ClassifierFeedbackModal";
 import { EffectifDetailDisplay } from "./EffectifDetailDisplay";
 import { RightColumnSkeleton } from "./RightColumnSkeleton";
 
@@ -33,6 +34,7 @@ export default function EffectifDetail({ data }: { data: IEffectifMissionLocale 
   const queryClient = useQueryClient();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [pendingRedirectUrl, setPendingRedirectUrl] = useState<string | null>(null);
 
   const isCfaPage = pathname?.startsWith("/cfa/");
   const orgType = pathname && pathname.startsWith("/cfa") ? "cfa" : "mission-locale";
@@ -96,10 +98,17 @@ export default function EffectifDetail({ data }: { data: IEffectifMissionLocale 
           ? computeRedirectUrl(mutationData.goNext, mutationData.nextId, nomListe, data?.total)
           : `/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`;
 
-      setTimeout(() => {
-        queryClient.invalidateQueries(["effectif"]);
-        router.push(targetUrl);
-      }, REDIRECTION_DELAY);
+      const isContactOpportun = !isCfaPage && data?.effectif.contact_opportun;
+
+      if (isContactOpportun) {
+        setPendingRedirectUrl(targetUrl);
+        feedbackModal.open();
+      } else {
+        setTimeout(() => {
+          queryClient.invalidateQueries(["effectif"]);
+          router.push(targetUrl);
+        }, REDIRECTION_DELAY);
+      }
     },
     onError: () => {
       setSaveStatus("error");
@@ -166,6 +175,18 @@ export default function EffectifDetail({ data }: { data: IEffectifMissionLocale 
           )}
         </SuspenseWrapper>
       </Grid>
+      {data && (
+        <ClassifierFeedbackModal
+          effectifId={data.effectif.id.toString()}
+          onClose={() => {
+            if (pendingRedirectUrl) {
+              queryClient.invalidateQueries(["effectif"]);
+              router.push(pendingRedirectUrl);
+              setPendingRedirectUrl(null);
+            }
+          }}
+        />
+      )}
     </Grid>
   );
 }

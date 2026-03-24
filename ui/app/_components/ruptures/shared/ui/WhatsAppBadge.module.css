@@ -2,8 +2,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background-color: #6a6af4;
-  color: white;
+  background-color: #ededed;
+  color: #3a3a3a;
 }
 
 .whatsappBadgeNoHelp {

@@ -43,6 +43,10 @@ jobs:
         with:
           node-version: 22.6
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -54,6 +58,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+
+      - name: Install classifier dependencies
+        run: yarn classifier:install
 
       - name: Make sure to use same dependencies version across all packages
         run: yarn dedupe --check

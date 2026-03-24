@@ -1,0 +1,9 @@
+Dockerfile
+ruff.toml
+.dockerignore
+.gitignore
+.venv/
+__pycache__/
+tests/
+*.pyc
+.env

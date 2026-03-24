@@ -100,6 +100,28 @@ services:
         tag: docker.txt.tdb.{{env_type}}.ui
         fluentd-async: "true"
 
+  server-classifier:
+    <<: *default
+    image: ghcr.io/mission-apprentissage/mna_tdb_server_classifier:{{app_version}}
+    deploy:
+      <<: *deploy-default
+      resources:
+        limits:
+          memory: 2g
+    env_file: .env_server_classifier
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: docker.json.tdb.{{env_type}}.server_classifier
+        fluentd-async: "true"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 30s
+      retries: 11
+      start_period: 30s
+
   metabase:
     <<: *default
     image: metabase/metabase:v0.58.7

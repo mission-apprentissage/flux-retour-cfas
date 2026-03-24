@@ -13,6 +13,16 @@ import { createIndexes } from "@/common/model/indexes";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 
+const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.5] });
+
+vi.mock("@/common/services/classifier/classifier", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/common/services/classifier/classifier")>();
+  return {
+    ...actual,
+    scoreEffectifs: (...args: unknown[]) => mockScoreEffectifs(...args),
+  };
+});
+
 const UAI = "0802004U";
 const SIRET = "77937827200016";
 const ML_ID = 609;
@@ -996,6 +1006,58 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
         .find({ soft_deleted: { $ne: true } })
         .toArray();
       expect(mlEffectifs.length).toBe(2);
+    });
+  });
+
+  describe("createMissionLocaleSnapshot - scoring classifier", () => {
+    beforeEach(() => {
+      vi.useRealTimers();
+      mockScoreEffectifs.mockReset();
+      mockScoreEffectifs.mockResolvedValue({ model: "2026-03-16", scores: [0.85] });
+    });
+
+    it("appelle le classifier et stocke le score lors de l'insertion", async () => {
+      const effectif = createBaseErpEffectif();
+      const result = await createMissionLocaleSnapshot(effectif);
+
+      expect(result?.upserted).toBe(true);
+
+      await vi.waitFor(async () => {
+        expect(mockScoreEffectifs).toHaveBeenCalledOnce();
+        const mlEffectif = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
+        expect(mlEffectif?.classification_reponse_appel).toBeDefined();
+        expect(mlEffectif?.classification_reponse_appel?.score).toBe(0.85);
+        expect(mlEffectif?.classification_reponse_appel?.model).toBe("2026-03-16");
+      });
+    });
+
+    it("ne score pas lors d'une mise à jour (effectif déjà existant)", async () => {
+      const effectif = createBaseErpEffectif();
+      await createMissionLocaleSnapshot(effectif);
+      await new Promise((r) => setTimeout(r, 100));
+      mockScoreEffectifs.mockClear();
+      mockScoreEffectifs.mockResolvedValue({ model: "2026-03-16", scores: [0.85] });
+
+      // Deuxième appel = update, pas insert
+      const result2 = await createMissionLocaleSnapshot(effectif);
+      expect(result2?.upserted).toBe(false);
+      await new Promise((r) => setTimeout(r, 100));
+      expect(mockScoreEffectifs).not.toHaveBeenCalled();
+    });
+
+    it("crée l'effectif même si le classifier échoue", async () => {
+      mockScoreEffectifs.mockRejectedValue(new Error("Classifier down"));
+
+      const effectif = createBaseErpEffectif();
+      const result = await createMissionLocaleSnapshot(effectif);
+
+      expect(result?.upserted).toBe(true);
+
+      await vi.waitFor(() => expect(mockScoreEffectifs).toHaveBeenCalledOnce());
+
+      const mlEffectif = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
+      expect(mlEffectif).not.toBeNull();
+      expect(mlEffectif?.classification_reponse_appel).toBeUndefined();
     });
   });
 });

@@ -96,27 +96,13 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   function getColumns(listType: API_EFFECTIF_LISTE): ColumnData[] {
     switch (listType) {
       case API_EFFECTIF_LISTE.A_TRAITER:
-        return [
-          { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 300 },
-          { label: "Statut", dataKey: "badge", width: 320 },
-          { label: "", dataKey: "icon", width: 10 },
-        ];
-
+      case API_EFFECTIF_LISTE.INJOIGNABLE:
       case API_EFFECTIF_LISTE.TRAITE:
         return [
-          { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 300 },
+          { label: "Apprenant", dataKey: "name", width: 250 },
+          { label: "Formation", dataKey: "formation", width: "auto" },
           { label: "Statut", dataKey: "badge", width: 200 },
-          { label: "", dataKey: "icon", width: 10 },
-        ];
-
-      case API_EFFECTIF_LISTE.INJOIGNABLE:
-        return [
-          { label: "Apprenant", dataKey: "name", width: 200 },
-          { label: "Formation", dataKey: "formation", width: 300 },
-          { label: "Statut", dataKey: "badge", width: 320 },
-          { label: "", dataKey: "icon", width: 10 },
+          { label: "", dataKey: "icon", width: 40 },
         ];
 
       default:

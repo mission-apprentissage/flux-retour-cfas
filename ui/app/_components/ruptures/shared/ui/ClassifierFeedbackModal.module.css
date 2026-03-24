@@ -1,0 +1,156 @@
+.scaleContainer {
+  flex: 1;
+}
+
+.scaleLabel {
+  display: none;
+}
+
+.scaleButtons {
+  display: flex;
+  gap: 0;
+}
+
+.scaleButton {
+  flex: 1;
+  height: 40px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #161616;
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.scaleButton:hover {
+  background-color: #f6f6f6;
+}
+
+.scaleButton:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.scaleButton:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.scaleButtonSelected {
+  background-color: #000091 !important;
+  border-color: #000091 !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.scaleLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.scaleGradient {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e1000f 0%, #fb926b 33.65%, #fcc63a 56.73%, #2fc368 100%);
+  margin-top: 4px;
+}
+
+.modalWrapper :global(.fr-btn--close) {
+  display: none;
+}
+
+.modalContent {
+  padding: 8px 0;
+}
+
+.modalTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 32px 0;
+}
+
+.contactOpportunLabel {
+  color: #6a6af4;
+  font-weight: 700;
+}
+
+.questionRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.questionLabel {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  width: 55%;
+  flex-shrink: 0;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.scaleRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.scaleRowLabel {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  width: 55%;
+  flex-shrink: 0;
+}
+
+.scaleRowContent {
+  flex: 1;
+}
+
+.radioButton {
+  width: 80px;
+  height: 40px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #161616;
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.radioButton:hover {
+  background-color: #f6f6f6;
+}
+
+.radioButtonSelected {
+  background-color: #f6f6f6;
+  border-color: #000091;
+  font-weight: 700;
+}
+
+.radioInput {
+  accent-color: #000091;
+}
+
+.errorText {
+  color: red;
+  font-size: 14px;
+}
+
+.submitContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}

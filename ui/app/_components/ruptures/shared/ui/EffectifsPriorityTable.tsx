@@ -15,7 +15,7 @@ import { EffectifPriorityData } from "@/common/types/ruptures";
 import { isMissionLocaleUser } from "../utils";
 import { matchesSearchTerm } from "../utils/searchUtils";
 
-import { EffectifPriorityBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
 
 type EffectifsPriorityTableProps = {
@@ -24,34 +24,6 @@ type EffectifsPriorityTableProps = {
   hadEffectifsPrioritaires?: boolean;
   listType?: IMissionLocaleEffectifList;
 };
-
-function CfaBadge() {
-  return (
-    <span
-      className="fr-badge"
-      style={{
-        backgroundColor: "#ECECFE",
-        color: "#161616",
-        fontSize: "12px",
-        fontWeight: 700,
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
-      }}
-    >
-      <div
-        style={{
-          width: "6px",
-          height: "6px",
-          borderRadius: "50%",
-          backgroundColor: "#E1000F",
-          flexShrink: 0,
-        }}
-      />
-      CFA
-    </span>
-  );
-}
 
 function PriorityBadge({
   priorityData,
@@ -90,7 +62,7 @@ export function EffectifsPriorityTable({
     return [
       { label: "", dataKey: "name", width: 250 },
       { label: "", dataKey: "formation", width: "auto" },
-      { label: "", dataKey: "badge", width: 250 },
+      { label: "", dataKey: "badge", width: 200 },
       { label: "", dataKey: "arrow", width: 40 },
     ];
   }, []);
@@ -114,12 +86,12 @@ export function EffectifsPriorityTable({
           id: effectif.id,
           badge: (
             <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
-              <EffectifPriorityBadge effectif={effectif} />
+              <EffectifStatusBadge effectif={effectif} />
             </div>
           ),
           name: (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              {effectif.acc_conjoint && <CfaBadge />}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />
               <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>
             </div>
           ),
@@ -197,7 +169,12 @@ export function EffectifsPriorityTable({
                       <strong>les jeunes ayant exprimé un besoin d&apos;accompagnement (campagne mailing)</strong>
                     </li>
                     <li>
-                      <strong>les jeunes en situation de rupture total dans moins d&apos;1 mois</strong>
+                      <strong>
+                        les jeunes identifiés comme « Contact opportun » par l&apos;algorithme de priorisation
+                      </strong>
+                    </li>
+                    <li>
+                      <strong>les jeunes ayant demandé à être recontactés via WhatsApp</strong>
                     </li>
                   </ul>
                   <p style={{ margin: "0 0 8px 0" }}>
