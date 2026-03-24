@@ -255,3 +255,34 @@ const zWhatsAppStats = z.object({
 });
 
 export type IWhatsAppStats = z.output<typeof zWhatsAppStats>;
+
+const zSituationDistribution = z.object({
+  rdv_pris: z.number(),
+  nouveau_projet: z.number(),
+  deja_accompagne: z.number(),
+  contacte_sans_retour: z.number(),
+  coordonnees_incorrect: z.number(),
+  injoignable_apres_relances: z.number(),
+  autre: z.number(),
+  total: z.number(),
+});
+
+const zClassifierStats = z.object({
+  feedback: z.object({
+    total: z.number(),
+    meilleure_reactivite: z.object({ oui: z.number(), non: z.number() }),
+    confiance_indice: z.object({ distribution: z.array(z.number()).length(6), moyenne: z.number().min(0).max(5) }),
+    utilite_indice: z.object({ distribution: z.array(z.number()).length(6), moyenne: z.number().min(0).max(5) }),
+  }),
+  situations: z.object({
+    contact_opportun: zSituationDistribution,
+    autres: zSituationDistribution,
+  }),
+  scoring: z.object({
+    total_scored: z.number(),
+    total_contact_opportun: z.number(),
+    score_moyen: z.number(),
+  }),
+});
+
+export type IClassifierStats = z.output<typeof zClassifierStats>;

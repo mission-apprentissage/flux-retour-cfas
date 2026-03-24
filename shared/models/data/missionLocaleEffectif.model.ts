@@ -189,6 +189,22 @@ const zMissionLocaleEffectif = z.object({
     .default(false)
     .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp"),
   whatsapp_no_help_responded_at: z.date().nullish(),
+  classification_reponse_appel: z
+    .object({
+      score: z.number().min(0).max(1).describe("Probabilité de réponse à un appel (0-1)"),
+      model: z.string().describe("Version du modèle (ex: 2026-03-16)"),
+      scored_at: z.date().describe("Date du scoring"),
+      feedback: z
+        .object({
+          meilleure_reactivite: z.boolean().describe("Le conseiller a remarqué une meilleure réactivité"),
+          confiance_indice: z.number().int().min(0).max(5).describe("Confiance dans l'indice de probabilité (0-5)"),
+          utilite_indice: z.number().int().min(0).max(5).describe("Utilité de l'indice pour prioriser (0-5)"),
+          responded_at: z.date(),
+          responded_by: zObjectId,
+        })
+        .nullish(),
+    })
+    .nullish(),
   deca_feedback: z
     .object({
       differences_remarquees: z
