@@ -2458,6 +2458,7 @@ const MERGEABLE_FIELDS = [
   "whatsapp_no_help_responded_at",
   "deca_feedback",
   "effectif_choice",
+  "classification_reponse_appel",
 ] as const;
 
 /**
