@@ -276,6 +276,14 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("purge:queues"));
 
+program
+  .command("classifier:score-effectifs")
+  .description("Score les effectifs ML existants sans score via le classifier")
+  .option("--dryRun", "Mode simulation sans écriture", false)
+  .option("-l, --limit <number>", "Limiter le nombre d'effectifs", (n) => parseInt(n, 10))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("classifier:score-effectifs"));
+
 /**
  * Job de lancement des scripts de fiabilisation des couples UAI SIRET
  */

@@ -9,6 +9,7 @@ import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
 import { verifyMissionLocaleEffectifMail } from "./bal/bal.job";
+import { scoreExistingEffectifs } from "./classifier/score-effectifs";
 import { purgeQueues } from "./clear/purge-queues";
 import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
@@ -583,6 +584,12 @@ export async function setupJobProcessor() {
           const dryRun = (job.payload as any)?.dryRun ?? false;
           const limit = (job.payload as any)?.limit;
           return sendWhatsAppInjoignables({ dryRun, limit });
+        },
+      },
+      "classifier:score-effectifs": {
+        handler: async (job) => {
+          const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
+          return scoreExistingEffectifs({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
         },
       },
     },
