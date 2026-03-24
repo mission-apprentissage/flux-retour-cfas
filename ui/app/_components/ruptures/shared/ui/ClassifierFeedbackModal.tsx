@@ -96,7 +96,7 @@ export function ClassifierFeedbackModal({ effectifId, onClose }: ClassifierFeedb
       title=""
       concealingBackdrop={false}
       size="large"
-      buttons={[]}
+      buttons={undefined}
       className={styles.modalWrapper}
     >
       <div className={styles.modalContent}>
