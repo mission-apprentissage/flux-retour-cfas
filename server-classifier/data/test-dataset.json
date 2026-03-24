@@ -1,0 +1,29 @@
+[
+    {
+        "apprenant.date_de_naissance": "2002-07-28T00:00:00.000Z",
+        "formation.date_inscription": "2025-11-10T00:00:00.000Z",
+        "formation.date_fin": "2027-05-09T00:00:00.000Z",
+        "formation.date_entree": "2025-11-10T00:00:00.000Z",
+        "contrat.date_debut": "2025-11-10T00:00:00.000Z",
+        "contrat.date_fin": "2027-05-09T00:00:00.000Z",
+        "contrat.date_rupture": "2025-12-15T00:00:00.000Z"
+    },
+    {
+        "apprenant.date_de_naissance": "2001-04-07T00:00:00.000Z",
+        "formation.date_inscription": "2024-12-05T00:00:00.000Z",
+        "formation.date_fin": "2026-10-01T00:00:00.000Z",
+        "formation.date_entree": "2024-12-05T00:00:00.000Z",
+        "contrat.date_debut": "2024-12-02T00:00:00.000Z",
+        "contrat.date_fin": "2026-10-01T00:00:00.000Z",
+        "contrat.date_rupture": "2026-02-03T00:00:00.000Z"
+    },
+    {
+        "apprenant.date_de_naissance": "2007-08-12T00:00:00.000Z",
+        "formation.date_inscription": "2024-04-10T11:29:00.000Z",
+        "formation.date_fin": "2025-06-30T00:00:00.000Z",
+        "formation.date_entree": "2024-09-03T00:00:00.000Z",
+        "contrat.date_debut": "2023-09-01T00:00:00.000Z",
+        "contrat.date_fin": "2025-08-31T00:00:00.000Z",
+        "contrat.date_rupture": "2024-12-31T00:00:00.000Z"
+    }
+]

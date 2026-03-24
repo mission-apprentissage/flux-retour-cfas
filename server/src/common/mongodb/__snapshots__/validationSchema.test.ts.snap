@@ -12430,6 +12430,80 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "classification_reponse_appel": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "feedback": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "confiance_indice": {
+                      "bsonType": "int",
+                      "description": "Confiance dans l'indice de probabilité (0-5)",
+                      "maximum": 5,
+                      "minimum": 0,
+                    },
+                    "meilleure_reactivite": {
+                      "bsonType": "bool",
+                      "description": "Le conseiller a remarqué une meilleure réactivité",
+                    },
+                    "responded_at": {
+                      "bsonType": "date",
+                    },
+                    "responded_by": {
+                      "bsonType": "objectId",
+                    },
+                    "utilite_indice": {
+                      "bsonType": "int",
+                      "description": "Utilité de l'indice pour prioriser (0-5)",
+                      "maximum": 5,
+                      "minimum": 0,
+                    },
+                  },
+                  "required": [
+                    "meilleure_reactivite",
+                    "confiance_indice",
+                    "utilite_indice",
+                    "responded_at",
+                    "responded_by",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "model": {
+              "bsonType": "string",
+              "description": "Version du modèle (ex: 2026-03-16)",
+            },
+            "score": {
+              "bsonType": "number",
+              "description": "Probabilité de réponse à un appel (0-1)",
+              "maximum": 1,
+              "minimum": 0,
+            },
+            "scored_at": {
+              "bsonType": "date",
+              "description": "Date du scoring",
+            },
+          },
+          "required": [
+            "score",
+            "model",
+            "scored_at",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "commentaires": {
       "bsonType": "string",
     },

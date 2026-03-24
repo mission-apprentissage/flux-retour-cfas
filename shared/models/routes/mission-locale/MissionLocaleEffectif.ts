@@ -42,6 +42,13 @@ export const updateMissionLocaleEffectifApi = {
   deja_connu: z.boolean().nullish(),
   probleme_type: zProblemeTypeEnum.optional(),
   probleme_detail: z.string().optional(),
+  classifier_feedback: z
+    .object({
+      meilleure_reactivite: z.boolean(),
+      confiance_indice: z.number().int().min(0).max(5),
+      utilite_indice: z.number().int().min(0).max(5),
+    })
+    .optional(),
 };
 
 const zEffectifMissionLocale = z
@@ -104,7 +111,7 @@ const zEffectifMissionLocale = z
       })
       .nullish(),
     mineur: z.boolean().nullish(),
-    presque_6_mois: z.boolean().nullish(),
+    contact_opportun: z.boolean().nullish(),
     acc_conjoint: z.boolean().nullish(),
     rqth: z.boolean().nullish(),
     mission_locale_logs: z.array(zMissionLocaleEffectifLogWithUnread).nullish(),

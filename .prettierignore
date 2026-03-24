@@ -2,4 +2,6 @@
 .talismanrc
 .infra/files/configs/mongodb/seed.gpg
 .infra/.env_server
+.infra/.env_server_classifier
 .infra/local/mongo_keyfile
+server-classifier/

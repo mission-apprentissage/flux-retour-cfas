@@ -51,6 +51,14 @@
     - "{{inventory_dir}}/.env_ui"
   when: env_type != 'preview'
 
+- name: copy server classifier env file
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/opt/app/.env_server_classifier"
+  with_fileglob:
+    - "{{inventory_dir}}/.env_server_classifier"
+  when: env_type != 'preview'
+
 - name: copy du fichier docker compose
   ansible.builtin.template:
     src: "{{ item }}"

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "Updating local server/.env & ui/.env"
+echo "Updating local server/.env, ui/.env & server-classifier/.env"
 
 delete_cleartext() {
   if [ -f "${ROOT_DIR}/.vault_pwd.txt" ]; then
@@ -30,6 +30,16 @@ MSYS_NO_PATHCONV=1 docker run -it --rm \
     --limit "local" \
     -m template \
     -a "src=\"/root/.infra/.env_ui\" dest=\"/root/ui/.env\"" \
+    --extra-vars "@root/.infra/vault/vault.yml" \
+    --vault-password-file="/root/.vault_pwd.txt"'
+
+MSYS_NO_PATHCONV=1 docker run -it --rm \
+  -v "${ROOT_DIR}:/root" \
+  -e ANSIBLE_CONFIG="/root/.infra/ansible/ansible.cfg" \
+  alpine/ansible sh -c 'chmod 0600 /root/.vault_pwd.txt && ansible all \
+    --limit "local" \
+    -m template \
+    -a "src=\"/root/.infra/.env_server_classifier\" dest=\"/root/server-classifier/.env\"" \
     --extra-vars "@root/.infra/vault/vault.yml" \
     --vault-password-file="/root/.vault_pwd.txt"'
 

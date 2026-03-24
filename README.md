@@ -47,6 +47,7 @@ Avant d'installer le projet, assurez-vous d'avoir les éléments suivants :
 - **shred**
 - **sshpass**
 - **NodeJS** 20+
+- **Python** 3.11+
 - **Ansible** 2.7+
 
 #### Installation des pré-requis sur un environnement **MacOS** :
@@ -123,9 +124,10 @@ Avant de lancer l'application, assurez-vous d'installer toutes les dépendances 
 ```bash
 yarn
 yarn setup
+yarn classifier:install
 ```
 
-Cette commande mettra à jour les dépendances du projet.
+Ces commandes installeront les dépendances du projet (Node + Python).
 
 Le script vous demandera plusieurs fois la phrase secrète de votre clé GPG pour décrypter les variables d'environnement du vault.
 
@@ -150,7 +152,7 @@ Les principales opérations sont regroupées dans le `package.json`.
   yarn setup
 ```
 
-installation ou mise à jour de vos fichiers d'environnement de développement depuis le vault.yml (`server/.env` et `ui/.env`)
+installation ou mise à jour de vos fichiers d'environnement de développement depuis le vault.yml (`server/.env`, `ui/.env` et `server-classifier/.env`)
 
 #### Lancement de la stack compléte
 
@@ -185,6 +187,12 @@ Lance le server en dev indépendamment de la stack
 ```
 
 Lance l'ui en dev indépendamment de la stack
+
+```bash
+  yarn classifier:dev
+```
+
+Lance le classifier en dev indépendamment de la stack
 
 #### Gestion des services docker
 

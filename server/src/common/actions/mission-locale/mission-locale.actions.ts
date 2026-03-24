@@ -27,6 +27,7 @@ import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
+import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
 import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
@@ -35,6 +36,7 @@ import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DATE_START = new Date("2025-01-01");
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
@@ -147,17 +149,19 @@ const matchTraitementEffectifPipelineMl = (
       ];
   }
 
+  const WHATSAPP_CALLBACK_INJOIGNABLE = { whatsapp_callback_requested: true, injoignable: true };
+
   if (type === "MISSION_LOCALE") {
     switch (nom_liste) {
       case API_EFFECTIF_LISTE.A_TRAITER:
-        return [{ $match: { a_traiter: true } }];
+        return [{ $match: { $or: [{ a_traiter: true }, WHATSAPP_CALLBACK_INJOIGNABLE] } }];
       case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
       case API_EFFECTIF_LISTE.PRIORITAIRE:
         return [
           {
             $match: {
               $and: [
-                { a_traiter: true },
+                { $or: [{ a_traiter: true }, WHATSAPP_CALLBACK_INJOIGNABLE] },
                 { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
               ],
             },
@@ -418,32 +422,11 @@ const addMissionLocaleFieldTraitementStatus = () => {
     ],
   };
 
-  const PRESQUE_6_MOIS_CONDITION = {
+  const CONTACT_OPPORTUN_CONDITION = {
     $and: [
-      {
-        $gte: [
-          "$date_rupture",
-          {
-            $dateSubtract: {
-              startDate: new Date(),
-              unit: "day",
-              amount: 180,
-            },
-          },
-        ],
-      },
-      {
-        $lte: [
-          "$date_rupture",
-          {
-            $dateSubtract: {
-              startDate: new Date(),
-              unit: "day",
-              amount: 150,
-            },
-          },
-        ],
-      },
+      { $gte: [{ $ifNull: ["$classification_reponse_appel.score", 0] }, CONTACT_OPPORTUN_SCORE_THRESHOLD] },
+      { $not: [MINEUR_CONDITION] },
+      { $not: [RQTH_CONDITION] },
     ],
   };
 
@@ -473,7 +456,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
       {
         $or: [
           RQTH_CONDITION,
-          PRESQUE_6_MOIS_CONDITION,
+          CONTACT_OPPORTUN_CONDITION,
           MINEUR_CONDITION,
           ACCOMPAGNEMENT_CONJOINT_CONDITION,
           WHATSAPP_CALLBACK_CONDITION,
@@ -499,8 +482,8 @@ const addMissionLocaleFieldTraitementStatus = () => {
         a_risque_mineur: {
           $cond: [MINEUR_CONDITION, true, false],
         },
-        a_risque_presque_6_mois: {
-          $cond: [PRESQUE_6_MOIS_CONDITION, true, false],
+        a_risque_contact_opportun: {
+          $cond: [CONTACT_OPPORTUN_CONDITION, true, false],
         },
         a_risque_accompagnement_conjoint: {
           $cond: [ACCOMPAGNEMENT_CONJOINT_CONDITION, true, false],
@@ -508,28 +491,10 @@ const addMissionLocaleFieldTraitementStatus = () => {
         a_risque_whatsapp_callback: {
           $cond: [WHATSAPP_CALLBACK_CONDITION, true, false],
         },
-        a_risque_presque_6_mois_avec_cfa: {
+        a_risque_cfa_sans_mineur_rqth: {
           $cond: [
             {
-              $and: [PRESQUE_6_MOIS_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
-            },
-            true,
-            false,
-          ],
-        },
-        a_risque_mineur_avec_cfa: {
-          $cond: [
-            {
-              $and: [MINEUR_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
-            },
-            true,
-            false,
-          ],
-        },
-        a_risque_rqth_avec_cfa: {
-          $cond: [
-            {
-              $and: [RQTH_CONDITION, ACCOMPAGNEMENT_CONJOINT_CONDITION],
+              $and: [ACCOMPAGNEMENT_CONJOINT_CONDITION, { $not: [MINEUR_CONDITION] }, { $not: [RQTH_CONDITION] }],
             },
             true,
             false,
@@ -611,7 +576,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           whatsapp_no_help_responded: "$whatsapp_no_help_responded",
           whatsapp_contact: "$whatsapp_contact",
           mineur: "$a_risque_mineur",
-          presque_6_mois: "$a_risque_presque_6_mois",
+          contact_opportun: "$a_risque_contact_opportun",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
         }
       : {
@@ -632,14 +597,12 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
-        a_risque_whatsapp_callback: -1,
-        a_risque_presque_6_mois_avec_cfa: -1,
-        a_risque_mineur_avec_cfa: -1,
-        a_risque_rqth_avec_cfa: -1,
-        a_risque_accompagnement_conjoint: -1,
-        a_risque_presque_6_mois: -1,
         a_risque_mineur: -1,
         a_risque_rqth: -1,
+        a_risque_cfa_sans_mineur_rqth: -1,
+        a_risque_whatsapp_callback: -1,
+        a_risque_contact_opportun: -1,
+        a_risque_accompagnement_conjoint: -1,
         a_contacter: -1,
       };
   }
@@ -960,10 +923,18 @@ export const getEffectifsParMoisByMissionLocaleId = async (
         return {
           $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", true] }],
         };
-      case API_EFFECTIF_LISTE.PRIORITAIRE:
       case API_EFFECTIF_LISTE.A_TRAITER:
         return {
           $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
+      case API_EFFECTIF_LISTE.PRIORITAIRE:
+        return {
+          $or: [
+            { $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }] },
+            {
+              $and: [{ $eq: ["$$ROOT.whatsapp_callback_requested", true] }, { $eq: ["$$ROOT.injoignable", true] }],
+            },
+          ],
         };
     }
   };
@@ -1051,7 +1022,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 prioritaire: "$a_risque",
                 a_contacter: "$a_contacter",
                 mineur: "$a_risque_mineur",
-                presque_6_mois: "$a_risque_presque_6_mois",
+                contact_opportun: "$a_risque_contact_opportun",
                 acc_conjoint: "$a_risque_accompagnement_conjoint",
                 rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
                 a_traiter: "$$ROOT.a_traiter",
@@ -1354,6 +1325,9 @@ export const getEffectifsListByMissionLocaleId = (
             [],
           ],
         },
+        contact_opportun: "$a_risque_contact_opportun",
+        collaboration_cfa: "$a_risque_accompagnement_conjoint",
+        disponible_whatsapp: { $ifNull: ["$whatsapp_callback_requested", false] },
         effectif_choice: "$_effectif_choice_label",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
@@ -1405,7 +1379,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
               injoignable: "$injoignable",
               a_contacter: "$a_contacter",
               mineur: "$a_risque_mineur",
-              presque_6_mois: "$a_risque_presque_6_mois",
+              contact_opportun: "$a_risque_contact_opportun",
               acc_conjoint: "$a_risque_accompagnement_conjoint",
               rqth: "$effectif_snapshot.apprenant.rqth",
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
@@ -2052,15 +2026,15 @@ export const setEffectifMissionLocaleData = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { situation, situation_autre, commentaires, deja_connu, probleme_type, probleme_detail } = data;
+  const { classifier_feedback, ...effectifFields } = data;
 
-  const setObject = {
-    situation,
-    deja_connu,
-    ...(situation_autre !== undefined ? { situation_autre } : {}),
-    ...(commentaires !== undefined ? { commentaires } : {}),
-    ...(probleme_type !== undefined ? { probleme_type } : {}),
-    ...(probleme_detail !== undefined ? { probleme_detail } : {}),
+  const dbSetObject = {
+    ...(effectifFields.situation !== undefined ? { situation: effectifFields.situation } : {}),
+    ...(effectifFields.deja_connu !== undefined ? { deja_connu: effectifFields.deja_connu } : {}),
+    ...(effectifFields.situation_autre !== undefined ? { situation_autre: effectifFields.situation_autre } : {}),
+    ...(effectifFields.commentaires !== undefined ? { commentaires: effectifFields.commentaires } : {}),
+    ...(effectifFields.probleme_type !== undefined ? { probleme_type: effectifFields.probleme_type } : {}),
+    ...(effectifFields.probleme_detail !== undefined ? { probleme_detail: effectifFields.probleme_detail } : {}),
   };
 
   const effectif = await missionLocaleEffectifsDb().findOne({
@@ -2075,8 +2049,19 @@ export const setEffectifMissionLocaleData = async (
     },
     {
       $set: {
-        ...setObject,
+        ...dbSetObject,
         updated_at: new Date(),
+        ...(classifier_feedback
+          ? {
+              "classification_reponse_appel.feedback": {
+                meilleure_reactivite: classifier_feedback.meilleure_reactivite,
+                confiance_indice: classifier_feedback.confiance_indice,
+                utilite_indice: classifier_feedback.utilite_indice,
+                responded_at: new Date(),
+                responded_by: new ObjectId(user._id),
+              },
+            }
+          : {}),
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,
@@ -2086,10 +2071,12 @@ export const setEffectifMissionLocaleData = async (
     },
     { upsert: true, returnDocument: "after" }
   );
-  await createEffectifMissionLocaleLog(updated.value?._id, setObject, user, missionLocaleId);
+  if (Object.keys(dbSetObject).length > 0) {
+    await createEffectifMissionLocaleLog(updated.value?._id, dbSetObject, user, missionLocaleId);
+  }
 
   // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"
-  if (setObject.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+  if (effectifFields.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
     triggerWhatsAppIfEligible(updated.value, missionLocaleId).catch((error) => {
       logger.error({ error, effectifId: effectifId }, "Failed to trigger WhatsApp");
       captureException(error);
@@ -2344,11 +2331,41 @@ export const createMissionLocaleSnapshot = async (
         normalizedIdentifiant,
         mlData._id
       );
+
+      // Score classifier (fire-and-forget, non-fatal si erreur)
+      scoreEffectifInBackground(new ObjectId(upsertedId), effectif);
     }
   }
 
   return { upserted: !!upsertedId };
 };
+
+function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, effectif: IEffectif | IEffectifDECA) {
+  const scoreInput = extractScoreInput(effectif);
+  if (!scoreInput) return;
+
+  scoreEffectifs([scoreInput])
+    .then((result) => {
+      const score = result.scores?.[0];
+      if (score != null) {
+        return missionLocaleEffectifsDb().updateOne(
+          { _id: missionLocaleEffectifId },
+          {
+            $set: {
+              classification_reponse_appel: {
+                score,
+                model: result.model,
+                scored_at: new Date(),
+              },
+            },
+          }
+        );
+      }
+    })
+    .catch((err) => {
+      logger.warn({ err, effectif_id: effectif._id }, "Classifier scoring failed, continuing without score");
+    });
+}
 
 export const getMissionLocaleStat = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
@@ -2441,6 +2458,7 @@ const MERGEABLE_FIELDS = [
   "whatsapp_no_help_responded_at",
   "deca_feedback",
   "effectif_choice",
+  "classification_reponse_appel",
 ] as const;
 
 /**

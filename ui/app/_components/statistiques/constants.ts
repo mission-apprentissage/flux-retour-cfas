@@ -127,4 +127,29 @@ export const WHATSAPP_OUTCOMES_LABELS = {
   en_attente: "En attente de traitement",
 } as const;
 
+export const CLASSIFIER_SITUATION_COLORS = {
+  rdv_pris: COLOR_PALETTE.GREEN_DARK,
+  nouveau_projet: COLOR_PALETTE.GREEN_LIGHT,
+  deja_accompagne: "#6A6AF4",
+  contacte_sans_retour: COLOR_PALETTE.YELLOW,
+  coordonnees_incorrect: COLOR_PALETTE.PINK_LIGHT,
+  injoignable_apres_relances: COLOR_PALETTE.RED_LIGHT,
+  autre: COLOR_PALETTE.GREY_LIGHT,
+} as const;
+
+export const CLASSIFIER_SITUATION_LABELS = {
+  rdv_pris: "RDV pris",
+  nouveau_projet: "Nouveau projet",
+  deja_accompagne: "Déjà accompagné",
+  contacte_sans_retour: "Contacté sans retour",
+  coordonnees_incorrect: "Coordonnées incorrectes",
+  injoignable_apres_relances: "Injoignable après relances",
+  autre: "Autre",
+} as const;
+
+export const CLASSIFIER_FEEDBACK_COLORS = {
+  oui: COLOR_PALETTE.GREEN_DARK,
+  non: COLOR_PALETTE.RED_DARK,
+} as const;
+
 export const STATS_LAUNCH_DATE_LABEL = "février 2025";

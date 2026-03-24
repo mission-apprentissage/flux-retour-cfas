@@ -1,5 +1,6 @@
 "use client";
 
+import { ClassifierSection } from "../sections/ClassifierSection";
 import { DeploymentSection } from "../sections/DeploymentSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
 import { WhatsAppSection } from "../sections/WhatsAppSection";
@@ -27,6 +28,7 @@ export function SyntheseView({ showDetailColumn = true, isAdmin = false }: Synth
       <DeploymentSection showDetailColumn={showDetailColumn} isAdmin={isAdmin} />
 
       {isAdmin && <WhatsAppSection />}
+      {isAdmin && <ClassifierSection />}
     </div>
   );
 }
