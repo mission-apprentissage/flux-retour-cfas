@@ -42,6 +42,9 @@ export const DOSSIERS_TRAITES_COLORS = {
   injoignables: COLOR_PALETTE.RED_LIGHT,
   coordonnees_incorrectes: COLOR_PALETTE.PINK_LIGHT,
   autre: COLOR_PALETTE.GREY_LIGHT,
+  cherche_contrat: "#F4A261",
+  reorientation: "#2A9D8F",
+  ne_veut_pas_accompagnement: "#E76F51",
 } as const;
 
 export const DOSSIERS_TRAITES_LABELS = {
@@ -52,6 +55,9 @@ export const DOSSIERS_TRAITES_LABELS = {
   injoignables: "Injoignables",
   coordonnees_incorrectes: "Mauvaises coordonnées",
   autre: "Autre",
+  cherche_contrat: "Cherche un contrat",
+  reorientation: "Réorientation",
+  ne_veut_pas_accompagnement: "Refuse l'accompagnement",
 } as const;
 
 export const DOSSIERS_TRAITES_DESCRIPTIONS = {
@@ -69,6 +75,12 @@ export const DOSSIERS_TRAITES_DESCRIPTIONS = {
     "La Mission Locale a tenté de contacter le jeune mais les coordonnées fournies par le CFA sont incorrectes et par conséquent ne lui permettent pas d'atteindre ce jeune.\nMalheureusement la Mission Locale n'a pas la possibilité de chercher d'autre moyen de le contacter.",
   autre:
     "NB : Cette catégorie de traitement de dossier a vocation à être supprimée dans la démarche d'amélioration continue du service du Tableau de bord de l'apprentissage.\nUne Mission Locale peut marquer un dossier comme traité avec le motif \"Autre\" (auquel s'ajoute parfois un commentaire). Ce motif couvre principalement des cas exceptionnels comme des déménagements, des décès, des situations socio-professionnelles trop spéciales.\nPour améliorer nos synthèses vous retrouvez actuellement la prise en compte de la raison pour limiter l'utilisation de cette catégorie \"Autre\".",
+  cherche_contrat:
+    "Le jeune cherche toujours un contrat d'apprentissage ou un emploi mais ne souhaite pas l'aide de la Mission Locale pour le moment.",
+  reorientation:
+    "Le jeune se réoriente vers un autre projet professionnel ou de formation mais ne souhaite pas être aidé par la Mission Locale.",
+  ne_veut_pas_accompagnement:
+    "Le jeune a explicitement indiqué qu'il ne souhaitait pas être accompagné par la Mission Locale.",
 } as const;
 
 export const RUPTURANTS_COLORS = {
@@ -88,6 +100,9 @@ export const TRAITEMENT_SEGMENTS = [
   { key: "contacte_sans_retour" as const, label: "Sans retour", color: "#C8AA39" },
   { key: "injoignables" as const, label: "Injoignable", color: "#CE614A" },
   { key: "coordonnees_incorrectes" as const, label: "Coord. incorrectes", color: "#E1000F" },
+  { key: "cherche_contrat" as const, label: "Cherche contrat", color: "#F4A261" },
+  { key: "reorientation" as const, label: "Réorientation", color: "#2A9D8F" },
+  { key: "ne_veut_pas_accompagnement" as const, label: "Refuse accomp.", color: "#E76F51" },
   { key: "autre" as const, label: "Autre", color: "#929292" },
 ] as const;
 

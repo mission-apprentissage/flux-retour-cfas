@@ -122,6 +122,48 @@ export function FeedbackForm({
               },
             },
             {
+              label: SITUATION_LABEL_ENUM.CHERCHE_CONTRAT,
+              nativeInputProps: {
+                value: SITUATION_ENUM.CHERCHE_CONTRAT,
+                checked: formData.situation === SITUATION_ENUM.CHERCHE_CONTRAT,
+                onChange: () => {
+                  setFormData({
+                    ...formData,
+                    situation: SITUATION_ENUM.CHERCHE_CONTRAT,
+                  });
+                  setDidChangeSituation(true);
+                },
+              },
+            },
+            {
+              label: SITUATION_LABEL_ENUM.REORIENTATION,
+              nativeInputProps: {
+                value: SITUATION_ENUM.REORIENTATION,
+                checked: formData.situation === SITUATION_ENUM.REORIENTATION,
+                onChange: () => {
+                  setFormData({
+                    ...formData,
+                    situation: SITUATION_ENUM.REORIENTATION,
+                  });
+                  setDidChangeSituation(true);
+                },
+              },
+            },
+            {
+              label: SITUATION_LABEL_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
+              nativeInputProps: {
+                value: SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
+                checked: formData.situation === SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
+                onChange: () => {
+                  setFormData({
+                    ...formData,
+                    situation: SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
+                  });
+                  setDidChangeSituation(true);
+                },
+              },
+            },
+            {
               label: SITUATION_LABEL_ENUM.AUTRE,
               nativeInputProps: {
                 value: SITUATION_ENUM.AUTRE,
