@@ -96,7 +96,11 @@ export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps
 
 function getAllPriorityBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
-  { fontSize, iconSize }: { fontSize: string; iconSize: string }
+  {
+    fontSize,
+    iconSize,
+    organisation,
+  }: { fontSize: string; iconSize: string; organisation?: EffectifStatusBadgeProps["organisation"] }
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
@@ -119,17 +123,19 @@ function getAllPriorityBadges(
     badges.push(<AContacterBadge key="a_contacter" iconSize={iconSize} fontSize={fontSize} />);
   }
   if (effectif.acc_conjoint) {
-    badges.push(<AccConjointBadge key="acc_conjoint" withCollab={false} fontSize={fontSize} />);
+    badges.push(
+      <AccConjointBadge key="acc_conjoint" withCollab={organisation === "MISSION_LOCALE"} fontSize={fontSize} />
+    );
   }
 
   return badges;
 }
 
-export function EffectifPriorityBadgeMultiple({ effectif, isHeader = false }: EffectifStatusBadgeProps) {
+export function EffectifPriorityBadgeMultiple({ effectif, isHeader = false, organisation }: EffectifStatusBadgeProps) {
   const fontSize = isHeader ? "12px" : "14px";
   const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
 
-  const badges = getAllPriorityBadges(effectif, { fontSize, iconSize });
+  const badges = getAllPriorityBadges(effectif, { fontSize, iconSize, organisation });
 
   if (badges.length === 0) return null;
   if (badges.length === 1) return badges[0];
@@ -205,7 +211,7 @@ function AccConjointBadge({ withCollab, fontSize }: { withCollab: boolean; fontS
       style={{ fontSize }}
     >
       <i className="ri-school-fill fr-icon--xs" aria-hidden="true" />
-      {withCollab ? "Collab CFA" : "CFA"}
+      {withCollab ? "Collaboration CFA" : "CFA"}
     </p>
   );
 }
