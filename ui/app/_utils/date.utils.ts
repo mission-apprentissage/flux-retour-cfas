@@ -50,3 +50,7 @@ export function formatRelativeDate(date: Date | string): string {
   if (diffDays === 1) return "hier";
   return `il y a ${diffDays} jours`;
 }
+
+export function formatAnnee(annee: number): string {
+  return annee === 1 ? "1ère année" : `${annee}ème année`;
+}

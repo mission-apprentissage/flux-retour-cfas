@@ -5,8 +5,12 @@ import { IEffectifMissionLocale } from "shared";
 
 import { getInitials } from "@/app/_utils/user.utils";
 
-import detailStyles from "./CfaCollaborationDetail.module.css";
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
+import cfaLocalStyles from "./CfaCollaborationDetail.module.css";
 import styles from "./CollaborationForm.module.css";
+
+const detailStyles = withSharedStyles(cfaLocalStyles);
 
 interface CollaborationSidebarProps {
   effectif: IEffectifMissionLocale["effectif"];

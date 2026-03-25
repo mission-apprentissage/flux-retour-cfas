@@ -8,7 +8,11 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatDate } from "@/app/_utils/date.utils";
 import { getUserDisplayName, isCurrentUserId } from "@/app/_utils/user.utils";
 
-import styles from "./CfaCollaborationDetail.module.css";
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
+import localStyles from "./CfaCollaborationDetail.module.css";
+
+const styles = withSharedStyles(localStyles);
 
 export function CollaborationSentView({ effectif }: { effectif: IEffectifMissionLocale["effectif"] }) {
   const { user } = useAuth();
@@ -41,7 +45,7 @@ export function CollaborationSentView({ effectif }: { effectif: IEffectifMission
       <div className={styles.sentHeader}>
         <span className={styles.sentHeaderTitle}>Collaboration avec la Mission Locale</span>
         <span className={styles.sentBadge}>
-          <span className="fr-icon-send-plane-fill fr-icon--sm" aria-hidden="true" />
+          <span className={`fr-icon-send-plane-fill fr-icon--sm ${styles.sentBadgeIcon}`} aria-hidden="true" />
           Dossier envoyé à la ML
         </span>
       </div>
@@ -122,7 +126,7 @@ export function CollaborationSentView({ effectif }: { effectif: IEffectifMission
         {od?.still_at_cfa != null && (
           <div className={styles.sentBubbleSection}>
             <p className={styles.sentStillAtCfa}>
-              {prenom} est {od.still_at_cfa ? "encore en formation dans le CFA 📚" : "n'est plus en formation au CFA"}
+              {prenom} {od.still_at_cfa ? "est maintenu en formation dans le CFA ✅" : "n'est plus en formation au CFA"}
             </p>
           </div>
         )}
@@ -151,7 +155,7 @@ export function CollaborationSentView({ effectif }: { effectif: IEffectifMission
 
       {od?.reponse_at && (
         <div className={styles.sentFooter}>
-          <span className="fr-icon-send-plane-fill fr-icon--sm" aria-hidden="true" />
+          <span className={`fr-icon-send-plane-fill fr-icon--sm ${styles.sentBadgeIcon}`} aria-hidden="true" />
           <span>
             Dossier envoyé par le CFA{organismeName ? ` ${organismeName}` : ""}
             {userName ? `, par ${userName}${isCurrentUser ? " (vous)" : ""}` : ""}{" "}

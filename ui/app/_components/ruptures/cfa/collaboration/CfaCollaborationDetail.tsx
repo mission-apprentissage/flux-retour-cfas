@@ -3,10 +3,14 @@
 import Link from "next/link";
 import { IEffectifMissionLocale } from "shared";
 
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
 import { CfaCollaborationColumn } from "./CfaCollaborationColumn";
-import styles from "./CfaCollaborationDetail.module.css";
+import localStyles from "./CfaCollaborationDetail.module.css";
 import { CfaEffectifInfoColumn } from "./CfaEffectifInfoColumn";
 import { CfaSuiviDossierColumn } from "./CfaSuiviDossierColumn";
+
+const styles = withSharedStyles(localStyles);
 
 interface CfaCollaborationDetailProps {
   data: IEffectifMissionLocale;

@@ -1,24 +1,23 @@
 "use client";
 
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
+import { formatAnnee, formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { getInitials } from "@/app/_utils/user.utils";
 
-import styles from "./CfaCollaborationDetail.module.css";
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
+import localStyles from "./CfaCollaborationDetail.module.css";
+
+const styles = withSharedStyles(localStyles);
 
 interface CfaEffectifInfoColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
-}
-
-function formatAnnee(annee: number): string {
-  return annee === 1 ? "1ère année" : `${annee}ème année`;
 }
 
 export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) {
@@ -80,26 +79,26 @@ export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) 
       </p>
 
       {isMineur && (
-        <Alert
-          severity="warning"
-          small
-          description="Jeune mineur : Les Missions Locales ont des aides et dispositifs spécifiques."
-          className="fr-mb-2w"
-        />
+        <div className={styles.mineurNotice} role="note">
+          <i className="fr-icon-lightbulb-fill fr-icon--sm" aria-hidden="true" />
+          <span>
+            <strong>Jeune mineur</strong> : Les Missions Locales ont des aides et dispositifs spécifiques.
+          </span>
+        </div>
       )}
 
       <p className={styles.infoLine}>
-        <i className="fr-icon-phone-line fr-icon--sm" />
+        <i className="fr-icon-phone-line fr-icon--sm" aria-hidden="true" />
         {formatPhoneNumber(effectif.telephone_corrected || effectif.telephone) || "Non renseigné"}
       </p>
 
       <p className={styles.infoLine}>
-        <i className="fr-icon-mail-line fr-icon--sm" />
+        <i className="fr-icon-mail-line fr-icon--sm" aria-hidden="true" />
         {effectif.courriel || "Non renseigné"}
       </p>
 
       <p className={styles.infoLine}>
-        <i className="fr-icon-home-4-line fr-icon--sm" />
+        <i className="fr-icon-home-4-line fr-icon--sm" aria-hidden="true" />
         Réside à {effectif.adresse?.commune || <span className={styles.noData}>commune non renseignée</span>}{" "}
         {effectif.adresse?.code_postal && `(${effectif.adresse.code_postal})`}
       </p>
@@ -111,13 +110,13 @@ export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) 
       <p className={styles.sectionTitle}>Formation et établissement</p>
 
       <p className={styles.infoLine}>
-        <i className="ri-school-line fr-icon--sm" />
+        <i className="ri-school-line fr-icon--sm" aria-hidden="true" />
         {effectif.organisme?.nom || "Organisme non renseigné"}{" "}
         {effectif.organisme?.adresse?.departement && `(${effectif.organisme.adresse.departement})`}
       </p>
 
       <p className={styles.infoLine}>
-        <i className="ri-honour-line fr-icon--sm" />
+        <i className="ri-honour-line fr-icon--sm" aria-hidden="true" />
         {effectif.formation?.libelle_long || "Formation non renseignée"}
       </p>
 
@@ -136,7 +135,7 @@ export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) 
       {effectif.mission_locale_organisation ? (
         <>
           <p className={styles.mlName}>
-            <i className="ri-school-line fr-icon--sm" />
+            <i className="ri-school-line fr-icon--sm" aria-hidden="true" />
             Mission Locale de {effectif.mission_locale_organisation.nom}
           </p>
           <DsfrLink

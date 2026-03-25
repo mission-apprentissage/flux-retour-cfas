@@ -10,7 +10,11 @@ import { formatDate, formatRelativeDate } from "@/app/_utils/date.utils";
 import { getUserDisplayName, isCurrentUserId } from "@/app/_utils/user.utils";
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
 
-import styles from "./CfaCollaborationDetail.module.css";
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
+import localStyles from "./CfaCollaborationDetail.module.css";
+
+const styles = withSharedStyles(localStyles);
 
 type EventIconType = "rupture" | "partage" | "traite" | "contacte-sans-reponse" | "attente";
 

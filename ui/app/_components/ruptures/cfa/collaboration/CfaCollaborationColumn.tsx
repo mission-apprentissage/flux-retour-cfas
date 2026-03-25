@@ -7,8 +7,12 @@ import { IEffectifMissionLocale } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
-import styles from "./CfaCollaborationDetail.module.css";
+import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
+
+import localStyles from "./CfaCollaborationDetail.module.css";
 import { CollaborationSentView } from "./CollaborationSentView";
+
+const styles = withSharedStyles(localStyles);
 
 interface CfaCollaborationColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
