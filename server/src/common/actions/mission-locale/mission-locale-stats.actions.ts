@@ -131,6 +131,9 @@ const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[])
           injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
           coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
           autre: { $sum: "$latest_stats.autre" },
+          cherche_contrat: { $sum: { $ifNull: ["$latest_stats.cherche_contrat", 0] } },
+          reorientation: { $sum: { $ifNull: ["$latest_stats.reorientation", 0] } },
+          ne_veut_pas_accompagnement: { $sum: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] } },
           deja_connu: { $sum: "$latest_stats.deja_connu" },
         },
       },
@@ -409,6 +412,9 @@ export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: Object
       injoignables: currentStats.injoignables || 0,
       coordonnees_incorrectes: currentStats.coordonnees_incorrectes || 0,
       autre: currentStats.autre || 0,
+      cherche_contrat: currentStats.cherche_contrat || 0,
+      reorientation: currentStats.reorientation || 0,
+      ne_veut_pas_accompagnement: currentStats.ne_veut_pas_accompagnement || 0,
       deja_connu: currentStats.deja_connu || 0,
     };
   } catch (error) {
@@ -742,6 +748,9 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
                 injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
                 coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
                 autre: { $ifNull: ["$latest_stats.autre", 0] },
+                cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
+                reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
+                ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
               },
               derniere_activite: 1,
               jours_depuis_activite: 1,
@@ -1024,6 +1033,9 @@ export const getAccompagnementConjointStats = async (
       injoignables: statutsTraitement.injoignables || 0,
       coordonnees_incorrectes: statutsTraitement.coordonnees_incorrectes || 0,
       autre: statutsTraitement.autre || 0,
+      cherche_contrat: statutsTraitement.cherche_contrat || 0,
+      reorientation: statutsTraitement.reorientation || 0,
+      ne_veut_pas_accompagnement: statutsTraitement.ne_veut_pas_accompagnement || 0,
     },
     dejaConnu: dejaConnuData.count,
     totalPourDejaConnu: dejaConnuData.total,
@@ -1121,6 +1133,12 @@ export async function getDossiersTraitesStats(period: StatsPeriod = "30days", re
       previousStats.coordonnees_incorrectes
     ),
     autre: createStatWithVariation(currentStats.autre, previousStats.autre),
+    cherche_contrat: createStatWithVariation(currentStats.cherche_contrat, previousStats.cherche_contrat),
+    reorientation: createStatWithVariation(currentStats.reorientation, previousStats.reorientation),
+    ne_veut_pas_accompagnement: createStatWithVariation(
+      currentStats.ne_veut_pas_accompagnement,
+      previousStats.ne_veut_pas_accompagnement
+    ),
     deja_connu: currentStats.deja_connu,
     total: currentStats.total_traites,
   };
@@ -1187,6 +1205,9 @@ const buildDetailFieldsProjection = () => ({
   injoignables: 1,
   coordonnees_incorrectes: 1,
   autre: 1,
+  cherche_contrat: 1,
+  reorientation: 1,
+  ne_veut_pas_accompagnement: 1,
 });
 
 export const getTraitementExportData = async (params: TraitementExportParams) => {
@@ -1210,6 +1231,9 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
         coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
         autre: { $ifNull: ["$latest_stats.autre", 0] },
+        cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
+        reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
+        ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
         deja_connu: { $ifNull: ["$latest_stats.deja_connu", 0] },
         derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
       },
@@ -1248,6 +1272,9 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
         coordonnees_incorrectes: { $sum: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] } },
         autre: { $sum: { $ifNull: ["$latest_stats.autre", 0] } },
+        cherche_contrat: { $sum: { $ifNull: ["$latest_stats.cherche_contrat", 0] } },
+        reorientation: { $sum: { $ifNull: ["$latest_stats.reorientation", 0] } },
+        ne_veut_pas_accompagnement: { $sum: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] } },
         deja_connu: { $sum: { $ifNull: ["$latest_stats.deja_connu", 0] } },
         ml_actives: { $sum: 1 },
         derniere_activite: { $max: "$derniere_activite_ml" },

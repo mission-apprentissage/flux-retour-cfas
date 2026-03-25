@@ -3,7 +3,9 @@ import { ObjectId } from "bson";
 import { SITUATION_ENUM } from "shared";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
+import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
+  effectifsDb,
   effectifsQueueDb,
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
@@ -251,6 +253,131 @@ describe("Mission Locale Routes", () => {
         expect(res2.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
       });
     });
+
+    describe("CFA déclare une rupture (cfa_rupture_declaration)", () => {
+      it("POST declare-rupture persiste cfa_rupture_declaration sur le ML effectif", async () => {
+        const dateRupture = new Date();
+        dateRupture.setDate(dateRupture.getDate() - 10);
+
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "post",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/cfa/effectif/${EFFECTIF_ID.toString()}/declare-rupture`,
+          { date_rupture: dateRupture.toISOString(), source: "effectifs" }
+        );
+
+        expect(res.status).toBe(200);
+
+        const mlEffectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(mlEffectif?.cfa_rupture_declaration).toBeTruthy();
+        expect(mlEffectif?.cfa_rupture_declaration?.date_rupture).toBeTruthy();
+      });
+
+      it("cfa_rupture_declaration est nettoyé quand un nouveau contrat arrive après la rupture", async () => {
+        const dateRupture = new Date();
+        dateRupture.setDate(dateRupture.getDate() - 10);
+
+        // CFA déclare la rupture
+        await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "post",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/cfa/effectif/${EFFECTIF_ID.toString()}/declare-rupture`,
+          { date_rupture: dateRupture.toISOString(), source: "effectifs" }
+        );
+
+        // Vérifier que la déclaration existe
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(before?.cfa_rupture_declaration).toBeTruthy();
+
+        // Simuler un nouveau contrat : mettre à jour le statut de l'effectif en APPRENTI
+        const effectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        expect(effectif).toBeTruthy();
+
+        const newContractDate = new Date();
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": {
+                valeur: "APPRENTI",
+                date: newContractDate,
+              },
+            } as any,
+          }
+        );
+
+        // Re-calculer le snapshot
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        // cfa_rupture_declaration doit être nettoyé
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.cfa_rupture_declaration).toBeFalsy();
+      });
+    });
+
+    describe("La ML soumet le formulaire collaboration", () => {
+      it.each([
+        { situation: SITUATION_ENUM.CHERCHE_CONTRAT },
+        { situation: SITUATION_ENUM.REORIENTATION },
+        { situation: SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT },
+      ])("POST avec situation=$situation persiste en base", async ({ situation }) => {
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          { situation }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.situation).toBe(situation);
+      });
+
+      it("POST avec deja_connu et commentaires persiste en base", async () => {
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          {
+            situation: SITUATION_ENUM.CHERCHE_CONTRAT,
+            deja_connu: true,
+            commentaires: "Commentaire de test",
+          }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.situation).toBe(SITUATION_ENUM.CHERCHE_CONTRAT);
+        expect(effectif?.deja_connu).toBe(true);
+        expect(effectif?.commentaires).toBe("Commentaire de test");
+      });
+
+      it("POST avec acc_conjoint=true déclenche has_unread_notification pour le CFA", async () => {
+        // D'abord le CFA accepte l'acc_conjoint
+        await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${EFFECTIF_ID.toString()}`,
+          { rupture: true, acc_conjoint: true }
+        );
+
+        // Puis la ML soumet son retour
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          { situation: SITUATION_ENUM.REORIENTATION, deja_connu: false }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.organisme_data?.has_unread_notification).toBe(true);
+      });
+    });
   });
 });
 
@@ -321,6 +448,9 @@ describe("Mission Locale Stats Routes - Public", () => {
       mineur_coordonnees_incorrectes: 0,
       mineur_autre: 0,
       mineur_autre_avec_contact: 0,
+      mineur_cherche_contrat: 0,
+      mineur_reorientation: 0,
+      mineur_ne_veut_pas_accompagnement: 0,
       rqth: 0,
       rqth_a_traiter: 0,
       rqth_traite: 0,
@@ -332,6 +462,9 @@ describe("Mission Locale Stats Routes - Public", () => {
       rqth_coordonnees_incorrectes: 0,
       rqth_autre: 0,
       rqth_autre_avec_contact: 0,
+      rqth_cherche_contrat: 0,
+      rqth_reorientation: 0,
+      rqth_ne_veut_pas_accompagnement: 0,
     };
 
     await missionLocaleStatsDb().insertMany([
@@ -352,6 +485,9 @@ describe("Mission Locale Stats Routes - Public", () => {
           injoignables: 5,
           coordonnees_incorrectes: 5,
           autre: 5,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ne_veut_pas_accompagnement: 0,
           autre_avec_contact: 2,
           deja_connu: 8,
           ...statsBase,
@@ -374,6 +510,9 @@ describe("Mission Locale Stats Routes - Public", () => {
           injoignables: 2,
           coordonnees_incorrectes: 1,
           autre: 1,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ne_veut_pas_accompagnement: 0,
           autre_avec_contact: 1,
           deja_connu: 4,
           ...statsBase,
@@ -539,6 +678,9 @@ describe("Mission Locale Stats Routes - Admin", () => {
       mineur_coordonnees_incorrectes: 0,
       mineur_autre: 0,
       mineur_autre_avec_contact: 0,
+      mineur_cherche_contrat: 0,
+      mineur_reorientation: 0,
+      mineur_ne_veut_pas_accompagnement: 0,
       rqth: 0,
       rqth_a_traiter: 0,
       rqth_traite: 0,
@@ -550,6 +692,9 @@ describe("Mission Locale Stats Routes - Admin", () => {
       rqth_coordonnees_incorrectes: 0,
       rqth_autre: 0,
       rqth_autre_avec_contact: 0,
+      rqth_cherche_contrat: 0,
+      rqth_reorientation: 0,
+      rqth_ne_veut_pas_accompagnement: 0,
     };
 
     await missionLocaleStatsDb().insertMany([
@@ -570,6 +715,9 @@ describe("Mission Locale Stats Routes - Admin", () => {
           injoignables: 2,
           coordonnees_incorrectes: 2,
           autre: 1,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ne_veut_pas_accompagnement: 0,
           autre_avec_contact: 1,
           deja_connu: 4,
           ...statsBase,
@@ -592,6 +740,9 @@ describe("Mission Locale Stats Routes - Admin", () => {
           injoignables: 5,
           coordonnees_incorrectes: 3,
           autre: 2,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ne_veut_pas_accompagnement: 0,
           autre_avec_contact: 2,
           deja_connu: 6,
           ...statsBase,

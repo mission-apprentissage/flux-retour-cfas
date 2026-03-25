@@ -44,7 +44,6 @@ import {
   DATE_START_RUPTURES,
   buildEffRuptureAgeFilter,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
-  matchDernierStatutRupturantPipeline,
 } from "../shared/rupture-pipeline.utils";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
@@ -53,6 +52,19 @@ import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
+
+/**
+ * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
+ * Retourne true si cfa_rupture_declaration doit être nettoyé.
+ */
+function shouldCleanCfaRuptureDeclaration(
+  cfaRuptureDeclaration: { date_rupture: Date } | null | undefined,
+  currentStatus: { valeur?: string; date?: Date } | undefined
+): boolean {
+  if (!cfaRuptureDeclaration || !currentStatus?.date) return false;
+  if (currentStatus.valeur !== STATUT_APPRENANT.APPRENTI) return false;
+  return new Date(currentStatus.date).getTime() > new Date(cfaRuptureDeclaration.date_rupture).getTime();
+}
 /**
  *    EffectifsDb
  */
@@ -203,7 +215,17 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-export const matchDernierStatutPipelineMl = matchDernierStatutRupturantPipeline;
+export const matchDernierStatutPipelineMl = (): any => {
+  return {
+    $match: {
+      date_rupture: { $lte: new Date() },
+      $or: [
+        { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
+        { cfa_rupture_declaration: { $exists: true, $ne: null } },
+      ],
+    },
+  };
+};
 
 /**
  * Création du filtre sur la mission locale concerné
@@ -347,7 +369,16 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
   const commonFields = {
     $addFields: {
       nouveau_contrat: {
-        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
+        $cond: [
+          {
+            $and: [
+              { $eq: ["$current_status.value", "APPRENTI"] },
+              { $not: [{ $ifNull: ["$cfa_rupture_declaration", false] }] },
+            ],
+          },
+          true,
+          false,
+        ],
       },
     },
   };
@@ -445,7 +476,10 @@ const addMissionLocaleFieldTraitementStatus = () => {
         ],
       },
       {
-        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
+        $or: [
+          { $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI] },
+          { $ifNull: ["$cfa_rupture_declaration", false] },
+        ],
       },
       RUPTURE_MOINS_DE_180_JOURS_CONDITION,
     ],
@@ -1601,16 +1635,27 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
   if (eff) {
+    const cleanCfaDeclaration = shouldCleanCfaRuptureDeclaration(eff.cfa_rupture_declaration, currentStatus);
+    const hasValidCfaDeclaration = !!eff.cfa_rupture_declaration && !cleanCfaDeclaration;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration;
+
+    const dateRupture = shouldKeep
+      ? rupturantFilter
+        ? currentStatus?.date
+        : eff.cfa_rupture_declaration?.date_rupture
+      : null;
+
     await missionLocaleEffectifsDb().updateOne(
       { effectif_id: effectif._id },
       {
         $set: {
-          ...(rupturantFilter ? {} : { soft_deleted: true }),
+          ...(shouldKeep ? {} : { soft_deleted: true }),
           effectif_snapshot: { ...effectif, _id: effectif._id },
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
-          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
+          date_rupture: dateRupture ?? null,
         },
+        ...(cleanCfaDeclaration ? { $unset: { cfa_rupture_declaration: "" } } : {}),
       }
     );
   }
@@ -1708,6 +1753,15 @@ export const computeMissionLocaleStats = async (
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
         },
         autre: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+        cherche_contrat: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }, 1, 0] },
+        },
+        reorientation: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }, 1, 0] },
+        },
+        ne_veut_pas_accompagnement: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }, 1, 0] },
+        },
         autre_avec_contact: {
           $sum: {
             $cond: [
@@ -1803,6 +1857,29 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        mineur_cherche_contrat: {
+          $sum: {
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }] },
+              1,
+              0,
+            ],
+          },
+        },
+        mineur_reorientation: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }] }, 1, 0],
+          },
+        },
+        mineur_ne_veut_pas_accompagnement: {
+          $sum: {
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }] },
+              1,
+              0,
+            ],
+          },
+        },
         mineur_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -1894,6 +1971,25 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        rqth_cherche_contrat: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }] }, 1, 0],
+          },
+        },
+        rqth_reorientation: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }] }, 1, 0],
+          },
+        },
+        rqth_ne_veut_pas_accompagnement: {
+          $sum: {
+            $cond: [
+              { $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }] },
+              1,
+              0,
+            ],
+          },
+        },
         rqth_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -1969,6 +2065,9 @@ export const computeMissionLocaleStats = async (
       injoignables: 0,
       coordonnees_incorrectes: 0,
       autre: 0,
+      cherche_contrat: 0,
+      reorientation: 0,
+      ne_veut_pas_accompagnement: 0,
       autre_avec_contact: 0,
       deja_connu: 0,
       mineur: 0,
@@ -1981,6 +2080,9 @@ export const computeMissionLocaleStats = async (
       mineur_injoignables: 0,
       mineur_coordonnees_incorrectes: 0,
       mineur_autre: 0,
+      mineur_cherche_contrat: 0,
+      mineur_reorientation: 0,
+      mineur_ne_veut_pas_accompagnement: 0,
       mineur_autre_avec_contact: 0,
       rqth: 0,
       rqth_a_traiter: 0,
@@ -1992,6 +2094,9 @@ export const computeMissionLocaleStats = async (
       rqth_injoignables: 0,
       rqth_coordonnees_incorrectes: 0,
       rqth_autre: 0,
+      rqth_cherche_contrat: 0,
+      rqth_reorientation: 0,
+      rqth_ne_veut_pas_accompagnement: 0,
       rqth_autre_avec_contact: 0,
       abandon: 0,
     };
@@ -2362,6 +2467,14 @@ export const createMissionLocaleSnapshot = async (
 
   const upsertedId = mongoInfo.lastErrorObject?.upserted;
 
+  // Nettoyer cfa_rupture_declaration si un nouveau contrat est arrivé depuis
+  if (!upsertedId && shouldCleanCfaRuptureDeclaration(mongoInfo.value?.cfa_rupture_declaration, currentStatus)) {
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: effectif._id },
+      { $unset: { cfa_rupture_declaration: "" } }
+    );
+  }
+
   if (mongoInfo.lastErrorObject?.n > 0) {
     await createOrUpdateMissionLocaleStats(mlData._id);
     if (upsertedId) {
@@ -2461,6 +2574,9 @@ export const getMissionLocaleStat = async (
         injoignables: withCondition({ $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }),
         coordonnees_incorrectes: withCondition({ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }),
         autre: withCondition({ $eq: ["$situation", SITUATION_ENUM.AUTRE] }),
+        cherche_contrat: withCondition({ $eq: ["$situation", SITUATION_ENUM.CHERCHE_CONTRAT] }),
+        reorientation: withCondition({ $eq: ["$situation", SITUATION_ENUM.REORIENTATION] }),
+        ne_veut_pas_accompagnement: withCondition({ $eq: ["$situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }),
         deja_connu: withCondition({ $eq: ["$deja_connu", true] }),
       },
     },

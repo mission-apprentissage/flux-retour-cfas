@@ -17950,6 +17950,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "NOUVEAU_CONTRAT",
             "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
+            "CHERCHE_CONTRAT",
+            "REORIENTATION",
+            "NE_VEUT_PAS_ACCOMPAGNEMENT",
           ],
         },
         {
@@ -18274,6 +18277,9 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "NOUVEAU_CONTRAT",
             "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
+            "CHERCHE_CONTRAT",
+            "REORIENTATION",
+            "NE_VEUT_PAS_ACCOMPAGNEMENT",
           ],
         },
         {
@@ -18329,6 +18335,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "autre_avec_contact": {
           "bsonType": "int",
         },
+        "cherche_contrat": {
+          "bsonType": "int",
+        },
         "contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18356,6 +18365,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_autre_avec_contact": {
           "bsonType": "int",
         },
+        "mineur_cherche_contrat": {
+          "bsonType": "int",
+        },
         "mineur_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18368,19 +18380,31 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_injoignables": {
           "bsonType": "int",
         },
+        "mineur_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
         "mineur_nouveau_projet": {
           "bsonType": "int",
         },
         "mineur_rdv_pris": {
           "bsonType": "int",
         },
+        "mineur_reorientation": {
+          "bsonType": "int",
+        },
         "mineur_traite": {
+          "bsonType": "int",
+        },
+        "ne_veut_pas_accompagnement": {
           "bsonType": "int",
         },
         "nouveau_projet": {
           "bsonType": "int",
         },
         "rdv_pris": {
+          "bsonType": "int",
+        },
+        "reorientation": {
           "bsonType": "int",
         },
         "rqth": {
@@ -18395,6 +18419,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "rqth_autre_avec_contact": {
           "bsonType": "int",
         },
+        "rqth_cherche_contrat": {
+          "bsonType": "int",
+        },
         "rqth_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18407,10 +18434,16 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "rqth_injoignables": {
           "bsonType": "int",
         },
+        "rqth_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
         "rqth_nouveau_projet": {
           "bsonType": "int",
         },
         "rqth_rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth_reorientation": {
           "bsonType": "int",
         },
         "rqth_traite": {

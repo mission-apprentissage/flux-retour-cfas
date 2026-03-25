@@ -20,6 +20,9 @@ const zAggregatedStats = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
   deja_connu: z.number(),
 });
 
@@ -54,6 +57,9 @@ const zDetailsDossiersTraites = z.object({
   injoignables: zStatWithVariation,
   coordonnees_incorrectes: zStatWithVariation,
   autre: zStatWithVariation,
+  cherche_contrat: zStatWithVariation,
+  reorientation: zStatWithVariation,
+  ne_veut_pas_accompagnement: zStatWithVariation,
   deja_connu: z.number(),
   total: z.number(),
 });
@@ -101,6 +107,9 @@ const zTraitementDetails = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
 });
 
 export type ITraitementDetails = z.output<typeof zTraitementDetails>;
@@ -197,6 +206,9 @@ const zMissionLocaleExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
 });
 
 export type IMissionLocaleExportData = z.output<typeof zMissionLocaleExportData>;
@@ -219,6 +231,9 @@ const zRegionExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
 });
 
 export type IRegionExportData = z.output<typeof zRegionExportData>;

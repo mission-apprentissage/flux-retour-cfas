@@ -35,6 +35,9 @@ export const EMPTY_STATS: IAggregatedStats = {
   injoignables: 0,
   coordonnees_incorrectes: 0,
   autre: 0,
+  cherche_contrat: 0,
+  reorientation: 0,
+  ne_veut_pas_accompagnement: 0,
   deja_connu: 0,
 };
 

@@ -38,6 +38,9 @@ export enum SITUATION_ENUM {
   NOUVEAU_CONTRAT = "NOUVEAU_CONTRAT",
   NE_SOUHAITE_PAS_ETRE_RECONTACTE = "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
   AUTRE = "AUTRE",
+  CHERCHE_CONTRAT = "CHERCHE_CONTRAT",
+  REORIENTATION = "REORIENTATION",
+  NE_VEUT_PAS_ACCOMPAGNEMENT = "NE_VEUT_PAS_ACCOMPAGNEMENT",
 }
 
 export enum SITUATION_LABEL_ENUM {
@@ -50,6 +53,9 @@ export enum SITUATION_LABEL_ENUM {
   NOUVEAU_CONTRAT = "Ce jeune a retrouvé un contrat d'apprentissage",
   NE_SOUHAITE_PAS_ETRE_RECONTACTE = "Ne souhaite pas être recontacté (WhatsApp)",
   AUTRE = "Autre situation / retour",
+  CHERCHE_CONTRAT = "Cherche un contrat, ne souhaite pas l'aide de la Mission Locale",
+  REORIENTATION = "Se réoriente, ne souhaite pas l'aide de la Mission Locale",
+  NE_VEUT_PAS_ACCOMPAGNEMENT = "Ne veut pas être accompagné",
 }
 
 export enum PROBLEME_TYPE_ENUM {
