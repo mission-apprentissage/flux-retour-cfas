@@ -1,33 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { API_EFFECTIF_LISTE, IEffectifMissionLocale } from "shared";
-
-import EffectifDetail from "@/app/_components/ruptures/shared/ui/EffectifDetail";
-import { _get } from "@/common/httpClient";
+import { MlCollaborationDetail, useMlEffectifDetail } from "@/app/_components/ruptures/mission-locale/collaboration";
 
 export default function MissionLocaleDetailClient({ id }: { id: string }) {
-  const searchParams = useSearchParams();
-  const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
-
-  const { data } = useQuery(
-    ["effectif", id, nomListe],
-    async () => {
-      if (!id) return null;
-      return await _get<IEffectifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
-        params: {
-          nom_liste: nomListe,
-        },
-      });
-    },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  const { data } = useMlEffectifDetail(id);
 
   if (!data) return null;
-  return <EffectifDetail data={data} />;
+
+  return <MlCollaborationDetail data={data} />;
 }
