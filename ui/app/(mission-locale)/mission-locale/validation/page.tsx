@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { MlContainer } from "../MlContainer";
+
 import ValidationClient from "./ValidationClient";
 
 export const metadata: Metadata = {
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ValidationClient />;
+  return (
+    <MlContainer>
+      <ValidationClient />
+    </MlContainer>
+  );
 }

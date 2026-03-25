@@ -1,4 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import dynamic from "next/dynamic";
 
 import { ConnectedHeader } from "../_components/ConnectedHeader";
@@ -18,11 +17,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         <div
           style={{
             flex: 1,
-            margin: "auto",
-            maxWidth: 1232,
-            ...fr.spacing("padding", {
-              topBottom: "10v",
-            }),
+            background: "var(--background-default-grey)",
           }}
         >
           {children}
