@@ -14,9 +14,6 @@
     "preprod": {
       "targets": ["server", "server-classifier", "ui-preprod"]
     },
-    "preview": {
-      "targets": ["server", "server-classifier", "ui-preview"]
-    },
     "local": {
       "targets": ["server", "server-classifier", "ui-local"]
     }
@@ -62,7 +59,7 @@
     "ui": {
       "inherits": ["common"],
       "matrix": {
-        "ENV": ["production", "recette", "preprod", "preview", "local"]
+        "ENV": ["production", "recette", "preprod", "local"]
       },
       "name": "ui-${ENV}",
       "args": {

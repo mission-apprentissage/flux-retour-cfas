@@ -5,7 +5,7 @@ HEAD=$(git rev-parse HEAD)
 
 if [[ "$VERSION" = "$HEAD" ]]; then
   VERSION="v0.0.0"
-fi;
+fi
 
 set -euo pipefail
 

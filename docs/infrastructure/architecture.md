@@ -213,7 +213,3 @@ Ainsi, avec Fluentd, nous avons la flexibilité d'enrichir, structurer et transf
 La recette est similaire à l'environnement de production excepté que l'environnement intègre un serveur SMTP pour la gestion des emails.
 
 Il est possible d'accéder à l'interface via [https://cfas-recette.apprentissage.beta.gouv.fr/smtp/](https://cfas-recette.apprentissage.beta.gouv.fr/smtp/)
-
-## Preview
-
-Pour plus d'informations concernant l'environnement de recette veuillez vous référer à la [documentation dédiée](./infrastructure/preview.md).
