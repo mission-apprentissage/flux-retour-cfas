@@ -3,7 +3,7 @@ import logging
 from flask import Flask, jsonify
 
 from config import CLASSIFIER_API_KEY
-from model_manager import get_model, load_latest_model
+from model_manager import get_model, load_latest_models
 from routes import register_all_routes
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def create_app():
     if not CLASSIFIER_API_KEY:
         app.logger.warning("CLASSIFIER_API_KEY is not set — API authentication is disabled")
 
-    load_latest_model()
+    load_latest_models()
     register_all_routes(app, get_model)
 
     @app.errorhandler(Exception)

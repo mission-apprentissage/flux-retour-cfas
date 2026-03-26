@@ -3,11 +3,11 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from classifier import Classifier
+from models import Contact
 
 
 def test_extract_features():
-    classifier = Classifier(version="test", token="")
+    classifier = Contact(version="contact-2026-03-16", token="")
     data = [
         {
             "apprenant.date_de_naissance": "2002-07-28T00:00:00.000Z",
