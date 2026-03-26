@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Contact:
     def __init__(self, version="2026-03-16", token=""):
         self.version = version
-        self.model_file = f"tba-rf-ml-{version}.joblib"
+        self.model_file = "model.joblib"
         self.repo_id = f"tableaudebord-apprentissage/{version}"
         self.token = token
         self.classifier = None

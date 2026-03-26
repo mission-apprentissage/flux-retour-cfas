@@ -1,29 +1,62 @@
 [
     {
-        "apprenant.date_de_naissance": "2002-07-28T00:00:00.000Z",
-        "formation.date_inscription": "2025-11-10T00:00:00.000Z",
-        "formation.date_fin": "2027-05-09T00:00:00.000Z",
-        "formation.date_entree": "2025-11-10T00:00:00.000Z",
-        "contrat.date_debut": "2025-11-10T00:00:00.000Z",
-        "contrat.date_fin": "2027-05-09T00:00:00.000Z",
-        "contrat.date_rupture": "2025-12-15T00:00:00.000Z"
+        "apprenant.date_de_naissance": "2001-07-30T00:00:00.000Z",
+        "formation.date_inscription": "2025-09-01T00:00:00.000Z",
+        "formation.date_fin": "2027-06-30T00:00:00.000Z",
+        "formation.date_entree": "2025-09-01T00:00:00.000Z",
+        "contrat.date_debut": "2025-09-01T00:00:00.000Z",
+        "contrat.date_fin": "2027-08-27T00:00:00.000Z",
+        "contrat.date_rupture": "2026-01-31T00:00:00.000Z",
+        "apprenant.sexe": "M",
+        "mission_locale": "ALPES",
+        "deja_connu": 0.0
     },
     {
-        "apprenant.date_de_naissance": "2001-04-07T00:00:00.000Z",
-        "formation.date_inscription": "2024-12-05T00:00:00.000Z",
-        "formation.date_fin": "2026-10-01T00:00:00.000Z",
-        "formation.date_entree": "2024-12-05T00:00:00.000Z",
-        "contrat.date_debut": "2024-12-02T00:00:00.000Z",
-        "contrat.date_fin": "2026-10-01T00:00:00.000Z",
-        "contrat.date_rupture": "2026-02-03T00:00:00.000Z"
+        "apprenant.date_de_naissance": "2007-07-02T00:00:00.000Z",
+        "formation.date_inscription": "2025-09-02T00:00:00.000Z",
+        "formation.date_fin": "2026-06-30T00:00:00.000Z",
+        "formation.date_entree": "2025-09-02T00:00:00.000Z",
+        "contrat.date_debut": "2025-11-06T00:00:00.000Z",
+        "contrat.date_fin": "2026-08-30T00:00:00.000Z",
+        "contrat.date_rupture": "2025-12-31T00:00:00.000Z",
+        "apprenant.sexe": "F",
+        "mission_locale": "POUR L'EMPLOI DES JEUNES DU SOISSONNAIS",
+        "deja_connu": 1.0
     },
     {
-        "apprenant.date_de_naissance": "2007-08-12T00:00:00.000Z",
-        "formation.date_inscription": "2024-04-10T11:29:00.000Z",
-        "formation.date_fin": "2025-06-30T00:00:00.000Z",
-        "formation.date_entree": "2024-09-03T00:00:00.000Z",
-        "contrat.date_debut": "2023-09-01T00:00:00.000Z",
-        "contrat.date_fin": "2025-08-31T00:00:00.000Z",
-        "contrat.date_rupture": "2024-12-31T00:00:00.000Z"
+        "apprenant.date_de_naissance": "2005-10-15T00:00:00.000Z",
+        "formation.date_inscription": "2025-09-25T00:00:00.000Z",
+        "formation.date_fin": "2026-09-04T00:00:00.000Z",
+        "formation.date_entree": "2025-09-25T00:00:00.000Z",
+        "contrat.date_debut": "2025-09-01T00:00:00.000Z",
+        "contrat.date_fin": "2026-09-30T00:00:00.000Z",
+        "contrat.date_rupture": "2025-12-19T00:00:00.000Z",
+        "apprenant.sexe": "F",
+        "mission_locale": "INTERCOMMUNALE DES BORDS DE MARNE",
+        "deja_connu": null
+    },
+    {
+        "apprenant.date_de_naissance": "2003-02-25T00:00:00.000Z",
+        "formation.date_inscription": "2025-09-03T00:00:00.000Z",
+        "formation.date_fin": "2026-07-01T00:00:00.000Z",
+        "formation.date_entree": "2025-09-03T00:00:00.000Z",
+        "contrat.date_debut": "2025-09-01T00:00:00.000Z",
+        "contrat.date_fin": "2026-08-31T00:00:00.000Z",
+        "contrat.date_rupture": "2025-11-24T00:00:00.000Z",
+        "apprenant.sexe": "F",
+        "mission_locale": "LILLE AVENIRS",
+        "deja_connu": 0.0
+    },
+    {
+        "apprenant.date_de_naissance": "2007-06-09T00:00:00.000Z",
+        "formation.date_inscription": "2025-08-27T00:00:00.000Z",
+        "formation.date_fin": "2027-07-31T00:00:00.000Z",
+        "formation.date_entree": "2025-08-27T00:00:00.000Z",
+        "contrat.date_debut": "2025-10-20T00:00:00.000Z",
+        "contrat.date_fin": "2027-07-31T00:00:00.000Z",
+        "contrat.date_rupture": "2025-11-07T00:00:00.000Z",
+        "apprenant.sexe": "F",
+        "mission_locale": "A.V.E.C.",
+        "deja_connu": 0.0
     }
 ]

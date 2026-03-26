@@ -30,12 +30,14 @@ down: ## Stop all services
 test: ## Test the /model/score endpoint using test dataset (requires server to be running)
 	@echo "Testing batch classification..."
 	jq '{data: .}' data/test-dataset.json | curl -X POST http://localhost:8000/contact/score -H 'Content-Type: application/json' -d @-
+	jq '{data: .}' data/test-dataset.json | curl -X POST http://localhost:8000/whatsapp/score -H 'Content-Type: application/json' -d @-
 
 health: ## Check API health
 	curl -f http://localhost:8000/ || echo "Service not available"
 
 version: ## Get API version
 	curl -s http://localhost:8000/contact/version
+	curl -s http://localhost:8000/whatsapp/version
 
 clean: ## Clean up containers and volumes
 	docker-compose down -v
