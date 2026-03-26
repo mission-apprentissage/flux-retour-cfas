@@ -63,7 +63,7 @@ def make_mock_model(version="contact-2026-03-16"):
 def full_app():
     mock_model = make_mock_model()
 
-    def get_model(version=None):
+    def get_model(origin=None, version=None):
         if version is None:
             return mock_model
         if version == mock_model.version or version is None:
@@ -136,8 +136,8 @@ def test_score_rejects_batch_exceeding_max():
     mock_model = make_mock_model()
     app = Flask(__name__)
 
-    with patch("routes.inference.MAX_BATCH_SIZE", 2):
-        register_all_routes(app, lambda v=None: mock_model)
+    with patch("routes.contact.MAX_BATCH_SIZE", 2):
+        register_all_routes(app, lambda origin=None, version=None: mock_model)
         test_client = app.test_client()
         response = test_client.post("/contact/score", json={"data": [VALID_ITEM, VALID_ITEM, VALID_ITEM]})
         assert response.status_code == 400
@@ -151,7 +151,7 @@ def test_score_rejects_batch_exceeding_max():
 def test_auth_rejects_missing_api_key():
     mock_model = make_mock_model()
     app = Flask(__name__)
-    register_all_routes(app, lambda v=None: mock_model)
+    register_all_routes(app, lambda origin=None, version=None: mock_model)
     client = app.test_client()
 
     response = client.post("/contact/score", json={"data": [VALID_ITEM]})
@@ -162,7 +162,7 @@ def test_auth_rejects_missing_api_key():
 def test_auth_rejects_wrong_api_key():
     mock_model = make_mock_model()
     app = Flask(__name__)
-    register_all_routes(app, lambda v=None: mock_model)
+    register_all_routes(app, lambda origin=None, version=None: mock_model)
     client = app.test_client()
 
     response = client.post("/contact/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "wrong-key"})
@@ -173,7 +173,7 @@ def test_auth_rejects_wrong_api_key():
 def test_auth_accepts_correct_api_key():
     mock_model = make_mock_model()
     app = Flask(__name__)
-    register_all_routes(app, lambda v=None: mock_model)
+    register_all_routes(app, lambda origin=None, version=None: mock_model)
     client = app.test_client()
 
     response = client.post("/contact/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "test-secret-key"})
@@ -183,7 +183,7 @@ def test_auth_accepts_correct_api_key():
 @patch("routes.CLASSIFIER_API_KEY", "test-secret-key")
 def test_auth_skipped_on_health_endpoint():
     app = Flask(__name__)
-    register_all_routes(app, lambda v=None: None)
+    register_all_routes(app, lambda origin=None, version=None: None)
     client = app.test_client()
 
     response = client.get("/")

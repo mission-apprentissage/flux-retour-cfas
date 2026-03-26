@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from contact import Contact
+from models import Contact
 
 
 def test_extract_features():
