@@ -7,7 +7,7 @@ from contact import Contact
 
 
 def test_extract_features():
-    classifier = Contact(version="test", token="")
+    classifier = Contact(version="contact-2026-03-16", token="")
     data = [
         {
             "apprenant.date_de_naissance": "2002-07-28T00:00:00.000Z",

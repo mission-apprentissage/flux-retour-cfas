@@ -52,7 +52,7 @@ VALID_ITEM = {
 }
 
 
-def make_mock_model(version="2026-03-16"):
+def make_mock_model(version="contact-2026-03-16"):
     model = MagicMock()
     model.version = version
     model.score.return_value = {"model": version, "scores": [0.85]}
