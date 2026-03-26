@@ -5,7 +5,7 @@ from flask import jsonify, request
 
 from config import CLASSIFIER_API_KEY
 
-from . import health, contact, whatsapp
+from . import contact, health, whatsapp
 
 logger = logging.getLogger(__name__)
 

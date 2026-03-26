@@ -1,2 +1,2 @@
-from .contact import Contact
-from .whatsapp import WhatsApp
+from .contact import Contact as Contact
+from .whatsapp import WhatsApp as WhatsApp

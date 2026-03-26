@@ -1,6 +1,7 @@
 import logging
+
+from config import CONTACT_MODEL_VERSION, HF_TOKEN, WHATSAPP_MODEL_VERSION
 from models import Contact, WhatsApp
-from config import HF_TOKEN, CONTACT_MODEL_VERSION, WHATSAPP_MODEL_VERSION
 
 logger = logging.getLogger(__name__)
 contact_model = None

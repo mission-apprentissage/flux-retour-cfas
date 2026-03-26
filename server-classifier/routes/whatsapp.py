@@ -25,7 +25,7 @@ def register_routes(app, get_model):
         model = get_model(origin="whatsapp")
         version = model.version if model else None
         return jsonify({"model": version}), 200
-    
+
     @app.route("/whatsapp/score", methods=["POST"])
     def wa_score():
         if not request.is_json:

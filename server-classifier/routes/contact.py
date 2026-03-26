@@ -25,7 +25,7 @@ def register_routes(app, get_model):
         model = get_model(origin="contact")
         version = model.version if model else None
         return jsonify({"model": version}), 200
-    
+
     @app.route("/contact/score", methods=["POST"])
     def score():
         if not request.is_json:

@@ -1,10 +1,8 @@
 import logging
-from pathlib import Path
-from tempfile import mkdtemp
 
 import joblib
 import pandas as pd
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import hf_hub_download
 from tqdm import tqdm
 
 tqdm.pandas()
@@ -47,9 +45,13 @@ class WhatsApp:
                     'contrat.date_fin',
                     'contrat.date_rupture',
         ]
-        features[date_cols] = features[date_cols].map(lambda x: pd.to_datetime(str(x), utc=True, errors='coerce')) # Cast as date
+        features[date_cols] = features[date_cols].map(
+            lambda x: pd.to_datetime(str(x), utc=True, errors='coerce')
+        )  # Cast as date
         features[date_cols] = features[date_cols].sub(features['formation.date_fin'], axis=0) # Diff with end date
-        features[date_cols] = features[date_cols].map(lambda x: x.days if isinstance(x, pd.Timedelta) else 0) # Keep days
+        features[date_cols] = features[date_cols].map(
+            lambda x: x.days if isinstance(x, pd.Timedelta) else 0
+        )  # Keep days
 
         # Prepare cat features
         cat_cols = ['apprenant.sexe', 'mission_locale', 'deja_connu']
