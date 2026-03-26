@@ -8,6 +8,7 @@ from tqdm import tqdm
 tqdm.pandas()
 logger = logging.getLogger(__name__)
 
+
 class Contact:
     def __init__(self, version="2026-03-16", token=""):
         self.version = version

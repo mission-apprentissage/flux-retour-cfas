@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 contact_model = None
 wa_model = None
 
+
 def get_model(origin="contact", version=None):
     if origin == "contact":
         global contact_model
@@ -49,5 +50,3 @@ def load_latest_models():
 
     if wa_model is None or not hasattr(wa_model, "classifier") or wa_model.classifier is None:
         raise RuntimeError(f"WhatsApp model '{WHATSAPP_MODEL_VERSION}' loaded but classifier is not available.")
-
-

@@ -8,6 +8,7 @@ from routes import register_all_routes
 
 logger = logging.getLogger(__name__)
 
+
 def create_app():
     app = Flask(__name__)
 

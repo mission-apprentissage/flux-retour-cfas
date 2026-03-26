@@ -7,6 +7,7 @@ from config import MAX_BATCH_SIZE, VERSION_PATTERN
 
 logger = logging.getLogger(__name__)
 
+
 def register_routes(app, get_model):
     @app.route("/whatsapp/load", methods=["GET"])
     def wa_load_model():
@@ -52,7 +53,7 @@ def register_routes(app, get_model):
             "contrat.date_rupture",
             "apprenant.sexe",
             "mission_locale",
-            "deja_connu"
+            "deja_connu",
         ]
         for i, item in enumerate(data):
             if not isinstance(item, dict):

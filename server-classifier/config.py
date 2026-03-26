@@ -13,4 +13,3 @@ VERSION_PATTERN = r".*-^\d{4}-\d{2}-\d{2}$"
 SERVER_PORT = int(os.getenv("LAB_SERVER_PORT", 8000))
 MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 1000))
 PUBLIC_VERSION = os.getenv("PUBLIC_VERSION", "2026-03-26")
-

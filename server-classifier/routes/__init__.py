@@ -9,6 +9,7 @@ from . import contact, health, whatsapp
 
 logger = logging.getLogger(__name__)
 
+
 def register_all_routes(app, get_model):
     @app.before_request
     def authenticate():
@@ -28,4 +29,3 @@ def register_all_routes(app, get_model):
     health.register_routes(app)
     contact.register_routes(app, get_model)
     whatsapp.register_routes(app, get_model)
-

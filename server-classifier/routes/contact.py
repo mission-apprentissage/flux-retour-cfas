@@ -7,6 +7,7 @@ from config import MAX_BATCH_SIZE, VERSION_PATTERN
 
 logger = logging.getLogger(__name__)
 
+
 def register_routes(app, get_model):
     @app.route("/contact/load", methods=["GET"])
     def load_model():
