@@ -6,7 +6,6 @@ from config import PUBLIC_VERSION
 
 logger = logging.getLogger(__name__)
 
-
 def register_routes(app):
     @app.route("/favicon.ico")
     def favicon():

@@ -84,7 +84,7 @@ def client(full_app):
 
 
 def test_score_valid_request(client):
-    response = client.post("/model/score", json={"data": [VALID_ITEM]})
+    response = client.post("/contact/score", json={"data": [VALID_ITEM]})
     assert response.status_code == 200
     data = response.get_json()
     assert "model" in data
@@ -92,42 +92,42 @@ def test_score_valid_request(client):
 
 
 def test_score_rejects_non_json(client):
-    response = client.post("/model/score", data="not json", content_type="text/plain")
+    response = client.post("/contact/score", data="not json", content_type="text/plain")
     assert response.status_code == 400
     assert "JSON" in response.get_json()["error"]
 
 
 def test_score_rejects_empty_data(client):
-    response = client.post("/model/score", json={"data": []})
+    response = client.post("/contact/score", json={"data": []})
     assert response.status_code == 400
     assert "'data'" in response.get_json()["error"]
 
 
 def test_score_rejects_missing_data(client):
-    response = client.post("/model/score", json={})
+    response = client.post("/contact/score", json={})
     assert response.status_code == 400
 
 
 def test_score_rejects_non_list_data(client):
-    response = client.post("/model/score", json={"data": "not a list"})
+    response = client.post("/contact/score", json={"data": "not a list"})
     assert response.status_code == 400
 
 
 def test_score_rejects_missing_fields(client):
     incomplete_item = {"apprenant.date_de_naissance": "2002-07-28T00:00:00.000Z"}
-    response = client.post("/model/score", json={"data": [incomplete_item]})
+    response = client.post("/contact/score", json={"data": [incomplete_item]})
     assert response.status_code == 400
     assert "missing fields" in response.get_json()["error"]
 
 
 def test_score_rejects_non_object_in_data(client):
-    response = client.post("/model/score", json={"data": ["not an object"]})
+    response = client.post("/contact/score", json={"data": ["not an object"]})
     assert response.status_code == 400
     assert "must be an object" in response.get_json()["error"]
 
 
 def test_score_rejects_invalid_version_format(client):
-    response = client.post("/model/score", json={"data": [VALID_ITEM], "version": "invalid"})
+    response = client.post("/contact/score", json={"data": [VALID_ITEM], "version": "invalid"})
     assert response.status_code == 400
     assert "version" in response.get_json()["error"].lower()
 
@@ -139,7 +139,7 @@ def test_score_rejects_batch_exceeding_max():
     with patch("routes.inference.MAX_BATCH_SIZE", 2):
         register_all_routes(app, lambda v=None: mock_model)
         test_client = app.test_client()
-        response = test_client.post("/model/score", json={"data": [VALID_ITEM, VALID_ITEM, VALID_ITEM]})
+        response = test_client.post("/contact/score", json={"data": [VALID_ITEM, VALID_ITEM, VALID_ITEM]})
         assert response.status_code == 400
         assert "maximum" in response.get_json()["error"].lower()
 
@@ -154,7 +154,7 @@ def test_auth_rejects_missing_api_key():
     register_all_routes(app, lambda v=None: mock_model)
     client = app.test_client()
 
-    response = client.post("/model/score", json={"data": [VALID_ITEM]})
+    response = client.post("/contact/score", json={"data": [VALID_ITEM]})
     assert response.status_code == 401
 
 
@@ -165,7 +165,7 @@ def test_auth_rejects_wrong_api_key():
     register_all_routes(app, lambda v=None: mock_model)
     client = app.test_client()
 
-    response = client.post("/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "wrong-key"})
+    response = client.post("/contact/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "wrong-key"})
     assert response.status_code == 401
 
 
@@ -176,7 +176,7 @@ def test_auth_accepts_correct_api_key():
     register_all_routes(app, lambda v=None: mock_model)
     client = app.test_client()
 
-    response = client.post("/model/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "test-secret-key"})
+    response = client.post("/contact/score", json={"data": [VALID_ITEM]}, headers={"X-API-Key": "test-secret-key"})
     assert response.status_code == 200
 
 

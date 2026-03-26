@@ -7,9 +7,26 @@ from config import MAX_BATCH_SIZE, VERSION_PATTERN
 
 logger = logging.getLogger(__name__)
 
-
 def register_routes(app, get_model):
-    @app.route("/model/score", methods=["POST"])
+    @app.route("/contact/load", methods=["GET"])
+    def load_model():
+        version = request.args.get("version")
+        if not version:
+            return jsonify({"error": "'version' argument missing."}), 400
+        if not re.match(VERSION_PATTERN, version):
+            return jsonify({"error": "Invalid version format. Expected YYYY-MM-DD."}), 400
+        model = get_model(origin="contact", version=version)
+        if model is None:
+            return jsonify({"error": f"Failed to load model version '{version}'"}), 503
+        return jsonify({"model": model.version}), 200
+
+    @app.route("/contact/version", methods=["GET"])
+    def model_version():
+        model = get_model(origin="contact")
+        version = model.version if model else None
+        return jsonify({"model": version}), 200
+    
+    @app.route("/contact/score", methods=["POST"])
     def score():
         if not request.is_json:
             return jsonify({"error": "Request must be JSON"}), 400
@@ -17,7 +34,7 @@ def register_routes(app, get_model):
         version = request_data.get("version")
         if version is not None and not re.match(VERSION_PATTERN, version):
             return jsonify({"error": "Invalid version format. Expected YYYY-MM-DD."}), 400
-        model = get_model(version)
+        model = get_model(origin="contact", version=version)
         if model is None:
             return jsonify({"error": "Model not available"}), 503
         data = request_data.get("data")

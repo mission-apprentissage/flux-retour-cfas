@@ -5,10 +5,9 @@ from flask import jsonify, request
 
 from config import CLASSIFIER_API_KEY
 
-from . import health, inference, model
+from . import health, contact, whatsapp
 
 logger = logging.getLogger(__name__)
-
 
 def register_all_routes(app, get_model):
     @app.before_request
@@ -27,5 +26,6 @@ def register_all_routes(app, get_model):
             logger.info("%s %s", request.method, request.path)
 
     health.register_routes(app)
-    model.register_routes(app, get_model)
-    inference.register_routes(app, get_model)
+    contact.register_routes(app, get_model)
+    whatsapp.register_routes(app, get_model)
+

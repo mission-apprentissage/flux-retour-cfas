@@ -7,7 +7,6 @@ from __init__ import create_app
 
 load_dotenv()
 
-
 def setup_logging():
     logging.basicConfig(
         level=logging.INFO,
