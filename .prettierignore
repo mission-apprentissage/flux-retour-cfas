@@ -4,4 +4,11 @@
 .infra/.env_server
 .infra/.env_server_classifier
 .infra/local/mongo_keyfile
+.infra/authorizations/*
+.infra/inventories/*
+.infra/env.global.yml
+.infra/env.local.yml
+.infra/env.preprod.yml
+.infra/env.production.yml
+.infra/env.recette.yml
 server-classifier/

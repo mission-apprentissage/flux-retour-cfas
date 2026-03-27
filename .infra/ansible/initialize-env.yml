@@ -32,4 +32,3 @@
         dest: "{{ inventory_dir }}/../../server-classifier/.env"
       with_fileglob:
         - "{{inventory_dir}}/../.env_server_classifier"
-

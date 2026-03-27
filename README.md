@@ -285,7 +285,7 @@ Création d'une release
 
 ### Variables d'environnement local
 
-Les variables d'environnement locales du serveur sont stockées dans le fichier chiffré avec **SOPS** `.infra/env.local.yml`. Si vous souhaitez surcharger certaines   variables ou changer le port de l'API par exemple, il est possible de créer un fichier `server/.env.local` et `ui/.env.local`
+Les variables d'environnement locales du serveur sont stockées dans le fichier chiffré avec **SOPS** `.infra/env.local.yml`. Si vous souhaitez surcharger certaines variables ou changer le port de l'API par exemple, il est possible de créer un fichier `server/.env.local` et `ui/.env.local`
 
 ### Exécution des tests
 
