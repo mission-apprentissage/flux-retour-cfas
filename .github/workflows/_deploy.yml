@@ -102,7 +102,7 @@ jobs:
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
       - name: Notify sentry deployment
-        run: .bin/mna-tdb sentry:deploy "${{ inputs.environment }}" "${{ inputs.app_version }}" 
+        run: .bin/mna-tdb sentry:deploy "${{ inputs.environment }}" "${{ inputs.app_version }}"
 
       - name: Encrypt logs
         run: .bin/mna-tdb app:deploy:log:encrypt

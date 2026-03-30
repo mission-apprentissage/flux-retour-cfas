@@ -13,11 +13,9 @@
         file: "{{ inventory_dir }}/../env.preprod.yml"
         expressions: ignore
 
-    - set_fact:
-        SYNC_MNA_TDB_MONGODB_URI={{ MNA_TDB_MONGODB_URI }}
+    - set_fact: SYNC_MNA_TDB_MONGODB_URI={{ MNA_TDB_MONGODB_URI }}
 
-    - set_fact:
-        SYNC_MNA_TDB_MONGODB_DB_NAME={{ MNA_TDB_MONGODB_DB_NAME }}
+    - set_fact: SYNC_MNA_TDB_MONGODB_DB_NAME={{ MNA_TDB_MONGODB_DB_NAME }}
 
     - name: Chargement des variables chiffrées de l'environnement {{ env_type }}
       community.sops.load_vars:
