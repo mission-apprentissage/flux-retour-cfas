@@ -5,12 +5,15 @@ set -euo pipefail
 export ENVIRONMENT="${1:?"Veuillez préciser l'environement"}"
 shift
 
-if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
+export PUBLIC_VERSION="${1:?"Veuillez préciser la version"}"
+shift
+
+if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
   echo "Missing SENTRY_AUTH_TOKEN"
   exit 1
 fi
 
-if [[ -z "${SENTRY_DSN:-}" ]]; then
+if [ -z "${SENTRY_DSN:-}" ]; then
   echo "Missing SENTRY_DSN"
   exit 1
 fi

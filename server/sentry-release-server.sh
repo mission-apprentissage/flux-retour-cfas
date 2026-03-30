@@ -8,6 +8,9 @@ shift
 export COMMIT_ID="${1:?"Veuillez préciser le commit ID"}"
 shift
 
+export PUBLIC_VERSION="${1:?"Veuillez préciser la version"}"
+shift 1
+
 if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
   echo "Missing SENTRY_AUTH_TOKEN"
   exit 1
