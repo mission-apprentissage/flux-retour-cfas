@@ -87,6 +87,14 @@ jobs:
             Host *
               IdentityFile ~/.ssh/github_actions
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Run playbook
         run: .bin/mna-tdb app:deploy ${{ inputs.environment }} --extra-vars "app_version=${{ inputs.app_version }}"
         env:

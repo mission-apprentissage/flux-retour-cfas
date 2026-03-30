@@ -23,3 +23,4 @@ export SENTRY_ORG=sentry
 export SENTRY_PROJECT=tdb-api
 
 ../node_modules/.bin/sentry-cli releases deploys "$PUBLIC_VERSION" new -e "${ENVIRONMENT}"
+

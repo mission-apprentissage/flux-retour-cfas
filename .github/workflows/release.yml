@@ -105,6 +105,14 @@ jobs:
       - name: Setup SOPS
         uses: nhedger/setup-sops@v2
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Create sentry release
         run: .bin/mna-tdb sentry:release "${{ github.sha }}"
 
