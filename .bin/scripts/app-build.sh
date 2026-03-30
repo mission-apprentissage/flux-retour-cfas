@@ -45,6 +45,9 @@ fi
 export CHANNEL=$(get_channel $VERSION)
 
 # "$@" is the list of environements
-docker buildx bake --builder mna-tdb --${mode} "$@"
+echo "Debug 001"
+docker buildx bake --builder mna-tdb --${mode} "$environement"
+echo "Debug 002"
 docker builder prune --builder mna-tdb --keep-storage 20GB --force
+echo "Debug 003"
 docker buildx stop --builder mna-tdb
