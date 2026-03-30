@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Classifier:
     def __init__(self, version="2026-03-16", token=""):
         self.version = version
-        self.model_file = f"model.joblib"
+        self.model_file = "model.joblib"
         self.repo_id = f"tableaudebord-apprentissage/contact-{version}"
         self.token = token
         self.classifier = None
