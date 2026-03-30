@@ -4,7 +4,7 @@
     path: "/opt/app/{{ item.path }}"
     state: directory
     mode: "{{ item.mode }}"
-  with_filetree: "{{inventory_dir}}/files"
+  with_filetree: "{{ inventory_dir }}/../files"
   when:
     - item.state == 'directory'
     # /app/tools is managed by infra
@@ -16,7 +16,7 @@
     src: "{{ item.src }}"
     dest: "/opt/app/{{ item.path }}"
     mode: "{{ item.mode }}"
-  with_filetree: "{{inventory_dir}}/files"
+  with_filetree: "{{ inventory_dir }}/../files"
   when:
     - item.state == 'file'
     - item.path | basename != '.gitkeep'
@@ -28,55 +28,38 @@
     - item.path | regex_search('^tools/?') == none
     - item.path | regex_search('^system/?') == none
 
-- name: Copie du fichier de seed
-  ansible.builtin.copy:
-    src: "{{inventory_dir}}/files/configs/mongodb/seed.gpg"
-    dest: "/opt/app/configs/mongodb/seed.gpg"
-    mode: "700"
-  when: env_type == 'preview'
-
 - name: copy server env file
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/opt/app/.env_server"
   with_fileglob:
-    - "{{inventory_dir}}/.env_server"
-  when: env_type != 'preview'
+    - "{{ inventory_dir }}/../.env_server"
 
 - name: copy ui env file
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/opt/app/.env_ui"
   with_fileglob:
-    - "{{inventory_dir}}/.env_ui"
-  when: env_type != 'preview'
+    - "{{ inventory_dir }}/../.env_ui"
 
 - name: copy server classifier env file
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/opt/app/.env_server_classifier"
   with_fileglob:
-    - "{{inventory_dir}}/.env_server_classifier"
-  when: env_type != 'preview'
+    - "{{ inventory_dir }}/../.env_server_classifier"
 
 - name: copy du fichier docker compose
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/opt/app/docker-compose.production.yml"
   with_fileglob:
-    - "{{inventory_dir}}/docker-compose.production.yml"
-  when: env_type != 'preview'
+    - "{{ inventory_dir }}/../docker-compose.production.yml"
 
 - name: copy du fichier recette docker compose
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/opt/app/docker-compose.recette.yml"
   with_fileglob:
-    - "{{inventory_dir}}/docker-compose.recette.yml"
+    - "{{ inventory_dir }}/../docker-compose.recette.yml"
   when: env_type == 'recette' or env_type == 'preprod'
-
-- name: creation du fichier docker compose preview system
-  ansible.builtin.template:
-    src: "{{inventory_dir}}/docker-compose.preview-system.yml"
-    dest: "/opt/app/docker-compose.preview-system.yml"
-  when: env_type == 'preview'
