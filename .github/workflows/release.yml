@@ -16,6 +16,7 @@ jobs:
       group: "release-${{ github.workflow }}-${{ github.ref }}"
     permissions:
       contents: write
+      packages: write
     outputs:
       VERSION: ${{ steps.get-version.outputs.VERSION }}
       PREV_VERSION: ${{ steps.get-prev-version.outputs.VERSION }}

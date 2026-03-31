@@ -40,6 +40,7 @@ jobs:
       group: "build-${{ github.workflow }}-${{ github.ref }}"
     permissions:
       contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
