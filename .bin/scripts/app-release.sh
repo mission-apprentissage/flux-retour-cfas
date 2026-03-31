@@ -17,7 +17,15 @@ else
   defaultMode="load"
 fi
 
-readonly next_version="${1}"
-readonly mode=${2:-$defaultMode}
+defaultEnvironement="production"
 
-"$ROOT_DIR"/.bin/mna-lba app:build $next_version $mode production recette
+next_version="${1:?"Veuillez préciser la version"}"
+shift 1
+
+mode=${1:-$defaultMode}
+shift 1
+
+environement=${1:-$defaultEnvironement}
+shift 1
+
+"$ROOT_DIR"/.bin/mna-lba app:build $next_version $mode $environement
