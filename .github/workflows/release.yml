@@ -14,7 +14,8 @@ jobs:
     needs: ["tests"]
     concurrency:
       group: "release-${{ github.workflow }}-${{ github.ref }}"
-    permissions: write-all
+    permissions:
+      contents: write
     outputs:
       VERSION: ${{ steps.get-version.outputs.VERSION }}
       PREV_VERSION: ${{ steps.get-prev-version.outputs.VERSION }}

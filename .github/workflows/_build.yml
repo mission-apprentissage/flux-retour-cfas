@@ -38,7 +38,8 @@ jobs:
     needs: ["npm-packages-check"]
     concurrency:
       group: "build-${{ github.workflow }}-${{ github.ref }}"
-    permissions: write-all
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
