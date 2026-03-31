@@ -6353,7 +6353,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-cache-interceptor@npm:^1.6.2":
+"axios-cache-interceptor@npm:1.6.2":
   version: 1.6.2
   resolution: "axios-cache-interceptor@npm:1.6.2"
   dependencies:
@@ -6366,7 +6366,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-retry@npm:^4.5.0":
+"axios-retry@npm:4.5.0":
   version: 4.5.0
   resolution: "axios-retry@npm:4.5.0"
   dependencies:
@@ -6377,16 +6377,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.0":
-  version: 0.21.4
-  resolution: "axios@npm:0.21.4"
-  dependencies:
-    follow-redirects: ^1.14.0
-  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.11.0, axios@npm:^1.7.9":
+"axios@npm:1.11.0":
   version: 1.11.0
   resolution: "axios@npm:1.11.0"
   dependencies:
@@ -6394,6 +6385,26 @@ __metadata:
     form-data: ^4.0.4
     proxy-from-env: ^1.1.0
   checksum: 0a33dc600b588bfd3111b198d5985527ed89f722817455d7cdb66c1d055e5f8859cc2bebb7320888957fc8458ebe77d5f83af02af9cd260217c91c4e92b6dfb6
+  languageName: node
+  linkType: hard
+
+"axios@npm:1.7.9":
+  version: 1.7.9
+  resolution: "axios@npm:1.7.9"
+  dependencies:
+    follow-redirects: ^1.15.6
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: cb8ce291818effda09240cb60f114d5625909b345e10f389a945320e06acf0bc949d0f8422d25720f5dd421362abee302c99f5e97edec4c156c8939814b23d19
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.21.0":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
+  dependencies:
+    follow-redirects: ^1.14.0
+  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
   languageName: node
   linkType: hard
 
@@ -10084,6 +10095,19 @@ __metadata:
   version: 0.6.1
   resolution: "forever-agent@npm:0.6.1"
   checksum: 766ae6e220f5fe23676bb4c6a99387cec5b7b62ceb99e10923376e27bfea72f3c3aeec2ba5f45f3f7ba65d6616965aa7c20b15002b6860833bb6e394dea546a8
+  languageName: node
+  linkType: hard
+
+"form-data@npm:^4.0.0":
+  version: 4.0.5
+  resolution: "form-data@npm:4.0.5"
+  dependencies:
+    asynckit: ^0.4.0
+    combined-stream: ^1.0.8
+    es-set-tostringtag: ^2.1.0
+    hasown: ^2.0.2
+    mime-types: ^2.1.12
+  checksum: af8328413c16d0cded5fccc975a44d227c5120fd46a9e81de8acf619d43ed838414cc6d7792195b30b248f76a65246949a129a4dadd148721948f90cd6d4fb69
   languageName: node
   linkType: hard
 
@@ -17951,9 +17975,9 @@ __metadata:
     "@types/stream-json": ^1.7.7
     adm-zip: ^0.5.16
     api-alternance-sdk: 2.14.0
-    axios: ^1.7.9
-    axios-cache-interceptor: ^1.6.2
-    axios-retry: ^4.5.0
+    axios: 1.7.9
+    axios-cache-interceptor: 1.6.2
+    axios-retry: 4.5.0
     axiosist: 0.10.0
     body-parser: ^1.20.3
     boom: 7.3.0
@@ -19787,7 +19811,7 @@ __metadata:
     "@types/qs": ^6.9.18
     "@types/react": ^18.3.11
     "@types/react-dom": ^18.3.1
-    axios: ^1.11.0
+    axios: 1.11.0
     chakra-ui-markdown-renderer: 4.1.0
     chart.js: ^4.4.5
     crisp-sdk-web: ^1.0.27
