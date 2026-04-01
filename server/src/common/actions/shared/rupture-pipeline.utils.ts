@@ -1,5 +1,3 @@
-import { STATUT_APPRENANT } from "shared/constants";
-
 export const DATE_START_RUPTURES = new Date("2025-01-01");
 
 export const buildEffRuptureAgeFilter = () => {
@@ -33,12 +31,3 @@ export const createDernierStatutFieldPipeline = () => [
     },
   },
 ];
-
-export const matchDernierStatutRupturantPipeline = (): any => {
-  return {
-    $match: {
-      "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-      date_rupture: { $lte: new Date() },
-    },
-  };
-};
