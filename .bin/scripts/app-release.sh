@@ -17,15 +17,10 @@ else
   defaultMode="load"
 fi
 
-defaultEnvironement="production"
-
 next_version="${1:?"Veuillez préciser la version"}"
 shift 1
 
 mode=${1:-$defaultMode}
 shift 1
 
-environement=${1:-$defaultEnvironement}
-shift 1
-
-"$ROOT_DIR"/.bin/mna-lba app:build $next_version $mode $environement
+"$ROOT_DIR"/.bin/mna-lba app:build $next_version $mode "production"
