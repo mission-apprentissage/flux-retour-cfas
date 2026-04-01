@@ -47,7 +47,7 @@ jobs:
         with:
           token: ${{ secrets.TOKEN_MNA_SHARED }}
           submodules: true
-          fetch-depth: 2
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Initialize the GnuPG keyring
