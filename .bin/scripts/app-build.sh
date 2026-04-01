@@ -16,9 +16,6 @@ shift 1
 mode=${1:?"Veuillez préciser le mode <push|load>"}
 shift 1
 
-environement=${1:?"Veuillez spécifier l'environnement à build (production, preprod, recette, local)"}
-shift 1
-
 get_channel() {
   local version="$1"
   channel=$(echo "$version" | cut -d '-' -f 2)
@@ -44,6 +41,6 @@ fi
 
 export CHANNEL=$(get_channel $VERSION)
 
-docker buildx bake --builder mna-tdb --${mode} "$environement"
+docker buildx bake --builder mna-tdb --${mode} "$@"
 docker builder prune --builder mna-tdb --keep-storage 20GB --force
 docker buildx stop --builder mna-tdb
