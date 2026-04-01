@@ -115,7 +115,7 @@ export const getAllEffectifForMissionLocaleCursor = (
  *    MissionLocaleEffectifDb
  */
 
-export const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
+const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
@@ -193,7 +193,7 @@ const matchTraitementEffectifPipelineMl = (
   }
 };
 
-export const createDernierStatutFieldPipelineML = createDernierStatutFieldPipelineShared;
+const createDernierStatutFieldPipelineML = createDernierStatutFieldPipelineShared;
 
 /**
  * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
@@ -215,7 +215,7 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-export const matchDernierStatutPipelineMl = (): any => {
+const matchDernierStatutPipelineMl = (): any => {
   return {
     $match: {
       date_rupture: { $lte: new Date() },
@@ -313,17 +313,30 @@ const addFieldFromActivationDate = () => {
   ];
 };
 
+const DECA_AUTO_DELAY_DAYS = 45;
+
 const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
+      // CFA pas utilisateur TDB (pas de ml_beta_activated_at dans organisations)
+      { $eq: [{ $size: "$_org_ml_beta_lookup" }, 0] },
+      // Effectif déjà traité (a une situation)
+      { $ne: [{ $ifNull: ["$situation", null] }, null] },
+      // Collaboration active (CFA a envoyé le dossier)
+      { $eq: ["$organisme_data.acc_conjoint", true] },
+      // Effectif grandfathéré : créé AVANT l'activation du CFA sur TDB
       {
-        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
+        $lt: ["$created_at", { $arrayElemAt: ["$_org_ml_beta_lookup.ml_beta_activated_at", 0] }],
       },
+      // CFA DECA + 45+ jours depuis la rupture sans collaboration initiée
       {
-        $ne: [{ $ifNull: ["$situation", null] }, null],
-      },
-      {
-        $eq: ["$organisme_data.acc_conjoint", true],
+        $and: [
+          { $eq: [{ $arrayElemAt: ["$_organisme_deca_lookup.is_allowed_deca", 0] }, true] },
+          { $ne: [{ $ifNull: ["$organisme_data.acc_conjoint", false] }, true] },
+          {
+            $lte: ["$date_rupture", new Date(Date.now() - DECA_AUTO_DELAY_DAYS * 24 * 60 * 60 * 1000)],
+          },
+        ],
       },
     ],
   };
@@ -348,8 +361,42 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
     }
   };
 
-  // TODO ajout ici des conditions pour afficher les effectifs qui ont été créés après l'activation de la mission locale
   return [
+    // Lookups légers avant le filtre (uniquement pour ML)
+    ...(visibility !== "ORGANISME_FORMATION"
+      ? [
+          {
+            $lookup: {
+              from: "organismes",
+              localField: "effectif_snapshot.organisme_id",
+              foreignField: "_id",
+              pipeline: [{ $project: { _id: 0, is_allowed_deca: 1 } }],
+              as: "_organisme_deca_lookup",
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              let: { organisme_id: { $toString: "$effectif_snapshot.organisme_id" } },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$organisme_id", "$$organisme_id"] },
+                        { $ne: [{ $ifNull: ["$ml_beta_activated_at", null] }, null] },
+                      ],
+                    },
+                  },
+                },
+                { $project: { _id: 0, ml_beta_activated_at: 1 } },
+                { $limit: 1 },
+              ],
+              as: "_org_ml_beta_lookup",
+            },
+          },
+        ]
+      : []),
     {
       $addFields: {
         in_joint_organisme_range: {
@@ -362,6 +409,16 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         in_joint_organisme_range: true,
       },
     },
+    ...(visibility !== "ORGANISME_FORMATION"
+      ? [
+          {
+            $project: {
+              _organisme_deca_lookup: 0,
+              _org_ml_beta_lookup: 0,
+            },
+          },
+        ]
+      : []),
   ];
 };
 
@@ -555,7 +612,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     a_traiter: "$a_traiter",
     transmitted_at: "$effectif_snapshot.transmitted_at",
     source: "$effectif_snapshot.source",
-    organisme: "$organisme",
+    organisme: {
+      $mergeObjects: ["$organisme", { ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at" }],
+    },
     contrats: "$effectif_snapshot.contrats",
     "situation.situation": "$situation",
     "situation.situation_autre": "$situation_autre",
@@ -577,9 +636,22 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     nouveau_contrat: "$nouveau_contrat",
     current_status: "$current_status",
     organisme_data: "$organisme_data",
+    acc_conjoint_by_user: "$contact_cfa_user",
     date_rupture: "$date_rupture",
     mission_locale_organisation: "$mission_locale_organisation",
     mission_locale_logs: "$ml_logs",
+    is_grandfathered: {
+      $cond: [
+        {
+          $and: [
+            { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+            { $lt: ["$created_at", "$organisme_organisation.ml_beta_activated_at"] },
+          ],
+        },
+        true,
+        false,
+      ],
+    },
   };
 
   const specificFields =
@@ -641,6 +713,7 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
               adresse: 1,
               siret: 1,
               enseigne: 1,
+              is_allowed_deca: 1,
             },
           },
         ],
@@ -1159,6 +1232,23 @@ export const getEffectifFromMissionLocaleId = async (
           { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$mission_locale_effectif_id"] } } },
           {
             $sort: { created_at: 1 },
+          },
+          {
+            $lookup: {
+              from: "usersMigration",
+              let: { created_by_id: "$created_by" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$created_by_id"] } } },
+                { $project: { _id: 0, nom: 1, prenom: 1 } },
+                { $limit: 1 },
+              ],
+              as: "created_by_user",
+            },
+          },
+          {
+            $addFields: {
+              created_by_user: { $arrayElemAt: ["$created_by_user", 0] },
+            },
           },
           ...(userId
             ? [
@@ -2323,7 +2413,7 @@ async function checkAndHandleDuplicate(
   return { canInsert: false };
 }
 
-export interface IMissionLocaleSnapshotResult {
+interface IMissionLocaleSnapshotResult {
   upserted: boolean;
 }
 
