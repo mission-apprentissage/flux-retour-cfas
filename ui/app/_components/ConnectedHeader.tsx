@@ -7,11 +7,19 @@ import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 import { useAuth } from "../_context/UserContext";
 
 import { Impersonate } from "./Impersonate";
+import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
 export function ConnectedHeader() {
   const { user } = useAuth();
   const pathname = usePathname();
+
+  const isCfaWithMlBeta =
+    user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !!user?.organisation?.ml_beta_activated_at;
+  const { data: unreadData } = useCfaUnreadNotificationsCount(
+    isCfaWithMlBeta ? user?.organisation?.organisme_id : undefined
+  );
+  const unreadCount = unreadData?.count ?? 0;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -50,6 +58,7 @@ export function ConnectedHeader() {
             pathname === "/cfa" ||
             (pathname?.startsWith("/cfa/") &&
               !pathname?.startsWith("/cfa/effectifs") &&
+              !pathname?.startsWith("/cfa/collaborations") &&
               !pathname?.startsWith("/cfa/parametres")),
           linkProps: {
             href: "/cfa",
@@ -61,6 +70,32 @@ export function ConnectedHeader() {
           isActive: pathname?.startsWith("/cfa/effectifs"),
           linkProps: {
             href: "/cfa/effectifs",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+              Collaborations en cours
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: "var(--text-default-error)",
+                    flexShrink: 0,
+                  }}
+                  role="status"
+                  aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+                />
+              )}
+            </span>
+          ),
+          isActive: pathname?.startsWith("/cfa/collaborations"),
+          linkProps: {
+            href: "/cfa/collaborations",
             target: "_self",
           },
         });

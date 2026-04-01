@@ -106,8 +106,6 @@ export const TRAITEMENT_SEGMENTS = [
   { key: "autre" as const, label: "Autre", color: "#929292" },
 ] as const;
 
-export type TraitementSegmentKey = (typeof TRAITEMENT_SEGMENTS)[number]["key"];
-
 export const WHATSAPP_RESPONSE_COLORS = {
   callback: COLOR_PALETTE.GREEN_DARK,
   no_help: COLOR_PALETTE.YELLOW,
