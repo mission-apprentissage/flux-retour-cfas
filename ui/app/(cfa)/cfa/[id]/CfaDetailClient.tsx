@@ -14,15 +14,17 @@ export default function CfaDetailClient({ id }: { id: string }) {
   const markAsReadRef = useRef(markAsReadMutation.mutate);
   markAsReadRef.current = markAsReadMutation.mutate;
 
+  const hasUnreadNotification = data?.effectif?.organisme_data?.has_unread_notification === true;
+
   useEffect(() => {
-    if (data?.effectif?.unread_by_current_user === true && id && !user?.impersonating) {
+    if (hasUnreadNotification && id && !user?.impersonating) {
       markAsReadRef.current(id, {
         onError: (error: unknown) => {
           console.error("Failed to mark notification as read:", error);
         },
       });
     }
-  }, [data?.effectif?.unread_by_current_user, id, user?.impersonating]);
+  }, [hasUnreadNotification, id, user?.impersonating]);
 
   if (!data) return null;
 
