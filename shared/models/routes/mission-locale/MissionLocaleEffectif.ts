@@ -18,6 +18,12 @@ import { zMissionLocaleEffectifLog } from "../../data/missionLocaleEffectifLog.m
 
 const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifLog.extend({
   unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
+  created_by_user: z
+    .object({
+      nom: z.string(),
+      prenom: z.string(),
+    })
+    .nullish(),
 });
 
 const zApprenantPick = zApprenant
@@ -77,6 +83,8 @@ const zEffectifMissionLocale = z
         )
         .describe("Contacts email du CFA")
         .optional(),
+      is_allowed_deca: z.boolean().describe("Organisme du programme DECA-CFA").nullish(),
+      ml_beta_activated_at: z.date().describe("Date d'activation ML beta du CFA").nullish(),
     }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
@@ -135,6 +143,17 @@ const zEffectifMissionLocale = z
         telephone: z.string().nullish(),
       })
       .describe("Coordonnées de l'accompagnant CFA (uniquement si CFA actif avec ml_beta_activated_at)")
+      .nullish(),
+    acc_conjoint_by_user: z
+      .object({
+        nom: z.string(),
+        prenom: z.string(),
+      })
+      .describe("Nom/prénom de l'utilisateur CFA qui a initié la collaboration")
+      .nullish(),
+    is_grandfathered: z
+      .boolean()
+      .describe("Effectif créé avant l'activation du CFA sur TDB, reste traitable par la ML")
       .nullish(),
     mission_locale_organisation: z
       .object({

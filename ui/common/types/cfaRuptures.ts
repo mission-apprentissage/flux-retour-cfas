@@ -1,6 +1,5 @@
 export type {
   CfaCollaborationStatus,
-  CfaEffectifSource,
   CfaRuptureSegmentKey,
   ICfaEffectif,
   ICfaEffectifsResponse,
@@ -32,6 +31,18 @@ export const COLLAB_STATUS_ORDER: Record<CfaCollaborationStatus, number> = {
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: 1,
   [CFA_COLLAB_STATUS.CONTACTE_PAR_ML]: 2,
   [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: 3,
+};
+
+export const ACTIVE_COLLAB_STATUSES = [
+  CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
+  CFA_COLLAB_STATUS.CONTACTE_PAR_ML,
+  CFA_COLLAB_STATUS.TRAITE_PAR_ML,
+] as const;
+
+export const ACTIVE_COLLAB_STATUS_LABELS: Partial<Record<CfaCollaborationStatus, string>> = {
+  [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Collaboration demandée",
+  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML]: "Contacté par la ML",
+  [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: "Traité par la ML",
 };
 
 export const CFA_DEFAULT_ITEMS_TO_SHOW = 10;

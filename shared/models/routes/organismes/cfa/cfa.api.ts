@@ -8,8 +8,6 @@ export const zDeclareCfaRuptureApi = z.object({
   source: z.enum(["effectifs", "effectifsDECA"]),
 });
 
-export type IDeclareCfaRupture = z.infer<typeof zDeclareCfaRuptureApi>;
-
 export const CFA_COLLAB_STATUS = {
   DEMARRER_COLLAB: "demarrer_collab",
   COLLAB_DEMANDEE: "collab_demandee",
@@ -57,6 +55,7 @@ export interface ICfaEffectif {
   libelle_formation: string;
   formation_niveau_libelle: string | null;
   collab_status: CfaCollaborationStatus | null;
+  has_unread_notification: boolean;
 }
 
 export interface ICfaEffectifsResponse {

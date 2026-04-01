@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const STATS_PERIODS = ["30days", "3months", "all"] as const;
+const STATS_PERIODS = ["30days", "3months", "all"] as const;
 export const zStatsPeriod = z.enum(STATS_PERIODS);
 export type StatsPeriod = z.output<typeof zStatsPeriod>;
 
@@ -211,8 +211,6 @@ const zMissionLocaleExportData = z.object({
   ne_veut_pas_accompagnement: z.number(),
 });
 
-export type IMissionLocaleExportData = z.output<typeof zMissionLocaleExportData>;
-
 const zRegionExportData = z.object({
   region_nom: z.string(),
   total_jeunes: z.number(),
@@ -235,8 +233,6 @@ const zRegionExportData = z.object({
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
 });
-
-export type IRegionExportData = z.output<typeof zRegionExportData>;
 
 const zTraitementExportResponse = z.object({
   mlData: z.array(zMissionLocaleExportData),
