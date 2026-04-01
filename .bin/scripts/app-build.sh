@@ -1,9 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -euo pipefail
 
+if [ -z "${SCRIPT_DIR:-}" ]; then
+  export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+if [ -z "${ROOT_DIR:-}" ]; then
+  export ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+fi
+
 export VERSION="${1:?"Veuillez préciser la version"}"
-mode=${2:?"Veuillez préciser le mode <push|load>"}
-shift 2
+shift 1
+
+mode=${1:?"Veuillez préciser le mode <push|load>"}
+shift 1
+
+environement=${1:?"Veuillez spécifier l'environnement à build (production, preprod, recette, local)"}
+shift 1
 
 get_channel() {
   local version="$1"
@@ -18,11 +32,6 @@ get_channel() {
   echo $channel
 }
 
-if [[ $# == "0" ]]; then
-  echo "Veuillez spécifier les environnements à build (production, recette, preview, local)"
-  exit 1;
-fi;
-
 set +e
 docker buildx create --name mna-tdb --driver docker-container --config "$SCRIPT_DIR/buildkitd.toml" 2> /dev/null
 set -e
@@ -35,7 +44,6 @@ fi
 
 export CHANNEL=$(get_channel $VERSION)
 
-# "$@" is the list of environements
-docker buildx bake --builder mna-tdb --${mode} "$@"
+docker buildx bake --builder mna-tdb --${mode} "$environement"
 docker builder prune --builder mna-tdb --keep-storage 20GB --force
 docker buildx stop --builder mna-tdb

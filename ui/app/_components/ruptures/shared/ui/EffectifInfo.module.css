@@ -111,6 +111,10 @@
   font-size: 14px;
 }
 
+.highlightText {
+  margin: 0;
+}
+
 /* DECA Source Info */
 .decaInfoContainer {
   margin-top: 8px;

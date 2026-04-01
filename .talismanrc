@@ -17,8 +17,6 @@ fileignoreconfig:
   checksum: e2a10f9b36e4f906dc8e5eec4d6f4fbbf903da8515556cdfa5d5526446ea6396
 - filename: .bin/commands.sh
   checksum: 229b0af8587bef9f35ba5bae8e90a4f0eecbde15239a8f6b807e2d4a79de5332
-- filename: .bin/scripts/get-vault-password-client.sh
-  checksum: 3b48fcb116e6f8e02a9201503142834b10d06ad0d796f26ccf747547d23c9968
 - filename: .bin/scripts/seed-update.sh
   checksum: 5d6c4905865f66008d6ffd23eff04577bb8d1260022106b0be24062591bf0883
 - filename: .bin/scripts/setup-local-env.sh
@@ -83,8 +81,6 @@ fileignoreconfig:
   checksum: 1c634f0c37729f0f33fd2e9be585a5fc5b0541cc32ae0acd01cc5e0790a641b0
 - filename: ui/app/(home)/auth/connexion/ConnexionClient.tsx
   checksum: b8f93a25559cedb9e5caa7f3c887c376d371eadde25ed9d2782521c42e484158
-- filename: .infra/vault/vault.yml
-  checksum: 0b8d763b1781b7605695e5302239808456381f00c085f932e905438566efee3c
 - filename: server/src/db/migrations/20251029160433-fix-acc-conjoint-by-missing.ts
   checksum: 50b4531854636bf4ccb95c8a5a2b90fdb88f54b15b4490b071b970deae6a23c0
 - filename: ui/app/_components/ServiceDiscontinuedPage.tsx
@@ -99,6 +95,25 @@ fileignoreconfig:
   checksum: 28826c73f294a2392c6f2fd3c114e97b6f63f3ddee98c96efe22e29533550b61
 - filename: server/tests/integration/common/actions/mission-locale-organisme.actions.test.ts
   checksum: 7b99641f06c918dade84589eca61fdb46d792a884580b74f30127a63133d9b4c
+- filename: .bin/shared
+  ignore_detectors: [filecontent]
+- filename: .infra/inventories
+  ignore_detectors: [filecontent]
+- filename: .infra/authorizations
+  ignore_detectors: [filecontent]
+- filename: .gitmodules
+  ignore_detectors: [filecontent]
+- filename: .infra/env.global.yml
+  checksum: 48124720a4f9eeadbc092449cde77d963d6a0c9d9e03449b061b6fd86d43c2f2
+- filename: .infra/env.local.yml
+  checksum: 33e545d992ab5c0b79d495713d00d9474971cbb5e2b68df97be8de509359062b
+- filename: .infra/env.preprod.yml
+  checksum: 86df20ad23403a144f745de94ac3fff017b22060aeb95b975ca1fd3ecead1cb9
+- filename: .infra/env.production.yml
+  checksum: acd9741899acc5cb426b2a4adb1c565c7d8c21a73beca7c2ad47d12902cb2ed5
+- filename: .infra/env.recette.yml
+  checksum: 9d768de94ac141ad2651526710b6d1c2e63916633dd8bc36794cde37ae15f5ce
+
 scopeconfig:
 - scope: node
 custom_patterns:

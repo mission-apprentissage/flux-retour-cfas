@@ -19,13 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          fetch-depth: 1
 
       - name: Clone mna-npm-check repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: mission-apprentissage/mna-npm-check
           path: mna-npm-check
@@ -38,14 +37,28 @@ jobs:
     needs: ["npm-packages-check"]
     concurrency:
       group: "build-${{ github.workflow }}-${{ github.ref }}"
-    permissions: write-all
+    permissions:
+      contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          token: ${{ secrets.TOKEN_MNA_SHARED }}
+          persist-credentials: false
+          submodules: true
           fetch-depth: 0
-          persist-credentials: true
+          fetch-tags: true
+
+      - name: Initialize the GnuPG keyring
+        run: |
+          echo -n "$OPENPGP_KEY" | gpg --import
+        env:
+          OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
+
+      - name: Setup SOPS
+        uses: nhedger/setup-sops@v2
 
       - uses: actions/setup-node@v4
         with:
@@ -80,12 +93,8 @@ jobs:
       - name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
 
-      - name: Retrieve previous version
-        id: get-prev-version
-        run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
-
       - name: bump and release
-        run: .bin/mna-tdb build:image "${{ inputs.version }}" push "${{ inputs.environment }}"
+        run: .bin/mna-tdb app:build "${{ inputs.version }}" push "${{ inputs.environment }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -99,10 +108,11 @@ jobs:
     uses: "./.github/workflows/_deploy.yml"
     with:
       environment: ${{ inputs.environment }}
-      app_version: ${{ inputs.version  }}
+      app_version: ${{ inputs.version }}
     secrets:
       DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
       DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
       SLACK_WEBHOOK_NOTIF: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_WEBHOOK_ALERTING: ${{ secrets.SLACK_WEBHOOK_ALERTING }}
-      VAULT_PWD: ${{ secrets.VAULT_PWD }}
+      OPENPGP_PRIVATE_SUBKEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
+      TOKEN_MNA_SHARED: ${{ secrets.TOKEN_MNA_SHARED }}

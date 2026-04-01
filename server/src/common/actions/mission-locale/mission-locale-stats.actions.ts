@@ -1481,6 +1481,7 @@ export const getClassifierStats = async (period: StatsPeriod = "all"): Promise<I
           {
             $match: {
               "classification_reponse_appel.score": { $gte: CONTACT_OPPORTUN_SCORE_THRESHOLD },
+              "classification_reponse_appel.feedback": { $exists: true, $ne: null },
               situation: { $ne: null },
             },
           },
@@ -1489,6 +1490,7 @@ export const getClassifierStats = async (period: StatsPeriod = "all"): Promise<I
         situations_autres: [
           {
             $match: {
+              "classification_reponse_appel.feedback": { $exists: true, $ne: null },
               $or: [
                 { "classification_reponse_appel.score": { $lt: CONTACT_OPPORTUN_SCORE_THRESHOLD } },
                 { classification_reponse_appel: { $exists: false } },
@@ -1555,7 +1557,7 @@ export const getClassifierStats = async (period: StatsPeriod = "all"): Promise<I
     };
     for (const item of data || []) {
       const key = item._id?.toLowerCase();
-      if (situationKeys.has(key)) (map as Record<string, number>)[key] = item.count;
+      if (situationKeys.has(key)) (map as Record<string, number>)[key] += item.count;
       else map.autre += item.count;
       map.total += item.count;
     }
