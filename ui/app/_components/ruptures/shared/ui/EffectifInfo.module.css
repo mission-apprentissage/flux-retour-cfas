@@ -58,11 +58,6 @@
   gap: 8px;
 }
 
-.badgeGap {
-  gap: 0.5rem;
-  font-weight: bold;
-}
-
 .adminActions {
   display: flex;
   align-items: center;
@@ -93,10 +88,6 @@
   font-weight: bold;
 }
 
-.noticeText {
-  margin: 0;
-}
-
 .transmissionInfo {
   font-size: 0.75rem;
   color: grey;
@@ -118,10 +109,6 @@
 .contactOpportunText {
   margin: 8px 0 0 0;
   font-size: 14px;
-}
-
-.highlightText {
-  margin: 0;
 }
 
 /* DECA Source Info */

@@ -101,7 +101,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
         return [
           { label: "Apprenant", dataKey: "name", width: 250 },
           { label: "Formation", dataKey: "formation", width: "auto" },
-          { label: "Statut", dataKey: "badge", width: 200 },
+          { label: "Statut", dataKey: "badge", width: 230 },
           { label: "", dataKey: "icon", width: 40 },
         ];
 

@@ -111,10 +111,6 @@
   flex-shrink: 0;
 }
 
-.scaleRowContent {
-  flex: 1;
-}
-
 .radioButton {
   width: 80px;
   height: 40px;

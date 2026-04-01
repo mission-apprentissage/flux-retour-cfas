@@ -2,7 +2,7 @@
 
 import styles from "./SortableTable.module.css";
 
-export function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
+function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   const iconClass = isSorted === "desc" ? "fr-icon-arrow-down-line" : "fr-icon-arrow-up-line";
   return (
     <span className={styles.sortIconWrapper}>

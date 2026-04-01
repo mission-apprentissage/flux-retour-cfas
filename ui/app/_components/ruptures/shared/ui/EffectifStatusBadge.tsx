@@ -27,7 +27,12 @@ interface EffectifStatusBadgeProps {
 
 export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBadgeProps) {
   if (effectif.nouveau_contrat && (effectif.a_traiter || effectif.injoignable)) {
-    return <Badge severity="info">Nouveau contrat</Badge>;
+    return (
+      <span className={`fr-badge ${styles.nouveauContratBadge}`} aria-label="Nouveau contrat">
+        <i className={`fr-icon-information-fill fr-icon--sm ${styles.nouveauContratIcon}`} aria-hidden="true" />
+        <span className={styles.badgeTextSpacing}>Nouveau contrat</span>
+      </span>
+    );
   }
 
   // Effectif traité
