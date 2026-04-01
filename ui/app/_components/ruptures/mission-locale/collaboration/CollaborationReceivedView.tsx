@@ -5,6 +5,7 @@ import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { ReferentCoordonnees } from "../../shared/collaboration/ReferentCoordonnees";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./MlCollaborationDetail.module.css";
@@ -93,14 +94,7 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
         {od?.referent_coordonnees && (
           <div className={styles.sentBubbleSection}>
             <p className={styles.sentSectionTitle}>Référent(e) à contacter</p>
-            {od.referent_coordonnees
-              .split("\n")
-              .filter(Boolean)
-              .map((line, i) => (
-                <p key={i} className={styles.sentBody}>
-                  {line}
-                </p>
-              ))}
+            <ReferentCoordonnees value={od.referent_coordonnees} />
           </div>
         )}
       </div>

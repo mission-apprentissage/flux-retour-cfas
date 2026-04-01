@@ -4,7 +4,10 @@ import { useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { EffectifPriorityBadgeMultiple } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
+import {
+  EffectifPriorityBadgeMultiple,
+  EffectifStatusBadge,
+} from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
 import { formatAnnee, formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { getInitials } from "@/app/_utils/user.utils";
@@ -37,7 +40,12 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
 
       <hr className={styles.separator} />
 
-      <EffectifPriorityBadgeMultiple effectif={effectif} organisation="MISSION_LOCALE" />
+      <div className={styles.badgesGroup}>
+        {effectif.nouveau_contrat && (effectif.a_traiter || effectif.injoignable) && (
+          <EffectifStatusBadge effectif={effectif} />
+        )}
+        <EffectifPriorityBadgeMultiple effectif={effectif} organisation="MISSION_LOCALE" />
+      </div>
 
       <hr className={styles.separator} />
 

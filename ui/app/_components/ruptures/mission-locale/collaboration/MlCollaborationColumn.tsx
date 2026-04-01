@@ -3,6 +3,10 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { IEffectifMissionLocale } from "shared";
 
+import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
+import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
+import { FeedbackBubble } from "../../shared/collaboration/FeedbackBubble";
+import { NouveauContratBanner } from "../../shared/collaboration/NouveauContratBanner";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import { CollaborationReceivedView } from "./CollaborationReceivedView";
@@ -25,7 +29,7 @@ function CfaCard({ effectif, minimal }: { effectif: IEffectifMissionLocale["effe
       {(commune || codePostal) && (
         <p className={styles.mlCallOutLocation}>{[commune, codePostal].filter(Boolean).join(" ")}</p>
       )}
-      {!minimal && effectif.contact_cfa && (
+      {!minimal && !!effectif.organisme?.ml_beta_activated_at && (
         <Badge as="span" severity="success">
           Utilise le Tableau de bord
         </Badge>
@@ -36,12 +40,25 @@ function CfaCard({ effectif, minimal }: { effectif: IEffectifMissionLocale["effe
 
 export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) {
   const collabReceived = effectif.organisme_data?.acc_conjoint === true;
-  const cfaIsRegistered = !!effectif.contact_cfa;
+  const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
+  const situationLogs = getSituationLogs(effectif);
 
   if (collabReceived) {
     return (
       <div className={styles.collaborationColumn}>
         <CollaborationReceivedView effectif={effectif} />
+        <NouveauContratBanner effectif={effectif} />
+        {situationLogs.map((log) => (
+          <FeedbackBubble
+            key={String(log._id)}
+            log={log}
+            effectif={effectif}
+            styles={styles}
+            variant="sent"
+            showCurrentUser
+          />
+        ))}
+        <CommentBubbles effectif={effectif} showCurrentUser styles={styles} variant="sent" />
       </div>
     );
   }
@@ -51,7 +68,7 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
       <p className={styles.columnHeader}>Collaboration avec le CFA</p>
 
       <div className={styles.collabBlock}>
-        {cfaIsRegistered ? (
+        {cfaIsTdbUser ? (
           <>
             <p className={styles.collabQuestion}>
               Ce dossier est envoyé de manière automatique depuis ce CFA formateur. Ce CFA utilise le Tableau de bord,
@@ -68,6 +85,19 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
           </>
         )}
       </div>
+
+      <NouveauContratBanner effectif={effectif} />
+      {situationLogs.map((log) => (
+        <FeedbackBubble
+          key={String(log._id)}
+          log={log}
+          effectif={effectif}
+          styles={styles}
+          variant="sent"
+          showCurrentUser
+        />
+      ))}
+      <CommentBubbles effectif={effectif} showCurrentUser styles={styles} variant="sent" />
     </div>
   );
 }
