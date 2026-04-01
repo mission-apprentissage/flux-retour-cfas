@@ -7,6 +7,10 @@ import { IEffectifMissionLocale } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
+import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
+import { FeedbackBubble } from "../../shared/collaboration/FeedbackBubble";
+import { NouveauContratBanner } from "../../shared/collaboration/NouveauContratBanner";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./CfaCollaborationDetail.module.css";
@@ -44,6 +48,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
   const router = useRouter();
   const ml = effectif.mission_locale_organisation;
   const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
+  const situationLogs = collabAlreadyStarted ? getSituationLogs(effectif) : [];
 
   return (
     <div className={styles.collaborationColumn}>
@@ -74,7 +79,14 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
           )}
         </>
       ) : (
-        <CollaborationSentView effectif={effectif} />
+        <>
+          <CollaborationSentView effectif={effectif} hasMLResponse={situationLogs.length > 0} />
+          <NouveauContratBanner effectif={effectif} />
+          {situationLogs.map((log) => (
+            <FeedbackBubble key={String(log._id)} log={log} effectif={effectif} styles={styles} variant="received" />
+          ))}
+          <CommentBubbles effectif={effectif} styles={styles} variant="received" />
+        </>
       )}
     </div>
   );

@@ -40,6 +40,21 @@
   text-transform: none;
 }
 
+.unreadDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-default-error);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.enRuptureOui {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
 .alertRow,
 .alertRow td {
   padding: 0 !important;

@@ -22,7 +22,7 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   return (
     <div className={styles.page}>
       <div className={styles.backLink}>
-        <Link href="/cfa" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
+        <Link href="/cfa/collaborations" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
           Retour à la liste
         </Link>
       </div>

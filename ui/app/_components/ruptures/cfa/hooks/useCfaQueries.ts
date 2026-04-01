@@ -19,6 +19,8 @@ export const cfaQueryKeys = {
   ruptures: (organismeId: string) => [...cfaQueryKeys.all, "effectifs-ruptures", organismeId] as const,
   effectifs: (organismeId: string, params: CfaEffectifsParams) =>
     [...cfaQueryKeys.all, "effectifs", organismeId, params] as const,
+  unreadNotificationsCount: (organismeId: string) =>
+    [...cfaQueryKeys.all, "unread-notifications-count", organismeId] as const,
 };
 
 export function useCfaEffectifsRuptures(organismeId: string | undefined) {
@@ -27,6 +29,16 @@ export function useCfaEffectifsRuptures(organismeId: string | undefined) {
     queryFn: () => _get(`/api/v1/organismes/${organismeId}/cfa/effectifs-ruptures`),
     enabled: !!organismeId,
     useErrorBoundary: true,
+  });
+}
+
+export function useCfaUnreadNotificationsCount(organismeId: string | undefined) {
+  return useQuery<{ count: number }>({
+    queryKey: cfaQueryKeys.unreadNotificationsCount(organismeId!),
+    queryFn: () => _get(`/api/v1/organismes/${organismeId}/cfa/unread-notifications-count`),
+    enabled: !!organismeId,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   });
 }
 

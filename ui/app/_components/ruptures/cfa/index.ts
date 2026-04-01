@@ -7,4 +7,6 @@ export { CfaEffectifsTable } from "./CfaEffectifsTable";
 export { CfaFeedback } from "./CfaFeedback";
 export { CfaRuptureInfoModal, ruptureInfoModal } from "./CfaRuptureInfoModal";
 export { CfaRuptureSegment } from "./CfaRuptureSegment";
+export { CfaCollaborationsList } from "./CfaCollaborationsList";
+export { CfaCollaborationsTable } from "./CfaCollaborationsTable";
 export { CfaRupturesList } from "./CfaRupturesList";

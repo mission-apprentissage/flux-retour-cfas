@@ -1,2 +1,7 @@
-export { useCfaEffectifsRuptures, useCfaEffectifs, cfaQueryKeys } from "./useCfaQueries";
+export {
+  useCfaEffectifsRuptures,
+  useCfaEffectifs,
+  useCfaUnreadNotificationsCount,
+  cfaQueryKeys,
+} from "./useCfaQueries";
 export { useDeclareCfaRupture } from "./useCfaMutations";
