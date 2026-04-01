@@ -23,4 +23,4 @@ shift 1
 mode=${1:-$defaultMode}
 shift 1
 
-"$ROOT_DIR"/.bin/mna-lba app:build $next_version $mode "production"
+"$ROOT_DIR"/.bin/mna-tdb app:build $next_version $mode "production"
