@@ -118,7 +118,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Create sentry release
-        run: .bin/mna-tdb sentry:release "${{ github.sha }}"
+        run: .bin/mna-tdb sentry:release "{{ needs.release.outputs.VERSION }}" "${{ github.sha }}"
 
   docker-scout:
     if: needs.release.outputs.VERSION != needs.release.outputs.PREV_VERSION
