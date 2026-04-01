@@ -342,6 +342,9 @@ export async function getCfaEffectifs(
             libelle_formation: "$formation.libelle_long",
             formation_niveau_libelle: { $ifNull: ["$formation.niveau_libelle", null] },
             collab_status: 1,
+            has_unread_notification: {
+              $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
+            },
           },
         },
       ],
@@ -445,6 +448,23 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         pipeline: [
           { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$mission_locale_effectif_id"] } } },
           { $sort: { created_at: 1 } },
+          {
+            $lookup: {
+              from: "usersMigration",
+              let: { created_by_id: "$created_by" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$created_by_id"] } } },
+                { $project: { _id: 0, nom: 1, prenom: 1 } },
+                { $limit: 1 },
+              ],
+              as: "created_by_user",
+            },
+          },
+          {
+            $addFields: {
+              created_by_user: { $arrayElemAt: ["$created_by_user", 0] },
+            },
+          },
           ...(userId
             ? [
                 {
@@ -460,26 +480,25 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         as: "ml_logs",
       },
     },
-    ...(userId
-      ? [
-          {
-            $addFields: {
-              unread_by_current_user: {
-                $cond: [
-                  {
-                    $and: [
-                      { $eq: ["$organisme_data.acc_conjoint_by", userId] },
-                      { $eq: ["$organisme_data.has_unread_notification", true] },
-                    ],
-                  },
-                  true,
-                  false,
-                ],
-              },
-            },
-          },
-        ]
-      : []),
+    {
+      $lookup: {
+        from: "usersMigration",
+        let: { acc_conjoint_by_id: "$organisme_data.acc_conjoint_by" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$_id", "$$acc_conjoint_by_id"] } } },
+          { $project: { _id: 0, nom: 1, prenom: 1 } },
+          { $limit: 1 },
+        ],
+        as: "acc_conjoint_by_user_arr",
+      },
+    },
+    {
+      $addFields: {
+        unread_by_current_user: {
+          $eq: ["$organisme_data.has_unread_notification", true],
+        },
+      },
+    },
     {
       $project: {
         id: "$effectif_snapshot._id",
@@ -500,6 +519,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         a_traiter: { $literal: false },
         organisme: "$organisme",
         organisme_data: "$organisme_data",
+        acc_conjoint_by_user: { $arrayElemAt: ["$acc_conjoint_by_user_arr", 0] },
         date_rupture: "$date_rupture",
         mission_locale_organisation: "$mission_locale_organisation",
         mission_locale_logs: "$ml_logs",

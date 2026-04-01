@@ -11,7 +11,7 @@ import {
   getCfaEffectifs,
 } from "@/common/actions/cfa/cfa-effectifs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
-import { organismesDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
@@ -57,6 +57,19 @@ export default () => {
   const router = express.Router();
 
   router.get("/effectifs-ruptures", returnResult(getCfaEffectifsRuptureHandler));
+
+  router.get(
+    "/unread-notifications-count",
+    returnResult(async (_req, { locals }) => {
+      const { organismeId } = await getOrganismeWithDeca(locals);
+      const count = await missionLocaleEffectifsDb().countDocuments({
+        "effectif_snapshot.organisme_id": organismeId,
+        "organisme_data.has_unread_notification": true,
+        soft_deleted: { $ne: true },
+      });
+      return { count };
+    })
+  );
 
   router.get(
     "/effectifs",

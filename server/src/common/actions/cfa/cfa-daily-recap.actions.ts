@@ -22,7 +22,7 @@ const SITUATIONS_ACTIVES = [
   SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
 ];
 
-export interface IMissionLocaleWithActions {
+interface IMissionLocaleWithActions {
   mission_locale: {
     id: string;
     nom: string;
@@ -31,7 +31,7 @@ export interface IMissionLocaleWithActions {
   acc_conjoint_by: ObjectId | null;
 }
 
-export interface ICfaDailyStats {
+interface ICfaDailyStats {
   cfa: {
     _id: ObjectId;
     nom: string;
