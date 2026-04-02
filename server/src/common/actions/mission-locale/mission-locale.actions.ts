@@ -24,7 +24,13 @@ import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
-import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
@@ -312,12 +318,28 @@ const addFieldFromActivationDate = () => {
 const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
+      // Organisme pas activé ML ET pas collab → visible (comportement existant)
       {
-        $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null],
+        $and: [
+          { $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+          { $ne: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
+        ],
       },
+      // Organisme collab → visible seulement après 45 jours de rupture
+      {
+        $and: [
+          { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
+          { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
+          {
+            $lte: ["$date_rupture", { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: 45 } }],
+          },
+        ],
+      },
+      // Situation déjà définie → toujours visible
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
       },
+      // Accompagnement conjoint → toujours visible
       {
         $eq: ["$organisme_data.acc_conjoint", true],
       },
@@ -2257,6 +2279,10 @@ export const createMissionLocaleSnapshot = async (
 
   const date = new Date();
   const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
+  const organisme = await organismesDb().findOne(
+    { _id: effectif.organisme_id },
+    { projection: { is_allowed_collab: 1 } }
+  );
 
   let mongoInfo;
   try {
@@ -2285,6 +2311,7 @@ export const createMissionLocaleSnapshot = async (
           computed: {
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
+              is_allowed_collab: organisme?.is_allowed_collab ?? false,
             },
             ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
