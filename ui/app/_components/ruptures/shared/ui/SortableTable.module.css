@@ -20,11 +20,11 @@
 }
 
 .sortIconActive {
-  color: var(--text-title-grey);
+  color: var(--text-title-blue-france);
 }
 
 .sortIconInactive {
-  color: var(--text-mention-grey);
+  color: var(--border-default-grey);
 }
 
 .nameCell {
