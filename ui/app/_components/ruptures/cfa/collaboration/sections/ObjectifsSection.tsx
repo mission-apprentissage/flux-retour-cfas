@@ -14,9 +14,19 @@ interface ObjectifsSectionProps {
   setFieldValue: (field: string, value: unknown) => void;
   error?: string;
   submitCount: number;
+  touchedCommentaires: Record<string, boolean>;
+  commentaireErrors: Record<string, string>;
 }
 
-export function ObjectifsSection({ prenom, values, setFieldValue, error, submitCount }: ObjectifsSectionProps) {
+export function ObjectifsSection({
+  prenom,
+  values,
+  setFieldValue,
+  error,
+  submitCount,
+  touchedCommentaires,
+  commentaireErrors,
+}: ObjectifsSectionProps) {
   const [freinsOpen, setFreinsOpen] = useState(false);
 
   const hasRecherche = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI);
@@ -83,12 +93,16 @@ export function ObjectifsSection({ prenom, values, setFieldValue, error, submitC
               <span className={styles.required}>*</span>
             </p>
             <textarea
-              className="fr-input"
+              className={`fr-input ${touchedCommentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] ? "fr-input--error" : ""}`}
               placeholder={"Le jeune a-t-il déjà des pistes ?\nQuel accompagnement a déjà été apporté au CFA ?"}
               value={values.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] || ""}
               onChange={(e) => setComment(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI, e.target.value)}
               rows={4}
             />
+            {touchedCommentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] &&
+              commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && (
+                <p className="fr-error-text">{commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}</p>
+              )}
           </div>
         )}
       </div>
@@ -131,12 +145,15 @@ export function ObjectifsSection({ prenom, values, setFieldValue, error, submitC
                   {isChecked && (
                     <div className={styles.freinItemTextarea}>
                       <textarea
-                        className="fr-input"
+                        className={`fr-input ${touchedCommentaires[motif] && commentaireErrors[motif] ? "fr-input--error" : ""}`}
                         placeholder="Précisez le contexte pour la Mission Locale (requis)"
                         value={values.commentaires_par_motif[motif] || ""}
                         onChange={(e) => setComment(motif, e.target.value)}
                         rows={2}
                       />
+                      {touchedCommentaires[motif] && commentaireErrors[motif] && (
+                        <p className="fr-error-text">{commentaireErrors[motif]}</p>
+                      )}
                     </div>
                   )}
                 </div>

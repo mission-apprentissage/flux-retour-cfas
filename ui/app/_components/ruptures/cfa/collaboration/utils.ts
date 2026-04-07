@@ -74,7 +74,7 @@ export function isSection5Valid(v: FormValues): boolean {
 
 export function computeProgress(v: FormValues): number {
   let filled = 0;
-  let total = 10;
+  const total = 10;
 
   if (v.still_at_cfa !== null) filled++;
   if (v.motifs.length > 0) filled++;
@@ -87,21 +87,5 @@ export function computeProgress(v: FormValues): number {
   if (v.verified_info.formation_libelle.trim()) filled++;
   if (v.verified_info.date_fin_formation.trim()) filled++;
 
-  const selectedFreins = FREINS_MOTIFS.filter((m) => v.motifs.includes(m));
-  total += selectedFreins.length;
-  for (const m of selectedFreins) {
-    if (v.commentaires_par_motif[m]?.trim()) filled++;
-  }
-
-  if (v.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI)) {
-    total++;
-    if (v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]?.trim()) filled++;
-  }
-
-  if (v.referent_type === "other") {
-    total++;
-    if (v.referent_details.trim()) filled++;
-  }
-
-  return total > 0 ? Math.round((filled / total) * 100) : 0;
+  return Math.round((filled / total) * 100);
 }

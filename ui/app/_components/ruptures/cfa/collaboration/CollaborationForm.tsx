@@ -2,7 +2,7 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useFormik } from "formik";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
@@ -37,17 +37,20 @@ function validate(values: FormValues): FlatErrors {
 
   if (values.still_at_cfa === null) errors.still_at_cfa = "Requis";
   if (values.motifs.length === 0) errors.motifs = "Sélectionnez au moins un objectif";
+  const commentaireErrors: Record<string, string> = {};
   for (const m of FREINS_MOTIFS) {
     if (values.motifs.includes(m) && !values.commentaires_par_motif[m]?.trim()) {
-      errors.commentaires_par_motif = "Précisez le contexte pour chaque frein sélectionné";
-      break;
+      commentaireErrors[m] = "Précisez le contexte pour la Mission Locale";
     }
   }
   if (
     values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI) &&
     !values.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]?.trim()
   ) {
-    errors.commentaires_par_motif = "Précisez votre demande d'aide";
+    commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] = "Précisez votre demande d'aide";
+  }
+  if (Object.keys(commentaireErrors).length > 0) {
+    (errors as Record<string, unknown>).commentaires_par_motif = commentaireErrors;
   }
 
   if (!values.cause_rupture.trim()) errors.cause_rupture = "Ce champ est obligatoire";
@@ -165,6 +168,26 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
   const showSection5 = showSection4 && isSection4Valid(values);
   const showSection6 = showSection5 && isSection5Valid(values);
 
+  useEffect(() => {
+    if (showSection3) {
+      for (const m of values.motifs) {
+        if (
+          FREINS_MOTIFS.includes(m) ||
+          m === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||
+          m === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION
+        ) {
+          formik.setFieldTouched(`commentaires_par_motif.${m}`, true, false);
+        }
+      }
+    }
+  }, [showSection3]);
+
+  useEffect(() => {
+    if (showSection5 && values.referent_type === "other") {
+      formik.setFieldTouched("referent_details", true, false);
+    }
+  }, [showSection5]);
+
   const mlName = effectif.mission_locale_organisation?.nom;
   const prenom = effectif.prenom;
 
@@ -221,6 +244,8 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
               setFieldValue={setFieldValue}
               error={errors.motifs}
               submitCount={submitCount}
+              touchedCommentaires={(formik.touched.commentaires_par_motif as Record<string, boolean>) || {}}
+              commentaireErrors={(formik.errors.commentaires_par_motif as Record<string, string>) || {}}
             />
           </div>
 
