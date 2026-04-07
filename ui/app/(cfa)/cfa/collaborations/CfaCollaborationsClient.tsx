@@ -60,7 +60,6 @@ export default function CfaCollaborationsClient() {
     search: debouncedSearch || undefined,
     sort,
     order,
-    en_rupture: "oui",
     collab_status: collabStatusParam,
     formation,
   });

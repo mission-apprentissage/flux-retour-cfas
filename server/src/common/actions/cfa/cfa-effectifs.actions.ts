@@ -263,13 +263,7 @@ export async function getCfaEffectifs(
     },
     {
       $addFields: {
-        collab_status: {
-          $cond: {
-            if: "$en_rupture",
-            then: buildCollabStatusSwitch("$ml_doc"),
-            else: null,
-          },
-        },
+        collab_status: buildCollabStatusSwitch("$ml_doc"),
       },
     }
   );
