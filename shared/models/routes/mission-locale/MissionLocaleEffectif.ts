@@ -109,6 +109,13 @@ const zEffectifMissionLocale = z
       .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp")
       .nullish(),
     whatsapp_contact: zWhatsAppContact.nullish(),
+    cfa_rupture_declaration: z
+      .object({
+        date_rupture: z.date(),
+        declared_at: z.date(),
+        declared_by: zObjectId,
+      })
+      .nullish(),
     organisme_data: z
       .object({
         rupture: z.boolean().nullish(),

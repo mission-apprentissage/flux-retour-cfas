@@ -26,13 +26,21 @@ const styles = withSharedStyles(localStyles);
 
 function buildSuiviTimeline(
   effectif: IEffectifMissionLocale["effectif"],
-  ctx: { userName: string; isCurrentUser: boolean }
+  ctx: { userName: string; isCurrentUser: boolean; userId?: string }
 ): TimelineEvent[] {
   const events: TimelineEvent[] = [];
 
-  if (effectif.date_rupture) {
-    const rawDate = effectif.date_rupture;
-    const date = toDate(((rawDate as any).date || rawDate) as Date | string);
+  if (effectif.cfa_rupture_declaration) {
+    const decl = effectif.cfa_rupture_declaration;
+    const isDeclByCurrentUser = ctx.userId ? isCurrentUserId(decl.declared_by, ctx.userId) : false;
+    events.push({
+      date: toDate(decl.declared_at),
+      title: 'Statut changé pour "En rupture"',
+      subtext: isDeclByCurrentUser ? "Statut changé par vous" : `Statut changé par ${ctx.userName}`,
+      icon: "rupture",
+    });
+  } else if (effectif.date_rupture) {
+    const date = toDate(effectif.date_rupture as Date | string | { date: string | Date });
 
     events.push({
       date,
@@ -89,6 +97,7 @@ export function CfaSuiviDossierColumn({ effectif }: CfaSuiviDossierColumnProps) 
   const timeline = buildSuiviTimeline(effectif, {
     userName: getUserDisplayName(user),
     isCurrentUser: isCurrentUserId(od?.acc_conjoint_by, user?._id),
+    userId: user?._id,
   });
 
   return (

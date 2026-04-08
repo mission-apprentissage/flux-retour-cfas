@@ -25,6 +25,7 @@ export function useDeclareCfaRupture() {
     mutationFn: declareCfaRupture,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cfaQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: ["effectif"] });
     },
   });
 }

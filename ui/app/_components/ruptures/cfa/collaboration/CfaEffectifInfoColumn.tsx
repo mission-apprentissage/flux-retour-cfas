@@ -19,14 +19,15 @@ const styles = withSharedStyles(localStyles);
 
 interface CfaEffectifInfoColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
+  onToggleRupture?: () => void;
 }
 
-export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) {
+export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectifInfoColumnProps) {
   const [contactsOpen, setContactsOpen] = useState(false);
 
   const age = getAge(effectif.date_de_naissance);
   const isMineur = typeof age === "number" && age < 18;
-  const enRupture = !!effectif.date_rupture;
+  const enRupture = !!effectif.date_rupture || !!effectif.cfa_rupture_declaration;
 
   return (
     <div className={styles.infoColumn}>
@@ -66,7 +67,7 @@ export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) 
           label=""
           labelPosition="left"
           checked={enRupture}
-          onChange={() => {}}
+          onChange={() => onToggleRupture?.()}
           showCheckedHint={false}
         />
       </div>
