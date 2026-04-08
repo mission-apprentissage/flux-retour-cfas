@@ -1,24 +1,15 @@
+import { getIn, useFormikContext } from "formik";
 import { useState } from "react";
 
 import styles from "../CollaborationForm.module.css";
 import { VERIFIED_FIELDS } from "../constants";
-import { VerifiedInfo } from "../hooks";
+import { FormValues } from "../types";
 import { formatAdresseDisplay } from "../utils";
 
-interface VerifiedInfoSectionProps {
-  verifiedInfo: VerifiedInfo;
-  setFieldValue: (field: string, value: unknown) => void;
-  submitCount: number;
-  fieldErrors?: Partial<Record<keyof VerifiedInfo, string>>;
-}
-
-export function VerifiedInfoSection({
-  verifiedInfo,
-  setFieldValue,
-  submitCount,
-  fieldErrors,
-}: VerifiedInfoSectionProps) {
+export function VerifiedInfoSection() {
+  const { values, errors, touched, handleChange, handleBlur } = useFormikContext<FormValues>();
   const [editingFields, setEditingFields] = useState<Set<string>>(new Set());
+  const verifiedInfo = values.verified_info;
 
   const toggleEdit = (key: string) => {
     setEditingFields((prev) => {
@@ -32,10 +23,6 @@ export function VerifiedInfoSection({
     });
   };
 
-  const setVerifiedField = (key: keyof VerifiedInfo, value: string) => {
-    setFieldValue(`verified_info.${key}`, value);
-  };
-
   return (
     <div className={styles.sectionBlock}>
       <p className={styles.sectionLabel}>Informations de l&apos;apprenant à vérifier</p>
@@ -45,24 +32,24 @@ export function VerifiedInfoSection({
       </p>
       <div className={styles.verifiedTable}>
         {VERIFIED_FIELDS.map((field) => {
-          const isEditing = editingFields.has(field.key);
-          const isEmpty = !verifiedInfo[field.key]?.trim();
-          const showFieldError = submitCount > 0 && field.required && isEmpty;
-          const formatError = submitCount > 0 ? fieldErrors?.[field.key] : undefined;
-
           if (field.isAddress) {
             return (
               <AddressRow
                 key="adresse"
                 field={field}
-                verifiedInfo={verifiedInfo}
                 isEditing={editingFields.has("adresse")}
-                showError={submitCount > 0}
                 onToggleEdit={() => toggleEdit("adresse")}
-                onFieldChange={setVerifiedField}
               />
             );
           }
+
+          const isEditing = editingFields.has(field.key);
+          const fieldPath = `verified_info.${field.key}`;
+          const isEmpty = !verifiedInfo[field.key]?.trim();
+          const isTouched = getIn(touched, fieldPath);
+          const fieldError = getIn(errors, fieldPath) as string | undefined;
+          const hasError = isTouched && !!fieldError;
+          const isFormatError = hasError && !isEmpty;
 
           return (
             <div key={field.key} className={styles.verifiedRow}>
@@ -75,17 +62,20 @@ export function VerifiedInfoSection({
                   <>
                     <input
                       type="text"
-                      className={`fr-input ${showFieldError || formatError ? styles.inputError : ""}`}
+                      name={fieldPath}
+                      className={`fr-input ${hasError ? "fr-input--error" : ""}`}
                       value={verifiedInfo[field.key]}
-                      onChange={(e) => setVerifiedField(field.key, e.target.value)}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
                     />
-                    {formatError && <span className={styles.infoRequise}>{formatError}</span>}
+                    {isFormatError && <span className={styles.infoRequise}>{fieldError}</span>}
                   </>
                 ) : (
                   <>
                     <span>{verifiedInfo[field.key] || "—"}</span>
-                    {showFieldError && <span className={styles.infoRequise}>information requise</span>}
-                    {!showFieldError && formatError && <span className={styles.infoRequise}>{formatError}</span>}
+                    {hasError && (
+                      <span className={styles.infoRequise}>{isEmpty ? "information requise" : fieldError}</span>
+                    )}
                   </>
                 )}
               </div>
@@ -107,20 +97,21 @@ export function VerifiedInfoSection({
 
 interface AddressRowProps {
   field: { label: string; required: boolean };
-  verifiedInfo: VerifiedInfo;
   isEditing: boolean;
-  showError: boolean;
   onToggleEdit: () => void;
-  onFieldChange: (key: keyof VerifiedInfo, value: string) => void;
 }
 
-function AddressRow({ field, verifiedInfo, isEditing, showError, onToggleEdit, onFieldChange }: AddressRowProps) {
+function AddressRow({ field, isEditing, onToggleEdit }: AddressRowProps) {
+  const { values, errors, touched, handleChange, handleBlur } = useFormikContext<FormValues>();
+  const verifiedInfo = values.verified_info;
   const adresseDisplay = formatAdresseDisplay(verifiedInfo);
-  const adresseEmpty =
-    !verifiedInfo.adresse_rue.trim() ||
-    !verifiedInfo.adresse_code_postal.trim() ||
-    !verifiedInfo.adresse_commune.trim();
-  const showAddrError = showError && adresseEmpty;
+
+  const showRueError = getIn(touched, "verified_info.adresse_rue") && getIn(errors, "verified_info.adresse_rue");
+  const showCpError =
+    getIn(touched, "verified_info.adresse_code_postal") && getIn(errors, "verified_info.adresse_code_postal");
+  const showCommuneError =
+    getIn(touched, "verified_info.adresse_commune") && getIn(errors, "verified_info.adresse_commune");
+  const showAddrError = showRueError || showCpError || showCommuneError;
 
   return (
     <div className={styles.verifiedRow}>
@@ -133,25 +124,31 @@ function AddressRow({ field, verifiedInfo, isEditing, showError, onToggleEdit, o
           <div className={styles.addressEditGroup}>
             <input
               type="text"
-              className={`fr-input ${showAddrError && !verifiedInfo.adresse_rue.trim() ? styles.inputError : ""}`}
+              name="verified_info.adresse_rue"
+              className={`fr-input ${showRueError ? "fr-input--error" : ""}`}
               placeholder="Rue"
               value={verifiedInfo.adresse_rue}
-              onChange={(e) => onFieldChange("adresse_rue", e.target.value)}
+              onChange={handleChange}
+              onBlur={handleBlur}
             />
             <div className={styles.addressEditRow}>
               <input
                 type="text"
-                className={`fr-input ${showAddrError && !verifiedInfo.adresse_code_postal.trim() ? styles.inputError : ""}`}
+                name="verified_info.adresse_code_postal"
+                className={`fr-input ${showCpError ? "fr-input--error" : ""}`}
                 placeholder="Code postal"
                 value={verifiedInfo.adresse_code_postal}
-                onChange={(e) => onFieldChange("adresse_code_postal", e.target.value)}
+                onChange={handleChange}
+                onBlur={handleBlur}
               />
               <input
                 type="text"
-                className={`fr-input ${showAddrError && !verifiedInfo.adresse_commune.trim() ? styles.inputError : ""}`}
+                name="verified_info.adresse_commune"
+                className={`fr-input ${showCommuneError ? "fr-input--error" : ""}`}
                 placeholder="Commune"
                 value={verifiedInfo.adresse_commune}
-                onChange={(e) => onFieldChange("adresse_commune", e.target.value)}
+                onChange={handleChange}
+                onBlur={handleBlur}
               />
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
+import { ErrorMessage, useField, useFormikContext } from "formik";
 import { useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
@@ -10,33 +11,50 @@ import { FormValues } from "../types";
 
 interface ObjectifsSectionProps {
   prenom: string;
-  values: FormValues;
-  setFieldValue: (field: string, value: unknown) => void;
-  error?: string;
-  submitCount: number;
-  touchedCommentaires: Record<string, boolean>;
-  commentaireErrors: Record<string, string>;
 }
 
-export function ObjectifsSection({
-  prenom,
-  values,
-  setFieldValue,
-  error,
-  submitCount,
-  touchedCommentaires,
-  commentaireErrors,
-}: ObjectifsSectionProps) {
+function MotifCommentaire({
+  motif,
+  placeholder,
+  rows,
+}: {
+  motif: ACC_CONJOINT_MOTIF_ENUM;
+  placeholder: string;
+  rows: number;
+}) {
+  const [field, meta] = useField(`commentaires_par_motif.${motif}`);
+  return (
+    <>
+      <textarea
+        {...field}
+        value={field.value ?? ""}
+        className={`fr-input ${meta.touched && meta.error ? "fr-input--error" : ""}`}
+        placeholder={placeholder}
+        rows={rows}
+      />
+      <ErrorMessage name={`commentaires_par_motif.${motif}`} component="p" className="fr-error-text" />
+    </>
+  );
+}
+
+export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
+  const { values, setFieldValue } = useFormikContext<FormValues>();
   const [freinsOpen, setFreinsOpen] = useState(false);
 
   const hasRecherche = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI);
   const hasReorientation = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
   const showFreinsSection = freinsOpen || values.motifs.some((m) => FREINS_MOTIFS.includes(m));
-  const showError = submitCount > 0 && !!error;
 
   const toggleMotif = (motif: ACC_CONJOINT_MOTIF_ENUM, checked: boolean) => {
     if (checked) {
       setFieldValue("motifs", [...values.motifs, motif]);
+      if (
+        FREINS_MOTIFS.includes(motif) ||
+        motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||
+        motif === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION
+      ) {
+        setFieldValue(`commentaires_par_motif.${motif}`, values.commentaires_par_motif[motif] ?? "");
+      }
     } else {
       const { [motif]: _removed, ...restCommentaires } = values.commentaires_par_motif;
       setFieldValue(
@@ -60,10 +78,6 @@ export function ObjectifsSection({
       values.motifs.filter((m) => !FREINS_MOTIFS.includes(m))
     );
     setFieldValue("commentaires_par_motif", restCommentaires);
-  };
-
-  const setComment = (motif: ACC_CONJOINT_MOTIF_ENUM, comment: string) => {
-    setFieldValue("commentaires_par_motif", { ...values.commentaires_par_motif, [motif]: comment });
   };
 
   return (
@@ -92,17 +106,11 @@ export function ObjectifsSection({
               Précisez votre demande d&apos;aide et décrivez ce qui a déjà été mis en place
               <span className={styles.required}>*</span>
             </p>
-            <textarea
-              className={`fr-input ${touchedCommentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] ? "fr-input--error" : ""}`}
+            <MotifCommentaire
+              motif={ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI}
               placeholder={"Le jeune a-t-il déjà des pistes ?\nQuel accompagnement a déjà été apporté au CFA ?"}
-              value={values.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] || ""}
-              onChange={(e) => setComment(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI, e.target.value)}
               rows={4}
             />
-            {touchedCommentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] &&
-              commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && (
-                <p className="fr-error-text">{commentaireErrors[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}</p>
-              )}
           </div>
         )}
       </div>
@@ -144,16 +152,11 @@ export function ObjectifsSection({
                   </div>
                   {isChecked && (
                     <div className={styles.freinItemTextarea}>
-                      <textarea
-                        className={`fr-input ${touchedCommentaires[motif] && commentaireErrors[motif] ? "fr-input--error" : ""}`}
+                      <MotifCommentaire
+                        motif={motif}
                         placeholder="Précisez le contexte pour la Mission Locale (requis)"
-                        value={values.commentaires_par_motif[motif] || ""}
-                        onChange={(e) => setComment(motif, e.target.value)}
                         rows={2}
                       />
-                      {touchedCommentaires[motif] && commentaireErrors[motif] && (
-                        <p className="fr-error-text">{commentaireErrors[motif]}</p>
-                      )}
                     </div>
                   )}
                 </div>
@@ -177,9 +180,22 @@ export function ObjectifsSection({
             },
           ]}
         />
+        {hasReorientation && (
+          <div className={styles.subSection}>
+            <p className={styles.subSectionLabel}>
+              Le jeune a quitté le CFA ou souhaite se réorienter ? Précisez la situation actuelle en quelques mots
+              <span className={styles.required}>*</span>
+            </p>
+            <MotifCommentaire
+              motif={ACC_CONJOINT_MOTIF_ENUM.REORIENTATION}
+              placeholder="Précisez la situation actuelle en quelques mots"
+              rows={3}
+            />
+          </div>
+        )}
       </div>
 
-      {showError && <p className={styles.errorText}>Sélectionnez au moins un objectif</p>}
+      <ErrorMessage name="motifs" component="p" className="fr-error-text" />
     </div>
   );
 }

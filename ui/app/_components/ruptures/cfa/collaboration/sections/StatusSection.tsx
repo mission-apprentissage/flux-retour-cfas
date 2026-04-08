@@ -1,14 +1,10 @@
+import { ErrorMessage, useFormikContext } from "formik";
+
 import styles from "../CollaborationForm.module.css";
+import { FormValues } from "../types";
 
-interface StatusSectionProps {
-  value: boolean | null;
-  setFieldValue: (field: string, value: unknown) => void;
-  error?: string;
-  submitCount: number;
-}
-
-export function StatusSection({ value, setFieldValue, error, submitCount }: StatusSectionProps) {
-  const showError = submitCount > 0 && !!error;
+export function StatusSection() {
+  const { values, setFieldValue } = useFormikContext<FormValues>();
 
   return (
     <>
@@ -25,12 +21,12 @@ export function StatusSection({ value, setFieldValue, error, submitCount }: Stat
         ).map(({ value: optionValue, label }) => (
           <label
             key={String(optionValue)}
-            className={`${styles.radioCard} ${value === optionValue ? styles.radioCardSelected : ""}`}
+            className={`${styles.radioCard} ${values.still_at_cfa === optionValue ? styles.radioCardSelected : ""}`}
           >
             <input
               type="radio"
               name="still_at_cfa"
-              checked={value === optionValue}
+              checked={values.still_at_cfa === optionValue}
               onChange={() => setFieldValue("still_at_cfa", optionValue)}
               className={styles.radioInput}
             />
@@ -38,7 +34,7 @@ export function StatusSection({ value, setFieldValue, error, submitCount }: Stat
           </label>
         ))}
       </div>
-      {showError && <p className={styles.errorText}>Ce champ est obligatoire</p>}
+      <ErrorMessage name="still_at_cfa" component="p" className="fr-error-text" />
     </>
   );
 }

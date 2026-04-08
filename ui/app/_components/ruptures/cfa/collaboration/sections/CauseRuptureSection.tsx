@@ -1,14 +1,9 @@
+import { ErrorMessage, useField } from "formik";
+
 import styles from "../CollaborationForm.module.css";
 
-interface CauseRuptureSectionProps {
-  value: string;
-  setFieldValue: (field: string, value: unknown) => void;
-  error?: string;
-  submitCount: number;
-}
-
-export function CauseRuptureSection({ value, setFieldValue, error, submitCount }: CauseRuptureSectionProps) {
-  const showError = submitCount > 0 && !!error;
+export function CauseRuptureSection() {
+  const [field, meta] = useField("cause_rupture");
 
   return (
     <div className={styles.sectionBlock}>
@@ -21,13 +16,12 @@ export function CauseRuptureSection({ value, setFieldValue, error, submitCount }
         faute grave professionnelle, l&apos;employeur n&apos;a pas mis à disposition de tuteur...)
       </p>
       <textarea
-        className={`fr-input ${showError ? styles.inputError : ""}`}
+        {...field}
+        className={`fr-input ${meta.touched && meta.error ? "fr-input--error" : ""}`}
         placeholder="Décrivez les circonstances de la rupture..."
-        value={value}
-        onChange={(e) => setFieldValue("cause_rupture", e.target.value)}
         rows={5}
       />
-      {showError && <p className={styles.errorText}>Ce champ est obligatoire</p>}
+      <ErrorMessage name="cause_rupture" component="p" className="fr-error-text" />
     </div>
   );
 }

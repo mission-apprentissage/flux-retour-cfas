@@ -424,14 +424,9 @@
   border-radius: 4px;
 }
 
-.inputError {
-  border-color: var(--text-default-error) !important;
-}
-
-.errorText {
-  font-size: 0.8125rem;
-  color: var(--text-default-error);
-  margin-top: 0.25rem;
+.sidebarErrorCount {
+  margin-bottom: 0.75rem;
+  margin-top: -0.5rem;
 }
 
 .sidebar {

@@ -1,3 +1,5 @@
+import { ErrorMessage, useField, useFormikContext } from "formik";
+
 import { useAuth } from "@/app/_context/UserContext";
 
 import styles from "../CollaborationForm.module.css";
@@ -5,15 +7,12 @@ import { FormValues } from "../types";
 
 interface ReferentSectionProps {
   prenom: string;
-  values: FormValues;
-  setFieldValue: (field: string, value: unknown) => void;
-  error?: string;
-  submitCount: number;
 }
 
-export function ReferentSection({ prenom, values, setFieldValue, error, submitCount }: ReferentSectionProps) {
+export function ReferentSection({ prenom }: ReferentSectionProps) {
   const { user } = useAuth();
-  const showError = submitCount > 0 && !!error;
+  const { values, setFieldValue } = useFormikContext<FormValues>();
+  const [detailsField, detailsMeta] = useField("referent_details");
 
   return (
     <div className={styles.sectionBlock}>
@@ -63,18 +62,20 @@ export function ReferentSection({ prenom, values, setFieldValue, error, submitCo
             <span className={`fr-icon-user-add-fill fr-icon--sm ${styles.referentIcon}`} aria-hidden="true" />
           </label>
           {values.referent_type === "other" && (
-            <textarea
-              className={`fr-input ${showError && !values.referent_details.trim() ? styles.inputError : ""}`}
-              placeholder="Nom, prénom, téléphone et email du référent"
-              value={values.referent_details}
-              onChange={(e) => setFieldValue("referent_details", e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-              rows={2}
-            />
+            <>
+              <textarea
+                {...detailsField}
+                className={`fr-input ${detailsMeta.touched && detailsMeta.error ? "fr-input--error" : ""}`}
+                placeholder="Nom, prénom, téléphone et email du référent"
+                onClick={(e) => e.stopPropagation()}
+                rows={2}
+              />
+              <ErrorMessage name="referent_details" component="p" className="fr-error-text" />
+            </>
           )}
         </div>
       </div>
-      {showError && <p className={styles.errorText}>Veuillez indiquer un contact</p>}
+      <ErrorMessage name="referent_type" component="p" className="fr-error-text" />
     </div>
   );
 }
