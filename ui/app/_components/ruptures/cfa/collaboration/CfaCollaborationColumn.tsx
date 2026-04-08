@@ -10,19 +10,20 @@ import { formatDate } from "@/app/_utils/date.utils";
 import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
 import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
 import { FeedbackBubble } from "../../shared/collaboration/FeedbackBubble";
+import { MlInactiveBadge } from "../../shared/collaboration/MlInactiveBadge";
 import { NouveauContratBanner } from "../../shared/collaboration/NouveauContratBanner";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./CfaCollaborationDetail.module.css";
 import { CollaborationSentView } from "./CollaborationSentView";
+import { MlInactiveBanner } from "./MlInactiveBanner";
+import { MlOrg } from "./types";
 
 const styles = withSharedStyles(localStyles);
 
 interface CfaCollaborationColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
 }
-
-type MlOrg = NonNullable<IEffectifMissionLocale["effectif"]["mission_locale_organisation"]>;
 
 function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: boolean }) {
   return (
@@ -38,7 +39,7 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
           Active depuis le {formatDate(ml.activated_at)}
         </Badge>
       ) : showInactiveMessage ? (
-        <p className={styles.mlCallOutInactive}>Cette Mission Locale n&apos;est pas encore active sur l&apos;outil</p>
+        <MlInactiveBadge />
       ) : null}
     </div>
   );
@@ -81,6 +82,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
       ) : (
         <>
           <CollaborationSentView effectif={effectif} hasMLResponse={situationLogs.length > 0} />
+          {ml && !ml.activated_at && <MlInactiveBanner ml={ml} />}
           <NouveauContratBanner effectif={effectif} />
           {situationLogs.map((log) => (
             <FeedbackBubble key={String(log._id)} log={log} effectif={effectif} styles={styles} variant="received" />

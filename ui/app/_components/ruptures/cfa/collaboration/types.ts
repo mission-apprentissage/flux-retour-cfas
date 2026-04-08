@@ -1,4 +1,4 @@
-import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
+import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 
 import { VerifiedInfo } from "./hooks";
 
@@ -19,3 +19,5 @@ export type VerifiedField = {
   required: boolean;
   isAddress?: boolean;
 };
+
+export type MlOrg = NonNullable<IEffectifMissionLocale["effectif"]["mission_locale_organisation"]>;

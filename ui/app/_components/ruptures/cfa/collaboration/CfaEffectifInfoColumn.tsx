@@ -10,6 +10,7 @@ import { formatAnnee, formatDate, formatRelativeDate, getAge } from "@/app/_util
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { getInitials } from "@/app/_utils/user.utils";
 
+import { MlInactiveBadge } from "../../shared/collaboration/MlInactiveBadge";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./CfaCollaborationDetail.module.css";
@@ -131,6 +132,9 @@ export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) 
       <hr className={styles.separator} />
 
       <p className={styles.sectionTitle}>Mission Locale de rattachement</p>
+      {effectif.mission_locale_organisation && !effectif.mission_locale_organisation.activated_at && (
+        <MlInactiveBadge />
+      )}
 
       {effectif.mission_locale_organisation ? (
         <>
