@@ -12572,6 +12572,12 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                   "additionalProperties": false,
                   "bsonType": "object",
                   "properties": {
+                    "is_allowed_collab": {
+                      "bsonType": [
+                        "bool",
+                        "null",
+                      ],
+                    },
                     "ml_beta_activated_at": {
                       "anyOf": [
                         {
@@ -19905,6 +19911,10 @@ exports[`validation-schema > should create validation schema for organismes > or
     "has_transmission_errors": {
       "bsonType": "bool",
       "description": "Indique si cet organisme a une transmissions d'effectif en erreur",
+    },
+    "is_allowed_collab": {
+      "bsonType": "bool",
+      "description": "Indique si cet organisme fait partie du pilote de collaboration ML/CFA",
     },
     "is_allowed_deca": {
       "bsonType": [

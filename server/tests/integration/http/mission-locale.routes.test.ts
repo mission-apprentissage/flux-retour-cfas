@@ -1146,41 +1146,6 @@ describe("Classifier Feedback Routes", () => {
     EFFECTIF_ID = effQ?.effectif_id as ObjectId;
   });
 
-  describe("Classifier feedback via POST /effectif/:id", () => {
-    it("stocke le feedback dans classification_reponse_appel.feedback", async () => {
-      await missionLocaleEffectifsDb().updateOne(
-        { effectif_id: EFFECTIF_ID },
-        {
-          $set: {
-            classification_reponse_appel: { score: 0.85, model: "2026-03-16", scored_at: new Date() },
-          },
-        }
-      );
-
-      const res = await requestAsOrganisation(
-        CF_ML_DATA,
-        "post",
-        `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
-        {
-          classifier_feedback: {
-            meilleure_reactivite: true,
-            confiance_indice: 4,
-            utilite_indice: 3,
-          },
-        }
-      );
-
-      expect(res.status).toBe(200);
-
-      const doc = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
-      expect(doc?.classification_reponse_appel?.feedback).toBeDefined();
-      expect(doc?.classification_reponse_appel?.feedback?.meilleure_reactivite).toBe(true);
-      expect(doc?.classification_reponse_appel?.feedback?.confiance_indice).toBe(4);
-      expect(doc?.classification_reponse_appel?.feedback?.utilite_indice).toBe(3);
-      expect(doc?.classification_reponse_appel?.feedback?.responded_at).toBeDefined();
-    });
-  });
-
   describe("Contact opportun dans la réponse API", () => {
     it("expose contact_opportun: true quand score >= 0.75 et pas mineur ni RQTH", async () => {
       await missionLocaleEffectifsDb().updateOne(

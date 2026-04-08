@@ -193,6 +193,11 @@ export const zOrganisme = z
           "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
       })
       .nullish(),
+    is_allowed_collab: z
+      .boolean({
+        description: "Indique si cet organisme fait partie du pilote de collaboration ML/CFA",
+      })
+      .optional(),
     last_effectifs_deca_update: z
       .date({
         description: "Date de la dernière mise à jour des effectifs deca pour cet organisme",

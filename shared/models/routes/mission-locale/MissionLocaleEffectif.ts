@@ -50,13 +50,6 @@ export const updateMissionLocaleEffectifApi = {
   deja_connu: z.boolean().nullish(),
   probleme_type: zProblemeTypeEnum.optional(),
   probleme_detail: z.string().optional(),
-  classifier_feedback: z
-    .object({
-      meilleure_reactivite: z.boolean(),
-      confiance_indice: z.number().int().min(0).max(5),
-      utilite_indice: z.number().int().min(0).max(5),
-    })
-    .optional(),
 };
 
 const zEffectifMissionLocale = z

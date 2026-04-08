@@ -196,6 +196,7 @@ const zMissionLocaleEffectif = z.object({
       organisme: z
         .object({
           ml_beta_activated_at: z.date().nullish(),
+          is_allowed_collab: z.boolean().nullish(),
         })
         .nullish(),
       mission_locale: z

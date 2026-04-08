@@ -313,30 +313,33 @@ const addFieldFromActivationDate = () => {
   ];
 };
 
-const DECA_AUTO_DELAY_DAYS = 45;
-
 const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
-      // CFA pas utilisateur TDB (pas de ml_beta_activated_at dans organisations)
-      { $eq: [{ $size: "$_org_ml_beta_lookup" }, 0] },
-      // Effectif déjà traité (a une situation)
-      { $ne: [{ $ifNull: ["$situation", null] }, null] },
-      // Collaboration active (CFA a envoyé le dossier)
-      { $eq: ["$organisme_data.acc_conjoint", true] },
-      // Effectif grandfathéré : créé AVANT l'activation du CFA sur TDB
-      {
-        $lt: ["$created_at", { $arrayElemAt: ["$_org_ml_beta_lookup.ml_beta_activated_at", 0] }],
-      },
-      // CFA DECA + 45+ jours depuis la rupture sans collaboration initiée
+      // Organisme pas activé ML ET pas collab → visible (comportement existant)
       {
         $and: [
-          { $eq: [{ $arrayElemAt: ["$_organisme_deca_lookup.is_allowed_deca", 0] }, true] },
-          { $ne: [{ $ifNull: ["$organisme_data.acc_conjoint", false] }, true] },
+          { $eq: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+          { $ne: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
+        ],
+      },
+      // Organisme collab → visible seulement après 45 jours de rupture
+      {
+        $and: [
+          { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
+          { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
           {
-            $lte: ["$date_rupture", new Date(Date.now() - DECA_AUTO_DELAY_DAYS * 24 * 60 * 60 * 1000)],
+            $lte: ["$date_rupture", { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: 45 } }],
           },
         ],
+      },
+      // Situation déjà définie → toujours visible
+      {
+        $ne: [{ $ifNull: ["$situation", null] }, null],
+      },
+      // Accompagnement conjoint → toujours visible
+      {
+        $eq: ["$organisme_data.acc_conjoint", true],
       },
     ],
   };
@@ -362,41 +365,6 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
   };
 
   return [
-    // Lookups légers avant le filtre (uniquement pour ML)
-    ...(visibility !== "ORGANISME_FORMATION"
-      ? [
-          {
-            $lookup: {
-              from: "organismes",
-              localField: "effectif_snapshot.organisme_id",
-              foreignField: "_id",
-              pipeline: [{ $project: { _id: 0, is_allowed_deca: 1 } }],
-              as: "_organisme_deca_lookup",
-            },
-          },
-          {
-            $lookup: {
-              from: "organisations",
-              let: { organisme_id: { $toString: "$effectif_snapshot.organisme_id" } },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$organisme_id", "$$organisme_id"] },
-                        { $ne: [{ $ifNull: ["$ml_beta_activated_at", null] }, null] },
-                      ],
-                    },
-                  },
-                },
-                { $project: { _id: 0, ml_beta_activated_at: 1 } },
-                { $limit: 1 },
-              ],
-              as: "_org_ml_beta_lookup",
-            },
-          },
-        ]
-      : []),
     {
       $addFields: {
         in_joint_organisme_range: {
@@ -409,16 +377,6 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
         in_joint_organisme_range: true,
       },
     },
-    ...(visibility !== "ORGANISME_FORMATION"
-      ? [
-          {
-            $project: {
-              _organisme_deca_lookup: 0,
-              _org_ml_beta_lookup: 0,
-            },
-          },
-        ]
-      : []),
   ];
 };
 
@@ -2205,7 +2163,7 @@ export const setEffectifMissionLocaleData = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { classifier_feedback, ...effectifFields } = data;
+  const effectifFields = data;
 
   const dbSetObject = {
     ...(effectifFields.situation !== undefined ? { situation: effectifFields.situation } : {}),
@@ -2230,17 +2188,6 @@ export const setEffectifMissionLocaleData = async (
       $set: {
         ...dbSetObject,
         updated_at: new Date(),
-        ...(classifier_feedback
-          ? {
-              "classification_reponse_appel.feedback": {
-                meilleure_reactivite: classifier_feedback.meilleure_reactivite,
-                confiance_indice: classifier_feedback.confiance_indice,
-                utilite_indice: classifier_feedback.utilite_indice,
-                responded_at: new Date(),
-                responded_by: new ObjectId(user._id),
-              },
-            }
-          : {}),
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,
@@ -2500,6 +2447,10 @@ export const createMissionLocaleSnapshot = async (
 
   const date = new Date();
   const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
+  const organisme = await organismesDb().findOne(
+    { _id: effectif.organisme_id },
+    { projection: { is_allowed_collab: 1 } }
+  );
 
   let mongoInfo;
   try {
@@ -2527,6 +2478,7 @@ export const createMissionLocaleSnapshot = async (
           computed: {
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
+              is_allowed_collab: organisme?.is_allowed_collab ?? false,
             },
             ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
