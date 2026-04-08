@@ -32,15 +32,8 @@ export function useCfaEffectifsRuptures(organismeId: string | undefined) {
   });
 }
 
-export function useCfaUnreadNotificationsCount(organismeId: string | undefined) {
-  return useQuery<{ count: number }>({
-    queryKey: cfaQueryKeys.unreadNotificationsCount(organismeId!),
-    queryFn: () => _get(`/api/v1/organismes/${organismeId}/cfa/unread-notifications-count`),
-    enabled: !!organismeId,
-    refetchInterval: 60_000,
-    refetchIntervalInBackground: false,
-  });
-}
+// Re-exported from shared hook to maintain backwards compatibility
+export { useCfaUnreadNotificationsCount } from "@/hooks/useCfaUnreadNotifications";
 
 export function useCfaEffectifs(organismeId: string | undefined, params: CfaEffectifsParams) {
   const { page, limit, sort, order, search, en_rupture, collab_status, formation } = params;
