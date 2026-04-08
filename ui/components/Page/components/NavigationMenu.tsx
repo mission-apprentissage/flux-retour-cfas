@@ -5,10 +5,12 @@ import { ReactElement, useState } from "react";
 import { CRISP_FAQ, IOrganisationType, ORGANISATION_TYPE } from "shared";
 
 import { AuthContext } from "@/common/internal/AuthContext";
+import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
+import { useCfaUnreadNotificationsCount } from "@/hooks/useCfaUnreadNotifications";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
 
@@ -159,20 +161,46 @@ function NavBarTransverse(): React.ReactElement {
   }
 }
 
+function NavBarCfaMlBeta(): ReactElement {
+  const { auth } = useAuth();
+  const organismeId = auth?.organisation?.type === "ORGANISME_FORMATION" ? auth.organisation.organisme_id : undefined;
+  const { data: unreadData } = useCfaUnreadNotificationsCount(organismeId ?? undefined);
+  const unreadCount = unreadData?.count ?? 0;
+
+  return (
+    <>
+      <NavItem to="/cfa" exactMatch>
+        Effectifs en ruptures
+      </NavItem>
+      <NavItem to="/cfa/collaborations">
+        <Flex align="center" gap="0.5rem">
+          Collaborations en cours
+          {unreadCount > 0 && (
+            <Box
+              as="span"
+              display="inline-block"
+              w="8px"
+              h="8px"
+              borderRadius="50%"
+              bg="red.500"
+              flexShrink={0}
+              role="status"
+              aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+            />
+          )}
+        </Flex>
+      </NavItem>
+      <NavItem to="/cfa/effectifs">Tous mes effectifs</NavItem>
+    </>
+  );
+}
+
 function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
   const { auth } = useAuth();
 
-  if (auth?.organisation?.type === "ORGANISME_FORMATION" && auth?.organisation?.ml_beta_activated_at) {
-    return (
-      <>
-        <NavItem to="/cfa" exactMatch>
-          Mon tableau de bord
-        </NavItem>
-        <NavItem to="/parametres">Paramètres</NavItem>
-        <MenuQuestions />
-      </>
-    );
+  if (checkCfaWithMlBeta(auth?.organisation)) {
+    return <NavBarCfaMlBeta />;
   }
 
   return (

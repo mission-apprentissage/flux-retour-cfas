@@ -4,6 +4,8 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
+
 import { useAuth } from "../_context/UserContext";
 
 import { Impersonate } from "./Impersonate";
@@ -14,8 +16,7 @@ export function ConnectedHeader() {
   const { user } = useAuth();
   const pathname = usePathname();
 
-  const isCfaWithMlBeta =
-    user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !!user?.organisation?.ml_beta_activated_at;
+  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
   const { data: unreadData } = useCfaUnreadNotificationsCount(
     isCfaWithMlBeta ? user?.organisation?.organisme_id : undefined
   );
@@ -66,14 +67,6 @@ export function ConnectedHeader() {
           },
         });
         baseItems.push({
-          text: "Tous mes effectifs",
-          isActive: pathname?.startsWith("/cfa/effectifs"),
-          linkProps: {
-            href: "/cfa/effectifs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
           text: (
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
               Collaborations en cours
@@ -100,10 +93,10 @@ export function ConnectedHeader() {
           },
         });
         baseItems.push({
-          text: "Paramètres",
-          isActive: pathname?.startsWith("/cfa/parametres"),
+          text: "Tous mes effectifs",
+          isActive: pathname?.startsWith("/cfa/effectifs"),
           linkProps: {
-            href: "/cfa/parametres",
+            href: "/cfa/effectifs",
             target: "_self",
           },
         });
@@ -288,7 +281,7 @@ export function ConnectedHeader() {
       text: "Glossaire",
     });
 
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !user?.organisation?.ml_beta_activated_at) {
+    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) {
       baseItems.push({
         text: "Paramètres",
         linkProps: {
@@ -298,10 +291,12 @@ export function ConnectedHeader() {
       });
     }
 
-    baseItems.push({
-      text: "Aide et ressources",
-      menuLinks: aideMenuLinks,
-    });
+    if (!isCfaWithMlBeta) {
+      baseItems.push({
+        text: "Aide et ressources",
+        menuLinks: aideMenuLinks,
+      });
+    }
 
     return baseItems;
   };

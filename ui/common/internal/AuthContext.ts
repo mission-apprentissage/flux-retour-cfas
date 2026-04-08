@@ -16,6 +16,9 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
   // legacy field used for ERPs
   username: string;
 
+  // nom de l'organisme, enrichi au runtime depuis la collection organismes (CFA uniquement)
+  organisation_nom?: string;
+
   // only admins can impersonate organisations
   impersonating?: boolean;
 
