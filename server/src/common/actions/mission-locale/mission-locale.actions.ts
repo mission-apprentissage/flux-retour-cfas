@@ -2048,7 +2048,7 @@ export const setEffectifMissionLocaleData = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { classifier_feedback, ...effectifFields } = data;
+  const effectifFields = data;
 
   const dbSetObject = {
     ...(effectifFields.situation !== undefined ? { situation: effectifFields.situation } : {}),
@@ -2073,17 +2073,6 @@ export const setEffectifMissionLocaleData = async (
       $set: {
         ...dbSetObject,
         updated_at: new Date(),
-        ...(classifier_feedback
-          ? {
-              "classification_reponse_appel.feedback": {
-                meilleure_reactivite: classifier_feedback.meilleure_reactivite,
-                confiance_indice: classifier_feedback.confiance_indice,
-                utilite_indice: classifier_feedback.utilite_indice,
-                responded_at: new Date(),
-                responded_by: new ObjectId(user._id),
-              },
-            }
-          : {}),
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,
