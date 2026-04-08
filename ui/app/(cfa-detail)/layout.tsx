@@ -10,16 +10,18 @@ export default async function CfaDetailLayout({ children }: { children: React.Re
   return (
     <Providers>
       <UserContextProvider user={user}>
-        <PublicHeaderWithoutAuth />
-        <div
-          style={{
-            flex: 1,
-            background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
-          }}
-        >
-          {children}
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <PublicHeaderWithoutAuth />
+          <div
+            style={{
+              flex: 1,
+              background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
+            }}
+          >
+            {children}
+          </div>
+          <Footer />
         </div>
-        <Footer />
       </UserContextProvider>
     </Providers>
   );

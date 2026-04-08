@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
@@ -19,9 +20,14 @@ interface CfaCollaborationDetailProps {
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
   const router = useRouter();
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    pageRef.current?.scrollIntoView({ behavior: "instant" });
+  }, []);
 
   return (
-    <div className={styles.page}>
+    <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
       <div className={styles.backLink}>
         <button
           type="button"
