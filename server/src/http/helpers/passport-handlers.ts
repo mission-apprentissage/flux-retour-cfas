@@ -7,9 +7,11 @@ import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
 
 import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
+import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { findSessionByToken } from "@/common/actions/sessions.actions";
 import { getUserByEmail } from "@/common/actions/users.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
+import logger from "@/common/logger";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
@@ -45,6 +47,18 @@ export const authMiddleware = () => {
           const organisation =
             jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
 
+          let organisation_nom: string | undefined;
+          if (organisation.type === "ORGANISME_FORMATION" && organisation.organisme_id) {
+            try {
+              const organisme = await getOrganismeById(new ObjectId(organisation.organisme_id));
+              if (organisme?.nom) {
+                organisation_nom = organisme.nom;
+              }
+            } catch (err) {
+              logger.warn({ err, organisme_id: organisation.organisme_id }, "Failed to enrich organisation nom");
+            }
+          }
+
           const acl = await getAcl(organisation);
 
           const ctx: AuthContext = {
@@ -58,6 +72,7 @@ export const authMiddleware = () => {
             has_accept_cgu_version: "",
             impersonating,
             organisation,
+            organisation_nom,
             last_connection: user.last_connection,
             created_at: user.created_at,
             fonction: user.fonction,

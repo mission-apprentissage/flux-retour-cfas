@@ -27,6 +27,9 @@ export interface AuthContext<I = IOrganisation> {
   password_updated_at?: Date;
   telephone?: string;
 
+  // nom de l'organisme, enrichi au runtime depuis la collection organismes (CFA uniquement)
+  organisation_nom?: string;
+
   // only admins can impersonate organisations
   impersonating?: boolean;
 
