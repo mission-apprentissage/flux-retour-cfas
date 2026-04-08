@@ -8,6 +8,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { UsersFiltersPanel } from "@/app/_components/admin/UsersFiltersPanel";
 import {
@@ -175,28 +176,38 @@ export default function UsersAdminClient() {
         return;
       }
 
-      const exportData = allUsersData.map((user: any) => ({
-        account_status: user.account_status,
-        civility: user.civility,
-        created_at: user.created_at,
-        nom: user.nom,
-        prenom: user.prenom,
-        email: user.email,
-        telephone: user.telephone,
-        fonction: user.fonction,
-        "organisation.type": user.organisation?.type,
-        "organisation.siret": user.organisation?.siret,
-        "organisation.uai": user.organisation?.uai,
-        "organisation.label": user.organisation?.label,
-        "organisation.organisme.nature": user.organisation?.organisme?.nature,
-        "organisation.organisme.nom": user.organisation?.organisme?.nom,
-        "organisation.organisme.raison_sociale": user.organisation?.organisme?.raison_sociale,
-        "organisation.organisme.reseaux": user.organisation?.organisme?.reseaux?.join(", "),
-        password_updated_at: user.password_updated_at,
-        has_accept_cgu_version: user.has_accept_cgu_version,
-        last_connection: user.last_connection,
-        _id: user._id,
-      }));
+      const exportData = allUsersData.map((user: any) => {
+        const deptCode = user.organisation?.adresse?.departement;
+        const regionCode = user.organisation?.adresse?.region;
+        const dept = deptCode ? DEPARTEMENTS_BY_CODE[deptCode as keyof typeof DEPARTEMENTS_BY_CODE] : undefined;
+        const region = regionCode ? REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE] : undefined;
+
+        return {
+          account_status: user.account_status,
+          civility: user.civility,
+          created_at: user.created_at,
+          nom: user.nom,
+          prenom: user.prenom,
+          email: user.email,
+          telephone: user.telephone,
+          fonction: user.fonction,
+          "organisation.type": user.organisation?.type,
+          "organisation.siret": user.organisation?.siret,
+          "organisation.uai": user.organisation?.uai,
+          "organisation.label": user.organisation?.label,
+          "organisation.organisme.nature": user.organisation?.organisme?.nature,
+          "organisation.organisme.nom": user.organisation?.organisme?.nom,
+          "organisation.organisme.raison_sociale": user.organisation?.organisme?.raison_sociale,
+          "organisation.organisme.reseaux": user.organisation?.organisme?.reseaux?.join(", "),
+          ml_code_departement: user.organisation?.type === "MISSION_LOCALE" ? deptCode : "",
+          ml_nom_departement: user.organisation?.type === "MISSION_LOCALE" ? (dept?.nom ?? "") : "",
+          ml_nom_region: user.organisation?.type === "MISSION_LOCALE" ? (region?.nom ?? "") : "",
+          password_updated_at: user.password_updated_at,
+          has_accept_cgu_version: user.has_accept_cgu_version,
+          last_connection: user.last_connection,
+          _id: user._id,
+        };
+      });
 
       exportDataAsXlsx("users.xlsx", exportData, usersExportColumns);
     } catch (error) {
