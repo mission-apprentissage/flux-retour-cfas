@@ -448,7 +448,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
               let: { created_by_id: "$created_by" },
               pipeline: [
                 { $match: { $expr: { $eq: ["$_id", "$$created_by_id"] } } },
-                { $project: { _id: 0, nom: 1, prenom: 1 } },
+                { $project: { _id: 0, nom: 1, prenom: 1, email: 1 } },
                 { $limit: 1 },
               ],
               as: "created_by_user",

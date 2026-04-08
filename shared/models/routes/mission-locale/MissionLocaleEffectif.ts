@@ -22,6 +22,7 @@ const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifLog.extend({
     .object({
       nom: z.string(),
       prenom: z.string(),
+      email: z.string().nullish(),
     })
     .nullish(),
 });
