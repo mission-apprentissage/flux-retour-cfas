@@ -46,6 +46,11 @@ export function isSection1Valid(v: FormValues): boolean {
     !v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]?.trim()
   )
     return false;
+  if (
+    v.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION) &&
+    !v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]?.trim()
+  )
+    return false;
   return freinsOk;
 }
 

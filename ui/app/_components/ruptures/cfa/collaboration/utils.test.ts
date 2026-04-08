@@ -82,8 +82,30 @@ describe("formatAdresseDisplay", () => {
 });
 
 describe("isSection1Valid", () => {
-  it("valid with simple motif (no freins)", () => {
-    expect(isSection1Valid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] }))).toBe(true);
+  it("valid with simple motif (no freins, no comment required)", () => {
+    expect(isSection1Valid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.AUTRE] }))).toBe(true);
+  });
+
+  it("invalid when REORIENTATION lacks comment", () => {
+    expect(
+      isSection1Valid(
+        makeValues({
+          motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
+          commentaires_par_motif: {},
+        })
+      )
+    ).toBe(false);
+  });
+
+  it("valid when REORIENTATION has comment", () => {
+    expect(
+      isSection1Valid(
+        makeValues({
+          motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
+          commentaires_par_motif: { [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]: "Veut changer de voie" },
+        })
+      )
+    ).toBe(true);
   });
 
   it("invalid when still_at_cfa is null", () => {
