@@ -3,17 +3,13 @@ import { ObjectId } from "bson";
 import { MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
-import {
-  CFA_COLLAB_STATUS,
-  CfaEffectifSource,
-  ICfaEffectif,
-  ICfaEffectifsResponse,
-} from "shared/models/routes/organismes/cfa";
+import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
+import { buildCollabStatusSwitch } from "@/common/actions/shared/rupture-pipeline.utils";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -92,33 +88,6 @@ function stripDiacritics(expr: Record<string, unknown>) {
     result = { $replaceAll: { input: result, find: from, replacement: to } };
   }
   return result;
-}
-
-function buildCollabStatusSwitch(mlDocField: string) {
-  return {
-    $switch: {
-      branches: [
-        {
-          case: {
-            $and: [
-              { $ne: [{ $ifNull: [`${mlDocField}.situation`, null] }, null] },
-              { $ne: [`${mlDocField}.situation`, "CONTACTE_SANS_RETOUR"] },
-            ],
-          },
-          then: CFA_COLLAB_STATUS.TRAITE_PAR_ML,
-        },
-        {
-          case: { $eq: [`${mlDocField}.situation`, "CONTACTE_SANS_RETOUR"] },
-          then: CFA_COLLAB_STATUS.CONTACTE_PAR_ML,
-        },
-        {
-          case: { $eq: [`${mlDocField}.organisme_data.acc_conjoint`, true] },
-          then: CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
-        },
-      ],
-      default: CFA_COLLAB_STATUS.DEMARRER_COLLAB,
-    },
-  };
 }
 
 function getSortField(sort: string): string {
@@ -513,6 +482,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         a_traiter: { $literal: false },
         organisme: "$organisme",
         organisme_data: "$organisme_data",
+        cfa_rupture_declaration: "$cfa_rupture_declaration",
         acc_conjoint_by_user: { $arrayElemAt: ["$acc_conjoint_by_user_arr", 0] },
         date_rupture: "$date_rupture",
         mission_locale_organisation: "$mission_locale_organisation",
@@ -565,9 +535,10 @@ export async function declareCfaEffectifRupture(
     throw Boom.notFound("Effectif non trouvé");
   }
 
+  const now = new Date();
   const declaration = {
     date_rupture: dateRupture,
-    declared_at: new Date(),
+    declared_at: now,
     declared_by: userId,
   };
 
@@ -583,8 +554,8 @@ export async function declareCfaEffectifRupture(
         $set: {
           cfa_rupture_declaration: declaration,
           "organisme_data.rupture": true,
-          "organisme_data.reponse_at": new Date(),
-          updated_at: new Date(),
+          "organisme_data.reponse_at": now,
+          updated_at: now,
         },
       }
     );
@@ -605,7 +576,6 @@ export async function declareCfaEffectifRupture(
     throw Boom.badData("Impossible de déclarer en rupture : organisation Mission Locale non trouvée");
   }
 
-  const now = new Date();
   const currentStatus =
     effectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
     effectif._computed?.statut?.parcours?.slice(-1)[0];

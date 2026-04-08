@@ -1,18 +1,14 @@
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
-import {
-  CFA_COLLAB_STATUS,
-  CfaRuptureSegmentKey,
-  ICfaRuptureEffectif,
-  ICfaRupturesResponse,
-} from "shared/models/routes/organismes/cfa";
+import { CfaRuptureSegmentKey, ICfaRuptureEffectif, ICfaRupturesResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
   DATE_START_RUPTURES,
+  buildCollabStatusSwitch,
   buildEffRuptureAgeFilter,
   createDernierStatutFieldPipeline,
 } from "../shared/rupture-pipeline.utils";
@@ -93,30 +89,7 @@ export async function getCfaEffectifsEnRupture(
     },
     {
       $addFields: {
-        collab_status: {
-          $switch: {
-            branches: [
-              {
-                case: {
-                  $and: [
-                    { $ne: [{ $ifNull: ["$situation", null] }, null] },
-                    { $ne: ["$situation", "CONTACTE_SANS_RETOUR"] },
-                  ],
-                },
-                then: CFA_COLLAB_STATUS.TRAITE_PAR_ML,
-              },
-              {
-                case: { $eq: ["$situation", "CONTACTE_SANS_RETOUR"] },
-                then: CFA_COLLAB_STATUS.CONTACTE_PAR_ML,
-              },
-              {
-                case: { $eq: ["$organisme_data.acc_conjoint", true] },
-                then: CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
-              },
-            ],
-            default: CFA_COLLAB_STATUS.DEMARRER_COLLAB,
-          },
-        },
+        collab_status: buildCollabStatusSwitch(),
         segment: {
           $switch: {
             branches: [
