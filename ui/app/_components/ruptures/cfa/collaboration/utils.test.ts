@@ -251,18 +251,18 @@ describe("computeProgress", () => {
     expect(computeProgress(makeValues())).toBe(100);
   });
 
-  it("accounts for frein comments in total", () => {
+  it("does not count frein comments in progress (fixed total)", () => {
     const values = makeValues({
       motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT, ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
       commentaires_par_motif: {},
     });
     const progress = computeProgress(values);
-    expect(progress).toBeLessThan(100);
+    expect(progress).toBe(100);
   });
 
-  it("accounts for referent_details when type is other", () => {
+  it("does not count referent_details in progress (fixed total)", () => {
     const withDetails = computeProgress(makeValues({ referent_type: "other", referent_details: "Jean" }));
     const withoutDetails = computeProgress(makeValues({ referent_type: "other", referent_details: "" }));
-    expect(withDetails).toBeGreaterThan(withoutDetails);
+    expect(withDetails).toBe(withoutDetails);
   });
 });
