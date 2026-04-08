@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
@@ -18,13 +18,24 @@ interface CfaCollaborationDetailProps {
 
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
+  const router = useRouter();
 
   return (
     <div className={styles.page}>
       <div className={styles.backLink}>
-        <Link href="/cfa/collaborations" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/cfa/collaborations");
+            }
+          }}
+          className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
+        >
           Retour à la liste
-        </Link>
+        </button>
       </div>
 
       <div className={styles.columns}>
