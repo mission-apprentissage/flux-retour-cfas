@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -19,7 +18,6 @@ interface CfaCollaborationDetailProps {
 
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
-  const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,19 +27,9 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   return (
     <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
       <div className={styles.backLink}>
-        <button
-          type="button"
-          onClick={() => {
-            if (window.history.length > 1) {
-              router.back();
-            } else {
-              router.push("/cfa/collaborations");
-            }
-          }}
-          className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
-        >
+        <a href="/cfa" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
           Retour à la liste
-        </button>
+        </a>
       </div>
 
       <div className={styles.columns}>
