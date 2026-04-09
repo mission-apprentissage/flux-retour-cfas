@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { MlInactiveBadge } from "../../shared/collaboration/MlInactiveBadge";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
@@ -11,7 +9,6 @@ import { MlOrg } from "./types";
 const styles = withSharedStyles(localStyles);
 
 export function MlInactiveBanner({ ml }: { ml: MlOrg }) {
-  const [contactsOpen, setContactsOpen] = useState(false);
   const mlName = ml.nom || "de rattachement";
 
   return (
@@ -29,25 +26,6 @@ export function MlInactiveBanner({ ml }: { ml: MlOrg }) {
           plus long. N&apos;hésitez pas à prendre contact avec la Mission Locale directement.
         </p>
       </div>
-
-      <button
-        type="button"
-        className={styles.sentContactToggle}
-        aria-expanded={contactsOpen}
-        onClick={() => setContactsOpen((o) => !o)}
-      >
-        Coordonnées de la Mission Locale {mlName}
-        <span
-          className={`fr-icon--sm ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}
-          aria-hidden="true"
-        />
-      </button>
-      {contactsOpen && (
-        <div className={styles.sentContactDetails}>
-          {ml.email && <p>Email : {ml.email}</p>}
-          {ml.telephone && <p>Téléphone : {ml.telephone}</p>}
-        </div>
-      )}
     </div>
   );
 }
