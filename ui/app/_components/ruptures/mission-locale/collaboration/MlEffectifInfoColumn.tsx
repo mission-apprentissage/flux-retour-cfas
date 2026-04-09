@@ -28,7 +28,6 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const age = getAge(effectif.date_de_naissance);
-  const isMineur = typeof age === "number" && age < 18;
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "Organisme non renseigné";
 
   return (
@@ -61,30 +60,9 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
         <p className={styles.infoLine}>Date de naissance non renseignée</p>
       )}
 
-      {isMineur && (
-        <div className={styles.mineurNotice} role="note">
-          <i className="fr-icon-lightbulb-fill fr-icon--sm" aria-hidden="true" />
-          <span>
-            <strong>Jeune mineur</strong> : Les Missions Locales ont des aides et dispositifs spécifiques.
-          </span>
-        </div>
-      )}
-
       <p className={styles.infoLine}>
         <i className="fr-icon-phone-line fr-icon--sm" aria-hidden="true" />
-        {(() => {
-          const phone = formatPhoneNumber(effectif.telephone_corrected || effectif.telephone);
-          return phone ? (
-            <a
-              href={`tel:${effectif.telephone_corrected || effectif.telephone}`}
-              onClick={() => trackPlausibleEvent("ml_fiche_contact_tel")}
-            >
-              {phone}
-            </a>
-          ) : (
-            "Non renseigné"
-          );
-        })()}
+        {formatPhoneNumber(effectif.telephone_corrected || effectif.telephone) || "Non renseigné"}
       </p>
 
       <p className={styles.infoLine}>
