@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -35,8 +35,10 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   const nomListe = searchParams?.get("nom_liste") ?? null;
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const collabReceived = !!effectif.organisme_data?.acc_conjoint;
+  const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    pageRef.current?.scrollIntoView({ behavior: "instant" });
     trackPlausibleEvent("ml_fiche_ouverte", undefined, {
       effectifId: String(effectif.id),
       collaboration: collabReceived,
@@ -44,7 +46,7 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className={styles.page}>
+    <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
       <div className={styles.backLink}>
         <Link
           href={getBackLink(effectif, nomListe)}
