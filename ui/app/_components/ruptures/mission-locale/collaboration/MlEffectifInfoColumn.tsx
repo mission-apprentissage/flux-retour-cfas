@@ -51,9 +51,13 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
 
       <p className={styles.sectionTitle}>Infos et coordonnées</p>
 
-      <p className={styles.infoLine}>
-        Né(e) le {formatDate(effectif.date_de_naissance)} <strong>{age} ans</strong>
-      </p>
+      {effectif.date_de_naissance ? (
+        <p className={styles.infoLine}>
+          Né(e) le {formatDate(effectif.date_de_naissance)} <strong>{age} ans</strong>
+        </p>
+      ) : (
+        <p className={styles.infoLine}>Date de naissance non renseignée</p>
+      )}
 
       {isMineur && (
         <div className={styles.mineurNotice} role="note">

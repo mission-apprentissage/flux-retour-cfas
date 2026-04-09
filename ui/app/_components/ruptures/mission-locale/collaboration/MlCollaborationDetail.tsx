@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
@@ -16,7 +17,10 @@ interface MlCollaborationDetailProps {
   data: IEffectifMissionLocale;
 }
 
-function getBackLink(effectif: IEffectifMissionLocale["effectif"]): string {
+function getBackLink(effectif: IEffectifMissionLocale["effectif"], nomListe: string | null): string {
+  if (nomListe) {
+    return `/mission-locale?statut=${nomListe}`;
+  }
   if (effectif.injoignable) return "/mission-locale?statut=injoignable";
   if (effectif.a_traiter) return "/mission-locale?statut=a_traiter";
   return "/mission-locale?statut=traite";
@@ -24,11 +28,13 @@ function getBackLink(effectif: IEffectifMissionLocale["effectif"]): string {
 
 export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   const { effectif } = data;
+  const searchParams = useSearchParams();
+  const nomListe = searchParams?.get("nom_liste") ?? null;
 
   return (
     <div className={styles.page}>
       <div className={styles.backLink}>
-        <Link href={getBackLink(effectif)} className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
+        <Link href={getBackLink(effectif, nomListe)} className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
           Retour à la liste
         </Link>
       </div>
