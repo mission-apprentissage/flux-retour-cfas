@@ -4,6 +4,8 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useCallback, useState } from "react";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+
 const modal = createModal({
   id: "declare-rupture-cfa",
   isOpenedByDefault: false,
@@ -19,6 +21,7 @@ interface CfaDeclareDateRuptureModalProps {
 export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDeclareDateRuptureModalProps) {
   const [dateRupture, setDateRupture] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const handleConfirm = async () => {
     if (!dateRupture) return;
@@ -26,6 +29,7 @@ export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDecla
     try {
       await onConfirm(dateRupture);
       setStatus("success");
+      trackPlausibleEvent("cfa_rupture_declaree_manuellement");
       modal.close();
       resetState();
     } catch {

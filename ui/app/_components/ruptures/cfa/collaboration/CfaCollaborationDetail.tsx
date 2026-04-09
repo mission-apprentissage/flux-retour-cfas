@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "../../cfa/CfaDeclareDateRuptureModal";
 import { CfaRuptureInfoModal, ruptureInfoModal } from "../../cfa/CfaRuptureInfoModal";
@@ -27,10 +28,12 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const organismeId = user?.organisation?.organisme_id;
   const { mutateAsync: declareRupture } = useDeclareCfaRupture();
   const pageRef = useRef<HTMLDivElement>(null);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   useEffect(() => {
     pageRef.current?.scrollIntoView({ behavior: "instant" });
-  }, []);
+    trackPlausibleEvent("cfa_fiche_ouverte", undefined, { effectifId: String(effectif.id) });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleRupture = useCallback(() => {
     if (effectif.date_rupture) {
@@ -58,7 +61,11 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   return (
     <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
       <div className={styles.backLink}>
-        <a href="/cfa" className="fr-link fr-link--icon-left fr-icon-arrow-left-line">
+        <a
+          href="/cfa"
+          className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
+          onClick={() => trackPlausibleEvent("cfa_fiche_retour_liste")}
+        >
           Retour à la liste
         </a>
       </div>

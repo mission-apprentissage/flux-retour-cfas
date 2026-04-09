@@ -9,6 +9,7 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 import { MlCard } from "@/app/_components/card/MlCard";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import {
   sortDataByMonthDescending,
   getTotalEffectifs,
@@ -66,6 +67,11 @@ export function EffectifsListView({
 }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  useEffect(() => {
+    trackPlausibleEvent("ml_liste_a_traiter_ouverte");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const buildMonthLabel = (month: string, count?: number, section?: SelectedSection) => {
     if (month === "plus-de-180-j") {

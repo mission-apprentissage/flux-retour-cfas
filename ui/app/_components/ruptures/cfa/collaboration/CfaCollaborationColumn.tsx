@@ -5,6 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatDate } from "@/app/_utils/date.utils";
 
 import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
@@ -47,6 +48,7 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
 
 export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps) {
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const ml = effectif.mission_locale_organisation;
   const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
   const situationLogs = collabAlreadyStarted ? getSituationLogs(effectif) : [];
@@ -70,7 +72,13 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
                 <MlCard ml={ml} showInactiveMessage />
               </div>
               <div className={styles.collabCta}>
-                <Button priority="primary" onClick={() => router.push(`/cfa/${String(effectif.id)}/collaboration`)}>
+                <Button
+                  priority="primary"
+                  onClick={() => {
+                    trackPlausibleEvent("cfa_fiche_demarrer_collab");
+                    router.push(`/cfa/${String(effectif.id)}/collaboration`);
+                  }}
+                >
                   Démarrer une collaboration
                 </Button>
               </div>
@@ -101,7 +109,10 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
                     priority="primary"
                     iconId="fr-icon-send-plane-fill"
                     iconPosition="right"
-                    linkProps={{ href: `mailto:${mlUser.email}` }}
+                    linkProps={{
+                      href: `mailto:${mlUser.email}`,
+                      onClick: () => trackPlausibleEvent("cfa_message_ml_envoye"),
+                    }}
                   >
                     Écrire à {mlUser.prenom} {mlUser.nom} de la Mission Locale
                   </Button>

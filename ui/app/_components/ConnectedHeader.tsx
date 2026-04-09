@@ -7,6 +7,7 @@ import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
 import { useAuth } from "../_context/UserContext";
+import { usePlausibleAppTracking } from "../_hooks/plausible";
 
 import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
@@ -15,6 +16,7 @@ import { UserConnectedHeader } from "./UserConnectedHeader";
 export function ConnectedHeader() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
   const { data: unreadData } = useCfaUnreadNotificationsCount(
@@ -90,6 +92,7 @@ export function ConnectedHeader() {
           linkProps: {
             href: "/cfa/collaborations",
             target: "_self",
+            onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
           },
         });
         baseItems.push({
@@ -98,6 +101,7 @@ export function ConnectedHeader() {
           linkProps: {
             href: "/cfa/effectifs",
             target: "_self",
+            onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
           },
         });
       } else {

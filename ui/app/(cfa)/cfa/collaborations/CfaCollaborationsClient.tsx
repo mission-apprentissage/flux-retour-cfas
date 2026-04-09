@@ -7,6 +7,7 @@ import { CfaCollaborationsList } from "@/app/_components/ruptures/cfa/CfaCollabo
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
 import { useCfaEffectifs } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { ACTIVE_COLLAB_STATUSES } from "@/common/types/cfaRuptures";
 
 export default function CfaCollaborationsClient() {
@@ -14,6 +15,11 @@ export default function CfaCollaborationsClient() {
   const organismeId = user?.organisation?.organisme_id;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  useEffect(() => {
+    trackPlausibleEvent("cfa_collab_en_cours_ouverte");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const page = Number(searchParams?.get("page")) || 1;
   const limit = Number(searchParams?.get("limit")) || 20;

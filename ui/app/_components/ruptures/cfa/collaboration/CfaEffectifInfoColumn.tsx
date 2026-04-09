@@ -6,6 +6,7 @@ import { useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatAnnee, formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { getInitials } from "@/app/_utils/user.utils";
@@ -24,6 +25,7 @@ interface CfaEffectifInfoColumnProps {
 
 export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectifInfoColumnProps) {
   const [contactsOpen, setContactsOpen] = useState(false);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const age = getAge(effectif.date_de_naissance);
   const isMineur = typeof age === "number" && age < 18;
@@ -67,7 +69,10 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
           label=""
           labelPosition="left"
           checked={enRupture}
-          onChange={() => onToggleRupture?.()}
+          onChange={() => {
+            if (enRupture) trackPlausibleEvent("cfa_rupture_contestee");
+            onToggleRupture?.();
+          }}
           showCheckedHint={false}
         />
       </div>
@@ -91,12 +96,30 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
 
       <p className={styles.infoLine}>
         <i className="fr-icon-phone-line fr-icon--sm" aria-hidden="true" />
-        {formatPhoneNumber(effectif.telephone_corrected || effectif.telephone) || "Non renseigné"}
+        {(() => {
+          const phone = formatPhoneNumber(effectif.telephone_corrected || effectif.telephone);
+          return phone ? (
+            <a
+              href={`tel:${effectif.telephone_corrected || effectif.telephone}`}
+              onClick={() => trackPlausibleEvent("cfa_fiche_contact_tel")}
+            >
+              {phone}
+            </a>
+          ) : (
+            "Non renseigné"
+          );
+        })()}
       </p>
 
       <p className={styles.infoLine}>
         <i className="fr-icon-mail-line fr-icon--sm" aria-hidden="true" />
-        {effectif.courriel || "Non renseigné"}
+        {effectif.courriel ? (
+          <a href={`mailto:${effectif.courriel}`} onClick={() => trackPlausibleEvent("cfa_fiche_contact_email")}>
+            {effectif.courriel}
+          </a>
+        ) : (
+          "Non renseigné"
+        )}
       </p>
 
       <p className={styles.infoLine}>

@@ -7,12 +7,18 @@ import { CfaEffectifsList } from "@/app/_components/ruptures/cfa/CfaEffectifsLis
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
 import { useCfaEffectifs } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function CfaEffectifsClient() {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  useEffect(() => {
+    trackPlausibleEvent("cfa_tous_effectifs_ouverte");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const page = Number(searchParams?.get("page")) || 1;
   const limit = Number(searchParams?.get("limit")) || 20;

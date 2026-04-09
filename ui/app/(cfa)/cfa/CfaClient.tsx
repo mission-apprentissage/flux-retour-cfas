@@ -1,18 +1,21 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CfaDashboard } from "@/app/_components/ruptures/cfa/CfaDashboard";
 import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboardSkeleton";
 import { useCfaEffectifs, useCfaEffectifsRuptures } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function CfaClient() {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const hasTrackedSearchRef = useRef(false);
 
   const urlSearch = searchParams?.get("search") || "";
   const searchPage = Number(searchParams?.get("page")) || 1;
@@ -41,9 +44,15 @@ export default function CfaClient() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
+      if (searchInput && !hasTrackedSearchRef.current) {
+        trackPlausibleEvent("cfa_liste_recherche");
+        hasTrackedSearchRef.current = true;
+      } else if (!searchInput) {
+        hasTrackedSearchRef.current = false;
+      }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, trackPlausibleEvent]);
 
   useEffect(() => {
     if (debouncedSearch !== urlSearch) {
@@ -52,6 +61,12 @@ export default function CfaClient() {
   }, [debouncedSearch, urlSearch, updateParams]);
 
   const { data, isLoading } = useCfaEffectifsRuptures(organismeId);
+
+  useEffect(() => {
+    if (data) {
+      trackPlausibleEvent("cfa_liste_ouverte");
+    }
+  }, [!!data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: searchData, isLoading: isSearchLoading } = useCfaEffectifs(debouncedSearch ? organismeId : undefined, {
     page: searchPage,

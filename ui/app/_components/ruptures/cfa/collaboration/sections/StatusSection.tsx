@@ -1,10 +1,13 @@
 import { ErrorMessage, useFormikContext } from "formik";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+
 import styles from "../CollaborationForm.module.css";
 import { FormValues } from "../types";
 
 export function StatusSection() {
   const { values, setFieldValue } = useFormikContext<FormValues>();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   return (
     <>
@@ -27,7 +30,12 @@ export function StatusSection() {
               type="radio"
               name="still_at_cfa"
               checked={values.still_at_cfa === optionValue}
-              onChange={() => setFieldValue("still_at_cfa", optionValue)}
+              onChange={() => {
+                setFieldValue("still_at_cfa", optionValue);
+                trackPlausibleEvent("cfa_form_statut_cfa_renseigne", undefined, {
+                  valeur: optionValue ? "oui" : "non",
+                });
+              }}
               className={styles.radioInput}
             />
             {label}

@@ -8,6 +8,7 @@ import { IEffectifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } 
 
 import { EffectifStatusBadge } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatDate } from "@/app/_utils/date.utils";
 
 import { CollapsibleDetail } from "../../shared/collaboration/CollapsibleDetail";
@@ -176,6 +177,7 @@ interface MlSuiviDossierColumnProps {
 
 export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const { user } = useAuth();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const timeline = buildSuiviTimeline(effectif, { userId: user?._id });
   const isDossierTraite = timeline.some((e) => e.icon === "traite" || e.icon === "injoignable");
   const recontacterCount = timeline.filter((e) => e.icon === "recontacter").length;
@@ -183,8 +185,17 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
   const mutation = useMlUpdateEffectif();
   const commentMutation = useMlUpdateEffectif();
+  const hasSubmittedRef = useRef(false);
 
   const [lastSubmitWasRecontacter, setLastSubmitWasRecontacter] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (!hasSubmittedRef.current) {
+        trackPlausibleEvent("ml_form_abandonne");
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const collabStarted = effectif.organisme_data?.acc_conjoint === true;
   const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
@@ -260,9 +271,14 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
         { effectifId: effectif.id.toString(), data: payload },
         {
           onSuccess: () => {
+            hasSubmittedRef.current = true;
+            trackPlausibleEvent("ml_form_valider_enregistrer");
             if (isRecontacterPayload) {
+              trackPlausibleEvent("ml_dossier_a_recontacter");
               formik.resetForm();
               mutationTimerRef.current = setTimeout(() => mutation.reset(), 2000);
+            } else {
+              trackPlausibleEvent("ml_dossier_traite");
             }
           },
         }
@@ -400,6 +416,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       situationJeune: null,
                       commentaire: "",
                     });
+                    trackPlausibleEvent("ml_form_contact_renseigne", undefined, { reussi: true });
                   }}
                 />
                 Oui
@@ -419,6 +436,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       situationJeune: null,
                       commentaire: "",
                     });
+                    trackPlausibleEvent("ml_form_contact_renseigne", undefined, { reussi: false });
                   }}
                 />
                 Non
@@ -475,7 +493,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="actionRecontact"
                     className={styles.radioInput}
                     checked={formik.values.actionRecontact === "marquer_traite"}
-                    onChange={() => formik.setFieldValue("actionRecontact", "marquer_traite")}
+                    onChange={() => {
+                      formik.setFieldValue("actionRecontact", "marquer_traite");
+                      trackPlausibleEvent("ml_form_marquer_traite");
+                    }}
                   />
                   <div>
                     <span>
@@ -513,6 +534,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         situationJeune: null,
                         commentaire: "",
                       });
+                      trackPlausibleEvent("ml_form_contact_non_situation", undefined, { motif: "tentative_relancer" });
                     }}
                   />
                   <span aria-hidden="true">🔄</span> Tentative de contact, à relancer
@@ -560,6 +582,9 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         situationNonContact: "mauvaises_coordonnees",
                         situationJeune: null,
                         commentaire: "",
+                      });
+                      trackPlausibleEvent("ml_form_contact_non_situation", undefined, {
+                        motif: "mauvaises_coordonnees",
                       });
                     }}
                   />
@@ -686,7 +711,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         name="actionRecontact"
                         className={styles.radioInput}
                         checked={formik.values.actionRecontact === "marquer_traite"}
-                        onChange={() => formik.setFieldValue("actionRecontact", "marquer_traite")}
+                        onChange={() => {
+                          formik.setFieldValue("actionRecontact", "marquer_traite");
+                          trackPlausibleEvent("ml_form_marquer_traite");
+                        }}
                       />
                       <div>
                         <span>
@@ -773,7 +801,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="rdvPris"
                     className={styles.radioInput}
                     checked={formik.values.rdvPris === true}
-                    onChange={() => formik.setFieldValue("rdvPris", true)}
+                    onChange={() => {
+                      formik.setFieldValue("rdvPris", true);
+                      trackPlausibleEvent("ml_form_rdv_pris");
+                    }}
                   />
                   Oui
                 </label>
@@ -785,7 +816,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="rdvPris"
                     className={styles.radioInput}
                     checked={formik.values.rdvPris === false}
-                    onChange={() => formik.setFieldValue("rdvPris", false)}
+                    onChange={() => {
+                      formik.setFieldValue("rdvPris", false);
+                      trackPlausibleEvent("ml_form_rdv_non_pris");
+                    }}
                   />
                   Non
                 </label>
@@ -828,7 +862,13 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       name="situationNon"
                       className={styles.radioInput}
                       checked={formik.values.situationNon === option.value}
-                      onChange={() => formik.setFieldValue("situationNon", option.value)}
+                      onChange={() => {
+                        formik.setFieldValue("situationNon", option.value);
+                        trackPlausibleEvent("ml_form_situation_selectionnee", undefined, { situation: option.value });
+                        if (option.value === "ne_veut_pas") {
+                          trackPlausibleEvent("ml_form_situation_no_accompagnement");
+                        }
+                      }}
                     />
                     <div>
                       <span
@@ -865,7 +905,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="situationJeune"
                     className={styles.radioInput}
                     checked={formik.values.situationJeune === "accompagne"}
-                    onChange={() => formik.setFieldValue("situationJeune", "accompagne")}
+                    onChange={() => {
+                      formik.setFieldValue("situationJeune", "accompagne");
+                      trackPlausibleEvent("ml_form_connaissance_jeune", undefined, { connaissance: "accompagne" });
+                    }}
                   />
                   <div>
                     <span className={styles.radioListLabel}>Connu et déjà accompagné activement</span>
@@ -879,7 +922,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="situationJeune"
                     className={styles.radioInput}
                     checked={formik.values.situationJeune === "connu"}
-                    onChange={() => formik.setFieldValue("situationJeune", "connu")}
+                    onChange={() => {
+                      formik.setFieldValue("situationJeune", "connu");
+                      trackPlausibleEvent("ml_form_connaissance_jeune", undefined, { connaissance: "connu" });
+                    }}
                   />
                   <div>
                     <span className={styles.radioListLabel}>Connu mais il n&apos;était pas en accompagnement</span>
@@ -895,7 +941,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     name="situationJeune"
                     className={styles.radioInput}
                     checked={formik.values.situationJeune === "inconnu"}
-                    onChange={() => formik.setFieldValue("situationJeune", "inconnu")}
+                    onChange={() => {
+                      formik.setFieldValue("situationJeune", "inconnu");
+                      trackPlausibleEvent("ml_form_connaissance_jeune", undefined, { connaissance: "inconnu" });
+                    }}
                   />
                   <div>
                     <span className={styles.radioListLabel}>Non connu de la Mission Locale</span>
@@ -923,6 +972,9 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   aria-label="Commentaire sur la situation"
                   value={formik.values.commentaire}
                   onChange={formik.handleChange}
+                  onBlur={(e) => {
+                    if (e.target.value.trim()) trackPlausibleEvent("ml_form_commentaire_saisi");
+                  }}
                 />
 
                 <div className={styles.commentaireCallout}>

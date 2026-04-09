@@ -1,7 +1,10 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { useEffect } from "react";
 import { IEffectifMissionLocale } from "shared";
+
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
 import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
@@ -42,6 +45,15 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
   const collabReceived = effectif.organisme_data?.acc_conjoint === true;
   const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
   const situationLogs = getSituationLogs(effectif);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  useEffect(() => {
+    if (collabReceived) {
+      trackPlausibleEvent("ml_collab_dossier_ouvert_cfa");
+    } else {
+      trackPlausibleEvent("ml_collab_dossier_ouvert_off");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (collabReceived) {
     return (

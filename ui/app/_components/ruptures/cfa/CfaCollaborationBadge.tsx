@@ -1,6 +1,9 @@
+"use client";
+
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type { CfaCollaborationStatus } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaCollaborationBadge.module.css";
@@ -11,6 +14,8 @@ interface CfaCollaborationBadgeProps {
 }
 
 export function CfaCollaborationBadge({ status, effectifId }: CfaCollaborationBadgeProps) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
   switch (status) {
     case "demarrer_collab":
       return (
@@ -19,7 +24,10 @@ export function CfaCollaborationBadge({ status, effectifId }: CfaCollaborationBa
           size="small"
           iconId="fr-icon-arrow-right-line"
           iconPosition="right"
-          linkProps={{ href: `/cfa/${effectifId}` }}
+          linkProps={{
+            href: `/cfa/${effectifId}`,
+            onClick: () => trackPlausibleEvent("cfa_liste_demarrer_collab", undefined, { effectifId }),
+          }}
         >
           Démarrer une collab
         </Button>

@@ -1,6 +1,7 @@
 import { ErrorMessage, useField, useFormikContext } from "formik";
 
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "../CollaborationForm.module.css";
 import { FormValues } from "../types";
@@ -13,6 +14,7 @@ export function ReferentSection({ prenom }: ReferentSectionProps) {
   const { user } = useAuth();
   const { values, setFieldValue } = useFormikContext<FormValues>();
   const [detailsField, detailsMeta] = useField("referent_details");
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   return (
     <div className={styles.sectionBlock}>
@@ -23,14 +25,20 @@ export function ReferentSection({ prenom }: ReferentSectionProps) {
       <div className={styles.referentCardGroup}>
         <div
           className={`${styles.referentCard} ${values.referent_type === "me" ? `${styles.referentCardSelected} ${styles.referentCardColumn}` : ""}`}
-          onClick={() => setFieldValue("referent_type", "me")}
+          onClick={() => {
+            setFieldValue("referent_type", "me");
+            trackPlausibleEvent("cfa_form_referent_selectionne", undefined, { type: "me" });
+          }}
         >
           <label className={styles.referentCardLabel}>
             <input
               type="radio"
               name="referent_type"
               checked={values.referent_type === "me"}
-              onChange={() => setFieldValue("referent_type", "me")}
+              onChange={() => {
+                setFieldValue("referent_type", "me");
+                trackPlausibleEvent("cfa_form_referent_selectionne", undefined, { type: "me" });
+              }}
               className={styles.radioInput}
             />
             <span>Me contacter uniquement</span>
@@ -48,14 +56,20 @@ export function ReferentSection({ prenom }: ReferentSectionProps) {
 
         <div
           className={`${styles.referentCard} ${styles.referentCardColumn} ${values.referent_type === "other" ? styles.referentCardSelected : ""}`}
-          onClick={() => setFieldValue("referent_type", "other")}
+          onClick={() => {
+            setFieldValue("referent_type", "other");
+            trackPlausibleEvent("cfa_form_referent_selectionne", undefined, { type: "other" });
+          }}
         >
           <label className={styles.referentCardLabel}>
             <input
               type="radio"
               name="referent_type"
               checked={values.referent_type === "other"}
-              onChange={() => setFieldValue("referent_type", "other")}
+              onChange={() => {
+                setFieldValue("referent_type", "other");
+                trackPlausibleEvent("cfa_form_referent_selectionne", undefined, { type: "other" });
+              }}
               className={styles.radioInput}
             />
             <span>Ajouter les coordonnées d&apos;un(e) référent(e)</span>

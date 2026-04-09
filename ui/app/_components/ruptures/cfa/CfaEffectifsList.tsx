@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type { CfaCollaborationStatus, ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
 import { COLLAB_STATUS_LABELS, DECA_TOOLTIP_TEXT, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
 
@@ -48,6 +49,7 @@ export function CfaEffectifsList({
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
   const { mutateAsync: declareRupture } = useDeclareCfaRupture();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [selectedEffectif, setSelectedEffectif] = useState<ICfaEffectif | null>(null);
 
   const handleToggleRupture = useCallback((effectif: ICfaEffectif) => {
@@ -161,7 +163,10 @@ export function CfaEffectifsList({
             <MultiSelectDropdown
               options={EN_RUPTURE_OPTIONS}
               value={enRuptureValues}
-              onChange={(v) => onParamsChange({ en_rupture: v[0] || undefined, page: "1" })}
+              onChange={(v) => {
+                onParamsChange({ en_rupture: v[0] || undefined, page: "1" });
+                if (v.length > 0) trackPlausibleEvent("cfa_liste_filtre_statut", undefined, { valeurs: v.join(",") });
+              }}
               placeholder="En rupture"
             />
           </div>

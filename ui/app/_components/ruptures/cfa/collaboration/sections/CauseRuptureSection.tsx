@@ -1,9 +1,12 @@
 import { ErrorMessage, useField } from "formik";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+
 import styles from "../CollaborationForm.module.css";
 
 export function CauseRuptureSection() {
   const [field, meta] = useField("cause_rupture");
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   return (
     <div className={styles.sectionBlock}>
@@ -17,6 +20,10 @@ export function CauseRuptureSection() {
       </p>
       <textarea
         {...field}
+        onBlur={(e) => {
+          field.onBlur(e);
+          if (e.target.value.trim()) trackPlausibleEvent("cfa_form_cause_rupture_saisie");
+        }}
         className={`fr-input ${meta.touched && meta.error ? "fr-input--error" : ""}`}
         placeholder="Décrivez les circonstances de la rupture..."
         rows={5}

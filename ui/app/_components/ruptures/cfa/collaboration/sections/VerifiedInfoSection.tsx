@@ -1,5 +1,7 @@
 import { getIn, useFormikContext } from "formik";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "../CollaborationForm.module.css";
 import { VERIFIED_FIELDS } from "../constants";
@@ -10,6 +12,8 @@ export function VerifiedInfoSection() {
   const { values, errors, touched, handleChange, handleBlur } = useFormikContext<FormValues>();
   const [editingFields, setEditingFields] = useState<Set<string>>(new Set());
   const verifiedInfo = values.verified_info;
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const trackedFieldsRef = useRef<Set<string>>(new Set());
 
   const toggleEdit = (key: string) => {
     setEditingFields((prev) => {
@@ -66,7 +70,13 @@ export function VerifiedInfoSection() {
                       className={`fr-input ${hasError ? "fr-input--error" : ""}`}
                       value={verifiedInfo[field.key]}
                       onChange={handleChange}
-                      onBlur={handleBlur}
+                      onBlur={(e) => {
+                        handleBlur(e);
+                        if (!trackedFieldsRef.current.has(field.key)) {
+                          trackedFieldsRef.current.add(field.key);
+                          trackPlausibleEvent("cfa_form_coordonnees_modifiees", undefined, { champ: field.key });
+                        }
+                      }}
                     />
                     {isFormatError && <span className={styles.infoRequise}>{fieldError}</span>}
                   </>

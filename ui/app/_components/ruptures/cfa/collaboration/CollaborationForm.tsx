@@ -6,6 +6,7 @@ import { useRef, useMemo, useEffect } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatDate } from "@/app/_utils/date.utils";
 
 import styles from "./CollaborationForm.module.css";
@@ -135,7 +136,13 @@ interface CollaborationFormProps {
 
 export function CollaborationForm({ effectif, onSuccess, onCancel }: CollaborationFormProps) {
   const { user } = useAuth();
-  const submitMutation = useSubmitCollaborationForm(String(effectif.id), onSuccess);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const hasSubmittedRef = useRef(false);
+  const submitMutation = useSubmitCollaborationForm(String(effectif.id), () => {
+    hasSubmittedRef.current = true;
+    trackPlausibleEvent("cfa_form_dossier_envoye");
+    onSuccess();
+  });
 
   const initialVerifiedInfo = useMemo<VerifiedInfo>(() => {
     const adresse = effectif.adresse as Record<string, unknown> | null | undefined;
@@ -202,7 +209,12 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
         });
       }}
     >
-      <CollaborationFormInner effectif={effectif} onCancel={onCancel} submitMutation={submitMutation} />
+      <CollaborationFormInner
+        effectif={effectif}
+        onCancel={onCancel}
+        submitMutation={submitMutation}
+        hasSubmittedRef={hasSubmittedRef}
+      />
     </Formik>
   );
 }
@@ -211,10 +223,20 @@ interface CollaborationFormInnerProps {
   effectif: IEffectifMissionLocale["effectif"];
   onCancel: () => void;
   submitMutation: { isLoading: boolean; isError: boolean };
+  hasSubmittedRef: React.MutableRefObject<boolean>;
 }
 
-function CollaborationFormInner({ effectif, onCancel, submitMutation }: CollaborationFormInnerProps) {
+function CollaborationFormInner({ effectif, onCancel, submitMutation, hasSubmittedRef }: CollaborationFormInnerProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  useEffect(() => {
+    return () => {
+      if (!hasSubmittedRef.current) {
+        trackPlausibleEvent("cfa_form_abandonne");
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const { values, submitCount, submitForm, handleSubmit } = useFormikContext<FormValues>();
 
   const progress = computeProgress(values);

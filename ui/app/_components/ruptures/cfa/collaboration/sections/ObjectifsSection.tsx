@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "../CollaborationForm.module.css";
 import { FREINS_MOTIFS } from "../constants";
@@ -40,6 +41,7 @@ function MotifCommentaire({
 export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
   const { values, setFieldValue } = useFormikContext<FormValues>();
   const [freinsOpen, setFreinsOpen] = useState(false);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const hasRecherche = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI);
   const hasReorientation = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
@@ -48,6 +50,13 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
   const toggleMotif = (motif: ACC_CONJOINT_MOTIF_ENUM, checked: boolean) => {
     if (checked) {
       setFieldValue("motifs", [...values.motifs, motif]);
+      if (FREINS_MOTIFS.includes(motif)) {
+        trackPlausibleEvent("cfa_form_frein_selectionne", undefined, { frein: motif });
+      } else if (motif === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION) {
+        trackPlausibleEvent("cfa_form_reorientation_selectionnee");
+      } else {
+        trackPlausibleEvent("cfa_form_objectif_selectionne", undefined, { objectif: motif });
+      }
       if (
         FREINS_MOTIFS.includes(motif) ||
         motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||

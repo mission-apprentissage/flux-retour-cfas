@@ -9,19 +9,22 @@ import { IEffectifMissionLocale } from "shared";
 import { CollaborationForm } from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function CollaborationFormPage({ id }: { id: string }) {
   const { data, isLoading } = useCfaEffectifDetail(id);
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const snapshotRef = useRef<IEffectifMissionLocale["effectif"] | null>(null);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const handleSuccess = useCallback(() => {
     if (data?.effectif) {
       snapshotRef.current = data.effectif;
     }
     setShowModal(true);
-  }, [data]);
+    trackPlausibleEvent("cfa_form_confirmation_vue");
+  }, [data, trackPlausibleEvent]);
 
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;

@@ -6,6 +6,7 @@ import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useCallback, useMemo, useState } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type {
   CfaCollaborationStatus,
   ICfaEffectif,
@@ -59,6 +60,7 @@ export function CfaRupturesList({
   onSearchSort,
   onPageChange,
 }: CfaRupturesListProps) {
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [collabStatuses, setCollabStatuses] = useState<CfaCollaborationStatus[]>([]);
   const [formations, setFormations] = useState<string[]>([]);
   const [selectedEffectif, setSelectedEffectif] = useState<ICfaEffectif | null>(null);
@@ -145,7 +147,11 @@ export function CfaRupturesList({
                 <MultiSelectDropdown
                   options={collabOptions}
                   value={collabStatuses}
-                  onChange={(v) => setCollabStatuses(v as CfaCollaborationStatus[])}
+                  onChange={(v) => {
+                    setCollabStatuses(v as CfaCollaborationStatus[]);
+                    if (v.length > 0)
+                      trackPlausibleEvent("cfa_liste_filtre_collab", undefined, { valeurs: v.join(",") });
+                  }}
                   placeholder="Statut de la collaboration avec la ML"
                 />
               </div>
@@ -154,7 +160,11 @@ export function CfaRupturesList({
                 <MultiSelectDropdown
                   options={formationOptions}
                   value={formations}
-                  onChange={setFormations}
+                  onChange={(v) => {
+                    setFormations(v);
+                    if (v.length > 0)
+                      trackPlausibleEvent("cfa_liste_filtre_formation", undefined, { valeurs: v.join(",") });
+                  }}
                   placeholder="Toutes les formations"
                 />
               </div>

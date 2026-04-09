@@ -7,6 +7,7 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type { CfaRuptureSegmentKey, ICfaRuptureEffectif } from "@/common/types/cfaRuptures";
 import { CFA_DEFAULT_ITEMS_TO_SHOW, COLLAB_STATUS_ORDER, SEGMENT_LABELS } from "@/common/types/cfaRuptures";
 
@@ -56,6 +57,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
   const [sortKey, setSortKey] = useState<SortKey>("date_rupture");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [isExpanded, setIsExpanded] = useState(false);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const hasNotice = SEGMENTS_WITH_NOTICE.includes(segment);
 
@@ -136,7 +138,11 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
       {e.has_unread_notification && (
         <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
       )}
-      <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
+      <Link
+        href={`/cfa/${e.id}`}
+        className={sharedStyles.nameText}
+        onClick={() => trackPlausibleEvent("cfa_liste_jeune_ouvert", undefined, { effectifId: e.id })}
+      >
         {e.prenom} {e.nom}
       </Link>
     </div>,
@@ -203,7 +209,10 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
               <Button
                 className={styles.expandButton}
                 priority="tertiary no outline"
-                onClick={() => setIsExpanded(true)}
+                onClick={() => {
+                  setIsExpanded(true);
+                  trackPlausibleEvent("cfa_liste_afficher_plus", undefined, { segment });
+                }}
               >
                 Afficher tous ({remaining} de plus) +
               </Button>
