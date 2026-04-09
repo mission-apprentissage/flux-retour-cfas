@@ -2,7 +2,8 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
+import { IEffectif, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -10,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { buildCollabStatusSwitch } from "@/common/actions/shared/rupture-pipeline.utils";
+import logger from "@/common/logger";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -17,6 +19,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
+import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -559,6 +562,7 @@ export async function declareCfaEffectifRupture(
         },
       }
     );
+    scoreEffectifInBackground(existing._id, effectif);
     return { created: false, updated: true };
   }
 
@@ -592,7 +596,7 @@ export async function declareCfaEffectifRupture(
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
 
   try {
-    await missionLocaleEffectifsDb().insertOne({
+    const { insertedId } = await missionLocaleEffectifsDb().insertOne({
       mission_locale_id: mlOrganisation._id,
       effectif_id: new ObjectId(effectifId),
       effectif_snapshot: { ...effectif, _id: effectif._id },
@@ -621,6 +625,7 @@ export async function declareCfaEffectifRupture(
       },
       ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
     } as any);
+    scoreEffectifInBackground(insertedId, effectif);
   } catch (error) {
     if (error instanceof MongoServerError && error.code === 11000) {
       const filter = normalizedIdentifiant
@@ -629,20 +634,54 @@ export async function declareCfaEffectifRupture(
             mission_locale_id: mlOrganisation._id,
             soft_deleted: { $ne: true },
           }
-        : { effectif_id: new ObjectId(effectifId), mission_locale_id: mlOrganisation._id };
+        : { effectif_id: new ObjectId(effectifId), mission_locale_id: mlOrganisation._id, soft_deleted: { $ne: true } };
 
-      await missionLocaleEffectifsDb().updateOne(filter, {
-        $set: {
-          cfa_rupture_declaration: declaration,
-          "organisme_data.rupture": true,
-          "organisme_data.reponse_at": now,
-          updated_at: now,
+      const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
+        filter,
+        {
+          $set: {
+            cfa_rupture_declaration: declaration,
+            "organisme_data.rupture": true,
+            "organisme_data.reponse_at": now,
+            updated_at: now,
+          },
         },
-      });
+        { returnDocument: "after", projection: { _id: 1 }, includeResultMetadata: false }
+      );
+      if (updated?._id) {
+        scoreEffectifInBackground(updated._id, effectif);
+      }
       return { created: false, updated: true };
     }
     throw error;
   }
 
   return { created: true, updated: false };
+}
+
+function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, effectif: IEffectif | IEffectifDECA) {
+  const scoreInput = extractScoreInput(effectif);
+  if (!scoreInput) return;
+
+  scoreEffectifs([scoreInput])
+    .then((result) => {
+      const score = result.scores?.[0];
+      if (score != null) {
+        return missionLocaleEffectifsDb().updateOne(
+          { _id: missionLocaleEffectifId },
+          {
+            $set: {
+              classification_reponse_appel: {
+                score,
+                model: result.model,
+                scored_at: new Date(),
+              },
+            },
+          }
+        );
+      }
+    })
+    .catch((err) => {
+      logger.warn({ err, effectif_id: effectif._id }, "Classifier scoring failed, continuing without score");
+    });
 }
