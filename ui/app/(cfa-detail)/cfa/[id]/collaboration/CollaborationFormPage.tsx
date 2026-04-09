@@ -50,10 +50,16 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   return (
     <>
-      <CollaborationForm effectif={effectif!} onSuccess={handleSuccess} onCancel={() => router.back()} />
+      {effectif ? (
+        <CollaborationForm effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
+      ) : (
+        <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
+          <p>Effectif introuvable.</p>
+        </div>
+      )}
 
       {showModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
           <div className={styles.modalCard}>
             <div className={styles.modalCheckIcon}>
               <span
@@ -62,7 +68,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
                 style={{ fontSize: "40px", color: "var(--text-action-high-blue-france)" }}
               />
             </div>
-            <p className={styles.modalText}>
+            <p id="modal-success-title" className={styles.modalText}>
               Le dossier de{" "}
               <span className={styles.modalHighlight}>
                 {prenom} {nom}

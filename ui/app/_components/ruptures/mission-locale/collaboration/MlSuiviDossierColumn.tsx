@@ -207,11 +207,13 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const showCommentForm =
     canProcessDossier && (isDossierTraite || (mutation.isSuccess && !lastSubmitWasRecontacter)) && !isRecontacter;
   const [postComment, setPostComment] = useState("");
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const mutationTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const commentTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     return () => {
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      if (mutationTimerRef.current) clearTimeout(mutationTimerRef.current);
+      if (commentTimerRef.current) clearTimeout(commentTimerRef.current);
     };
   }, []);
 
@@ -260,7 +262,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
           onSuccess: () => {
             if (isRecontacterPayload) {
               formik.resetForm();
-              resetTimerRef.current = setTimeout(() => mutation.reset(), 2000);
+              mutationTimerRef.current = setTimeout(() => mutation.reset(), 2000);
             }
           },
         }
@@ -348,7 +350,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   {
                     onSuccess: () => {
                       setPostComment("");
-                      resetTimerRef.current = setTimeout(() => commentMutation.reset(), 3000);
+                      commentTimerRef.current = setTimeout(() => commentMutation.reset(), 3000);
                     },
                   }
                 );
@@ -373,54 +375,56 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
         >
           <p className={styles.dossierFormTitle}>Du nouveau sur le dossier ?</p>
 
-          <p className={styles.dossierFormLegend}>
-            <span aria-hidden="true">{"📞 ✉️ "}</span>
-            <strong>J&apos;ai réussi à joindre le jeune</strong> <em>(ou son responsable légal)</em>
-            <span className={styles.required}> *</span>
-          </p>
-          <p className={styles.dossierFormHint}>
-            Si vous avez tenté de joindre le jeune, laissé un message vocal ou un mail sans réponse, répondez non
-          </p>
+          <fieldset className={styles.radioFieldset}>
+            <legend className={styles.dossierFormLegend}>
+              <span aria-hidden="true">{"📞 ✉️ "}</span>
+              <strong>J&apos;ai réussi à joindre le jeune</strong> <em>(ou son responsable légal)</em>
+              <span className={styles.required}> *</span>
+            </legend>
+            <p className={styles.dossierFormHint}>
+              Si vous avez tenté de joindre le jeune, laissé un message vocal ou un mail sans réponse, répondez non
+            </p>
 
-          <div className={styles.radioCardGroup}>
-            <label className={`${styles.radioCard} ${contactReussi === true ? styles.radioCardSelected : ""}`}>
-              <input
-                type="radio"
-                name="contactReussi"
-                className={styles.radioInput}
-                checked={contactReussi === true}
-                onChange={() => {
-                  formik.setValues({
-                    ...formik.values,
-                    contactReussi: true,
-                    situationNonContact: null,
-                    situationJeune: null,
-                    commentaire: "",
-                  });
-                }}
-              />
-              Oui
-            </label>
-            <label className={`${styles.radioCard} ${contactReussi === false ? styles.radioCardSelected : ""}`}>
-              <input
-                type="radio"
-                name="contactReussi"
-                className={styles.radioInput}
-                checked={contactReussi === false}
-                onChange={() => {
-                  formik.setValues({
-                    ...formik.values,
-                    contactReussi: false,
-                    rdvPris: null,
-                    situationNon: null,
-                    situationJeune: null,
-                    commentaire: "",
-                  });
-                }}
-              />
-              Non
-            </label>
-          </div>
+            <div className={styles.radioCardGroup}>
+              <label className={`${styles.radioCard} ${contactReussi === true ? styles.radioCardSelected : ""}`}>
+                <input
+                  type="radio"
+                  name="contactReussi"
+                  className={styles.radioInput}
+                  checked={contactReussi === true}
+                  onChange={() => {
+                    formik.setValues({
+                      ...formik.values,
+                      contactReussi: true,
+                      situationNonContact: null,
+                      situationJeune: null,
+                      commentaire: "",
+                    });
+                  }}
+                />
+                Oui
+              </label>
+              <label className={`${styles.radioCard} ${contactReussi === false ? styles.radioCardSelected : ""}`}>
+                <input
+                  type="radio"
+                  name="contactReussi"
+                  className={styles.radioInput}
+                  checked={contactReussi === false}
+                  onChange={() => {
+                    formik.setValues({
+                      ...formik.values,
+                      contactReussi: false,
+                      rdvPris: null,
+                      situationNon: null,
+                      situationJeune: null,
+                      commentaire: "",
+                    });
+                  }}
+                />
+                Non
+              </label>
+            </div>
+          </fieldset>
 
           {contactReussi === false && effectif.nouveau_contrat && (
             <div className={styles.nouveauContratCallout}>

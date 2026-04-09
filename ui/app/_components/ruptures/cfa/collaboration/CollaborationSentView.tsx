@@ -82,7 +82,12 @@ export function CollaborationSentView({
 
           {ml && (
             <>
-              <button type="button" className={styles.sentContactToggle} onClick={() => setContactsOpen((o) => !o)}>
+              <button
+                type="button"
+                className={styles.sentContactToggle}
+                onClick={() => setContactsOpen((o) => !o)}
+                aria-expanded={contactsOpen}
+              >
                 Afficher les coordonnées de la Mission Locale {mlName}
                 <span
                   className={`fr-icon--sm ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}

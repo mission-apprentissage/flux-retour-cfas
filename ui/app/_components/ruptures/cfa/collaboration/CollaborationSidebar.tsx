@@ -54,7 +54,14 @@ export function CollaborationSidebar({ effectif, progress, isLoading, hasError, 
       </div>
 
       <div className={`${styles.progressSection} ${progress >= 100 ? styles.progressComplete : ""}`}>
-        <div className={styles.progressBar}>
+        <div
+          className={styles.progressBar}
+          role="progressbar"
+          aria-valuenow={progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Progression du dossier"
+        >
           <div className={styles.progressFill} style={{ width: `${progress}%` }} />
         </div>
         <div className={styles.progressLabel}>

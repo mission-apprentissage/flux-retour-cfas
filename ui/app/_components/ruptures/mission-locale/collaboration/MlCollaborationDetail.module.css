@@ -208,6 +208,12 @@
   margin: 0 0 1.25rem 0;
 }
 
+.radioFieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
 .dossierFormLegend {
   font-family: Marianne, sans-serif;
   font-size: 0.875rem;

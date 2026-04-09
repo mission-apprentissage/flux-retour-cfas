@@ -42,13 +42,13 @@ export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBa
       <>
         {badge}
         {organisation === "ORGANISME_FORMATION" && effectif.situation && (
-          <p
+          <span
             className={`fr-badge fr-badge--success-inverted ${styles.mlTreatedBadge}`}
             aria-label="Effectif traité par la ML"
           >
             <i className="fr-icon-success-fill fr-icon--sm" />
             <span className={styles.badgeTextSpacing}>ML</span>
-          </p>
+          </span>
         )}
       </>
     );
@@ -57,19 +57,19 @@ export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBa
   // INJOIGNABLE / A TRAITER
   if (effectif.injoignable) {
     return (
-      <p className="fr-badge fr-badge--purple-glycine" aria-label="Effectif à recontacter">
+      <span className="fr-badge fr-badge--purple-glycine" aria-label="Effectif à recontacter">
         <i className="fr-icon-phone-fill fr-icon--sm" />
         <span className={styles.badgeTextSpacing}>À RECONTACTER</span>
-      </p>
+      </span>
     );
   }
 
   if (effectif.a_traiter) {
     return (
-      <p className="fr-badge fr-badge--yellow-tournesol" aria-label="Effectif à traiter">
+      <span className="fr-badge fr-badge--yellow-tournesol" aria-label="Effectif à traiter">
         <i className="fr-icon-flashlight-fill fr-icon--sm" />
         <span className={styles.badgeTextSpacing}>A TRAITER</span>
-      </p>
+      </span>
     );
   }
 
@@ -80,19 +80,19 @@ export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBa
 export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps) {
   if (effectif.prioritaire && effectif.a_traiter) {
     return (
-      <p className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
+      <span className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
         <i className="fr-icon-fire-fill fr-icon--sm" />
         <span className={`${styles.badgeTextSpacing} ${styles.fontWeightNormal}`}>À TRAITER EN PRIORITÉ</span>
-      </p>
+      </span>
     );
   }
 
   if (effectif.prioritaire && !effectif.a_traiter && effectif.injoignable) {
     return (
-      <p className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
+      <span className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
         <i className="fr-icon-fire-fill fr-icon--sm" />
         <span className={`${styles.badgeTextSpacing} ${styles.fontWeightNormal}`}>À RECONTACTER EN PRIORITÉ</span>
-      </p>
+      </span>
     );
   }
 
@@ -162,7 +162,7 @@ export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffectifMis
 
 function ContactOpportunBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
   return (
-    <p className={`fr-badge ${styles.contactOpportunBadge}`} aria-label="Contact opportun">
+    <span className={`fr-badge ${styles.contactOpportunBadge}`} aria-label="Contact opportun">
       <i className={`ri-sparkling-fill ${iconSize} ${styles.contactOpportunIcon}`} aria-hidden="true" />
       <span style={{ fontSize }}>CONTACT OPPORTUN</span>
       <Tooltip
@@ -178,7 +178,7 @@ function ContactOpportunBadge({ iconSize, fontSize }: { iconSize: string; fontSi
           </span>
         }
       />
-    </p>
+    </span>
   );
 }
 
@@ -188,53 +188,53 @@ export function EffectifContactOpportunBadge() {
 
 function MineurBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
   return (
-    <p className="fr-badge fr-badge--red" aria-label="Effectif mineur">
+    <span className="fr-badge fr-badge--red" aria-label="Effectif mineur">
       <i className={`fr-icon-fire-fill ${iconSize}`} aria-hidden="true" />
       <span className={styles.badgeTextSpacing} style={{ fontSize }}>
         {"16-18 ANS"}
       </span>
-    </p>
+    </span>
   );
 }
 
 function RQTHBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
   return (
-    <p className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
+    <span className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
       <i className={`fr-icon-fire-fill ${iconSize}`} aria-hidden="true" />
       <span className={styles.badgeTextSpacing} style={{ fontSize }}>
         {"RQTH"}
       </span>
-    </p>
+    </span>
   );
 }
 
 function AccConjointBadge({ withCollab, fontSize }: { withCollab: boolean; fontSize: string }) {
   return (
-    <p
+    <span
       className={`fr-badge ${styles.accConjointBadge}`}
       aria-label="Effectif en collaboration avec un CFA"
       style={{ fontSize }}
     >
       <i className="ri-school-fill fr-icon--xs" aria-hidden="true" />
       {withCollab ? "Collaboration CFA" : "CFA"}
-    </p>
+    </span>
   );
 }
 
 function AContacterBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
   return (
-    <p className="fr-badge fr-badge--red" aria-label="Effectif ayant répondu à la campagne mail">
+    <span className="fr-badge fr-badge--red" aria-label="Effectif ayant répondu à la campagne mail">
       <i className={`fr-icon-time-fill ${iconSize}`} aria-hidden="true" />
       <span className={styles.badgeTextSpacing} style={{ fontSize }}>
         {"CAMPAGNE MAIL"}
       </span>
-    </p>
+    </span>
   );
 }
 
 function WhatsAppCallbackBadge({ fontSize }: { fontSize: string }) {
   return (
-    <p className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif disponible via WhatsApp">
+    <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif disponible via WhatsApp">
       <i className="ri-whatsapp-fill fr-icon--sm" style={{ color: "#18753C" }} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
@@ -262,18 +262,18 @@ function WhatsAppCallbackBadge({ fontSize }: { fontSize: string }) {
           </span>
         }
       />
-    </p>
+    </span>
   );
 }
 
 function WhatsAppNoHelpBadge({ fontSize }: { fontSize: string }) {
   return (
-    <p
+    <span
       className={`fr-badge ${badgeStyles.whatsappBadgeNoHelp}`}
       aria-label="Effectif ne souhaitant pas être recontacté via WhatsApp"
     >
       <i className="ri-whatsapp-line fr-icon--sm" aria-hidden="true" />
       <span style={{ fontSize }}>NE SOUHAITE PAS ÊTRE RECONTACTÉ·E</span>
-    </p>
+    </span>
   );
 }
