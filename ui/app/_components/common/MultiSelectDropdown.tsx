@@ -1,7 +1,7 @@
 "use client";
 
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./MultiSelectDropdown.module.css";
 
@@ -32,12 +32,15 @@ export function MultiSelectDropdown({
   getDisplayText = defaultDisplayText,
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setFocusedIndex(-1);
       }
     };
 
@@ -53,16 +56,62 @@ export function MultiSelectDropdown({
     }
   };
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isOpen) {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setIsOpen(true);
+          setFocusedIndex(0);
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev < options.length - 1 ? prev + 1 : prev));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+          break;
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < options.length) {
+            handleToggle(options[focusedIndex].value);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          setIsOpen(false);
+          setFocusedIndex(-1);
+          break;
+      }
+    },
+    [isOpen, focusedIndex, options, value]
+  );
+
+  useEffect(() => {
+    if (focusedIndex >= 0 && optionRefs.current[focusedIndex]) {
+      optionRefs.current[focusedIndex]?.scrollIntoView({ block: "nearest" });
+    }
+  }, [focusedIndex]);
+
   const displayText = getDisplayText(value, options, placeholder);
 
   return (
-    <div className={styles.container} ref={dropdownRef}>
+    <div className={styles.container} ref={dropdownRef} onKeyDown={handleKeyDown}>
       {label && <label className="fr-label">{label}</label>}
       <div className={styles.selectWrapper}>
         <button
           type="button"
           className={styles.selectButton}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (!isOpen) setFocusedIndex(0);
+          }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
@@ -71,10 +120,18 @@ export function MultiSelectDropdown({
         </button>
 
         {isOpen && (
-          <div className={styles.dropdown}>
+          <div className={styles.dropdown} role="listbox" aria-multiselectable="true">
             <div className={styles.dropdownContent}>
-              {options.map((option) => (
-                <div key={option.value} className={styles.option}>
+              {options.map((option, index) => (
+                <div
+                  key={option.value}
+                  ref={(el) => {
+                    optionRefs.current[index] = el;
+                  }}
+                  className={`${styles.option} ${index === focusedIndex ? styles.optionFocused : ""}`}
+                  role="option"
+                  aria-selected={value.includes(option.value)}
+                >
                   <Checkbox
                     options={[
                       {
