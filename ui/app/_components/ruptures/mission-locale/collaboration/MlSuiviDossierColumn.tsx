@@ -188,6 +188,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const hasSubmittedRef = useRef(false);
 
   const [lastSubmitWasRecontacter, setLastSubmitWasRecontacter] = useState(false);
+  const [tentativeCalloutDismissed, setTentativeCalloutDismissed] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -540,7 +541,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   <span aria-hidden="true">🔄</span> Tentative de contact, à relancer
                 </label>
 
-                {formik.values.situationNonContact === "tentative_relancer" && (
+                {formik.values.situationNonContact === "tentative_relancer" && !tentativeCalloutDismissed && (
                   <div className={styles.tentativeCallout}>
                     <div className={styles.tentativeCalloutHeader}>
                       <p className={styles.tentativeCalloutTitle}>
@@ -556,7 +557,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         type="button"
                         className={styles.tentativeCalloutClose}
                         aria-label="Fermer"
-                        onClick={() => formik.setFieldValue("situationNonContact", null)}
+                        onClick={() => setTentativeCalloutDismissed(true)}
                       >
                         ×
                       </button>
