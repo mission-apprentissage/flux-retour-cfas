@@ -62,7 +62,7 @@ const UserMenu = () => {
       case MENU_ENTRIES.ADMIN:
         return organisationType === "ADMINISTRATEUR";
       default:
-        false;
+        return false;
     }
   };
 
