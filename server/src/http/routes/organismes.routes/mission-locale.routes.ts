@@ -44,6 +44,11 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
 
 const updateEffectifMissionLocaleData = async (req, { locals }) => {
   const effectifId = req.params.id;
+
+  if (!ObjectId.isValid(effectifId)) {
+    throw Boom.badRequest("Invalid effectif ID");
+  }
+
   const organisme = await getOrganismeById(locals.organismeId);
 
   if (!organisme) {
@@ -71,6 +76,11 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   });
 
   const effectifId = req.params.id;
+
+  if (!ObjectId.isValid(effectifId)) {
+    throw Boom.badRequest("Invalid effectif ID");
+  }
+
   const organisme = await getOrganisationOrganismeByOrganismeId(locals.organismeId);
 
   if (!organisme) {

@@ -98,8 +98,11 @@ export default () => {
       if (!ObjectId.isValid(req.params.id)) {
         throw Boom.badRequest("ID effectif invalide");
       }
-      const { organismeId } = await getOrganismeWithDeca(locals);
+      const { organismeId, isAllowedDeca } = await getOrganismeWithDeca(locals);
       const { date_rupture, source } = await validateFullZodObjectSchema(req.body, zDeclareRuptureBody);
+      if (source === "effectifsDECA" && !isAllowedDeca) {
+        throw Boom.forbidden("DECA access not allowed for this organisme");
+      }
       const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
       if (!userId) {
         throw Boom.unauthorized("Utilisateur non authentifié");
