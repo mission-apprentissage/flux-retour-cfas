@@ -109,6 +109,70 @@ export const plausibleGoals = [
   "isc_telechargement_liste_traitee",
   "isc_afficher_plus_dossiers",
   "isc_fiche_traitee_ouverte",
+
+  // CFA — Liste
+  "cfa_liste_ouverte",
+  "cfa_liste_jeune_ouvert",
+  "cfa_liste_filtre_statut",
+  "cfa_liste_filtre_collab",
+  "cfa_liste_filtre_formation",
+  "cfa_liste_recherche",
+  "cfa_liste_afficher_plus",
+  "cfa_liste_onglet_collab",
+  "cfa_collab_en_cours_ouverte",
+  "cfa_liste_onglet_tous",
+  "cfa_tous_effectifs_ouverte",
+  "cfa_rupture_declaree_manuellement",
+  "cfa_rupture_contestee",
+  "cfa_liste_demarrer_collab",
+
+  // CFA — Fiche jeune
+  "cfa_fiche_ouverte",
+  "cfa_fiche_retour_liste",
+  "cfa_fiche_demarrer_collab",
+  "cfa_fiche_contact_tel",
+  "cfa_fiche_contact_email",
+  "cfa_message_ml_envoye",
+
+  // CFA — Formulaire collab
+  "cfa_form_objectif_selectionne",
+  "cfa_form_frein_selectionne",
+  "cfa_form_statut_cfa_renseigne",
+  "cfa_form_cause_rupture_saisie",
+  "cfa_form_referent_selectionne",
+  "cfa_form_coordonnees_modifiees",
+  "cfa_form_reorientation_selectionnee",
+  "cfa_form_note_saisie",
+  "cfa_form_dossier_envoye",
+  "cfa_form_confirmation_vue",
+  "cfa_form_abandonne",
+
+  // ML — Fiche jeune
+  "ml_liste_a_traiter_ouverte",
+  "ml_fiche_ouverte",
+  "ml_fiche_retour_liste",
+  "ml_fiche_contact_tel",
+  "ml_fiche_contact_email",
+  "ml_fiche_coordonnees_cfa_vues",
+
+  // ML — Formulaire traitement
+  "ml_form_contact_renseigne",
+  "ml_form_rdv_pris",
+  "ml_form_rdv_non_pris",
+  "ml_form_situation_selectionnee",
+  "ml_form_situation_no_accompagnement",
+  "ml_form_contact_non_situation",
+  "ml_form_connaissance_jeune",
+  "ml_form_commentaire_saisi",
+  "ml_form_valider_enregistrer",
+  "ml_form_abandonne",
+  "ml_form_marquer_traite",
+  "ml_dossier_a_recontacter",
+  "ml_dossier_traite",
+
+  // ML — Collaboration CFA
+  "ml_collab_dossier_ouvert_cfa",
+  "ml_collab_dossier_ouvert_off",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
