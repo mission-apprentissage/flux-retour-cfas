@@ -6,6 +6,8 @@ import { API_EFFECTIF_LISTE, IEffectifMissionLocale, IUpdateMissionLocaleEffecti
 
 import { _get, _post } from "@/common/httpClient";
 
+import { effectifQueryKeys } from "../../shared/hooks";
+
 export function useMlUpdateEffectif() {
   const queryClient = useQueryClient();
 
@@ -13,8 +15,8 @@ export function useMlUpdateEffectif() {
     mutationFn: ({ effectifId, data }: { effectifId: string; data: IUpdateMissionLocaleEffectif }) =>
       _post(`/api/v1/organisation/mission-locale/effectif/${effectifId}`, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(["effectif", variables.effectifId]);
-      queryClient.invalidateQueries(["effectifs"]);
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.detail(variables.effectifId) });
+      queryClient.invalidateQueries({ queryKey: effectifQueryKeys.all });
     },
   });
 }
@@ -24,7 +26,7 @@ export function useMlEffectifDetail(id: string) {
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
 
   return useQuery(
-    ["effectif", id, nomListe],
+    [...effectifQueryKeys.detail(id), nomListe],
     async () => {
       if (!id) return null;
       return await _get<IEffectifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
