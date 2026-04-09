@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -19,6 +20,33 @@ const styles = withSharedStyles(localStyles);
 
 interface MlCollaborationColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
+}
+
+function ContactCfaButton({
+  effectif,
+  trackPlausibleEvent,
+}: {
+  effectif: IEffectifMissionLocale["effectif"];
+  trackPlausibleEvent: ReturnType<typeof usePlausibleAppTracking>["trackPlausibleEvent"];
+}) {
+  const contact = effectif.contact_cfa;
+  if (!contact?.email) return null;
+
+  return (
+    <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
+      <Button
+        priority="primary"
+        iconId="fr-icon-send-plane-fill"
+        iconPosition="right"
+        linkProps={{
+          href: `mailto:${contact.email}`,
+          onClick: () => trackPlausibleEvent("ml_message_cfa_envoye"),
+        }}
+      >
+        Contacter {contact.prenom} {contact.nom} du CFA
+      </Button>
+    </div>
+  );
 }
 
 function CfaCard({ effectif, minimal }: { effectif: IEffectifMissionLocale["effectif"]; minimal?: boolean }) {
@@ -71,6 +99,7 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
           />
         ))}
         <CommentBubbles effectif={effectif} showCurrentUser styles={styles} variant="sent" />
+        <ContactCfaButton effectif={effectif} trackPlausibleEvent={trackPlausibleEvent} />
       </div>
     );
   }
@@ -110,6 +139,7 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
         />
       ))}
       <CommentBubbles effectif={effectif} showCurrentUser styles={styles} variant="sent" />
+      <ContactCfaButton effectif={effectif} trackPlausibleEvent={trackPlausibleEvent} />
     </div>
   );
 }

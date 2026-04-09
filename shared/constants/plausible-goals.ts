@@ -154,6 +154,7 @@ export const plausibleGoals = [
   "ml_fiche_contact_tel",
   "ml_fiche_contact_email",
   "ml_fiche_coordonnees_cfa_vues",
+  "ml_message_cfa_envoye",
 
   // ML — Formulaire traitement
   "ml_form_contact_renseigne",
