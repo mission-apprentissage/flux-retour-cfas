@@ -5,6 +5,7 @@ import { IEffectifMissionLocale } from "shared";
 import { IVerifiedInfo } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
+import { cfaQueryKeys } from "@/app/_components/ruptures/cfa/hooks/useCfaQueries";
 import { useAuth } from "@/app/_context/UserContext";
 import { _get, _put } from "@/common/httpClient";
 
@@ -61,6 +62,7 @@ export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => 
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["effectif"]);
+      queryClient.invalidateQueries(cfaQueryKeys.all);
       onSuccess();
     },
   });

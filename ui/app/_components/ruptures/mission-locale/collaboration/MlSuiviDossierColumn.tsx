@@ -759,6 +759,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   className={styles.dossierFormButton}
                   disabled={mutation.isLoading}
                   onClick={() => {
+                    hasSubmittedRef.current = true;
                     mutation.mutate({
                       effectifId: effectif.id.toString(),
                       data: { situation: SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES },
