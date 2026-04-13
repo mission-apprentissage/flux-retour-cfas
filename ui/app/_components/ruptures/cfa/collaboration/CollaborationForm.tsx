@@ -89,43 +89,58 @@ function useAutoTouchFields(
   showSection5: boolean,
   showSection6: boolean
 ) {
-  const { values, setFieldTouched } = useFormikContext<FormValues>();
+  const { values, setTouched, touched } = useFormikContext<FormValues>();
+  const touchedRef = useRef(touched);
+  touchedRef.current = touched;
 
   useEffect(() => {
+    const newTouched: Record<string, unknown> = {};
+
     if (showSection3) {
-      setFieldTouched("still_at_cfa", true, false);
-      setFieldTouched("motifs", true, false);
+      newTouched.still_at_cfa = true;
+      newTouched.motifs = true;
+      const motifsTouched: Record<string, boolean> = {};
       for (const m of values.motifs) {
         if (
           FREINS_MOTIFS.includes(m) ||
           m === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||
           m === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION
         ) {
-          setFieldTouched(`commentaires_par_motif.${m}`, true, false);
+          motifsTouched[m] = true;
         }
+      }
+      if (Object.keys(motifsTouched).length > 0) {
+        newTouched.commentaires_par_motif = motifsTouched;
       }
     }
     if (showSection4) {
-      setFieldTouched("cause_rupture", true, false);
+      newTouched.cause_rupture = true;
     }
     if (showSection5) {
-      setFieldTouched("referent_type", true, false);
+      newTouched.referent_type = true;
       if (values.referent_type === "other") {
-        setFieldTouched("referent_details", true, false);
+        newTouched.referent_details = true;
       }
     }
     if (showSection6) {
+      const infoTouched: Record<string, boolean> = {};
       for (const field of VERIFIED_FIELDS) {
         if (field.isAddress) {
-          setFieldTouched("verified_info.adresse_rue", true, false);
-          setFieldTouched("verified_info.adresse_code_postal", true, false);
-          setFieldTouched("verified_info.adresse_commune", true, false);
+          infoTouched.adresse_rue = true;
+          infoTouched.adresse_code_postal = true;
+          infoTouched.adresse_commune = true;
         } else {
-          setFieldTouched(`verified_info.${field.key}`, true, false);
+          infoTouched[field.key] = true;
         }
       }
+      newTouched.verified_info = infoTouched;
     }
-  }, [showSection3, showSection4, showSection5, showSection6, values.motifs, values.referent_type, setFieldTouched]);
+
+    if (Object.keys(newTouched).length > 0) {
+      setTouched({ ...touchedRef.current, ...newTouched } as typeof touched, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSection3, showSection4, showSection5, showSection6, values.motifs, values.referent_type, setTouched]);
 }
 
 interface CollaborationFormProps {

@@ -53,6 +53,11 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
   const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
   const situationLogs = collabAlreadyStarted ? getSituationLogs(effectif) : [];
 
+  const lastLogWithEmail = [...(effectif.mission_locale_logs || [])]
+    .reverse()
+    .find((log) => log.created_by_user?.email);
+  const mlContactUser = lastLogWithEmail?.created_by_user;
+
   return (
     <div className={styles.collaborationColumn}>
       {!collabAlreadyStarted && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
@@ -96,29 +101,21 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
             <FeedbackBubble key={String(log._id)} log={log} effectif={effectif} styles={styles} variant="received" />
           ))}
           <CommentBubbles effectif={effectif} styles={styles} variant="received" />
-          {effectif.mission_locale_logs &&
-            (() => {
-              const lastLogWithEmail = [...(effectif.mission_locale_logs || [])]
-                .reverse()
-                .find((log) => log.created_by_user?.email);
-              const mlUser = lastLogWithEmail?.created_by_user;
-              if (!mlUser?.email) return null;
-              return (
-                <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
-                  <Button
-                    priority="primary"
-                    iconId="fr-icon-send-plane-fill"
-                    iconPosition="right"
-                    linkProps={{
-                      href: `mailto:${mlUser.email}`,
-                      onClick: () => trackPlausibleEvent("cfa_message_ml_envoye"),
-                    }}
-                  >
-                    Écrire à {mlUser.prenom} {mlUser.nom} de la Mission Locale
-                  </Button>
-                </div>
-              );
-            })()}
+          {mlContactUser?.email && (
+            <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
+              <Button
+                priority="primary"
+                iconId="fr-icon-send-plane-fill"
+                iconPosition="right"
+                linkProps={{
+                  href: `mailto:${mlContactUser.email}`,
+                  onClick: () => trackPlausibleEvent("cfa_message_ml_envoye"),
+                }}
+              >
+                Écrire à {mlContactUser.prenom} {mlContactUser.nom} de la Mission Locale
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -61,13 +62,13 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   return (
     <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
       <div className={styles.backLink}>
-        <a
+        <Link
           href="/cfa"
           className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
           onClick={() => trackPlausibleEvent("cfa_fiche_retour_liste")}
         >
           Retour à la liste
-        </a>
+        </Link>
       </div>
 
       <div className={styles.columns}>

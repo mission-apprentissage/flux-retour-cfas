@@ -56,7 +56,8 @@ export function CfaCollaborationsList({
     []
   );
 
-  const hasActiveCollabFilter = collabStatuses.length > 0 && collabStatuses.length < 3;
+  const hasActiveCollabFilter =
+    collabStatuses.length > 0 && collabStatuses.length < Object.keys(ACTIVE_COLLAB_STATUS_LABELS).length;
   const hasActiveFilters = hasActiveCollabFilter || formations.length > 0;
 
   const handleSort = (sortKey: string) => {
