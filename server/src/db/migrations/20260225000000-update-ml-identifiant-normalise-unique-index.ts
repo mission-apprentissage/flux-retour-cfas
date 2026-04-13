@@ -102,7 +102,7 @@ export const up = async () => {
     console.log("Ancien index non trouvé, skip drop");
   }
 
-  // 3. Créer le nouvel index unique partiel
+  // 4. Créer le nouvel index unique partiel
   await collection.createIndex(
     {
       "identifiant_normalise.nom": 1,

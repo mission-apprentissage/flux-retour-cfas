@@ -60,7 +60,7 @@ export const createDernierStatutFieldPipeline = () => [
   {
     $addFields: {
       dernierStatutDureeInDay: {
-        $dateDiff: { startDate: "$date_rupture", endDate: new Date(), unit: "day" },
+        $dateDiff: { startDate: "$date_rupture", endDate: "$$NOW", unit: "day" },
       },
     },
   },
