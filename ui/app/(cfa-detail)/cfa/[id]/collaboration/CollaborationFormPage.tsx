@@ -29,22 +29,21 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;
   const noRupture = effectif && !effectif.date_rupture;
+  const shouldRedirect = !isLoading && !showModal && effectif && (alreadySent || noRupture);
 
   useEffect(() => {
-    if (!isLoading && !showModal && effectif && (alreadySent || noRupture)) {
+    if (shouldRedirect) {
       router.replace(`/cfa/${id}`);
     }
-  }, [isLoading, showModal, effectif, alreadySent, noRupture, id, router]);
+  }, [shouldRedirect, id, router]);
 
-  if (isLoading || !data) {
+  if (isLoading || !data || shouldRedirect) {
     return (
       <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
         <Skeleton variant="rectangular" height={400} />
       </div>
     );
   }
-
-  if (!showModal && (alreadySent || noRupture)) return null;
 
   const modalEffectif = snapshotRef.current ?? effectif;
   const mlName = modalEffectif?.mission_locale_organisation?.nom;
