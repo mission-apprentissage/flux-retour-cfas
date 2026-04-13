@@ -136,6 +136,9 @@ export function CollaborationSentView({
                 <strong>
                   L&apos;aider dans sa réorientation {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}
                 </strong>
+                {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] && (
+                  <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}</>
+                )}
               </p>
             )}
           </div>
