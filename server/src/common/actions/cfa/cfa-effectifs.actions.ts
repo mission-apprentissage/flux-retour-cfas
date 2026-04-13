@@ -547,6 +547,7 @@ export async function declareCfaEffectifRupture(
 
   const existing = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
+    "effectif_snapshot.organisme_id": organismeId,
     soft_deleted: { $ne: true },
   });
 

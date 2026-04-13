@@ -4,7 +4,15 @@ export const zDeclareCfaRuptureApi = z.object({
   date_rupture: z
     .string()
     .datetime()
-    .refine((val) => new Date(val) <= new Date(), { message: "La date de rupture ne peut pas être dans le futur" }),
+    .refine((val) => new Date(val) <= new Date(), { message: "La date de rupture ne peut pas être dans le futur" })
+    .refine(
+      (val) => {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        return new Date(val) >= oneYearAgo;
+      },
+      { message: "La date de rupture ne peut pas être antérieure à plus d'un an" }
+    ),
   source: z.enum(["effectifs", "effectifsDECA"]),
 });
 
