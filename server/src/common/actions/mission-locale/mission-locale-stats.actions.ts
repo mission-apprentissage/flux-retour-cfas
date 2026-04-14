@@ -1267,23 +1267,94 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     { $sort: { region_nom: 1 as const } },
   ];
 
-  const [mlDataRaw, regionData] = await Promise.all([
+  const collabMlFilter = region ? { mission_locale_id: { $in: await getMissionLocaleIdsByRegion(region) } } : {};
+
+  const collabByMlPipeline = [
+    {
+      $match: {
+        "organisme_data.acc_conjoint": true,
+        soft_deleted: { $ne: true },
+        ...collabMlFilter,
+      },
+    },
+    {
+      $group: {
+        _id: "$mission_locale_id",
+        collab_total: { $sum: 1 },
+        collab_non_traite: {
+          $sum: { $cond: [{ $eq: [{ $ifNull: ["$situation", null] }, null] }, 1, 0] },
+        },
+        collab_traite: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: [{ $ifNull: ["$situation", null] }, null] },
+                  { $ne: ["$situation", "CONTACTE_SANS_RETOUR"] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        collab_a_recontacter: { $sum: { $cond: [{ $eq: ["$situation", "CONTACTE_SANS_RETOUR"] }, 1, 0] } },
+      },
+    },
+  ];
+
+  const [mlDataRaw, regionData, collabData] = await Promise.all([
     missionLocaleStatsDb().aggregate(mlPipeline, { allowDiskUse: true }).toArray(),
     missionLocaleStatsDb().aggregate(regionPipeline, { allowDiskUse: true }).toArray(),
+    missionLocaleEffectifsDb().aggregate(collabByMlPipeline).toArray(),
   ]);
+
+  const collabByMl = new Map(collabData.map((c) => [c._id.toString(), c]));
 
   const mlData = mlDataRaw.map((ml) => {
     const deptCode = ml.departement_code as string | null;
     const departement = deptCode ? DEPARTEMENTS_BY_CODE[deptCode as keyof typeof DEPARTEMENTS_BY_CODE] : null;
+    const collab = collabByMl.get(ml._id.toString());
     return {
       ...ml,
       departement_nom: departement?.nom ?? "Département inconnu",
+      collab_total: collab?.collab_total ?? 0,
+      collab_non_traite: collab?.collab_non_traite ?? 0,
+      collab_traite: collab?.collab_traite ?? 0,
+      collab_a_recontacter: collab?.collab_a_recontacter ?? 0,
+    };
+  });
+
+  const collabByRegion = new Map<
+    string,
+    { total: number; non_traite: number; traite: number; a_recontacter: number }
+  >();
+  for (const ml of mlDataRaw) {
+    const regionNom = ml.region_nom as string;
+    const collab = collabByMl.get(ml._id.toString());
+    if (!collab) continue;
+    const existing = collabByRegion.get(regionNom) ?? { total: 0, non_traite: 0, traite: 0, a_recontacter: 0 };
+    existing.total += collab.collab_total ?? 0;
+    existing.non_traite += collab.collab_non_traite ?? 0;
+    existing.traite += collab.collab_traite ?? 0;
+    existing.a_recontacter += collab.collab_a_recontacter ?? 0;
+    collabByRegion.set(regionNom, existing);
+  }
+
+  const regionDataWithCollab = regionData.map((r) => {
+    const collab = collabByRegion.get(r.region_nom as string);
+    return {
+      ...r,
+      collab_total: collab?.total ?? 0,
+      collab_non_traite: collab?.non_traite ?? 0,
+      collab_traite: collab?.traite ?? 0,
+      collab_a_recontacter: collab?.a_recontacter ?? 0,
     };
   });
 
   return {
     mlData,
-    regionData,
+    regionData: regionDataWithCollab,
     exportDate: evaluationDate,
   };
 };

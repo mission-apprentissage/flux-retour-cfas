@@ -256,6 +256,7 @@ export function convertOrganismeToExport(
 export const traitementMLExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Département", key: "departement_nom", width: 25 },
+  { label: "Code département", key: "departement_code", xlsxType: "string", width: 18 },
   { label: "Mission Locale", key: "nom", width: 40 },
   { label: "SIRET", key: "siret", xlsxType: "string", width: 15 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },
@@ -274,6 +275,10 @@ export const traitementMLExportColumns = [
   { label: "Injoignable", key: "injoignables", width: 12 },
   { label: "Coordonnées incorrectes", key: "coordonnees_incorrectes", width: 22 },
   { label: "Autre", key: "autre", width: 10 },
+  { label: "Collab total", key: "collab_total", width: 12 },
+  { label: "Collab non traité", key: "collab_non_traite", width: 16 },
+  { label: "Collab traité", key: "collab_traite", width: 13 },
+  { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
 export const traitementRegionExportColumns = [
@@ -294,4 +299,8 @@ export const traitementRegionExportColumns = [
   { label: "Injoignable", key: "injoignables", width: 12 },
   { label: "Coordonnées incorrectes", key: "coordonnees_incorrectes", width: 22 },
   { label: "Autre", key: "autre", width: 10 },
+  { label: "Collab total", key: "collab_total", width: 12 },
+  { label: "Collab non traité", key: "collab_non_traite", width: 16 },
+  { label: "Collab traité", key: "collab_traite", width: 13 },
+  { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;

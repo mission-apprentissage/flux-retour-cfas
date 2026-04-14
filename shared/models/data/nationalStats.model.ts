@@ -196,6 +196,10 @@ const zMissionLocaleExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  collab_total: z.number(),
+  collab_non_traite: z.number(),
+  collab_traite: z.number(),
+  collab_a_recontacter: z.number(),
 });
 
 export type IMissionLocaleExportData = z.output<typeof zMissionLocaleExportData>;
@@ -218,6 +222,10 @@ const zRegionExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  collab_total: z.number(),
+  collab_non_traite: z.number(),
+  collab_traite: z.number(),
+  collab_a_recontacter: z.number(),
 });
 
 export type IRegionExportData = z.output<typeof zRegionExportData>;
