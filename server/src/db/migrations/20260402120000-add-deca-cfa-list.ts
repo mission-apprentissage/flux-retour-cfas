@@ -63,6 +63,7 @@ const ETABLISSEMENTS = [
   { siret: "85003894400011", uai: "0762917H" },
   { siret: "87817990200019", uai: "0062380E" },
   { siret: "88846866700017", uai: "0062260Z" },
+  { siret: "78128367600018", uai: "0171438W" },
 ] as const;
 
 export const up = async () => {
