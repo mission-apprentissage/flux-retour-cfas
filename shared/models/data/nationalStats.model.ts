@@ -209,6 +209,10 @@ const zMissionLocaleExportData = z.object({
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
+  collab_total: z.number(),
+  collab_non_traite: z.number(),
+  collab_traite: z.number(),
+  collab_a_recontacter: z.number(),
 });
 
 const zRegionExportData = z.object({
@@ -232,6 +236,10 @@ const zRegionExportData = z.object({
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
+  collab_total: z.number(),
+  collab_non_traite: z.number(),
+  collab_traite: z.number(),
+  collab_a_recontacter: z.number(),
 });
 
 const zTraitementExportResponse = z.object({
