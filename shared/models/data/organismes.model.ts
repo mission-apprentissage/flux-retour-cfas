@@ -206,6 +206,9 @@ export const zOrganisme = z
     last_erp_transmission_date: z
       .date({ description: "Date de dernière transmission en tant qu'organisme transmetteur" })
       .nullish(),
+    is_allowed_deca: z
+      .boolean({ description: "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)" })
+      .nullish(),
   })
   .strict();
 

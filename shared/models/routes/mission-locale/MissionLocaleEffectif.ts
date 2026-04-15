@@ -6,6 +6,7 @@ import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { zWhatsAppContact } from "shared/models/data/whatsappContact.model";
 
@@ -17,6 +18,13 @@ import { zMissionLocaleEffectifLog } from "../../data/missionLocaleEffectifLog.m
 
 const zMissionLocaleEffectifLogWithUnread = zMissionLocaleEffectifLog.extend({
   unread_by_current_user: z.boolean().describe("Indique si ce log est non lu par l'utilisateur connecté").nullish(),
+  created_by_user: z
+    .object({
+      nom: z.string(),
+      prenom: z.string(),
+      email: z.string().nullish(),
+    })
+    .nullish(),
 });
 
 const zApprenantPick = zApprenant
@@ -69,6 +77,8 @@ const zEffectifMissionLocale = z
         )
         .describe("Contacts email du CFA")
         .optional(),
+      is_allowed_deca: z.boolean().describe("Organisme du programme DECA-CFA").nullish(),
+      ml_beta_activated_at: z.date().describe("Date d'activation ML beta du CFA").nullish(),
     }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
@@ -92,6 +102,13 @@ const zEffectifMissionLocale = z
       .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp")
       .nullish(),
     whatsapp_contact: zWhatsAppContact.nullish(),
+    cfa_rupture_declaration: z
+      .object({
+        date_rupture: z.date(),
+        declared_at: z.date(),
+        declared_by: zObjectId,
+      })
+      .nullish(),
     organisme_data: z
       .object({
         rupture: z.boolean().nullish(),
@@ -101,6 +118,13 @@ const zEffectifMissionLocale = z
         reponse_at: z.date().nullish(),
         has_unread_notification: z.boolean().nullish(),
         acc_conjoint_by: zObjectId.nullish(),
+        still_at_cfa: z.boolean().nullish(),
+        commentaires_par_motif: z.record(zAccConjointMotifEnum, z.string()).nullish(),
+        cause_rupture: z.string().nullish(),
+        referent_type: z.enum(["me", "other"]).nullish(),
+        referent_coordonnees: z.string().nullish(),
+        note_complementaire: z.string().nullish(),
+        verified_info: zVerifiedInfo.nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),
@@ -121,6 +145,17 @@ const zEffectifMissionLocale = z
       })
       .describe("Coordonnées de l'accompagnant CFA (uniquement si CFA actif avec ml_beta_activated_at)")
       .nullish(),
+    acc_conjoint_by_user: z
+      .object({
+        nom: z.string(),
+        prenom: z.string(),
+      })
+      .describe("Nom/prénom de l'utilisateur CFA qui a initié la collaboration")
+      .nullish(),
+    is_grandfathered: z
+      .boolean()
+      .describe("Effectif créé avant l'activation du CFA sur TDB, reste traitable par la ML")
+      .nullish(),
     mission_locale_organisation: z
       .object({
         _id: zObjectId,
@@ -128,6 +163,12 @@ const zEffectifMissionLocale = z
         email: z.string().nullish(),
         telephone: z.string().nullish(),
         activated_at: z.date().nullish(),
+        adresse: z
+          .object({
+            commune: z.string().nullish(),
+            code_postal: z.string().nullish(),
+          })
+          .nullish(),
       })
       .nullish(),
   })

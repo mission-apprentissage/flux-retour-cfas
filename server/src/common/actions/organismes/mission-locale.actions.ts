@@ -11,17 +11,31 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
   data: IUpdateMissionLocaleEffectifOrganisme,
   userId?: ObjectId
 ) => {
-  const { rupture, acc_conjoint, motif, commentaires } = data;
+  const OPTIONAL_FIELDS: (keyof IUpdateMissionLocaleEffectifOrganisme)[] = [
+    "motif",
+    "commentaires",
+    "still_at_cfa",
+    "commentaires_par_motif",
+    "cause_rupture",
+    "referent_type",
+    "referent_coordonnees",
+    "note_complementaire",
+    "verified_info",
+  ];
 
-  const setObject = {
-    rupture,
-    acc_conjoint,
-    reponse_at: new Date(),
-    has_unread_notification: false,
-    ...(userId ? { acc_conjoint_by: userId } : {}),
-    ...(motif !== undefined ? { motif } : {}),
-    ...(commentaires !== undefined ? { commentaires } : {}),
+  const setFields: Record<string, unknown> = {
+    "organisme_data.rupture": data.rupture,
+    "organisme_data.acc_conjoint": data.acc_conjoint,
+    "organisme_data.reponse_at": new Date(),
+    "organisme_data.has_unread_notification": false,
+    ...(userId ? { "organisme_data.acc_conjoint_by": userId } : {}),
   };
+
+  for (const key of OPTIONAL_FIELDS) {
+    if (data[key] !== undefined) {
+      setFields[`organisme_data.${key}`] = data[key];
+    }
+  }
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
@@ -31,7 +45,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     },
     {
       $set: {
-        organisme_data: setObject,
+        ...setFields,
         updated_at: new Date(),
       },
     },

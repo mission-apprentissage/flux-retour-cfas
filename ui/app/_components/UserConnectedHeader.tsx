@@ -6,11 +6,12 @@ import { ListItemIcon, ListSubheader } from "@mui/material";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
-import { ORGANISATION_TYPE } from "shared";
+import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
+import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
 import { useAuth } from "../_context/UserContext";
 
@@ -18,6 +19,8 @@ export const UserConnectedHeader = () => {
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
 
   const logout = async () => {
     await _post("/api/v1/auth/logout");
@@ -50,7 +53,18 @@ export const UserConnectedHeader = () => {
       {user && (
         <>
           <Button iconId="ri-account-circle-fill" priority="tertiary no outline" onClick={handleClick}>
-            {getAccountLabel(user as AuthContext)}
+            {isCfaWithMlBeta && user.prenom && user.nom ? (
+              <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.3 }}>
+                <span
+                  style={{ fontWeight: 700 }}
+                >{`${user.prenom.charAt(0).toUpperCase()}${user.prenom.slice(1)} ${user.nom.charAt(0).toUpperCase()}.`}</span>
+                {user.organisation_nom && (
+                  <span style={{ fontSize: "0.75rem", fontWeight: 400 }}>{user.organisation_nom}</span>
+                )}
+              </span>
+            ) : (
+              getAccountLabel(user as AuthContext)
+            )}
           </Button>
           <Menu
             anchorEl={anchorEl}
@@ -59,11 +73,16 @@ export const UserConnectedHeader = () => {
             slotProps={{
               paper: {
                 sx: {
-                  "& a": {
+                  "& a, & .MuiMenuItem-root": {
                     backgroundImage: "none !important",
+                    color: "var(--text-action-high-blue-france)",
                     "&:hover": {
                       backgroundColor: "rgba(0, 0, 0, 0.04)",
                     },
+                  },
+                  "& .MuiListItemIcon-root": {
+                    color: "var(--text-action-high-blue-france)",
+                    minWidth: 28,
                   },
                 },
               },
@@ -71,15 +90,15 @@ export const UserConnectedHeader = () => {
           >
             <MenuItem component="a" href="/mon-compte" onClick={handleClose}>
               <ListItemIcon>
-                <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                <i className={fr.cx("ri-account-circle-fill", "fr-icon--sm")}></i>
               </ListItemIcon>
-              Informations
+              Mon compte
             </MenuItem>
 
             {hasRight("ROLES") && (
               <MenuItem component="a" href="/organisation/membres" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Rôles et habilitations
               </MenuItem>
@@ -88,11 +107,50 @@ export const UserConnectedHeader = () => {
             {hasRight("TRANSMISSIONS") && (
               <MenuItem component="a" href="/transmissions" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-send-plane-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Transmissions
               </MenuItem>
             )}
+
+            {isCfaWithMlBeta && [
+              <MenuItem key="cfa-parametres" component="a" href="/cfa/parametres" onClick={handleClose}>
+                <ListItemIcon>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Paramètres de connexion ERP
+              </MenuItem>,
+              <ListSubheader
+                key="cfa-aide-header"
+                component="div"
+                sx={{ fontWeight: "bold", color: "var(--text-action-high-blue-france)" }}
+              >
+                Aide et ressources
+              </ListSubheader>,
+              <MenuItem key="cfa-aide-centre" component="a" href={CRISP_FAQ} target="_blank" onClick={handleClose}>
+                <ListItemIcon>
+                  <i className={fr.cx("fr-icon-question-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Centre d&apos;aide
+              </MenuItem>,
+              <MenuItem key="cfa-aide-glossaire" component="a" href="/glossaire" onClick={handleClose}>
+                <ListItemIcon>
+                  <i className={fr.cx("fr-icon-book-2-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Glossaire
+              </MenuItem>,
+              <MenuItem
+                key="cfa-aide-referencement"
+                component="a"
+                href="/referencement-organisme"
+                onClick={handleClose}
+              >
+                <ListItemIcon>
+                  <i className={fr.cx("fr-icon-building-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Référencement organisme
+              </MenuItem>,
+            ]}
 
             {hasRight("ADMIN") && [
               <ListSubheader key="admin-header" component="div" sx={{ fontWeight: "bold", color: "text.primary" }}>
@@ -100,19 +158,19 @@ export const UserConnectedHeader = () => {
               </ListSubheader>,
               <MenuItem key="admin-transmissions" component="a" href="/admin/transmissions" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Toutes les transmissions
               </MenuItem>,
               <MenuItem key="admin-users" component="a" href="/admin/users" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Gestion des utilisateurs
               </MenuItem>,
               <MenuItem key="admin-reseaux" component="a" href="/admin/reseaux" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Gestion des réseaux
               </MenuItem>,
@@ -123,7 +181,7 @@ export const UserConnectedHeader = () => {
                 onClick={handleClose}
               >
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Recherche organisme
               </MenuItem>,
@@ -134,7 +192,7 @@ export const UserConnectedHeader = () => {
                 onClick={handleClose}
               >
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Fusion d&apos;organismes
               </MenuItem>,
@@ -145,29 +203,32 @@ export const UserConnectedHeader = () => {
                 onClick={handleClose}
               >
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Gestion des organismes
               </MenuItem>,
               <MenuItem key="admin-maintenance" component="a" href="/admin/maintenance" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Message de maintenance
               </MenuItem>,
               <MenuItem key="admin-impostures" component="a" href="/admin/impostures" onClick={handleClose}>
                 <ListItemIcon>
-                  <i className={fr.cx("fr-icon-eye-line", "fr-icon--md")}></i>
+                  <i className={fr.cx("fr-icon-eye-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Impostures
               </MenuItem>,
             ]}
 
-            <MenuItem onClick={logout}>
+            <MenuItem onClick={logout} sx={{ borderTop: "1px solid var(--border-default-grey)", mt: 1, pt: 1 }}>
               <ListItemIcon>
-                <i className={fr.cx("fr-icon-logout-box-r-line", "fr-icon--md")}></i>
+                <i
+                  className={fr.cx("fr-icon-logout-box-r-fill", "fr-icon--sm")}
+                  style={{ color: "var(--text-default-error)" }}
+                ></i>
               </ListItemIcon>
-              Déconnexion
+              <span style={{ color: "var(--text-default-error)" }}>Déconnexion</span>
             </MenuItem>
           </Menu>
         </>

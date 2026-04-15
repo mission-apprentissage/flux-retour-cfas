@@ -1,5 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
-
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
@@ -16,11 +14,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         <div
           style={{
             flex: 1,
-            margin: "auto",
-            maxWidth: 1232,
-            ...fr.spacing("padding", {
-              topBottom: "10v",
-            }),
+            background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
           }}
         >
           {children}

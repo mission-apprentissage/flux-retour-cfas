@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const STATS_PERIODS = ["30days", "3months", "all"] as const;
+const STATS_PERIODS = ["30days", "3months", "all"] as const;
 export const zStatsPeriod = z.enum(STATS_PERIODS);
 export type StatsPeriod = z.output<typeof zStatsPeriod>;
 
@@ -20,6 +20,9 @@ const zAggregatedStats = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
   deja_connu: z.number(),
 });
 
@@ -54,6 +57,9 @@ const zDetailsDossiersTraites = z.object({
   injoignables: zStatWithVariation,
   coordonnees_incorrectes: zStatWithVariation,
   autre: zStatWithVariation,
+  cherche_contrat: zStatWithVariation,
+  reorientation: zStatWithVariation,
+  ne_veut_pas_accompagnement: zStatWithVariation,
   deja_connu: z.number(),
   total: z.number(),
 });
@@ -101,6 +107,9 @@ const zTraitementDetails = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
 });
 
 export type ITraitementDetails = z.output<typeof zTraitementDetails>;
@@ -152,6 +161,7 @@ const zAccompagnementConjointMotifs = z.object({
   sante: z.number(),
   finance: z.number(),
   administratif: z.number(),
+  social_familial: z.number(),
   reorientation: z.number(),
   recherche_emploi: z.number(),
   autre: z.number(),
@@ -196,13 +206,14 @@ const zMissionLocaleExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
   collab_total: z.number(),
   collab_non_traite: z.number(),
   collab_traite: z.number(),
   collab_a_recontacter: z.number(),
 });
-
-export type IMissionLocaleExportData = z.output<typeof zMissionLocaleExportData>;
 
 const zRegionExportData = z.object({
   region_nom: z.string(),
@@ -222,13 +233,14 @@ const zRegionExportData = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre: z.number(),
+  cherche_contrat: z.number(),
+  reorientation: z.number(),
+  ne_veut_pas_accompagnement: z.number(),
   collab_total: z.number(),
   collab_non_traite: z.number(),
   collab_traite: z.number(),
   collab_a_recontacter: z.number(),
 });
-
-export type IRegionExportData = z.output<typeof zRegionExportData>;
 
 const zTraitementExportResponse = z.object({
   mlData: z.array(zMissionLocaleExportData),

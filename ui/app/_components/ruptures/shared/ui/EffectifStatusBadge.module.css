@@ -83,6 +83,19 @@
   margin-bottom: 1.5rem;
 }
 
+.nouveauContratBadge {
+  background-color: #77b645;
+  color: #ffffff;
+  font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nouveauContratIcon {
+  color: #ffffff;
+}
+
 .mlTreatedBadge {
   margin-left: 5px;
 }

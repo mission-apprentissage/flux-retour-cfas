@@ -8,6 +8,7 @@ import {
   IEffectif,
   IOrganisationMissionLocale,
   IOrganisationOrganismeFormation,
+  IPersonV2,
   IUpdateMissionLocaleEffectif,
 } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -39,14 +40,31 @@ import config from "@/config";
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
+import {
+  DATE_START_RUPTURES,
+  buildEffRuptureAgeFilter,
+  createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
+} from "../shared/rupture-pipeline.utils";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
-const DATE_START = new Date("2025-01-01");
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
+
+/**
+ * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
+ * Retourne true si cfa_rupture_declaration doit être nettoyé.
+ */
+function shouldCleanCfaRuptureDeclaration(
+  cfaRuptureDeclaration: { date_rupture: Date } | null | undefined,
+  currentStatus: { valeur?: string; date?: Date } | undefined
+): boolean {
+  if (!cfaRuptureDeclaration || !currentStatus?.date) return false;
+  if (currentStatus.valeur !== STATUT_APPRENANT.APPRENTI) return false;
+  return new Date(currentStatus.date).getTime() > new Date(cfaRuptureDeclaration.date_rupture).getTime();
+}
 /**
  *    EffectifsDb
  */
@@ -73,7 +91,7 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
   {
     $match: {
       "apprenant.adresse.mission_locale_id": missionLocaleId,
-      annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
+      annee_scolaire: { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
     },
   },
 ];
@@ -97,27 +115,7 @@ export const getAllEffectifForMissionLocaleCursor = (
  *    MissionLocaleEffectifDb
  */
 
-/**
- * Filtre constant pour les missions locales
- */
-const EFF_MISSION_LOCALE_FILTER = [
-  {
-    $match: {
-      $or: [
-        {
-          "effectif_snapshot.apprenant.date_de_naissance": {
-            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
-          },
-        },
-        { "effectif_snapshot.apprenant.rqth": true },
-      ],
-      soft_deleted: { $ne: true },
-      "effectif_snapshot.apprenant.date_de_naissance": {
-        $lte: new Date(new Date().setFullYear(new Date().getFullYear() - 16)),
-      },
-    },
-  },
-];
+const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
@@ -195,15 +193,7 @@ const matchTraitementEffectifPipelineMl = (
   }
 };
 
-const createDernierStatutFieldPipelineML = () => [
-  {
-    $addFields: {
-      dernierStatutDureeInDay: {
-        $dateDiff: { startDate: "$date_rupture", endDate: new Date(), unit: "day" },
-      },
-    },
-  },
-];
+const createDernierStatutFieldPipelineML = createDernierStatutFieldPipelineShared;
 
 /**
  * Application des filtres sur les dernier statut en fonction de la liste de statut et de la date
@@ -225,19 +215,16 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-/**
- * Création du match sur les dernier statuts
- * @param statut Liste de statuts à matcher
- * @returns Un obet match
- */
 const matchDernierStatutPipelineMl = (): any => {
-  const match = {
+  return {
     $match: {
-      "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
       date_rupture: { $lte: new Date() },
+      $or: [
+        { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
+        { cfa_rupture_declaration: { $exists: true, $ne: null } },
+      ],
     },
   };
-  return match;
 };
 
 /**
@@ -245,11 +232,13 @@ const matchDernierStatutPipelineMl = (): any => {
  * @param missionLocaleId Id de la mission locale
  * @returns Objet match
  */
-const generateOrganisationMatchStage = (organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation) => {
+const generateOrganisationMatchStage = async (
+  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+) => {
   const matchStage = [
     {
       $match: {
-        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START, new Date()) },
+        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
       },
     },
     ...matchFromJointOrganisme(organisation.type),
@@ -264,17 +253,26 @@ const generateOrganisationMatchStage = (organisation: IOrganisationMissionLocale
         },
         ...matchStage,
       ];
-    case "ORGANISME_FORMATION":
-      return [
+    case "ORGANISME_FORMATION": {
+      const organismeId = new ObjectId((organisation as IOrganisationOrganismeFormation).organisme_id as string);
+      const stages: Record<string, unknown>[] = [
         {
           $match: {
-            "effectif_snapshot.organisme_id": new ObjectId(
-              (organisation as IOrganisationOrganismeFormation).organisme_id as string
-            ),
+            "effectif_snapshot.organisme_id": organismeId,
           },
         },
-        ...matchStage,
       ];
+
+      // Exclure les effectifs DECA pour les CFA non-pilotes
+      const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_deca: 1 } });
+      if (!organisme?.is_allowed_deca) {
+        stages.push({
+          $match: { "effectif_snapshot.is_deca_compatible": { $exists: false } },
+        });
+      }
+
+      return [...stages, ...matchStage];
+    }
     default:
       throw new Error(`Unknown organisation type: ${organisation}`);
   }
@@ -366,7 +364,6 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
     }
   };
 
-  // TODO ajout ici des conditions pour afficher les effectifs qui ont été créés après l'activation de la mission locale
   return [
     {
       $addFields: {
@@ -387,7 +384,16 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
   const commonFields = {
     $addFields: {
       nouveau_contrat: {
-        $cond: [{ $eq: ["$current_status.value", "APPRENTI"] }, true, false],
+        $cond: [
+          {
+            $and: [
+              { $eq: ["$current_status.value", "APPRENTI"] },
+              { $not: [{ $ifNull: ["$cfa_rupture_declaration", false] }] },
+            ],
+          },
+          true,
+          false,
+        ],
       },
     },
   };
@@ -485,7 +491,10 @@ const addMissionLocaleFieldTraitementStatus = () => {
         ],
       },
       {
-        $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI],
+        $or: [
+          { $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI] },
+          { $ifNull: ["$cfa_rupture_declaration", false] },
+        ],
       },
       RUPTURE_MOINS_DE_180_JOURS_CONDITION,
     ],
@@ -546,8 +555,8 @@ const addMissionLocaleFieldTraitementStatus = () => {
 const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const baseProjection = {
     id: "$effectif_snapshot._id",
-    nom: "$effectif_snapshot.apprenant.nom",
-    prenom: "$effectif_snapshot.apprenant.prenom",
+    nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+    prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
     date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
     adresse: "$effectif_snapshot.apprenant.adresse",
     formation: "$effectif_snapshot.formation",
@@ -561,7 +570,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     a_traiter: "$a_traiter",
     transmitted_at: "$effectif_snapshot.transmitted_at",
     source: "$effectif_snapshot.source",
-    organisme: "$organisme",
+    organisme: {
+      $mergeObjects: ["$organisme", { ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at" }],
+    },
     contrats: "$effectif_snapshot.contrats",
     "situation.situation": "$situation",
     "situation.situation_autre": "$situation_autre",
@@ -583,9 +594,22 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     nouveau_contrat: "$nouveau_contrat",
     current_status: "$current_status",
     organisme_data: "$organisme_data",
+    acc_conjoint_by_user: "$contact_cfa_user",
     date_rupture: "$date_rupture",
     mission_locale_organisation: "$mission_locale_organisation",
     mission_locale_logs: "$ml_logs",
+    is_grandfathered: {
+      $cond: [
+        {
+          $and: [
+            { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
+            { $lt: ["$created_at", "$organisme_organisation.ml_beta_activated_at"] },
+          ],
+        },
+        true,
+        false,
+      ],
+    },
   };
 
   const specificFields =
@@ -647,6 +671,7 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
               adresse: 1,
               siret: 1,
               enseigne: 1,
+              is_allowed_deca: 1,
             },
           },
         ],
@@ -851,12 +876,12 @@ export async function listContactsMlOrganisme(missionLocaleID: number) {
   return contacts;
 }
 
-export const missionLocaleBaseAggregation = (
+export const missionLocaleBaseAggregation = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   return [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
+    ...(await generateOrganisationMatchStage(organisation)),
+    ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
@@ -870,7 +895,7 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   nom_liste: API_EFFECTIF_LISTE
 ) => {
   const aggregation = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(nom_liste, organisation.type),
     {
       $sort: getSortedRulesByListeType(nom_liste),
@@ -879,8 +904,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
       $project: {
         _id: 0,
         id: "$effectif_snapshot._id",
-        nom: "$effectif_snapshot.apprenant.nom",
-        prenom: "$effectif_snapshot.apprenant.prenom",
+        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
       },
     },
   ];
@@ -992,8 +1017,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   };
 
   const organismeMissionLocaleAggregation: any[] = [
-    ...generateOrganisationMatchStage(organisation),
-    ...EFF_MISSION_LOCALE_FILTER,
+    ...(await generateOrganisationMatchStage(organisation)),
+    ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
@@ -1035,8 +1060,10 @@ export const getEffectifsParMoisByMissionLocaleId = async (
               getGroupPushCondition(),
               {
                 id: "$$ROOT.effectif_snapshot._id",
-                nom: "$$ROOT.effectif_snapshot.apprenant.nom",
-                prenom: "$$ROOT.effectif_snapshot.apprenant.prenom",
+                nom: { $ifNull: ["$$ROOT.identifiant_normalise.nom", "$$ROOT.effectif_snapshot.apprenant.nom"] },
+                prenom: {
+                  $ifNull: ["$$ROOT.identifiant_normalise.prenom", "$$ROOT.effectif_snapshot.apprenant.prenom"],
+                },
                 libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
                 organisme_nom: "$$ROOT.organisme.nom",
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
@@ -1126,7 +1153,7 @@ export const getEffectifFromMissionLocaleId = async (
   userId?: ObjectId
 ) => {
   const aggregation = [
-    ...generateOrganisationMatchStage(organisation),
+    ...(await generateOrganisationMatchStage(organisation)),
     {
       $match: {
         "effectif_snapshot._id": new ObjectId(effectifId),
@@ -1163,6 +1190,23 @@ export const getEffectifFromMissionLocaleId = async (
           { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$mission_locale_effectif_id"] } } },
           {
             $sort: { created_at: 1 },
+          },
+          {
+            $lookup: {
+              from: "usersMigration",
+              let: { created_by_id: "$created_by" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$created_by_id"] } } },
+                { $project: { _id: 0, nom: 1, prenom: 1 } },
+                { $limit: 1 },
+              ],
+              as: "created_by_user",
+            },
+          },
+          {
+            $addFields: {
+              created_by_user: { $arrayElemAt: ["$created_by_user", 0] },
+            },
           },
           ...(userId
             ? [
@@ -1224,7 +1268,7 @@ export const getEffectifFromMissionLocaleId = async (
   return { effectif, ...next };
 };
 
-export const getEffectifsListByMissionLocaleId = (
+export const getEffectifsListByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema
 ) => {
@@ -1264,7 +1308,7 @@ export const getEffectifsListByMissionLocaleId = (
   };
 
   const effectifsMissionLocaleAggregation = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(type, organisation.type),
     ...lookUpOrganisme(true),
     ...computeMonthParams(),
@@ -1301,8 +1345,8 @@ export const getEffectifsListByMissionLocaleId = (
     },
     {
       $project: {
-        nom: "$effectif_snapshot.apprenant.nom",
-        prenom: "$effectif_snapshot.apprenant.prenom",
+        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
         transmitted_at: "$effectif_snapshot.transmitted_at",
         source: "$effectif_snapshot.source",
         contrat_date_debut: {
@@ -1367,7 +1411,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
   nom_liste: API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE | API_EFFECTIF_LISTE.PRIORITAIRE
 ) => {
   const pipeline = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     {
       $facet: {
         hadEffectifs: [
@@ -1389,8 +1433,8 @@ export const getEffectifARisqueByMissionLocaleId = async (
             $project: {
               _id: 0,
               id: "$effectif_snapshot._id",
-              nom: "$effectif_snapshot.apprenant.nom",
-              prenom: "$effectif_snapshot.apprenant.prenom",
+              nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+              prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
               libelle_formation: "$effectif_snapshot.formation.libelle_long",
               organisme_nom: "$organisme.nom",
               organisme_raison_sociale: "$organisme.raison_sociale",
@@ -1424,11 +1468,11 @@ export const getEffectifARisqueByMissionLocaleId = async (
   return result;
 };
 
-const getEffectifMissionLocaleEligibleToBrevoAggregation = (
+const getEffectifMissionLocaleEligibleToBrevoAggregation = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => [
-  ...generateOrganisationMatchStage(organisation),
-  ...EFF_MISSION_LOCALE_FILTER,
+  ...(await generateOrganisationMatchStage(organisation)),
+  ...buildEffMissionLocaleFilter(),
   ...filterByDernierStatutPipelineMl(),
   ...addFieldFromActivationDate(),
   ...filterByActivationDatePipelineMl(),
@@ -1438,7 +1482,7 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
+    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
 
     {
       $facet: {
@@ -1493,7 +1537,7 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
 ) => {
   const effectifsMissionLocaleAggregation = [
-    ...getEffectifMissionLocaleEligibleToBrevoAggregation(organisation),
+    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
     {
       $match: {
         soft_deleted: { $ne: true },
@@ -1549,8 +1593,8 @@ export const getEffectifMissionLocaleEligibleToBrevo = async (
       $project: {
         _id: 0,
         email: "$effectif_snapshot.apprenant.courriel",
-        nom: "$effectif_snapshot.apprenant.nom",
-        prenom: "$effectif_snapshot.apprenant.prenom",
+        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
         "urls.TDB_AB_TEST_A": {
           $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
         },
@@ -1639,16 +1683,27 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
   if (eff) {
+    const cleanCfaDeclaration = shouldCleanCfaRuptureDeclaration(eff.cfa_rupture_declaration, currentStatus);
+    const hasValidCfaDeclaration = !!eff.cfa_rupture_declaration && !cleanCfaDeclaration;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration;
+
+    const dateRupture = shouldKeep
+      ? rupturantFilter
+        ? currentStatus?.date
+        : eff.cfa_rupture_declaration?.date_rupture
+      : null;
+
     await missionLocaleEffectifsDb().updateOne(
       { effectif_id: effectif._id },
       {
         $set: {
-          ...(rupturantFilter ? {} : { soft_deleted: true }),
+          ...(shouldKeep ? {} : { soft_deleted: true }),
           effectif_snapshot: { ...effectif, _id: effectif._id },
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
-          ...(rupturantFilter ? { date_rupture: currentStatus?.date } : { date_rupture: null }),
+          date_rupture: dateRupture ?? null,
         },
+        ...(cleanCfaDeclaration ? { $unset: { cfa_rupture_declaration: "" } } : {}),
       }
     );
   }
@@ -1676,7 +1731,7 @@ export const computeMissionLocaleStats = async (
           },
         ]
       : []),
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     {
       $lookup: {
         from: "missionLocaleEffectifLog",
@@ -1746,6 +1801,15 @@ export const computeMissionLocaleStats = async (
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }, 1, 0] },
         },
         autre: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }, 1, 0] } },
+        cherche_contrat: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }, 1, 0] },
+        },
+        reorientation: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }, 1, 0] },
+        },
+        ne_veut_pas_accompagnement: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }, 1, 0] },
+        },
         autre_avec_contact: {
           $sum: {
             $cond: [
@@ -1841,6 +1905,29 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        mineur_cherche_contrat: {
+          $sum: {
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }] },
+              1,
+              0,
+            ],
+          },
+        },
+        mineur_reorientation: {
+          $sum: {
+            $cond: [{ $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }] }, 1, 0],
+          },
+        },
+        mineur_ne_veut_pas_accompagnement: {
+          $sum: {
+            $cond: [
+              { $and: [mineurCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }] },
+              1,
+              0,
+            ],
+          },
+        },
         mineur_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -1932,6 +2019,25 @@ export const computeMissionLocaleStats = async (
             $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] }] }, 1, 0],
           },
         },
+        rqth_cherche_contrat: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.CHERCHE_CONTRAT] }] }, 1, 0],
+          },
+        },
+        rqth_reorientation: {
+          $sum: {
+            $cond: [{ $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.REORIENTATION] }] }, 1, 0],
+          },
+        },
+        rqth_ne_veut_pas_accompagnement: {
+          $sum: {
+            $cond: [
+              { $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }] },
+              1,
+              0,
+            ],
+          },
+        },
         rqth_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -2007,6 +2113,9 @@ export const computeMissionLocaleStats = async (
       injoignables: 0,
       coordonnees_incorrectes: 0,
       autre: 0,
+      cherche_contrat: 0,
+      reorientation: 0,
+      ne_veut_pas_accompagnement: 0,
       autre_avec_contact: 0,
       deja_connu: 0,
       mineur: 0,
@@ -2019,6 +2128,9 @@ export const computeMissionLocaleStats = async (
       mineur_injoignables: 0,
       mineur_coordonnees_incorrectes: 0,
       mineur_autre: 0,
+      mineur_cherche_contrat: 0,
+      mineur_reorientation: 0,
+      mineur_ne_veut_pas_accompagnement: 0,
       mineur_autre_avec_contact: 0,
       rqth: 0,
       rqth_a_traiter: 0,
@@ -2030,6 +2142,9 @@ export const computeMissionLocaleStats = async (
       rqth_injoignables: 0,
       rqth_coordonnees_incorrectes: 0,
       rqth_autre: 0,
+      rqth_cherche_contrat: 0,
+      rqth_reorientation: 0,
+      rqth_ne_veut_pas_accompagnement: 0,
       rqth_autre_avec_contact: 0,
       abandon: 0,
     };
@@ -2159,7 +2274,93 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
   }
 };
 
-export interface IMissionLocaleSnapshotResult {
+/** Type guard : distingue un effectif DECA d'un effectif ERP */
+function isDeca(effectif: IEffectif | IEffectifDECA): effectif is IEffectifDECA {
+  return "is_deca_compatible" in effectif;
+}
+
+/** Même vérification sur un snapshot sérialisé (peut être null en base) */
+function isDecaSnapshot(snapshot: IEffectif | IEffectifDECA | null | undefined): snapshot is IEffectifDECA {
+  return !!snapshot && "is_deca_compatible" in snapshot;
+}
+
+/**
+ * Vérifie les doublons par identifiant normalisé.
+ * Gère la priorité ERP > DECA et le changement de ML (cross-ML).
+ *
+ * Table de vérité :
+ * | Existant | Nouveau | Same ML | Action                         |
+ * |----------|---------|---------|--------------------------------|
+ * | ERP      | DECA    | oui     | Rejet (ERP prioritaire)        |
+ * | ERP      | DECA    | non     | Rejet (ERP prioritaire)        |
+ * | DECA     | ERP     | oui     | Soft-delete DECA, insert ERP   |
+ * | DECA     | ERP     | non     | Soft-delete DECA, insert ERP   |
+ * | DECA     | DECA    | oui     | Rejet (premier arrivé)         |
+ * | DECA     | DECA    | non     | Soft-delete ancien, insert new |
+ * | ERP      | ERP     | oui     | Rejet (premier arrivé)         |
+ * | ERP      | ERP     | non     | Soft-delete ancien, insert new |
+ *
+ * @returns canInsert=true si l'insertion doit se faire, softDeletedId si un record a été soft-deleted
+ */
+interface DuplicateCheckResult {
+  canInsert: boolean;
+  softDeletedId?: ObjectId;
+}
+
+async function checkAndHandleDuplicate(
+  normalizedIdentifiant: IPersonV2["identifiant"],
+  isNewDeca: boolean,
+  newMissionLocaleId: ObjectId
+): Promise<DuplicateCheckResult> {
+  const existing = await missionLocaleEffectifsDb().findOne({
+    "identifiant_normalise.nom": normalizedIdentifiant.nom,
+    "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+    "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+    soft_deleted: { $ne: true },
+  });
+
+  if (!existing) return { canInsert: true };
+
+  if (!existing.effectif_snapshot) {
+    logger.warn(`Dedup: effectif_snapshot null pour ${existing._id}, données incohérentes`);
+  }
+  const isExistingDeca = isDecaSnapshot(existing.effectif_snapshot);
+  const isSameML = existing.mission_locale_id.toString() === newMissionLocaleId.toString();
+  const personLabel = `${normalizedIdentifiant.nom} ${normalizedIdentifiant.prenom}`;
+
+  if (!isSameML) {
+    // Cross-ML : la personne a changé de ML
+    if (isNewDeca && !isExistingDeca) {
+      logger.info(
+        `Dedup cross-ML: DECA rejeté (ERP ${existing._id} prioritaire dans ML ${existing.mission_locale_id} pour ${personLabel})`
+      );
+      return { canInsert: false };
+    }
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: existing._id },
+      { $set: { soft_deleted: true }, $unset: { identifiant_normalise: "" } }
+    );
+    await createOrUpdateMissionLocaleStats(existing.mission_locale_id);
+    logger.info(`Dedup cross-ML: soft-deleted ${existing._id} (changement de ML pour ${personLabel})`);
+    return { canInsert: true, softDeletedId: existing._id };
+  }
+
+  // Same ML
+  if (isExistingDeca && !isNewDeca) {
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: existing._id },
+      { $set: { soft_deleted: true }, $unset: { identifiant_normalise: "" } }
+    );
+    await createOrUpdateMissionLocaleStats(existing.mission_locale_id);
+    logger.info(`Dedup: soft-deleted DECA ${existing._id} (ERP prioritaire pour ${personLabel})`);
+    return { canInsert: true, softDeletedId: existing._id };
+  }
+
+  logger.info(`Dedup: doublon bloqué pour ${personLabel} (existing ${existing._id})`);
+  return { canInsert: false };
+}
+
+interface IMissionLocaleSnapshotResult {
   upserted: boolean;
 }
 
@@ -2193,23 +2394,22 @@ export const createMissionLocaleSnapshot = async (
   }
 
   let decaFilter = true;
-  if ("is_deca_compatible" in effectif) {
-    const decaEffectif = effectif as IEffectifDECA;
-    const dateRupture = decaEffectif.contrats?.[0]?.date_rupture;
-    const dateFinContrat = decaEffectif.contrats?.[0]?.date_fin;
+  if (isDeca(effectif)) {
+    const dateRupture = effectif.contrats?.[0]?.date_rupture;
+    const dateFinContrat = effectif.contrats?.[0]?.date_fin;
 
     const dateRuptureAfterStart = dateRupture && dateRupture >= DECA_RUPTURE_DATE_DEBUT;
 
     const dateRuptureBeforeFin = dateRupture && dateFinContrat && dateRupture < dateFinContrat;
-    const hasContact = !!(decaEffectif.apprenant.telephone || decaEffectif.apprenant.courriel);
+    const hasContact = !!(effectif.apprenant.telephone || effectif.apprenant.courriel);
 
-    const hasSiret = !!decaEffectif._computed?.organisme?.siret;
-    const hasUai = !!decaEffectif._computed?.organisme?.uai;
-    const hasRncp = !!decaEffectif.formation?.rncp;
-    const hasLocation = !!(decaEffectif.apprenant.adresse?.code_postal || decaEffectif.apprenant.adresse?.code_insee);
+    const hasSiret = !!effectif._computed?.organisme?.siret;
+    const hasUai = !!effectif._computed?.organisme?.uai;
+    const hasRncp = !!effectif.formation?.rncp;
+    const hasLocation = !!(effectif.apprenant.adresse?.code_postal || effectif.apprenant.adresse?.code_insee);
     const hasRequiredFields = hasSiret && hasUai && hasRncp && hasLocation;
 
-    const dateFinFormation = decaEffectif.formation?.date_fin;
+    const dateFinFormation = effectif.formation?.date_fin;
     const delaiMinMs = DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS * 24 * 60 * 60 * 1000;
     const delaiFormationFilter =
       !dateRupture || !dateFinFormation ? true : dateFinFormation.getTime() - dateRupture.getTime() > delaiMinMs;
@@ -2234,34 +2434,13 @@ export const createMissionLocaleSnapshot = async (
     return null;
   }
 
-  const isIncomingErp = effectif.source !== "DECA";
-
   let duplicateFilter = true;
-  let replacedDecaId: ObjectId | null = null;
+  let softDeletedId: ObjectId | undefined;
   if (preFilter && normalizedIdentifiant) {
-    const existingEffectif = await missionLocaleEffectifsDb().findOne({
-      "identifiant_normalise.nom": normalizedIdentifiant.nom,
-      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      mission_locale_id: mlData._id,
-      soft_deleted: { $ne: true },
-    });
-
-    if (existingEffectif) {
-      // ERP peut remplacer un DECA existant (ERP prime sur DECA)
-      const existingIsDeca = existingEffectif.effectif_snapshot?.source === "DECA";
-      if (isIncomingErp && existingIsDeca) {
-        // Soft-delete le DECA AVANT l'insert pour libérer l'index unique
-        await missionLocaleEffectifsDb().updateOne(
-          { _id: existingEffectif._id },
-          { $set: { soft_deleted: true, updated_at: new Date() } }
-        );
-        replacedDecaId = existingEffectif._id;
-        duplicateFilter = true;
-      } else {
-        duplicateFilter = false;
-      }
-    }
+    const isNewDeca = isDeca(effectif);
+    const dupResult = await checkAndHandleDuplicate(normalizedIdentifiant, isNewDeca, mlData._id);
+    duplicateFilter = dupResult.canInsert;
+    softDeletedId = dupResult.softDeletedId;
   }
 
   const shouldUpsert = preFilter && duplicateFilter;
@@ -2292,7 +2471,6 @@ export const createMissionLocaleSnapshot = async (
           effectif_snapshot_date: date,
           date_rupture: currentStatus?.date,
           created_at: date,
-          soft_deleted: false,
           brevo: {
             token: uuidv4(),
             token_created_at: date,
@@ -2309,37 +2487,42 @@ export const createMissionLocaleSnapshot = async (
       },
       { upsert: shouldUpsert }
     );
-  } catch (err) {
-    // Duplicate key on identifiant_normalise unique index — concurrent insert for same person, skip
-    if (err instanceof MongoServerError && err.code === 11000) {
-      // Restaurer le DECA soft-deleted si l'insert ERP a échoué sur duplicate key
-      if (replacedDecaId) {
-        await missionLocaleEffectifsDb().updateOne(
-          { _id: replacedDecaId },
-          { $set: { soft_deleted: false, updated_at: new Date() } }
-        );
-      }
-      logger.info(`Duplicate identifiant_normalise for effectif ${effectif._id}, skipping`);
+  } catch (error) {
+    // Race condition : un doublon a été inséré entre le check et l'upsert
+    if (error instanceof MongoServerError && error.code === 11000) {
+      logger.info(`Dedup: insertion concurrente détectée pour effectif ${effectif._id}, doublon ignoré`);
       return { upserted: false };
     }
-    // Restaurer le DECA soft-deleted si l'upsert échoue pour éviter la perte de données
-    if (replacedDecaId) {
+    // Restaurer le record soft-deleted si l'upsert a échoué pour une autre raison
+    if (softDeletedId) {
       await missionLocaleEffectifsDb().updateOne(
-        { _id: replacedDecaId },
-        { $set: { soft_deleted: false, updated_at: new Date() } }
+        { _id: softDeletedId },
+        {
+          $unset: { soft_deleted: "" },
+          ...(normalizedIdentifiant ? { $set: { identifiant_normalise: normalizedIdentifiant } } : {}),
+        }
       );
+      logger.warn(`Dedup: restauration de ${softDeletedId} après échec de l'upsert pour effectif ${effectif._id}`);
     }
-    throw err;
+    throw error;
   }
 
   const upsertedId = mongoInfo.lastErrorObject?.upserted;
+
+  // Nettoyer cfa_rupture_declaration si un nouveau contrat est arrivé depuis
+  if (!upsertedId && shouldCleanCfaRuptureDeclaration(mongoInfo.value?.cfa_rupture_declaration, currentStatus)) {
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: effectif._id },
+      { $unset: { cfa_rupture_declaration: "" } }
+    );
+  }
 
   if (mongoInfo.lastErrorObject?.n > 0) {
     await createOrUpdateMissionLocaleStats(mlData._id);
     if (upsertedId) {
       // Si on a remplacé un DECA, merger les données utilisateur du DECA vers le nouveau keeper ERP
-      if (replacedDecaId) {
-        await mergeAndSoftDeleteDuplicates(new ObjectId(upsertedId), [replacedDecaId]);
+      if (softDeletedId) {
+        await mergeAndSoftDeleteDuplicates(new ObjectId(upsertedId), [softDeletedId]);
       }
       await checkMissionLocaleEffectifDoublon(
         new ObjectId(upsertedId),
@@ -2414,7 +2597,7 @@ export const getMissionLocaleStat = async (
   };
 
   const effectifsMissionLocaleAggregation = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     {
       $group: {
         _id: null,
@@ -2433,6 +2616,9 @@ export const getMissionLocaleStat = async (
         injoignables: withCondition({ $eq: ["$situation", SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES] }),
         coordonnees_incorrectes: withCondition({ $eq: ["$situation", SITUATION_ENUM.COORDONNEES_INCORRECT] }),
         autre: withCondition({ $eq: ["$situation", SITUATION_ENUM.AUTRE] }),
+        cherche_contrat: withCondition({ $eq: ["$situation", SITUATION_ENUM.CHERCHE_CONTRAT] }),
+        reorientation: withCondition({ $eq: ["$situation", SITUATION_ENUM.REORIENTATION] }),
+        ne_veut_pas_accompagnement: withCondition({ $eq: ["$situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }),
         deja_connu: withCondition({ $eq: ["$deja_connu", true] }),
       },
     },

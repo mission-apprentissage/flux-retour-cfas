@@ -117,7 +117,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (pathname === "/mission-locale") {
+  if (pathname === "/mission-locale" || pathname.startsWith("/mission-locale/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -137,7 +137,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(requestNextData);
   }
 
-  if (pathname === "/cfa") {
+  if (pathname === "/cfa" || pathname.startsWith("/cfa/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }

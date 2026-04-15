@@ -5,7 +5,7 @@ import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collec
 
 import { missionLocaleBaseAggregation } from "./mission-locale.actions";
 
-export interface IMissionLocaleEffectifsStats {
+interface IMissionLocaleEffectifsStats {
   effectifs_prioritaire: number;
   effectifs_a_traiter: number;
   effectifs_a_recontacter: number;
@@ -30,7 +30,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
   }
 
   const aggregationPipeline = [
-    ...missionLocaleBaseAggregation(organisation),
+    ...(await missionLocaleBaseAggregation(organisation)),
     {
       $group: {
         _id: null,

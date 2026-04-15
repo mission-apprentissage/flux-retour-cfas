@@ -1,4 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import dynamic from "next/dynamic";
 
 import { ConnectedHeader } from "../_components/ConnectedHeader";
@@ -7,9 +6,10 @@ import { Footer } from "../_components/Footer";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
+const CrispChatNoSSR = dynamic(() => import("../_components/CrispChat").then((mod) => mod.CrispChat));
+
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
-  const CrispChatNoSSR = dynamic(() => import("../_components/CrispChat").then((mod) => mod.CrispChat));
 
   return (
     <Providers>
@@ -18,11 +18,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         <div
           style={{
             flex: 1,
-            margin: "auto",
-            maxWidth: 1232,
-            ...fr.spacing("padding", {
-              topBottom: "10v",
-            }),
+            background: "var(--background-default-grey)",
           }}
         >
           {children}

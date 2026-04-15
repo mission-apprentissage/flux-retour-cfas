@@ -1,0 +1,90 @@
+.emptyDate {
+  color: var(--text-mention-grey);
+  font-size: 14px;
+}
+
+.emptyMessage {
+  color: var(--text-mention-grey);
+  font-style: italic;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.declareRuptureCta {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-mention-grey);
+  font-style: italic;
+  white-space: normal;
+  max-width: 260px;
+}
+
+.plus25Row {
+  opacity: 0.5;
+}
+
+.plus25Badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.plus25Tooltip {
+  text-transform: none;
+}
+
+.unreadDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-default-error);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.enRuptureOui {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.alertRow,
+.alertRow td {
+  padding: 0 !important;
+}
+
+.alertBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: var(--background-contrast-grey);
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
+.alertBox i {
+  color: var(--text-mention-grey);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.alertTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-default-grey);
+}
+
+.alertDescription {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}

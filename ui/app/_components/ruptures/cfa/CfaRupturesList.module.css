@@ -1,0 +1,52 @@
+.searchFieldFix :global(.fr-input-wrap--action) :global(.fr-btn) {
+  margin-left: 0 !important;
+}
+
+.filtersRowNarrow {
+  max-width: 900px;
+}
+
+.selectFieldWider {
+  min-width: 320px;
+}
+
+.infoBox {
+  background-color: #e3e3fd;
+  border: 1px solid #cacafb;
+  padding: 1.5rem 2rem;
+  margin-top: 2rem;
+}
+
+.infoBoxTitle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  color: #000091;
+  font-family: Marianne, arial, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+}
+
+.infoBoxIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #000091;
+}
+
+.infoBoxContent {
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--text-default-grey);
+}
+
+.infoBoxContent ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.infoBoxContent li {
+  margin-bottom: 0.25rem;
+}

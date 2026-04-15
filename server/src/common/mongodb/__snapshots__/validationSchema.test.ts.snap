@@ -12430,6 +12430,36 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "cfa_rupture_declaration": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_rupture": {
+              "bsonType": "date",
+              "description": "Date de rupture déclarée par le CFA",
+            },
+            "declared_at": {
+              "bsonType": "date",
+              "description": "Date de la déclaration",
+            },
+            "declared_by": {
+              "bsonType": "objectId",
+              "description": "ID de l'utilisateur CFA qui a déclaré la rupture",
+            },
+          },
+          "required": [
+            "date_rupture",
+            "declared_at",
+            "declared_by",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "classification_reponse_appel": {
       "anyOf": [
         {
@@ -17718,11 +17748,32 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "ID de l'utilisateur CFA qui a effectué la demande",
             },
+            "cause_rupture": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Cause et circonstances de la rupture décrites par le CFA",
+            },
             "commentaires": {
               "bsonType": [
                 "string",
                 "null",
               ],
+            },
+            "commentaires_par_motif": {
+              "anyOf": [
+                {
+                  "additionalProperties": {
+                    "bsonType": "string",
+                  },
+                  "bsonType": "object",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Commentaires libres par motif",
             },
             "has_unread_notification": {
               "bsonType": "bool",
@@ -17740,6 +17791,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                       "SANTE",
                       "FINANCE",
                       "ADMINISTRATIF",
+                      "SOCIAL_FAMILIAL",
                       "REORIENTATION",
                       "RECHERCHE_EMPLOI",
                       "AUTRE",
@@ -17750,6 +17802,35 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "bsonType": "null",
                 },
               ],
+            },
+            "note_complementaire": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Note complémentaire facultative pour la ML",
+            },
+            "referent_coordonnees": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Coordonnées du référent CFA (snapshot figé au moment de l'envoi)",
+            },
+            "referent_type": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "me",
+                    "other",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Type de référent CFA à contacter",
             },
             "reponse_at": {
               "anyOf": [
@@ -17769,6 +17850,69 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "null",
               ],
               "description": "Indique si l'effectif est signalé en rupture par le CFA",
+            },
+            "still_at_cfa": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+              "description": "Indique si le jeune est toujours en formation au CFA",
+            },
+            "verified_info": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "adresse_code_postal": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "adresse_commune": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "adresse_rue": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "courriel": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "date_fin_formation": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "formation_libelle": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "telephone": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Informations vérifiées/corrigées par le CFA pour la ML",
             },
           },
         },
@@ -17812,6 +17956,9 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "NOUVEAU_CONTRAT",
             "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
+            "CHERCHE_CONTRAT",
+            "REORIENTATION",
+            "NE_VEUT_PAS_ACCOMPAGNEMENT",
           ],
         },
         {
@@ -18136,6 +18283,9 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "NOUVEAU_CONTRAT",
             "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
             "AUTRE",
+            "CHERCHE_CONTRAT",
+            "REORIENTATION",
+            "NE_VEUT_PAS_ACCOMPAGNEMENT",
           ],
         },
         {
@@ -18191,6 +18341,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "autre_avec_contact": {
           "bsonType": "int",
         },
+        "cherche_contrat": {
+          "bsonType": "int",
+        },
         "contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18218,6 +18371,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_autre_avec_contact": {
           "bsonType": "int",
         },
+        "mineur_cherche_contrat": {
+          "bsonType": "int",
+        },
         "mineur_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18230,19 +18386,31 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_injoignables": {
           "bsonType": "int",
         },
+        "mineur_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
         "mineur_nouveau_projet": {
           "bsonType": "int",
         },
         "mineur_rdv_pris": {
           "bsonType": "int",
         },
+        "mineur_reorientation": {
+          "bsonType": "int",
+        },
         "mineur_traite": {
+          "bsonType": "int",
+        },
+        "ne_veut_pas_accompagnement": {
           "bsonType": "int",
         },
         "nouveau_projet": {
           "bsonType": "int",
         },
         "rdv_pris": {
+          "bsonType": "int",
+        },
+        "reorientation": {
           "bsonType": "int",
         },
         "rqth": {
@@ -18257,6 +18425,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "rqth_autre_avec_contact": {
           "bsonType": "int",
         },
+        "rqth_cherche_contrat": {
+          "bsonType": "int",
+        },
         "rqth_contacte_sans_retour": {
           "bsonType": "int",
         },
@@ -18269,10 +18440,16 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "rqth_injoignables": {
           "bsonType": "int",
         },
+        "rqth_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
         "rqth_nouveau_projet": {
           "bsonType": "int",
         },
         "rqth_rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth_reorientation": {
           "bsonType": "int",
         },
         "rqth_traite": {
@@ -19738,6 +19915,13 @@ exports[`validation-schema > should create validation schema for organismes > or
     "is_allowed_collab": {
       "bsonType": "bool",
       "description": "Indique si cet organisme fait partie du pilote de collaboration ML/CFA",
+    },
+    "is_allowed_deca": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+      "description": "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)",
     },
     "is_transmission_target": {
       "bsonType": [

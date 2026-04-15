@@ -1,0 +1,13 @@
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-mention-grey);
+}

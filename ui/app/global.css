@@ -33,6 +33,11 @@
   --active: var(--background-contrast-error-active);
 }
 
+/* DSFR tooltips default to bold — override to normal weight globally */
+.fr-tooltip {
+  font-weight: 400 !important;
+}
+
 .fr-badge--success-inverted {
   color: var(--background-contrast-success);
   background-color: var(--text-default-success);

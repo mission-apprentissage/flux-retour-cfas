@@ -18,15 +18,10 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
       "identifiant_normalise.nom": 1,
       "identifiant_normalise.prenom": 1,
       "identifiant_normalise.date_de_naissance": 1,
-      mission_locale_id: 1,
     },
     {
       unique: true,
-      name: "identifiant_normalise_ml_unique_active",
-      partialFilterExpression: {
-        soft_deleted: { $eq: false },
-        "identifiant_normalise.nom": { $exists: true },
-      },
+      partialFilterExpression: { "identifiant_normalise.nom": { $exists: true } },
     },
   ],
   [{ "whatsapp_contact.phone_normalized": 1 }, { sparse: true }],
@@ -43,6 +38,9 @@ export enum SITUATION_ENUM {
   NOUVEAU_CONTRAT = "NOUVEAU_CONTRAT",
   NE_SOUHAITE_PAS_ETRE_RECONTACTE = "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
   AUTRE = "AUTRE",
+  CHERCHE_CONTRAT = "CHERCHE_CONTRAT",
+  REORIENTATION = "REORIENTATION",
+  NE_VEUT_PAS_ACCOMPAGNEMENT = "NE_VEUT_PAS_ACCOMPAGNEMENT",
 }
 
 export enum SITUATION_LABEL_ENUM {
@@ -55,6 +53,9 @@ export enum SITUATION_LABEL_ENUM {
   NOUVEAU_CONTRAT = "Ce jeune a retrouvé un contrat d'apprentissage",
   NE_SOUHAITE_PAS_ETRE_RECONTACTE = "Ne souhaite pas être recontacté (WhatsApp)",
   AUTRE = "Autre situation / retour",
+  CHERCHE_CONTRAT = "Cherche un contrat, ne souhaite pas l'aide de la Mission Locale",
+  REORIENTATION = "Se réoriente, ne souhaite pas l'aide de la Mission Locale",
+  NE_VEUT_PAS_ACCOMPAGNEMENT = "Ne veut pas être accompagné",
 }
 
 export enum PROBLEME_TYPE_ENUM {
@@ -69,6 +70,7 @@ export enum ACC_CONJOINT_MOTIF_ENUM {
   SANTE = "SANTE",
   FINANCE = "FINANCE",
   ADMINISTRATIF = "ADMINISTRATIF",
+  SOCIAL_FAMILIAL = "SOCIAL_FAMILIAL",
   REORIENTATION = "REORIENTATION",
   RECHERCHE_EMPLOI = "RECHERCHE_EMPLOI",
   AUTRE = "AUTRE",
@@ -92,6 +94,18 @@ export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
+
+export const zVerifiedInfo = z.object({
+  telephone: z.string().nullish(),
+  courriel: z.string().nullish(),
+  adresse_rue: z.string().nullish(),
+  adresse_code_postal: z.string().nullish(),
+  adresse_commune: z.string().nullish(),
+  formation_libelle: z.string().nullish(),
+  date_fin_formation: z.string().nullish(),
+});
+
+export type IVerifiedInfo = z.output<typeof zVerifiedInfo>;
 
 const zMissionLocaleEffectif = z.object({
   _id: zObjectId,
@@ -132,6 +146,19 @@ const zMissionLocaleEffectif = z.object({
           "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
         ),
       acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
+      still_at_cfa: z.boolean().nullish().describe("Indique si le jeune est toujours en formation au CFA"),
+      commentaires_par_motif: z
+        .record(zAccConjointMotifEnum, z.string())
+        .nullish()
+        .describe("Commentaires libres par motif"),
+      cause_rupture: z.string().nullish().describe("Cause et circonstances de la rupture décrites par le CFA"),
+      referent_type: z.enum(["me", "other"]).nullish().describe("Type de référent CFA à contacter"),
+      referent_coordonnees: z
+        .string()
+        .nullish()
+        .describe("Coordonnées du référent CFA (snapshot figé au moment de l'envoi)"),
+      note_complementaire: z.string().nullish().describe("Note complémentaire facultative pour la ML"),
+      verified_info: zVerifiedInfo.nullish().describe("Informations vérifiées/corrigées par le CFA pour la ML"),
     })
     .nullish(),
   effectif_choice: z
@@ -217,6 +244,13 @@ const zMissionLocaleEffectif = z.object({
         .max(5)
         .describe("Score 0-5 de disposition à recevoir d'autres dossiers DECA"),
       responded_by: zObjectId.describe("ID de l'utilisateur qui a répondu au feedback"),
+    })
+    .nullish(),
+  cfa_rupture_declaration: z
+    .object({
+      date_rupture: z.date({ description: "Date de rupture déclarée par le CFA" }),
+      declared_at: z.date({ description: "Date de la déclaration" }),
+      declared_by: zObjectId.describe("ID de l'utilisateur CFA qui a déclaré la rupture"),
     })
     .nullish(),
 });

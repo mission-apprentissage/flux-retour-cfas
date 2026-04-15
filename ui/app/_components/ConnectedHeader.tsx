@@ -4,14 +4,25 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
+
 import { useAuth } from "../_context/UserContext";
+import { usePlausibleAppTracking } from "../_hooks/plausible";
 
 import { Impersonate } from "./Impersonate";
+import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
 export function ConnectedHeader() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
+  const { data: unreadData } = useCfaUnreadNotificationsCount(
+    isCfaWithMlBeta ? user?.organisation?.organisme_id : undefined
+  );
+  const unreadCount = unreadData?.count ?? 0;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -45,17 +56,52 @@ export function ConnectedHeader() {
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
       if (user?.organisation?.ml_beta_activated_at) {
         baseItems.push({
-          text: "Mon tableau de bord",
+          text: "Effectifs en ruptures",
+          isActive:
+            pathname === "/cfa" ||
+            (pathname?.startsWith("/cfa/") &&
+              !pathname?.startsWith("/cfa/effectifs") &&
+              !pathname?.startsWith("/cfa/collaborations") &&
+              !pathname?.startsWith("/cfa/parametres")),
           linkProps: {
             href: "/cfa",
             target: "_self",
           },
         });
         baseItems.push({
-          text: "Paramètres",
+          text: (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+              Collaborations en cours
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: "var(--text-default-error)",
+                    flexShrink: 0,
+                  }}
+                  role="status"
+                  aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+                />
+              )}
+            </span>
+          ),
+          isActive: pathname?.startsWith("/cfa/collaborations"),
           linkProps: {
-            href: "/cfa/parametres",
+            href: "/cfa/collaborations",
             target: "_self",
+            onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
+          },
+        });
+        baseItems.push({
+          text: "Tous mes effectifs",
+          isActive: pathname?.startsWith("/cfa/effectifs"),
+          linkProps: {
+            href: "/cfa/effectifs",
+            target: "_self",
+            onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
           },
         });
       } else {
@@ -239,7 +285,7 @@ export function ConnectedHeader() {
       text: "Glossaire",
     });
 
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !user?.organisation?.ml_beta_activated_at) {
+    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) {
       baseItems.push({
         text: "Paramètres",
         linkProps: {
@@ -249,10 +295,12 @@ export function ConnectedHeader() {
       });
     }
 
-    baseItems.push({
-      text: "Aide et ressources",
-      menuLinks: aideMenuLinks,
-    });
+    if (!isCfaWithMlBeta) {
+      baseItems.push({
+        text: "Aide et ressources",
+        menuLinks: aideMenuLinks,
+      });
+    }
 
     return baseItems;
   };

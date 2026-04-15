@@ -1,0 +1,238 @@
+.detailPage {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  border-top: 1px solid var(--border-default-grey);
+  padding-top: 2rem;
+  margin-left: -3rem;
+  margin-right: -3rem;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 991px) {
+  .columns {
+    grid-template-columns: 1fr;
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+
+  .collaborationColumn {
+    order: -1;
+  }
+
+  .columns {
+    height: auto;
+  }
+}
+
+.ruptureBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ruptureBlock :global(.fr-toggle) {
+  border-bottom: none;
+}
+
+.ruptureLabel {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--text-default-grey);
+  margin: 0 0 0.25rem 0;
+}
+
+.ruptureBlock :global(.fr-toggle__btn),
+.ruptureBlock :global(.fr-toggle__label) {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.collaborationColumn {
+  padding: 2rem 2rem 0 1.5rem;
+  margin-top: -2rem;
+  margin-bottom: -2rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 991px) {
+  .collaborationColumn {
+    padding: 0;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-default-grey);
+  }
+}
+
+.columnHeader {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-mention-grey);
+  background: white;
+  border-bottom: 1px solid var(--border-default-grey);
+  margin: -2rem -2rem 1rem -1.5rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.suiviColumn {
+  background: var(--background-alt-grey);
+  border-left: 1px solid var(--border-default-grey);
+  padding: 2rem 3rem 2rem 1.5rem;
+  margin-top: -2rem;
+  margin-bottom: -2rem;
+  overflow-y: auto;
+}
+
+.suiviColumn .columnHeader {
+  margin-right: -3rem;
+}
+
+@media (max-width: 991px) {
+  .suiviColumn {
+    padding: 1.5rem 1rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    background: none;
+  }
+}
+
+.suiviNotice {
+  margin: -1rem -3rem 1.5rem -1.5rem;
+}
+
+.suiviNotice :global(.fr-notice) {
+  background: var(--background-contrast-grey);
+}
+
+.suiviNotice :global(.fr-notice__title) {
+  display: flex;
+  align-items: flex-start;
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 136%;
+  color: var(--text-mention-grey);
+}
+
+.suiviNotice :global(.fr-notice__title::before) {
+  font-size: 0.875rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.suiviTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.suiviEvent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.suiviEventIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.suiviEventBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  flex: 1;
+}
+
+.suiviEventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.suiviEventTitle {
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.suiviEventDate {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+  margin: 0;
+}
+
+.suiviEventSubtext {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  margin: 0;
+}
+
+.attenteIcon {
+  color: var(--text-mention-grey);
+}
+
+.suiviEventAttente .suiviEventTitle {
+  color: var(--text-mention-grey);
+}
+
+.sentBubble {
+  background: var(--background-alt-blue-france);
+  border: 1px solid var(--border-action-low-blue-france);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0.25rem 1rem 4rem;
+}
+
+.sentFooter {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-default-grey);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0.5rem 0.25rem 0 4rem;
+}
+
+.mlReceivedBubble {
+  background: white;
+  border: 1px solid var(--border-default-grey);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 4rem 1rem 0.25rem;
+}
+
+.mlReceivedFooter {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-default-grey);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0.5rem 4rem 0 0.25rem;
+}
+
+.mlReceivedFooterIcon {
+  color: var(--text-default-success);
+  flex-shrink: 0;
+  margin-top: 1px;
+}

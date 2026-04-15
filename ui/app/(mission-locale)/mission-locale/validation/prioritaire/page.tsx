@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { MlContainer } from "../../MlContainer";
+
 import ValidationPrioritaireClient from "./ValidationPrioritaireClient";
 
 export const metadata: Metadata = {
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ValidationPrioritaireClient />;
+  return (
+    <MlContainer>
+      <ValidationPrioritaireClient />
+    </MlContainer>
+  );
 }

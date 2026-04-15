@@ -1,0 +1,570 @@
+.page {
+  padding: 2rem 3rem;
+  background: white;
+}
+
+.backLink {
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 991px) {
+  .page {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.infoColumn {
+  border-right: 2px solid var(--border-default-grey);
+  padding-left: 3rem;
+  padding-right: 2rem;
+  margin-top: -2rem;
+  padding-top: 2rem;
+  margin-bottom: -2rem;
+  padding-bottom: 2rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 991px) {
+  .infoColumn {
+    border-right: none;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-bottom: 1px solid var(--border-default-grey);
+    padding-bottom: 2rem;
+  }
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--border-action-low-blue-france);
+  color: var(--blue-france-main-525);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.nameRow h4 {
+  margin: 0;
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 2.5rem;
+  color: var(--text-default-grey);
+}
+
+.badgesGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.separator {
+  border: none;
+  height: 4px;
+  padding: 0;
+  background: var(--background-alt-grey);
+  margin: 0.75rem -2rem 0.75rem -3rem;
+}
+
+.mineurNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #f5f5fe;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #000091;
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-default-grey);
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+}
+
+.infoLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.infoLine i,
+.mlName i {
+  color: var(--text-mention-grey);
+  flex-shrink: 0;
+}
+
+.infoLine strong {
+  font-weight: 700;
+  color: var(--text-action-high-blue-france);
+}
+
+.rqthLine {
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+}
+
+.formationLevel {
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+  color: var(--text-mention-grey);
+}
+
+.noData {
+  color: var(--text-mention-grey);
+  font-style: italic;
+}
+
+.mlName {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+}
+
+.mlCoordLink {
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.mlContactDetails {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.mlContactDetails p {
+  margin: 0.25rem 0;
+}
+
+.sourceFooter {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  font-style: italic;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.collabBlock {
+  background: var(--background-alt-blue-france);
+  border-radius: 4px;
+  padding: 1.5rem;
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='4' ry='4' stroke='%23C1C1FB' stroke-width='2' stroke-dasharray='14%2c 10' stroke-linecap='square'/%3e%3c/svg%3e");
+}
+
+.collabQuestion {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.mlCallOut {
+  border-left: 4px solid var(--blue-france-main-525);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0;
+}
+
+.mlCallOutTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.mlCallOutLocation {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+  margin: 0 0 0.5rem 0;
+}
+
+.mlInactiveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--background-contrast-error);
+  color: var(--text-default-error);
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0 0.5rem 0;
+  width: fit-content;
+}
+
+.collabCta {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.collabDisabledMessage {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+  font-style: italic;
+}
+
+.emptyTimeline {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+  font-style: italic;
+}
+
+.sentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-default-grey);
+  margin: -2rem -2rem 1rem -1.5rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.sentHeaderTitle {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-mention-grey);
+}
+
+.sentBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: Marianne, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-action-high-blue-france);
+  white-space: nowrap;
+  background: var(--background-action-low-blue-france-hover);
+  padding: 0 0.5rem;
+  border-radius: 4px;
+}
+
+.sentBadgeIcon {
+  color: var(--blue-france-main-525);
+}
+
+.sentCallout {
+  background: var(--background-alt-blue-france);
+  padding: 1rem 1.25rem;
+  margin: -1rem -2rem 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 2rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-default-grey);
+}
+
+.sentCalloutTitle {
+  font-weight: 700;
+  margin: 0 0 0.375rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.sentCalloutTitle :global([class^="fr-icon-"]) {
+  color: var(--text-mention-grey);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sentCalloutBody {
+  font-weight: 400;
+  margin: 0 0 0.75rem 0;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  line-height: 1.5;
+}
+
+.sentContactToggle {
+  background: none;
+  border: none;
+  color: var(--text-action-high-blue-france);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: underline;
+}
+
+.sentContactToggle:hover {
+  text-decoration: none;
+}
+
+.sentContactDetails {
+  color: var(--text-default-grey);
+  margin-top: 0.375rem;
+}
+
+.sentContactDetails p {
+  margin: 0.125rem 0;
+  font-size: 1rem;
+}
+
+.sentBubbleSection {
+  padding: 0;
+  margin-bottom: 1.25rem;
+}
+
+.sentBubbleSection:last-child {
+  margin-bottom: 0;
+}
+
+.sentSectionTitle {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+  margin: 0 0 0.25rem 0;
+}
+
+.sentMotifInline {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-title-grey);
+  margin: 0 0 0.25rem 0;
+}
+
+.sentMotifInline strong {
+  font-weight: 700;
+}
+
+.sentBody {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-title-grey);
+  margin: 0 0 0.125rem 0;
+}
+
+.sentStillAtCfa {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-title-grey);
+  margin: 0;
+}
+
+.sentFooter :global([class^="fr-icon-"]) {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  color: var(--blue-france-main-525);
+  margin-top: 1px;
+}
+
+.sentFooterDate {
+  font-weight: 400;
+}
+
+.feedbackLine {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-title-grey);
+  margin: 0.375rem 0;
+}
+
+.feedbackCommentaire {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-title-grey);
+  margin: 0;
+}
+
+.mlInactiveBanner {
+  background: var(--background-alt-grey);
+  padding: 1rem 1.5rem;
+  margin: 1rem -2rem 0 -1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mlInactiveNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mlInactiveNoticeTitle {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--text-default-grey);
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.mlInactiveNoticeTitle :global([class^="fr-icon-"]) {
+  color: var(--text-title-blue-france);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mlInactiveNoticeBody {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-mention-grey);
+  margin: 0;
+}
+
+.nouveauContratIcon {
+  color: #679e3b;
+}
+
+.recontacterIcon {
+  color: var(--text-mention-grey);
+}
+
+.injoignableIcon {
+  color: var(--text-default-error);
+}
+
+.suiviCommentText {
+  font-family: Marianne, sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.5;
+}
+
+.recommendedLabel {
+  display: block;
+  font-size: 1rem;
+  color: var(--blue-france-main-525);
+}
+
+.detailToggle {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-action-high-blue-france);
+  font-family: Marianne, sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.detailToggle:hover {
+  text-decoration: none;
+}
+
+.dossierTraiteBubble {
+  background: #eeeeee;
+  border: 1px solid var(--border-default-grey);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.dossierTraiteLine {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--text-title-grey);
+  margin: 0.25rem 0;
+}
+
+.dossierTraiteCommentaire {
+  font-family: Marianne, sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--text-title-grey);
+  margin: 0;
+}
+
+.nouveauContratBanner {
+  background: #eeeeee;
+  padding: 0.75rem 1.25rem;
+  margin: 1rem -2rem 1rem -1.5rem;
+}
+
+.nouveauContratBannerTag {
+  margin-bottom: 0.5rem;
+}
+
+.nouveauContratBannerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nouveauContratBannerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nouveauContratBannerIcon {
+  color: #77b645;
+}
+
+.nouveauContratBannerTitle {
+  font-family: Marianne, sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+}
+
+.nouveauContratBannerDate {
+  font-family: Marianne, sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.nouveauContratBannerSubtext {
+  font-family: Marianne, sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  margin: 0.25rem 0 0 0;
+}

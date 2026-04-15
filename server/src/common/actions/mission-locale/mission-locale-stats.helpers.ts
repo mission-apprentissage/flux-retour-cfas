@@ -35,6 +35,9 @@ export const EMPTY_STATS: IAggregatedStats = {
   injoignables: 0,
   coordonnees_incorrectes: 0,
   autre: 0,
+  cherche_contrat: 0,
+  reorientation: 0,
+  ne_veut_pas_accompagnement: 0,
   deja_connu: 0,
 };
 
@@ -131,7 +134,7 @@ export const withMissionLocaleFilter = <T extends Record<string, unknown>>(
 /**
  * Récupère la date la plus ancienne des statistiques
  */
-export const getEarliestDate = async () => {
+const getEarliestDate = async () => {
   const earliestDate = await missionLocaleStatsDb().findOne(
     {},
     { sort: { computed_day: 1 }, projection: { computed_day: 1 } }

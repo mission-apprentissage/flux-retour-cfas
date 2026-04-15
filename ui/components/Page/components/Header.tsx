@@ -15,15 +15,16 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { CRISP_FAQ } from "shared";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { _delete, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
+import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 import Link from "@/components/Links/Link";
 import MenuItem from "@/components/Links/MenuItem";
 import useAuth from "@/hooks/useAuth";
-import { Settings4Fill, UserFill } from "@/theme/components/icons";
 import { AccountFill } from "@/theme/components/icons/AccountFill";
 import { AccountUnfill } from "@/theme/components/icons/AccountUnfill";
 import { ExitIcon } from "@/theme/components/icons/ExitIcon";
@@ -45,6 +46,8 @@ enum MENU_ENTRIES {
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
 
+  const isCfaWithMlBeta = checkCfaWithMlBeta(auth?.organisation);
+
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
@@ -59,9 +62,18 @@ const UserMenu = () => {
       case MENU_ENTRIES.ADMIN:
         return organisationType === "ADMINISTRATEUR";
       default:
-        false;
+        return false;
     }
   };
+
+  const buttonLabel = (() => {
+    if (isCfaWithMlBeta && auth?.prenom && auth?.nom) {
+      return `${auth.prenom.charAt(0).toUpperCase()}${auth.prenom.slice(1)} ${auth.nom.charAt(0).toUpperCase()}.`;
+    }
+    return getAccountLabel(auth as AuthContext);
+  })();
+
+  const cfaName = isCfaWithMlBeta ? auth?.organisation_nom : null;
 
   return (
     <>
@@ -85,59 +97,119 @@ const UserMenu = () => {
         <Flex w="full">
           <Menu placement="bottom">
             <MenuButton as={Button} variant="pill" px={0} flexGrow={1}>
-              <Flex maxWidth="226px">
-                <UserFill mt="0.3rem" boxSize={4} />
-                <Box display={["none", "block"]} ml={2}>
-                  <Text color="bluefrance" textStyle="sm" textOverflow="ellipsis" maxWidth="200px" overflow="hidden">
-                    {getAccountLabel(auth as AuthContext)}
+              <Flex maxWidth="280px" alignItems="center">
+                <i
+                  className="ri-account-circle-fill"
+                  style={{ fontSize: "1.125rem", color: "#000091", flexShrink: 0 }}
+                />
+                <Box display={["none", "block"]} ml={2} textAlign="left">
+                  <Text
+                    color="bluefrance"
+                    textStyle="sm"
+                    fontWeight={isCfaWithMlBeta ? "700" : undefined}
+                    textOverflow="ellipsis"
+                    maxWidth="240px"
+                    overflow="hidden"
+                  >
+                    {buttonLabel}
                   </Text>
+                  {cfaName && (
+                    <Text color="bluefrance" fontSize="0.75rem" fontWeight="400" lineHeight="1.2">
+                      {cfaName}
+                    </Text>
+                  )}
                 </Box>
               </Flex>
             </MenuButton>
-            <MenuList>
-              <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
-                Informations
+            <MenuList color="#000091">
+              <MenuItem
+                href="/mon-compte"
+                icon={<i className="ri-account-circle-fill" style={{ fontSize: "0.875rem" }} />}
+              >
+                Mon compte
               </MenuItem>
               {hasRight(MENU_ENTRIES.ROLES) && (
-                <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
+                <MenuItem
+                  href="/organisation/membres"
+                  icon={<i className="ri-team-fill" style={{ fontSize: "0.875rem" }} />}
+                >
                   Rôles et habilitations
                 </MenuItem>
               )}
               {hasRight(MENU_ENTRIES.TRANSMISSIONS) && (
-                <MenuItem href="/transmissions" icon={<Parametre boxSize={4} />}>
+                <MenuItem
+                  href="/transmissions"
+                  icon={<i className="ri-send-plane-fill" style={{ fontSize: "0.875rem" }} />}
+                >
                   Transmissions
                 </MenuItem>
               )}
+              {isCfaWithMlBeta && (
+                <>
+                  <MenuItem
+                    href="/cfa/parametres"
+                    icon={<i className="ri-settings-5-fill" style={{ fontSize: "0.875rem" }} />}
+                  >
+                    Paramètres de connexion ERP
+                  </MenuItem>
+                  <MenuGroup title="Aide et ressources">
+                    <MenuItem
+                      href={CRISP_FAQ}
+                      icon={<i className="ri-question-fill" style={{ fontSize: "0.875rem" }} />}
+                    >
+                      Centre d&apos;aide
+                    </MenuItem>
+                    <MenuItem
+                      href="/glossaire"
+                      icon={<i className="ri-book-2-fill" style={{ fontSize: "0.875rem" }} />}
+                    >
+                      Glossaire
+                    </MenuItem>
+                    <MenuItem
+                      href="/referencement-organisme"
+                      icon={<i className="ri-building-fill" style={{ fontSize: "0.875rem" }} />}
+                    >
+                      Référencement organisme
+                    </MenuItem>
+                  </MenuGroup>
+                </>
+              )}
               {hasRight(MENU_ENTRIES.ADMIN) && (
                 <MenuGroup title="Administration">
-                  <MenuItem href="/admin/transmissions" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/transmissions" icon={<Parametre boxSize={3} color="#000091" />}>
                     Toutes les transmissions
                   </MenuItem>
-                  <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/users" icon={<Parametre boxSize={3} color="#000091" />}>
                     Gestion des utilisateurs
                   </MenuItem>
-                  <MenuItem href="/admin/reseaux" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/reseaux" icon={<Parametre boxSize={3} color="#000091" />}>
                     Gestion des réseaux
                   </MenuItem>
-                  <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={3} color="#000091" />}>
                     Recherche organisme
                   </MenuItem>
-                  <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={3} color="#000091" />}>
                     Fusion d&apos;organismes
                   </MenuItem>
-                  <MenuItem href="/admin/organismes/gestion" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/organismes/gestion" icon={<Parametre boxSize={3} color="#000091" />}>
                     Gestion des organismes
                   </MenuItem>
-                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={3} color="#000091" />}>
                     Message de maintenance
                   </MenuItem>
-                  <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={4} />}>
+                  <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={3} color="#000091" />}>
                     Impostures
                   </MenuItem>
                 </MenuGroup>
               )}
               <MenuDivider />
-              <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
+              <ChakraMenuItem onClick={logout} color="var(--text-default-error)">
+                <i
+                  className="ri-logout-box-r-fill"
+                  style={{ fontSize: "0.875rem", color: "var(--text-default-error)", marginRight: "0.5rem" }}
+                />
+                Déconnexion
+              </ChakraMenuItem>
             </MenuList>
           </Menu>
         </Flex>

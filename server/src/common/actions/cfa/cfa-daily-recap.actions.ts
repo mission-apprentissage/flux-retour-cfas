@@ -17,9 +17,12 @@ const SITUATIONS_ACTIVES = [
   SITUATION_ENUM.AUTRE,
   SITUATION_ENUM.CONTACTE_SANS_RETOUR,
   SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES,
+  SITUATION_ENUM.CHERCHE_CONTRAT,
+  SITUATION_ENUM.REORIENTATION,
+  SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
 ];
 
-export interface IMissionLocaleWithActions {
+interface IMissionLocaleWithActions {
   mission_locale: {
     id: string;
     nom: string;
@@ -28,7 +31,7 @@ export interface IMissionLocaleWithActions {
   acc_conjoint_by: ObjectId | null;
 }
 
-export interface ICfaDailyStats {
+interface ICfaDailyStats {
   cfa: {
     _id: ObjectId;
     nom: string;
