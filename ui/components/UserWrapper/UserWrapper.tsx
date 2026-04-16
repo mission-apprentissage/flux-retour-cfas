@@ -76,7 +76,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
         messageMaintenance?.enabled &&
         router.asPath !== "/en-maintenance" &&
         router.asPath !== "/auth/connexion" &&
-        auth.organisation.type === "ADMINISTRATEUR"
+        auth?.organisation?.type === "ADMINISTRATEUR"
       ) {
         router.push("/en-maintenance");
       }
