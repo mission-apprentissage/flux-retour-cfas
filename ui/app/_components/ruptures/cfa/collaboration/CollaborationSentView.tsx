@@ -38,6 +38,12 @@ export function CollaborationSentView({
   );
   const hasRecherche = motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI);
   const hasReorientation = motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
+  const hasBubbleContent =
+    motifs.length > 0 ||
+    !!od?.cause_rupture ||
+    od?.still_at_cfa != null ||
+    !!od?.referent_coordonnees ||
+    !!od?.note_complementaire;
 
   const organismeName =
     (effectif.organisme as { nom?: string } | null)?.nom ||
@@ -105,74 +111,77 @@ export function CollaborationSentView({
         </div>
       )}
 
-      <div className={styles.sentBubble}>
-        {motifs.length > 0 && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Quel accompagnement attendu ?</p>
+      {hasBubbleContent && (
+        <div className={styles.sentBubble}>
+          {motifs.length > 0 && (
+            <div className={styles.sentBubbleSection}>
+              <p className={styles.sentSectionTitle}>Quel accompagnement attendu ?</p>
 
-            {hasRecherche && (
-              <p className={styles.sentMotifInline}>
-                <strong>
-                  L&apos;aider dans sa recherche d&apos;entreprise{" "}
-                  {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}
-                </strong>
-                {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && (
-                  <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}</>
-                )}
+              {hasRecherche && (
+                <p className={styles.sentMotifInline}>
+                  <strong>
+                    L&apos;aider dans sa recherche d&apos;entreprise{" "}
+                    {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}
+                  </strong>
+                  {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && (
+                    <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}</>
+                  )}
+                </p>
+              )}
+
+              {freinsMotifs.map((motif) => (
+                <p key={motif} className={styles.sentMotifInline}>
+                  <strong>
+                    Frein de {MOTIF_LABELS[motif] || motif} {MOTIF_EMOJIS[motif] || ""}
+                  </strong>
+                  {commentaires?.[motif] && <> — {commentaires[motif]}</>}
+                </p>
+              ))}
+
+              {hasReorientation && (
+                <p className={styles.sentMotifInline}>
+                  <strong>
+                    L&apos;aider dans sa réorientation {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}
+                  </strong>
+                  {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] && (
+                    <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}</>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+
+          {od?.cause_rupture && (
+            <div className={styles.sentBubbleSection}>
+              <p className={styles.sentSectionTitle}>A propos de la rupture</p>
+              <p className={styles.sentBody}>{od.cause_rupture}</p>
+            </div>
+          )}
+
+          {od?.still_at_cfa != null && (
+            <div className={styles.sentBubbleSection}>
+              <p className={styles.sentStillAtCfa}>
+                {prenom}{" "}
+                {od.still_at_cfa ? "est maintenu en formation dans le CFA ✅" : "n'est plus en formation au CFA"}
               </p>
-            )}
+            </div>
+          )}
 
-            {freinsMotifs.map((motif) => (
-              <p key={motif} className={styles.sentMotifInline}>
-                <strong>
-                  Frein de {MOTIF_LABELS[motif] || motif} {MOTIF_EMOJIS[motif] || ""}
-                </strong>
-                {commentaires?.[motif] && <> — {commentaires[motif]}</>}
-              </p>
-            ))}
+          {od?.referent_coordonnees && (
+            <div className={styles.sentBubbleSection}>
+              <p className={styles.sentSectionTitle}>Référent(e) à contacter</p>
+              <ReferentCoordonnees value={od.referent_coordonnees} />
+            </div>
+          )}
 
-            {hasReorientation && (
-              <p className={styles.sentMotifInline}>
-                <strong>
-                  L&apos;aider dans sa réorientation {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}
-                </strong>
-                {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] && (
-                  <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}</>
-                )}
-              </p>
-            )}
-          </div>
-        )}
-
-        {od?.cause_rupture && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>A propos de la rupture</p>
-            <p className={styles.sentBody}>{od.cause_rupture}</p>
-          </div>
-        )}
-
-        {od?.still_at_cfa != null && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentStillAtCfa}>
-              {prenom} {od.still_at_cfa ? "est maintenu en formation dans le CFA ✅" : "n'est plus en formation au CFA"}
-            </p>
-          </div>
-        )}
-
-        {od?.referent_coordonnees && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Référent(e) à contacter</p>
-            <ReferentCoordonnees value={od.referent_coordonnees} />
-          </div>
-        )}
-
-        {od?.note_complementaire && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Note complémentaire</p>
-            <p className={styles.sentBody}>{od.note_complementaire}</p>
-          </div>
-        )}
-      </div>
+          {od?.note_complementaire && (
+            <div className={styles.sentBubbleSection}>
+              <p className={styles.sentSectionTitle}>Note complémentaire</p>
+              <p className={styles.sentBody}>{od.note_complementaire}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {od?.reponse_at && (
         <div className={styles.sentFooter}>

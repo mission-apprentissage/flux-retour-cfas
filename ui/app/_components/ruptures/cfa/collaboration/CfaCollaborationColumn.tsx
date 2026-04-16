@@ -51,7 +51,9 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const ml = effectif.mission_locale_organisation;
   const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
-  const situationLogs = collabAlreadyStarted ? getSituationLogs(effectif) : [];
+  const traitéParMl = !!effectif.situation?.situation;
+  const dossierTraité = collabAlreadyStarted || traitéParMl;
+  const situationLogs = dossierTraité ? getSituationLogs(effectif) : [];
 
   const lastLogWithEmail = [...(effectif.mission_locale_logs || [])]
     .reverse()
@@ -60,13 +62,13 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
 
   return (
     <div className={styles.collaborationColumn}>
-      {!collabAlreadyStarted && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
+      {!dossierTraité && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
 
       {!effectif.date_rupture ? (
         <p className={styles.collabDisabledMessage}>
           La collaboration avec une Mission Locale n&apos;est possible que pour les jeunes en rupture de contrat.
         </p>
-      ) : !collabAlreadyStarted ? (
+      ) : !dossierTraité ? (
         <>
           {ml ? (
             <>

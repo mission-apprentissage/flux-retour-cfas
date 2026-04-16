@@ -73,7 +73,9 @@ function buildSuiviTimeline(
     events.push({ date, title: "Dossier envoyé par le CFA", subtext, icon: "partage" });
   }
 
-  if (effectif.organisme_data?.acc_conjoint === true && effectif.mission_locale_logs) {
+  const mlHasActed = effectif.organisme_data?.acc_conjoint === true || (effectif.mission_locale_logs ?? []).length > 0;
+
+  if (mlHasActed && effectif.mission_locale_logs) {
     events.push(...buildLogEvents(effectif.mission_locale_logs, { traiteSuffix: " par la Mission Locale" }));
   }
 
