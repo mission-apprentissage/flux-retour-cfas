@@ -483,6 +483,13 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         source: "$effectif_snapshot.source",
         transmitted_at: "$effectif_snapshot.transmitted_at",
         a_traiter: { $literal: false },
+        "situation.situation": "$situation",
+        "situation.situation_autre": "$situation_autre",
+        "situation.deja_connu": "$deja_connu",
+        "situation.commentaires": "$commentaires",
+        injoignable: {
+          $cond: [{ $eq: [{ $ifNull: ["$situation", null] }, "CONTACTE_SANS_RETOUR"] }, true, false],
+        },
         organisme: "$organisme",
         organisme_data: "$organisme_data",
         cfa_rupture_declaration: "$cfa_rupture_declaration",
