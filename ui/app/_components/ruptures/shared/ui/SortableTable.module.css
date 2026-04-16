@@ -134,9 +134,3 @@
   margin-bottom: 0;
   pointer-events: none;
 }
-
-.moreButton {
-  background: var(--background-alt-grey);
-  border: 1px solid var(--border-default-grey);
-  border-radius: 4px;
-}

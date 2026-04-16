@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
@@ -101,9 +100,6 @@ export function CfaEffectifsTable({
                 onSort={onSort}
               />
             </th>
-            <th>
-              <span className="fr-sr-only">Actions</span>
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -193,20 +189,6 @@ export function CfaEffectifsTable({
                         </span>
                       )}
                     </div>
-                  </td>
-                  <td>
-                    {e.is_plus_25 ? (
-                      <span />
-                    ) : (
-                      <Button
-                        className={sharedStyles.moreButton}
-                        priority="tertiary no outline"
-                        size="small"
-                        iconId="ri-more-2-fill"
-                        title="Voir la fiche"
-                        linkProps={{ href: `/cfa/${e.id}` }}
-                      />
-                    )}
                   </td>
                 </tr>
                 {showNonRuptureAlerts && !e.en_rupture && (
