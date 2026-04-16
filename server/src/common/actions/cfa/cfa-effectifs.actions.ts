@@ -105,6 +105,8 @@ function getSortField(sort: string): string {
       return "en_rupture";
     case "collab_status":
       return "collab_status";
+    case "last_activity":
+      return "last_activity_at";
     default:
       return "apprenant.nom";
   }
@@ -236,6 +238,12 @@ export async function getCfaEffectifs(
     {
       $addFields: {
         collab_status: buildCollabStatusSwitch("$ml_doc"),
+        last_activity_at: {
+          $max: ["$ml_doc.updated_at", "$ml_doc.created_at", "$ml_doc.organisme_data.reponse_at"],
+        },
+        has_unread_notification_computed: {
+          $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
+        },
       },
     }
   );
@@ -288,11 +296,15 @@ export async function getCfaEffectifs(
   }
 
   const sortField = getSortField(sort);
+  const sortStage =
+    sort === "last_activity"
+      ? { $sort: { has_unread_notification_computed: -1 as const, last_activity_at: sortDirection } }
+      : { $sort: { [sortField]: sortDirection } };
   pipeline.push({
     $facet: {
       total: [{ $count: "count" }],
       effectifs: [
-        { $sort: { [sortField]: sortDirection } },
+        sortStage,
         { $skip: skip },
         { $limit: limit },
         {
