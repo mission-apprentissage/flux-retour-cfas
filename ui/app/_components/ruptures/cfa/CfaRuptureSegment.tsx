@@ -128,9 +128,6 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
         onSort={handleSort}
       />
     </div>,
-    <span key="actions" className="fr-sr-only">
-      Actions
-    </span>,
   ];
 
   const data = displayed.map((e) => [
@@ -169,15 +166,6 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
     <div key={`collab-${e.id}`} className={sharedStyles.collabCell}>
       <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />
     </div>,
-    <Button
-      key={`more-${e.id}`}
-      className={sharedStyles.moreButton}
-      priority="tertiary no outline"
-      size="small"
-      iconId="ri-more-2-fill"
-      title="Voir la fiche"
-      linkProps={{ href: `/cfa/${e.id}` }}
-    />,
   ]);
 
   return (

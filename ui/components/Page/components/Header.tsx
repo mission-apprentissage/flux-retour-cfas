@@ -67,7 +67,8 @@ const UserMenu = () => {
   };
 
   const buttonLabel = (() => {
-    if (isCfaWithMlBeta && auth?.prenom && auth?.nom) {
+    if (!auth) return "";
+    if (isCfaWithMlBeta && auth.prenom && auth.nom) {
       return `${auth.prenom.charAt(0).toUpperCase()}${auth.prenom.slice(1)} ${auth.nom.charAt(0).toUpperCase()}.`;
     }
     return getAccountLabel(auth as AuthContext);

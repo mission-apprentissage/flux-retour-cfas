@@ -24,8 +24,8 @@ export default function CfaCollaborationsClient() {
   const page = Number(searchParams?.get("page")) || 1;
   const limit = Number(searchParams?.get("limit")) || 20;
   const search = searchParams?.get("search") || "";
-  const sort = searchParams?.get("sort") || "nom";
-  const order = searchParams?.get("order") === "desc" ? "desc" : "asc";
+  const sort = searchParams?.get("sort") || "last_activity";
+  const order = searchParams?.get("order") === "asc" ? "asc" : "desc";
   const collabStatusParam = searchParams?.get("collab_status") || ACTIVE_COLLAB_STATUSES.join(",");
   const formation = searchParams?.get("formation") || undefined;
 
