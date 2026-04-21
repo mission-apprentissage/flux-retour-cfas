@@ -7,7 +7,7 @@
       <mj-section background-color="#ffffff" padding-top="0">
         <mj-column>
           <mj-text>
-            Bonjour <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
+            Bonjour <strong><%= data.recipient.civility || "" %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
           </mj-text>
           <mj-text>
             <div>

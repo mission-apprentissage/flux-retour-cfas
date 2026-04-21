@@ -1,0 +1,30 @@
+<mj-wrapper padding="10px 20px">
+  <mj-section padding-top="0">
+    <mj-column>
+      <mj-divider border-color="#e5e5e5" border-width="1px" padding="10px 0" />
+
+      <mj-text font-size="13px" color="#3a3a3a" line-height="20px">
+        Ce courriel est généré automatiquement, vous ne pouvez pas y répondre.<br/>
+        Pour toute question écrivez-nous à
+        <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091;">tableaudebord@apprentissage.beta.gouv.fr</a>
+      </mj-text>
+
+      <mj-divider border-color="#e5e5e5" border-width="1px" padding="10px 0" />
+
+      <mj-text font-size="13px" color="#3a3a3a" line-height="20px" font-weight="600">
+        Ce service est développé par l'équipe du Tableau de bord de l'apprentissage conformément aux missions d'intérêt public du Ministère du Travail.
+      </mj-text>
+
+      <mj-divider border-color="#e5e5e5" border-width="1px" padding="10px 0" />
+
+      <mj-text font-size="13px" color="#3a3a3a" line-height="20px">
+        Vous ne souhaitez plus recevoir ce genre de courriel ?<br/>
+        <a href="<%= utils.getPublicUrl(`/api/emails/${data.token}/unsubscribe`) %>" style="color: #3a3a3a; text-decoration: underline;">
+          Demander à ne plus recevoir ces courriels de la part de l'outil professionnel Tableau de bord de l'apprentissage.
+        </a>
+      </mj-text>
+
+      <mj-image width="1px" alt="" src="<%= utils.getPublicUrl(`/api/emails/${data.token}/markAsOpened`) %>" />
+    </mj-column>
+  </mj-section>
+</mj-wrapper>

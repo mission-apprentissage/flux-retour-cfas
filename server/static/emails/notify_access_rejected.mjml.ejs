@@ -8,7 +8,7 @@
         <mj-column>
           <mj-text>
             Bonjour
-            <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
+            <strong><%= data.recipient.civility || "" %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
           </mj-text>
           <mj-text>
             Votre demande d'accès sur le <strong>Tableau de bord de l'apprentissage</strong> pour l'organisation <%=
