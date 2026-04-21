@@ -92,10 +92,12 @@ export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial
           prenom: 1,
           email: 1,
           telephone: 1,
+          fonction: 1,
           account_status: 1,
           created_at: 1,
           confirmed_at: 1,
           last_connection: 1,
+          organisation_role: 1,
         },
       }
     )
