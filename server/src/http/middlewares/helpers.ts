@@ -50,6 +50,42 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
   next();
 }
 
+export function requireCfaAdmin(req: Request, _res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+
+  if (user.organisation.type !== "ORGANISME_FORMATION") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+
+  if (user.impersonating) {
+    next();
+    return;
+  }
+
+  if (user.organisation_role !== "admin") {
+    throw Boom.forbidden("Accès réservé aux administrateurs de l'établissement");
+  }
+
+  next();
+}
+
+/**
+ * Pour les routes partagées entre tous les types d'org :
+ * si l'org est un CFA, on exige le rôle admin CFA. Sinon, on laisse passer.
+ */
+export function requireCfaAdminIfCfa(req: Request, _res: Response, next: NextFunction) {
+  const user = req.user as AuthContext;
+  ensureValidUser(user);
+
+  if (user.organisation.type === "ORGANISME_FORMATION") {
+    return requireCfaAdmin(req, _res, next);
+  }
+
+  next();
+}
+
+
 export function requireIndicateursOrganismesAccess(req: Request, _res: Response, next: NextFunction) {
   const blockedTypes = [
     ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
