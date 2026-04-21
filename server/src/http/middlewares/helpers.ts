@@ -85,7 +85,6 @@ export function requireCfaAdminIfCfa(req: Request, _res: Response, next: NextFun
   next();
 }
 
-
 export function requireIndicateursOrganismesAccess(req: Request, _res: Response, next: NextFunction) {
   const blockedTypes = [
     ORGANISATION_TYPE.OPERATEUR_PUBLIC_NATIONAL,
