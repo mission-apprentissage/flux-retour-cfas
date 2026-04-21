@@ -125,6 +125,7 @@ import errorMiddleware from "./middlewares/errorMiddleware";
 import {
   requireIndicateursOrganismesAccess,
   requireAdministrator,
+  requireCfaAdminIfCfa,
   requireEffectifOrganismePermission,
   requireMissionLocale,
   requireOrganismePermission,

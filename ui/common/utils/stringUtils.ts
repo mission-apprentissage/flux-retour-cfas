@@ -18,8 +18,8 @@ const civilityToAbbreviation = {
   Monsieur: "M.",
 };
 
-export function formatCivility(civility: "Madame" | "Monsieur"): string {
-  return civilityToAbbreviation[civility] ?? "";
+export function formatCivility(civility?: "Madame" | "Monsieur"): string {
+  return civility ? (civilityToAbbreviation[civility] ?? "") : "";
 }
 
 /**

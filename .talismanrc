@@ -113,7 +113,9 @@ fileignoreconfig:
   checksum: acd9741899acc5cb426b2a4adb1c565c7d8c21a73beca7c2ad47d12902cb2ed5
 - filename: .infra/env.recette.yml
   checksum: 9d768de94ac141ad2651526710b6d1c2e63916633dd8bc36794cde37ae15f5ce
-
+- filename: shared/utils/maskEmail.test.ts
+  checksum: 42cdc076957a5c13a67fbff83406f87457c8b6e1ba7eeb3a99b27bf3093acd3a
+  
 scopeconfig:
 - scope: node
 custom_patterns:
