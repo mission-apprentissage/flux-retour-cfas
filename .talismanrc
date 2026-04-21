@@ -115,7 +115,15 @@ fileignoreconfig:
   checksum: 9d768de94ac141ad2651526710b6d1c2e63916633dd8bc36794cde37ae15f5ce
 - filename: shared/utils/maskEmail.test.ts
   checksum: 42cdc076957a5c13a67fbff83406f87457c8b6e1ba7eeb3a99b27bf3093acd3a
-  
+- filename: server/tests/integration/http/organisation-membres-batch.routes.test.ts
+  checksum: ebdecd11c93471756eb0fbdef2ee3922089a3517d8be29b599b0f1b109fa0ace
+- filename: server/tests/integration/http/admin-invitations.routes.test.ts
+  checksum: 46822fc07cf81451399941f09302389e312e9f1b8568248a6187ab18fe9376f2
+- filename: server/tests/integration/http/admin-cfa-invite.routes.test.ts
+  checksum: a164f8362c78146ad956b7dde22bcfb1f613ee07110b102a3d5bdcc5089bfd87
+- filename: server/tests/integration/http/inscription-cfa.routes.test.ts
+  checksum: bd01625ded21d4b68540b064af772634252f48149a0f231ab9cc53232bee917b
+
 scopeconfig:
 - scope: node
 custom_patterns:
