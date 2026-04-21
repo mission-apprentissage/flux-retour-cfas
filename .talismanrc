@@ -123,6 +123,8 @@ fileignoreconfig:
   checksum: a164f8362c78146ad956b7dde22bcfb1f613ee07110b102a3d5bdcc5089bfd87
 - filename: server/tests/integration/http/inscription-cfa.routes.test.ts
   checksum: bd01625ded21d4b68540b064af772634252f48149a0f231ab9cc53232bee917b
+- filename: ui/modules/admin/InviteCfaAdminModal.tsx
+  checksum: 69738e43c618d84c60cd42dc01fe86b2ccc5d264e87ceeceb88fc302f9565234
 
 scopeconfig:
 - scope: node
