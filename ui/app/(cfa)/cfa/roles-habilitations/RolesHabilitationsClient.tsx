@@ -20,6 +20,7 @@ import { _delete, _get, _post, _put } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
 
 import InvitationSidePanel from "./InvitationSidePanel";
+import styles from "./RolesHabilitationsClient.module.css";
 
 interface Member {
   _id: string;
@@ -49,9 +50,9 @@ function ActivationDateCell({ dateString }: { dateString?: string | null }) {
     const formatted = format(date, "dd/MM/yyyy", { locale: frLocale });
     const relative = formatDistanceToNow(date, { locale: frLocale, addSuffix: true });
     return (
-      <div style={{ lineHeight: 1.4 }}>
+      <div className={styles.activationDate}>
         <div>{formatted}</div>
-        <div style={{ fontSize: "0.75rem", color: "var(--text-mention-grey)" }}>{relative}</div>
+        <div className={styles.activationDateRelative}>{relative}</div>
       </div>
     );
   } catch {
@@ -74,7 +75,11 @@ const roleChangeModal = createModal({
   isOpenedByDefault: false,
 });
 
-const centered = (text: string) => <div style={{ textAlign: "center", width: "100%" }}>{text}</div>;
+const centered = (text: string) => <div className={styles.centered}>{text}</div>;
+
+function AdminTag() {
+  return <span className={styles.adminTag}>ADMIN</span>;
+}
 
 const COLUMNS: ColumnData[] = [
   { label: "Nom et prénom", dataKey: "nom", width: "22%" },
@@ -227,39 +232,28 @@ export default function RolesHabilitationsClient() {
       },
       element: {
         nom: (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <span className={styles.nameCell}>
             <span>
               {m.nom} {m.prenom}
-              {user?.email === m.email && (
-                <span style={{ color: "var(--text-mention-grey)", fontWeight: 400 }}> (vous)</span>
-              )}
+              {user?.email === m.email && <span className={styles.youSuffix}> (vous)</span>}
             </span>
-            {m.organisation_role === "admin" && (
-              <span>
-                <Badge small noIcon severity="info">
-                  Admin
-                </Badge>
-              </span>
-            )}
-          </div>
+            {m.organisation_role === "admin" && <AdminTag />}
+          </span>
         ),
-        telephone: <div style={{ textAlign: "center" }}>{m.telephone || "—"}</div>,
-        email: <div style={{ textAlign: "center" }}>{m.email}</div>,
+        telephone: <div className={styles.textCenter}>{m.telephone || "—"}</div>,
+        email: <div className={styles.textCenter}>{m.email}</div>,
         fonction: (
-          <div
-            title={m.fonction || ""}
-            style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}
-          >
+          <div title={m.fonction || ""} className={styles.fonctionCell}>
             {m.fonction || "—"}
           </div>
         ),
         dateActivation: (
-          <div style={{ textAlign: "center" }}>
+          <div className={styles.textCenter}>
             <ActivationDateCell dateString={m.confirmed_at ?? m.created_at} />
           </div>
         ),
         actions: (
-          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", width: "100%" }}>
+          <div className={styles.actionsCell}>
             {user?.email !== m.email ? (
               <>
                 <Button
@@ -303,24 +297,20 @@ export default function RolesHabilitationsClient() {
       },
       element: {
         nom: (
-          <span style={{ color: "var(--text-mention-grey)" }}>
-            {inv.email}{" "}
+          <span className={styles.invitationCell}>
+            {inv.email}
             <Badge small noIcon severity="warning">
               En attente
-            </Badge>{" "}
-            {inv.role === "admin" && (
-              <Badge small noIcon severity="info">
-                Admin
-              </Badge>
-            )}
+            </Badge>
+            {inv.role === "admin" && <AdminTag />}
           </span>
         ),
-        telephone: <div style={{ textAlign: "center" }}>—</div>,
-        email: <div style={{ textAlign: "center" }}>{inv.email}</div>,
+        telephone: <div className={styles.textCenter}>—</div>,
+        email: <div className={styles.textCenter}>{inv.email}</div>,
         fonction: "—",
-        dateActivation: <div style={{ textAlign: "center" }}>—</div>,
+        dateActivation: <div className={styles.textCenter}>—</div>,
         actions: (
-          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", width: "100%" }}>
+          <div className={styles.actionsCell}>
             <Button
               iconId="ri-mail-send-line"
               priority="tertiary no outline"
@@ -424,29 +414,24 @@ export default function RolesHabilitationsClient() {
           : `Voulez-vous vraiment retirer le rôle administrateur à ${pendingRoleChange?.email} ? Cette personne ne pourra plus gérer les utilisateurs.`}
       </roleChangeModal.Component>
       <div>
-        <h1 style={{ fontWeight: 700, fontSize: "40px", color: "#000091", marginBottom: "1rem" }}>
-          Rôles et habilitations
-        </h1>
-        <p style={{ marginBottom: "2rem" }}>
+        <h1 className={styles.title}>Rôles et habilitations</h1>
+        <p className={styles.description}>
           Retrouvez ici l&apos;ensemble des utilisateurs habilités à consulter les données des apprenants, utiliser le
           service et demander des collaborations avec les Missions Locales.
         </p>
 
-        <div
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}
-        >
-          <div style={{ maxWidth: 400, flex: 1 }}>
+        <div className={styles.topBar}>
+          <div className={styles.searchWrapper}>
             <SearchBar
               label="Cherchez un utilisateur"
               renderInput={({ id, className, placeholder }) => (
                 <input
                   id={id}
-                  className={className}
+                  className={`${className} ${styles.searchInput}`}
                   placeholder={placeholder}
                   type="search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ backgroundColor: "#ececfe" }}
                 />
               )}
             />
@@ -457,20 +442,10 @@ export default function RolesHabilitationsClient() {
         </div>
 
         {isLoading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+          <div className={styles.skeletonContainer}>
             {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: 52,
-                  borderRadius: 4,
-                  background: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",
-                  backgroundSize: "200% 100%",
-                  animation: "skeleton-loading 1.5s infinite",
-                }}
-              />
+              <div key={i} className={styles.skeletonItem} />
             ))}
-            <style>{`@keyframes skeleton-loading { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }`}</style>
           </div>
         ) : (
           <FullTable data={tableData} columns={COLUMNS} emptyMessage="Aucun utilisateur trouvé" hasPagination={false} />

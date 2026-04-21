@@ -38,7 +38,7 @@ export const UserConnectedHeader = () => {
     const organisationType = user?.organisation?.type;
     switch (entry) {
       case "ROLES":
-        return organisationType !== ORGANISATION_TYPE.MISSION_LOCALE;
+        return organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && !isCfaWithMlBeta;
       case "TRANSMISSIONS":
         return organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION;
       case "ADMIN":
@@ -110,6 +110,15 @@ export const UserConnectedHeader = () => {
                   <i className={fr.cx("fr-icon-send-plane-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Transmissions
+              </MenuItem>
+            )}
+
+            {isCfaWithMlBeta && (user?.organisation_role === "admin" || user?.impersonating === true) && (
+              <MenuItem component="a" href="/cfa/roles-habilitations" onClick={handleClose}>
+                <ListItemIcon>
+                  <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Rôles et habilitations
               </MenuItem>
             )}
 
