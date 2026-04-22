@@ -2,7 +2,7 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { zSituationEnum, zProblemeTypeEnum } from "./missionLocaleEffectif.model";
+import { zSituationEnum, zProblemeTypeEnum, zConnaissanceMlEnum } from "./missionLocaleEffectif.model";
 
 const collectionName = "missionLocaleEffectifLog";
 
@@ -16,6 +16,7 @@ export const zMissionLocaleEffectifLog = z.object({
   situation: zSituationEnum.nullish(),
   situation_autre: z.string().nullish(),
   deja_connu: z.boolean().nullish(),
+  connaissance_ml: zConnaissanceMlEnum.nullish(),
   commentaires: z.string().nullish(),
   probleme_type: zProblemeTypeEnum.nullish(),
   probleme_detail: z.string().nullish(),

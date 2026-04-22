@@ -4,7 +4,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useFormik } from "formik";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { IEffectifMissionLocale, IUpdateMissionLocaleEffectif, SITUATION_ENUM } from "shared";
+import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { EffectifStatusBadge } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
 import { useAuth } from "@/app/_context/UserContext";
@@ -24,6 +24,7 @@ import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import { useMlUpdateEffectif } from "./hooks";
 import localStyles from "./MlCollaborationDetail.module.css";
+import { FormValues, mapFormToPayload } from "./MlSuiviDossierColumn.utils";
 
 const styles = withSharedStyles(localStyles);
 
@@ -79,96 +80,6 @@ function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"], ctx: {
   }
 
   return events.sort((a, b) => a.date.getTime() - b.date.getTime());
-}
-
-interface FormValues {
-  contactReussi: boolean | null;
-  rdvPris: boolean | null;
-  situationNon: string | null;
-  situationNonContact: "tentative_relancer" | "mauvaises_coordonnees" | null;
-  problemeRecontact: "mauvaises_coordonnees" | "ne_souhaite_pas" | "autre" | null;
-  actionRecontact: "garder_liste" | "marquer_traite" | null;
-  situationJeune: string | null;
-  commentaire: string;
-}
-
-function mapFormToPayload(
-  values: FormValues,
-  isRecontacterFlow: boolean,
-  isNouveauContrat: boolean
-): IUpdateMissionLocaleEffectif {
-  const payload: IUpdateMissionLocaleEffectif = {};
-
-  if (values.contactReussi === true) {
-    if (values.rdvPris === true) {
-      payload.situation = SITUATION_ENUM.RDV_PRIS;
-    } else {
-      switch (values.situationNon) {
-        case "contrat_apprentissage":
-          payload.situation = SITUATION_ENUM.NOUVEAU_CONTRAT;
-          break;
-        case "cdi_cdd":
-          payload.situation = SITUATION_ENUM.NOUVEAU_PROJET;
-          break;
-        case "cherche_contrat":
-          payload.situation = SITUATION_ENUM.CHERCHE_CONTRAT;
-          break;
-        case "reorientation":
-          payload.situation = SITUATION_ENUM.REORIENTATION;
-          break;
-        case "ne_veut_pas":
-          payload.situation = SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT;
-          break;
-        case "autre":
-          payload.situation = SITUATION_ENUM.AUTRE;
-          break;
-      }
-    }
-  } else if (values.contactReussi === false) {
-    if (isRecontacterFlow) {
-      if (values.actionRecontact === "garder_liste") {
-        payload.situation = SITUATION_ENUM.CONTACTE_SANS_RETOUR;
-      } else if (values.actionRecontact === "marquer_traite") {
-        switch (values.problemeRecontact) {
-          case "mauvaises_coordonnees":
-            payload.situation = SITUATION_ENUM.COORDONNEES_INCORRECT;
-            break;
-          case "ne_souhaite_pas":
-            payload.situation = SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT;
-            break;
-          case "autre":
-            payload.situation = SITUATION_ENUM.AUTRE;
-            break;
-        }
-      }
-    } else if (isNouveauContrat) {
-      if (values.actionRecontact === "garder_liste") {
-        payload.situation = SITUATION_ENUM.CONTACTE_SANS_RETOUR;
-      } else if (values.actionRecontact === "marquer_traite") {
-        payload.situation = SITUATION_ENUM.NOUVEAU_CONTRAT;
-      }
-    } else {
-      if (values.situationNonContact === "tentative_relancer") {
-        payload.situation = SITUATION_ENUM.CONTACTE_SANS_RETOUR;
-      } else if (values.situationNonContact === "mauvaises_coordonnees") {
-        payload.situation = SITUATION_ENUM.COORDONNEES_INCORRECT;
-      }
-    }
-  }
-
-  if (!isRecontacterFlow || values.contactReussi === true) {
-    if (values.situationJeune === "inconnu") {
-      payload.deja_connu = false;
-    } else if (values.situationJeune !== null) {
-      payload.deja_connu = true;
-    }
-  }
-
-  if (values.commentaire) {
-    payload.commentaires = values.commentaire;
-  }
-
-  return payload;
 }
 
 interface MlSuiviDossierColumnProps {

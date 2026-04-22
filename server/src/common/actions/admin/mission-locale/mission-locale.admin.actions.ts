@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { IMissionLocaleStats, IOrganisationMissionLocale, IUpdateMissionLocaleEffectif } from "shared/models";
+import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import {
   missionLocaleEffectifsDb,
@@ -72,7 +73,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
   data: IUpdateMissionLocaleEffectif,
   user: AuthContext
 ) => {
-  const { situation, situation_autre, commentaires, deja_connu } = data;
+  const { situation, situation_autre, commentaires, deja_connu, connaissance_ml } = data;
 
   const mlEff = await missionLocaleEffectifsDb().findOne({
     effectif_id: new ObjectId(effectifId),
@@ -83,9 +84,15 @@ export const setEffectifMissionLocaleDataAdmin = async (
     throw Boom.notFound("Effectif introuvable");
   }
 
+  const derivedDejaConnu =
+    connaissance_ml !== undefined && connaissance_ml !== null
+      ? connaissance_ml !== CONNAISSANCE_ML_ENUM.NON_CONNU
+      : deja_connu;
+
   const setObject = {
     situation,
-    deja_connu,
+    deja_connu: derivedDejaConnu,
+    ...(connaissance_ml !== undefined ? { connaissance_ml } : {}),
     ...(situation_autre !== undefined ? { situation_autre } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
   };
@@ -132,6 +139,7 @@ export const resetEffectifMissionLocaleDataAdmin = async (
       situation_autre: undefined,
       commentaires: undefined,
       deja_connu: undefined,
+      connaissance_ml: undefined,
     },
     user,
     missionLocaleId
@@ -150,6 +158,7 @@ export const resetEffectifMissionLocaleDataAdmin = async (
         situation: 1,
         situation_autre: 1,
         deja_connu: 1,
+        connaissance_ml: 1,
         commentaires: 1,
       },
     }

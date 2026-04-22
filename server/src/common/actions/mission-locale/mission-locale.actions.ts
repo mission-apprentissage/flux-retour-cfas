@@ -15,6 +15,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CONNAISSANCE_ML_ENUM,
   SITUATION_ENUM,
   zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -2165,9 +2166,15 @@ export const setEffectifMissionLocaleData = async (
 ) => {
   const effectifFields = data;
 
+  const derivedDejaConnu =
+    effectifFields.connaissance_ml !== undefined && effectifFields.connaissance_ml !== null
+      ? effectifFields.connaissance_ml !== CONNAISSANCE_ML_ENUM.NON_CONNU
+      : effectifFields.deja_connu;
+
   const dbSetObject = {
     ...(effectifFields.situation !== undefined ? { situation: effectifFields.situation } : {}),
-    ...(effectifFields.deja_connu !== undefined ? { deja_connu: effectifFields.deja_connu } : {}),
+    ...(derivedDejaConnu !== undefined ? { deja_connu: derivedDejaConnu } : {}),
+    ...(effectifFields.connaissance_ml !== undefined ? { connaissance_ml: effectifFields.connaissance_ml } : {}),
     ...(effectifFields.situation_autre !== undefined ? { situation_autre: effectifFields.situation_autre } : {}),
     ...(effectifFields.commentaires !== undefined ? { commentaires: effectifFields.commentaires } : {}),
     ...(effectifFields.probleme_type !== undefined ? { probleme_type: effectifFields.probleme_type } : {}),

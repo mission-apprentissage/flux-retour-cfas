@@ -64,6 +64,12 @@ export enum PROBLEME_TYPE_ENUM {
   AUTRE = "autre",
 }
 
+export enum CONNAISSANCE_ML_ENUM {
+  DEJA_ACCOMPAGNE_ACTIVEMENT = "DEJA_ACCOMPAGNE_ACTIVEMENT",
+  CONNU_NON_ACCOMPAGNE = "CONNU_NON_ACCOMPAGNE",
+  NON_CONNU = "NON_CONNU",
+}
+
 export enum ACC_CONJOINT_MOTIF_ENUM {
   MOBILITE = "MOBILITE",
   LOGEMENT = "LOGEMENT",
@@ -88,6 +94,7 @@ export enum API_EFFECTIF_LISTE {
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zProblemeTypeEnum = z.nativeEnum(PROBLEME_TYPE_ENUM);
+export const zConnaissanceMlEnum = z.nativeEnum(CONNAISSANCE_ML_ENUM);
 export const zAccConjointMotifEnum = z.nativeEnum(ACC_CONJOINT_MOTIF_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
@@ -124,6 +131,7 @@ const zMissionLocaleEffectif = z.object({
   created_at: z.date(),
   updated_at: z.date().optional(),
   deja_connu: z.boolean().nullish(),
+  connaissance_ml: zConnaissanceMlEnum.nullish(),
   commentaires: z.string().optional(),
   probleme_type: zProblemeTypeEnum.nullish(),
   probleme_detail: z.string().nullish(),
