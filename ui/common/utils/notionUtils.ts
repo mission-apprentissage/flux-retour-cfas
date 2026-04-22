@@ -1,28 +1,25 @@
 import { ExtendedRecordMap } from "notion-types";
 
 export function sanitizeNotionRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordMap {
-  const block = { ...recordMap.block };
+  const block: ExtendedRecordMap["block"] = {};
 
-  for (const key of Object.keys(block)) {
-    const entry = block[key];
-    const value = entry?.value;
+  for (const key of Object.keys(recordMap.block)) {
+    const entry = recordMap.block[key] as any;
+    const inner = entry?.value?.role !== undefined ? entry.value : entry;
+    const value = inner?.value;
 
-    if (!value) {
-      delete block[key];
+    if (!value || !value.type || inner?.role === "none") {
       continue;
     }
 
-    if (!value.id) {
-      block[key] = { ...entry, value: { ...value, id: key } };
-      continue;
-    }
-
+    const cleanValue = { ...value, id: value.id ?? key };
     if (Array.isArray(value.content)) {
-      const cleaned = value.content.filter((id): id is string => typeof id === "string" && id.length > 0);
-      if (cleaned.length !== value.content.length) {
-        block[key] = { ...entry, value: { ...value, content: cleaned } };
-      }
+      cleanValue.content = value.content.filter(
+        (contentId: unknown): contentId is string => typeof contentId === "string" && contentId.length > 0
+      );
     }
+
+    block[key] = { role: inner.role ?? "reader", value: cleanValue };
   }
 
   return { ...recordMap, block };
