@@ -21,6 +21,7 @@ const zMissionLocaleStats = z.object({
     a_traiter: z.number().int().default(0),
     traite: z.number().int().default(0),
     rdv_pris: z.number().int().default(0),
+    rdv_pris_decouverts: z.number().int().default(0),
     nouveau_projet: z.number().int().default(0),
     deja_accompagne: z.number().int().default(0),
     contacte_sans_retour: z.number().int().default(0),

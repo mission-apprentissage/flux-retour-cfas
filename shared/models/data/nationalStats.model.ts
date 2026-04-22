@@ -14,6 +14,7 @@ const zAggregatedStats = z.object({
   total_a_traiter: z.number(),
   total_traites: z.number(),
   rdv_pris: z.number(),
+  rdv_pris_decouverts: z.number(),
   nouveau_projet: z.number(),
   deja_accompagne: z.number(),
   contacte_sans_retour: z.number(),
@@ -65,6 +66,18 @@ const zDetailsDossiersTraites = z.object({
 });
 
 export type IDetailsDossiersTraites = z.output<typeof zDetailsDossiersTraites>;
+
+const zDetailsDossiersTraitesV2 = z.object({
+  rdv_pris: zStatWithVariation,
+  projet_pro_securise: zStatWithVariation,
+  ne_souhaite_pas_accompagnement: zStatWithVariation,
+  a_recontacter: zStatWithVariation,
+  injoignable: zStatWithVariation,
+  autre: zStatWithVariation,
+  total: zStatWithVariation,
+});
+
+export type IDetailsDossiersTraitesV2 = z.output<typeof zDetailsDossiersTraitesV2>;
 
 const zRegionStats = z.object({
   code: z.string(),

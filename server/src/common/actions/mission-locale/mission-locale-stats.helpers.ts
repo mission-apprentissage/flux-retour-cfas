@@ -29,6 +29,7 @@ export const EMPTY_STATS: IAggregatedStats = {
   total_a_traiter: 0,
   total_traites: 0,
   rdv_pris: 0,
+  rdv_pris_decouverts: 0,
   nouveau_projet: 0,
   deja_accompagne: 0,
   contacte_sans_retour: 0,

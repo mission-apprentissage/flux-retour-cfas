@@ -6,6 +6,7 @@ import {
   IAggregatedStats,
   IClassifierStats,
   IDetailsDossiersTraites,
+  IDetailsDossiersTraitesV2,
   IRupturantsSummary,
   ITimeSeriesPoint,
   ITraitementStatsResponse,
@@ -125,6 +126,7 @@ const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[])
           total_traites: { $sum: "$latest_stats.traite" },
           total_a_traiter: { $sum: "$latest_stats.a_traiter" },
           rdv_pris: { $sum: "$latest_stats.rdv_pris" },
+          rdv_pris_decouverts: { $sum: { $ifNull: ["$latest_stats.rdv_pris_decouverts", 0] } },
           nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
           deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
           contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
@@ -406,6 +408,7 @@ export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: Object
       total_a_traiter: currentStats.total_a_traiter || 0,
       total_traites: currentStats.total_traites || 0,
       rdv_pris: currentStats.rdv_pris || 0,
+      rdv_pris_decouverts: currentStats.rdv_pris_decouverts || 0,
       nouveau_projet: currentStats.nouveau_projet || 0,
       deja_accompagne: currentStats.deja_accompagne || 0,
       contacte_sans_retour: currentStats.contacte_sans_retour || 0,
@@ -456,7 +459,11 @@ export const getTraitementStats = async (
     {
       $addFields: {
         injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
-        autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
+        coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
+        cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
+        reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
+        ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
+        rdv_pris_decouverts: { $ifNull: ["$latest_stats.rdv_pris_decouverts", 0] },
       },
     },
     {
@@ -468,19 +475,28 @@ export const getTraitementStats = async (
             $add: [
               "$latest_stats.rdv_pris",
               "$latest_stats.nouveau_projet",
-              "$latest_stats.deja_accompagne",
+              "$ne_veut_pas_accompagnement",
+              "$cherche_contrat",
+              "$reorientation",
               "$latest_stats.contacte_sans_retour",
               "$injoignables",
+              "$coordonnees_incorrectes",
             ],
           },
         },
         total_repondu: {
           $sum: {
-            $add: ["$latest_stats.rdv_pris", "$latest_stats.nouveau_projet", "$latest_stats.deja_accompagne"],
+            $add: [
+              "$latest_stats.rdv_pris",
+              "$latest_stats.nouveau_projet",
+              "$ne_veut_pas_accompagnement",
+              "$cherche_contrat",
+              "$reorientation",
+            ],
           },
         },
         total_accompagne: {
-          $sum: "$latest_stats.rdv_pris",
+          $sum: "$rdv_pris_decouverts",
         },
       },
     },
@@ -1143,8 +1159,45 @@ export async function getDossiersTraitesStats(period: StatsPeriod = "30days", re
     total: currentStats.total_traites,
   };
 
+  const projetProCurrent = currentStats.nouveau_projet;
+  const projetProPrevious = previousStats.nouveau_projet;
+
+  const neSouhaiteCurrent =
+    currentStats.ne_veut_pas_accompagnement + currentStats.cherche_contrat + currentStats.reorientation;
+  const neSouhaitePrevious =
+    previousStats.ne_veut_pas_accompagnement + previousStats.cherche_contrat + previousStats.reorientation;
+
+  const injoignableCurrent = currentStats.injoignables + currentStats.coordonnees_incorrectes;
+  const injoignablePrevious = previousStats.injoignables + previousStats.coordonnees_incorrectes;
+
+  const totalV2Current =
+    currentStats.rdv_pris +
+    projetProCurrent +
+    neSouhaiteCurrent +
+    currentStats.contacte_sans_retour +
+    injoignableCurrent +
+    currentStats.autre;
+  const totalV2Previous =
+    previousStats.rdv_pris +
+    projetProPrevious +
+    neSouhaitePrevious +
+    previousStats.contacte_sans_retour +
+    injoignablePrevious +
+    previousStats.autre;
+
+  const detailsTraitesV2: IDetailsDossiersTraitesV2 = {
+    rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
+    projet_pro_securise: createStatWithVariation(projetProCurrent, projetProPrevious),
+    ne_souhaite_pas_accompagnement: createStatWithVariation(neSouhaiteCurrent, neSouhaitePrevious),
+    a_recontacter: createStatWithVariation(currentStats.contacte_sans_retour, previousStats.contacte_sans_retour),
+    injoignable: createStatWithVariation(injoignableCurrent, injoignablePrevious),
+    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
+    total: createStatWithVariation(totalV2Current, totalV2Previous),
+  };
+
   return {
     details: detailsTraites,
+    detailsV2: detailsTraitesV2,
     evaluationDate,
     period,
   };

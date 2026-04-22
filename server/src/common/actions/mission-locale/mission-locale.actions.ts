@@ -1765,6 +1765,7 @@ export const computeMissionLocaleStats = async (
       $addFields: {
         computed_situation: { $ifNull: ["$log.situation", "$situation"] },
         computed_deja_connu: { $ifNull: ["$log.deja_connu", "$deja_connu"] },
+        computed_connaissance_ml: { $ifNull: ["$log.connaissance_ml", "$connaissance_ml"] },
         computed_situation_autre: { $ifNull: ["$log.situation_autre", "$situation_autre"] },
         computed_probleme_type: { $ifNull: ["$log.probleme_type", "$probleme_type"] },
         computed_probleme_detail: { $ifNull: ["$log.probleme_detail", "$probleme_detail"] },
@@ -1777,6 +1778,35 @@ export const computeMissionLocaleStats = async (
         a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
         traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
         rdv_pris: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        rdv_pris_decouverts: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] },
+                  {
+                    $or: [
+                      {
+                        $in: [
+                          "$computed_connaissance_ml",
+                          [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
+                        ],
+                      },
+                      {
+                        $and: [
+                          { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+                          { $eq: ["$computed_deja_connu", false] },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         nouveau_projet: {
           $sum: {
             $cond: [
@@ -2064,6 +2094,7 @@ export const computeMissionLocaleStats = async (
         a_traiter: 1,
         traite: 1,
         rdv_pris: 1,
+        rdv_pris_decouverts: 1,
         nouveau_projet: 1,
         deja_accompagne: 1,
         contacte_sans_retour: 1,
@@ -2108,6 +2139,7 @@ export const computeMissionLocaleStats = async (
       a_traiter: 0,
       traite: 0,
       rdv_pris: 0,
+      rdv_pris_decouverts: 0,
       nouveau_projet: 0,
       deja_accompagne: 0,
       contacte_sans_retour: 0,
