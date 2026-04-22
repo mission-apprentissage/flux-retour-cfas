@@ -20,12 +20,16 @@ export const zUsersMigration = z.object({
   _id: zObjectId,
   email: z.string().describe("Email utilisateur"),
   password: z.string().describe("Le mot de passe hashé"),
-  civility: z.enum(["Madame", "Monsieur"]).describe("civilité"),
+  civility: z.enum(["Madame", "Monsieur"]).optional().describe("civilité"),
   nom: z.string().describe("Le nom de l'utilisateur"),
   prenom: z.string().describe("Le prénom de l'utilisateur"),
   telephone: z.string().optional().describe("Le téléphone de l'utilisateur"),
   fonction: z.string().optional().describe("La fonction de l'utilisateur"),
   organisation_id: zObjectId.describe("Organisation à laquelle appartient l'utilisateur"),
+  organisation_role: z
+    .enum(["admin", "member"])
+    .optional()
+    .describe("Rôle de l'utilisateur dans son organisation (CFA)"),
 
   // Internal
   account_status: z
@@ -33,6 +37,11 @@ export const zUsersMigration = z.object({
     .describe("Statut du compte"),
   has_accept_cgu_version: z.string().optional().describe("Version des cgu accepté par l'utilisateur"),
   created_at: z.date().optional().describe("Date de création du compte"),
+  confirmed_at: z.date().optional().describe("Date d'activation du compte (passage à CONFIRMED)"),
+  last_activation_email_sent_at: z
+    .date()
+    .optional()
+    .describe("Date du dernier envoi du mail d'activation (pour cooldown de renvoi)"),
   last_connection: z.date().optional().describe("Date de dernière connexion"),
   connection_history: z.array(z.date()).optional().describe("Historique des dates de connexion"),
   password_updated_at: z.date().optional().describe("Date de dernière mise à jour mot de passe"),

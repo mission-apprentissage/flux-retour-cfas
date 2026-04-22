@@ -3,7 +3,7 @@ import { Acl, IOrganisationJson } from "shared";
 
 export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisationJson> {
   _id: string;
-  civility: "Madame" | "Monsieur";
+  civility?: "Madame" | "Monsieur";
   nom: string;
   prenom: string;
   email: string;
@@ -15,6 +15,8 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
 
   // legacy field used for ERPs
   username: string;
+
+  organisation_role?: "admin" | "member";
 
   // nom de l'organisme, enrichi au runtime depuis la collection organismes (CFA uniquement)
   organisation_nom?: string;

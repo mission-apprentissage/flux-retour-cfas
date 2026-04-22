@@ -4,12 +4,14 @@ import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
+import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants/territoires";
 
+import InvitationsTable from "@/app/_components/admin/InvitationsTable";
 import { UsersFiltersPanel } from "@/app/_components/admin/UsersFiltersPanel";
 import {
   ActionsCell,
@@ -25,6 +27,8 @@ import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { UsersFiltersQuery, parseUsersFiltersFromQuery } from "@/modules/admin/users/models/users-filters";
+
+type TabKey = "users" | "invitations-pending" | "invitations-consumed";
 
 const USERS_TABLE_COLUMNS = [
   {
@@ -80,6 +84,10 @@ function transformUserToTableData(user: any) {
 
 export default function UsersAdminClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialTab = (searchParams?.get("tab") as TabKey) || "users";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const organisationIdFilter = searchParams?.get("organisation_id") || undefined;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,6 +95,16 @@ export default function UsersAdminClient() {
   const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }]);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleTabChange = useCallback(
+    (tabId: TabKey) => {
+      setActiveTab(tabId);
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.set("tab", tabId);
+      router.replace(`/admin/users?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
 
   useEffect(() => {
     document.title = "Utilisateurs | Tableau de bord de l'apprentissage";
@@ -299,62 +317,75 @@ export default function UsersAdminClient() {
         />
       )}
 
-      <Stack spacing={3}>
-        <UsersFiltersPanel />
-        <Stack spacing={3}>
-          <SearchBar
-            label="Rechercher un utilisateur"
-            onButtonClick={(value) => setSearchTerm(value)}
-            renderInput={({ className, id, type }) => (
-              <input
-                className={className}
-                id={id}
-                placeholder="Nom, prénom, email, organisation..."
-                type={type}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+      <Tabs
+        selectedTabId={activeTab}
+        onTabChange={(id) => handleTabChange(id as TabKey)}
+        tabs={[
+          { tabId: "users", label: "Utilisateurs" },
+          { tabId: "invitations-pending", label: "Invitations en cours" },
+          { tabId: "invitations-consumed", label: "Invitations consommées" },
+        ]}
+      >
+        {activeTab === "users" && (
+          <Stack spacing={3}>
+            <UsersFiltersPanel />
+            <Stack spacing={3}>
+              <SearchBar
+                label="Rechercher un utilisateur"
+                onButtonClick={(value) => setSearchTerm(value)}
+                renderInput={({ className, id, type }) => (
+                  <input
+                    className={className}
+                    id={id}
+                    placeholder="Nom, prénom, email, organisation..."
+                    type={type}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                )}
               />
-            )}
-          />
-          {showSkeleton ? (
-            <TableSkeleton />
-          ) : (
-            <>
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  {hasFiltersOrSearch ? (
-                    <>
-                      {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} trouvé
-                      {displayCount.total > 1 ? "s" : ""} ({pagination.globalTotal} au total)
-                    </>
-                  ) : (
-                    <>
-                      {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
-                    </>
-                  )}
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  overflow: "hidden",
-                }}
-              >
-                <FullTable
-                  data={tableData}
-                  columns={USERS_TABLE_COLUMNS}
-                  pagination={pagination}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={setItemsPerPage}
-                  pageSize={itemsPerPage}
-                  sorting={sorting}
-                  onSortingChange={handleSortingChange}
-                />
-              </Box>
-            </>
-          )}
-        </Stack>
-      </Stack>
+              {showSkeleton ? (
+                <TableSkeleton />
+              ) : (
+                <>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {hasFiltersOrSearch ? (
+                        <>
+                          {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} trouvé
+                          {displayCount.total > 1 ? "s" : ""} ({pagination.globalTotal} au total)
+                        </>
+                      ) : (
+                        <>
+                          {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
+                        </>
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ width: "100%", overflow: "hidden" }}>
+                    <FullTable
+                      data={tableData}
+                      columns={USERS_TABLE_COLUMNS}
+                      pagination={pagination}
+                      onPageChange={handlePageChange}
+                      onPageSizeChange={setItemsPerPage}
+                      pageSize={itemsPerPage}
+                      sorting={sorting}
+                      onSortingChange={handleSortingChange}
+                    />
+                  </Box>
+                </>
+              )}
+            </Stack>
+          </Stack>
+        )}
+        {activeTab === "invitations-pending" && (
+          <InvitationsTable status="pending" organisation_id={organisationIdFilter} />
+        )}
+        {activeTab === "invitations-consumed" && (
+          <InvitationsTable status="consumed" organisation_id={organisationIdFilter} />
+        )}
+      </Tabs>
     </Stack>
   );
 }

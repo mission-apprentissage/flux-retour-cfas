@@ -10,7 +10,7 @@
                 Bonjour,
               </mj-text>
               <mj-text>
-                L'utilisateur <strong><%= data.user.civility %> <%= data.user.prenom %> <%= data.user.nom %> (<%= data.user.email %>)</strong> souhaite accéder à l'organisation <%= data.organisationLabel %>.
+                L'utilisateur <strong><%= data.user.civility || "" %> <%= data.user.prenom %> <%= data.user.nom %> (<%= data.user.email %>)</strong> souhaite accéder à l'organisation <%= data.organisationLabel %>.
               </mj-text>
 
               <mj-button href="<%= utils.getPublicUrl(`/admin/users/${data.user._id}`) %>" background-color="#0e4194" color="white">

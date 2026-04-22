@@ -1,6 +1,7 @@
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
+import { CfaInviteBanner } from "../_components/ruptures/cfa/CfaInviteBanner";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
@@ -11,6 +12,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
     <Providers>
       <UserContextProvider user={user}>
         <ConnectedHeader />
+        <CfaInviteBanner />
         <div
           style={{
             flex: 1,

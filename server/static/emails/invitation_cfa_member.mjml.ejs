@@ -1,0 +1,118 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <mj-wrapper padding="10px 20px" css-class="mobile-wrapper-tight">
+      <mj-section background-color="#ffffff" padding="20px 0 0 0" text-align="left" vertical-align="top">
+        <mj-column>
+          <mj-image
+            alt="logo"
+            src="<%= utils.getPublicUrl(`/images/emails/marianne.png`) %>"
+            width="177px"
+            align="left"
+          ></mj-image>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 30px" css-class="mobile-section-narrow">
+        <mj-column>
+          <mj-text align="center" font-size="22px" line-height="28px" font-weight="700" padding-bottom="10px" color="#161616" css-class="mobile-text-tight">
+            Bonjour,
+          </mj-text>
+          <mj-text align="center" font-size="16px" color="#161616" css-class="mobile-text-tight">
+            Vous avez été invité(e) à rejoindre le service Tableau de bord de l'apprentissage.
+          </mj-text>
+
+          <mj-section background-color="#f5f5fe" padding="20px" border-radius="8px" css-class="mobile-padding-sm">
+            <mj-column>
+              <mj-text align="center" font-size="16px" line-height="24px" color="#161616">
+                <strong><%= data.admin.prenom %> <%= data.admin.nom %></strong><% if (data.admin.fonction) { %>, <%= data.admin.fonction %><% } %>, de l'établissement
+              </mj-text>
+              <mj-text align="center" font-size="18px" line-height="24px" font-weight="700" color="#6A6AF4" padding-top="10px">
+                <%= data.cfaName %>
+              </mj-text>
+              <mj-text align="center" font-weight="700" font-size="18px" line-height="24px" color="#161616" padding-top="10px">
+                vous invite à utiliser le Tableau de bord de l'apprentissage
+              </mj-text>
+              <mj-text align="center" font-size="14px" padding-top="10px" color="#161616">
+                Commencez à collaborer avec les Missions Locales pour l'accompagnement des jeunes en rupture de contrat.
+              </mj-text>
+              <mj-text align="center" font-size="14px" padding-top="5px" color="#161616">
+                Cliquez sur le lien ci-dessous pour activer votre compte
+              </mj-text>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/auth/inscription-cfa?invitationToken=${data.invitationToken}`) %>"
+                background-color="#000091"
+                color="white"
+                border-radius="0"
+                font-size="14px"
+                line-height="20px"
+                font-weight="400"
+                inner-padding="10px 20px"
+                css-class="mobile-full-btn"
+              >
+                Activer mon compte
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 6px;">
+                  <path d="m16.172 11-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2h12.172Z"/>
+                </svg>
+              </mj-button>
+            </mj-column>
+          </mj-section>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#6a6af4" padding="30px 20px" border-radius="8px">
+        <mj-column>
+          <mj-text align="center" font-size="20px" font-weight="700" color="#ffffff">
+            Vous ne connaissez pas le Tableau de bord de l'apprentissage ?
+          </mj-text>
+          <mj-text align="center" color="#ffffff" padding-top="5px">
+            Découvrez le site officiel du service
+          </mj-text>
+          <mj-image
+            src="<%= utils.getPublicUrl(`/images/emails/tba-homepage.png`) %>"
+            alt="Tableau de bord de l'apprentissage"
+            width="300px"
+            padding="15px 0"
+          />
+          <mj-button
+            href="<%= utils.getPublicUrl('/') %>"
+            background-color="#000091"
+            color="white"
+            border-radius="0"
+            font-size="14px"
+            line-height="20px"
+            font-weight="400"
+            inner-padding="10px 20px"
+            css-class="mobile-full-btn"
+          >
+            Aller sur le site
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 6px;">
+              <path d="m16.172 11-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2h12.172Z"/>
+            </svg>
+          </mj-button>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 0 20px 0">
+        <mj-column>
+          <mj-divider border-color="#e5e5e5" border-width="1px" padding="20px 25px 10px 25px" />
+
+          <mj-text font-size="13px" color="#3a3a3a" line-height="20px" css-class="mobile-text-14">
+            Ce courriel est généré automatiquement, vous ne pouvez pas y répondre.<br/>
+            Pour toute question écrivez-nous à
+            <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091;">tableaudebord@apprentissage.beta.gouv.fr</a>
+          </mj-text>
+
+          <mj-divider border-color="#e5e5e5" border-width="1px" padding="10px 25px" />
+
+          <mj-text font-size="13px" color="#3a3a3a" line-height="20px" font-weight="600" css-class="mobile-text-14">
+            Ce service est développé par l'équipe du Tableau de bord de l'apprentissage conformément aux missions d'intérêt public du Ministère du Travail.
+          </mj-text>
+
+          <mj-image width="1px" alt="" src="<%= utils.getPublicUrl(`/api/emails/${data.token}/markAsOpened`) %>" />
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>

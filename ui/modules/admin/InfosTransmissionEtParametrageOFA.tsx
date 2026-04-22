@@ -1,11 +1,15 @@
-import { Box, Stack, Text, Link, HStack, useClipboard, Input, Button } from "@chakra-ui/react";
+import { Box, Stack, Text, Link, HStack, useClipboard, Input, Button, Divider, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { UAI_INCONNUE } from "shared/models/data/organismes.model";
 
 import { _get, _post } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
+
+import InviteCfaAdminModal from "./InviteCfaAdminModal";
 
 interface InfosTransmissionParametrageOFAProps {
   transmission_date?: Date;
@@ -38,6 +42,23 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   const [showFullApiKey, setShowFullApiKey] = useState(false);
   const { onCopy, hasCopied } = useClipboard(parametrage?.api_key ?? "");
   const toggleApiKeyVisibility = () => setShowFullApiKey(!showFullApiKey);
+  const { isOpen: isInviteOpen, onOpen: openInvite, onClose: closeInvite } = useDisclosure();
+
+  const canInviteAdmin = Boolean(organisme?.siret);
+  const normalizedUai =
+    organisme?.uai && organisme.uai.toLowerCase() !== UAI_INCONNUE.toLowerCase() ? organisme.uai : null;
+  const organismeNom = organisme?.enseigne || organisme?.raison_sociale || organisme?.nom || "Organisme";
+
+  const { data: counts, refetch: refetchCounts } = useQuery<{
+    organisation_id: string | null;
+    usersTotal: number;
+    usersAdmin: number;
+    invitationsPending: number;
+  }>(
+    ["admin/invitations/counts/organisme", organisme?._id],
+    () => _get(`/api/v1/admin/invitations/counts/organisme/${organisme?._id}`),
+    { enabled: !!organisme?._id && router.isReady }
+  );
 
   const apiKeyDisplay = parametrage?.api_key
     ? showFullApiKey
@@ -151,6 +172,67 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         <Box as="i" className="ri-eye-line" verticalAlign="middle" mr={2} />
         Voir les transmissions
       </Button>
+
+      <Divider borderColor="#0063CB" opacity={0.3} />
+      <Box color="#0063CB" display="flex" alignItems="center">
+        <Box as="i" className="ri-user-add-line" />
+        <Text fontSize="zeta" fontWeight="bold" ml="2">
+          Gestion des administrateurs
+        </Text>
+      </Box>
+      <HStack>
+        <Button
+          variant="secondary"
+          w="fit-content"
+          bg="white"
+          isDisabled={!canInviteAdmin}
+          onClick={openInvite}
+          title={canInviteAdmin ? undefined : "Cet organisme n'a pas de SIRET, invitation impossible"}
+        >
+          <Box as="i" className="ri-mail-send-line" verticalAlign="middle" mr={2} />
+          Inviter un administrateur
+        </Button>
+      </HStack>
+
+      {counts?.organisation_id && (
+        <Stack spacing={1} pl={1}>
+          <Link
+            as={NextLink}
+            href={`/admin/users?tab=users&organisation_id=${counts.organisation_id}`}
+            color="bluefrance"
+            borderBottom="1px"
+            w="fit-content"
+            _hover={{ textDecoration: "none" }}
+          >
+            Voir les {counts.usersTotal} utilisateur{counts.usersTotal > 1 ? "s" : ""} actif
+            {counts.usersTotal > 1 ? "s" : ""}
+            {counts.usersAdmin > 0 ? ` (dont ${counts.usersAdmin} admin)` : ""}
+            <Box as="i" className="ri-arrow-right-line" ml={1} verticalAlign="middle" />
+          </Link>
+          <Link
+            as={NextLink}
+            href={`/admin/users?tab=invitations-pending&organisation_id=${counts.organisation_id}`}
+            color="bluefrance"
+            borderBottom="1px"
+            w="fit-content"
+            _hover={{ textDecoration: "none" }}
+          >
+            Voir les {counts.invitationsPending} invitation{counts.invitationsPending > 1 ? "s" : ""} en cours
+            <Box as="i" className="ri-arrow-right-line" ml={1} verticalAlign="middle" />
+          </Link>
+        </Stack>
+      )}
+
+      {canInviteAdmin && (
+        <InviteCfaAdminModal
+          isOpen={isInviteOpen}
+          onClose={closeInvite}
+          siret={organisme.siret}
+          uai={normalizedUai}
+          organismeNom={organismeNom}
+          onSuccess={() => refetchCounts()}
+        />
+      )}
     </Stack>
   );
 };

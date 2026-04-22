@@ -99,6 +99,11 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `📞 ${payload.effectif.prenom} ${payload.effectif.nom} souhaite être recontacté(e)`,
   whatsapp_nohelp_notification: (payload) =>
     `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
+  invitation_cfa_admin: () => "Invitation | Tableau de bord de l'apprentissage : activez votre compte d'administrateur",
+  invitation_cfa_member: (payload) =>
+    `${payload.admin.prenom} ${payload.admin.nom} vous invite à rejoindre ${payload.cfaName}`,
+  confirmation_cfa: () => "Confirmation email | Bienvenue, vous pouvez accéder au service",
+  activation_cfa: () => "Confirmation email | Dernier clic pour accéder au service",
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -106,7 +111,7 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
 export type TemplatePayloads = {
   activation_user: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -115,7 +120,7 @@ export type TemplatePayloads = {
   };
   invitation_organisation: {
     author: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
       email: string;
@@ -125,7 +130,7 @@ export type TemplatePayloads = {
   };
   notify_access_granted: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -133,7 +138,7 @@ export type TemplatePayloads = {
   };
   notify_access_granted_ofa: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -141,7 +146,7 @@ export type TemplatePayloads = {
   };
   notify_access_rejected: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -149,7 +154,7 @@ export type TemplatePayloads = {
   };
   notify_invitation_rejected: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -160,14 +165,14 @@ export type TemplatePayloads = {
   };
   reminder_missing_configuration_and_data: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
   };
   reminder_missing_data: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
@@ -177,7 +182,7 @@ export type TemplatePayloads = {
   };
   reset_password: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
       email: string;
@@ -187,13 +192,13 @@ export type TemplatePayloads = {
   };
   validation_user_by_orga_gestionnaire: {
     recipient: {
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
     };
     user: {
       _id: string;
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
       email: string;
@@ -203,7 +208,7 @@ export type TemplatePayloads = {
   validation_user_by_tdb_team: {
     user: {
       _id: string;
-      civility: string;
+      civility?: string;
       nom: string;
       prenom: string;
       email: string;
@@ -283,6 +288,40 @@ export type TemplatePayloads = {
     };
     lien_fiche: string;
     date_contacte_sans_retour: string;
+  };
+  invitation_cfa_admin: {
+    recipient: {
+      prenom: string;
+      nom: string;
+    };
+    cfaName: string;
+    cfaCity: string;
+    cfaPostalCode: string;
+    requestDate: string;
+    invitationToken: string;
+  };
+  invitation_cfa_member: {
+    admin: {
+      prenom: string;
+      nom: string;
+      fonction: string;
+    };
+    cfaName: string;
+    invitationToken: string;
+  };
+  confirmation_cfa: {
+    recipient: {
+      prenom: string;
+    };
+    cfaName: string;
+  };
+  activation_cfa: {
+    recipient: {
+      prenom: string;
+      nom: string;
+    };
+    activationToken: string;
+    isAdmin: boolean;
   };
 };
 

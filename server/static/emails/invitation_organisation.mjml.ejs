@@ -12,7 +12,7 @@
               Vous avez reçu une invitation pour accéder au <strong>tableau de bord de l'apprentissage</strong>. Cette
               invitation provient de :
               <ul>
-                <li><%= data.author.civility %> <%= data.author.prenom %> <%= data.author.nom %></li>
+                <li><%= data.author.civility || "" %> <%= data.author.prenom %> <%= data.author.nom %></li>
                 <li><%= data.author.email %></li>
                 <li><%= data.organisationLabel %></li>
               </ul>
