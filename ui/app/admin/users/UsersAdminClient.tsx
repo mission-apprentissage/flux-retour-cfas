@@ -177,10 +177,51 @@ export default function UsersAdminClient() {
       }
 
       const exportData = allUsersData.map((user: any) => {
-        const deptCode = user.organisation?.adresse?.departement;
-        const regionCode = user.organisation?.adresse?.region;
+        let deptCode: string | undefined;
+        let regionCode: string | undefined;
+        let codeRegionValue = "";
+        let nomRegionValue = "";
+
+        switch (user.organisation?.type) {
+          case "MISSION_LOCALE":
+            deptCode = user.organisation?.adresse?.departement;
+            regionCode = user.organisation?.adresse?.region;
+            break;
+          case "ORGANISME_FORMATION":
+            deptCode = user.organisation?.organisme?.adresse?.departement;
+            regionCode = user.organisation?.organisme?.adresse?.region;
+            break;
+          case "DDETS":
+            deptCode = user.organisation?.code_departement;
+            regionCode = deptCode
+              ? DEPARTEMENTS_BY_CODE[deptCode as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code
+              : undefined;
+            break;
+          case "DREETS":
+          case "DRAAF":
+          case "DRAFPIC":
+          case "CONSEIL_REGIONAL":
+          case "CARIF_OREF_REGIONAL":
+          case "FRANCE_TRAVAIL":
+            regionCode = user.organisation?.code_region;
+            break;
+          case "ARML": {
+            const regionList: string[] = user.organisation?.region_list ?? [];
+            codeRegionValue = regionList.join(", ");
+            nomRegionValue = regionList
+              .map((code) => REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? "")
+              .filter(Boolean)
+              .join(", ");
+            break;
+          }
+        }
+
         const dept = deptCode ? DEPARTEMENTS_BY_CODE[deptCode as keyof typeof DEPARTEMENTS_BY_CODE] : undefined;
         const region = regionCode ? REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE] : undefined;
+        if (regionCode) {
+          codeRegionValue = regionCode;
+          nomRegionValue = region?.nom ?? "";
+        }
 
         return {
           account_status: user.account_status,
@@ -199,9 +240,10 @@ export default function UsersAdminClient() {
           "organisation.organisme.nom": user.organisation?.organisme?.nom,
           "organisation.organisme.raison_sociale": user.organisation?.organisme?.raison_sociale,
           "organisation.organisme.reseaux": user.organisation?.organisme?.reseaux?.join(", "),
-          ml_code_departement: user.organisation?.type === "MISSION_LOCALE" ? deptCode : "",
-          ml_nom_departement: user.organisation?.type === "MISSION_LOCALE" ? (dept?.nom ?? "") : "",
-          ml_nom_region: user.organisation?.type === "MISSION_LOCALE" ? (region?.nom ?? "") : "",
+          code_departement: deptCode ?? "",
+          nom_departement: dept?.nom ?? "",
+          code_region: codeRegionValue,
+          nom_region: nomRegionValue,
           password_updated_at: user.password_updated_at,
           has_accept_cgu_version: user.has_accept_cgu_version,
           last_connection: user.last_connection,
