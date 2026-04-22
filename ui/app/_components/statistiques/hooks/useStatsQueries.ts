@@ -4,6 +4,7 @@ import type {
   IAccompagnementConjointStats,
   IClassifierStats,
   IDetailsDossiersTraites,
+  IDetailsDossiersTraitesV2,
   IRegionStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
@@ -45,6 +46,7 @@ interface IRupturantsStatsResponse {
 
 interface IDossiersTraitesStatsResponse {
   details: IDetailsDossiersTraites;
+  detailsV2: IDetailsDossiersTraitesV2;
   evaluationDate: Date;
   period: Period;
 }

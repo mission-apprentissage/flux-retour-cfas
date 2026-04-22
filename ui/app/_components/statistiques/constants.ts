@@ -83,6 +83,53 @@ export const DOSSIERS_TRAITES_DESCRIPTIONS = {
     "Le jeune a explicitement indiqué qu'il ne souhaitait pas être accompagné par la Mission Locale.",
 } as const;
 
+export const DOSSIERS_TRAITES_V2_COLORS = {
+  rdv_pris: COLOR_PALETTE.GREEN_DARK,
+  projet_pro_securise: COLOR_PALETTE.GREEN_LIGHT,
+  ne_souhaite_pas_accompagnement: COLOR_PALETTE.PINK_LIGHT,
+  a_recontacter: COLOR_PALETTE.YELLOW,
+  injoignable: COLOR_PALETTE.RED_LIGHT,
+  autre: COLOR_PALETTE.GREY_LIGHT,
+} as const;
+
+export const DOSSIERS_TRAITES_V2_LABELS = {
+  rdv_pris: "Rendez-vous pris",
+  projet_pro_securise: "Projet pro déjà sécurisé",
+  ne_souhaite_pas_accompagnement: "Ne souhaite pas être accompagné",
+  a_recontacter: "À recontacter",
+  injoignable: "Injoignable",
+  autre: "Autre",
+} as const;
+
+export const DOSSIERS_TRAITES_V2_DESCRIPTIONS = {
+  rdv_pris: "Tous les rendez-vous pris, que le jeune soit déjà connu ou non de la Mission Locale.",
+  projet_pro_securise:
+    "Contacté (réponse oui) + rendez-vous non pris : le jeune est déjà en contrat d'apprentissage, CDI ou CDD.",
+  ne_souhaite_pas_accompagnement:
+    "Contacté (réponse oui) + rendez-vous non pris : le jeune ne souhaite pas l'accompagnement de la Mission Locale (recherche contrat seul, réorientation, refus explicite).",
+  a_recontacter: "Tentative de contact sans réponse : le jeune est à recontacter (début ou boucle de relances).",
+  injoignable:
+    "Injoignable après plusieurs relances ou coordonnées incorrectes : le dossier est marqué traité mais le jeune reste injoignable.",
+  autre: "Contacté (réponse oui) + rendez-vous non pris + motif « Autre » renseigné par la Mission Locale.",
+} as const;
+
+export const TRAITEMENT_SEGMENTS_V2 = [
+  { key: "rdv_pris" as const, label: "RDV pris", color: DOSSIERS_TRAITES_V2_COLORS.rdv_pris },
+  {
+    key: "projet_pro_securise" as const,
+    label: "Projet pro déjà sécurisé",
+    color: DOSSIERS_TRAITES_V2_COLORS.projet_pro_securise,
+  },
+  {
+    key: "ne_souhaite_pas_accompagnement" as const,
+    label: "Ne souhaite pas être accompagné",
+    color: DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement,
+  },
+  { key: "a_recontacter" as const, label: "À recontacter", color: DOSSIERS_TRAITES_V2_COLORS.a_recontacter },
+  { key: "injoignable" as const, label: "Injoignable", color: DOSSIERS_TRAITES_V2_COLORS.injoignable },
+  { key: "autre" as const, label: "Autre", color: DOSSIERS_TRAITES_V2_COLORS.autre },
+] as const;
+
 export const RUPTURANTS_COLORS = {
   a_traiter: COLOR_PALETTE.ML_INACTIVE,
   traites: "#00A95F",

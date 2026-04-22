@@ -38,7 +38,12 @@ export function DossiersTraitesSection({
   return (
     <StatisticsSection title="Dossiers traités" width={fullWidth ? "full" : "two-thirds"} smallTitle>
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-        <DetailsDossiersTraitesPieChart data={data?.details} loading={isLoading} loadingVariation={loadingVariation} />
+        <DetailsDossiersTraitesPieChart
+          data={data?.detailsV2}
+          dejaConnu={data?.details.deja_connu}
+          loading={isLoading}
+          loadingVariation={loadingVariation}
+        />
       </StatsErrorHandler>
     </StatisticsSection>
   );

@@ -1,6 +1,6 @@
 import type { ITraitementDetails } from "shared/models/data/nationalStats.model";
 
-import { TRAITEMENT_SEGMENTS } from "../constants";
+import { TRAITEMENT_SEGMENTS_V2 } from "../constants";
 
 import styles from "./TraitementTable.module.css";
 
@@ -10,13 +10,29 @@ interface TraitementDetailsBarProps {
   tooltipPosition?: "top" | "bottom";
 }
 
+type SegmentKey = (typeof TRAITEMENT_SEGMENTS_V2)[number]["key"];
+
+function regroupV1ToV2(details: ITraitementDetails): Record<SegmentKey, number> {
+  return {
+    rdv_pris: details.rdv_pris,
+    projet_pro_securise: details.nouveau_projet,
+    ne_souhaite_pas_accompagnement:
+      details.ne_veut_pas_accompagnement + details.cherche_contrat + details.reorientation,
+    a_recontacter: details.contacte_sans_retour,
+    injoignable: details.injoignables + details.coordonnees_incorrectes,
+    autre: details.autre,
+  };
+}
+
 export function TraitementDetailsBar({ details, total, tooltipPosition = "top" }: TraitementDetailsBarProps) {
   if (total === 0) {
     return <span className={styles.emptyValue}>-</span>;
   }
 
-  const segments = TRAITEMENT_SEGMENTS.map((segment) => {
-    const value = details[segment.key] || 0;
+  const groupedValues = regroupV1ToV2(details);
+
+  const segments = TRAITEMENT_SEGMENTS_V2.map((segment) => {
+    const value = groupedValues[segment.key];
     const percentage = (value / total) * 100;
     return {
       ...segment,

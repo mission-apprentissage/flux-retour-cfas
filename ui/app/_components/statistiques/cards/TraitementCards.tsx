@@ -1,4 +1,4 @@
-import { DOSSIERS_TRAITES_COLORS } from "../constants";
+import { DOSSIERS_TRAITES_V2_COLORS } from "../constants";
 
 import { StatCard } from "./StatCard";
 import styles from "./TraitementCards.module.css";
@@ -74,18 +74,17 @@ export function TraitementCards({
               </TooltipText>
               <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.nouveau_projet}>Nouveau projet</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.contacte_sans_retour}>À recontacter</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.deja_accompagne}>
-                  Déjà suivi par le service public à l&apos;emploi
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.projet_pro_securise}>Projet pro déjà sécurisé</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement}>
+                  Ne souhaite pas être accompagné
                 </BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.injoignables}>Injoignable</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
               </ul>
-              <TooltipText spaced>sont exclus</TooltipText>
+              <TooltipText spaced>est exclu</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.coordonnees_incorrectes}>Mauvaises coordonnées</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.autre}>Autre</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
             </TooltipContent>
           </TooltipWrapper>
@@ -107,51 +106,55 @@ export function TraitementCards({
               </TooltipText>
               <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.nouveau_projet}>Nouveau projet</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.deja_accompagne}>
-                  Déjà suivi par le service public à l&apos;emploi
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.projet_pro_securise}>Projet pro déjà sécurisé</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement}>
+                  Ne souhaite pas être accompagné
                 </BulletItem>
               </ul>
               <TooltipText spaced>sont exclus</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.contacte_sans_retour}>À recontacter</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.coordonnees_incorrectes}>Mauvaises coordonnées</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.injoignables}>Injoignable</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.autre}>Autre</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
             </TooltipContent>
           </TooltipWrapper>
         }
       />
       <StatCard
-        label="Total jeunes accompagnés"
+        label="Total jeunes accompagnés découverts par le service"
         value={latestStats?.total_accompagne}
         previousValue={firstStats?.total_accompagne}
         loading={loading}
         loadingPercentage={loadingPercentage}
         tooltip={
           <TooltipWrapper>
-            <TooltipHeader>Total jeunes accompagnés</TooltipHeader>
+            <TooltipHeader>Total jeunes accompagnés découverts par le service</TooltipHeader>
             <TooltipContent>
               <TooltipText>
-                Les jeunes accompagnés sont l&apos;ensemble des jeunes détectés par le Tableau de bord qui ont obtenu un
-                rendez-vous grâce à la mise en relation.
+                Les jeunes accompagnés découverts par le service sont les jeunes détectés par le Tableau de bord qui ont
+                obtenu un rendez-vous à la Mission Locale et qui n&apos;étaient pas déjà en accompagnement actif au
+                moment de la rupture.
               </TooltipText>
-              <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
+              <TooltipText spaced>Sont inclus les rendez-vous pris où le jeune est :</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
-              </ul>
-              <TooltipText spaced>sont exclus</TooltipText>
-              <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.deja_accompagne}>
-                  Déjà suivi par le service public à l&apos;emploi
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>
+                  Non connu de la Mission Locale, ou connu mais pas en accompagnement actif
                 </BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.nouveau_projet}>Nouveau projet</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.contacte_sans_retour}>À recontacter</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.coordonnees_incorrectes}>Mauvaises coordonnées</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.injoignables}>Injoignable</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_COLORS.autre}>Autre</BulletItem>
+              </ul>
+              <TooltipText spaced>Sont exclus :</TooltipText>
+              <ul className={styles.bulletList}>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>
+                  Rendez-vous pris pour un jeune déjà accompagné activement (PACEA, CEJ, suivi régulier)
+                </BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.projet_pro_securise}>Projet pro déjà sécurisé</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement}>
+                  Ne souhaite pas être accompagné
+                </BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
             </TooltipContent>
           </TooltipWrapper>
