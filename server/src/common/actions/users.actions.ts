@@ -16,7 +16,7 @@ interface UserRegistration {
   email: string;
   nom: string;
   prenom: string;
-  civility: "Madame" | "Monsieur";
+  civility?: "Madame" | "Monsieur";
   fonction: string;
   telephone: string;
   password: string;
@@ -473,6 +473,37 @@ export const removeUser = async (_idStr) => {
   return await usersMigrationDb().deleteOne({ _id });
 };
 
+export async function adminUpdateUserRole(userId: string, newRole: "admin" | "member"): Promise<void> {
+  const userObjectId = new ObjectId(userId);
+  const user = await usersMigrationDb().findOne({ _id: userObjectId });
+
+  if (!user) {
+    throw Boom.notFound("Utilisateur non trouvé");
+  }
+
+  const organisation = await organisationsDb().findOne({ _id: user.organisation_id });
+  if (!organisation || organisation.type !== "ORGANISME_FORMATION") {
+    throw Boom.badRequest("Le changement de rôle n'est possible que pour les utilisateurs d'un CFA");
+  }
+
+  if (user.organisation_role === newRole) {
+    throw Boom.badRequest(`L'utilisateur est déjà ${newRole === "admin" ? "administrateur" : "non-administrateur"}`);
+  }
+
+  if (user.organisation_role === "admin" && newRole === "member") {
+    const adminCount = await usersMigrationDb().countDocuments({
+      organisation_id: user.organisation_id,
+      organisation_role: "admin",
+      account_status: "CONFIRMED",
+    });
+    if (adminCount <= 1) {
+      throw Boom.badRequest("Impossible de retirer le dernier administrateur de l'organisation");
+    }
+  }
+
+  await usersMigrationDb().updateOne({ _id: userObjectId }, { $set: { organisation_role: newRole } });
+}
+
 /**
  * Méthode de mise à jour d'un user depuis son id
  */
@@ -548,15 +579,85 @@ export async function getUserById(userId: ObjectId): Promise<WithId<IUsersMigrat
   return user;
 }
 
-export async function resendConfirmationEmail(userId: string): Promise<void> {
+export const RESEND_CONFIRMATION_EMAIL_COOLDOWN_MS = 60 * 1000;
+
+export interface ResendConfirmationEmailResult {
+  sent: boolean;
+  cooldown_remaining_seconds: number;
+}
+
+/**
+ * Renvoie le mail d'activation à un utilisateur en attente de confirmation d'email.
+ *
+ * - Respecte un cooldown de `RESEND_CONFIRMATION_EMAIL_COOLDOWN_MS` entre deux envois,
+ *   sauf si `bypassCooldown` est passé (route admin).
+ * - Le verrou est posé de façon atomique via un updateOne conditionnel avant
+ *   l'envoi effectif, ce qui empêche les doubles envois en cas d'appels concurrents.
+ * - Choisit le template selon le type de compte :
+ *   - `activation_cfa` si `organisation_role` est défini (flow CFA v2)
+ *   - `activation_user` sinon (flow legacy)
+ */
+export async function resendConfirmationEmail(
+  userId: string,
+  opts?: { bypassCooldown?: boolean }
+): Promise<ResendConfirmationEmailResult> {
   const user = await getUserById(new ObjectId(userId));
-  await sendEmail(user.email, "activation_user", {
-    recipient: {
-      civility: user.civility,
-      nom: user.nom,
-      prenom: user.prenom,
-    },
-    tdbEmail: config.email,
-    activationToken: createActivationToken(user.email),
-  });
+
+  if (user.account_status !== "PENDING_EMAIL_VALIDATION") {
+    return { sent: false, cooldown_remaining_seconds: 0 };
+  }
+
+  const now = new Date();
+
+  if (opts?.bypassCooldown) {
+    await usersMigrationDb().updateOne({ _id: user._id }, { $set: { last_activation_email_sent_at: now } });
+  } else {
+    const threshold = new Date(now.getTime() - RESEND_CONFIRMATION_EMAIL_COOLDOWN_MS);
+    const { modifiedCount } = await usersMigrationDb().updateOne(
+      {
+        _id: user._id,
+        account_status: "PENDING_EMAIL_VALIDATION",
+        $or: [
+          { last_activation_email_sent_at: { $exists: false } },
+          { last_activation_email_sent_at: { $lt: threshold } },
+        ],
+      },
+      { $set: { last_activation_email_sent_at: now } }
+    );
+
+    if (modifiedCount === 0) {
+      const current = await usersMigrationDb().findOne(
+        { _id: user._id },
+        { projection: { last_activation_email_sent_at: 1 } }
+      );
+      const lastSentAt = current?.last_activation_email_sent_at;
+      const remainingMs = lastSentAt
+        ? Math.max(0, RESEND_CONFIRMATION_EMAIL_COOLDOWN_MS - (now.getTime() - lastSentAt.getTime()))
+        : 0;
+      return {
+        sent: false,
+        cooldown_remaining_seconds: Math.ceil(remainingMs / 1000),
+      };
+    }
+  }
+
+  if (user.organisation_role) {
+    await sendEmail(user.email, "activation_cfa", {
+      recipient: { prenom: user.prenom, nom: user.nom },
+      activationToken: createActivationToken(user.email),
+      isAdmin: user.organisation_role === "admin",
+    });
+  } else {
+    await sendEmail(user.email, "activation_user", {
+      recipient: {
+        civility: user.civility,
+        nom: user.nom,
+        prenom: user.prenom,
+      },
+      tdbEmail: config.email,
+      activationToken: createActivationToken(user.email),
+    });
+  }
+
+  return { sent: true, cooldown_remaining_seconds: 0 };
 }

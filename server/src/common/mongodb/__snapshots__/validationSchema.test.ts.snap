@@ -12222,9 +12222,29 @@ exports[`validation-schema > should create validation schema for invitations > i
       "bsonType": "string",
       "description": "Email destinataire",
     },
+    "expires_at": {
+      "bsonType": "date",
+      "description": "Date d'expiration de l'invitation (96h après création)",
+    },
+    "nom": {
+      "bsonType": "string",
+      "description": "Nom de l'invité (si fourni à la création)",
+    },
     "organisation_id": {
       "bsonType": "objectId",
       "description": "Organisation cible de l'invitation",
+    },
+    "prenom": {
+      "bsonType": "string",
+      "description": "Prénom de l'invité (si fourni à la création)",
+    },
+    "role": {
+      "bsonType": "string",
+      "description": "Rôle attribué à l'utilisateur invité (CFA)",
+      "enum": [
+        "admin",
+        "member",
+      ],
     },
     "token": {
       "bsonType": "string",
@@ -12262,9 +12282,29 @@ exports[`validation-schema > should create validation schema for invitationsArch
       "bsonType": "string",
       "description": "Email destinataire",
     },
+    "expires_at": {
+      "bsonType": "date",
+      "description": "Date d'expiration de l'invitation (96h après création)",
+    },
+    "nom": {
+      "bsonType": "string",
+      "description": "Nom de l'invité (si fourni à la création)",
+    },
     "organisation_id": {
       "bsonType": "objectId",
       "description": "Organisation cible de l'invitation",
+    },
+    "prenom": {
+      "bsonType": "string",
+      "description": "Prénom de l'invité (si fourni à la création)",
+    },
+    "role": {
+      "bsonType": "string",
+      "description": "Rôle attribué à l'utilisateur invité (CFA)",
+      "enum": [
+        "admin",
+        "member",
+      ],
     },
     "token": {
       "bsonType": "string",
@@ -20660,6 +20700,10 @@ exports[`validation-schema > should create validation schema for usersMigration 
         "Monsieur",
       ],
     },
+    "confirmed_at": {
+      "bsonType": "date",
+      "description": "Date d'activation du compte (passage à CONFIRMED)",
+    },
     "connection_history": {
       "bsonType": "array",
       "description": "Historique des dates de connexion",
@@ -20743,6 +20787,10 @@ exports[`validation-schema > should create validation schema for usersMigration 
       "bsonType": "string",
       "description": "Version des cgu accepté par l'utilisateur",
     },
+    "last_activation_email_sent_at": {
+      "bsonType": "date",
+      "description": "Date du dernier envoi du mail d'activation (pour cooldown de renvoi)",
+    },
     "last_connection": {
       "bsonType": "date",
       "description": "Date de dernière connexion",
@@ -20754,6 +20802,14 @@ exports[`validation-schema > should create validation schema for usersMigration 
     "organisation_id": {
       "bsonType": "objectId",
       "description": "Organisation à laquelle appartient l'utilisateur",
+    },
+    "organisation_role": {
+      "bsonType": "string",
+      "description": "Rôle de l'utilisateur dans son organisation (CFA)",
+      "enum": [
+        "admin",
+        "member",
+      ],
     },
     "password": {
       "bsonType": "string",
@@ -20788,7 +20844,6 @@ exports[`validation-schema > should create validation schema for usersMigration 
     "_id",
     "email",
     "password",
-    "civility",
     "nom",
     "prenom",
     "organisation_id",

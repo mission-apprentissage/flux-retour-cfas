@@ -114,12 +114,10 @@ const UserForm = ({
             });
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        const response = await (e?.json ?? {});
-        const message = response?.message ?? e?.message;
         setAlert({
-          message: message,
+          message: e?.json?.data?.message || e?.message || "Une erreur est survenue",
           severity: "error",
         });
       }
@@ -165,12 +163,11 @@ const UserForm = ({
         severity: "success",
       });
       validate ? onUpdate?.() : onDelete?.();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setAlert({
-        message: "Erreur lors de la validation de l'accès.",
+        message: e?.json?.data?.message || "Erreur lors de la validation de l'accès.",
         severity: "error",
-        description: "Merci de réessayer plus tard",
       });
     }
   };
@@ -182,12 +179,11 @@ const UserForm = ({
         message: "L'email de confirmation a été renvoyé.",
         severity: "success",
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setAlert({
-        message: "Erreur lors de l'envoi de l'email.",
+        message: e?.json?.data?.message || "Erreur lors de l'envoi de l'email.",
         severity: "error",
-        description: "Merci de réessayer plus tard",
       });
     }
   };

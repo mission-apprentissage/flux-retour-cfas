@@ -1,0 +1,98 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <mj-wrapper padding="10px 20px" css-class="mobile-wrapper-tight">
+      <mj-section background-color="#ffffff" padding="20px 0 0 0" text-align="left" vertical-align="top">
+        <mj-column>
+          <mj-image
+            alt="logo"
+            src="<%= utils.getPublicUrl(`/images/emails/marianne.png`) %>"
+            width="177px"
+            align="left"
+          ></mj-image>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 30px" css-class="mobile-section-narrow">
+        <mj-column>
+          <mj-text align="center" font-size="22px" line-height="28px" font-weight="700" padding-bottom="10px" color="#161616" css-class="mobile-text-tight">
+            <% const fullName = `${data.recipient.prenom || ''} ${data.recipient.nom || ''}`.trim(); %>
+            Bonjour<% if (fullName) { %> <span style="color: #6A6AF4;"><%= fullName %></span><% } %>,
+          </mj-text>
+
+          <mj-section background-color="#f5f5fe" padding="20px" border-radius="8px" css-class="mobile-padding-sm">
+            <mj-column>
+              <mj-text align="center" font-weight="700" font-size="18px" line-height="24px" color="#161616">
+                Dernier clic pour activer votre compte
+              </mj-text>
+              <mj-text align="center" font-size="14px" padding-top="5px" color="#161616">
+                Cliquez sur le lien ci-dessous pour activer votre compte
+              </mj-text>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/auth/bienvenue?activationToken=${data.activationToken}`) %>"
+                background-color="#000091"
+                color="white"
+                border-radius="0"
+                font-size="14px"
+                line-height="20px"
+                font-weight="400"
+                inner-padding="10px 20px"
+                css-class="mobile-full-btn"
+              >
+                Activer mon compte
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 6px;">
+                  <path d="m16.172 11-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2h12.172Z"/>
+                </svg>
+              </mj-button>
+            </mj-column>
+          </mj-section>
+
+          <% if (data.isAdmin) { %>
+          <mj-section padding="10px 0 0 0" background-color="#f5f5fe" border="1px solid #ECECFE">
+            <mj-column padding="15px" css-class="mobile-column-padding-sm">
+              <mj-text padding="0" font-weight="700" color="#000091" font-size="14px" line-height="24px">
+                <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="width: 30px; vertical-align: middle; padding-right: 10px;">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#000091" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                        <path d="M19.5,2.5h-15c-1.1,0-2,0.9-2,2v15c0,1.1,0.9,2,2,2h15c1.1,0,2-0.9,2-2v-15C21.5,3.4,20.6,2.5,19.5,2.5z M13,17h-2v-6h2V17z M13,9h-2V7h2V9z"/>
+                      </svg>
+                    </td>
+                    <td style="vertical-align: middle;">
+                      Vous allez créer votre compte en tant que responsable de votre établissement sur l'outil du Tableau de bord de l'apprentissage avec le rôle "d'ADMINISTRATEUR" sur l'outil
+                    </td>
+                  </tr>
+                </table>
+              </mj-text>
+              <mj-text padding="10px 0 0 0" color="#161616" font-size="12px" line-height="20px" css-class="mobile-text-14">
+                Vous pourrez donner accès aux dossiers des jeunes et aux fonctionnalités de collaboration à d'autres personnes dans votre CFA une fois que votre compte sera activé et validé.
+              </mj-text>
+            </mj-column>
+          </mj-section>
+          <% } %>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 0 20px 0">
+        <mj-column>
+          <mj-divider border-color="#e5e5e5" border-width="1px" padding="20px 25px 10px 25px" />
+
+          <mj-text font-size="13px" color="#3a3a3a" line-height="20px" css-class="mobile-text-14">
+            Ce courriel est généré automatiquement, vous ne pouvez pas y répondre.<br/>
+            Pour toute question écrivez-nous à
+            <a href="mailto:tableaudebord@apprentissage.beta.gouv.fr" style="color: #000091;">tableaudebord@apprentissage.beta.gouv.fr</a>
+          </mj-text>
+
+          <mj-divider border-color="#e5e5e5" border-width="1px" padding="10px 25px" />
+
+          <mj-text font-size="13px" color="#3a3a3a" line-height="20px" font-weight="600" css-class="mobile-text-14">
+            Ce service est développé par l'équipe du Tableau de bord de l'apprentissage conformément aux missions d'intérêt public du Ministère du Travail.
+          </mj-text>
+
+          <mj-image width="1px" alt="" src="<%= utils.getPublicUrl(`/api/emails/${data.token}/markAsOpened`) %>" />
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>

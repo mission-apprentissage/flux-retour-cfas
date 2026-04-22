@@ -4,7 +4,7 @@ import { IOrganisation } from "shared/models/data/organisations.model";
 
 export interface AuthContext<I = IOrganisation> {
   _id: ObjectId;
-  civility: string;
+  civility?: string;
   nom: string;
   prenom: string;
   email: string;
@@ -26,6 +26,7 @@ export interface AuthContext<I = IOrganisation> {
   fonction?: string;
   password_updated_at?: Date;
   telephone?: string;
+  organisation_role?: "admin" | "member";
 
   // nom de l'organisme, enrichi au runtime depuis la collection organismes (CFA uniquement)
   organisation_nom?: string;

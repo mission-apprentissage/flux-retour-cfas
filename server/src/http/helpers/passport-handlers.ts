@@ -73,6 +73,7 @@ export const authMiddleware = () => {
             impersonating,
             organisation,
             organisation_nom,
+            organisation_role: user.organisation_role,
             last_connection: user.last_connection,
             created_at: user.created_at,
             fonction: user.fonction,

@@ -1,0 +1,143 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 500px;
+  max-width: 100vw;
+  height: 100vh;
+  background-color: #fff;
+  z-index: 1000;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.body {
+  padding: 1.5rem 2rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.closeRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #000091;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.entry {
+  margin-bottom: 1.5rem;
+}
+
+.entryRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.entryLabel {
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-top: 1.75rem;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.entryInput {
+  flex: 1;
+}
+
+.entryInput :global(.fr-label) {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-mention-grey);
+}
+
+.removeButton {
+  margin-top: 2rem;
+}
+
+.roleRow {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  margin-left: 136px;
+}
+
+.roleLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.addRow {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  border: 1px dashed #c1c1fb;
+  border-radius: 4px;
+  background-color: #f5f5fe;
+}
+
+.addRowDisabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-default-grey);
+  background-color: #fff;
+}
+
+.submitButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-mention-grey);
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+.hintIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

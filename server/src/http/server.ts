@@ -13,6 +13,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 import {
   CODE_POSTAL_REGEX,
   SOURCE_APPRENANT,
@@ -30,8 +31,10 @@ import { z } from "zod";
 
 import {
   activateUser,
+  getCfaOnboardingInfo,
   login,
   register,
+  registerCfa,
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
@@ -65,6 +68,7 @@ import {
   createOrganisation,
   getInvitationByToken,
   getOrganisationOrganisme,
+  batchInviteUsersToOrganisation,
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
@@ -72,6 +76,7 @@ import {
   rejectMembre,
   removeUserFromOrganisation,
   resendInvitationEmail,
+  updateMemberRole,
   validateMembre,
 } from "@/common/actions/organisations.actions";
 import {
@@ -101,7 +106,12 @@ import {
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import {
+  changePassword,
+  getUserByEmail,
+  resendConfirmationEmail,
+  updateUserProfile,
+} from "@/common/actions/users.actions";
 import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
@@ -116,6 +126,7 @@ import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema }
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
+import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
@@ -125,6 +136,7 @@ import errorMiddleware from "./middlewares/errorMiddleware";
 import {
   requireIndicateursOrganismesAccess,
   requireAdministrator,
+  requireCfaAdminIfCfa,
   requireEffectifOrganismePermission,
   requireMissionLocale,
   requireOrganismePermission,
@@ -140,6 +152,7 @@ import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
+import invitationsAdmin from "./routes/admin.routes/invitations.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
@@ -166,6 +179,25 @@ import transmissionRoutes from "./routes/specific.routes/transmission.routes";
 import brevoWhatsappWebhook from "./routes/webhooks.routes/brevo-whatsapp.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
+
+const resendActivationEmailRateLimiter = new RateLimiterMemory({
+  keyPrefix: "resend_activation_email",
+  points: 5,
+  duration: 60,
+});
+
+async function resendActivationEmailRateLimitMiddleware(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  try {
+    await resendActivationEmailRateLimiter.consume(req.ip || "unknown");
+    next();
+  } catch {
+    return res.status(429).json({ error: "Too many requests" });
+  }
+}
 
 /**
  * Create the express app
@@ -329,6 +361,37 @@ function setupRoutes(app: Application) {
         );
         registrationUnknownNetwork.email = registrationUnknownNetwork.email.toLowerCase();
         await registerUnknownNetwork(registrationUnknownNetwork);
+      })
+    )
+    .post(
+      "/api/v1/auth/register-cfa",
+      returnResult(async (req) => {
+        const data = await validateFullZodObjectSchema(req.body, registrationCfaSchema);
+        return await registerCfa(data);
+      })
+    )
+    .post(
+      "/api/v1/auth/resend-activation-email",
+      resendActivationEmailRateLimitMiddleware,
+      returnResult(async (req) => {
+        const { email } = await validateFullZodObjectSchema(req.body, {
+          email: z.string().email().toLowerCase().trim(),
+        });
+
+        const user = await getUserByEmail(email);
+
+        if (!user || user.account_status !== "PENDING_EMAIL_VALIDATION") {
+          return { sent: true, cooldown_remaining_seconds: 0 };
+        }
+
+        return await resendConfirmationEmail(user._id.toString());
+      })
+    )
+    .get(
+      "/api/v1/onboarding/cfa-info",
+      returnResult(async (req) => {
+        const token = z.string().min(10).max(200).parse(req.query.token);
+        return await getCfaOnboardingInfo(token);
       })
     )
     .post(
@@ -860,6 +923,27 @@ function setupRoutes(app: Application) {
           );
         })
       )
+      .post(
+        "/membres/batch",
+        requireCfaAdminIfCfa,
+        returnResult(async (req) => {
+          const batchSchema = {
+            emails: z.array(z.string().email()).min(1).max(50),
+            roles: z.array(z.enum(["admin", "member"])).optional(),
+          };
+          const { emails: rawEmails, roles: rawRoles } = await validateFullZodObjectSchema(req.body, batchSchema);
+          if (rawRoles !== undefined && rawRoles.length !== rawEmails.length) {
+            throw Boom.badRequest("Le champ 'roles' doit être un tableau de même taille que 'emails'");
+          }
+          const emails = rawEmails.map((e) => e.toLowerCase().trim());
+          return await batchInviteUsersToOrganisation(
+            req.user,
+            emails,
+            (req.user as AuthContext).organisation_id,
+            rawRoles
+          );
+        })
+      )
       .delete(
         "/membres/:userId",
         returnResult(async (req) => {
@@ -876,6 +960,14 @@ function setupRoutes(app: Application) {
         "/membres/:userId/reject",
         returnResult(async (req) => {
           await rejectMembre(req.user, req.params.userId);
+        })
+      )
+      .put(
+        "/membres/:userId/role",
+        requireCfaAdminIfCfa,
+        returnResult(async (req) => {
+          const { role } = await validateFullZodObjectSchema(req.body, { role: z.enum(["admin", "member"]) });
+          await updateMemberRole(req.user, req.params.userId, role);
         })
       )
       .get(
@@ -924,6 +1016,7 @@ function setupRoutes(app: Application) {
       .Router()
       .use(requireAdministrator)
       .use("/users", usersAdmin())
+      .use("/invitations", invitationsAdmin())
       .use("/organismes", organismesAdmin())
       .use("/reseaux", reseauxAdmin())
       .use("/effectifs", effectifsAdmin())

@@ -31,6 +31,8 @@ import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
 
+export const INVITATION_EXPIRATION_MS = 96 * 60 * 60 * 1000;
+
 export async function createOrganisation(organisation: IOrganisationCreate): Promise<ObjectId> {
   const formatOrganisme = async (organisation) => {
     const organisme = await organismesDb().findOne({
@@ -90,9 +92,12 @@ export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial
           prenom: 1,
           email: 1,
           telephone: 1,
+          fonction: 1,
           account_status: 1,
           created_at: 1,
+          confirmed_at: 1,
           last_connection: 1,
+          organisation_role: 1,
         },
       }
     )
@@ -126,9 +131,7 @@ export async function listContactsOrganisation(organisationId: ObjectId): Promis
 
 export async function listOrganisationPendingInvitations(ctx: AuthContext): Promise<any[]> {
   return await invitationsDb()
-    .find({
-      organisation_id: ctx.organisation_id,
-    })
+    .find({ organisation_id: ctx.organisation_id }, { projection: { token: 0 } })
     .toArray();
 }
 
@@ -148,6 +151,10 @@ export async function inviteUserToOrganisation(
         : "Cet utilisateur est déjà présent dans une autre organisation. Si vous pensez que c'est une erreur, merci de contacter le support."
     );
   }
+  const existingInvitation = await invitationsDb().findOne({ email, organisation_id });
+  if (existingInvitation) {
+    throw Boom.badRequest("Une invitation a déjà été envoyée à cette adresse email");
+  }
   const invitationToken = generateKey(50, "hex");
   await invitationsDb().insertOne({
     _id: new ObjectId(),
@@ -156,32 +163,167 @@ export async function inviteUserToOrganisation(
     token: invitationToken,
     author_id: ctx._id,
     created_at: getCurrentTime(),
+    expires_at: new Date(Date.now() + INVITATION_EXPIRATION_MS),
   });
 
-  await sendEmail(email, "invitation_organisation", {
-    author: {
-      civility: ctx.civility,
-      nom: ctx.nom,
-      prenom: ctx.prenom,
-      email: ctx.email,
-    },
-    organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
-    invitationToken,
-  });
+  const organisation = await getOrganisationById(organisation_id);
+
+  if (organisation.type === "ORGANISME_FORMATION") {
+    const cfaName = await getCfaNameForOrganisation(organisation);
+    await sendEmail(email, "invitation_cfa_member", {
+      admin: {
+        prenom: ctx.prenom,
+        nom: ctx.nom,
+        fonction: ctx.fonction || "",
+      },
+      cfaName,
+      invitationToken,
+    });
+  } else {
+    await sendEmail(email, "invitation_organisation", {
+      author: {
+        civility: ctx.civility,
+        nom: ctx.nom,
+        prenom: ctx.prenom,
+        email: ctx.email,
+      },
+      organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+      invitationToken,
+    });
+  }
+}
+
+export async function batchInviteUsersToOrganisation(
+  ctx: AuthContext,
+  emails: string[],
+  organisation_id: ObjectId,
+  roles?: Array<"admin" | "member">
+): Promise<{ success: string[]; errors: { email: string; message: string }[] }> {
+  const results: { success: string[]; errors: { email: string; message: string }[] } = {
+    success: [],
+    errors: [],
+  };
+
+  const seen = new Set<string>();
+  const uniquePairs: Array<{ email: string; role: "admin" | "member" }> = [];
+  for (let i = 0; i < emails.length; i++) {
+    if (!seen.has(emails[i])) {
+      seen.add(emails[i]);
+      uniquePairs.push({ email: emails[i], role: roles?.[i] ?? "member" });
+    }
+  }
+
+  const organisation = await getOrganisationById(organisation_id);
+  const isCfa = organisation.type === "ORGANISME_FORMATION";
+  const cfaName = isCfa ? await getCfaNameForOrganisation(organisation) : undefined;
+  const organisationLabel = !isCfa ? await buildOrganisationLabel(organisation_id) : undefined;
+
+  for (const { email, role } of uniquePairs) {
+    if (email === ctx.email) {
+      results.errors.push({ email, message: "Vous ne pouvez pas vous inviter vous-même" });
+      continue;
+    }
+
+    const existingInvitation = await invitationsDb().findOne({ email, organisation_id });
+    if (existingInvitation) {
+      results.errors.push({ email, message: "Une invitation a déjà été envoyée à cet email" });
+      continue;
+    }
+
+    const existingUser = await usersMigrationDb().findOne({ email });
+    if (existingUser) {
+      const sameOrg = existingUser.organisation_id.equals(organisation_id);
+      if (sameOrg) {
+        results.errors.push({
+          email,
+          message: "Cet utilisateur est déjà membre de votre organisation",
+        });
+      } else {
+        const existingOrg = await getOrganisationById(existingUser.organisation_id);
+        const message =
+          existingOrg.type === "MISSION_LOCALE"
+            ? "Cet utilisateur est déjà enregistré en tant que conseiller Mission Locale"
+            : existingOrg.type === "ORGANISME_FORMATION"
+              ? "Cet utilisateur est déjà rattaché à un autre CFA"
+              : "Cet utilisateur est déjà présent dans une autre organisation";
+        results.errors.push({ email, message });
+      }
+      continue;
+    }
+
+    const invitationToken = generateKey(50, "hex");
+    await invitationsDb().insertOne({
+      _id: new ObjectId(),
+      organisation_id,
+      email,
+      token: invitationToken,
+      author_id: ctx._id,
+      role,
+      created_at: getCurrentTime(),
+      expires_at: new Date(Date.now() + INVITATION_EXPIRATION_MS),
+    });
+
+    if (isCfa) {
+      await sendEmail(email, "invitation_cfa_member", {
+        admin: {
+          prenom: ctx.prenom,
+          nom: ctx.nom,
+          fonction: ctx.fonction || "",
+        },
+        cfaName: cfaName!,
+        invitationToken,
+      });
+    } else {
+      await sendEmail(email, "invitation_organisation", {
+        author: {
+          civility: ctx.civility,
+          nom: ctx.nom,
+          prenom: ctx.prenom,
+          email: ctx.email,
+        },
+        organisationLabel: organisationLabel!,
+        invitationToken,
+      });
+    }
+
+    results.success.push(email);
+  }
+
+  return results;
 }
 
 export async function resendInvitationEmail(ctx: AuthContext, invitationId: string): Promise<void> {
   const invitation = await getInvitationById(ctx, new ObjectId(invitationId));
-  await sendEmail(invitation.email, "invitation_organisation", {
-    author: {
-      civility: ctx.civility,
-      nom: ctx.nom,
-      prenom: ctx.prenom,
-      email: ctx.email,
-    },
-    organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
-    invitationToken: invitation.token,
-  });
+
+  const newToken = generateKey(50, "hex");
+  const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);
+  await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
+
+  const organisation = await getOrganisationById(ctx.organisation_id);
+
+  if (organisation.type === "ORGANISME_FORMATION") {
+    const cfaName = await getCfaNameForOrganisation(organisation);
+    await sendEmail(invitation.email, "invitation_cfa_member", {
+      admin: {
+        prenom: ctx.prenom,
+        nom: ctx.nom,
+        fonction: ctx.fonction || "",
+      },
+      cfaName,
+      invitationToken: newToken,
+    });
+  } else {
+    await sendEmail(invitation.email, "invitation_organisation", {
+      author: {
+        civility: ctx.civility,
+        nom: ctx.nom,
+        prenom: ctx.prenom,
+        email: ctx.email,
+      },
+      organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+      invitationToken: newToken,
+    });
+  }
 }
 
 export async function cancelInvitation(ctx: AuthContext, invitationId: string): Promise<void> {
@@ -265,13 +407,68 @@ export async function rejectMembre(ctx: AuthContext, userId: string): Promise<vo
 }
 
 export async function removeUserFromOrganisation(ctx: AuthContext, userId: string): Promise<void> {
-  const res = await usersMigrationDb().deleteOne({
+  const userObjectId = new ObjectId(userId);
+
+  const userToDelete = await usersMigrationDb().findOne({
     organisation_id: ctx.organisation_id,
-    _id: new ObjectId(userId),
+    _id: userObjectId,
   });
-  if (res.deletedCount === 0) {
+  if (!userToDelete) {
     throw Boom.forbidden("Permissions invalides");
   }
+
+  if (userToDelete.organisation_role === "admin") {
+    const adminCount = await usersMigrationDb().countDocuments({
+      organisation_id: ctx.organisation_id,
+      organisation_role: "admin",
+      account_status: "CONFIRMED",
+    });
+    if (adminCount <= 1) {
+      throw Boom.badRequest("Impossible de retirer le dernier administrateur de l'organisation");
+    }
+  }
+
+  await usersMigrationDb().deleteOne({ _id: userObjectId, organisation_id: ctx.organisation_id });
+}
+
+export async function updateMemberRole(ctx: AuthContext, userId: string, newRole: "admin" | "member"): Promise<void> {
+  if (ctx.organisation.type !== "ORGANISME_FORMATION") {
+    throw Boom.badRequest("Le changement de rôle n'est possible que pour les utilisateurs d'un CFA");
+  }
+
+  const userObjectId = new ObjectId(userId);
+
+  if (ctx._id.equals(userObjectId)) {
+    throw Boom.badRequest("Vous ne pouvez pas modifier votre propre rôle");
+  }
+
+  const user = await usersMigrationDb().findOne({
+    organisation_id: ctx.organisation_id,
+    _id: userObjectId,
+  });
+  if (!user) {
+    throw Boom.notFound("Utilisateur non trouvé dans votre organisation");
+  }
+
+  if (user.organisation_role === newRole) {
+    throw Boom.badRequest(`L'utilisateur est déjà ${newRole === "admin" ? "administrateur" : "non-administrateur"}`);
+  }
+
+  if (user.organisation_role === "admin" && newRole === "member") {
+    const adminCount = await usersMigrationDb().countDocuments({
+      organisation_id: ctx.organisation_id,
+      organisation_role: "admin",
+      account_status: "CONFIRMED",
+    });
+    if (adminCount <= 1) {
+      throw Boom.badRequest("Impossible de retirer le dernier administrateur de l'organisation");
+    }
+  }
+
+  await usersMigrationDb().updateOne(
+    { _id: userObjectId, organisation_id: ctx.organisation_id },
+    { $set: { organisation_role: newRole } }
+  );
 }
 
 export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>> {
@@ -357,8 +554,12 @@ export async function getInvitationByToken(token: string): Promise<any> {
   if (!invitation) {
     throw Boom.notFound("Jeton d'invitation non valide");
   }
+  if (invitation.expires_at && new Date() > invitation.expires_at) {
+    throw Boom.unauthorized("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
+  }
   const organisation = await getOrganisationById(invitation.organisation_id);
-  return { ...invitation, organisation };
+  const { token: _token, ...safeInvitation } = invitation;
+  return { ...safeInvitation, organisation };
 }
 
 export async function rejectInvitation(token: string): Promise<void> {
@@ -401,6 +602,16 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
     throw Boom.notFound(`missing invitation ${invitationId}`);
   }
   return invitation;
+}
+
+async function getCfaNameForOrganisation(
+  organisation: IOrganisation & { type: "ORGANISME_FORMATION" }
+): Promise<string> {
+  const organisme = await organismesDb().findOne({
+    siret: organisation.siret,
+    ...(organisation.uai ? { uai: organisation.uai } : {}),
+  });
+  return organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme";
 }
 
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {
