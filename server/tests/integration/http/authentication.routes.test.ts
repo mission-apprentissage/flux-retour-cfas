@@ -61,7 +61,8 @@ describe("Authentification", () => {
       });
 
       assert.strictEqual(response.status, 200);
-      const cookie = response.headers["set-cookie"][0];
+      const cookie = response.headers["set-cookie"]?.[0];
+      assert.ok(cookie);
       assert.match(cookie, /^flux-retour-cfas-/);
 
       response = await httpClient.get("/api/v1/session", {

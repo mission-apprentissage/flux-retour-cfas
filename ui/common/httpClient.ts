@@ -106,7 +106,11 @@ export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) 
     responseType: "blob",
     ...options,
   });
-  return { data: handleResponse(path, response), extension: mime.getExtension(response.headers["content-type"]) };
+  const contentType = response.headers["content-type"];
+  return {
+    data: handleResponse(path, response),
+    extension: typeof contentType === "string" ? mime.getExtension(contentType) : null,
+  };
 };
 
 export const _post = async <RequestBody = any, ResponseBody = any>(
