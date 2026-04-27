@@ -4,7 +4,7 @@ import { zObjectId } from "zod-mongodb-schema";
 import { SourceApprenantEnum } from "shared/constants/effectifs";
 import zMissionLocaleEffectif, { zAccConjointMotifEnum } from "shared/models/data/missionLocaleEffectif.model";
 
-import { zEffectifComputedOrganisme, zStatutApprenantEnum } from "../../data";
+import { zEffectifComputedOrganisme } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
 import { zContrat } from "../../data/effectifs/contrat.part";
 import { zFormationEffectif } from "../../data/effectifs/formation.part";
@@ -40,12 +40,7 @@ const zEffectifOrganismeFormation = z
     injoignable: z.boolean().nullish(),
     nouveau_contrat: z.boolean().describe("Indique si le jeune a retrouvé un contrat après rupture/abandon").nullish(),
     autorisation_contact: z.boolean().nullish(),
-    date_rupture: z
-      .object({
-        date: z.date(),
-        valeur: zStatutApprenantEnum,
-      })
-      .nullish(),
+    date_rupture: z.date().nullish(),
     organisme_data: z.object(updateOrganismeFormationEffectifApi).optional(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),

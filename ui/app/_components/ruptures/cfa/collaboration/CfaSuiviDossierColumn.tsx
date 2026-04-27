@@ -40,7 +40,7 @@ function buildSuiviTimeline(
       icon: "rupture",
     });
   } else if (effectif.date_rupture) {
-    const date = toDate(effectif.date_rupture as Date | string | { date: string | Date });
+    const date = toDate(effectif.date_rupture);
 
     events.push({
       date,
