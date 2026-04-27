@@ -104,7 +104,7 @@ fileignoreconfig:
 - filename: .gitmodules
   ignore_detectors: [filecontent]
 - filename: .infra/env.global.yml
-  checksum: 48124720a4f9eeadbc092449cde77d963d6a0c9d9e03449b061b6fd86d43c2f2
+  checksum: aac1a71f4f8ca0e724bae960b803e6dfe9c4936852675cab39106bfc82a0d8d5
 - filename: .infra/env.local.yml
   checksum: 33e545d992ab5c0b79d495713d00d9474971cbb5e2b68df97be8de509359062b
 - filename: .infra/env.preprod.yml
