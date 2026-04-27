@@ -201,8 +201,8 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const collabStarted = effectif.organisme_data?.acc_conjoint === true;
   const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
   const isDecaCfa = !!effectif.organisme?.is_allowed_deca;
-  const daysSinceRupture = effectif.date_rupture?.date
-    ? (Date.now() - new Date(effectif.date_rupture.date).getTime()) / (1000 * 60 * 60 * 24)
+  const daysSinceRupture = effectif.date_rupture
+    ? (Date.now() - new Date(effectif.date_rupture).getTime()) / (1000 * 60 * 60 * 24)
     : 0;
 
   // ML peut traiter si :
