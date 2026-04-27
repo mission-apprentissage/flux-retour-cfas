@@ -58,10 +58,8 @@ export function formatTimelineDate(date: Date): string {
   return formatDate(date);
 }
 
-export function toDate(value: Date | string | { date: string | Date }): Date {
-  if (value instanceof Date) return value;
-  if (typeof value === "string") return new Date(value);
-  return new Date(value.date as string);
+export function toDate(value: Date | string): Date {
+  return value instanceof Date ? value : new Date(value);
 }
 
 export function buildLogCreatorSubtext(

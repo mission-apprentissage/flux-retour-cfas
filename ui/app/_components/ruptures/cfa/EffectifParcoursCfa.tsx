@@ -49,7 +49,7 @@ const buildTimeline = (effectif: IEffectifMissionLocale["effectif"]): TimelineEv
   const events: TimelineEvent[] = [];
 
   if (effectif.date_rupture) {
-    const ruptureDate = effectif.date_rupture?.date || effectif.date_rupture;
+    const ruptureDate = effectif.date_rupture;
     events.push({
       date: ruptureDate instanceof Date ? ruptureDate : new Date(ruptureDate),
       type: TIMELINE_EVENTS.RUPTURE,
