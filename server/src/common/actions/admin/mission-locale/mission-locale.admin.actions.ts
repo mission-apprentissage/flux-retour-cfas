@@ -89,15 +89,19 @@ export const setEffectifMissionLocaleDataAdmin = async (
       ? connaissance_ml !== CONNAISSANCE_ML_ENUM.NON_CONNU
       : deja_connu;
 
+  const shouldClearStaleConnaissanceMl = connaissance_ml === undefined && deja_connu !== undefined;
+
   const setObject = {
-    situation,
-    deja_connu: derivedDejaConnu,
+    ...(situation !== undefined ? { situation } : {}),
+    ...(derivedDejaConnu !== undefined ? { deja_connu: derivedDejaConnu } : {}),
     ...(connaissance_ml !== undefined ? { connaissance_ml } : {}),
     ...(situation_autre !== undefined ? { situation_autre } : {}),
     ...(commentaires !== undefined ? { commentaires } : {}),
   };
 
-  await createEffectifMissionLocaleLog(mlEff?._id, setObject, user, missionLocaleId);
+  const logPayload = shouldClearStaleConnaissanceMl ? { ...setObject, connaissance_ml: null } : setObject;
+
+  await createEffectifMissionLocaleLog(mlEff?._id, logPayload, user, missionLocaleId);
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
@@ -109,6 +113,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
         ...setObject,
         updated_at: new Date(),
       },
+      ...(shouldClearStaleConnaissanceMl ? { $unset: { connaissance_ml: 1 } } : {}),
     },
     { upsert: true, returnDocument: "after" }
   );
