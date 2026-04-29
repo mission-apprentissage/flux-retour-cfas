@@ -81,9 +81,6 @@ export function TraitementCards({
                 </BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
-              </ul>
-              <TooltipText spaced>est exclu</TooltipText>
-              <ul className={styles.bulletList}>
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
             </TooltipContent>
@@ -111,12 +108,12 @@ export function TraitementCards({
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement}>
                   Ne souhaite pas être accompagné
                 </BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
               <TooltipText spaced>sont exclus</TooltipText>
               <ul className={styles.bulletList}>
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
                 <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
               </ul>
             </TooltipContent>
           </TooltipWrapper>
@@ -133,29 +130,15 @@ export function TraitementCards({
             <TooltipHeader>Total jeunes accompagnés découverts par le service</TooltipHeader>
             <TooltipContent>
               <TooltipText>
-                Les jeunes accompagnés découverts par le service sont les jeunes détectés par le Tableau de bord qui ont
-                obtenu un rendez-vous à la Mission Locale et qui n&apos;étaient pas déjà en accompagnement actif au
-                moment de la rupture.
+                Ces jeunes ont été découverts par les Missions Locales grâce au Tableau de bord de l&apos;apprentissage
+                et y ont pris rendez-vous.
               </TooltipText>
-              <TooltipText spaced>Sont inclus les rendez-vous pris où le jeune est :</TooltipText>
+              <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
               <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>
-                  Non connu de la Mission Locale, ou connu mais pas en accompagnement actif
-                </BulletItem>
+                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>Rendez-vous pris</BulletItem>
               </ul>
-              <TooltipText spaced>Sont exclus :</TooltipText>
-              <ul className={styles.bulletList}>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.rdv_pris}>
-                  Rendez-vous pris pour un jeune déjà accompagné activement (PACEA, CEJ, suivi régulier)
-                </BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.projet_pro_securise}>Projet pro déjà sécurisé</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.ne_souhaite_pas_accompagnement}>
-                  Ne souhaite pas être accompagné
-                </BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.a_recontacter}>À recontacter</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.injoignable}>Injoignable</BulletItem>
-                <BulletItem color={DOSSIERS_TRAITES_V2_COLORS.autre}>Autre</BulletItem>
-              </ul>
+              <TooltipText spaced>sont exclus</TooltipText>
+              <TooltipText>Les jeunes déjà connus et accompagnés par les Missions Locales.</TooltipText>
             </TooltipContent>
           </TooltipWrapper>
         }

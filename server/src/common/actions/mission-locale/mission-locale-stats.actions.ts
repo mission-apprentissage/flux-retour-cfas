@@ -31,6 +31,7 @@ import {
   buildOrgLookupPipeline,
   buildPercentageExpression,
   buildRegionLookupPipeline,
+  buildTotalTraitesV2Expression,
   calculateStartDate,
   calculateStartDateAsync,
   createStatWithVariation,
@@ -123,19 +124,21 @@ const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[])
         $group: {
           _id: null,
           total: { $sum: "$latest_stats.total" },
-          total_traites: { $sum: "$latest_stats.traite" },
+          total_traites: { $sum: buildTotalTraitesV2Expression() },
           total_a_traiter: { $sum: "$latest_stats.a_traiter" },
           rdv_pris: { $sum: "$latest_stats.rdv_pris" },
           rdv_pris_decouverts: { $sum: { $ifNull: ["$latest_stats.rdv_pris_decouverts", 0] } },
           nouveau_projet: { $sum: "$latest_stats.nouveau_projet" },
-          deja_accompagne: { $sum: "$latest_stats.deja_accompagne" },
           contacte_sans_retour: { $sum: "$latest_stats.contacte_sans_retour" },
           injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
           coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
-          autre: { $sum: "$latest_stats.autre" },
+          autre_avec_contact: { $sum: { $ifNull: ["$latest_stats.autre_avec_contact", 0] } },
           cherche_contrat: { $sum: { $ifNull: ["$latest_stats.cherche_contrat", 0] } },
           reorientation: { $sum: { $ifNull: ["$latest_stats.reorientation", 0] } },
           ne_veut_pas_accompagnement: { $sum: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] } },
+          ne_souhaite_pas_etre_recontacte: {
+            $sum: { $ifNull: ["$latest_stats.ne_souhaite_pas_etre_recontacte", 0] },
+          },
           deja_connu: { $sum: "$latest_stats.deja_connu" },
         },
       },
@@ -410,14 +413,14 @@ export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: Object
       rdv_pris: currentStats.rdv_pris || 0,
       rdv_pris_decouverts: currentStats.rdv_pris_decouverts || 0,
       nouveau_projet: currentStats.nouveau_projet || 0,
-      deja_accompagne: currentStats.deja_accompagne || 0,
       contacte_sans_retour: currentStats.contacte_sans_retour || 0,
       injoignables: currentStats.injoignables || 0,
       coordonnees_incorrectes: currentStats.coordonnees_incorrectes || 0,
-      autre: currentStats.autre || 0,
+      autre_avec_contact: currentStats.autre_avec_contact || 0,
       cherche_contrat: currentStats.cherche_contrat || 0,
       reorientation: currentStats.reorientation || 0,
       ne_veut_pas_accompagnement: currentStats.ne_veut_pas_accompagnement || 0,
+      ne_souhaite_pas_etre_recontacte: currentStats.ne_souhaite_pas_etre_recontacte || 0,
       deja_connu: currentStats.deja_connu || 0,
     };
   } catch (error) {
@@ -463,6 +466,8 @@ export const getTraitementStats = async (
         cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
         reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
         ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
+        ne_souhaite_pas_etre_recontacte: { $ifNull: ["$latest_stats.ne_souhaite_pas_etre_recontacte", 0] },
+        autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
         rdv_pris_decouverts: { $ifNull: ["$latest_stats.rdv_pris_decouverts", 0] },
       },
     },
@@ -476,11 +481,13 @@ export const getTraitementStats = async (
               "$latest_stats.rdv_pris",
               "$latest_stats.nouveau_projet",
               "$ne_veut_pas_accompagnement",
+              "$ne_souhaite_pas_etre_recontacte",
               "$cherche_contrat",
               "$reorientation",
               "$latest_stats.contacte_sans_retour",
               "$injoignables",
               "$coordonnees_incorrectes",
+              "$autre_avec_contact",
             ],
           },
         },
@@ -490,8 +497,10 @@ export const getTraitementStats = async (
               "$latest_stats.rdv_pris",
               "$latest_stats.nouveau_projet",
               "$ne_veut_pas_accompagnement",
+              "$ne_souhaite_pas_etre_recontacte",
               "$cherche_contrat",
               "$reorientation",
+              "$autre_avec_contact",
             ],
           },
         },
@@ -666,7 +675,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
                   $multiply: [
                     {
                       $divide: [
-                        { $ifNull: ["$latest_stats.traite", 0] },
+                        buildTotalTraitesV2Expression(),
                         {
                           $add: [{ $ifNull: ["$latest_stats.a_traiter", 0] }, { $ifNull: ["$latest_stats.traite", 0] }],
                         },
@@ -690,7 +699,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
               $multiply: [
                 {
                   $divide: [
-                    { $ifNull: ["$first_stats.traite", 0] },
+                    buildTotalTraitesV2Expression("$first_stats"),
                     { $add: [{ $ifNull: ["$first_stats.a_traiter", 0] }, { $ifNull: ["$first_stats.traite", 0] }] },
                   ],
                 },
@@ -703,7 +712,7 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
         region_code: "$adresse.region",
         region_nom: { $ifNull: [{ $arrayElemAt: ["$region_info.nom", 0] }, "Région inconnue"] },
         a_traiter: { $ifNull: ["$latest_stats.a_traiter", 0] },
-        traites: { $ifNull: ["$latest_stats.traite", 0] },
+        traites: buildTotalTraitesV2Expression(),
         is_activated: { $ne: ["$activated_at", null] },
       },
     },
@@ -759,14 +768,16 @@ export const getTraitementStatsByMissionLocale = async (params: TraitementMLPara
               details: {
                 rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
                 nouveau_projet: { $ifNull: ["$latest_stats.nouveau_projet", 0] },
-                deja_accompagne: { $ifNull: ["$latest_stats.deja_accompagne", 0] },
                 contacte_sans_retour: { $ifNull: ["$latest_stats.contacte_sans_retour", 0] },
                 injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
                 coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
-                autre: { $ifNull: ["$latest_stats.autre", 0] },
+                autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
                 cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
                 reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
                 ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
+                ne_souhaite_pas_etre_recontacte: {
+                  $ifNull: ["$latest_stats.ne_souhaite_pas_etre_recontacte", 0],
+                },
               },
               derniere_activite: 1,
               jours_depuis_activite: 1,
@@ -834,7 +845,8 @@ export const getSuiviTraitementByRegion = async () => {
       $group: {
         _id: "$ml.adresse.region",
         a_traiter: { $sum: "$latest_stats.a_traiter" },
-        traites: { $sum: "$latest_stats.traite" },
+        traites: { $sum: buildTotalTraitesV2Expression() },
+        traites_brut: { $sum: "$latest_stats.traite" },
         ml_actives: {
           $sum: {
             $cond: [{ $ne: [{ $ifNull: ["$ml.activated_at", null] }, null] }, 1, 0],
@@ -850,8 +862,8 @@ export const getSuiviTraitementByRegion = async () => {
         nom: 1,
         a_traiter: 1,
         traites: 1,
-        total_jeunes: { $add: ["$a_traiter", "$traites"] },
-        pourcentage_traites: buildPercentageExpression("$traites", { $add: ["$a_traiter", "$traites"] }),
+        total_jeunes: { $add: ["$a_traiter", "$traites_brut"] },
+        pourcentage_traites: buildPercentageExpression("$traites", { $add: ["$a_traiter", "$traites_brut"] }),
         ml_actives: 1,
       },
     },
@@ -890,11 +902,14 @@ const DEFAULT_MOTIFS = {
 const DEFAULT_STATUTS_TRAITEMENT = {
   rdv_pris: 0,
   nouveau_projet: 0,
-  deja_accompagne: 0,
   contacte_sans_retour: 0,
   injoignables: 0,
   coordonnees_incorrectes: 0,
-  autre: 0,
+  cherche_contrat: 0,
+  reorientation: 0,
+  ne_veut_pas_accompagnement: 0,
+  ne_souhaite_pas_etre_recontacte: 0,
+  autre_avec_contact: 0,
   total_traites: 0,
 };
 
@@ -916,19 +931,52 @@ const MOTIFS_PIPELINE = [
   },
 ];
 
+const NOUVEAU_PROJET_SITUATIONS = ["NOUVEAU_PROJET", "NOUVEAU_CONTRAT"] as const;
+
+const TRAITES_V2_SITUATIONS = [
+  "RDV_PRIS",
+  ...NOUVEAU_PROJET_SITUATIONS,
+  "CONTACTE_SANS_RETOUR",
+  "INJOIGNABLE_APRES_RELANCES",
+  "COORDONNEES_INCORRECT",
+  "CHERCHE_CONTRAT",
+  "REORIENTATION",
+  "NE_VEUT_PAS_ACCOMPAGNEMENT",
+  "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
+] as const;
+
+const buildAutreAvecContactCondition = () => ({
+  $and: [{ $eq: ["$situation", "AUTRE"] }, { $eq: [{ $ifNull: ["$probleme_type", null] }, null] }],
+});
+
 const STATUTS_TRAITEMENT_PIPELINE = [
   {
     $group: {
       _id: null,
       rdv_pris: buildCountIf("$situation", "RDV_PRIS"),
-      nouveau_projet: buildCountIf("$situation", "NOUVEAU_PROJET"),
-      deja_accompagne: buildCountIf("$situation", "DEJA_ACCOMPAGNE"),
+      nouveau_projet: {
+        $sum: { $cond: [{ $in: ["$situation", NOUVEAU_PROJET_SITUATIONS] }, 1, 0] },
+      },
       contacte_sans_retour: buildCountIf("$situation", "CONTACTE_SANS_RETOUR"),
       injoignables: buildCountIf("$situation", "INJOIGNABLE_APRES_RELANCES"),
       coordonnees_incorrectes: buildCountIf("$situation", "COORDONNEES_INCORRECT"),
-      autre: buildCountIf("$situation", "AUTRE"),
+      cherche_contrat: buildCountIf("$situation", "CHERCHE_CONTRAT"),
+      reorientation: buildCountIf("$situation", "REORIENTATION"),
+      ne_veut_pas_accompagnement: buildCountIf("$situation", "NE_VEUT_PAS_ACCOMPAGNEMENT"),
+      ne_souhaite_pas_etre_recontacte: buildCountIf("$situation", "NE_SOUHAITE_PAS_ETRE_RECONTACTE"),
+      autre_avec_contact: {
+        $sum: { $cond: [buildAutreAvecContactCondition(), 1, 0] },
+      },
       total_traites: {
-        $sum: { $cond: [{ $and: [{ $ne: ["$situation", null] }, { $ne: ["$situation", ""] }] }, 1, 0] },
+        $sum: {
+          $cond: [
+            {
+              $or: [{ $in: ["$situation", TRAITES_V2_SITUATIONS] }, buildAutreAvecContactCondition()],
+            },
+            1,
+            0,
+          ],
+        },
       },
     },
   },
@@ -1044,14 +1092,14 @@ export const getAccompagnementConjointStats = async (
     statutsTraitement: {
       rdv_pris: statutsTraitement.rdv_pris || 0,
       nouveau_projet: statutsTraitement.nouveau_projet || 0,
-      deja_accompagne: statutsTraitement.deja_accompagne || 0,
       contacte_sans_retour: statutsTraitement.contacte_sans_retour || 0,
       injoignables: statutsTraitement.injoignables || 0,
       coordonnees_incorrectes: statutsTraitement.coordonnees_incorrectes || 0,
-      autre: statutsTraitement.autre || 0,
+      autre_avec_contact: statutsTraitement.autre_avec_contact || 0,
       cherche_contrat: statutsTraitement.cherche_contrat || 0,
       reorientation: statutsTraitement.reorientation || 0,
       ne_veut_pas_accompagnement: statutsTraitement.ne_veut_pas_accompagnement || 0,
+      ne_souhaite_pas_etre_recontacte: statutsTraitement.ne_souhaite_pas_etre_recontacte || 0,
     },
     dejaConnu: dejaConnuData.count,
     totalPourDejaConnu: dejaConnuData.total,
@@ -1142,57 +1190,56 @@ export async function getDossiersTraitesStats(period: StatsPeriod = "30days", re
       currentStats.contacte_sans_retour,
       previousStats.contacte_sans_retour
     ),
-    deja_accompagne: createStatWithVariation(currentStats.deja_accompagne, previousStats.deja_accompagne),
     injoignables: createStatWithVariation(currentStats.injoignables, previousStats.injoignables),
     coordonnees_incorrectes: createStatWithVariation(
       currentStats.coordonnees_incorrectes,
       previousStats.coordonnees_incorrectes
     ),
-    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
+    autre_avec_contact: createStatWithVariation(currentStats.autre_avec_contact, previousStats.autre_avec_contact),
     cherche_contrat: createStatWithVariation(currentStats.cherche_contrat, previousStats.cherche_contrat),
     reorientation: createStatWithVariation(currentStats.reorientation, previousStats.reorientation),
     ne_veut_pas_accompagnement: createStatWithVariation(
       currentStats.ne_veut_pas_accompagnement,
       previousStats.ne_veut_pas_accompagnement
     ),
+    ne_souhaite_pas_etre_recontacte: createStatWithVariation(
+      currentStats.ne_souhaite_pas_etre_recontacte,
+      previousStats.ne_souhaite_pas_etre_recontacte
+    ),
     deja_connu: currentStats.deja_connu,
     total: currentStats.total_traites,
   };
 
-  const projetProCurrent = currentStats.nouveau_projet;
-  const projetProPrevious = previousStats.nouveau_projet;
-
   const neSouhaiteCurrent =
-    currentStats.ne_veut_pas_accompagnement + currentStats.cherche_contrat + currentStats.reorientation;
+    currentStats.ne_veut_pas_accompagnement +
+    currentStats.ne_souhaite_pas_etre_recontacte +
+    currentStats.cherche_contrat +
+    currentStats.reorientation;
   const neSouhaitePrevious =
-    previousStats.ne_veut_pas_accompagnement + previousStats.cherche_contrat + previousStats.reorientation;
+    previousStats.ne_veut_pas_accompagnement +
+    previousStats.ne_souhaite_pas_etre_recontacte +
+    previousStats.cherche_contrat +
+    previousStats.reorientation;
 
   const injoignableCurrent = currentStats.injoignables + currentStats.coordonnees_incorrectes;
   const injoignablePrevious = previousStats.injoignables + previousStats.coordonnees_incorrectes;
 
   const totalV2Current =
     currentStats.rdv_pris +
-    projetProCurrent +
+    currentStats.nouveau_projet +
     neSouhaiteCurrent +
     currentStats.contacte_sans_retour +
     injoignableCurrent +
-    currentStats.autre;
-  const totalV2Previous =
-    previousStats.rdv_pris +
-    projetProPrevious +
-    neSouhaitePrevious +
-    previousStats.contacte_sans_retour +
-    injoignablePrevious +
-    previousStats.autre;
+    currentStats.autre_avec_contact;
 
   const detailsTraitesV2: IDetailsDossiersTraitesV2 = {
     rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
-    projet_pro_securise: createStatWithVariation(projetProCurrent, projetProPrevious),
+    projet_pro_securise: createStatWithVariation(currentStats.nouveau_projet, previousStats.nouveau_projet),
     ne_souhaite_pas_accompagnement: createStatWithVariation(neSouhaiteCurrent, neSouhaitePrevious),
     a_recontacter: createStatWithVariation(currentStats.contacte_sans_retour, previousStats.contacte_sans_retour),
     injoignable: createStatWithVariation(injoignableCurrent, injoignablePrevious),
-    autre: createStatWithVariation(currentStats.autre, previousStats.autre),
-    total: createStatWithVariation(totalV2Current, totalV2Previous),
+    autre: createStatWithVariation(currentStats.autre_avec_contact, previousStats.autre_avec_contact),
+    total: totalV2Current,
   };
 
   return {
@@ -1253,11 +1300,10 @@ const buildPercentageProjections = () => ({
 const buildDetailFieldsProjection = () => ({
   rdv_pris: 1,
   nouveau_projet: 1,
-  deja_accompagne: 1,
   contacte_sans_retour: 1,
   injoignables: 1,
   coordonnees_incorrectes: 1,
-  autre: 1,
+  autre_avec_contact: 1,
   cherche_contrat: 1,
   reorientation: 1,
   ne_veut_pas_accompagnement: 1,
@@ -1275,15 +1321,14 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     {
       $addFields: {
         total_jeunes: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] },
-        traites: "$latest_stats.traite",
+        traites: buildTotalTraitesV2Expression(),
         a_traiter: "$latest_stats.a_traiter",
         rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
         nouveau_projet: { $ifNull: ["$latest_stats.nouveau_projet", 0] },
-        deja_accompagne: { $ifNull: ["$latest_stats.deja_accompagne", 0] },
         contacte_sans_retour: { $ifNull: ["$latest_stats.contacte_sans_retour", 0] },
         injoignables: { $ifNull: ["$latest_stats.injoignables", 0] },
         coordonnees_incorrectes: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] },
-        autre: { $ifNull: ["$latest_stats.autre", 0] },
+        autre_avec_contact: { $ifNull: ["$latest_stats.autre_avec_contact", 0] },
         cherche_contrat: { $ifNull: ["$latest_stats.cherche_contrat", 0] },
         reorientation: { $ifNull: ["$latest_stats.reorientation", 0] },
         ne_veut_pas_accompagnement: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] },
@@ -1317,14 +1362,13 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         _id: "$ml.adresse.region",
         total_jeunes: { $sum: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] } },
         a_traiter: { $sum: "$latest_stats.a_traiter" },
-        traites: { $sum: "$latest_stats.traite" },
+        traites: { $sum: buildTotalTraitesV2Expression() },
         rdv_pris: { $sum: { $ifNull: ["$latest_stats.rdv_pris", 0] } },
         nouveau_projet: { $sum: { $ifNull: ["$latest_stats.nouveau_projet", 0] } },
-        deja_accompagne: { $sum: { $ifNull: ["$latest_stats.deja_accompagne", 0] } },
         contacte_sans_retour: { $sum: { $ifNull: ["$latest_stats.contacte_sans_retour", 0] } },
         injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
         coordonnees_incorrectes: { $sum: { $ifNull: ["$latest_stats.coordonnees_incorrectes", 0] } },
-        autre: { $sum: { $ifNull: ["$latest_stats.autre", 0] } },
+        autre_avec_contact: { $sum: { $ifNull: ["$latest_stats.autre_avec_contact", 0] } },
         cherche_contrat: { $sum: { $ifNull: ["$latest_stats.cherche_contrat", 0] } },
         reorientation: { $sum: { $ifNull: ["$latest_stats.reorientation", 0] } },
         ne_veut_pas_accompagnement: { $sum: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] } },

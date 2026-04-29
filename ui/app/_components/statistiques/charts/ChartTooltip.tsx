@@ -3,15 +3,28 @@
 import { ChartsTooltipContainer, useAxesTooltip, useItemTooltip } from "@mui/x-charts/ChartsTooltip";
 import type { ChartsTooltipContainerProps } from "@mui/x-charts/ChartsTooltip";
 
-import { DOSSIERS_TRAITES_DESCRIPTIONS, DOSSIERS_TRAITES_LABELS } from "../constants";
+import {
+  DOSSIERS_TRAITES_DESCRIPTIONS,
+  DOSSIERS_TRAITES_LABELS,
+  DOSSIERS_TRAITES_V2_DESCRIPTIONS,
+  DOSSIERS_TRAITES_V2_LABELS,
+} from "../constants";
 
 import styles from "./ChartTooltip.module.css";
 
 const getDescriptionFromLabel = (label: string): string | null => {
-  const entries = Object.entries(DOSSIERS_TRAITES_LABELS) as [keyof typeof DOSSIERS_TRAITES_DESCRIPTIONS, string][];
-  const found = entries.find(([, value]) => value === label);
-  if (found) {
-    return DOSSIERS_TRAITES_DESCRIPTIONS[found[0]];
+  const v2Entries = Object.entries(DOSSIERS_TRAITES_V2_LABELS) as [
+    keyof typeof DOSSIERS_TRAITES_V2_DESCRIPTIONS,
+    string,
+  ][];
+  const v2 = v2Entries.find(([, value]) => value === label);
+  if (v2) {
+    return DOSSIERS_TRAITES_V2_DESCRIPTIONS[v2[0]];
+  }
+  const v1Entries = Object.entries(DOSSIERS_TRAITES_LABELS) as [keyof typeof DOSSIERS_TRAITES_DESCRIPTIONS, string][];
+  const v1 = v1Entries.find(([, value]) => value === label);
+  if (v1) {
+    return DOSSIERS_TRAITES_DESCRIPTIONS[v1[0]];
   }
   return null;
 };

@@ -2,26 +2,13 @@ import type { ITraitementDetails } from "shared/models/data/nationalStats.model"
 
 import { TRAITEMENT_SEGMENTS_V2 } from "../constants";
 
+import { regroupV1ToV2 } from "./TraitementDetailsBar.utils";
 import styles from "./TraitementTable.module.css";
 
 interface TraitementDetailsBarProps {
   details: ITraitementDetails;
   total: number;
   tooltipPosition?: "top" | "bottom";
-}
-
-type SegmentKey = (typeof TRAITEMENT_SEGMENTS_V2)[number]["key"];
-
-function regroupV1ToV2(details: ITraitementDetails): Record<SegmentKey, number> {
-  return {
-    rdv_pris: details.rdv_pris,
-    projet_pro_securise: details.nouveau_projet,
-    ne_souhaite_pas_accompagnement:
-      details.ne_veut_pas_accompagnement + details.cherche_contrat + details.reorientation,
-    a_recontacter: details.contacte_sans_retour,
-    injoignable: details.injoignables + details.coordonnees_incorrectes,
-    autre: details.autre,
-  };
 }
 
 export function TraitementDetailsBar({ details, total, tooltipPosition = "top" }: TraitementDetailsBarProps) {

@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import { SITUATION_ENUM } from "shared";
+import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -8,6 +9,7 @@ import {
   effectifsDb,
   effectifsQueueDb,
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
@@ -355,6 +357,77 @@ describe("Mission Locale Routes", () => {
         expect(effectif?.commentaires).toBe("Commentaire de test");
       });
 
+      it("POST avec connaissance_ml dérive deja_connu et persiste les deux champs", async () => {
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          {
+            situation: SITUATION_ENUM.RDV_PRIS,
+            connaissance_ml: CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT,
+          }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT);
+        expect(effectif?.deja_connu).toBe(true);
+      });
+
+      it("POST avec deja_connu seul wipe une connaissance_ml stale et la trace dans le log", async () => {
+        await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, {
+          situation: SITUATION_ENUM.RDV_PRIS,
+          connaissance_ml: CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT,
+        });
+
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(before?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT);
+
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          { deja_connu: false }
+        );
+
+        expect(res.status).toBe(200);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.connaissance_ml).toBeUndefined();
+        expect(after?.deja_connu).toBe(false);
+
+        const logs = await missionLocaleEffectifsLogDb()
+          .find({ mission_locale_effectif_id: after?._id })
+          .sort({ created_at: -1 })
+          .limit(1)
+          .toArray();
+        expect(logs[0]?.connaissance_ml).toBeNull();
+        expect(logs[0]?.deja_connu).toBe(false);
+      });
+
+      it("POST avec connaissance_ml explicite ne déclenche pas le marqueur de wipe dans le log", async () => {
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "post",
+          `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`,
+          {
+            connaissance_ml: CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE,
+            deja_connu: true,
+          }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        const logs = await missionLocaleEffectifsLogDb()
+          .find({ mission_locale_effectif_id: effectif?._id })
+          .sort({ created_at: -1 })
+          .limit(1)
+          .toArray();
+        expect(logs[0]?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE);
+      });
+
       it("POST avec acc_conjoint=true déclenche has_unread_notification pour le CFA", async () => {
         // D'abord le CFA accepte l'acc_conjoint
         await requestAsOrganisation(
@@ -376,6 +449,67 @@ describe("Mission Locale Routes", () => {
 
         const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
         expect(effectif?.organisme_data?.has_unread_notification).toBe(true);
+      });
+    });
+
+    describe("L'admin met à jour un effectif via le back-office", () => {
+      it("PUT avec deja_connu seul wipe une connaissance_ml stale et la trace dans le log", async () => {
+        await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, {
+          situation: SITUATION_ENUM.RDV_PRIS,
+          connaissance_ml: CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT,
+        });
+
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "put",
+          "/api/v1/admin/mission-locale/effectif",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+            deja_connu: false,
+          }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.connaissance_ml).toBeUndefined();
+        expect(effectif?.deja_connu).toBe(false);
+
+        const logs = await missionLocaleEffectifsLogDb()
+          .find({ mission_locale_effectif_id: effectif?._id })
+          .sort({ created_at: -1 })
+          .limit(1)
+          .toArray();
+        expect(logs[0]?.connaissance_ml).toBeNull();
+        expect(logs[0]?.deja_connu).toBe(false);
+      });
+
+      it("PUT n'écrase pas situation/deja_connu absents du payload", async () => {
+        await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, {
+          situation: SITUATION_ENUM.RDV_PRIS,
+          connaissance_ml: CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE,
+          commentaires: "initial",
+        });
+
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "put",
+          "/api/v1/admin/mission-locale/effectif",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+            commentaires: "corrigé",
+          }
+        );
+
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.commentaires).toBe("corrigé");
+        expect(effectif?.situation).toBe(SITUATION_ENUM.RDV_PRIS);
+        expect(effectif?.deja_connu).toBe(true);
+        expect(effectif?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE);
       });
     });
   });
@@ -451,6 +585,7 @@ describe("Mission Locale Stats Routes - Public", () => {
       mineur_cherche_contrat: 0,
       mineur_reorientation: 0,
       mineur_ne_veut_pas_accompagnement: 0,
+      mineur_ne_souhaite_pas_etre_recontacte: 0,
       rqth: 0,
       rqth_a_traiter: 0,
       rqth_traite: 0,
@@ -465,6 +600,7 @@ describe("Mission Locale Stats Routes - Public", () => {
       rqth_cherche_contrat: 0,
       rqth_reorientation: 0,
       rqth_ne_veut_pas_accompagnement: 0,
+      rqth_ne_souhaite_pas_etre_recontacte: 0,
     };
 
     await missionLocaleStatsDb().insertMany([
@@ -489,6 +625,7 @@ describe("Mission Locale Stats Routes - Public", () => {
           cherche_contrat: 0,
           reorientation: 0,
           ne_veut_pas_accompagnement: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
           autre_avec_contact: 2,
           deja_connu: 8,
           ...statsBase,
@@ -515,6 +652,7 @@ describe("Mission Locale Stats Routes - Public", () => {
           cherche_contrat: 0,
           reorientation: 0,
           ne_veut_pas_accompagnement: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
           autre_avec_contact: 1,
           deja_connu: 4,
           ...statsBase,
@@ -623,6 +761,40 @@ describe("Mission Locale Stats Routes - Admin", () => {
   const ML_DATA_ADMIN = { ml_id: 611, nom: "ML ADMIN TEST", type: "MISSION_LOCALE" as const };
   const ML_DATA_ADMIN_ARA = { ml_id: 613, nom: "ML ADMIN ARA", type: "MISSION_LOCALE" as const };
 
+  const statsBase = {
+    abandon: 0,
+    mineur: 0,
+    mineur_a_traiter: 0,
+    mineur_traite: 0,
+    mineur_rdv_pris: 0,
+    mineur_nouveau_projet: 0,
+    mineur_deja_accompagne: 0,
+    mineur_contacte_sans_retour: 0,
+    mineur_injoignables: 0,
+    mineur_coordonnees_incorrectes: 0,
+    mineur_autre: 0,
+    mineur_autre_avec_contact: 0,
+    mineur_cherche_contrat: 0,
+    mineur_reorientation: 0,
+    mineur_ne_veut_pas_accompagnement: 0,
+    mineur_ne_souhaite_pas_etre_recontacte: 0,
+    rqth: 0,
+    rqth_a_traiter: 0,
+    rqth_traite: 0,
+    rqth_rdv_pris: 0,
+    rqth_nouveau_projet: 0,
+    rqth_deja_accompagne: 0,
+    rqth_contacte_sans_retour: 0,
+    rqth_injoignables: 0,
+    rqth_coordonnees_incorrectes: 0,
+    rqth_autre: 0,
+    rqth_autre_avec_contact: 0,
+    rqth_cherche_contrat: 0,
+    rqth_reorientation: 0,
+    rqth_ne_veut_pas_accompagnement: 0,
+    rqth_ne_souhaite_pas_etre_recontacte: 0,
+  };
+
   beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
@@ -667,38 +839,6 @@ describe("Mission Locale Stats Routes - Admin", () => {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    const statsBase = {
-      abandon: 0,
-      mineur: 0,
-      mineur_a_traiter: 0,
-      mineur_traite: 0,
-      mineur_rdv_pris: 0,
-      mineur_nouveau_projet: 0,
-      mineur_deja_accompagne: 0,
-      mineur_contacte_sans_retour: 0,
-      mineur_injoignables: 0,
-      mineur_coordonnees_incorrectes: 0,
-      mineur_autre: 0,
-      mineur_autre_avec_contact: 0,
-      mineur_cherche_contrat: 0,
-      mineur_reorientation: 0,
-      mineur_ne_veut_pas_accompagnement: 0,
-      rqth: 0,
-      rqth_a_traiter: 0,
-      rqth_traite: 0,
-      rqth_rdv_pris: 0,
-      rqth_nouveau_projet: 0,
-      rqth_deja_accompagne: 0,
-      rqth_contacte_sans_retour: 0,
-      rqth_injoignables: 0,
-      rqth_coordonnees_incorrectes: 0,
-      rqth_autre: 0,
-      rqth_autre_avec_contact: 0,
-      rqth_cherche_contrat: 0,
-      rqth_reorientation: 0,
-      rqth_ne_veut_pas_accompagnement: 0,
-    };
-
     await missionLocaleStatsDb().insertMany([
       {
         _id: new ObjectId(),
@@ -721,6 +861,7 @@ describe("Mission Locale Stats Routes - Admin", () => {
           cherche_contrat: 0,
           reorientation: 0,
           ne_veut_pas_accompagnement: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
           autre_avec_contact: 1,
           deja_connu: 4,
           ...statsBase,
@@ -747,6 +888,7 @@ describe("Mission Locale Stats Routes - Admin", () => {
           cherche_contrat: 0,
           reorientation: 0,
           ne_veut_pas_accompagnement: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
           autre_avec_contact: 2,
           deja_connu: 6,
           ...statsBase,
@@ -840,7 +982,6 @@ describe("Mission Locale Stats Routes - Admin", () => {
       expect(response.data).toHaveProperty("period");
       expect(response.data.details).toHaveProperty("rdv_pris");
       expect(response.data.details).toHaveProperty("nouveau_projet");
-      expect(response.data.details).toHaveProperty("deja_accompagne");
       expect(response.data.details).toHaveProperty("contacte_sans_retour");
       expect(response.data.details).toHaveProperty("injoignables");
     });
@@ -885,6 +1026,128 @@ describe("Mission Locale Stats Routes - Admin", () => {
 
       expect(response.status).toBe(200);
       expect(response.data.details.rdv_pris.current).toBe(25);
+    });
+
+    it("V1 et V2 affichent le cumul (indépendant de la plage), seule la variation reflète l'évolution", async () => {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const dayMinus30 = new Date(today);
+      dayMinus30.setUTCDate(today.getUTCDate() - 30);
+
+      await missionLocaleStatsDb().deleteMany({ mission_locale_id: ML_ID_ADMIN });
+
+      const buildStats = (
+        ne_souhaite_pas_etre_recontacte: number,
+        ne_veut_pas_accompagnement: number,
+        cherche_contrat: number,
+        reorientation: number
+      ) => ({
+        total: 50,
+        a_traiter: 20,
+        traite: 30,
+        rdv_pris: 0,
+        rdv_pris_decouverts: 0,
+        nouveau_projet: 0,
+        deja_accompagne: 0,
+        contacte_sans_retour: 0,
+        injoignables: 0,
+        coordonnees_incorrectes: 0,
+        autre: 0,
+        autre_avec_contact: 0,
+        deja_connu: 0,
+        ne_souhaite_pas_etre_recontacte,
+        ne_veut_pas_accompagnement,
+        cherche_contrat,
+        reorientation,
+        ...statsBase,
+      });
+
+      await missionLocaleStatsDb().insertMany([
+        {
+          _id: new ObjectId(),
+          mission_locale_id: ML_ID_ADMIN,
+          computed_day: dayMinus30,
+          created_at: new Date(),
+          updated_at: new Date(),
+          stats: buildStats(4, 2, 0, 1),
+        },
+        {
+          _id: new ObjectId(),
+          mission_locale_id: ML_ID_ADMIN,
+          computed_day: today,
+          created_at: new Date(),
+          updated_at: new Date(),
+          stats: buildStats(11, 5, 2, 1),
+        },
+      ]);
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/mission-locale/stats/national/dossiers-traites?region=11"
+      );
+
+      expect(response.status).toBe(200);
+
+      expect(response.data.details.ne_souhaite_pas_etre_recontacte.current).toBe(11);
+      expect(response.data.details.ne_souhaite_pas_etre_recontacte.variation).toBe("+64%");
+      expect(response.data.details.ne_veut_pas_accompagnement.current).toBe(5);
+      expect(response.data.details.ne_veut_pas_accompagnement.variation).toBe("+60%");
+
+      expect(response.data.detailsV2.ne_souhaite_pas_accompagnement.current).toBe(19);
+      expect(response.data.detailsV2.ne_souhaite_pas_accompagnement.variation).toBe("+63%");
+    });
+
+    it("Changer la plage ne déplace que la variation, pas les valeurs absolues", async () => {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      await missionLocaleStatsDb().deleteMany({ mission_locale_id: ML_ID_ADMIN });
+      await missionLocaleStatsDb().insertOne({
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID_ADMIN,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 50,
+          a_traiter: 20,
+          traite: 30,
+          rdv_pris: 7,
+          rdv_pris_decouverts: 0,
+          nouveau_projet: 3,
+          deja_accompagne: 0,
+          contacte_sans_retour: 0,
+          injoignables: 0,
+          coordonnees_incorrectes: 0,
+          autre: 0,
+          autre_avec_contact: 0,
+          deja_connu: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
+          ne_veut_pas_accompagnement: 0,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ...statsBase,
+        },
+      });
+
+      const responses = await Promise.all(
+        ["30days", "3months", "all"].map((period) =>
+          requestAsOrganisation(
+            { type: "ADMINISTRATEUR" },
+            "get",
+            `/api/v1/admin/mission-locale/stats/national/dossiers-traites?region=11&period=${period}`
+          )
+        )
+      );
+
+      for (const response of responses) {
+        expect(response.status).toBe(200);
+        expect(response.data.details.rdv_pris.current).toBe(7);
+        expect(response.data.details.nouveau_projet.current).toBe(3);
+        expect(response.data.detailsV2.rdv_pris.current).toBe(7);
+        expect(response.data.detailsV2.projet_pro_securise.current).toBe(3);
+      }
     });
   });
 
@@ -1070,11 +1333,10 @@ describe("Mission Locale Stats Routes - Admin", () => {
       expect(response.status).toBe(200);
       expect(response.data.statutsTraitement).toHaveProperty("rdv_pris");
       expect(response.data.statutsTraitement).toHaveProperty("nouveau_projet");
-      expect(response.data.statutsTraitement).toHaveProperty("deja_accompagne");
       expect(response.data.statutsTraitement).toHaveProperty("contacte_sans_retour");
       expect(response.data.statutsTraitement).toHaveProperty("injoignables");
       expect(response.data.statutsTraitement).toHaveProperty("coordonnees_incorrectes");
-      expect(response.data.statutsTraitement).toHaveProperty("autre");
+      expect(response.data.statutsTraitement).toHaveProperty("autre_avec_contact");
     });
 
     it("Accepte le paramètre region", async () => {

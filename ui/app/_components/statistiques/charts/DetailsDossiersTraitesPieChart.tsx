@@ -12,7 +12,7 @@ import styles from "./DetailsDossiersTraitesPieChart.module.css";
 
 interface DetailsDossiersTraitesPieChartProps {
   data?: IDetailsDossiersTraitesV2;
-  dejaConnu?: number;
+  dejaConnu?: { value: number; total: number };
   loading?: boolean;
   loadingVariation?: boolean;
 }
@@ -33,7 +33,7 @@ export function DetailsDossiersTraitesPieChart({
 
   type StatusId = keyof typeof DOSSIERS_TRAITES_V2_COLORS;
 
-  const totalCurrent = data.total.current;
+  const totalCurrent = data.total;
 
   const pieData: Array<{
     id: StatusId;
@@ -113,7 +113,7 @@ export function DetailsDossiersTraitesPieChart({
         </div>
       </div>
 
-      {dejaConnu !== undefined && <DejaConnuMiniChart dejaConnu={dejaConnu} total={totalCurrent} />}
+      {dejaConnu !== undefined && <DejaConnuMiniChart dejaConnu={dejaConnu.value} total={dejaConnu.total} />}
     </div>
   );
 }

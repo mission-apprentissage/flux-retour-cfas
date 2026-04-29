@@ -40,7 +40,7 @@ export function DossiersTraitesSection({
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         <DetailsDossiersTraitesPieChart
           data={data?.detailsV2}
-          dejaConnu={data?.details.deja_connu}
+          dejaConnu={data?.details ? { value: data.details.deja_connu, total: data.details.total } : undefined}
           loading={isLoading}
           loadingVariation={loadingVariation}
         />

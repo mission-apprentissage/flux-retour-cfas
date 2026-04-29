@@ -12642,6 +12642,21 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       ],
     },
+    "connaissance_ml": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "DEJA_ACCOMPAGNE_ACTIVEMENT",
+            "CONNU_NON_ACCOMPAGNE",
+            "NON_CONNU",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "created_at": {
       "bsonType": "date",
     },
@@ -18258,6 +18273,21 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         "null",
       ],
     },
+    "connaissance_ml": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "DEJA_ACCOMPAGNE_ACTIVEMENT",
+            "CONNU_NON_ACCOMPAGNE",
+            "NON_CONNU",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "created_at": {
       "bsonType": "date",
     },
@@ -18426,6 +18456,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_injoignables": {
           "bsonType": "int",
         },
+        "mineur_ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
         "mineur_ne_veut_pas_accompagnement": {
           "bsonType": "int",
         },
@@ -18441,6 +18474,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
         "mineur_traite": {
           "bsonType": "int",
         },
+        "ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
         "ne_veut_pas_accompagnement": {
           "bsonType": "int",
         },
@@ -18448,6 +18484,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
           "bsonType": "int",
         },
         "rdv_pris": {
+          "bsonType": "int",
+        },
+        "rdv_pris_decouverts": {
           "bsonType": "int",
         },
         "reorientation": {
@@ -18478,6 +18517,9 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
           "bsonType": "int",
         },
         "rqth_injoignables": {
+          "bsonType": "int",
+        },
+        "rqth_ne_souhaite_pas_etre_recontacte": {
           "bsonType": "int",
         },
         "rqth_ne_veut_pas_accompagnement": {
