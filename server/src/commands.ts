@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { captureException } from "@sentry/node";
 import { program } from "commander";
 import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor";
@@ -335,6 +337,18 @@ program
   .option("-l, --limit <number>", "Limite le nombre d'envois", (value) => parseInt(value))
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:whatsapp:send-injoignables"));
+
+program
+  .command("tmp:migrate:autre-situations")
+  .description("Migre les situations AUTRE legacy vers les nouveaux buckets à partir d'un CSV")
+  .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes _id, nouveau_motif, ...)")
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    const baseDir = process.env.INIT_CWD || process.cwd();
+    const csvPath = path.resolve(baseDir, options.csvPath);
+    return createJobAction("tmp:migrate:autre-situations")({ ...options, csvPath });
+  });
 
 program
   .command("job:run")
