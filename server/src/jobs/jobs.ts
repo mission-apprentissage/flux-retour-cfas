@@ -74,6 +74,7 @@ import { updateEffectifQueueDateAndError } from "./ingestion/migration/effectif-
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { migrateEffectifs } from "./ingestion/process-ingestion.v2";
+import { migrateAutreSituations } from "./migration/migrate-autre-situations";
 import {
   createAllMissingOrganismeOrganisation,
   deleteOrganisationWithoutUser,
@@ -590,6 +591,15 @@ export async function setupJobProcessor() {
         handler: async (job) => {
           const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
           return scoreExistingEffectifs({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
+        },
+      },
+      "tmp:migrate:autre-situations": {
+        handler: async (job) => {
+          const payload = job.payload as { csvPath?: string; dryRun?: boolean } | undefined;
+          if (!payload?.csvPath) {
+            throw new Error("csvPath est requis");
+          }
+          return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
         },
       },
     },

@@ -15,6 +15,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CONNAISSANCE_ML_ENUM,
   SITUATION_ENUM,
   zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -1764,6 +1765,7 @@ export const computeMissionLocaleStats = async (
       $addFields: {
         computed_situation: { $ifNull: ["$log.situation", "$situation"] },
         computed_deja_connu: { $ifNull: ["$log.deja_connu", "$deja_connu"] },
+        computed_connaissance_ml: { $ifNull: ["$log.connaissance_ml", "$connaissance_ml"] },
         computed_situation_autre: { $ifNull: ["$log.situation_autre", "$situation_autre"] },
         computed_probleme_type: { $ifNull: ["$log.probleme_type", "$probleme_type"] },
         computed_probleme_detail: { $ifNull: ["$log.probleme_detail", "$probleme_detail"] },
@@ -1776,6 +1778,35 @@ export const computeMissionLocaleStats = async (
         a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
         traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
         rdv_pris: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        rdv_pris_decouverts: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] },
+                  {
+                    $or: [
+                      {
+                        $in: [
+                          "$computed_connaissance_ml",
+                          [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
+                        ],
+                      },
+                      {
+                        $and: [
+                          { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+                          { $eq: ["$computed_deja_connu", false] },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         nouveau_projet: {
           $sum: {
             $cond: [
@@ -1809,6 +1840,9 @@ export const computeMissionLocaleStats = async (
         },
         ne_veut_pas_accompagnement: {
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT] }, 1, 0] },
+        },
+        ne_souhaite_pas_etre_recontacte: {
+          $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE] }, 1, 0] },
         },
         autre_avec_contact: {
           $sum: {
@@ -1928,6 +1962,20 @@ export const computeMissionLocaleStats = async (
             ],
           },
         },
+        mineur_ne_souhaite_pas_etre_recontacte: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  mineurCondition,
+                  { $eq: ["$computed_situation", SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         mineur_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -2038,6 +2086,17 @@ export const computeMissionLocaleStats = async (
             ],
           },
         },
+        rqth_ne_souhaite_pas_etre_recontacte: {
+          $sum: {
+            $cond: [
+              {
+                $and: [rqthCondition, { $eq: ["$computed_situation", SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE] }],
+              },
+              1,
+              0,
+            ],
+          },
+        },
         rqth_autre_avec_contact: {
           $sum: {
             $cond: [
@@ -2063,12 +2122,17 @@ export const computeMissionLocaleStats = async (
         a_traiter: 1,
         traite: 1,
         rdv_pris: 1,
+        rdv_pris_decouverts: 1,
         nouveau_projet: 1,
         deja_accompagne: 1,
         contacte_sans_retour: 1,
         injoignables: 1,
         coordonnees_incorrectes: 1,
         autre: 1,
+        cherche_contrat: 1,
+        reorientation: 1,
+        ne_veut_pas_accompagnement: 1,
+        ne_souhaite_pas_etre_recontacte: 1,
         autre_avec_contact: 1,
         deja_connu: 1,
         mineur: 1,
@@ -2081,6 +2145,10 @@ export const computeMissionLocaleStats = async (
         mineur_injoignables: 1,
         mineur_coordonnees_incorrectes: 1,
         mineur_autre: 1,
+        mineur_cherche_contrat: 1,
+        mineur_reorientation: 1,
+        mineur_ne_veut_pas_accompagnement: 1,
+        mineur_ne_souhaite_pas_etre_recontacte: 1,
         mineur_autre_avec_contact: 1,
         rqth: 1,
         rqth_a_traiter: 1,
@@ -2092,6 +2160,10 @@ export const computeMissionLocaleStats = async (
         rqth_injoignables: 1,
         rqth_coordonnees_incorrectes: 1,
         rqth_autre: 1,
+        rqth_cherche_contrat: 1,
+        rqth_reorientation: 1,
+        rqth_ne_veut_pas_accompagnement: 1,
+        rqth_ne_souhaite_pas_etre_recontacte: 1,
         rqth_autre_avec_contact: 1,
         abandon: 1,
       },
@@ -2107,6 +2179,7 @@ export const computeMissionLocaleStats = async (
       a_traiter: 0,
       traite: 0,
       rdv_pris: 0,
+      rdv_pris_decouverts: 0,
       nouveau_projet: 0,
       deja_accompagne: 0,
       contacte_sans_retour: 0,
@@ -2116,6 +2189,7 @@ export const computeMissionLocaleStats = async (
       cherche_contrat: 0,
       reorientation: 0,
       ne_veut_pas_accompagnement: 0,
+      ne_souhaite_pas_etre_recontacte: 0,
       autre_avec_contact: 0,
       deja_connu: 0,
       mineur: 0,
@@ -2131,6 +2205,7 @@ export const computeMissionLocaleStats = async (
       mineur_cherche_contrat: 0,
       mineur_reorientation: 0,
       mineur_ne_veut_pas_accompagnement: 0,
+      mineur_ne_souhaite_pas_etre_recontacte: 0,
       mineur_autre_avec_contact: 0,
       rqth: 0,
       rqth_a_traiter: 0,
@@ -2145,6 +2220,7 @@ export const computeMissionLocaleStats = async (
       rqth_cherche_contrat: 0,
       rqth_reorientation: 0,
       rqth_ne_veut_pas_accompagnement: 0,
+      rqth_ne_souhaite_pas_etre_recontacte: 0,
       rqth_autre_avec_contact: 0,
       abandon: 0,
     };
@@ -2165,9 +2241,18 @@ export const setEffectifMissionLocaleData = async (
 ) => {
   const effectifFields = data;
 
+  const derivedDejaConnu =
+    effectifFields.connaissance_ml !== undefined && effectifFields.connaissance_ml !== null
+      ? effectifFields.connaissance_ml !== CONNAISSANCE_ML_ENUM.NON_CONNU
+      : effectifFields.deja_connu;
+
+  const shouldClearStaleConnaissanceMl =
+    effectifFields.connaissance_ml === undefined && effectifFields.deja_connu !== undefined;
+
   const dbSetObject = {
     ...(effectifFields.situation !== undefined ? { situation: effectifFields.situation } : {}),
-    ...(effectifFields.deja_connu !== undefined ? { deja_connu: effectifFields.deja_connu } : {}),
+    ...(derivedDejaConnu !== undefined ? { deja_connu: derivedDejaConnu } : {}),
+    ...(effectifFields.connaissance_ml !== undefined ? { connaissance_ml: effectifFields.connaissance_ml } : {}),
     ...(effectifFields.situation_autre !== undefined ? { situation_autre: effectifFields.situation_autre } : {}),
     ...(effectifFields.commentaires !== undefined ? { commentaires: effectifFields.commentaires } : {}),
     ...(effectifFields.probleme_type !== undefined ? { probleme_type: effectifFields.probleme_type } : {}),
@@ -2194,11 +2279,13 @@ export const setEffectifMissionLocaleData = async (
             }
           : {}),
       },
+      ...(shouldClearStaleConnaissanceMl ? { $unset: { connaissance_ml: 1 } } : {}),
     },
     { upsert: true, returnDocument: "after" }
   );
   if (Object.keys(dbSetObject).length > 0) {
-    await createEffectifMissionLocaleLog(updated.value?._id, dbSetObject, user, missionLocaleId);
+    const logPayload = shouldClearStaleConnaissanceMl ? { ...dbSetObject, connaissance_ml: null } : dbSetObject;
+    await createEffectifMissionLocaleLog(updated.value?._id, logPayload, user, missionLocaleId);
   }
 
   // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"

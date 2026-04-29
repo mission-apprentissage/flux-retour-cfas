@@ -29,15 +29,16 @@ export const EMPTY_STATS: IAggregatedStats = {
   total_a_traiter: 0,
   total_traites: 0,
   rdv_pris: 0,
+  rdv_pris_decouverts: 0,
   nouveau_projet: 0,
-  deja_accompagne: 0,
   contacte_sans_retour: 0,
   injoignables: 0,
   coordonnees_incorrectes: 0,
-  autre: 0,
+  autre_avec_contact: 0,
   cherche_contrat: 0,
   reorientation: 0,
   ne_veut_pas_accompagnement: 0,
+  ne_souhaite_pas_etre_recontacte: 0,
   deja_connu: 0,
 };
 
@@ -174,6 +175,21 @@ export async function calculateStartDateAsync(period: StatsPeriod, referenceDate
   return calculateStartDate(period, referenceDate);
 }
 
+export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
+  $add: [
+    { $ifNull: [`${statsPath}.rdv_pris`, 0] },
+    { $ifNull: [`${statsPath}.nouveau_projet`, 0] },
+    { $ifNull: [`${statsPath}.contacte_sans_retour`, 0] },
+    { $ifNull: [`${statsPath}.injoignables`, 0] },
+    { $ifNull: [`${statsPath}.coordonnees_incorrectes`, 0] },
+    { $ifNull: [`${statsPath}.autre_avec_contact`, 0] },
+    { $ifNull: [`${statsPath}.cherche_contrat`, 0] },
+    { $ifNull: [`${statsPath}.reorientation`, 0] },
+    { $ifNull: [`${statsPath}.ne_veut_pas_accompagnement`, 0] },
+    { $ifNull: [`${statsPath}.ne_souhaite_pas_etre_recontacte`, 0] },
+  ],
+});
+
 /**
  * Crée un objet IStatWithVariation à partir de valeurs courante et précédente
  */
@@ -219,7 +235,7 @@ export const buildCumulativeStatsPipeline = (targetDate: Date, missionLocaleIds?
       $group: {
         _id: null,
         total: { $sum: "$latest_stats.total" },
-        total_traites: { $sum: "$latest_stats.traite" },
+        total_traites: { $sum: buildTotalTraitesV2Expression() },
         total_a_traiter: { $sum: "$latest_stats.a_traiter" },
       },
     },

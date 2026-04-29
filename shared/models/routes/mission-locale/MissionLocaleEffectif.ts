@@ -6,6 +6,7 @@ import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zConnaissanceMlEnum,
   zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { zWhatsAppContact } from "shared/models/data/whatsappContact.model";
@@ -48,6 +49,7 @@ export const updateMissionLocaleEffectifApi = {
   situation_autre: zMissionLocaleEffectif.zod.shape.situation_autre.optional(),
   commentaires: zMissionLocaleEffectif.zod.shape.commentaires.optional(),
   deja_connu: z.boolean().nullish(),
+  connaissance_ml: zConnaissanceMlEnum.nullish(),
   probleme_type: zProblemeTypeEnum.optional(),
   probleme_detail: z.string().optional(),
 };

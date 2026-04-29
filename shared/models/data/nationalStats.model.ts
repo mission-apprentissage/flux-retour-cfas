@@ -14,15 +14,16 @@ const zAggregatedStats = z.object({
   total_a_traiter: z.number(),
   total_traites: z.number(),
   rdv_pris: z.number(),
+  rdv_pris_decouverts: z.number(),
   nouveau_projet: z.number(),
-  deja_accompagne: z.number(),
   contacte_sans_retour: z.number(),
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
-  autre: z.number(),
+  autre_avec_contact: z.number(),
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
+  ne_souhaite_pas_etre_recontacte: z.number(),
   deja_connu: z.number(),
 });
 
@@ -53,18 +54,30 @@ const zDetailsDossiersTraites = z.object({
   rdv_pris: zStatWithVariation,
   nouveau_projet: zStatWithVariation,
   contacte_sans_retour: zStatWithVariation,
-  deja_accompagne: zStatWithVariation,
   injoignables: zStatWithVariation,
   coordonnees_incorrectes: zStatWithVariation,
-  autre: zStatWithVariation,
+  autre_avec_contact: zStatWithVariation,
   cherche_contrat: zStatWithVariation,
   reorientation: zStatWithVariation,
   ne_veut_pas_accompagnement: zStatWithVariation,
+  ne_souhaite_pas_etre_recontacte: zStatWithVariation,
   deja_connu: z.number(),
   total: z.number(),
 });
 
 export type IDetailsDossiersTraites = z.output<typeof zDetailsDossiersTraites>;
+
+const zDetailsDossiersTraitesV2 = z.object({
+  rdv_pris: zStatWithVariation,
+  projet_pro_securise: zStatWithVariation,
+  ne_souhaite_pas_accompagnement: zStatWithVariation,
+  a_recontacter: zStatWithVariation,
+  injoignable: zStatWithVariation,
+  autre: zStatWithVariation,
+  total: z.number(),
+});
+
+export type IDetailsDossiersTraitesV2 = z.output<typeof zDetailsDossiersTraitesV2>;
 
 const zRegionStats = z.object({
   code: z.string(),
@@ -102,14 +115,14 @@ export type ITraitementStatsResponse = z.output<typeof zTraitementStatsResponse>
 const zTraitementDetails = z.object({
   rdv_pris: z.number(),
   nouveau_projet: z.number(),
-  deja_accompagne: z.number(),
   contacte_sans_retour: z.number(),
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
-  autre: z.number(),
+  autre_avec_contact: z.number(),
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
+  ne_souhaite_pas_etre_recontacte: z.number(),
 });
 
 export type ITraitementDetails = z.output<typeof zTraitementDetails>;
@@ -201,11 +214,10 @@ const zMissionLocaleExportData = z.object({
   derniere_activite: z.date().nullable(),
   rdv_pris: z.number(),
   nouveau_projet: z.number(),
-  deja_accompagne: z.number(),
   contacte_sans_retour: z.number(),
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
-  autre: z.number(),
+  autre_avec_contact: z.number(),
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
@@ -228,11 +240,10 @@ const zRegionExportData = z.object({
   derniere_activite: z.date().nullable(),
   rdv_pris: z.number(),
   nouveau_projet: z.number(),
-  deja_accompagne: z.number(),
   contacte_sans_retour: z.number(),
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
-  autre: z.number(),
+  autre_avec_contact: z.number(),
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),
