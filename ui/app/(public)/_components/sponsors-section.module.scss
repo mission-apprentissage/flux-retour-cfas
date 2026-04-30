@@ -1,0 +1,68 @@
+@use "../../../styles/breakpoints" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: var(--container-l, 880px);
+  margin: auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+  text-align: center;
+
+  @include respond-from(md) {
+    flex-direction: row;
+    gap: 30px;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+  padding: 8px;
+
+  @include respond-from(md) {
+    width: 280px;
+    gap: 24px;
+    padding: 24px;
+  }
+}
+
+.image {
+  width: auto;
+  height: 100px;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+}

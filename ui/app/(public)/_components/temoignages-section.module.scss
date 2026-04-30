@@ -1,0 +1,316 @@
+@use "../../../styles/breakpoints" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding: 40px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #ececfe 100%);
+  box-sizing: border-box;
+  text-align: left;
+  overflow: hidden;
+
+  @include respond-from(md) {
+    gap: 32px;
+    padding: 56px 0;
+  }
+
+  @include respond-from(lg) {
+    gap: 40px;
+    padding: 80px 0;
+  }
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  @include respond-from(md) {
+    gap: 32px;
+    padding: 0 40px;
+  }
+
+  @include respond-from(lg) {
+    gap: 40px;
+    padding: 0 120px;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.carousel {
+  width: 100%;
+  overflow: visible;
+  --card-width: calc(100vw - 32px);
+  --card-gap: 16px;
+
+  @include respond-from(md) {
+    --card-width: 480px;
+    --card-gap: 24px;
+  }
+
+  @include respond-from(lg) {
+    --card-width: 588px;
+    --card-gap: 32px;
+  }
+}
+
+.track {
+  display: flex;
+  gap: var(--card-gap);
+  transform: translateX(
+    calc(50vw - (var(--card-width) / 2) - var(--position, 0) * (var(--card-width) + var(--card-gap)))
+  );
+  will-change: transform;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  gap: 16px;
+  width: var(--card-width);
+  max-height: none;
+  padding: 22px;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  box-sizing: border-box;
+  overflow: hidden;
+  max-height: 450px;
+
+  @include respond-from(md) {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 32px;
+    max-height: 350px;
+  }
+}
+
+.avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  overflow: hidden;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+.separator {
+  display: none;
+
+  @include respond-from(md) {
+    display: block;
+    align-self: stretch;
+    width: 1px;
+    background: var(--light-decisions-border-default-grey, #ddd);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.temoignageIcon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: -16px 8px 0 0;
+  font-size: 32px;
+  color: var(--light-decisions-artwork-artwork-minor-blue-france, #6a6af4);
+
+  @include respond-from(md) {
+    display: block;
+    margin: 0 0 8px;
+  }
+}
+
+.temoignageText {
+  flex: 1;
+  min-height: 0;
+  margin: 16px;
+  overflow: hidden;
+  font-family: Marianne;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+  text-align: left;
+
+  @include respond-from(md) {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 32px;
+  }
+}
+
+.temoignageTextTruncated {
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+.cardExpanded {
+  max-height: none;
+
+  .temoignageText {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
+.expandButton {
+  align-self: flex-start;
+  flex-shrink: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: Marianne;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.author {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+  text-align: left;
+}
+
+.role {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-align: left;
+}
+
+.progress {
+  display: flex;
+  gap: 8px;
+}
+
+.progressStep,
+.progressStepActive {
+  flex: 1 0 0;
+  height: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.progressStep {
+  background: var(--light-decisions-background-background-contrast-blue-france, #ececfe);
+}
+
+.progressStepActive {
+  background: var(--light-decisions-background-background-action-high-blue-france, #000091);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 145, 0.08);
+  }
+}
+
+.controlsRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pauseButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  border: 1px solid var(--light-decisions-border-default-grey, #ddd);
+  font-family: Marianne;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--light-decisions-background-background-contrast-blue-france, #ececfe);
+  }
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+}

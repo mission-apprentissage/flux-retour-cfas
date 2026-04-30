@@ -1,0 +1,17 @@
+@use "@gouvfr/dsfr/src/module/media-query" as *;
+
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  margin: 0;
+  gap: 48px;
+  background: var(--grey-grey-1000, #fff);
+
+  @include respond-from(md) {
+    gap: 32px;
+  }
+}

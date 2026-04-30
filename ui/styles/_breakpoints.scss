@@ -1,0 +1,19 @@
+@use "sass:list";
+@use "sass:map";
+@use "@gouvfr/dsfr/src/module/media-query/variable/breakpoints";
+
+/// Mobile-first responsive mixin. Mirrors the official DSFR `respond-from`
+/// mixin but uses modern `map.get` / `list.nth` to avoid Sass 3.0 deprecation
+/// warnings from upstream globals.
+///
+/// @param {String} $media - Target breakpoint (`xs`, `sm`, `md`, `lg`, `xl`).
+@mixin respond-from($media) {
+  $limits: map.get(breakpoints.$values, $media);
+  @if $limits != null {
+    @media (min-width: list.nth($limits, 1)) {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}

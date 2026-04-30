@@ -1,0 +1,79 @@
+@use "../../../styles/breakpoints" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: auto;
+  max-width: 1197px;
+  height: auto;
+  margin: 0 16px;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ececfe 22.59%, #ffffff 166.66%);
+  box-sizing: border-box;
+
+  @include respond-from(md) {
+    margin: 0 24px;
+    padding: 32px;
+  }
+
+  @include respond-from(lg) {
+    width: 100%;
+    height: 652px;
+    gap: 32px;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 18px;
+  }
+}
+
+.image {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  user-select: none;
+
+  @include respond-from(md) {
+    max-width: 320px;
+  }
+
+  @include respond-from(lg) {
+    max-width: 440px;
+  }
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 792px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+.description {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+}

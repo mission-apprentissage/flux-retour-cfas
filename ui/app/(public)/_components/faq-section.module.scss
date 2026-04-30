@@ -1,0 +1,130 @@
+@use "../../../styles/breakpoints" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  padding: 40px 16px;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  box-sizing: border-box;
+  text-align: left;
+
+  @include respond-from(md) {
+    flex-direction: row;
+    gap: 64px;
+    padding: 56px 40px;
+  }
+
+  @include respond-from(lg) {
+    gap: 215px;
+    padding: 80px 120px;
+  }
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 16px;
+  width: 100%;
+
+  @include respond-from(md) {
+    width: 193px;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 40px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+.subtitle {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-align: left;
+
+  @include respond-from(md) {
+    text-align: center;
+  }
+}
+
+.contentBlock {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 24px;
+  max-width: 792px;
+}
+
+.help {
+  display: flex;
+  background: var(--light-decisions-background-background-contrast-grey, #eee);
+}
+
+.helpBorder {
+  flex-shrink: 0;
+  width: 4px;
+  background: var(--light-decisions-border-default-blue-france, #6a6af4);
+}
+
+.helpContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+  padding: 24px;
+
+  @include respond-from(md) {
+    padding: 32px 48px 32px 32px;
+  }
+}
+
+.helpTitle {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
+
+.helpDescription {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+
+  @include respond-from(md) {
+    font-size: 18px;
+    line-height: 28px;
+  }
+}
+
+.helpButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}

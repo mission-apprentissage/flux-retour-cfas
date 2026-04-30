@@ -2319,6 +2319,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gouvfr/dsfr@npm:^1.14.4":
+  version: 1.14.4
+  resolution: "@gouvfr/dsfr@npm:1.14.4"
+  checksum: 7a1b23c23db118955c925bd40e0c11c18c29019f307ebcb6d2d85399ed463b958d02f338bf67c93e704dd579e06b2827ba2ba3f0d10938cde18c9a93f5b8c31c
+  languageName: node
+  linkType: hard
+
 "@hapi/hoek@npm:^9.0.0, @hapi/hoek@npm:^9.3.0":
   version: 9.3.0
   resolution: "@hapi/hoek@npm:9.3.0"
@@ -19782,6 +19789,7 @@ __metadata:
     "@emotion/react": ^11.14.0
     "@emotion/server": ^11.11.0
     "@emotion/styled": ^11.14.0
+    "@gouvfr/dsfr": ^1.14.4
     "@mui/icons-material": ^7.1.2
     "@mui/material": ^6.4.7
     "@mui/material-nextjs": ^6.4.3

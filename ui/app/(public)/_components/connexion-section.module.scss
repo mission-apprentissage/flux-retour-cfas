@@ -1,0 +1,141 @@
+@use "../../../styles/breakpoints" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: auto;
+  max-width: 1200px;
+  margin: 0 16px;
+  padding: 40px 24px;
+  border-radius: 12px;
+  background: linear-gradient(0deg, #6a6af4 -22.59%, #3c3cf1 166.66%), #6a6af4;
+  box-sizing: border-box;
+  text-align: left;
+
+  @include respond-from(md) {
+    margin: 0 24px;
+    padding: 56px 40px;
+  }
+
+  @include respond-from(lg) {
+    width: 100%;
+    margin: 0 auto;
+    padding: 80px 102px;
+    border-radius: 18px;
+  }
+}
+
+.title {
+  margin: 0;
+  max-width: 792px;
+  font-family: Marianne;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-inverted-blue-france, #f5f5fe);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row,
+.rowStats {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  height: auto;
+  padding: 24px;
+  box-sizing: border-box;
+
+  @include respond-from(lg) {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 32px;
+    height: 170px;
+    padding: 30px 32px 31px;
+  }
+}
+
+.row {
+  background: var(--light-decisions-background-background-default-grey, #fff);
+}
+
+.rowStats {
+  background: var(--light-decisions-background-background-contrast-blue-france, #ececfe);
+}
+
+.rowLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  min-width: 0;
+
+  @include respond-from(md) {
+    gap: 40px;
+  }
+}
+
+.rowIcon {
+  flex-shrink: 0;
+  font-size: 32px;
+  color: var(--light-decisions-text-text-title-blue-france, #000091);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  max-width: 600px;
+}
+
+.rowTitle {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-title-blue-france, #000091);
+}
+
+.rowDescription {
+  margin: 0;
+  font-family: Marianne;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+}
+
+.rowRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  gap: 16px;
+
+  @include respond-from(lg) {
+    align-items: flex-end;
+  }
+}
+
+.rowLink {
+  font-family: Marianne;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+}
