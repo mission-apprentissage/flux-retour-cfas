@@ -48,6 +48,7 @@ on:
         required: true
 
 jobs:
+
   version:
     name: Get Version
     runs-on: ubuntu-latest
