@@ -60,21 +60,21 @@ export function HeroSection() {
             imgAlt="Illustration d'une Mission Locale"
             title="Pour les Missions Locales et le service public à l’emploi"
             description="Accédez à la liste des jeunes en rupture sur votre territoire et centralisez vos collaborations avec les CFA sur un outil unique"
-            href="/missions-locales"
+            href="/accueil-mission-locale"
           />
           <AccesLandingCard
             imgSrc="/images/home/minia-CFA.png"
             imgAlt="Illustration d'un CFA"
             title="Pour les établissement de formation (CFA)"
-            description="Passez le relai aux Missions Locales pour les problématiques extra professionnelles sur des ruptures complexes. "
-            href="/cfa"
+            description="Passez le relai aux Missions Locales pour les problématiques extra professionnelles sur des ruptures complexes."
+            href="/accueil-cfa"
           />
           <AccesLandingCard
             imgSrc="/images/home/minia-territoire.png"
             imgAlt="Illustration d'un territoire"
             title="Pour les collectivités et acteurs du territoire"
             description="Suivez l’activité et la collaboration des CFA et des Missions Locales et consultez les chiffres des ruptures sur votre territoire"
-            href="/territoires"
+            href="/accueil-territoire"
           />
         </div>
       </div>

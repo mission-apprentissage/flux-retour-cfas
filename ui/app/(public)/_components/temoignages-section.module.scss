@@ -102,12 +102,11 @@
   flex: 0 0 auto;
   gap: 16px;
   width: var(--card-width);
-  max-height: none;
+  max-height: 450px;
   padding: 22px;
   background: var(--light-decisions-background-background-default-grey, #fff);
   box-sizing: border-box;
   overflow: hidden;
-  max-height: 450px;
 
   @include respond-from(md) {
     flex-direction: row;

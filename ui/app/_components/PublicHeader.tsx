@@ -26,7 +26,7 @@ export function PublicHeader() {
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)",
+        title: "Accueil - Tableau de bord de l'apprentissage",
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}

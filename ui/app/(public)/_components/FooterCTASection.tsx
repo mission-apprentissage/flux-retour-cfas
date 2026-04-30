@@ -35,7 +35,7 @@ const CTAS: Array<CTA> = [
 
 function CTAItem(cta: CTA) {
   return (
-    <div key={cta.href} className={styles.ctaItem}>
+    <div className={styles.ctaItem}>
       <div className={styles.ctaTop}>
         <span className={`${cta.iconClass} ${styles.ctaIcon}`} aria-hidden="true" />
         <h3 className={styles.ctaTitle}>{cta.title}</h3>

@@ -21,31 +21,31 @@ const ROWS: Row[] = [
     title: "Je suis un établissement de formation",
     description:
       "Accédez à la liste de vos effectifs en rupture et initiez des collaborations avec les Missions Locales de rattachement de vos apprenants.",
-    primary: { label: "Créer mon compte", href: "/cfa" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/cfa" },
+    primary: { label: "Créer mon compte", href: "/auth/inscription/organisme_formation" },
+    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-cfa" },
   },
   {
     iconClass: "fr-icon-community-line",
     title: "Je suis une Mission Locale",
     description:
       "Accédez à la liste des jeunes en rupture de contrat d’apprentissage sur votre territoire et collaborez avec les CFA.",
-    primary: { label: "Créer mon compte", href: "/missions-locales" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/missions-locales" },
+    primary: { label: "Créer mon compte", href: "/auth/inscription/missions_locales" },
+    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-mission-locale" },
   },
   {
     iconClass: "fr-icon-government-line",
     title: "Je suis un-e référent-e territorial•e",
     description:
       "Suivez l’activité et la collaboration des CFA et des Missions Locales de votre territoire pour la lutte contre le décrochage de l’apprentissage.",
-    primary: { label: "Obtenir mon accès", href: "/territoires" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/territoires" },
+    primary: { label: "Obtenir mon accès", href: "/auth/inscription/operateur_public" },
+    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-territoire" },
   },
   {
     iconClass: "fr-icon-line-chart-line",
     title:
       "+100 accompagnements démarrés chaque semaine grâce à la collaboration des CFA et des Missions Locales sur le service",
     description: "Découvrez les chiffres de l’impact du service Tableau de bord de l’apprentissage.",
-    secondary: { label: "Voir les indicateurs d’impact", href: "/impact" },
+    secondary: { label: "Voir les indicateurs d’impact", href: "/stats" },
     variant: "stats",
   },
 ];
