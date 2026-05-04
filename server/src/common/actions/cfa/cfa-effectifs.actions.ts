@@ -8,6 +8,7 @@ import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/m
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
 
+import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { buildCollabStatusSwitch } from "@/common/actions/shared/rupture-pipeline.utils";
@@ -563,25 +564,65 @@ export async function declareCfaEffectifRupture(
     declared_at: now,
     declared_by: userId,
   };
+  const newEffectifId = new ObjectId(effectifId);
 
-  const existing = await missionLocaleEffectifsDb().findOne({
-    effectif_id: new ObjectId(effectifId),
+  const currentStatus =
+    effectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
+    effectif._computed?.statut?.parcours?.slice(-1)[0];
+
+  const normalizedIdentifiant =
+    effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance
+      ? normalisePersonIdentifiant({
+          nom: effectif.apprenant.nom,
+          prenom: effectif.apprenant.prenom,
+          date_de_naissance: effectif.apprenant.date_de_naissance,
+        })
+      : undefined;
+
+  let existing = await missionLocaleEffectifsDb().findOne({
+    effectif_id: newEffectifId,
     "effectif_snapshot.organisme_id": organismeId,
     soft_deleted: { $ne: true },
   });
 
+  if (!existing && normalizedIdentifiant) {
+    existing = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      "effectif_snapshot.organisme_id": organismeId,
+      soft_deleted: { $ne: true },
+    });
+  }
+
   if (existing) {
-    await missionLocaleEffectifsDb().updateOne(
-      { _id: existing._id },
-      {
-        $set: {
-          cfa_rupture_declaration: declaration,
-          "organisme_data.rupture": true,
-          "organisme_data.reponse_at": now,
-          updated_at: now,
-        },
+    const ruptureSet = {
+      cfa_rupture_declaration: declaration,
+      "organisme_data.rupture": true,
+      "organisme_data.reponse_at": now,
+      updated_at: now,
+    };
+    const isMigration = !existing.effectif_id.equals(newEffectifId);
+    const existingIsDeca = isDecaSnapshot(existing.effectif_snapshot);
+    const incomingIsDeca = source === "effectifsDECA";
+
+    if (isMigration && existingIsDeca && !incomingIsDeca) {
+      await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, { extraSet: ruptureSet });
+    } else {
+      if (isMigration) {
+        logger.warn(
+          {
+            ml_record: existing._id,
+            existing_effectif: existing.effectif_id,
+            existing_source: existing.effectif_snapshot?.source,
+            incoming_effectif: newEffectifId,
+            incoming_source: source,
+          },
+          "declareCfaEffectifRupture: mismatch effectif_id sans migration (cas non DECA→ERP)"
+        );
       }
-    );
+      await missionLocaleEffectifsDb().updateOne({ _id: existing._id }, { $set: ruptureSet });
+    }
     scoreEffectifInBackground(existing._id, effectif);
     return { created: false, updated: true };
   }
@@ -600,25 +641,12 @@ export async function declareCfaEffectifRupture(
     throw Boom.badData("Impossible de déclarer en rupture : organisation Mission Locale non trouvée");
   }
 
-  const currentStatus =
-    effectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours?.slice(-1)[0];
-
-  const normalizedIdentifiant =
-    effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance
-      ? normalisePersonIdentifiant({
-          nom: effectif.apprenant.nom,
-          prenom: effectif.apprenant.prenom,
-          date_de_naissance: effectif.apprenant.date_de_naissance,
-        })
-      : undefined;
-
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
 
   try {
     const { insertedId } = await missionLocaleEffectifsDb().insertOne({
       mission_locale_id: mlOrganisation._id,
-      effectif_id: new ObjectId(effectifId),
+      effectif_id: newEffectifId,
       effectif_snapshot: { ...effectif, _id: effectif._id },
       effectif_snapshot_date: now,
       date_rupture: dateRupture,
@@ -650,11 +678,17 @@ export async function declareCfaEffectifRupture(
     if (error instanceof MongoServerError && error.code === 11000) {
       const filter = normalizedIdentifiant
         ? {
-            identifiant_normalise: normalizedIdentifiant,
+            "identifiant_normalise.nom": normalizedIdentifiant.nom,
+            "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+            "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
             mission_locale_id: mlOrganisation._id,
             soft_deleted: { $ne: true },
           }
-        : { effectif_id: new ObjectId(effectifId), mission_locale_id: mlOrganisation._id, soft_deleted: { $ne: true } };
+        : {
+            effectif_id: newEffectifId,
+            mission_locale_id: mlOrganisation._id,
+            soft_deleted: { $ne: true },
+          };
 
       const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
         filter,

@@ -491,6 +491,37 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].effectif_id.toString()).toBe(deca1._id.toString());
     });
 
+    it("DECA inséré, puis ERP non-RUPTURANT (FIN_DE_FORMATION) → ml record migré vers ERP", async () => {
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("VILLENEUVE", "Téo", 21) });
+      const decaResult = await createMissionLocaleSnapshot(decaEffectif);
+      expect(decaResult?.upserted).toBe(true);
+
+      const dateFin = new Date("2026-01-10");
+      const erpEffectif = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("VILLENEUVE", "Téo", 21),
+        organisme_id: decaEffectif.organisme_id,
+        _computed: {
+          organisme: { uai: UAI, siret: SIRET, region: "11" },
+          statut: {
+            en_cours: STATUT_APPRENANT.FIN_DE_FORMATION,
+            parcours: [
+              { date: new Date("2025-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
+              { date: dateFin, valeur: STATUT_APPRENANT.FIN_DE_FORMATION },
+            ],
+          },
+        },
+      });
+      await createMissionLocaleSnapshot(erpEffectif);
+
+      const allMlEffectifs = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(allMlEffectifs.length).toBe(1);
+      expect(allMlEffectifs[0].effectif_id.toString()).toBe(erpEffectif._id.toString());
+      expect((allMlEffectifs[0].effectif_snapshot as IEffectifDECA)?.is_deca_compatible).toBeFalsy();
+    });
+
     it("Deux ERP pour même personne, même ML → premier reste, second rejeté", async () => {
       const erp1 = createBaseErpEffectif({ apprenant: makeApprenant("GARCIA", "Lucas", 20) });
       const result1 = await createMissionLocaleSnapshot(erp1);

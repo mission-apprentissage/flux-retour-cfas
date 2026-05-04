@@ -361,5 +361,120 @@ describe("CFA Effectifs Actions", () => {
         declareCfaEffectifRupture(organismeId, effectif._id.toString(), "effectifs", new Date(), userId)
       ).rejects.toThrow("zone Mission Locale non identifiée");
     });
+
+    it("migre un ml record orphelin lié à un effectif jumeau (DECA → ERP)", async () => {
+      const ddn = new Date("2005-06-15T00:00:00Z");
+      const apprenantBase = {
+        nom: "VILLENEUVE",
+        prenom: "Téo",
+        date_de_naissance: ddn,
+        adresse: { mission_locale_id: 337 },
+      };
+
+      const decaEffectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: apprenantBase,
+          source: "DECA" as any,
+        })),
+        organisme_id: organismeId,
+        is_deca_compatible: true,
+      };
+      await effectifsDECADb().insertOne(decaEffectif as any);
+
+      const mlRecord = createMlEffectifDoc(decaEffectif, {
+        identifiant_normalise: { nom: "VILLENEUVE", prenom: "Téo", date_de_naissance: ddn },
+        soft_deleted: false,
+      });
+      await missionLocaleEffectifsDb().insertOne(mlRecord as any);
+
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML Test",
+        created_at: new Date(),
+      } as any);
+      await organisationsDb().insertOne(organisation as any);
+
+      const erpEffectif = await insertEffectif({ apprenant: apprenantBase });
+
+      const dateRupture = new Date("2026-01-10");
+      const result = await declareCfaEffectifRupture(
+        organismeId,
+        erpEffectif._id.toString(),
+        "effectifs",
+        dateRupture,
+        userId
+      );
+
+      expect(result).toEqual({ created: false, updated: true });
+
+      const migrated = await missionLocaleEffectifsDb().findOne({ _id: mlRecord._id });
+      expect(migrated?.effectif_id).toEqual(erpEffectif._id);
+      expect(migrated?.effectif_snapshot?._id).toEqual(erpEffectif._id);
+      expect(migrated?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+
+      const detail = await getCfaEffectifDetail(organismeId, erpEffectif._id.toString());
+      expect((detail.effectif as any).cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+    });
+
+    it("ne migre PAS dans le sens ERP → DECA quand un ml record est déjà bound à un ERP", async () => {
+      const ddn = new Date("2005-06-15T00:00:00Z");
+      const apprenantBase = {
+        nom: "DURAND",
+        prenom: "Léa",
+        date_de_naissance: ddn,
+        adresse: { mission_locale_id: 337 },
+      };
+
+      const erpEffectif = await insertEffectif({ apprenant: apprenantBase });
+      const mlRecord = createMlEffectifDoc(erpEffectif, {
+        identifiant_normalise: { nom: "DURAND", prenom: "Léa", date_de_naissance: ddn },
+        soft_deleted: false,
+      });
+      await missionLocaleEffectifsDb().insertOne(mlRecord as any);
+
+      const decaEffectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: apprenantBase,
+          source: "DECA" as any,
+        })),
+        organisme_id: organismeId,
+      };
+      await effectifsDECADb().insertOne(decaEffectif as any);
+
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML Test",
+        created_at: new Date(),
+      } as any);
+      await organisationsDb().insertOne(organisation as any);
+
+      const dateRupture = new Date("2026-01-10");
+      const result = await declareCfaEffectifRupture(
+        organismeId,
+        decaEffectif._id.toString(),
+        "effectifsDECA",
+        dateRupture,
+        userId
+      );
+
+      expect(result).toEqual({ created: false, updated: true });
+
+      const after = await missionLocaleEffectifsDb().findOne({ _id: mlRecord._id });
+      expect(after?.effectif_id).toEqual(erpEffectif._id);
+      expect(after?.effectif_snapshot?._id).toEqual(erpEffectif._id);
+      expect(after?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+    });
   });
 });
