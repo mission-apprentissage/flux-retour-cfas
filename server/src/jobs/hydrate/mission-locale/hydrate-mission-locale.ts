@@ -13,11 +13,13 @@ import {
   createMissionLocaleSnapshot,
   getAllEffectifForMissionLocaleCursor,
   mergeAndSoftDeleteDuplicates,
+  migrateMlRecordEffectifId,
   sortKeeperPriority,
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import logger from "@/common/logger";
 import {
   effectifsDb,
   effectifsQueueDb,
@@ -385,6 +387,143 @@ export const updateMissionLocaleEffectifActivationDate = async () => {
       }
     );
   }
+};
+
+export const migrateOrphanMlRecordsDecaToErp = async () => {
+  let scanned = 0;
+  let migrated = 0;
+  let skippedNoErpTwin = 0;
+  let skippedMlIdMismatch = 0;
+  let skippedPrenomMismatch = 0;
+  let skippedMissingFields = 0;
+
+  type ErpIndex = {
+    _id: ObjectId;
+    mission_locale_id: number | null;
+    normalized: ReturnType<typeof normalisePersonIdentifiant>;
+  };
+  const ORG_CACHE_MAX = 50;
+  const orgErpCache = new Map<string, ErpIndex[]>();
+  const loadOrg = async (orgId: ObjectId): Promise<ErpIndex[]> => {
+    const key = orgId.toString();
+    const cached = orgErpCache.get(key);
+    if (cached) {
+      orgErpCache.delete(key);
+      orgErpCache.set(key, cached);
+      return cached;
+    }
+    const projected = await effectifsDb()
+      .find(
+        { organisme_id: orgId, "apprenant.nom": { $exists: true } },
+        {
+          projection: {
+            _id: 1,
+            "apprenant.nom": 1,
+            "apprenant.prenom": 1,
+            "apprenant.date_de_naissance": 1,
+            "apprenant.adresse.mission_locale_id": 1,
+          },
+        }
+      )
+      .toArray();
+    const indexed: ErpIndex[] = [];
+    for (const e of projected) {
+      if (!e.apprenant?.nom || !e.apprenant?.prenom || !e.apprenant?.date_de_naissance) continue;
+      indexed.push({
+        _id: e._id,
+        mission_locale_id: e.apprenant.adresse?.mission_locale_id ?? null,
+        normalized: normalisePersonIdentifiant({
+          nom: e.apprenant.nom,
+          prenom: e.apprenant.prenom,
+          date_de_naissance: e.apprenant.date_de_naissance,
+        }),
+      });
+    }
+    orgErpCache.set(key, indexed);
+    if (orgErpCache.size > ORG_CACHE_MAX) {
+      const oldest = orgErpCache.keys().next().value;
+      if (oldest) orgErpCache.delete(oldest);
+    }
+    return indexed;
+  };
+
+  const cursor = missionLocaleEffectifsDb()
+    .find({
+      soft_deleted: { $ne: true },
+      "effectif_snapshot.source": "DECA",
+      "identifiant_normalise.nom": { $exists: true },
+    })
+    .sort({ _id: 1 })
+    .addCursorFlag("noCursorTimeout", true);
+
+  try {
+    while (await cursor.hasNext()) {
+      const mlRecord = await cursor.next();
+      if (!mlRecord) continue;
+      scanned++;
+
+      const ddn = mlRecord.identifiant_normalise?.date_de_naissance;
+      const nom = mlRecord.identifiant_normalise?.nom;
+      const prenom = mlRecord.identifiant_normalise?.prenom;
+      const orgId = mlRecord.effectif_snapshot?.organisme_id;
+      if (!ddn || !nom || !prenom || !orgId) {
+        skippedMissingFields++;
+        continue;
+      }
+
+      const candidates = await loadOrg(orgId);
+      const sameNomDdn = candidates.filter(
+        (c) => c.normalized.nom === nom && c.normalized.date_de_naissance.getTime() === ddn.getTime()
+      );
+
+      if (sameNomDdn.length === 0) {
+        skippedNoErpTwin++;
+        continue;
+      }
+
+      const match = sameNomDdn.find((c) => c.normalized.prenom === prenom);
+      if (!match) {
+        skippedPrenomMismatch++;
+        continue;
+      }
+
+      const decaMlId = mlRecord.effectif_snapshot?.apprenant?.adresse?.mission_locale_id;
+      const erpMlId = match.mission_locale_id;
+      if (decaMlId && erpMlId && decaMlId !== erpMlId) {
+        skippedMlIdMismatch++;
+        continue;
+      }
+
+      const erpTwin = await effectifsDb().findOne({ _id: match._id });
+      if (!erpTwin) {
+        skippedNoErpTwin++;
+        continue;
+      }
+
+      await migrateMlRecordEffectifId(mlRecord._id, mlRecord.effectif_id, erpTwin);
+      migrated++;
+
+      if (scanned % 1000 === 0) {
+        logger.info(
+          { scanned, migrated, skippedNoErpTwin, skippedMlIdMismatch, skippedPrenomMismatch, skippedMissingFields },
+          "migrateOrphanMlRecordsDecaToErp progress"
+        );
+      }
+    }
+  } finally {
+    await cursor.close();
+  }
+
+  const summary = {
+    scanned,
+    migrated,
+    skippedNoErpTwin,
+    skippedMlIdMismatch,
+    skippedPrenomMismatch,
+    skippedMissingFields,
+  };
+  logger.info(summary, "migrateOrphanMlRecordsDecaToErp done");
+  return summary;
 };
 
 export const softDeleteDoublonEffectifML = async () => {
