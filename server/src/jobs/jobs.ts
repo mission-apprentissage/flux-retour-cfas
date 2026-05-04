@@ -50,6 +50,7 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  migrateOrphanMlRecordsDecaToErp,
   softDeleteDoublonEffectifML,
   updateMissionLocaleEffectifActivationDate,
   updateMissionLocaleEffectifCurrentStatus,
@@ -553,6 +554,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-duplication": {
         handler: async () => {
           return softDeleteDoublonEffectifML();
+        },
+      },
+      "tmp:migration:ml-orphan-deca-to-erp": {
+        handler: async () => {
+          return migrateOrphanMlRecordsDecaToErp();
         },
       },
       "tmp:migration:ml-identifiant-normalise": {

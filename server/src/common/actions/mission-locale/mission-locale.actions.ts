@@ -2362,12 +2362,12 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
 };
 
 /** Type guard : distingue un effectif DECA d'un effectif ERP */
-function isDeca(effectif: IEffectif | IEffectifDECA): effectif is IEffectifDECA {
+export function isDeca(effectif: IEffectif | IEffectifDECA): effectif is IEffectifDECA {
   return "is_deca_compatible" in effectif;
 }
 
 /** Même vérification sur un snapshot sérialisé (peut être null en base) */
-function isDecaSnapshot(snapshot: IEffectif | IEffectifDECA | null | undefined): snapshot is IEffectifDECA {
+export function isDecaSnapshot(snapshot: IEffectif | IEffectifDECA | null | undefined): snapshot is IEffectifDECA {
   return !!snapshot && "is_deca_compatible" in snapshot;
 }
 
@@ -2451,6 +2451,36 @@ interface IMissionLocaleSnapshotResult {
   upserted: boolean;
 }
 
+export async function migrateMlRecordEffectifId(
+  mlRecordId: ObjectId,
+  oldEffectifId: ObjectId,
+  newEffectif: IEffectif | IEffectifDECA,
+  options: { skipCurrentStatus?: boolean; extraSet?: Record<string, unknown> } = {}
+): Promise<void> {
+  const now = new Date();
+  const $set: Record<string, unknown> = {
+    effectif_id: newEffectif._id,
+    effectif_snapshot: { ...newEffectif, _id: newEffectif._id },
+    effectif_snapshot_date: now,
+    updated_at: now,
+    ...(options.extraSet ?? {}),
+  };
+
+  if (!options.skipCurrentStatus) {
+    const currentStatus =
+      newEffectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
+      newEffectif._computed?.statut?.parcours?.slice(-1)[0];
+    $set.current_status = { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null };
+  }
+
+  await missionLocaleEffectifsDb().updateOne({ _id: mlRecordId }, { $set });
+
+  logger.info(
+    { ml_id: mlRecordId, from_effectif: oldEffectifId, to_effectif: newEffectif._id },
+    "ml record: migration effectif_id"
+  );
+}
+
 export const createMissionLocaleSnapshot = async (
   effectif: IEffectif | IEffectifDECA
 ): Promise<IMissionLocaleSnapshotResult | null> => {
@@ -2519,6 +2549,23 @@ export const createMissionLocaleSnapshot = async (
 
   if (!mlData) {
     return null;
+  }
+
+  if (normalizedIdentifiant && !isDeca(effectif)) {
+    const orphan = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      "effectif_snapshot.organisme_id": effectif.organisme_id,
+      mission_locale_id: mlData._id,
+      soft_deleted: { $ne: true },
+    });
+
+    if (orphan && !orphan.effectif_id.equals(effectif._id) && isDecaSnapshot(orphan.effectif_snapshot)) {
+      // skipCurrentStatus: le findOneAndUpdate ci-dessous filtre par effectif_id (qui matche désormais
+      // le record migré) et $set current_status — pas la peine de le faire deux fois.
+      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, { skipCurrentStatus: true });
+    }
   }
 
   let duplicateFilter = true;
