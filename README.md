@@ -18,7 +18,7 @@
       - [Hydratation du projet en local](#hydratation-du-projet-en-local)
       - [Deploiement depuis l'environnement local](#deploiement-depuis-lenvironnement-local)
       - [Gestion des migrations](#gestion-des-migrations)
-      - [Talisman](#talisman)
+      - [Gitleaks](#gitleaks)
       - [SOPS](#sops)
       - [Linter](#linter)
       - [Release depuis l'environnement local](#release-depuis-lenvironnement-local)
@@ -247,13 +247,21 @@ Cli pour créer une migration
   yarn migration:create -d <name>
 ```
 
-#### Talisman
+#### Gitleaks
 
-Ajouter une exception à talisman
+Scanner les secrets dans le repo
 
 ```bash
-  yarn talisman:add-exception
+  yarn gitleaks:check
 ```
+
+Ajouter les secrets détectés à la baseline des exceptions
+
+```bash
+  yarn gitleaks:update-ignore
+```
+
+Les secrets actuellement ignorés sont stockés dans `gitleaks-fingerprints-baseline.txt`.
 
 #### SOPS
 
