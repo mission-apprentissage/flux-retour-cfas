@@ -4,12 +4,12 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 
 import { PauseButton } from "../../_components/PauseButton";
-import { useGifPause, GIF_WIDTH, GIF_HEIGHT } from "../../_hooks/useGifPause";
+import { useVideoPause } from "../../_hooks/useVideoPause";
 
 import styles from "./hero-section.module.scss";
 
 export function HeroSection() {
-  const { isPaused, togglePause, imgRef, canvasRef } = useGifPause();
+  const { isPaused, togglePause, videoRef } = useVideoPause();
 
   return (
     <section className={styles.section}>
@@ -63,24 +63,22 @@ export function HeroSection() {
         </div>
         <div className={styles.dashboardPreviewContainer}>
           <div className={styles.dashboardPreviewMedia}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={imgRef}
-              src="/images/home/hero.gif"
-              alt="Aperçu animé du Tableau de bord pour les CFA"
-              width={GIF_WIDTH}
-              height={GIF_HEIGHT}
+            <video
+              ref={videoRef}
               className={styles.dashboardPreview}
-              style={{ visibility: isPaused ? "hidden" : "visible" }}
-            />
-            <canvas
-              ref={canvasRef}
-              width={GIF_WIDTH}
-              height={GIF_HEIGHT}
-              className={styles.dashboardPreviewFrozen}
-              style={{ visibility: isPaused ? "visible" : "hidden" }}
-              aria-hidden="true"
-            />
+              width={996}
+              height={560}
+              poster="/videos/hero-poster.webp"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Aperçu animé du Tableau de bord pour les Missions Locales"
+            >
+              <source src="/videos/hero.webm" type="video/webm" />
+              <source src="/videos/hero.mp4" type="video/mp4" />
+            </video>
             <PauseButton
               isPaused={isPaused}
               togglePause={togglePause}
