@@ -48,7 +48,6 @@ on:
         required: true
 
 jobs:
-
   version:
     name: Get Version
     runs-on: ubuntu-latest
@@ -188,4 +187,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
-
