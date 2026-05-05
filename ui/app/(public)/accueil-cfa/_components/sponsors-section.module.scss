@@ -1,0 +1,54 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  justify-content: space-between;
+  max-width: var(--container-xl);
+
+  @include respond-from(md) {
+    flex-direction: row;
+  }
+}
+
+.srOnly {
+  @extend %landing-sr-only;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  padding: 8px;
+
+  @include respond-from(md) {
+    gap: 24px;
+    width: 280px;
+    padding: 24px;
+  }
+}
+
+.image {
+  width: auto;
+  max-width: 100%;
+  height: 100px;
+  object-fit: contain;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+}
