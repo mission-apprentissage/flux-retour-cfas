@@ -72,7 +72,6 @@ jobs:
         uses: docker/setup-buildx-action@v4
         with:
           platforms: linux/amd64
-          install: true
           buildkitd-config-inline: |
             [worker.oci]
               gc = true
