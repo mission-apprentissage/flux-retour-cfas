@@ -491,7 +491,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].effectif_id.toString()).toBe(deca1._id.toString());
     });
 
-    it("DECA inséré, puis ERP non-RUPTURANT (FIN_DE_FORMATION) → ml record migré vers ERP", async () => {
+    it("DECA inséré, puis ERP non-RUPTURANT (FIN_DE_FORMATION) → migration skipped pour ne pas faire disparaître l'orphan des stats", async () => {
       const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("VILLENEUVE", "Téo", 21) });
       const decaResult = await createMissionLocaleSnapshot(decaEffectif);
       expect(decaResult?.upserted).toBe(true);
@@ -514,12 +514,14 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       });
       await createMissionLocaleSnapshot(erpEffectif);
 
+      // L'orphan DECA reste à son ancien effectif_id avec son snapshot RUPTURANT préservé.
+      // Migrer vers l'ERP non-RUPTURANT le ferait disparaître de matchDernierStatutPipelineMl.
       const allMlEffectifs = await missionLocaleEffectifsDb()
         .find({ soft_deleted: { $ne: true } })
         .toArray();
       expect(allMlEffectifs.length).toBe(1);
-      expect(allMlEffectifs[0].effectif_id.toString()).toBe(erpEffectif._id.toString());
-      expect((allMlEffectifs[0].effectif_snapshot as IEffectifDECA)?.is_deca_compatible).toBeFalsy();
+      expect(allMlEffectifs[0].effectif_id.toString()).toBe(decaEffectif._id.toString());
+      expect((allMlEffectifs[0].effectif_snapshot as IEffectifDECA)?.is_deca_compatible).toBe(true);
     });
 
     it("Deux ERP pour même personne, même ML → premier reste, second rejeté", async () => {
