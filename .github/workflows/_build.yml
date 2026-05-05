@@ -32,7 +32,7 @@ jobs:
       - name: Analyze NPM dependancies
         run: mna-npm-check/npm-check.sh -p .
 
-  release:
+  build:
     if: ${{ success() }}
     needs: ["npm-packages-check"]
     concurrency:
@@ -63,25 +63,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.6
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            **/node_modules
-            .yarn/install-state.gz
-            .yarn/cache
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: yarn-
-          save-always: true
+          cache: "yarn"
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           platforms: linux/amd64
           install: true
+          buildkitd-config-inline: |
+            [worker.oci]
+              gc = true
+              gckeepstorage = 10240
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -93,12 +88,20 @@ jobs:
       - name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
 
+      - name: Retrieve previous version
+        id: get-prev-version
+        run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
+
       - name: bump and release
         run: .bin/mna-tdb app:build "${{ inputs.version }}" push "${{ inputs.environment }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
+
+      - name: Prune BuildKit cache
+        run: docker buildx prune --filter until=24h --force
+        if: always()
 
   deploy:
     concurrency:

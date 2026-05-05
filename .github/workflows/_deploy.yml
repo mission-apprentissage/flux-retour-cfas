@@ -48,8 +48,54 @@ on:
         required: true
 
 jobs:
+
+  version:
+    name: Get Version
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get-version.outputs.VERSION }}
+    steps:
+      - name: Checkout project
+        if: ${{ inputs.app_version == 'latest' }}
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get Version
+        id: get-version
+        shell: bash
+        run: |
+          if [[ "${APP_VERSION}" == "latest" ]]; then
+            echo "VERSION=$(git describe --tags --abbrev=0 --candidates 100 --always | cut -c 2-)" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          APP_VERSION: ${{ inputs.app_version }}
+
+  npm-packages-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Clone mna-npm-check repository
+        uses: actions/checkout@v6
+        with:
+          repository: mission-apprentissage/mna-npm-check
+          path: mna-npm-check
+
+      - name: Analyze NPM dependancies
+        run: mna-npm-check/npm-check.sh -p .
+
   deploy:
-    name: Deploy ${{ inputs.app_version }} on ${{ inputs.environment }}
+    if: ${{ success() }}
+    needs: ["version", "npm-packages-check"]
+    name: Deploy ${{ needs.version.outputs.VERSION }} on ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify new deployment on Slack
@@ -57,7 +103,7 @@ jobs:
         if: always()
         with:
           status: ${{ job.status }}
-          notification_title: "Déploiement ${{ inputs.app_version }} en ${{ inputs.environment }} initié..."
+          notification_title: "Déploiement ${{ needs.version.outputs.VERSION }} en ${{ inputs.environment }} initié..."
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIF }}
 
@@ -96,13 +142,10 @@ jobs:
         run: yarn install --immutable
 
       - name: Run playbook
-        run: .bin/mna-tdb app:deploy ${{ inputs.environment }} --extra-vars "app_version=${{ inputs.app_version }}"
+        run: .bin/mna-tdb app:deploy ${{ inputs.environment }} --extra-vars "app_version=${{ needs.version.outputs.VERSION }}"
         env:
           ANSIBLE_REMOTE_USER: deploy
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
-
-      - name: Notify sentry deployment
-        run: .bin/mna-tdb sentry:deploy "${{ inputs.environment }}" "${{ inputs.app_version }}"
 
       - name: Encrypt logs
         run: .bin/mna-tdb app:deploy:log:encrypt
@@ -139,3 +182,10 @@ jobs:
           notification_title: "Déploiement ${{ inputs.app_version }} en ${{ inputs.environment }} terminé avec {status_message}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIF }}
+
+      - name: Notify sentry that a new version has been deployed
+        run: .bin/mna-tdb sentry:deploy ${{ inputs.environment }} ${{ needs.version.outputs.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
+
