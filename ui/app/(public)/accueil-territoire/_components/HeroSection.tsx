@@ -11,7 +11,7 @@ export function HeroSection() {
           Analysez les chiffres des ruptures de contrat sur votre territoire et suivez l’activité de collaboration des
           CFA et des Missions Locales
         </h1>
-        <p className={styles.subtitle}>Pour collectivités et les acteurs de l’apprentissage</p>
+        <p className={styles.subtitle}>Pour les collectivités et les acteurs de l’apprentissage</p>
         <div className={styles.cta}>
           <Button
             iconId="fr-icon-arrow-right-line"

@@ -20,7 +20,7 @@ const CARDS: Array<Card> = [
   },
   {
     image: "/images/home/cfa/avantage-cfa-collab.png",
-    title: "Collaboration avec la Mission Locale à votre initative sur chaque dossier",
+    title: "Collaboration avec la Mission Locale à votre initiative sur chaque dossier",
   },
   {
     image: "/images/home/cfa/avantage-cfa-ml.png",
@@ -28,7 +28,7 @@ const CARDS: Array<Card> = [
   },
   {
     image: "/images/home/cfa/avantage-cfa-fiche-navette.png",
-    title: "Une fiche navette par dossier pour voir toute les interactions réalisées",
+    title: "Une fiche navette par dossier pour voir toutes les interactions réalisées",
   },
   {
     image: "/images/home/cfa/avantage-cfa-suivi.png",

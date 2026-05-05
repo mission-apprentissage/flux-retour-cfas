@@ -132,7 +132,7 @@ const TRANSITION_DURATION = 500;
 
 type LinkInscription = "/missions_locales" | "/operateur_public" | "/organisme_formation";
 
-export function TemoignagesSection({ linkInscription }: { linkInscription?: LinkInscription }) {
+export function TemoignagesSection({ linkInscription = "" }: { linkInscription?: LinkInscription }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = useCallback((id: string) => {

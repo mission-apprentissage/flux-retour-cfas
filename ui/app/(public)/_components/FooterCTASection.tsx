@@ -7,7 +7,7 @@ import styles from "./footer-cta-section.module.scss";
 
 type LinkInscription = "/missions_locales" | "/operateur_public" | "/organisme_formation";
 
-export function FooterCTASection({ linkInscription }: { linkInscription?: LinkInscription }) {
+export function FooterCTASection({ linkInscription = "" }: { linkInscription?: LinkInscription }) {
   return (
     <section className={styles.section}>
       <div className={styles.illustrationBand}>

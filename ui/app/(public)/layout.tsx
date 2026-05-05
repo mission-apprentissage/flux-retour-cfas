@@ -1,4 +1,5 @@
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
+import { ReactNode } from "react";
 
 import { Footer } from "../_components/Footer";
 import { PublicHeader } from "../_components/PublicHeader";
@@ -6,7 +7,7 @@ import { Providers } from "../providers";
 
 import styles from "./layout.module.scss";
 
-export default async function RootLayout({ children }: { children: JSX.Element }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Providers>
       <div className={styles.layout}>

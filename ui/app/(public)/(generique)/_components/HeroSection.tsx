@@ -67,7 +67,7 @@ export function HeroSection() {
           <AccesLandingCard
             imgSrc="/images/home/generique/minia-CFA.png"
             imgAlt="Illustration d'un CFA"
-            title="Pour les établissement de formation (CFA)"
+            title="Pour les établissements de formation (CFA)"
             description="Passez le relai aux Missions Locales pour les problématiques extra professionnelles sur des ruptures complexes."
             href="/accueil-cfa"
           />
