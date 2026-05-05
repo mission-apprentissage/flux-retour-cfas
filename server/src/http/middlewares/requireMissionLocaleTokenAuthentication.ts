@@ -7,7 +7,10 @@ export default function requireMissionLocaleTokenAuthentication() {
   return async (req: any, res: Response, next: NextFunction) => {
     try {
       const token = req.params.id;
-      const eff = await missionLocaleEffectifsDb().findOne({ "brevo.token": token });
+      const eff = await missionLocaleEffectifsDb().findOne({
+        $or: [{ "brevo.token": token }, { "brevo.history.token": token }],
+        soft_deleted: { $ne: true },
+      });
       if (!eff) {
         throw Boom.forbidden("Token invalide");
       }

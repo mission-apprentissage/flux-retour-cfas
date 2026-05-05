@@ -29,6 +29,7 @@ import logger from "@/common/logger";
 import {
   effectifsDb,
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
   organisationsDb,
   organismesDb,
   usersMigrationDb,
@@ -223,6 +224,9 @@ const matchDernierStatutPipelineMl = (): any => {
       $or: [
         { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
         { cfa_rupture_declaration: { $exists: true, $ne: null } },
+        // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
+        // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
+        { situation: { $exists: true, $ne: null } },
       ],
     },
   };
@@ -2451,34 +2455,136 @@ interface IMissionLocaleSnapshotResult {
   upserted: boolean;
 }
 
+/**
+ * Migre l'`effectif_id` d'un ml record orphelin (typiquement DECA) vers un nouvel effectif (typiquement ERP).
+ *
+ * Si un autre ml record (actif OU soft-deleted) occupe déjà `(mission_locale_id, newEffectif._id)` :
+ * on "réveille" ce squatter (s'il était soft-deleted), on merge l'orphelin dedans (champs utilisateur,
+ * logs, brevo.history) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
+ * `mission_locale_id_1_effectif_id_1` qui n'est pas filtré sur `soft_deleted`.
+ *
+ * Garde anti-disparition : si remplacer le snapshot par celui de `newEffectif` ferait perdre
+ * la visibilité du record dans `matchDernierStatutPipelineMl` (orphan rupturant → ERP non-rupturant,
+ * sans `cfa_rupture_declaration` ni `situation` ni rupture déclarée par `extraSet`), on saute
+ * la migration. Évite que des dossiers DECA-rupturants disparaissent silencieusement quand l'ERP
+ * source les marque comme `FIN_DE_FORMATION` / `APPRENTI` / etc.
+ */
 export async function migrateMlRecordEffectifId(
   mlRecordId: ObjectId,
   oldEffectifId: ObjectId,
   newEffectif: IEffectif | IEffectifDECA,
   options: { skipCurrentStatus?: boolean; extraSet?: Record<string, unknown> } = {}
-): Promise<void> {
-  const now = new Date();
-  const $set: Record<string, unknown> = {
-    effectif_id: newEffectif._id,
-    effectif_snapshot: { ...newEffectif, _id: newEffectif._id },
-    effectif_snapshot_date: now,
-    updated_at: now,
-    ...(options.extraSet ?? {}),
-  };
-
-  if (!options.skipCurrentStatus) {
-    const currentStatus =
-      newEffectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
-      newEffectif._computed?.statut?.parcours?.slice(-1)[0];
-    $set.current_status = { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null };
+): Promise<{ keeperId: ObjectId; skipped?: boolean }> {
+  const orphan = await missionLocaleEffectifsDb().findOne({ _id: mlRecordId });
+  if (!orphan) {
+    throw new Error(`migrateMlRecordEffectifId: ml record ${mlRecordId} introuvable`);
   }
 
-  await missionLocaleEffectifsDb().updateOne({ _id: mlRecordId }, { $set });
+  // Option A : skip si la migration ferait disparaître le record des stats / listes ML.
+  const orphanStatutEnCours = orphan.effectif_snapshot?._computed?.statut?.en_cours;
+  const newStatutEnCours = newEffectif._computed?.statut?.en_cours;
+  const extraSetSetsRupture = !!options.extraSet && "cfa_rupture_declaration" in options.extraSet;
+
+  const orphanWasVisibleBefore =
+    orphanStatutEnCours === STATUT_APPRENANT.RUPTURANT ||
+    orphan.cfa_rupture_declaration != null ||
+    orphan.situation != null;
+
+  const orphanWillBeVisibleAfter =
+    newStatutEnCours === STATUT_APPRENANT.RUPTURANT ||
+    orphan.cfa_rupture_declaration != null ||
+    orphan.situation != null ||
+    extraSetSetsRupture;
+
+  if (orphanWasVisibleBefore && !orphanWillBeVisibleAfter) {
+    logger.info(
+      {
+        orphan_id: mlRecordId,
+        orphan_statut: orphanStatutEnCours,
+        new_statut: newStatutEnCours,
+        from_effectif: oldEffectifId,
+        to_effectif: newEffectif._id,
+      },
+      "ml record: migration skipped (would hide rupturant non qualifié)"
+    );
+    return { keeperId: mlRecordId, skipped: true };
+  }
+
+  const squatter = await missionLocaleEffectifsDb().findOne({
+    _id: { $ne: mlRecordId },
+    mission_locale_id: orphan.mission_locale_id,
+    effectif_id: newEffectif._id,
+  });
+
+  const now = new Date();
+
+  const buildRefreshSet = (): Record<string, unknown> => {
+    const set: Record<string, unknown> = {
+      effectif_snapshot: { ...newEffectif, _id: newEffectif._id },
+      effectif_snapshot_date: now,
+      updated_at: now,
+      ...(options.extraSet ?? {}),
+    };
+    if (!options.skipCurrentStatus) {
+      const currentStatus =
+        newEffectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
+        newEffectif._computed?.statut?.parcours?.slice(-1)[0];
+      set.current_status = { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null };
+    }
+    return set;
+  };
+
+  if (squatter) {
+    // Voie squatter : merge orphan -> squatter, soft-delete orphan.
+
+    // 1. Réveil si soft-deleted.
+    if (squatter.soft_deleted) {
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: squatter._id },
+        { $set: { soft_deleted: false, updated_at: now } }
+      );
+    }
+
+    // 2. Merge donor -> keeper (logs, brevo.history, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
+    await mergeAndSoftDeleteDuplicates(squatter._id, [mlRecordId]);
+
+    // 3. Backfill identifiant_normalise sur le keeper si manquant (cas legacy).
+    if (orphan.identifiant_normalise && !squatter.identifiant_normalise) {
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: squatter._id },
+        { $set: { identifiant_normalise: orphan.identifiant_normalise } }
+      );
+    }
+
+    // 4. Refresh effectif_snapshot + extraSet APRÈS merge (sinon dot-paths d'extraSet bloqueraient le merge).
+    await missionLocaleEffectifsDb().updateOne({ _id: squatter._id }, { $set: buildRefreshSet() });
+
+    logger.info(
+      {
+        squatter_id: squatter._id,
+        squatter_was_soft_deleted: !!squatter.soft_deleted,
+        orphan_id: mlRecordId,
+        from_effectif: oldEffectifId,
+        to_effectif: newEffectif._id,
+      },
+      "ml record: merge orphan into squatter (collision resolved)"
+    );
+
+    return { keeperId: squatter._id };
+  }
+
+  // Voie classique : pas de squatter, on repointe l'orphelin.
+  await missionLocaleEffectifsDb().updateOne(
+    { _id: mlRecordId },
+    { $set: { effectif_id: newEffectif._id, ...buildRefreshSet() } }
+  );
 
   logger.info(
     { ml_id: mlRecordId, from_effectif: oldEffectifId, to_effectif: newEffectif._id },
     "ml record: migration effectif_id"
   );
+
+  return { keeperId: mlRecordId };
 }
 
 export const createMissionLocaleSnapshot = async (
@@ -2784,9 +2890,16 @@ const MERGEABLE_FIELDS = [
   "situation_autre",
   "commentaires",
   "deja_connu",
+  "connaissance_ml",
+  "email_status",
   "probleme_type",
   "probleme_detail",
   "organisme_data",
+  "cfa_rupture_declaration",
+  "date_rupture",
+  "a_traiter",
+  "injoignable",
+  "nouveau_contrat",
   "whatsapp_contact",
   "whatsapp_callback_requested",
   "whatsapp_callback_requested_at",
@@ -2818,6 +2931,10 @@ export function sortKeeperPriority(
 
 /**
  * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
+ *
+ * - Réassigne les logs `missionLocaleEffectifLog` du donor vers le keeper (préserve l'historique côté UI).
+ * - Préserve les `brevo.token` des donors dans `keeper.brevo.history` (évite de casser les liens email actifs).
+ * - `$unset` `identifiant_normalise` sur les donors avant soft-delete (libère le partial unique index).
  */
 export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicateIds: ObjectId[]) {
   if (duplicateIds.length === 0) return;
@@ -2839,13 +2956,42 @@ export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicate
     }
   }
 
-  if (Object.keys(mergeUpdate).length > 0) {
-    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, { $set: { ...mergeUpdate, updated_at: new Date() } });
+  // Préserver les tokens brevo des donors dans keeper.brevo.history pour ne pas casser les liens email déjà envoyés.
+  const historyEntries: Array<{ token: string; token_created_at?: Date; token_expired_at?: Date }> = [];
+  const now = new Date();
+  for (const donor of duplicates) {
+    if (donor.brevo?.token && donor.brevo.token !== keeper.brevo?.token) {
+      historyEntries.push({
+        token: donor.brevo.token,
+        token_created_at: donor.brevo.token_created_at ?? undefined,
+        token_expired_at: now,
+      });
+    }
+    for (const entry of donor.brevo?.history ?? []) {
+      if (entry.token && entry.token !== keeper.brevo?.token) {
+        historyEntries.push(entry);
+      }
+    }
   }
 
+  if (Object.keys(mergeUpdate).length > 0 || historyEntries.length > 0) {
+    const update: Record<string, unknown> = { $set: { ...mergeUpdate, updated_at: now } };
+    if (historyEntries.length > 0) {
+      update.$push = { "brevo.history": { $each: historyEntries } };
+    }
+    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, update);
+  }
+
+  // Réassigner les logs des donors vers le keeper (préserve l'historique conseiller ML).
+  await missionLocaleEffectifsLogDb().updateMany(
+    { mission_locale_effectif_id: { $in: duplicateIds } },
+    { $set: { mission_locale_effectif_id: keeperId } }
+  );
+
+  // $unset identifiant_normalise + soft-delete sur les donors.
   await missionLocaleEffectifsDb().updateMany(
     { _id: { $in: duplicateIds } },
-    { $set: { soft_deleted: true, updated_at: new Date() } }
+    { $set: { soft_deleted: true, updated_at: now }, $unset: { identifiant_normalise: "" } }
   );
 }
 

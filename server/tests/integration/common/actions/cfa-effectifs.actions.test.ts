@@ -422,6 +422,79 @@ describe("CFA Effectifs Actions", () => {
       expect((detail.effectif as any).cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
     });
 
+    it("squatter ERP soft-deleted bloquant la migration : ressuscite + applique la rupture", async () => {
+      const ddn = new Date("2005-06-15T00:00:00Z");
+      const apprenantBase = {
+        nom: "MOREAU",
+        prenom: "Élise",
+        date_de_naissance: ddn,
+        adresse: { mission_locale_id: 337 },
+      };
+
+      const decaEffectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: apprenantBase,
+          source: "DECA" as any,
+        })),
+        organisme_id: organismeId,
+        is_deca_compatible: true,
+      };
+      await effectifsDECADb().insertOne(decaEffectif as any);
+
+      // Orphan DECA actif avec identifiant_normalise.
+      const orphanMlRecord = createMlEffectifDoc(decaEffectif, {
+        identifiant_normalise: { nom: "MOREAU", prenom: "Élise", date_de_naissance: ddn },
+        soft_deleted: false,
+      });
+      await missionLocaleEffectifsDb().insertOne(orphanMlRecord as any);
+
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML Test",
+        created_at: new Date(),
+      } as any);
+      await organisationsDb().insertOne(organisation as any);
+
+      const erpEffectif = await insertEffectif({ apprenant: apprenantBase });
+
+      // Squatter ERP soft-deleted occupant déjà (ml, erpEffectif._id).
+      const squatterMlRecord = createMlEffectifDoc(erpEffectif, {
+        soft_deleted: true,
+        situation: "RDV_PRIS",
+      });
+      await missionLocaleEffectifsDb().insertOne(squatterMlRecord as any);
+
+      const dateRupture = new Date("2026-01-10");
+      const result = await declareCfaEffectifRupture(
+        organismeId,
+        erpEffectif._id.toString(),
+        "effectifs",
+        dateRupture,
+        userId
+      );
+
+      expect(result).toEqual({ created: false, updated: true });
+
+      // Squatter ressuscité, rupture appliquée.
+      const squatterAfter = await missionLocaleEffectifsDb().findOne({ _id: squatterMlRecord._id });
+      expect(squatterAfter?.soft_deleted).toBe(false);
+      expect(squatterAfter?.effectif_id).toEqual(erpEffectif._id);
+      expect(squatterAfter?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+      expect(squatterAfter?.organisme_data?.rupture).toBe(true);
+      // Situation préexistante du squatter conservée.
+      expect(squatterAfter?.situation).toBe("RDV_PRIS");
+
+      // Orphan soft-deleted.
+      const orphanAfter = await missionLocaleEffectifsDb().findOne({ _id: orphanMlRecord._id });
+      expect(orphanAfter?.soft_deleted).toBe(true);
+    });
+
     it("ne migre PAS dans le sens ERP → DECA quand un ml record est déjà bound à un ERP", async () => {
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
