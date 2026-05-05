@@ -1,0 +1,82 @@
+@use "@/styles/breakpoints" as *;
+@use "../landing-shared" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  overflow: hidden;
+
+  @include respond-from(md) {
+    gap: 32px;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+  text-align: center;
+
+  @include respond-from(md) {
+    font-size: 20px;
+  }
+}
+
+.carousel {
+  width: 100%;
+  overflow: hidden;
+  --logo-size: 5rem;
+  --logo-gap: 1.3125rem;
+  // Durée d'une boucle complète (parcourt la largeur d'une copie du track,
+  // puis reboucle invisiblement à 0 grâce à la duplication des logos).
+  --scroll-duration: 24s;
+}
+
+.track {
+  display: flex;
+  gap: var(--logo-gap);
+  align-items: center;
+  width: max-content;
+  animation: scrollLogos var(--scroll-duration) linear infinite;
+  will-change: transform;
+
+  &[data-paused="true"] {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes scrollLogos {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    // -50% = largeur d'une copie du track (TRACK_LOGOS = LOGOS doublés).
+    // Visuellement, cette position est identique à 0% → boucle sans saut.
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+}
+
+.logo {
+  flex-shrink: 0;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  object-fit: contain;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: auto;
+}

@@ -1,36 +1,23 @@
 import Image from "next/image";
 
-import styles from "./sponsors-section.module.scss";
-
-type Sponsor = {
+export type Sponsor = {
   image: { src: string; width: number; height: number } | null;
   title: string;
   description: string;
 };
 
-const SPONSORS: Array<Sponsor> = [
-  {
-    image: { src: "/images/home/ml-actives.png", width: 360, height: 246 },
-    title: "+ 200 Missions Locales actives",
-    description: "Un réseau de Missions Locales déjà actives sur le service",
-  },
-  {
-    image: { src: "/images/home/made-in-DGEFP.png", width: 360, height: 200 },
-    title: "Un service proposé par la DGEFP",
-    description: "Un service co-construit avec les acteurs terrain CFA et Missions Locales directement",
-  },
-  {
-    image: null,
-    title: "+ XXX établissements de formation",
-    description: "Les CFA choisissent le Tableau de bord pour collaborer avec les Missions Locales.",
-  },
-];
-
-function SponsorItem({ image, title, description }: Sponsor) {
+function SponsorItem({ image, title, description, styles }: Sponsor & { styles: Record<string, string> }) {
   return (
     <div className={styles.item}>
       {image ? (
-        <Image className={styles.image} src={image.src} alt="" width={image.width} height={image.height} />
+        <Image
+          className={styles.image}
+          src={image.src}
+          alt=""
+          width={image.width}
+          height={image.height}
+          sizes="(max-width: 768px) 100px, 100px"
+        />
       ) : (
         <div className={styles.image} role="presentation" />
       )}
@@ -42,12 +29,12 @@ function SponsorItem({ image, title, description }: Sponsor) {
   );
 }
 
-export function SponsorsSection() {
+export function SponsorsSection({ sponsors, styles }: { sponsors: Sponsor[]; styles: Record<string, string> }) {
   return (
     <section className={styles.section} aria-label="Chiffres clés du service">
       <h2 className={styles.srOnly}>Le service en chiffres</h2>
-      {SPONSORS.map((sponsor) => (
-        <SponsorItem key={sponsor.title} {...sponsor} />
+      {sponsors.map((sponsor) => (
+        <SponsorItem key={sponsor.title} {...sponsor} styles={styles} />
       ))}
     </section>
   );

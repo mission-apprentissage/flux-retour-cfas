@@ -1,38 +1,34 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../landing-shared" as *;
 
 .section {
+  @extend %landing-section;
   display: flex;
   flex-direction: column;
+  gap: 24px;
   align-items: center;
   justify-content: center;
-  gap: 24px;
   width: auto;
-  max-width: 1197px;
   height: auto;
-  margin: 0 16px;
-  padding: 24px 16px;
+  margin-right: 0.5rem;
+
+  margin-left: 0.5rem;
+  background: linear-gradient(0deg, #ececfe -22.59%, #fff 166.66%), #d9d9d9;
   border-radius: 12px;
-  background: linear-gradient(180deg, #ececfe 22.59%, #ffffff 166.66%);
-  box-sizing: border-box;
 
   @include respond-from(md) {
-    margin: 0 24px;
-    padding: 32px;
-  }
-
-  @include respond-from(lg) {
-    width: 100%;
-    height: 652px;
-    gap: 32px;
-    margin: 0 auto;
-    padding: 40px;
+    width: var(--container-xl);
+    margin: auto;
     border-radius: 18px;
   }
 }
 
+.imageContainer {
+  max-width: var(--container-sm);
+}
+
 .image {
   width: 100%;
-  max-width: 240px;
   height: auto;
   user-select: none;
 
@@ -48,16 +44,19 @@
 .textContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 24px;
+  align-items: center;
   width: 100%;
-  max-width: 792px;
+  max-width: var(--container-md);
   text-align: center;
+
+  @include respond-from(md) {
+    margin-top: -32px;
+  }
 }
 
 .title {
   margin: 0;
-  font-family: Marianne;
   font-size: 24px;
   font-weight: 700;
   line-height: 32px;
@@ -71,7 +70,6 @@
 
 .description {
   margin: 0;
-  font-family: Marianne;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;

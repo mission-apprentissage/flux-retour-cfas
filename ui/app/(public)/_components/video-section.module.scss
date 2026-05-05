@@ -1,26 +1,16 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../landing-shared" as *;
 
 .section {
+  @extend %landing-section;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 24px;
-  width: auto;
-  max-width: 992px;
-  margin: 0 16px;
-  text-align: left;
+  width: var(--container-xl);
 
   @include respond-from(md) {
     flex-direction: row;
     align-items: center;
-    gap: 40px;
-    margin: 0 24px;
-  }
-
-  @include respond-from(lg) {
-    width: 100%;
-    margin: 0 auto;
-    gap: 84px;
+    padding: 0;
   }
 }
 
@@ -28,24 +18,23 @@
   flex-shrink: 0;
   width: auto;
   margin: 0;
-  font-family: Marianne;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 2rem;
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
 
   @include respond-from(md) {
     width: 320px;
-    font-size: 32px;
+    font-size: 2rem;
     line-height: 40px;
   }
 }
 
 .media {
   display: flex;
-  flex-direction: column;
   flex: 1;
-  gap: 12px;
+  flex-direction: column;
+  gap: 0.75rem;
   min-width: 0;
 }
 
@@ -53,8 +42,8 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #000;
   overflow: hidden;
+  background: #000;
 }
 
 .video {
@@ -71,34 +60,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #6a6af4, #000091);
-  font-family: Marianne;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--light-decisions-background-background-default-grey, #fff);
+  background: linear-gradient(135deg, #6a6af4, #000091);
 }
 
 .caption {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .captionText {
   margin: 0;
-  font-family: Marianne;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 1.25rem;
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
 }
 
 .captionLink {
   align-self: flex-start;
-  font-family: Marianne;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 1.25rem;
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
   text-decoration: underline;
 }

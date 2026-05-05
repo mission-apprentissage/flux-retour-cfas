@@ -4,6 +4,9 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useInfiniteCarousel } from "../_hooks/useInfiniteCarousel";
+
+import { PauseButton } from "./PauseButton";
 import styles from "./temoignages-section.module.scss";
 
 type Temoignage = {
@@ -119,76 +122,21 @@ function TemoignageCard({
 const NOMBRE_TEMOIGNAGES = TEMOIGNAGES.length;
 // Triple le tableau pour simuler un défilement infini
 const TRACK_TEMOIGNAGES = [...TEMOIGNAGES, ...TEMOIGNAGES, ...TEMOIGNAGES];
-const AUTOPLAY_INTERVAL = 6000;
 const TRANSITION_DURATION = 500;
 
-export function TemoignagesSection() {
-  const [position, setPosition] = useState(NOMBRE_TEMOIGNAGES);
-  const [transitionEnabled, setTransitionEnabled] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+type LinkInscription = "/missions_locales" | "/operateur_public" | "/organisme_formation";
+
+export function TemoignagesSection({ linkInscription }: { linkInscription?: LinkInscription }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = useCallback((id: string) => {
     setExpandedId((current) => (current === id ? null : id));
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
-    const handleChange = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+  const { position, transitionEnabled, animationActive, activeIndex, goToNext, goToPrevious, togglePause } =
+    useInfiniteCarousel({ count: NOMBRE_TEMOIGNAGES, extraPaused: expandedId !== null });
 
-  const goToNext = useCallback(() => {
-    setTransitionEnabled(true);
-    setPosition((p) => p + 1);
-  }, []);
-
-  const goToPrevious = useCallback(() => {
-    setTransitionEnabled(true);
-    setPosition((p) => p - 1);
-  }, []);
-
-  const togglePause = useCallback(() => {
-    setIsPaused((p) => !p);
-  }, []);
-
-  // Bascule invisible vers la copie centrale du track.
-  // Permet de donner l'illusion d'un carrousel infini tout en restant sur un tableau de témoignages fixe.
-  useEffect(() => {
-    if (position < NOMBRE_TEMOIGNAGES || position >= 2 * NOMBRE_TEMOIGNAGES) {
-      const timeout = setTimeout(() => {
-        setTransitionEnabled(false);
-        setPosition((p) => {
-          if (p >= 2 * NOMBRE_TEMOIGNAGES) return p - NOMBRE_TEMOIGNAGES;
-          if (p < NOMBRE_TEMOIGNAGES) return p + NOMBRE_TEMOIGNAGES;
-          return p;
-        });
-      }, TRANSITION_DURATION);
-      return () => clearTimeout(timeout);
-    }
-  }, [position]);
-
-  // Réactive la transition désactivée par la bascule invisible à la frame suivante
-  useEffect(() => {
-    if (!transitionEnabled) {
-      const id = requestAnimationFrame(() => setTransitionEnabled(true));
-      return () => cancelAnimationFrame(id);
-    }
-  }, [transitionEnabled]);
-
-  useEffect(() => {
-    if (isPaused || prefersReducedMotion || expandedId) return;
-    const interval = setInterval(goToNext, AUTOPLAY_INTERVAL);
-    return () => clearInterval(interval);
-  }, [isPaused, prefersReducedMotion, expandedId, goToNext]);
-
-  const activeIndex = ((position % NOMBRE_TEMOIGNAGES) + NOMBRE_TEMOIGNAGES) % NOMBRE_TEMOIGNAGES;
-  const activetemoignage = TEMOIGNAGES[activeIndex];
-  const animationActive = !isPaused && !prefersReducedMotion;
+  const activeTemoignage = TEMOIGNAGES[activeIndex];
 
   return (
     <section
@@ -201,7 +149,7 @@ export function TemoignagesSection() {
       </div>
 
       <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
-        Témoignage {activeIndex + 1} sur {NOMBRE_TEMOIGNAGES} — {activetemoignage.author}, {activetemoignage.role}.
+        Témoignage {activeIndex + 1} sur {NOMBRE_TEMOIGNAGES} — {activeTemoignage.author}, {activeTemoignage.role}.
       </div>
 
       <div className={styles.carousel}>
@@ -210,8 +158,7 @@ export function TemoignagesSection() {
           style={
             {
               "--position": position,
-              transition:
-                transitionEnabled && !prefersReducedMotion ? `transform ${TRANSITION_DURATION}ms ease` : "none",
+              transition: transitionEnabled ? `transform ${TRANSITION_DURATION}ms ease` : "none",
             } as React.CSSProperties
           }
         >
@@ -246,23 +193,7 @@ export function TemoignagesSection() {
             <span className="fr-icon-arrow-left-s-line" aria-hidden="true" />
           </button>
           <div className={styles.controlsRight}>
-            <button
-              type="button"
-              onClick={togglePause}
-              className={styles.pauseButton}
-              aria-pressed={!animationActive}
-              aria-label={
-                animationActive ? "Mettre en pause le défilement automatique" : "Reprendre le défilement automatique"
-              }
-            >
-              <span aria-hidden="true">
-                {animationActive ? "Mettre en pause l’animation" : "Reprendre l’animation"}
-              </span>
-              <span
-                className={animationActive ? "fr-icon-pause-circle-line" : "fr-icon-play-line"}
-                aria-hidden="true"
-              />
-            </button>
+            <PauseButton isPaused={!animationActive} togglePause={togglePause} />
             <button type="button" onClick={goToNext} className={styles.iconButton} aria-label="Témoignage suivant">
               <span className="fr-icon-arrow-right-s-line" aria-hidden="true" />
             </button>
@@ -270,7 +201,11 @@ export function TemoignagesSection() {
         </div>
 
         <div className={styles.cta}>
-          <Button iconId="fr-icon-arrow-right-line" iconPosition="right" linkProps={{ href: "/auth/inscription" }}>
+          <Button
+            iconId="fr-icon-arrow-right-line"
+            iconPosition="right"
+            linkProps={{ href: `/auth/inscription${linkInscription}` }}
+          >
             Commencer à collaborer
           </Button>
         </div>

@@ -1,0 +1,152 @@
+@use "@/styles/breakpoints" as *;
+@use "../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  text-align: left;
+  background: linear-gradient(0deg, rgba(245, 245, 254, 0) 0%, #f5f5fe 21.32%);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-xl);
+}
+
+.header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    max-width: 594px;
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: var(--container-xl);
+
+  @include respond-from(md) {
+    flex-direction: row;
+    gap: 4rem;
+    align-items: flex-start;
+  }
+}
+
+.accordions {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.accordionWrapper {
+  position: relative;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: -0.75rem;
+  z-index: 1;
+  width: 0.25rem;
+  margin: 1px;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--light-decisions-border-default-grey, #ddd);
+
+  &::before {
+    display: block;
+    width: 100%;
+    height: 100%;
+    content: "";
+    background: var(--light-decisions-text-text-action-high-blue-france, #000091);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+}
+
+.progressBarActive::before {
+  animation: fillProgress 6000ms linear forwards;
+}
+
+.progressBarPaused::before {
+  animation-play-state: paused;
+}
+
+@keyframes fillProgress {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressBarActive::before {
+    transform: scaleY(1);
+    animation: none;
+  }
+}
+
+.illustrationWrapper {
+  display: none;
+
+  @include respond-from(md) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    align-self: stretch;
+    justify-content: center;
+    width: 480px;
+    border-radius: 1.125rem;
+  }
+
+  @include respond-from(lg) {
+    width: 587px;
+  }
+}
+
+.illustration {
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  box-shadow: 0 2.125rem 4rem -0.625rem rgba(0, 0, 0, 0.15);
+}
+
+.illustrationMobileWrapper {
+  display: flex;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  @include respond-from(md) {
+    display: none;
+  }
+}
+
+.illustrationMobile {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+
+  @include respond-from(md) {
+    display: none;
+  }
+}

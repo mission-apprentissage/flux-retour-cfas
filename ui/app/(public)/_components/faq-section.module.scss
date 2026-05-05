@@ -1,74 +1,69 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../landing-shared" as *;
 
 .section {
+  @extend %landing-section;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 32px;
   width: 100%;
-  padding: 40px 16px;
-  background: var(--light-decisions-background-background-default-grey, #fff);
-  box-sizing: border-box;
+  max-width: var(--container-xl);
   text-align: left;
+  background: var(--light-decisions-background-background-default-grey, #fff);
 
   @include respond-from(md) {
     flex-direction: row;
-    gap: 64px;
-    padding: 56px 40px;
-  }
-
-  @include respond-from(lg) {
-    gap: 215px;
-    padding: 80px 120px;
+    justify-content: space-between;
+    padding: 0;
+    margin: auto;
   }
 }
 
 .titleBlock {
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
-  gap: 16px;
+  flex-direction: column;
+  gap: 1rem;
   width: 100%;
+  margin-bottom: auto;
 
   @include respond-from(md) {
-    width: 193px;
+    width: 12rem;
   }
 }
 
 .title {
   margin: 0;
-  font-family: Marianne;
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 40px;
+  line-height: 2.5rem;
   color: var(--light-decisions-text-text-title-grey, #161616);
 
   @include respond-from(md) {
-    font-size: 40px;
-    line-height: 48px;
+    font-size: 2.5rem;
+    line-height: 3rem;
   }
 }
 
 .subtitle {
   margin: 0;
-  font-family: Marianne;
-  font-size: 14px;
+  font-size: 0.75rem;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 1.5rem;
   color: var(--light-decisions-text-text-mention-grey, #666);
   text-align: left;
 
   @include respond-from(md) {
-    text-align: center;
+    text-align: left;
   }
 }
 
 .contentBlock {
   display: flex;
-  flex-direction: column;
   flex: 1;
-  gap: 24px;
-  max-width: 792px;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 49.5rem;
 }
 
 .help {
@@ -78,53 +73,54 @@
 
 .helpBorder {
   flex-shrink: 0;
-  width: 4px;
+  width: 0.25rem;
   background: var(--light-decisions-border-default-blue-france, #6a6af4);
 }
 
 .helpContent {
   display: flex;
-  flex-direction: column;
   flex: 1;
-  gap: 16px;
-  padding: 24px;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
 
   @include respond-from(md) {
-    padding: 32px 48px 32px 32px;
+    padding-top: 2rem;
+    padding-right: 3rem;
+    padding-bottom: 2rem;
+    padding-left: 3rem;
   }
 }
 
 .helpTitle {
   margin: 0;
-  font-family: Marianne;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 1.5rem;
   color: var(--light-decisions-text-text-title-grey, #161616);
 
   @include respond-from(md) {
-    font-size: 24px;
-    line-height: 32px;
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 }
 
 .helpDescription {
   margin: 0;
-  font-family: Marianne;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 1.5rem;
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
 
   @include respond-from(md) {
-    font-size: 18px;
-    line-height: 28px;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 }
 
 .helpButtons {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   align-items: flex-start;
-  gap: 8px;
 }
