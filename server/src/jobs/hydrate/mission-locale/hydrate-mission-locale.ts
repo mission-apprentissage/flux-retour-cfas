@@ -392,6 +392,8 @@ export const updateMissionLocaleEffectifActivationDate = async () => {
 export const migrateOrphanMlRecordsDecaToErp = async () => {
   let scanned = 0;
   let migrated = 0;
+  let mergedIntoSquatter = 0;
+  let skippedNonRupturant = 0;
   let skippedNoErpTwin = 0;
   let skippedMlIdMismatch = 0;
   let skippedPrenomMismatch = 0;
@@ -500,12 +502,27 @@ export const migrateOrphanMlRecordsDecaToErp = async () => {
         continue;
       }
 
-      await migrateMlRecordEffectifId(mlRecord._id, mlRecord.effectif_id, erpTwin);
-      migrated++;
+      const result = await migrateMlRecordEffectifId(mlRecord._id, mlRecord.effectif_id, erpTwin);
+      if (result.skipped) {
+        skippedNonRupturant++;
+      } else if (result.keeperId.equals(mlRecord._id)) {
+        migrated++;
+      } else {
+        mergedIntoSquatter++;
+      }
 
       if (scanned % 1000 === 0) {
         logger.info(
-          { scanned, migrated, skippedNoErpTwin, skippedMlIdMismatch, skippedPrenomMismatch, skippedMissingFields },
+          {
+            scanned,
+            migrated,
+            mergedIntoSquatter,
+            skippedNonRupturant,
+            skippedNoErpTwin,
+            skippedMlIdMismatch,
+            skippedPrenomMismatch,
+            skippedMissingFields,
+          },
           "migrateOrphanMlRecordsDecaToErp progress"
         );
       }
@@ -517,6 +534,8 @@ export const migrateOrphanMlRecordsDecaToErp = async () => {
   const summary = {
     scanned,
     migrated,
+    mergedIntoSquatter,
+    skippedNonRupturant,
     skippedNoErpTwin,
     skippedMlIdMismatch,
     skippedPrenomMismatch,

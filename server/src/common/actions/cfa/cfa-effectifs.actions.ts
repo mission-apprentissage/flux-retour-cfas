@@ -606,8 +606,12 @@ export async function declareCfaEffectifRupture(
     const existingIsDeca = isDecaSnapshot(existing.effectif_snapshot);
     const incomingIsDeca = source === "effectifsDECA";
 
+    let keeperId = existing._id;
     if (isMigration && existingIsDeca && !incomingIsDeca) {
-      await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, { extraSet: ruptureSet });
+      const result = await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, {
+        extraSet: ruptureSet,
+      });
+      keeperId = result.keeperId;
     } else {
       if (isMigration) {
         logger.warn(
@@ -623,7 +627,7 @@ export async function declareCfaEffectifRupture(
       }
       await missionLocaleEffectifsDb().updateOne({ _id: existing._id }, { $set: ruptureSet });
     }
-    scoreEffectifInBackground(existing._id, effectif);
+    scoreEffectifInBackground(keeperId, effectif);
     return { created: false, updated: true };
   }
 

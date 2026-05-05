@@ -3,12 +3,20 @@ import { BREVO_TEMPLATE_NAME, BREVO_TEMPLATE_TYPE } from "shared/models/data/bre
 
 import { brevoMissionLocaleTemplateDb, missionLocaleEffectifsDb } from "@/common/model/collections";
 
+/**
+ * Filtre pour retrouver un ml record actif via un token brevo.
+ * Matche le token courant OU un ancien token archivé dans `brevo.history` (suite à un merge),
+ * et exclut les records soft-deleted pour ne pas écrire/lire sur un fantôme.
+ */
+const tokenFilter = (token: string) => ({
+  $or: [{ "brevo.token": token }, { "brevo.history.token": token }],
+  soft_deleted: { $ne: true },
+});
+
 export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
   const aggregation = [
     {
-      $match: {
-        "brevo.token": token,
-      },
+      $match: tokenFilter(token),
     },
     {
       $lookup: {
@@ -85,7 +93,7 @@ export const getMissionLocaleEffectifInfoFromToken = async (token: string) => {
 };
 
 export const confirmEffectifChoiceByTokenDbUpdate = async (token: string, confirmation: string) => {
-  const doc = await missionLocaleEffectifsDb().findOne({ "brevo.token": token });
+  const doc = await missionLocaleEffectifsDb().findOne(tokenFilter(token));
   if (!doc) {
     throw Boom.notFound();
   }
@@ -105,7 +113,7 @@ export const confirmEffectifChoiceByTokenDbUpdate = async (token: string, confir
 };
 
 export const updateEffectifPhoneNumberByTokenDbUpdate = async (token: string, telephone: string) => {
-  const doc = await missionLocaleEffectifsDb().findOne({ "brevo.token": token });
+  const doc = await missionLocaleEffectifsDb().findOne(tokenFilter(token));
   if (!doc) {
     throw Boom.notFound();
   }
@@ -121,7 +129,8 @@ export const updateEffectifPhoneNumberByTokenDbUpdate = async (token: string, te
 };
 
 export const deactivateEffectifToken = async (token: string) => {
-  const doc = await missionLocaleEffectifsDb().findOne({ "brevo.token": token });
+  // Ne désactive QUE si le token est encore le token courant (pas un token déjà archivé dans history).
+  const doc = await missionLocaleEffectifsDb().findOne({ "brevo.token": token, soft_deleted: { $ne: true } });
   if (!doc) {
     throw Boom.notFound();
   }
@@ -150,15 +159,12 @@ export const deactivateEffectifToken = async (token: string) => {
 };
 
 export const getEffectifMailFromToken = async (token: string) => {
-  const data = await missionLocaleEffectifsDb().findOne(
-    { "brevo.token": token },
-    {
-      projection: {
-        "effectif_snapshot.apprenant.courriel": 1,
-        "effectif_snapshot.apprenant.adresse.mission_locale_id": 1,
-      },
-    }
-  );
+  const data = await missionLocaleEffectifsDb().findOne(tokenFilter(token), {
+    projection: {
+      "effectif_snapshot.apprenant.courriel": 1,
+      "effectif_snapshot.apprenant.adresse.mission_locale_id": 1,
+    },
+  });
   return {
     courriel: data?.effectif_snapshot.apprenant.courriel,
     ml_id: data?.effectif_snapshot.apprenant.adresse.mission_locale_id,
