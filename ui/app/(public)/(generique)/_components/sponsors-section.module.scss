@@ -1,61 +1,56 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
 
 .section {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.5rem;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   width: 100%;
   max-width: var(--container-l, 880px);
+  padding-top: 0;
+  padding-right: 1.5rem;
+  padding-bottom: 0;
+  padding-left: 1.5rem;
   margin: auto;
-  padding: 0 24px;
-  box-sizing: border-box;
   text-align: center;
 
   @include respond-from(md) {
     flex-direction: row;
-    gap: 30px;
+    gap: 1.875rem;
   }
 }
 
 .srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
+  @extend %landing-sr-only;
 }
 
 .item {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   align-items: center;
-  gap: 16px;
   width: 100%;
   max-width: 320px;
-  padding: 8px;
+  padding: 0.5rem;
 
   @include respond-from(md) {
+    gap: 1.5rem;
     width: 280px;
-    gap: 24px;
-    padding: 24px;
+    padding: 1.5rem;
   }
 }
 
 .image {
   width: auto;
-  height: 100px;
+  height: 6.25rem;
 }
 
 .textContainer {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .title {

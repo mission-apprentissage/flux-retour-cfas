@@ -1,33 +1,21 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  width: 100%;
-  text-align: center;
-  margin-top: 16px;
-
-  @include respond-from(md) {
-    margin-top: 32px;
-  }
-
-  @include respond-from(lg) {
-    gap: 32px;
-    margin-top: 64px;
-  }
+.section {
+  @extend %landing-section;
+  padding: 0;
 }
 
 .titleBlock {
   width: 880px;
   max-width: 100%;
-  padding: 0 24px;
-  box-sizing: border-box;
+  padding-top: 0;
+  padding-right: 2rem;
+  padding-bottom: 0;
+  padding-left: 2rem;
 }
 
 .title {
-  font-family: Marianne;
   font-size: 28px;
   font-weight: 700;
   line-height: 36px;
@@ -40,7 +28,6 @@
 }
 
 .subtitle {
-  font-family: Marianne;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
@@ -50,51 +37,59 @@
 .heroBlock {
   width: 100%;
   margin-top: 64px;
-  background: linear-gradient(180deg, #adadf9 3.87%, rgba(173, 173, 249, 0) 59.35%);
+  background: linear-gradient(180deg, #adadf9 2%, rgba(173, 173, 249, 0) 10%);
 
   @include respond-from(md) {
     margin-top: 120px;
+    background: linear-gradient(180deg, #adadf9 4%, rgba(173, 173, 249, 0) 60%);
   }
 
   @include respond-from(lg) {
-    margin-top: 200px;
+    margin-top: 150px;
   }
+}
+
+.illustrationContainer {
+  width: 100%;
+  max-width: var(--container-md);
+  margin: auto;
 }
 
 .heroImage {
   width: 100%;
-  max-width: 880px;
   height: auto;
-  margin-top: -90px;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-top: -80px;
 
   @include respond-from(md) {
+    padding: 0;
     margin-top: -120px;
   }
 
   @include respond-from(lg) {
-    margin-top: -205px;
+    margin-top: -185px;
   }
 }
 
 .cardsContainer {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  gap: 1.5rem;
   justify-content: center;
-  gap: 16px;
-  max-width: 1080px;
-  margin: 24px auto 0;
-  padding: 0 24px;
-  box-sizing: border-box;
+  max-width: var(--container-xl);
+  margin: auto;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
 
   @include respond-from(md) {
     flex-direction: row;
-    flex-wrap: wrap;
+    width: var(--container-xl);
+    margin: auto;
     margin-top: 32px;
   }
 
   @include respond-from(lg) {
-    flex-wrap: nowrap;
     gap: 24px;
   }
 }
@@ -111,39 +106,40 @@
 
 .accesLandingCardImg {
   width: 100%;
-  height: auto;
   max-width: 384px;
-  object-fit: contain;
+  height: auto;
+  object-fit: cover;
 }
 
 .accesLandingCardTextContainer {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   height: 100%;
-  padding: 0 32px;
+  padding-top: 0;
+  padding-right: 2rem;
+  padding-bottom: 0;
+  padding-left: 2rem;
   text-align: center;
 }
 
 .accesLandingCardTitle {
   margin: 0;
-  font-family: Marianne;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 1.75rem;
   color: var(--light-decisions-text-text-title-blue-france, #000091);
   text-align: start;
 }
 
 .accesLandingCardDescription {
-  font-family: Marianne;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
-  line-height: 24px;
-  background: var(--light-decisions-background-background-default-grey, #fff);
+  line-height: 1.5rem;
   text-align: start;
+  background: var(--light-decisions-background-background-default-grey, #fff);
 }
 
 .accesLandingCardButton {

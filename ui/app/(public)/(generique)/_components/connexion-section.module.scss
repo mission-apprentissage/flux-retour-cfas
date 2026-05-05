@@ -1,35 +1,45 @@
-@use "../../../styles/breakpoints" as *;
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
 
 .section {
+  @extend %landing-section;
   display: flex;
   flex-direction: column;
   gap: 32px;
   width: auto;
-  max-width: 1200px;
-  margin: 0 16px;
-  padding: 40px 24px;
-  border-radius: 12px;
-  background: linear-gradient(0deg, #6a6af4 -22.59%, #3c3cf1 166.66%), #6a6af4;
-  box-sizing: border-box;
+  max-width: var(--container-xl);
   text-align: left;
+  background: linear-gradient(0deg, #6a6af4 -22.59%, #3c3cf1 166.66%), #6a6af4;
+  border-radius: 12px;
 
   @include respond-from(md) {
-    margin: 0 24px;
-    padding: 56px 40px;
+    padding-top: 56px;
+    padding-right: 40px;
+    padding-bottom: 56px;
+    padding-left: 40px;
+    margin-top: 0;
+    margin-right: 24px;
+    margin-bottom: 0;
+    margin-left: 24px;
   }
 
   @include respond-from(lg) {
     width: 100%;
-    margin: 0 auto;
-    padding: 80px 102px;
+    padding-top: 80px;
+    padding-right: 102px;
+    padding-bottom: 80px;
+    padding-left: 102px;
+    margin-top: 0;
+    margin-right: auto;
+    margin-bottom: 0;
+    margin-left: auto;
     border-radius: 18px;
   }
 }
 
 .title {
-  margin: 0;
   max-width: 792px;
-  font-family: Marianne;
+  margin: 0;
   font-size: 24px;
   font-weight: 700;
   line-height: 32px;
@@ -51,20 +61,21 @@
 .rowStats {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: space-between;
   gap: 24px;
+  justify-content: space-between;
   width: 100%;
   height: auto;
   padding: 24px;
-  box-sizing: border-box;
 
   @include respond-from(lg) {
     flex-direction: row;
-    align-items: flex-end;
     gap: 32px;
+    align-items: flex-end;
     height: 170px;
-    padding: 30px 32px 31px;
+    padding-top: 30px;
+    padding-right: 32px;
+    padding-bottom: 31px;
+    padding-left: 32px;
   }
 }
 
@@ -78,9 +89,9 @@
 
 .rowLeft {
   display: flex;
-  align-items: center;
-  gap: 24px;
   flex: 1;
+  gap: 24px;
+  align-items: center;
   min-width: 0;
 
   @include respond-from(md) {
@@ -104,7 +115,6 @@
 
 .rowTitle {
   margin: 0;
-  font-family: Marianne;
   font-size: 20px;
   font-weight: 700;
   line-height: 28px;
@@ -113,7 +123,6 @@
 
 .rowDescription {
   margin: 0;
-  font-family: Marianne;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
@@ -122,10 +131,10 @@
 
 .rowRight {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   flex-shrink: 0;
+  flex-direction: column;
   gap: 16px;
+  align-items: flex-start;
 
   @include respond-from(lg) {
     align-items: flex-end;
@@ -133,7 +142,6 @@
 }
 
 .rowLink {
-  font-family: Marianne;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;

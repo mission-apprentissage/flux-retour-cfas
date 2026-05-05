@@ -37,7 +37,7 @@ function AccesLandingCard({
 
 export function HeroSection() {
   return (
-    <section className={styles.hero}>
+    <section className={styles.section}>
       <div className={styles.titleBlock}>
         <h1 className={styles.title}>Repérer et accompagner les jeunes en rupture de contrat d’apprentissage</h1>
         <p className={styles.subtitle}>
@@ -46,31 +46,33 @@ export function HeroSection() {
         </p>
       </div>
       <div className={styles.heroBlock}>
-        <Image
-          src="/images/home/illustration-hero.png"
-          alt="Illustration de jeunes en apprentissage"
-          width={1264}
-          height={404}
-          priority
-          className={styles.heroImage}
-        />
+        <div className={styles.illustrationContainer}>
+          <Image
+            src="/images/home/illustration-hero.png"
+            alt="Illustration de jeunes en apprentissage"
+            width={1264}
+            height={404}
+            priority
+            className={styles.heroImage}
+          />
+        </div>
         <div className={styles.cardsContainer}>
           <AccesLandingCard
-            imgSrc="/images/home/minia-ml.png"
+            imgSrc="/images/home/generique/minia-ml.png"
             imgAlt="Illustration d'une Mission Locale"
             title="Pour les Missions Locales et le service public à l’emploi"
             description="Accédez à la liste des jeunes en rupture sur votre territoire et centralisez vos collaborations avec les CFA sur un outil unique"
             href="/accueil-mission-locale"
           />
           <AccesLandingCard
-            imgSrc="/images/home/minia-CFA.png"
+            imgSrc="/images/home/generique/minia-CFA.png"
             imgAlt="Illustration d'un CFA"
             title="Pour les établissement de formation (CFA)"
             description="Passez le relai aux Missions Locales pour les problématiques extra professionnelles sur des ruptures complexes."
             href="/accueil-cfa"
           />
           <AccesLandingCard
-            imgSrc="/images/home/minia-territoire.png"
+            imgSrc="/images/home/generique/minia-territoire.png"
             imgAlt="Illustration d'un territoire"
             title="Pour les collectivités et acteurs du territoire"
             description="Suivez l’activité et la collaboration des CFA et des Missions Locales et consultez les chiffres des ruptures sur votre territoire"
