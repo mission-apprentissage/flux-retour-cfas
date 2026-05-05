@@ -1,0 +1,91 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  padding: 0;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  max-width: var(--container-sm);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+}
+
+.heroBlock {
+  width: 100%;
+  margin-top: 110px;
+  background: linear-gradient(180deg, #adadf9 1%, rgba(173, 173, 249, 0) 100%);
+
+  @include respond-from(md) {
+    margin-top: 120px;
+  }
+
+  @include respond-from(lg) {
+    margin-top: 205px;
+  }
+}
+
+.figureBand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+
+  @include respond-from(md) {
+    margin-top: 0;
+  }
+}
+
+.illustrationContainer {
+  width: 100%;
+  max-width: var(--container-md);
+  margin: auto;
+}
+
+.heroIllustration {
+  width: 100%;
+  height: auto;
+  margin-top: -90px;
+
+  @include respond-from(md) {
+    margin-top: -120px;
+  }
+
+  @include respond-from(lg) {
+    margin-top: -220px;
+  }
+}
