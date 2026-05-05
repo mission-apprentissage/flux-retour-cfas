@@ -194,7 +194,7 @@ jobs:
   deploy-recette:
     concurrency:
       group: "deploy-${{ github.workflow }}-${{ github.ref }}"
-    needs: ["release"]
+    needs: ["release", "build-ui-recette"]
     name: Deploy ${{ needs.release.outputs.VERSION }} on recette
     uses: "./.github/workflows/_deploy.yml"
     with:
