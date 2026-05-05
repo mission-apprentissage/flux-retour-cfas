@@ -10,6 +10,13 @@ type UseVideoPauseResult = {
   videoRef: React.RefObject<HTMLVideoElement>;
 };
 
+/**
+ * Pilote une `<video>` (play/pause natif) avec un état `isPaused` synchronisé.
+ *
+ * Branche `videoRef` sur l'élément `<video>` (autoplay attendu côté JSX) et `togglePause` sur
+ * un bouton. Si `prefers-reduced-motion` est actif au mount, la vidéo est mise en pause et
+ * l'état reflète ce choix — le visiteur peut ensuite la relancer manuellement.
+ */
 export function useVideoPause(): UseVideoPauseResult {
   const prefersReducedMotion = useReducedMotion();
   const [isPaused, setIsPaused] = useState(false);

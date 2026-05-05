@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+/**
+ * Renvoie `true` si l'utilisateur a activé `prefers-reduced-motion: reduce`.
+ *
+ * S'abonne à la `MediaQueryList` pour rester réactif si le réglage change pendant la session.
+ */
 export function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 

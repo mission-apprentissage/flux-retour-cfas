@@ -23,6 +23,14 @@ type UseInfiniteCarouselResult = {
   togglePause: () => void;
 };
 
+/**
+ * Pilote un carrousel auto-play à boucle infinie sans saut visible.
+ *
+ * Le track contient 3 copies des `count` slides ; `position` se déplace entre `count` et `2*count`.
+ * Quand on franchit ces bornes, on attend la fin de la transition puis on rebascule au centre
+ * en désactivant la transition une frame, ce qui simule la boucle. L'autoplay s'arrête si
+ * `isPaused`, `extraPaused` (contrôlé par le parent) ou `prefers-reduced-motion` est actif.
+ */
 export function useInfiniteCarousel({
   count,
   autoplayInterval = 6000,
