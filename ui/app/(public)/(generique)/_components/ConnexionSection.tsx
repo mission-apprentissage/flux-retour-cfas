@@ -73,11 +73,7 @@ export function ConnexionSection() {
                   {row.primary.label}
                 </Button>
               )}
-              <DsfrLink
-                href={row.secondary.href}
-                className={styles.rowLink}
-                aria-label={`${row.secondary.label} : ${row.title}`}
-              >
+              <DsfrLink href={row.secondary.href} className={styles.rowLink}>
                 {row.secondary.label}
               </DsfrLink>
             </div>

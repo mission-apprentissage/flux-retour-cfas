@@ -222,3 +222,7 @@
   width: 100%;
   height: auto;
 }
+
+.srOnly {
+  @extend %landing-sr-only;
+}

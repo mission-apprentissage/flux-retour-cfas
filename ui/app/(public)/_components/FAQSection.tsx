@@ -121,10 +121,13 @@ export function FAQSection() {
             <div className={styles.helpButtons}>
               <Button
                 priority="primary"
+                iconId="fr-icon-external-link-line"
+                iconPosition="right"
                 linkProps={{
                   href: "https://aide.cfas.apprentissage.beta.gouv.fr",
                   target: "_blank",
                   rel: "noopener noreferrer",
+                  title: "Consulter le centre d’aide - nouvelle fenêtre",
                 }}
               >
                 Consulter le centre d’aide

@@ -19,7 +19,7 @@ function SponsorItem({ image, title, description, styles }: Sponsor & { styles: 
           sizes="(max-width: 768px) 100px, 100px"
         />
       ) : (
-        <div className={styles.image} role="presentation" />
+        <div className={styles.image} aria-hidden="true" />
       )}
       <div className={styles.textContainer}>
         <p className={styles.title}>{title}</p>

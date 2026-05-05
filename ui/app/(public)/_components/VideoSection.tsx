@@ -32,8 +32,15 @@ export function VideoSection() {
             Vidéo de présentation de témoignages des Missions Locales qui ont co-construit le service
           </p>
           {hasVideo && (
-            <a className={styles.captionLink} href={fullVideoUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              className={styles.captionLink}
+              href={fullVideoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Voir la vidéo complète sur YouTube - nouvelle fenêtre"
+            >
               Lien de la vidéo complète
+              <span className="fr-icon-external-link-line" aria-hidden="true" />
             </a>
           )}
         </div>

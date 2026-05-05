@@ -75,10 +75,16 @@ export function HeroSection() {
               playsInline
               preload="metadata"
               aria-label="Aperçu animé du Tableau de bord pour les Missions Locales"
+              aria-describedby="hero-ml-video-description"
             >
               <source src="/videos/hero.webm" type="video/webm" />
               <source src="/videos/hero.mp4" type="video/mp4" />
             </video>
+            <p id="hero-ml-video-description" className={styles.srOnly}>
+              Démonstration sans son : interface du Tableau de bord pour les Missions Locales présentant la liste des
+              jeunes en rupture de contrat sur le territoire, l’ouverture d’une fiche navette et un échange de messages
+              avec un CFA.
+            </p>
             <PauseButton
               isPaused={isPaused}
               togglePause={togglePause}

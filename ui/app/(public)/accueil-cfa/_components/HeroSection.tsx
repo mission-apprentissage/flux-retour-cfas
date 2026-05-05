@@ -75,10 +75,15 @@ export function HeroSection() {
               playsInline
               preload="metadata"
               aria-label="Aperçu animé du Tableau de bord pour les CFA"
+              aria-describedby="hero-cfa-video-description"
             >
               <source src="/videos/hero.webm" type="video/webm" />
               <source src="/videos/hero.mp4" type="video/mp4" />
             </video>
+            <p id="hero-cfa-video-description" className={styles.srOnly}>
+              Démonstration sans son : interface du Tableau de bord pour les CFA présentant la liste des apprenants en
+              rupture de contrat, l’ouverture d’une fiche navette et un échange de messages avec une Mission Locale.
+            </p>
             <PauseButton
               isPaused={isPaused}
               togglePause={togglePause}

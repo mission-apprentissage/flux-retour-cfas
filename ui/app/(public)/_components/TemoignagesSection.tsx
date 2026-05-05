@@ -106,7 +106,13 @@ function TemoignageCard({
           <span className={`fr-icon-quote-line ${styles.temoignageIcon}`} aria-hidden="true" />« {temoignage.text} »
         </blockquote>
         {showExpandButton && (
-          <button type="button" onClick={onToggleExpand} className={styles.expandButton} aria-expanded={isExpanded}>
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            className={styles.expandButton}
+            aria-expanded={isExpanded}
+            tabIndex={isActive ? undefined : -1}
+          >
             {isExpanded ? "Réduire le témoignage" : "Lire le témoignage complet"}
           </button>
         )}
