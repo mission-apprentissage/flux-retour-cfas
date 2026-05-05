@@ -93,7 +93,7 @@ jobs:
         run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
 
       - name: bump and release
-        run: .bin/mna-tdb app:build "${{ inputs.version }}" push "${{ inputs.environment }}"
+        run: .bin/mna-tdb app:build "${{ inputs.version }}" push $(git rev-parse HEAD) "${{ inputs.environment }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
