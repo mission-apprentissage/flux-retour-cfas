@@ -47,6 +47,6 @@ fi
 
 export CHANNEL=$(get_channel $VERSION)
 
-docker buildx bake --builder mna-lba --${mode} "$environement"
+docker buildx bake --builder mna-tdb --${mode} "$environement"
 docker builder prune --builder mna-tdb --keep-storage 20GB --force
 docker buildx stop --builder mna-tdb
