@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-import styles from "./ruptures-contrat-section.module.scss";
+import styles from "./base-ruptures-contrat-section.module.scss";
 
-export function RupturesContratSection({ title, description }: { title: string; description: string }) {
+export function BaseRupturesContratSection({ title, description }: { title: string; description: string }) {
   return (
     <section className={styles.section}>
       <div className={styles.imageContainer}>

@@ -15,42 +15,30 @@
 .contentWrapper {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
   width: 100%;
   max-width: var(--container-xl);
-  padding-top: 0;
-  padding-right: 1rem;
-  padding-bottom: 0;
-  padding-left: 1rem;
-  margin-top: 0;
-  margin-right: auto;
-  margin-bottom: 0;
-  margin-left: auto;
+  padding: 0 1rem;
+  margin: 0 auto;
 
   @include respond-from(md) {
-    gap: 32px;
-    padding-top: 0;
-    padding-right: 2.5rem;
-    padding-bottom: 0;
-    padding-left: 2.5rem;
+    gap: 2rem;
+    padding: 0 2.5rem;
   }
 
   @include respond-from(lg) {
-    padding-top: 0;
-    padding-right: 7.5rem;
-    padding-bottom: 0;
-    padding-left: 7.5rem;
+    padding: 0 7.5rem;
   }
 }
 
 .intro {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 
   @include respond-from(lg) {
     flex-direction: row;
-    gap: 64px;
+    gap: 4rem;
     align-items: flex-start;
     justify-content: space-between;
   }
@@ -59,23 +47,23 @@
 .title {
   flex: 1;
   margin: 0;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 2rem;
   color: var(--light-decisions-text-text-title-grey, #161616);
 
   @include respond-from(md) {
     max-width: 690px;
-    font-size: 32px;
-    line-height: 40px;
+    font-size: 2rem;
+    line-height: 2.5rem;
   }
 }
 
 .subtitle {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 1.5rem;
   color: var(--light-decisions-text-text-mention-grey, #666);
 
   @include respond-from(lg) {
@@ -89,19 +77,19 @@
 }
 
 .carousel {
+  --card-width: calc(100vw - 2rem);
+  --card-gap: 1rem;
   width: 100%;
   overflow: visible;
-  --card-width: calc(100vw - 32px);
-  --card-gap: 16px;
 
   @include respond-from(md) {
     --card-width: 240px;
-    --card-gap: 24px;
+    --card-gap: 1.5rem;
   }
 
   @include respond-from(lg) {
     --card-width: 282px;
-    --card-gap: 24px;
+    --card-gap: 1.5rem;
   }
 }
 
@@ -122,7 +110,7 @@
   align-items: center;
   width: var(--card-width);
   min-height: 300px;
-  padding: 32px;
+  padding: 2rem;
   text-align: left;
   background: var(--light-decisions-background-background-default-grey, #fff);
   border: 1px solid var(--light-decisions-border-default-grey, #ddd);
@@ -135,7 +123,7 @@
   justify-content: center;
   width: 120px;
   height: 80px;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   overflow: hidden;
 }
 
@@ -148,16 +136,16 @@
 .cardTitle {
   width: 100%;
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 400;
-  line-height: 28px;
+  line-height: 1.75rem;
   color: var(--light-decisions-text-text-title-grey, #161616);
   text-align: left;
 }
 
 .progress {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .progressStep,
@@ -185,7 +173,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 0.5rem;
   color: var(--light-decisions-text-text-action-high-blue-france, #000091);
   cursor: pointer;
   background: none;
@@ -198,7 +186,7 @@
 
 .controlsRight {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
 }
 

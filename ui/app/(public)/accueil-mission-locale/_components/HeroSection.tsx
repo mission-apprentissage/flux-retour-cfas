@@ -3,7 +3,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 
-import { PauseButton } from "../../_components/PauseButton";
+import { PauseButton } from "../../_components/shared/PauseButton";
 import { useVideoPause } from "../../_hooks/useVideoPause";
 
 import styles from "./hero-section.module.scss";

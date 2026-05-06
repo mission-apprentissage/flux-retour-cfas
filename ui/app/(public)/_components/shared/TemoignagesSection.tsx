@@ -4,7 +4,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useInfiniteCarousel } from "../_hooks/useInfiniteCarousel";
+import { useInfiniteCarousel } from "../../_hooks/useInfiniteCarousel";
 
 import { PauseButton } from "./PauseButton";
 import styles from "./temoignages-section.module.scss";

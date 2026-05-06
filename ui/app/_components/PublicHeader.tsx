@@ -51,9 +51,9 @@ export function PublicHeader() {
       navigation={[
         {
           text: "Accueil",
-          isActive: isActive(pathname, "/"),
+          isActive: isActive(pathname, ROUTES.ACCUEIL),
           linkProps: {
-            href: "/",
+            href: ROUTES.ACCUEIL,
             target: "_self",
           },
         },

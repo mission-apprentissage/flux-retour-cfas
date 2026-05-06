@@ -4,9 +4,9 @@ import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useReducedMotion } from "../_hooks/useReducedMotion";
+import { useReducedMotion } from "../../_hooks/useReducedMotion";
 
-import styles from "./features-accordion-section.module.scss";
+import styles from "./base-features-accordion-section.module.scss";
 import { PauseButton } from "./PauseButton";
 
 const AUTOPLAY_INTERVAL = 6000;
@@ -103,7 +103,7 @@ function AccordionItem({
   );
 }
 
-export function FeaturesAccordionSection({ title, features, imgAlt, imgPath }: FeatureAccordionProps) {
+export function BaseFeaturesAccordionSection({ title, features, imgAlt, imgPath }: FeatureAccordionProps) {
   const [openFeatureIndex, setOpenFeatureIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const prefersReducedMotion = useReducedMotion();

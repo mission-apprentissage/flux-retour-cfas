@@ -2,23 +2,15 @@
 @use "../../landing-shared" as *;
 
 .section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @extend %landing-section;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: var(--container-lg);
-  padding-top: 0;
-  padding-right: 1.5rem;
-  padding-bottom: 0;
-  padding-left: 1.5rem;
+  justify-content: space-between;
+  max-width: var(--container-xl);
   margin: auto;
   text-align: center;
 
   @include respond-from(md) {
     flex-direction: row;
-    gap: 1.875rem;
   }
 }
 
@@ -32,19 +24,20 @@
   gap: 1rem;
   align-items: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 420px;
   padding: 0.5rem;
 
   @include respond-from(md) {
     gap: 1.5rem;
-    width: 280px;
     padding: 1.5rem;
   }
 }
 
 .image {
   width: auto;
-  height: 6.25rem;
+  max-width: 100%;
+  height: 100px;
+  object-fit: contain;
 }
 
 .textContainer {

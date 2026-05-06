@@ -1,6 +1,9 @@
 "use client";
 
-import { FeaturesAccordionSection, type FeatureAccordionFeature } from "../../_components/FeaturesAccordionSection";
+import {
+  BaseFeaturesAccordionSection,
+  type FeatureAccordionFeature,
+} from "../../_components/shared/BaseFeaturesAccordionSection";
 
 const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]] = [
   {
@@ -50,7 +53,7 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
 ];
 export function FeaturesSection() {
   return (
-    <FeaturesAccordionSection
+    <BaseFeaturesAccordionSection
       title="Profitez d’une opportunité de collaborer avec une Mission Locale pour chaque jeune en rupture"
       features={FEATURES}
       imgAlt="Aperçu du Tableau de bord pour les CFA"

@@ -46,7 +46,14 @@
   padding-right: 6px;
   padding-bottom: 0;
   padding-left: 6px;
-  background: var(--light-decisions-background-background-open-blue-france, #e3e3fd);
+  background-color: transparent;
+  background-image: linear-gradient(
+    var(--light-decisions-background-background-open-blue-france, #e3e3fd),
+    var(--light-decisions-background-background-open-blue-france, #e3e3fd)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% calc(100% - 0.2em);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }

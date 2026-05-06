@@ -2,27 +2,25 @@
 @use "../landing-shared" as *;
 
 .section {
-  @extend %landing-section;
-  gap: 0;
   width: 100%;
-  padding: 0;
 }
 
 .illustrationBand {
   position: relative;
   display: flex;
+  align-items: flex-end;
   justify-content: center;
   width: 100%;
+  height: 13rem;
   overflow: visible;
-  background: linear-gradient(0deg, #adadf9 -81.57%, rgba(173, 173, 249, 0) 96.71%);
+  background: linear-gradient(0deg, #adadf9 50%, rgba(173, 173, 249, 0) 80%);
+
+  @include respond-from(md) {
+    height: 13rem;
+  }
 }
 
 .illustrationContainer {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  width: 100%;
   max-width: var(--container-xl);
 }
 
@@ -30,47 +28,50 @@
   position: relative;
   z-index: 1;
   display: block;
+  width: 100%;
   height: auto;
-  padding-right: 16px;
-  padding-left: 16px;
-  margin-bottom: -36px;
+  margin-bottom: -1.375rem;
   user-select: none;
 
   @include respond-from(md) {
-    margin-bottom: -40px;
+    margin-bottom: -2.5rem;
   }
 }
 
 .ctaBand {
   width: 100%;
-  padding-top: 40px;
-  padding-right: 24px;
-  padding-bottom: 40px;
-  padding-left: 24px;
+  padding-top: 2.5rem;
+  padding-right: 2rem;
+  padding-bottom: 2.5rem;
+  padding-left: 2rem;
   text-align: left;
   background: var(--light-decisions-artwork-artwork-major-blue-france, #000091);
 
   @include respond-from(md) {
-    padding-top: 64px;
-    padding-right: 40px;
-    padding-bottom: 64px;
-    padding-left: 40px;
+    padding-top: 4rem;
+    padding-right: 2.5rem;
+    padding-bottom: 4rem;
+    padding-left: 2.5rem;
   }
 
   @include respond-from(lg) {
-    padding-top: 64px;
-    padding-right: 120px;
-    padding-bottom: 64px;
-    padding-left: 120px;
+    padding-top: 5rem;
+    padding-right: 7.5rem;
+    padding-bottom: 5rem;
+    padding-left: 7.5rem;
   }
+}
+
+.srOnly {
+  @extend %landing-sr-only;
 }
 
 .ctaContainer {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  justify-content: center;
-  max-width: var(--container-xl);
+  gap: 3.125rem;
+  justify-content: space-between;
+  max-width: 996px;
   margin-top: 0;
   margin-right: auto;
   margin-bottom: 0;
@@ -78,55 +79,88 @@
 
   @include respond-from(md) {
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  @include respond-from(lg) {
+    gap: 2rem;
   }
 }
 
-.subtitle {
-  max-width: 588px;
+.ctaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 0;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+
+  @include respond-from(md) {
+    flex: 1;
+    align-items: flex-start;
+    width: auto;
+    max-width: none;
+    margin: 0;
+  }
+
+  @include respond-from(lg) {
+    flex: 0 0 auto;
+    width: 280px;
+  }
+}
+
+.ctaTop {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  align-items: center;
+  width: 100%;
+
+  @include respond-from(md) {
+    align-items: flex-start;
+  }
+}
+
+.ctaIcon {
+  font-size: 32px;
+  color: var(--light-decisions-background-background-default-grey, #fff);
+}
+
+.ctaTitle {
+  margin: 0;
   font-size: 20px;
   font-weight: 700;
   line-height: 28px;
   color: var(--light-decisions-background-background-default-grey, #fff);
+  text-align: center;
 
   @include respond-from(md) {
-    margin-bottom: 32px;
-    font-size: 20px;
-    line-height: 32px;
+    text-align: left;
   }
 }
 
-.title {
-  max-width: 588px;
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 40px;
-  color: var(--light-decisions-background-background-default-grey, #fff);
-
-  @include respond-from(md) {
-    font-size: 32px;
-    line-height: 40px;
-  }
-}
-
-.actions {
+.ctaActions {
   display: flex;
-  flex-shrink: 0;
   flex-direction: column;
-  gap: 12px;
+  gap: 1rem;
+  height: 100%;
 
   @include respond-from(md) {
-    flex-direction: column;
-    gap: 16px;
     align-items: flex-end;
-    justify-content: end;
-    text-align: right;
   }
 }
 
-.primaryButton {
+.ctaButton {
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
   color: var(--light-decisions-artwork-artwork-major-blue-france, #000091);
   background-color: var(--light-decisions-background-background-default-grey, #fff);
 
@@ -135,10 +169,6 @@
   }
 }
 
-.demoLink {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
+.ctaLink {
   color: var(--light-decisions-background-background-default-grey, #fff) !important;
-  text-decoration: underline !important;
 }

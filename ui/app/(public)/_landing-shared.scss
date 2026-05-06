@@ -11,10 +11,6 @@
   text-align: center;
   background: var(--grey-grey-1000, #fff);
 
-  :where(img, canvas, video) {
-    max-inline-size: 100%;
-  }
-
   @include respond-from(md) {
     gap: 2rem;
   }

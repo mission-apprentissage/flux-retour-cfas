@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useState } from "react";
 
-import { useReducedMotion } from "../_hooks/useReducedMotion";
+import { useReducedMotion } from "../../_hooks/useReducedMotion";
 
 import styles from "./etablissements-connectes-section.module.scss";
 import { PauseButton } from "./PauseButton";

@@ -1,6 +1,4 @@
-import { SponsorsSection as BaseSponsorsSection, type Sponsor } from "../../_components/SponsorsSection";
-
-import styles from "./sponsors-section.module.scss";
+import { BaseSponsorsSection, type Sponsor } from "../../_components/shared/BaseSponsorsSection";
 
 const SPONSORS: Array<Sponsor> = [
   {
@@ -21,5 +19,5 @@ const SPONSORS: Array<Sponsor> = [
 ];
 
 export function SponsorsSection() {
-  return <BaseSponsorsSection sponsors={SPONSORS} styles={styles} />;
+  return <BaseSponsorsSection sponsors={SPONSORS} />;
 }
