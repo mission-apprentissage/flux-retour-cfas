@@ -1,0 +1,81 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  background: linear-gradient(0deg, #f6f6f6 -22.42%, #fff 99.84%), #d9d9d9;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-top: 0;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+  text-align: start;
+
+  @include respond-from(lg) {
+    flex-direction: row;
+    gap: 4rem;
+    align-items: center;
+  }
+}
+
+.textBlock {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 20rem;
+
+  @include respond-from(lg) {
+    width: 20rem;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+}
+
+.cta {
+  display: flex;
+}
+
+.previewWrapper {
+  position: relative;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  max-width: var(--container-md);
+  height: auto;
+}

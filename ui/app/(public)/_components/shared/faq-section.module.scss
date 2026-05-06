@@ -1,0 +1,126 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--container-xl);
+  text-align: left;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+
+  @include respond-from(md) {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0;
+    margin: auto;
+  }
+}
+
+.titleBlock {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: auto;
+
+  @include respond-from(md) {
+    width: 12rem;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2.5rem;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-align: left;
+
+  @include respond-from(md) {
+    text-align: left;
+  }
+}
+
+.contentBlock {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 49.5rem;
+}
+
+.help {
+  display: flex;
+  background: var(--light-decisions-background-background-contrast-grey, #eee);
+}
+
+.helpBorder {
+  flex-shrink: 0;
+  width: 0.25rem;
+  background: var(--light-decisions-border-default-blue-france, #6a6af4);
+}
+
+.helpContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+
+  @include respond-from(md) {
+    padding-top: 2rem;
+    padding-right: 3rem;
+    padding-bottom: 2rem;
+    padding-left: 3rem;
+  }
+}
+
+.helpTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+.helpDescription {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+
+  @include respond-from(md) {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
+.helpButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}

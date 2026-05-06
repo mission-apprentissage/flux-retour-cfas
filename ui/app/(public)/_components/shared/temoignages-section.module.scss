@@ -1,0 +1,264 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+  background: linear-gradient(180deg, #ffffff 0%, #ececfe 100%);
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: var(--container-xl);
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.srOnly {
+  @extend %landing-sr-only;
+}
+
+.carousel {
+  width: 100%;
+  overflow: visible;
+  --card-width: calc(100vw - 2rem);
+  --card-gap: 1rem;
+
+  @include respond-from(md) {
+    --card-width: 480px;
+    --card-gap: 1.5rem;
+  }
+
+  @include respond-from(lg) {
+    --card-width: 588px;
+    --card-gap: 2rem;
+  }
+}
+
+.track {
+  display: flex;
+  gap: var(--card-gap);
+  transform: translateX(
+    calc(50vw - (var(--card-width) / 2) - var(--position, 0) * (var(--card-width) + var(--card-gap)))
+  );
+  will-change: transform;
+}
+
+.card {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+  width: var(--card-width);
+  max-height: 28.125rem;
+  padding: 1.375rem;
+  overflow: hidden;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+
+  @include respond-from(md) {
+    flex-direction: row;
+    gap: 2rem;
+    align-items: stretch;
+    max-height: 21.875rem;
+  }
+}
+
+.avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 5rem;
+  height: 5rem;
+  overflow: hidden;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  border-radius: 50%;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+.separator {
+  display: none;
+
+  @include respond-from(md) {
+    display: block;
+    align-self: stretch;
+    width: 0.0625rem;
+    background: var(--light-decisions-border-default-grey, #ddd);
+  }
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.temoignageIcon {
+  display: inline-block;
+  margin-top: -1rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0;
+  margin-left: 0;
+  font-size: 32px;
+  vertical-align: middle;
+  color: var(--light-decisions-artwork-artwork-minor-blue-france, #6a6af4);
+
+  @include respond-from(md) {
+    display: block;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+  }
+}
+
+.temoignageText {
+  flex: 1;
+  min-height: 0;
+  margin: 1rem;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+  text-align: left;
+
+  @include respond-from(md) {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 32px;
+  }
+}
+
+.temoignageTextTruncated {
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+.cardExpanded {
+  max-height: none;
+
+  .temoignageText {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
+.expandButton {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.source {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.author {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+  text-align: left;
+}
+
+.role {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-align: left;
+}
+
+.progress {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.progressStep,
+.progressStepActive {
+  flex: 1 0 0;
+  height: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.progressStep {
+  background: var(--light-decisions-background-background-contrast-blue-france, #ececfe);
+}
+
+.progressStepActive {
+  background: var(--light-decisions-background-background-action-high-blue-france, #000091);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:hover {
+    background: rgba(0, 0, 145, 0.08);
+  }
+}
+
+.controlsRight {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+}

@@ -1,0 +1,145 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  margin-right: 0.5rem;
+
+  margin-left: 0.5rem;
+  overflow: hidden;
+  text-align: center;
+  background-image: url("/images/home/territoire/fond-carte.webp");
+  background-position: center;
+  background-size: cover;
+  border-radius: 18px;
+
+  @include respond-from(md) {
+    width: var(--container-xl);
+    margin: auto;
+  }
+}
+
+.mapImageContainer {
+  max-width: var(--container-sm);
+}
+
+.mapImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.titleBlock {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: var(--container-md);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  color: var(--light-decisions-background-background-default-grey, #fff);
+
+  @include respond-from(md) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-background-background-default-grey, #fff);
+}
+
+.cardDeploiement {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: var(--container-lg);
+  padding-top: 1.875rem;
+  padding-right: 2rem;
+  padding-bottom: 1.9375rem;
+  padding-left: 2rem;
+  text-align: left;
+  background: var(--light-decisions-background-background-default-grey, #fff);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px 0 rgba(0, 0, 18, 0.16);
+
+  @include respond-from(md) {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+.cardColumn {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.cardSeparator {
+  display: none;
+
+  @include respond-from(md) {
+    display: block;
+    flex-shrink: 0;
+    align-self: stretch;
+    width: 0.0625rem;
+    background: var(--light-decisions-border-default-grey, #ddd);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.cardAvatar {
+  display: block;
+  width: 4rem;
+  max-width: 100%;
+  height: 4rem;
+  margin-bottom: 0.75rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--light-decisions-text-text-action-high-blue-france, #000091);
+}
+
+.cardDescription {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+}

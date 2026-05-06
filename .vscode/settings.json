@@ -48,7 +48,7 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "javascript.validate.enable": true,
+  "js/ts.validate.enabled": true,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.exclude": {
@@ -78,5 +78,6 @@
     "**/*/build": true,
     "**/.webpack": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.preferences.includePackageJsonAutoImports": "off"
 }
