@@ -28,7 +28,7 @@
   color: var(--light-decisions-text-text-title-grey, #161616);
 
   @include respond-from(md) {
-    max-width: 594px;
+    max-width: 37.125rem;
     font-size: 32px;
     line-height: 40px;
   }
@@ -64,7 +64,7 @@
   left: -0.75rem;
   z-index: 1;
   width: 0.25rem;
-  margin: 1px;
+  margin: 0.0625rem;
   overflow: hidden;
   pointer-events: none;
   background: var(--light-decisions-border-default-grey, #ddd);
@@ -114,12 +114,12 @@
     align-items: center;
     align-self: stretch;
     justify-content: center;
-    width: 480px;
+    width: 30rem;
     border-radius: 1.125rem;
   }
 
   @include respond-from(lg) {
-    width: 587px;
+    width: 36.6875rem;
   }
 }
 

@@ -71,7 +71,7 @@
   flex-direction: column;
   gap: 3.125rem;
   justify-content: space-between;
-  max-width: 996px;
+  max-width: 62.25rem;
   margin-top: 0;
   margin-right: auto;
   margin-bottom: 0;
@@ -93,7 +93,7 @@
   gap: 1.25rem;
   align-items: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 20rem;
   margin-top: 0;
   margin-right: auto;
   margin-bottom: 0;
@@ -109,7 +109,7 @@
 
   @include respond-from(lg) {
     flex: 0 0 auto;
-    width: 280px;
+    width: 17.5rem;
   }
 }
 

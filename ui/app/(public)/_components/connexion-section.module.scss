@@ -5,7 +5,7 @@
   @extend %landing-section;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 2rem;
   width: auto;
   max-width: var(--container-xl);
   text-align: left;
@@ -13,22 +13,22 @@
   border-radius: 12px;
 
   @include respond-from(md) {
-    padding-top: 56px;
-    padding-right: 40px;
-    padding-bottom: 56px;
-    padding-left: 40px;
+    padding-top: 3.5rem;
+    padding-right: 2.5rem;
+    padding-bottom: 3.5rem;
+    padding-left: 2.5rem;
     margin-top: 0;
-    margin-right: 24px;
+    margin-right: 1.5rem;
     margin-bottom: 0;
-    margin-left: 24px;
+    margin-left: 1.5rem;
   }
 
   @include respond-from(lg) {
     width: 100%;
-    padding-top: 80px;
-    padding-right: 102px;
-    padding-bottom: 80px;
-    padding-left: 102px;
+    padding-top: 5rem;
+    padding-right: 6.375rem;
+    padding-bottom: 5rem;
+    padding-left: 6.375rem;
     margin-top: 0;
     margin-right: auto;
     margin-bottom: 0;
@@ -38,7 +38,7 @@
 }
 
 .title {
-  max-width: 792px;
+  max-width: 49.5rem;
   margin: 0;
   font-size: 24px;
   font-weight: 700;
@@ -54,28 +54,28 @@
 .rows {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .row,
 .rowStats {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
   justify-content: space-between;
   width: 100%;
   height: auto;
-  padding: 24px;
+  padding: 1.5rem;
 
   @include respond-from(lg) {
     flex-direction: row;
-    gap: 32px;
+    gap: 2rem;
     align-items: flex-end;
-    height: 170px;
-    padding-top: 30px;
-    padding-right: 32px;
-    padding-bottom: 31px;
-    padding-left: 32px;
+    height: 10.625rem;
+    padding-top: 1.875rem;
+    padding-right: 2rem;
+    padding-bottom: 1.9375rem;
+    padding-left: 2rem;
   }
 }
 
@@ -90,12 +90,12 @@
 .rowLeft {
   display: flex;
   flex: 1;
-  gap: 24px;
+  gap: 1.5rem;
   align-items: center;
   min-width: 0;
 
   @include respond-from(md) {
-    gap: 40px;
+    gap: 2.5rem;
   }
 }
 
@@ -108,9 +108,9 @@
 .rowText {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
   min-width: 0;
-  max-width: 600px;
+  max-width: 37.5rem;
 }
 
 .rowTitle {
@@ -133,7 +133,7 @@
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
   align-items: flex-start;
 
   @include respond-from(lg) {

@@ -9,7 +9,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 2rem;
   align-items: center;
   width: 100%;
   max-width: var(--container-xl);
@@ -21,7 +21,7 @@
 
   @include respond-from(lg) {
     flex-direction: row;
-    gap: 64px;
+    gap: 4rem;
     align-items: center;
   }
 }
@@ -30,12 +30,12 @@
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
   width: 100%;
-  max-width: 320px;
+  max-width: 20rem;
 
   @include respond-from(lg) {
-    width: 320px;
+    width: 20rem;
   }
 }
 

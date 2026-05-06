@@ -32,44 +32,44 @@
   display: block;
   max-inline-size: 100%;
   height: auto;
-  padding-right: 16px;
-  padding-left: 16px;
-  margin-bottom: -36px;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-bottom: -2.25rem;
   user-select: none;
 
   @include respond-from(md) {
-    margin-bottom: -40px;
+    margin-bottom: -2.5rem;
   }
 }
 
 .ctaBand {
   width: 100%;
-  padding-top: 40px;
-  padding-right: 24px;
-  padding-bottom: 40px;
-  padding-left: 24px;
+  padding-top: 2.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 2.5rem;
+  padding-left: 1.5rem;
   text-align: left;
   background: var(--light-decisions-artwork-artwork-major-blue-france, #000091);
 
   @include respond-from(md) {
-    padding-top: 64px;
-    padding-right: 40px;
-    padding-bottom: 64px;
-    padding-left: 40px;
+    padding-top: 4rem;
+    padding-right: 2.5rem;
+    padding-bottom: 4rem;
+    padding-left: 2.5rem;
   }
 
   @include respond-from(lg) {
-    padding-top: 64px;
-    padding-right: 120px;
-    padding-bottom: 64px;
-    padding-left: 120px;
+    padding-top: 4rem;
+    padding-right: 7.5rem;
+    padding-bottom: 4rem;
+    padding-left: 7.5rem;
   }
 }
 
 .ctaContainer {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
   justify-content: center;
   max-width: var(--container-xl);
   margin-top: 0;
@@ -85,21 +85,21 @@
 }
 
 .subtitle {
-  max-width: 588px;
+  max-width: 36.75rem;
   font-size: 20px;
   font-weight: 700;
   line-height: 28px;
   color: var(--light-decisions-background-background-default-grey, #fff);
 
   @include respond-from(md) {
-    margin-bottom: 32px;
+    margin-bottom: 2rem;
     font-size: 20px;
     line-height: 32px;
   }
 }
 
 .title {
-  max-width: 588px;
+  max-width: 36.75rem;
   margin: 0;
   font-size: 32px;
   font-weight: 700;
@@ -116,11 +116,11 @@
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 
   @include respond-from(md) {
     flex-direction: column;
-    gap: 16px;
+    gap: 1rem;
     align-items: flex-end;
     justify-content: end;
     text-align: right;

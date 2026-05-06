@@ -7,7 +7,7 @@
 }
 
 .titleBlock {
-  width: 880px;
+  width: 55rem;
   max-width: 100%;
   padding-top: 0;
   padding-right: 2rem;
@@ -36,16 +36,16 @@
 
 .heroBlock {
   width: 100%;
-  margin-top: 64px;
+  margin-top: 4rem;
   background: linear-gradient(180deg, #adadf9 2%, rgba(173, 173, 249, 0) 10%);
 
   @include respond-from(md) {
-    margin-top: 120px;
+    margin-top: 7.5rem;
     background: linear-gradient(180deg, #adadf9 4%, rgba(173, 173, 249, 0) 60%);
   }
 
   @include respond-from(lg) {
-    margin-top: 150px;
+    margin-top: 9.375rem;
   }
 }
 
@@ -60,15 +60,15 @@
   height: auto;
   padding-right: 1rem;
   padding-left: 1rem;
-  margin-top: -80px;
+  margin-top: -5rem;
 
   @include respond-from(md) {
     padding: 0;
-    margin-top: -120px;
+    margin-top: -7.5rem;
   }
 
   @include respond-from(lg) {
-    margin-top: -185px;
+    margin-top: -11.5625rem;
   }
 }
 
@@ -86,19 +86,19 @@
     flex-direction: row;
     width: var(--container-xl);
     margin: auto;
-    margin-top: 32px;
+    margin-top: 2rem;
   }
 
   @include respond-from(lg) {
-    gap: 24px;
+    gap: 1.5rem;
   }
 }
 
 .accesLandingCardContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-bottom: 16px;
+  gap: 1rem;
+  padding-bottom: 1rem;
   background: var(--light-decisions-background-background-default-grey, #fff);
   border: 1px solid var(--light-decisions-border-border-default-grey, #ddd);
   border-bottom: 2px solid var(--light-decisions-text-text-title-blue-france, #000091);
@@ -106,7 +106,7 @@
 
 .accesLandingCardImg {
   width: 100%;
-  max-width: 384px;
+  max-width: 24rem;
   height: auto;
   object-fit: cover;
 }
@@ -114,7 +114,7 @@
 .accesLandingCardTextContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
   justify-content: center;
   height: 100%;

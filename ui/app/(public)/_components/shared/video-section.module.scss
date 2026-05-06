@@ -24,7 +24,7 @@
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
 
   @include respond-from(md) {
-    width: 320px;
+    width: 20rem;
     font-size: 2rem;
     line-height: 40px;
   }

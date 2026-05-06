@@ -43,9 +43,9 @@
 
 .titleHighlight {
   padding-top: 0;
-  padding-right: 6px;
+  padding-right: 0.375rem;
   padding-bottom: 0;
-  padding-left: 6px;
+  padding-left: 0.375rem;
   background-color: transparent;
   background-image: linear-gradient(
     var(--light-decisions-background-background-open-blue-france, #e3e3fd),
@@ -64,11 +64,11 @@
   background: linear-gradient(180deg, #adadf9 50%, rgba(173, 173, 249, 0) 100%);
 
   @include respond-from(md) {
-    margin-top: 120px;
+    margin-top: 7.5rem;
   }
 
   @include respond-from(lg) {
-    margin-top: 150px;
+    margin-top: 9.375rem;
   }
 }
 
@@ -76,20 +76,20 @@
   position: relative;
   width: 100%;
   max-width: var(--container-xl);
-  height: 150px;
-  margin-top: -140px;
+  height: 9.375rem;
+  margin-top: -8.75rem;
   margin-right: auto;
   margin-bottom: 0;
   margin-left: auto;
 
   @include respond-from(md) {
-    height: 180px;
-    margin-top: -120px;
+    height: 11.25rem;
+    margin-top: -7.5rem;
   }
 
   @include respond-from(lg) {
-    height: 227px;
-    margin-top: -215px;
+    height: 14.1875rem;
+    margin-top: -13.4375rem;
   }
 }
 
@@ -104,29 +104,29 @@
 
 .cfaFigure {
   right: calc(50% + 25px);
-  width: 110px;
+  width: 6.875rem;
   animation: slideFromLeft 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
   @include respond-from(md) {
-    width: 140px;
+    width: 8.75rem;
   }
 
   @include respond-from(lg) {
-    width: 176px;
+    width: 11rem;
   }
 }
 
 .mlFigure {
   left: calc(50% + 25px);
-  width: 116px;
+  width: 7.25rem;
   animation: slideFromRight 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
   @include respond-from(md) {
-    width: 148px;
+    width: 9.25rem;
   }
 
   @include respond-from(lg) {
-    width: 184px;
+    width: 11.5rem;
   }
 }
 
@@ -136,13 +136,13 @@
   @include respond-from(md) {
     right: calc(50% + 130px);
     display: block;
-    width: 24px;
+    width: 1.5rem;
   }
 
   @include respond-from(lg) {
     right: calc(50% + 225px);
-    width: 32px;
-    margin-bottom: -30px;
+    width: 2rem;
+    margin-bottom: -1.875rem;
   }
 }
 
@@ -152,13 +152,13 @@
   @include respond-from(md) {
     left: calc(50% + 165px);
     display: block;
-    width: 56px;
+    width: 3.5rem;
   }
 
   @include respond-from(lg) {
     left: calc(50% + 225px);
-    width: 73px;
-    margin-bottom: -10px;
+    width: 4.5625rem;
+    margin-bottom: -0.625rem;
   }
 }
 
@@ -191,7 +191,7 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-top: 24px;
+  margin-top: 1.5rem;
   margin-right: auto;
   margin-bottom: 0;
   margin-left: auto;
@@ -200,7 +200,7 @@
 .dashboardPreviewContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
   align-items: center;
   width: 100%;
   max-width: calc(996px + 48px);
@@ -208,7 +208,7 @@
   padding-right: 1.5rem;
   padding-bottom: 0;
   padding-left: 1.5rem;
-  margin-top: 36px;
+  margin-top: 2.25rem;
   margin-right: auto;
   margin-bottom: 0;
   margin-left: auto;

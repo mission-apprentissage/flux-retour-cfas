@@ -25,12 +25,12 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-bottom: 100px;
+  margin-bottom: 6.25rem;
   background: var(--light-decisions-artwork-artwork-minor-blue-france, #6a6af4);
   border-radius: 18px;
 
   @include respond-from(md) {
-    margin-bottom: 100px;
+    margin-bottom: 6.25rem;
   }
 }
 
@@ -99,9 +99,9 @@
 .titleBlock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
-  max-width: 716px;
+  max-width: 44.75rem;
 }
 
 .eyebrow {
@@ -140,19 +140,19 @@
 .aidesGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 1rem;
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-  max-width: 716px;
+  max-width: 44.75rem;
 }
 
 .aideCard {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 0.5625rem;
   align-items: center;
-  width: 145px;
+  width: 9.0625rem;
   text-align: center;
 }
 
@@ -160,9 +160,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
-  padding: 28px;
+  width: 5rem;
+  height: 5rem;
+  padding: 1.75rem;
   background: var(--light-decisions-background-background-alt-grey, #f6f6f6);
   border-radius: 58px;
 }
