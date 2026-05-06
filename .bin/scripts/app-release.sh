@@ -17,10 +17,8 @@ else
   defaultMode="load"
 fi
 
-next_version="${1:?"Veuillez préciser la version"}"
-shift 1
+readonly next_version="${1}"
+readonly COMMIT_HASH="${2}"
+readonly mode=${3:-$defaultMode}
 
-mode=${1:-$defaultMode}
-shift 1
-
-"$ROOT_DIR"/.bin/mna-tdb app:build $next_version $mode "production" "recette"
+"$ROOT_DIR"/.bin/mna-tdb app:build $next_version $mode $COMMIT_HASH production

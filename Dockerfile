@@ -40,6 +40,8 @@ RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certi
 ENV NODE_ENV production
 ARG PUBLIC_VERSION
 ENV PUBLIC_VERSION=$PUBLIC_VERSION
+ARG COMMIT_HASH
+ENV COMMIT_HASH=$COMMIT_HASH
 
 COPY --from=builder_server /app/server ./server
 COPY --from=builder_server /app/shared ./shared
