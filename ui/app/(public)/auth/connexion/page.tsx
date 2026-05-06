@@ -1,10 +1,8 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import ConnexionClient from "./ConnexionClient";
 
-export const metadata: Metadata = {
-  title: "Connexion | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.authConnexion.getMetadata();
 
 export default function Page() {
   return <ConnexionClient />;

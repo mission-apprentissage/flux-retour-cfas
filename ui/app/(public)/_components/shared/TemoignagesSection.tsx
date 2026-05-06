@@ -4,6 +4,8 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { PAGES } from "@/app/_utils/routes.utils";
+
 import { useInfiniteCarousel } from "../../_hooks/useInfiniteCarousel";
 
 import { PauseButton } from "./PauseButton";
@@ -130,9 +132,10 @@ const NOMBRE_TEMOIGNAGES = TEMOIGNAGES.length;
 const TRACK_TEMOIGNAGES = [...TEMOIGNAGES, ...TEMOIGNAGES, ...TEMOIGNAGES];
 const TRANSITION_DURATION = 500;
 
-type LinkInscription = "/missions_locales" | "/operateur_public" | "/organisme_formation";
+type TypeOrganisationInscription = "missions_locales" | "operateur_public" | "organisme_formation";
 
-export function TemoignagesSection({ linkInscription = "" }: { linkInscription?: LinkInscription }) {
+export function TemoignagesSection({ linkInscription }: { linkInscription?: TypeOrganisationInscription }) {
+  const inscriptionHref = PAGES.dynamic.authInscription({ typeOrganisation: linkInscription }).getPath();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = useCallback((id: string) => {
@@ -207,11 +210,7 @@ export function TemoignagesSection({ linkInscription = "" }: { linkInscription?:
         </div>
 
         <div className={styles.cta}>
-          <Button
-            iconId="fr-icon-arrow-right-line"
-            iconPosition="right"
-            linkProps={{ href: `/auth/inscription${linkInscription}` }}
-          >
+          <Button iconId="fr-icon-arrow-right-line" iconPosition="right" linkProps={{ href: inscriptionHref }}>
             Commencer à collaborer
           </Button>
         </div>

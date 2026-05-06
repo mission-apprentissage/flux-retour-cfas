@@ -1,6 +1,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 
+import { PAGES } from "@/app/_utils/routes.utils";
+
 import styles from "./hero-section.module.scss";
 
 function AccesLandingCard({
@@ -62,21 +64,21 @@ export function HeroSection() {
             imgAlt="Illustration d'une Mission Locale"
             title="Pour les Missions Locales et le service public à l’emploi"
             description="Accédez à la liste des jeunes en rupture sur votre territoire et centralisez vos collaborations avec les CFA sur un outil unique"
-            href="/accueil-mission-locale"
+            href={PAGES.static.accueilMissionLocale.getPath()}
           />
           <AccesLandingCard
             imgSrc="/images/home/generique/minia-CFA.png"
             imgAlt="Illustration d'un CFA"
             title="Pour les établissements de formation (CFA)"
             description="Passez le relai aux Missions Locales pour les problématiques extra professionnelles sur des ruptures complexes."
-            href="/accueil-cfa"
+            href={PAGES.static.accueilCfa.getPath()}
           />
           <AccesLandingCard
             imgSrc="/images/home/generique/minia-territoire.png"
             imgAlt="Illustration d'un territoire"
             title="Pour les collectivités et acteurs du territoire"
             description="Suivez l’activité et la collaboration des CFA et des Missions Locales et consultez les chiffres des ruptures sur votre territoire"
-            href="/accueil-territoire"
+            href={PAGES.static.accueilTerritoire.getPath()}
           />
         </div>
       </div>

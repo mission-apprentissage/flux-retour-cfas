@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import { ConnexionSection } from "./_components/ConnexionSection";
 import { FooterCTASection } from "./_components/FooterCTASection";
@@ -10,9 +10,7 @@ import { VideoSection } from "./_components/shared/VideoSection";
 import { SponsorsSection } from "./_components/SponsorsSection";
 import landingStyles from "./landing-page.module.scss";
 
-export const metadata: Metadata = {
-  title: "Accueil | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.home.getMetadata();
 
 export default function HomePage() {
   return (

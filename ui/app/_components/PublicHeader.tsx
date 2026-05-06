@@ -4,13 +4,7 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ } from "shared";
 
-const ROUTES = {
-  ACCUEIL: "/",
-  ACCUEIL_CFA: "/accueil-cfa",
-  ACCUEIL_MISSION_LOCALE: "/accueil-mission-locale",
-  ACCUEIL_TERRITOIRE: "/accueil-territoire",
-  CENTRE_AIDE: CRISP_FAQ,
-};
+import { PAGES } from "@/app/_utils/routes.utils";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") {
@@ -21,11 +15,15 @@ function isActive(pathname: string, href: string) {
 
 export function PublicHeader() {
   const pathname = usePathname() ?? "/";
+  const home = PAGES.static.home;
+  const accueilCfa = PAGES.static.accueilCfa;
+  const accueilMissionLocale = PAGES.static.accueilMissionLocale;
+  const accueilTerritoire = PAGES.static.accueilTerritoire;
   return (
     <DsfrHeader
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
-        href: "/",
+        href: home.getPath(),
         title: "Accueil - Tableau de bord de l'apprentissage",
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
@@ -34,14 +32,14 @@ export function PublicHeader() {
         {
           iconId: "fr-icon-add-circle-line",
           linkProps: {
-            href: "/auth/inscription",
+            href: PAGES.dynamic.authInscription().getPath(),
             target: "_self",
           },
           text: "S'inscrire",
         },
         {
           linkProps: {
-            href: "/auth/connexion",
+            href: PAGES.static.authConnexion.getPath(),
             target: "_self",
           },
           iconId: "ri-account-box-line",
@@ -50,42 +48,42 @@ export function PublicHeader() {
       ]}
       navigation={[
         {
-          text: "Accueil",
-          isActive: isActive(pathname, ROUTES.ACCUEIL),
+          text: home.title,
+          isActive: isActive(pathname, home.getPath()),
           linkProps: {
-            href: ROUTES.ACCUEIL,
+            href: home.getPath(),
             target: "_self",
           },
         },
         {
-          text: "Établissement de formation (CFA)",
-          isActive: isActive(pathname, ROUTES.ACCUEIL_CFA),
+          text: accueilCfa.title,
+          isActive: isActive(pathname, accueilCfa.getPath()),
           linkProps: {
-            href: ROUTES.ACCUEIL_CFA,
+            href: accueilCfa.getPath(),
             target: "_self",
           },
         },
         {
-          text: "Missions Locales",
-          isActive: isActive(pathname, ROUTES.ACCUEIL_MISSION_LOCALE),
+          text: accueilMissionLocale.title,
+          isActive: isActive(pathname, accueilMissionLocale.getPath()),
           linkProps: {
-            href: ROUTES.ACCUEIL_MISSION_LOCALE,
+            href: accueilMissionLocale.getPath(),
             target: "_self",
           },
         },
         {
-          text: "Collectivités et acteurs de l'apprentissage",
-          isActive: isActive(pathname, ROUTES.ACCUEIL_TERRITOIRE),
+          text: accueilTerritoire.title,
+          isActive: isActive(pathname, accueilTerritoire.getPath()),
           linkProps: {
-            href: ROUTES.ACCUEIL_TERRITOIRE,
+            href: accueilTerritoire.getPath(),
             target: "_self",
           },
         },
         {
           text: "Centre d'aide",
-          isActive: isActive(pathname, ROUTES.CENTRE_AIDE),
+          isActive: isActive(pathname, CRISP_FAQ),
           linkProps: {
-            href: ROUTES.CENTRE_AIDE,
+            href: CRISP_FAQ,
             target: "_blank",
             rel: "noopener noreferrer",
           },

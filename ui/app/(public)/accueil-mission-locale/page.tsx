@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import { EtablissementsConnectesSection } from "../_components/shared/EtablissementsConnectesSection";
 import { FAQSection } from "../_components/shared/FAQSection";
@@ -12,9 +12,7 @@ import { HeroSection } from "./_components/HeroSection";
 import { ProcessusSection } from "./_components/ProcessusSection";
 import { SponsorsSection } from "./_components/SponsorsSection";
 
-export const metadata: Metadata = {
-  title: "Accueil mission locale | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.accueilMissionLocale.getMetadata();
 
 export default function AccueilMissionLocalePage() {
   return (
@@ -25,9 +23,9 @@ export default function AccueilMissionLocalePage() {
       <FeaturesSection />
       <ProcessusSection />
       <VideoSection />
-      <TemoignagesSection linkInscription="/missions_locales" />
+      <TemoignagesSection linkInscription="missions_locales" />
       <FAQSection />
-      <FooterCTASection linkInscription="/missions_locales" />
+      <FooterCTASection linkInscription="missions_locales" />
     </main>
   );
 }

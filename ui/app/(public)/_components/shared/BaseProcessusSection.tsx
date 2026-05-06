@@ -3,12 +3,14 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 
+import { PAGES } from "@/app/_utils/routes.utils";
+
 import { useInfiniteCarousel } from "../../_hooks/useInfiniteCarousel";
 
 import styles from "./base-processus-section.module.scss";
 import { PauseButton } from "./PauseButton";
 
-type LinkInscription = "/missions_locales" | "/operateur_public" | "/organisme_formation";
+type TypeOrganisationInscription = "missions_locales" | "operateur_public" | "organisme_formation";
 
 export type ProcessusCard = {
   image: string;
@@ -27,9 +29,10 @@ export function BaseProcessusSection({
   title: string;
   subtitle?: string;
   cards: Array<ProcessusCard>;
-  linkInscription: LinkInscription;
+  linkInscription: TypeOrganisationInscription;
   ariaLabel?: string;
 }) {
+  const inscriptionHref = PAGES.dynamic.authInscription({ typeOrganisation: linkInscription }).getPath();
   const count = cards.length;
   const trackCards = [...cards, ...cards, ...cards];
 
@@ -99,11 +102,7 @@ export function BaseProcessusSection({
         </div>
 
         <div className={styles.cta}>
-          <Button
-            iconId="fr-icon-arrow-right-line"
-            iconPosition="right"
-            linkProps={{ href: `/auth/inscription${linkInscription}` }}
-          >
+          <Button iconId="fr-icon-arrow-right-line" iconPosition="right" linkProps={{ href: inscriptionHref }}>
             Commencer à collaborer
           </Button>
         </div>

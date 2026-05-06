@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import { EtablissementsConnectesSection } from "../_components/shared/EtablissementsConnectesSection";
 import { FAQSection } from "../_components/shared/FAQSection";
@@ -12,9 +12,7 @@ import { PourquoiCollaborerSection } from "./_components/PourquoiCollaborerSecti
 import { ProcessusSection } from "./_components/ProcessusSection";
 import { SponsorsSection } from "./_components/SponsorsSection";
 
-export const metadata: Metadata = {
-  title: "Accueil CFA | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.accueilCfa.getMetadata();
 
 export default function AccueilCfaPage() {
   return (
@@ -25,9 +23,9 @@ export default function AccueilCfaPage() {
       <FeaturesSection />
       <PourquoiCollaborerSection />
       <ProcessusSection />
-      <TemoignagesSection linkInscription="/organisme_formation" />
+      <TemoignagesSection linkInscription="organisme_formation" />
       <FAQSection />
-      <FooterCTASection linkInscription="/organisme_formation" />
+      <FooterCTASection linkInscription="organisme_formation" />
     </main>
   );
 }

@@ -1,10 +1,8 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import ForgotPasswordClient from "./ForgotPasswordClient";
 
-export const metadata: Metadata = {
-  title: "Mot de passe oublié | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.authMotDePasseOublie.getMetadata();
 
 export default function Page() {
   return <ForgotPasswordClient />;

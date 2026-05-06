@@ -1,10 +1,8 @@
-import { Metadata } from "next";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import BienvenueClient from "./BienvenueClient";
 
-export const metadata: Metadata = {
-  title: "Bienvenue | Tableau de bord de l'apprentissage",
-};
+export const metadata = PAGES.static.authBienvenue.getMetadata();
 
 export default function Page() {
   return <BienvenueClient />;

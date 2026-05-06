@@ -1,6 +1,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PAGES } from "@/app/_utils/routes.utils";
 
 import styles from "./connexion-section.module.scss";
 
@@ -21,24 +22,33 @@ const ROWS: Row[] = [
     title: "Je suis un établissement de formation",
     description:
       "Accédez à la liste de vos effectifs en rupture et initiez des collaborations avec les Missions Locales de rattachement de vos apprenants.",
-    primary: { label: "Créer mon compte", href: "/auth/inscription/organisme_formation" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-cfa" },
+    primary: {
+      label: "Créer mon compte",
+      href: PAGES.dynamic.authInscription({ typeOrganisation: "organisme_formation" }).getPath(),
+    },
+    secondary: { label: "Découvrir les fonctionnalités", href: PAGES.static.accueilCfa.getPath() },
   },
   {
     iconClass: "fr-icon-community-line",
     title: "Je suis une Mission Locale",
     description:
       "Accédez à la liste des jeunes en rupture de contrat d’apprentissage sur votre territoire et collaborez avec les CFA.",
-    primary: { label: "Créer mon compte", href: "/auth/inscription/missions_locales" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-mission-locale" },
+    primary: {
+      label: "Créer mon compte",
+      href: PAGES.dynamic.authInscription({ typeOrganisation: "missions_locales" }).getPath(),
+    },
+    secondary: { label: "Découvrir les fonctionnalités", href: PAGES.static.accueilMissionLocale.getPath() },
   },
   {
     iconClass: "fr-icon-government-line",
     title: "Je suis un-e référent-e territorial•e",
     description:
       "Suivez l’activité et la collaboration des CFA et des Missions Locales de votre territoire pour la lutte contre le décrochage de l’apprentissage.",
-    primary: { label: "Obtenir mon accès", href: "/auth/inscription/operateur_public" },
-    secondary: { label: "Découvrir les fonctionnalités", href: "/accueil-territoire" },
+    primary: {
+      label: "Obtenir mon accès",
+      href: PAGES.dynamic.authInscription({ typeOrganisation: "operateur_public" }).getPath(),
+    },
+    secondary: { label: "Découvrir les fonctionnalités", href: PAGES.static.accueilTerritoire.getPath() },
   },
   {
     iconClass: "fr-icon-line-chart-line",
