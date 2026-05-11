@@ -194,8 +194,12 @@ export async function getCfaEffectifs(
       },
       en_rupture: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
       date_rupture_computed: {
+        // ABANDON inclus : rupture > 180j toujours pertinente à afficher (sinon date masquée
+        // pour les apprentis abandonnés bien qu'ils aient un contrat rupturé).
         $cond: {
-          if: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
+          if: {
+            $in: ["$_computed.statut.en_cours", [STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.ABANDON]],
+          },
           then: { $arrayElemAt: ["$contrats.date_rupture", -1] },
           else: null,
         },
@@ -263,12 +267,14 @@ export async function getCfaEffectifs(
           },
         },
         date_rupture_computed: {
+          // Priorités : cfa_rupture_declaration > contrat live > ml_doc.date_rupture (snapshot
+          // fallback pour les cas où l'effectif live a perdu sa date_rupture, ex. re-ingest).
           $cond: {
             if: {
               $and: [{ $not: ["$en_rupture"] }, { $ifNull: ["$ml_doc.cfa_rupture_declaration.date_rupture", false] }],
             },
             then: "$ml_doc.cfa_rupture_declaration.date_rupture",
-            else: "$date_rupture_computed",
+            else: { $ifNull: ["$date_rupture_computed", "$ml_doc.date_rupture"] },
           },
         },
       },

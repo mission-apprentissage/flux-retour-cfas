@@ -211,6 +211,46 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectifs[0].nom).toBe("ADULTE");
     });
 
+    it("date_rupture remontée pour un effectif ABANDON avec contrat rupturé", async () => {
+      // Avant fix : pipeline ne remontait date_rupture que si en_cours = RUPTURANT.
+      // Cas Ines HALAILI : ABANDON (rupture > 180j) mais contrat a une date_rupture.
+      const ruptureDate = new Date("2025-09-01");
+      const effectif = await insertEffectif({
+        apprenant: { nom: "HALAILI_TEST", prenom: "Ines" },
+        contrats: [{ date_rupture: ruptureDate, date_debut: new Date("2024-09-01"), date_fin: new Date("2026-08-31") }],
+        _computed: { statut: { en_cours: "ABANDON", parcours: [] } },
+      });
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      const match = result.effectifs.find((e) => (e as any).id?.toString() === effectif._id.toString());
+      expect(match).toBeDefined();
+      expect((match as any).date_rupture?.toISOString()).toBe(ruptureDate.toISOString());
+    });
+
+    it("date_rupture fallback sur ml_doc.date_rupture si effectif live n'a pas de rupture", async () => {
+      // Cas Denovan JACCOB : effectif re-ingéré sans rupture (contrat sans date_rupture),
+      // mais ml_doc.date_rupture garde la trace de la rupture précédente.
+      const ruptureSnapshot = new Date("2025-09-02");
+      const effectif = await insertEffectif({
+        apprenant: { nom: "JACCOB_TEST", prenom: "Denovan" },
+        contrats: [{ date_debut: new Date("2024-09-01"), date_fin: new Date("2026-08-31") }],
+        _computed: { statut: { en_cours: "ABANDON", parcours: [] } },
+      });
+      await missionLocaleEffectifsDb().insertOne(
+        createMlEffectifDoc(effectif, {
+          date_rupture: ruptureSnapshot,
+          situation: "NE_VEUT_PAS_ACCOMPAGNEMENT",
+        }) as any
+      );
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      const match = result.effectifs.find((e) => (e as any).id?.toString() === effectif._id.toString());
+      expect(match).toBeDefined();
+      expect((match as any).date_rupture?.toISOString()).toBe(ruptureSnapshot.toISOString());
+    });
+
     it("déduplique ERP/DECA en priorité ERP", async () => {
       const ddn = new Date(2000, 5, 15);
       await insertEffectif({
