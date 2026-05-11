@@ -678,6 +678,42 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
     });
 
+    it("ERP avec cfa_rupture_declaration dans ML-A, puis ingestion ERP dans ML-B → ancien préservé (pas de ping-pong)", async () => {
+      // Empêche le cron d'ingestion de défaire une migration cross-ML déclarée par un CFA.
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("ROUSSEL", "Théo", 20) });
+      const result1 = await createMissionLocaleSnapshot(erpML1);
+      expect(result1?.upserted).toBe(true);
+
+      // Simule une rupture déclarée par un CFA sur ce record.
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erpML1._id },
+        {
+          $set: {
+            cfa_rupture_declaration: {
+              date_rupture: new Date("2026-02-10"),
+              declared_at: new Date(),
+              declared_by: new ObjectId(),
+            },
+          },
+        }
+      );
+
+      // Nouvelle ingestion ERP pour la même personne sur une autre ML (le CFA-A re-transmet).
+      const erpML2 = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("ROUSSEL", "Théo", 20, ML_ID_2),
+      });
+      const result2 = await createMissionLocaleSnapshot(erpML2);
+      expect(result2?.upserted).toBe(false);
+
+      // Le record existant reste actif, intact, avec sa rupture.
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
+      expect(active[0].cfa_rupture_declaration).toBeTruthy();
+    });
+
     it("DECA dans ML-A, puis DECA pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
       const decaML1 = createBaseDecaEffectif({ apprenant: makeApprenant("PETIT", "Emma", 18) });
       const result1 = await createMissionLocaleSnapshot(decaML1);

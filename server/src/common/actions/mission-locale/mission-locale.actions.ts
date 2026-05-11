@@ -2427,6 +2427,15 @@ async function checkAndHandleDuplicate(
       );
       return { canInsert: false };
     }
+    // Préserver les records sous responsabilité d'un CFA déclarant. Sans cette garde,
+    // chaque ingestion ERP du CFA d'origine défait la migration cross-ML appliquée
+    // côté declareCfaEffectifRupture (ping-pong → toggle OFF côté CFA déclarant).
+    if (existing.cfa_rupture_declaration) {
+      logger.info(
+        `Dedup cross-ML: skip soft-delete pour ${personLabel} (cfa_rupture_declaration active sur ${existing._id})`
+      );
+      return { canInsert: false };
+    }
     await missionLocaleEffectifsDb().updateOne(
       { _id: existing._id },
       { $set: { soft_deleted: true }, $unset: { identifiant_normalise: "" } }

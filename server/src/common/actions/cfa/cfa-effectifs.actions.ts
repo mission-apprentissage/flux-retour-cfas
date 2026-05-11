@@ -698,6 +698,89 @@ export async function declareCfaEffectifRupture(
     }
   }
 
+  // Record actif sur une autre ML (apprenant a déménagé ou rattachement ML différent
+  // entre deux CFAs). L'index unique global sur (identifiant_normalise) bloque l'INSERT,
+  // on transfère le dossier vers la nouvelle ML.
+  if (normalizedIdentifiant) {
+    const crossMlOrphan = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      soft_deleted: { $ne: true },
+    });
+
+    if (crossMlOrphan) {
+      const orphanIsDeca = isDecaSnapshot(crossMlOrphan.effectif_snapshot);
+      const incomingIsDeca = source === "effectifsDECA";
+      const ruptureSet = {
+        cfa_rupture_declaration: declaration,
+        "organisme_data.rupture": true,
+        "organisme_data.reponse_at": now,
+        updated_at: now,
+      };
+
+      // Skip si dégradation ERP→DECA — priorité ERP > DECA. Patch en place.
+      if (incomingIsDeca && !orphanIsDeca) {
+        logger.warn(
+          {
+            ml_record: crossMlOrphan._id,
+            existing_effectif: crossMlOrphan.effectif_id,
+            existing_ml: crossMlOrphan.mission_locale_id,
+            incoming_effectif: newEffectifId,
+            incoming_ml: mlOrganisation._id,
+            incoming_source: source,
+          },
+          "declareCfaEffectifRupture: cross-ML migration ERP→DECA bloquée, patch en place"
+        );
+        await missionLocaleEffectifsDb().updateOne({ _id: crossMlOrphan._id }, { $set: ruptureSet });
+        scoreEffectifInBackground(crossMlOrphan._id, effectif);
+        return { created: false, updated: true };
+      }
+
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: crossMlOrphan._id },
+        {
+          $set: {
+            effectif_id: newEffectifId,
+            effectif_snapshot: { ...effectif, _id: effectif._id },
+            effectif_snapshot_date: now,
+            mission_locale_id: mlOrganisation._id,
+            current_status: {
+              value: currentStatus?.valeur ?? null,
+              date: currentStatus?.date ?? null,
+            },
+            cfa_rupture_declaration: declaration,
+            organisme_data: { rupture: true, reponse_at: now, has_unread_notification: false },
+            updated_at: now,
+          },
+          // Reset des données utilisateur héritées de l'ancienne ML : le dossier change
+          // de Mission Locale, le traitement précédent ne s'applique plus.
+          $unset: {
+            situation: "",
+            situation_autre: "",
+            commentaires: "",
+            deja_connu: "",
+            probleme_type: "",
+            probleme_detail: "",
+            a_traiter: "",
+            injoignable: "",
+            nouveau_contrat: "",
+            whatsapp_contact: "",
+            whatsapp_callback_requested: "",
+            whatsapp_callback_requested_at: "",
+            whatsapp_no_help_responded: "",
+            whatsapp_no_help_responded_at: "",
+            deca_feedback: "",
+            effectif_choice: "",
+            classification_reponse_appel: "",
+          },
+        }
+      );
+      scoreEffectifInBackground(crossMlOrphan._id, effectif);
+      return { created: false, updated: true };
+    }
+  }
+
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
 
   try {

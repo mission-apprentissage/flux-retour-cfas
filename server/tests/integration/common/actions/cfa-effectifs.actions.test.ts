@@ -639,8 +639,10 @@ describe("CFA Effectifs Actions", () => {
       expect(allActive).toHaveLength(1);
     });
 
-    it("crée un nouveau record si l'apprenant est rattaché à une ML cible différente", async () => {
-      // Pas de conflit d'index : (identifiant, ML A) et (identifiant, ML B) cohabitent.
+    it("transfère le record vers la nouvelle ML (cross-ML migration)", async () => {
+      // Apprenant a un record sur ML A, l'effectif Arras a ML B. L'index unique global
+      // sur (identifiant_normalise) bloque l'INSERT — on transfère le dossier vers ML B
+      // (déménagement implicite : un apprenant = une ML active à la fois).
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
         nom: "DESCAMPS",
@@ -674,6 +676,8 @@ describe("CFA Effectifs Actions", () => {
         effectif_snapshot: { ...otherEffectif, organisme_id: otherOrganismeId },
         identifiant_normalise: { nom: "DESCAMPS", prenom: "Lucie", date_de_naissance: ddn },
         soft_deleted: false,
+        situation: "INJOIGNABLE_APRES_RELANCES",
+        commentaires: "déjà appelé par l'ancienne ML",
       });
       await missionLocaleEffectifsDb().insertOne(existingMlRecord as any);
 
@@ -697,17 +701,108 @@ describe("CFA Effectifs Actions", () => {
         userId
       );
 
-      expect(result).toEqual({ created: true, updated: false });
+      expect(result).toEqual({ created: false, updated: true });
 
-      const created = await missionLocaleEffectifsDb().findOne({
-        effectif_id: erpEffectif._id,
-        mission_locale_id: mlOrganisationId,
+      // Le record existant a été migré : nouveau effectif_id, nouvelle ML, snapshot Arras.
+      const migrated = await missionLocaleEffectifsDb().findOne({ _id: existingMlRecord._id });
+      expect(migrated?.effectif_id).toEqual(erpEffectif._id);
+      expect(migrated?.mission_locale_id).toEqual(mlOrganisationId);
+      expect((migrated?.effectif_snapshot as any)?._id).toEqual(erpEffectif._id);
+      expect((migrated?.effectif_snapshot as any)?.organisme_id).toEqual(organismeId);
+      expect(migrated?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+      expect(migrated?.organisme_data?.rupture).toBe(true);
+      expect(migrated?.organisme_data?.has_unread_notification).toBe(false);
+
+      // Données utilisateur de l'ancienne ML reset : la nouvelle ML repart sur un dossier propre.
+      expect(migrated?.situation).toBeUndefined();
+      expect(migrated?.commentaires).toBeUndefined();
+
+      // Pas de duplicat actif.
+      const allActive = await missionLocaleEffectifsDb()
+        .find({
+          "identifiant_normalise.nom": "DESCAMPS",
+          soft_deleted: { $ne: true },
+        })
+        .toArray();
+      expect(allActive).toHaveLength(1);
+    });
+
+    it("cross-ML : ne migre PAS dans le sens ERP → DECA (priorité ERP > DECA, patch en place)", async () => {
+      const ddn = new Date("2005-06-15T00:00:00Z");
+      const apprenantBase = {
+        nom: "DELATTRE",
+        prenom: "Hugo",
+        date_de_naissance: ddn,
+        adresse: { mission_locale_id: 337 },
+      };
+
+      const otherMlId = new ObjectId(id(20));
+      const otherOrganismeId = new ObjectId(id(21));
+      const otherOrganisme = {
+        _id: otherOrganismeId,
+        ...createRandomOrganisme(),
+      };
+      await organismesDb().insertOne(otherOrganisme);
+
+      const otherErpEffectifId = new ObjectId();
+      const otherErpEffectif = {
+        _id: otherErpEffectifId,
+        ...(await createSampleEffectif({
+          organisme: otherOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: { ...apprenantBase, adresse: { mission_locale_id: 999 } },
+        })),
+        organisme_id: otherOrganismeId,
+      };
+      await effectifsDb().insertOne(otherErpEffectif as any);
+
+      const existingMlRecord = createMlEffectifDoc(otherErpEffectif, {
+        mission_locale_id: otherMlId,
+        effectif_snapshot: { ...otherErpEffectif, organisme_id: otherOrganismeId },
+        identifiant_normalise: { nom: "DELATTRE", prenom: "Hugo", date_de_naissance: ddn },
+        soft_deleted: false,
       });
-      expect(created?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+      await missionLocaleEffectifsDb().insertOne(existingMlRecord as any);
 
-      const oldRecord = await missionLocaleEffectifsDb().findOne({ _id: existingMlRecord._id });
-      expect(oldRecord?.effectif_id).toEqual(otherEffectifId);
-      expect(oldRecord?.cfa_rupture_declaration).toBeFalsy();
+      const decaEffectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: apprenantBase,
+          source: "DECA" as any,
+        })),
+        organisme_id: organismeId,
+      };
+      await effectifsDECADb().insertOne(decaEffectif as any);
+
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML Test (cible)",
+        created_at: new Date(),
+      } as any);
+      await organisationsDb().insertOne(organisation as any);
+
+      const dateRupture = new Date("2026-02-10");
+      const result = await declareCfaEffectifRupture(
+        organismeId,
+        decaEffectif._id.toString(),
+        "effectifsDECA",
+        dateRupture,
+        userId
+      );
+
+      expect(result).toEqual({ created: false, updated: true });
+
+      // Binding ERP préservé : effectif_id et snapshot inchangés, rupture appliquée.
+      const after = await missionLocaleEffectifsDb().findOne({ _id: existingMlRecord._id });
+      expect(after?.effectif_id).toEqual(otherErpEffectifId);
+      expect(after?.mission_locale_id).toEqual(otherMlId);
+      expect((after?.effectif_snapshot as any)?.organisme_id).toEqual(otherOrganismeId);
+      expect(after?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
     });
 
     it("ne migre PAS un orphelin ERP cross-organisme vers un effectif DECA (priorité ERP > DECA)", async () => {
