@@ -94,7 +94,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
     const { responsableId, formateurId } = await setupFamily();
 
     const ddn = new Date("2005-06-15T00:00:00.000Z");
-    const identifiant = { nom: "DESCAMPS", prenom: "Lucie", date_de_naissance: ddn };
+    const identifiant = { nom: "TESTNOM_A", prenom: "Prenoma", date_de_naissance: ddn };
 
     const oldEffectif = await insertEffectif(responsableId, identifiant, new Date("2025-09-01"));
     await insertMlRecord(oldEffectif, responsableId, identifiant, {
@@ -113,7 +113,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
     expect(summary.scanned).toBe(1);
     expect(summary.migrated).toBe(1);
 
-    const after = await missionLocaleEffectifsDb().findOne({ "identifiant_normalise.nom": "DESCAMPS" });
+    const after = await missionLocaleEffectifsDb().findOne({ "identifiant_normalise.nom": "TESTNOM_A" });
     expect(after?.effectif_id?.toString()).toBe(newEffectif._id.toString());
     expect(after?.effectif_snapshot?.organisme_id?.toString?.()).toBe(formateurId.toString());
     expect(after?.situation).toBe("INJOIGNABLE_APRES_RELANCES");

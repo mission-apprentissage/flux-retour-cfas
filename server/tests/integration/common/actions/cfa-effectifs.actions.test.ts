@@ -251,7 +251,7 @@ describe("CFA Effectifs Actions", () => {
       );
 
       const ddn = new Date(2005, 5, 15);
-      const apprenantBase = { nom: "DESCAMPS", prenom: "Lucie", date_de_naissance: ddn };
+      const apprenantBase = { nom: "TESTNOM_A", prenom: "Prenoma", date_de_naissance: ddn };
 
       const otherEffectifId = new ObjectId();
       const otherEffectif = {
@@ -292,7 +292,7 @@ describe("CFA Effectifs Actions", () => {
       await organismesDb().insertOne(strangerOrg as any);
 
       const ddn = new Date(2005, 5, 15);
-      const apprenantBase = { nom: "DUFOUR", prenom: "Marc", date_de_naissance: ddn };
+      const apprenantBase = { nom: "TESTNOM_B", prenom: "Prenomb", date_de_naissance: ddn };
 
       const strangerEffectifId = new ObjectId();
       const strangerEffectif = {
@@ -389,7 +389,7 @@ describe("CFA Effectifs Actions", () => {
 
       // UTC midnight requis : normalisePersonIdentifiant (côté detail) sinon décale la date.
       const ddn = new Date("2005-06-15T00:00:00.000Z");
-      const apprenantBase = { nom: "DESCAMPS", prenom: "Lucie", date_de_naissance: ddn };
+      const apprenantBase = { nom: "TESTNOM_A", prenom: "Prenoma", date_de_naissance: ddn };
 
       const otherEffectifId = new ObjectId();
       const otherEffectif = {
@@ -501,8 +501,8 @@ describe("CFA Effectifs Actions", () => {
     it("migre un ml record orphelin lié à un effectif jumeau (DECA → ERP)", async () => {
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "VILLENEUVE",
-        prenom: "Téo",
+        nom: "TESTNOM_C",
+        prenom: "Prenomc",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -522,7 +522,7 @@ describe("CFA Effectifs Actions", () => {
       await effectifsDECADb().insertOne(decaEffectif as any);
 
       const mlRecord = createMlEffectifDoc(decaEffectif, {
-        identifiant_normalise: { nom: "VILLENEUVE", prenom: "Téo", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_C", prenom: "Prenomc", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(mlRecord as any);
@@ -561,8 +561,8 @@ describe("CFA Effectifs Actions", () => {
     it("squatter ERP soft-deleted bloquant la migration : ressuscite + applique la rupture", async () => {
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "MOREAU",
-        prenom: "Élise",
+        nom: "TESTNOM_D",
+        prenom: "Prenomd",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -583,7 +583,7 @@ describe("CFA Effectifs Actions", () => {
 
       // Orphan DECA actif avec identifiant_normalise.
       const orphanMlRecord = createMlEffectifDoc(decaEffectif, {
-        identifiant_normalise: { nom: "MOREAU", prenom: "Élise", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_D", prenom: "Prenomd", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(orphanMlRecord as any);
@@ -636,8 +636,8 @@ describe("CFA Effectifs Actions", () => {
       // l'ancien. Sans migration, le toggle resterait OFF au refresh.
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "VERGEZ",
-        prenom: "Mathys",
+        nom: "TESTNOM_E",
+        prenom: "Prenome",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -646,7 +646,7 @@ describe("CFA Effectifs Actions", () => {
       const oldEffectif = await insertEffectif({ apprenant: apprenantBase });
 
       const oldMlRecord = createMlEffectifDoc(oldEffectif, {
-        identifiant_normalise: { nom: "VERGEZ", prenom: "Mathys", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_E", prenom: "Prenome", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(oldMlRecord as any);
@@ -691,7 +691,7 @@ describe("CFA Effectifs Actions", () => {
       // Pas de duplicat actif.
       const allActive = await missionLocaleEffectifsDb()
         .find({
-          "identifiant_normalise.nom": "VERGEZ",
+          "identifiant_normalise.nom": "TESTNOM_E",
           mission_locale_id: mlOrganisationId,
           soft_deleted: { $ne: true },
         })
@@ -705,8 +705,8 @@ describe("CFA Effectifs Actions", () => {
       // patch du squatter sans repointer effectif_id.
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "VANDENBOSSCHE",
-        prenom: "Margaux",
+        nom: "TESTNOM_F",
+        prenom: "Prenomf",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -732,7 +732,7 @@ describe("CFA Effectifs Actions", () => {
 
       const orphanMlRecord = createMlEffectifDoc(otherEffectif, {
         effectif_snapshot: { ...otherEffectif, organisme_id: otherOrganismeId },
-        identifiant_normalise: { nom: "VANDENBOSSCHE", prenom: "Margaux", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_F", prenom: "Prenomf", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(orphanMlRecord as any);
@@ -767,7 +767,7 @@ describe("CFA Effectifs Actions", () => {
 
       const allActive = await missionLocaleEffectifsDb()
         .find({
-          "identifiant_normalise.nom": "VANDENBOSSCHE",
+          "identifiant_normalise.nom": "TESTNOM_F",
           mission_locale_id: mlOrganisationId,
           soft_deleted: { $ne: true },
         })
@@ -782,8 +782,8 @@ describe("CFA Effectifs Actions", () => {
       // l'historique de traitement (la ML qui suit reste celle qui a déjà commencé).
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "DESCAMPS",
-        prenom: "Lucie",
+        nom: "TESTNOM_A",
+        prenom: "Prenoma",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -811,7 +811,7 @@ describe("CFA Effectifs Actions", () => {
       const existingMlRecord = createMlEffectifDoc(otherEffectif, {
         mission_locale_id: otherMlId,
         effectif_snapshot: { ...otherEffectif, organisme_id: otherOrganismeId },
-        identifiant_normalise: { nom: "DESCAMPS", prenom: "Lucie", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_A", prenom: "Prenoma", date_de_naissance: ddn },
         soft_deleted: false,
         situation: "INJOIGNABLE_APRES_RELANCES",
         commentaires: "déjà appelé par l'ancienne ML",
@@ -859,7 +859,7 @@ describe("CFA Effectifs Actions", () => {
       // Pas de duplicat actif.
       const allActive = await missionLocaleEffectifsDb()
         .find({
-          "identifiant_normalise.nom": "DESCAMPS",
+          "identifiant_normalise.nom": "TESTNOM_A",
           soft_deleted: { $ne: true },
         })
         .toArray();
@@ -871,8 +871,8 @@ describe("CFA Effectifs Actions", () => {
       // même apprenant — patch en place sans repointer effectif_id (priorité ERP).
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "BERNARD",
-        prenom: "Camille",
+        nom: "TESTNOM_G",
+        prenom: "Prenomg",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -898,7 +898,7 @@ describe("CFA Effectifs Actions", () => {
 
       const orphanMlRecord = createMlEffectifDoc(otherErpEffectif, {
         effectif_snapshot: { ...otherErpEffectif, organisme_id: otherOrganismeId },
-        identifiant_normalise: { nom: "BERNARD", prenom: "Camille", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_G", prenom: "Prenomg", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(orphanMlRecord as any);
@@ -946,15 +946,15 @@ describe("CFA Effectifs Actions", () => {
     it("ne migre PAS dans le sens ERP → DECA quand un ml record est déjà bound à un ERP", async () => {
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "DURAND",
-        prenom: "Léa",
+        nom: "TESTNOM_H",
+        prenom: "Prenomh",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
 
       const erpEffectif = await insertEffectif({ apprenant: apprenantBase });
       const mlRecord = createMlEffectifDoc(erpEffectif, {
-        identifiant_normalise: { nom: "DURAND", prenom: "Léa", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_H", prenom: "Prenomh", date_de_naissance: ddn },
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(mlRecord as any);
@@ -1001,8 +1001,8 @@ describe("CFA Effectifs Actions", () => {
     it("cross-ML : ne migre PAS dans le sens ERP → DECA (priorité ERP > DECA, patch en place)", async () => {
       const ddn = new Date("2005-06-15T00:00:00Z");
       const apprenantBase = {
-        nom: "LEROY",
-        prenom: "Sophie",
+        nom: "TESTNOM_I",
+        prenom: "Prenomi",
         date_de_naissance: ddn,
         adresse: { mission_locale_id: 337 },
       };
@@ -1030,7 +1030,7 @@ describe("CFA Effectifs Actions", () => {
       const existingMlRecord = createMlEffectifDoc(otherErpEffectif, {
         mission_locale_id: otherMlId,
         effectif_snapshot: { ...otherErpEffectif, organisme_id: otherOrganismeId },
-        identifiant_normalise: { nom: "LEROY", prenom: "Sophie", date_de_naissance: ddn },
+        identifiant_normalise: { nom: "TESTNOM_I", prenom: "Prenomi", date_de_naissance: ddn },
         soft_deleted: false,
         situation: "INJOIGNABLE_APRES_RELANCES",
       });
