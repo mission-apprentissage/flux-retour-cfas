@@ -299,10 +299,10 @@ describe("Processus d'ingestion", () => {
               opcos: [],
             },
             statut: {
-              en_cours: "FIN_DE_FORMATION",
+              en_cours: "ABANDON",
               parcours: [
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "APPRENTI" },
-                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "FIN_DE_FORMATION" },
+                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "ABANDON" },
               ],
             },
           },
@@ -454,7 +454,7 @@ describe("Processus d'ingestion", () => {
               opcos: [],
             },
             statut: {
-              en_cours: "FIN_DE_FORMATION",
+              en_cours: "ABANDON",
               parcours: [
                 {
                   date: new Date("2021-09-01T00:00:00.000Z"),
@@ -463,10 +463,6 @@ describe("Processus d'ingestion", () => {
                 {
                   date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
-                },
-                {
-                  date: new Date("2022-06-30T00:00:00.000Z"),
-                  valeur: "FIN_DE_FORMATION",
                 },
               ],
             },
@@ -691,7 +687,7 @@ describe("Processus d'ingestion", () => {
               opcos: [],
             },
             statut: {
-              en_cours: "FIN_DE_FORMATION",
+              en_cours: "ABANDON",
               parcours: [
                 {
                   date: new Date("2021-09-01T00:00:00.000Z"),
@@ -700,10 +696,6 @@ describe("Processus d'ingestion", () => {
                 {
                   date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
-                },
-                {
-                  date: new Date("2022-06-30T00:00:00.000Z"),
-                  valeur: "FIN_DE_FORMATION",
                 },
               ],
             },
