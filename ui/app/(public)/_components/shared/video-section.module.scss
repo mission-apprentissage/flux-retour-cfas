@@ -53,9 +53,19 @@
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--light-decisions-background-background-default-grey, #fff);
   background: linear-gradient(135deg, #6a6af4, #000091);
+}
+
+.caption {
+  display: flex;
+  align-items: start;
+}
+
+.transcription {
+  align-items: start;
+  justify-content: start;
+  text-align: left;
 }
