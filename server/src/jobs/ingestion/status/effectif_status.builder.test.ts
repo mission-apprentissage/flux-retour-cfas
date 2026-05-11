@@ -57,10 +57,6 @@ describe("buildEffectifStatus", () => {
             valeur: "ABANDON",
             date: new Date("2024-11-30"),
           },
-          {
-            valeur: "FIN_DE_FORMATION",
-            date: new Date("2025-08-31"),
-          },
         ],
       },
     ],
@@ -120,10 +116,6 @@ describe("buildEffectifStatus", () => {
             valeur: "ABANDON",
             date: new Date("2024-11-30"),
           },
-          {
-            valeur: "FIN_DE_FORMATION",
-            date: new Date("2025-08-31"),
-          },
         ],
       },
     ],
@@ -162,10 +154,6 @@ describe("buildEffectifStatus", () => {
           {
             valeur: "ABANDON",
             date: new Date("2025-05-30"),
-          },
-          {
-            valeur: "FIN_DE_FORMATION",
-            date: new Date("2025-08-31"),
           },
         ],
       },
@@ -264,10 +252,6 @@ describe("buildEffectifStatus", () => {
             valeur: "ABANDON",
             date: new Date("2025-03-01"),
           },
-          {
-            valeur: "FIN_DE_FORMATION",
-            date: new Date("2025-08-31"),
-          },
         ],
       },
     ],
@@ -287,10 +271,6 @@ describe("buildEffectifStatus", () => {
           {
             valeur: "ABANDON",
             date: new Date("2025-04-06"),
-          },
-          {
-            valeur: "FIN_DE_FORMATION",
-            date: new Date("2025-12-23"),
           },
         ],
       },
@@ -453,6 +433,91 @@ describe("buildEffectifStatus", () => {
           {
             valeur: "FIN_DE_FORMATION",
             date: new Date("2024-07-10T00:00:00.000Z"),
+          },
+        ],
+      },
+    ],
+    [
+      // Rupture sur formation.date_fin : RUPTURANT préservé (pas écrasé en FIN_DE_FORMATION).
+      {
+        session: { debut: new Date("2024-01-01"), fin: new Date("2024-12-15") },
+        contrats: {
+          "2024-02-01": {
+            date_debut: new Date("2024-02-01T00:00:00.000Z"),
+            date_fin: new Date("2024-12-15T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-12-15T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "RUPTURANT",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-01-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-02-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-12-15"),
+          },
+        ],
+      },
+    ],
+    [
+      // Multi-contrats : seul le DERNIER décide. Régression : avant fix, `.some(c => !c.rupture)`
+      // voyait contrat1 naturel et écrasait le RUPTURANT du contrat2 en FIN_DE_FORMATION.
+      {
+        session: { debut: new Date("2024-01-01"), fin: new Date("2024-12-15") },
+        contrats: {
+          "2024-02-01": {
+            date_debut: new Date("2024-02-01T00:00:00.000Z"),
+            date_fin: new Date("2024-06-30T00:00:00.000Z"),
+            rupture: null,
+            employeur: { siret: null },
+          },
+          "2024-08-01": {
+            date_debut: new Date("2024-08-01T00:00:00.000Z"),
+            date_fin: new Date("2024-12-15T00:00:00.000Z"),
+            rupture: {
+              date_rupture: new Date("2024-12-15T00:00:00.000Z"),
+              cause: null,
+            },
+            employeur: { siret: null },
+          },
+        },
+        exclusion: null,
+      },
+      {
+        en_cours: "RUPTURANT",
+        parcours: [
+          {
+            valeur: "INSCRIT",
+            date: new Date("2024-01-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-02-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-07-01"),
+          },
+          {
+            valeur: "APPRENTI",
+            date: new Date("2024-08-01"),
+          },
+          {
+            valeur: "RUPTURANT",
+            date: new Date("2024-12-15"),
           },
         ],
       },

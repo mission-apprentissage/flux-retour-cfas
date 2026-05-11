@@ -97,7 +97,23 @@ function buildEffectifParcours(
     }
   }
 
-  parcoursRaw.set(days.at(-1)!, STATUT_APPRENANT.FIN_DE_FORMATION);
+  // FIN_DE_FORMATION uniquement sur fin légitime : dernier jour APPRENTI/INSCRIT, ou dernier
+  // contrat (chronologique) terminé sans rupture ni exclusion. Sinon préserver RUPTURANT/ABANDON
+  // pour ne pas masquer la rupture côté CFA/ML.
+  const lastDayKey = days.at(-1)!;
+  const lastDayStatut = parcoursRaw.get(lastDayKey);
+  const sortedContrats = [...contrats].sort((a, b) => a.date_debut.getTime() - b.date_debut.getTime());
+  const lastContrat = sortedContrats.at(-1);
+  const lastContractEndedNaturally = lastContrat !== undefined && !lastContrat.rupture;
+  const hasNaturallyEndedContract = !effectif.exclusion && lastContractEndedNaturally;
+
+  if (
+    lastDayStatut === STATUT_APPRENANT.APPRENTI ||
+    lastDayStatut === STATUT_APPRENANT.INSCRIT ||
+    hasNaturallyEndedContract
+  ) {
+    parcoursRaw.set(lastDayKey, STATUT_APPRENANT.FIN_DE_FORMATION);
+  }
 
   const parcours: IEffectifComputedStatut["parcours"] = [];
 

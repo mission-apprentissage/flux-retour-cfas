@@ -271,6 +271,45 @@ export const getStatOrganismes = async () => {
   return stats;
 };
 
+/**
+ * Famille d'un organisme : lui + responsables directs + formateurs directs + formateurs frères
+ * (via les responsables). Traversée à 1 niveau : depuis un responsable on ne suit pas les
+ * back-links des formateurs vers d'autres responsables (cousins multi-responsables absents).
+ */
+export async function getFamilyOrganismeIds(organismeId: ObjectId): Promise<ObjectId[]> {
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { organismesResponsables: 1, organismesFormateurs: 1 } }
+  );
+  if (!organisme) return [organismeId];
+
+  const idSet = new Set<string>([organismeId.toString()]);
+  const responsableIds: ObjectId[] = [];
+
+  for (const r of organisme.organismesResponsables ?? []) {
+    if (r._id) {
+      idSet.add(r._id.toString());
+      responsableIds.push(r._id);
+    }
+  }
+  for (const f of organisme.organismesFormateurs ?? []) {
+    if (f._id) idSet.add(f._id.toString());
+  }
+
+  if (responsableIds.length > 0) {
+    const responsables = await organismesDb()
+      .find({ _id: { $in: responsableIds } }, { projection: { organismesFormateurs: 1 } })
+      .toArray();
+    for (const resp of responsables) {
+      for (const f of resp.organismesFormateurs ?? []) {
+        if (f._id) idSet.add(f._id.toString());
+      }
+    }
+  }
+
+  return [...idSet].map((id) => new ObjectId(id));
+}
+
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {

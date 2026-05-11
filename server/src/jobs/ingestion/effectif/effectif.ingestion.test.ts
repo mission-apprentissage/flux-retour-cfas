@@ -106,7 +106,6 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
-            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -161,7 +160,6 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
-            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -248,7 +246,6 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
-              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -337,7 +334,6 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
-              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -382,7 +378,6 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: sept24, valeur: "INSCRIT" },
               { date: nov24, valeur: "ABANDON" },
-              { date: aout26, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -433,7 +428,6 @@ describe("ingestEffectifV2", () => {
             parcours: [
               { date: aout24, valeur: "INSCRIT" },
               { date: new Date("2024-11-29"), valeur: "ABANDON" },
-              { date: aout25, valeur: "FIN_DE_FORMATION" },
             ],
           },
         },
@@ -528,7 +522,6 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
-            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
@@ -604,7 +597,6 @@ describe("ingestEffectifV2", () => {
           parcours: [
             { date: sept24, valeur: "INSCRIT" },
             { date: nov24, valeur: "ABANDON" },
-            { date: aout26, valeur: "FIN_DE_FORMATION" },
           ],
         },
       },
