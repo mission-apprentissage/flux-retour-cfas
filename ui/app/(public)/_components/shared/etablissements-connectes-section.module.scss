@@ -47,6 +47,14 @@
   &[data-paused="true"] {
     animation-play-state: paused;
   }
+
+  .carousel[data-scroll-enabled="false"] & {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    animation: none;
+    will-change: auto;
+  }
 }
 
 @keyframes scrollLogos {

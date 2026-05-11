@@ -8,16 +8,25 @@ import { useReducedMotion } from "../../_hooks/useReducedMotion";
 import styles from "./etablissements-connectes-section.module.scss";
 import { PauseButton } from "./PauseButton";
 
+// Feature flag temporaire : passer à `true` pour réactiver le défilement automatique.
+const AUTO_SCROLL_ENABLED = false;
+
 const LOGOS = [
-  { src: "/images/home/etablissements/logo-01.png", alt: "CCI Auvergne-Rhône-Alpes" },
-  { src: "/images/home/etablissements/logo-02.png", alt: "MFR — Cultivons les réussites" },
-  { src: "/images/home/etablissements/logo-03.png", alt: "BTP-CFA Picardie" },
-  { src: "/images/home/etablissements/logo-04.png", alt: "Campus du Lac" },
-  { src: "/images/home/etablissements/logo-05.png", alt: "Greta-CFA Alpes Provence" },
-  { src: "/images/home/etablissements/logo-06.png", alt: "Crops" },
-  { src: "/images/home/etablissements/logo-07.png", alt: "ESCG" },
-  { src: "/images/home/etablissements/logo-08.png", alt: "CMA — Chambre des métiers et de l’artisanat" },
-  { src: "/images/home/etablissements/logo-09.png", alt: "Apprentis d’Auteuil" },
+  { src: "/images/home/etablissements/campus-du-lac.png", alt: "Campus du Lac" },
+  {
+    src: "/images/home/etablissements/cma-nouvelle-aquitaine.png",
+    alt: "CMA — Chambre des métiers et de l’artisanat - Nouvelle-Aquitaine",
+  },
+  { src: "/images/home/etablissements/cci-auvergne-rhone-alpes.png", alt: "CCI Auvergne-Rhône-Alpes" },
+  { src: "/images/home/etablissements/btp-cfa-picardie.png", alt: "BTP-CFA Picardie" },
+  { src: "/images/home/etablissements/ccca-btp.png", alt: "CCCA BTP" },
+  { src: "/images/home/etablissements/groupe-institut-de-genech.png", alt: "Groupe Institut de Genech" },
+  // { src: "/images/home/etablissements/greta-cfa-alpes-provence.png", alt: "Greta-CFA Alpes Provence" },
+  // { src: "/images/home/etablissements/apprentis-auteuil.png", alt: "Apprentis d’Auteuil" },
+  // { src: "/images/home/etablissements/creps-hauts-de-france-btp.png", alt: "Creps - Hauts-de-France" },
+  // { src: "/images/home/etablissements/groupe-institut-de-genech.png", alt: "Groupe Institut de Genech" },
+  // { src: "/images/home/etablissements/mission-locale-3-vallees.png", alt: "Mission Locale 3 Vallées" },
+  // { src: "/images/home/etablissements/mission-locale-antipolis.png", alt: "Mission Locale Antipolis" },
 ];
 
 // Track dupliqué pour donner l'illusion d'un défilement infini :
@@ -41,9 +50,9 @@ export function EtablissementsConnectesSection() {
         Ces établissements sont déjà connectés aux Missions Locales grâce au Tableau de bord
       </h2>
 
-      <div className={styles.carousel}>
-        <div className={styles.track} data-paused={!animationActive} aria-hidden="true">
-          {TRACK_LOGOS.map((logo, index) => (
+      <div className={styles.carousel} data-scroll-enabled={AUTO_SCROLL_ENABLED}>
+        <div className={styles.track} aria-hidden="true">
+          {(AUTO_SCROLL_ENABLED ? TRACK_LOGOS : LOGOS).map((logo, index) => (
             <Image
               key={`${logo.src}-${index}`}
               src={logo.src}
@@ -56,9 +65,11 @@ export function EtablissementsConnectesSection() {
         </div>
       </div>
 
-      <div className={styles.controls}>
-        <PauseButton isPaused={!animationActive} togglePause={togglePause} />
-      </div>
+      {AUTO_SCROLL_ENABLED && (
+        <div className={styles.controls}>
+          <PauseButton isPaused={!animationActive} togglePause={togglePause} />
+        </div>
+      )}
     </section>
   );
 }

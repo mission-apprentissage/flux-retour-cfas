@@ -12,8 +12,8 @@ const SPONSORS: Array<Sponsor> = [
     description: "Un service co-construit avec les acteurs terrain CFA et Missions Locales directement",
   },
   {
-    image: null,
-    title: "+ XXX établissements de formation",
+    image: { src: "/images/home/cfas.png", width: 360, height: 246 },
+    title: "+ 1000 établissements de formation",
     description: "Les CFA choisissent le Tableau de bord pour collaborer avec les Missions Locales.",
   },
 ];
