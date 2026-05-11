@@ -50,6 +50,7 @@ import {
   hydrateMissionLocaleOrganisation,
   hydrateMissionLocaleSnapshot,
   hydrateMissionLocaleStats,
+  migrateOrphanMlRecordsCrossFamily,
   migrateOrphanMlRecordsDecaToErp,
   softDeleteDoublonEffectifML,
   updateMissionLocaleEffectifActivationDate,
@@ -280,9 +281,14 @@ export async function setupJobProcessor() {
         handler: cleanupOrganismes,
       },
       "hydrate:effectifs:update_all_computed_statut": {
-        handler: async () => {
-          return hydrateEffectifsComputedTypesGenerique();
+        handler: async (job, signal) => {
+          const organismeId = (job.payload?.id as string) ? new ObjectId(job.payload?.id as string) : null;
+          return hydrateEffectifsComputedTypesGenerique(
+            organismeId ? { query: { organisme_id: organismeId } } : undefined,
+            signal
+          );
         },
+        resumable: true,
       },
       "hydrate:effectifs:update_computed_statut": {
         handler: async (job, signal) => {
@@ -559,6 +565,11 @@ export async function setupJobProcessor() {
       "tmp:migration:ml-orphan-deca-to-erp": {
         handler: async () => {
           return migrateOrphanMlRecordsDecaToErp();
+        },
+      },
+      "tmp:migration:ml-orphan-cross-family": {
+        handler: async () => {
+          return migrateOrphanMlRecordsCrossFamily();
         },
       },
       "tmp:migration:ml-identifiant-normalise": {

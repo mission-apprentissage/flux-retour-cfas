@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
+import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { buildCollabStatusSwitch } from "@/common/actions/shared/rupture-pipeline.utils";
 import logger from "@/common/logger";
@@ -123,6 +124,7 @@ export async function getCfaEffectifs(
   }
 
   const organismeId = new ObjectId(organisation.organisme_id);
+  const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
   const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
   const { page, limit, search, sort, order, en_rupture, collab_status, formation } = params;
   const skip = (page - 1) * limit;
@@ -192,8 +194,12 @@ export async function getCfaEffectifs(
       },
       en_rupture: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
       date_rupture_computed: {
+        // ABANDON inclus : rupture > 180j toujours pertinente à afficher (sinon date masquée
+        // pour les apprentis abandonnés bien qu'ils aient un contrat rupturé).
         $cond: {
-          if: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
+          if: {
+            $in: ["$_computed.statut.en_cours", [STATUT_APPRENANT.RUPTURANT, STATUT_APPRENANT.ABANDON]],
+          },
           then: { $arrayElemAt: ["$contrats.date_rupture", -1] },
           else: null,
         },
@@ -211,9 +217,44 @@ export async function getCfaEffectifs(
         pipeline: [{ $match: { soft_deleted: { $ne: true } } }, { $limit: 1 }],
       },
     },
+    // Fallback identifiant scopé famille (rattrape les double-ingestions formateur/responsable).
+    // LIMITATION : compare raw apprenant.* vs identifiant_normalise.* — rate si effectif legacy
+    // non normalisé (getCfaEffectifDetail normalise JS-side et n'a pas ce problème).
+    {
+      $lookup: {
+        from: "missionLocaleEffectif",
+        let: {
+          nom: "$apprenant.nom",
+          prenom: "$apprenant.prenom",
+          dob: "$apprenant.date_de_naissance",
+        },
+        pipeline: [
+          {
+            $match: {
+              soft_deleted: { $ne: true },
+              "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
+            },
+          },
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$identifiant_normalise.nom", "$$nom"] },
+                  { $eq: ["$identifiant_normalise.prenom", "$$prenom"] },
+                  { $eq: ["$identifiant_normalise.date_de_naissance", "$$dob"] },
+                ],
+              },
+            },
+          },
+          { $sort: { updated_at: -1 } },
+          { $limit: 1 },
+        ],
+        as: "ml_data_by_identifiant",
+      },
+    },
     {
       $addFields: {
-        ml_doc: { $first: "$ml_data" },
+        ml_doc: { $ifNull: [{ $first: "$ml_data" }, { $first: "$ml_data_by_identifiant" }] },
       },
     },
     {
@@ -226,12 +267,14 @@ export async function getCfaEffectifs(
           },
         },
         date_rupture_computed: {
+          // Priorités : cfa_rupture_declaration > contrat live > ml_doc.date_rupture (snapshot
+          // fallback pour les cas où l'effectif live a perdu sa date_rupture, ex. re-ingest).
           $cond: {
             if: {
               $and: [{ $not: ["$en_rupture"] }, { $ifNull: ["$ml_doc.cfa_rupture_declaration.date_rupture", false] }],
             },
             then: "$ml_doc.cfa_rupture_declaration.date_rupture",
-            else: "$date_rupture_computed",
+            else: { $ifNull: ["$date_rupture_computed", "$ml_doc.date_rupture"] },
           },
         },
       },
@@ -379,14 +422,9 @@ function formatRawEffectif(
 }
 
 export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: string, userId?: ObjectId) {
-  const mlAggregation = [
-    {
-      $match: {
-        effectif_id: new ObjectId(effectifId),
-        "effectif_snapshot.organisme_id": organismeId,
-        soft_deleted: { $ne: true },
-      },
-    },
+  const eid = new ObjectId(effectifId);
+  const buildMlAggregation = (initialMatch: Record<string, unknown>) => [
+    { $match: initialMatch },
     {
       $lookup: {
         from: "organismes",
@@ -515,12 +553,46 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     },
   ];
 
-  const mlEffectif = await missionLocaleEffectifsDb().aggregate(mlAggregation).next();
+  const directMatch = {
+    effectif_id: eid,
+    "effectif_snapshot.organisme_id": organismeId,
+    soft_deleted: { $ne: true },
+  };
+  let mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(directMatch)).next();
   if (mlEffectif) {
     return { effectif: mlEffectif, currentIndex: 0, total: 1 };
   }
 
-  const erpEffectif = await effectifsDb().findOne({ _id: new ObjectId(effectifId), organisme_id: organismeId });
+  const erpEffectif = await effectifsDb().findOne({ _id: eid, organisme_id: organismeId });
+  const decaEffectif = erpEffectif ? null : await effectifsDECADb().findOne({ _id: eid, organisme_id: organismeId });
+  const baseEffectif = erpEffectif ?? decaEffectif;
+
+  // Fallback identifiant scopé famille (normalisation JS-side, tolère effectif legacy).
+  if (
+    baseEffectif &&
+    baseEffectif.apprenant?.nom &&
+    baseEffectif.apprenant?.prenom &&
+    baseEffectif.apprenant?.date_de_naissance
+  ) {
+    const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
+    const ident = normalisePersonIdentifiant({
+      nom: baseEffectif.apprenant.nom,
+      prenom: baseEffectif.apprenant.prenom,
+      date_de_naissance: baseEffectif.apprenant.date_de_naissance,
+    });
+    const fallbackMatch = {
+      "identifiant_normalise.nom": ident.nom,
+      "identifiant_normalise.prenom": ident.prenom,
+      "identifiant_normalise.date_de_naissance": ident.date_de_naissance,
+      "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
+      soft_deleted: { $ne: true },
+    };
+    mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(fallbackMatch)).next();
+    if (mlEffectif) {
+      return { effectif: mlEffectif, currentIndex: 0, total: 1 };
+    }
+  }
+
   if (erpEffectif) {
     const organisme = await organismesDb().findOne(
       { _id: erpEffectif.organisme_id },
@@ -528,8 +600,6 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     );
     return { effectif: formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
   }
-
-  const decaEffectif = await effectifsDECADb().findOne({ _id: new ObjectId(effectifId), organisme_id: organismeId });
   if (decaEffectif) {
     const organisme = await organismesDb().findOne(
       { _id: decaEffectif.organisme_id },
@@ -607,7 +677,9 @@ export async function declareCfaEffectifRupture(
     const incomingIsDeca = source === "effectifsDECA";
 
     let keeperId = existing._id;
-    if (isMigration && existingIsDeca && !incomingIsDeca) {
+    // Repointer effectif_id sur mismatch sinon le toggle reste OFF (lookup par effectif_id).
+    // Skip si dégradation ERP→DECA — priorité ERP > DECA.
+    if (isMigration && !(incomingIsDeca && !existingIsDeca)) {
       const result = await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, {
         extraSet: ruptureSet,
       });
@@ -622,7 +694,7 @@ export async function declareCfaEffectifRupture(
             incoming_effectif: newEffectifId,
             incoming_source: source,
           },
-          "declareCfaEffectifRupture: mismatch effectif_id sans migration (cas non DECA→ERP)"
+          "declareCfaEffectifRupture: dégradation ERP→DECA bloquée, patch en place sans repointer effectif_id"
         );
       }
       await missionLocaleEffectifsDb().updateOne({ _id: existing._id }, { $set: ruptureSet });
@@ -643,6 +715,106 @@ export async function declareCfaEffectifRupture(
 
   if (!mlOrganisation) {
     throw Boom.badData("Impossible de déclarer en rupture : organisation Mission Locale non trouvée");
+  }
+
+  // Record orphelin sur la même ML mais rattaché à un autre CFA (ex. deux établissements
+  // d'une même CMA). Sans migration proactive, l'INSERT échouerait en E11000 et le
+  // fallback patcherait le squatter sans repointer effectif_id.
+  if (normalizedIdentifiant) {
+    const crossOrganismeOrphan = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      mission_locale_id: mlOrganisation._id,
+      soft_deleted: { $ne: true },
+    });
+
+    if (crossOrganismeOrphan) {
+      const orphanIsDeca = isDecaSnapshot(crossOrganismeOrphan.effectif_snapshot);
+      const incomingIsDeca = source === "effectifsDECA";
+      const ruptureSet = {
+        cfa_rupture_declaration: declaration,
+        "organisme_data.rupture": true,
+        "organisme_data.reponse_at": now,
+        updated_at: now,
+      };
+
+      // Skip si dégradation ERP→DECA — priorité ERP > DECA. Patch en place.
+      if (incomingIsDeca && !orphanIsDeca) {
+        logger.warn(
+          {
+            ml_record: crossOrganismeOrphan._id,
+            existing_effectif: crossOrganismeOrphan.effectif_id,
+            existing_organisme: crossOrganismeOrphan.effectif_snapshot?.organisme_id,
+            incoming_effectif: newEffectifId,
+            incoming_organisme: organismeId,
+            incoming_source: source,
+          },
+          "declareCfaEffectifRupture: cross-organisme migration ERP→DECA bloquée, patch en place"
+        );
+        await missionLocaleEffectifsDb().updateOne({ _id: crossOrganismeOrphan._id }, { $set: ruptureSet });
+        scoreEffectifInBackground(crossOrganismeOrphan._id, effectif);
+        return { created: false, updated: true };
+      }
+
+      const result = await migrateMlRecordEffectifId(
+        crossOrganismeOrphan._id,
+        crossOrganismeOrphan.effectif_id,
+        effectif,
+        { extraSet: ruptureSet }
+      );
+      scoreEffectifInBackground(result.keeperId, effectif);
+      return { created: false, updated: true };
+    }
+  }
+
+  // Cross-ML : l'index unique global sur identifiant_normalise bloque l'INSERT. On repointe
+  // effectif_id + snapshot, mais on PRÉSERVE mission_locale_id et les fields ML utilisateur
+  // (situation, commentaires, ...) — la ML d'origine continue son suivi (policy produit).
+  // skipCurrentStatus évite d'écraser current_status avec celui calculé depuis le nouvel effectif.
+  if (normalizedIdentifiant) {
+    const crossMlOrphan = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      soft_deleted: { $ne: true },
+    });
+
+    if (crossMlOrphan) {
+      const orphanIsDeca = isDecaSnapshot(crossMlOrphan.effectif_snapshot);
+      const incomingIsDeca = source === "effectifsDECA";
+      const ruptureSet = {
+        cfa_rupture_declaration: declaration,
+        "organisme_data.rupture": true,
+        "organisme_data.reponse_at": now,
+        updated_at: now,
+      };
+
+      // Priorité ERP > DECA : patch en place sans repointer, snapshot ERP préservé.
+      if (incomingIsDeca && !orphanIsDeca) {
+        logger.warn(
+          {
+            ml_record: crossMlOrphan._id,
+            existing_effectif: crossMlOrphan.effectif_id,
+            existing_ml: crossMlOrphan.mission_locale_id,
+            incoming_effectif: newEffectifId,
+            incoming_organisme: organismeId,
+            incoming_source: source,
+          },
+          "declareCfaEffectifRupture: cross-ML migration ERP→DECA bloquée, patch en place"
+        );
+        await missionLocaleEffectifsDb().updateOne({ _id: crossMlOrphan._id }, { $set: ruptureSet });
+        scoreEffectifInBackground(crossMlOrphan._id, effectif);
+        return { created: false, updated: true };
+      }
+
+      const result = await migrateMlRecordEffectifId(crossMlOrphan._id, crossMlOrphan.effectif_id, effectif, {
+        extraSet: ruptureSet,
+        skipCurrentStatus: true,
+      });
+      scoreEffectifInBackground(result.keeperId, effectif);
+      return { created: false, updated: true };
+    }
   }
 
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);

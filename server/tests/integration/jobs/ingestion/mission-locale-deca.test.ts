@@ -492,14 +492,14 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     });
 
     it("DECA inséré, puis ERP non-RUPTURANT (FIN_DE_FORMATION) → migration skipped pour ne pas faire disparaître l'orphan des stats", async () => {
-      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("VILLENEUVE", "Téo", 21) });
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("TESTNOM_A", "Prenoma", 21) });
       const decaResult = await createMissionLocaleSnapshot(decaEffectif);
       expect(decaResult?.upserted).toBe(true);
 
       const dateFin = new Date("2026-01-10");
       const erpEffectif = createBaseErpEffectif({
         _id: new ObjectId(),
-        apprenant: makeApprenant("VILLENEUVE", "Téo", 21),
+        apprenant: makeApprenant("TESTNOM_A", "Prenoma", 21),
         organisme_id: decaEffectif.organisme_id,
         _computed: {
           organisme: { uai: UAI, siret: SIRET, region: "11" },
@@ -525,11 +525,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     });
 
     it("Deux ERP pour même personne, même ML → premier reste, second rejeté", async () => {
-      const erp1 = createBaseErpEffectif({ apprenant: makeApprenant("GARCIA", "Lucas", 20) });
+      const erp1 = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_B", "Prenomb", 20) });
       const result1 = await createMissionLocaleSnapshot(erp1);
       expect(result1?.upserted).toBe(true);
 
-      const erp2 = createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("GARCIA", "Lucas", 20) });
+      const erp2 = createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("TESTNOM_B", "Prenomb", 20) });
       const result2 = await createMissionLocaleSnapshot(erp2);
       expect(result2?.upserted).toBe(false);
 
@@ -567,7 +567,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
         }) as any;
       });
 
-      const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("MOREAU", "Alice", 20) });
+      const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_C", "Prenomc", 20) });
       const result = await createMissionLocaleSnapshot(erpEffectif);
 
       // Doit retourner upserted: false sans throw
@@ -578,7 +578,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
 
     it("Erreur non-E11000 après soft-delete → restaure le record soft-deleted et throw", async () => {
       // D'abord insérer un DECA
-      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("LAMBERT", "Hugo", 21) });
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("TESTNOM_D", "Prenomd", 21) });
       const decaResult = await createMissionLocaleSnapshot(decaEffectif);
       expect(decaResult?.upserted).toBe(true);
 
@@ -607,7 +607,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // L'ERP va soft-delete le DECA mais l'upsert va échouer
       const erpEffectif = createBaseErpEffectif({
         _id: new ObjectId(),
-        apprenant: makeApprenant("LAMBERT", "Hugo", 21),
+        apprenant: makeApprenant("TESTNOM_D", "Prenomd", 21),
       });
       await expect(createMissionLocaleSnapshot(erpEffectif)).rejects.toThrow("Simulated connection error");
 
@@ -639,13 +639,13 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     });
 
     it("ERP dans ML-A, puis ERP pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
-      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("LEROY", "Sophie", 21) });
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_E", "Prenome", 21) });
       const result1 = await createMissionLocaleSnapshot(erpML1);
       expect(result1?.upserted).toBe(true);
 
       const erpML2 = createBaseErpEffectif({
         _id: new ObjectId(),
-        apprenant: makeApprenant("LEROY", "Sophie", 21, ML_ID_2),
+        apprenant: makeApprenant("TESTNOM_E", "Prenome", 21, ML_ID_2),
       });
       const result2 = await createMissionLocaleSnapshot(erpML2);
       expect(result2?.upserted).toBe(true);
@@ -660,13 +660,13 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     });
 
     it("ERP dans ML-A, puis DECA pour même personne dans ML-B → DECA rejeté, ERP intact", async () => {
-      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("BERNARD", "Luc", 23) });
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_F", "Prenomf", 23) });
       const result1 = await createMissionLocaleSnapshot(erpML1);
       expect(result1?.upserted).toBe(true);
 
       const decaML2 = createBaseDecaEffectif({
         _id: new ObjectId(),
-        apprenant: makeApprenant("BERNARD", "Luc", 23, ML_ID_2),
+        apprenant: makeApprenant("TESTNOM_F", "Prenomf", 23, ML_ID_2),
       });
       const result2 = await createMissionLocaleSnapshot(decaML2);
       expect(result2?.upserted).toBe(false);
@@ -678,14 +678,50 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
     });
 
+    it("ERP avec cfa_rupture_declaration dans ML-A, puis ingestion ERP dans ML-B → ancien préservé (pas de ping-pong)", async () => {
+      // Empêche le cron d'ingestion de défaire une migration cross-ML déclarée par un CFA.
+      const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_G", "Prenomg", 20) });
+      const result1 = await createMissionLocaleSnapshot(erpML1);
+      expect(result1?.upserted).toBe(true);
+
+      // Simule une rupture déclarée par un CFA sur ce record.
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erpML1._id },
+        {
+          $set: {
+            cfa_rupture_declaration: {
+              date_rupture: new Date("2026-02-10"),
+              declared_at: new Date(),
+              declared_by: new ObjectId(),
+            },
+          },
+        }
+      );
+
+      // Nouvelle ingestion ERP pour la même personne sur une autre ML (le CFA-A re-transmet).
+      const erpML2 = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("TESTNOM_G", "Prenomg", 20, ML_ID_2),
+      });
+      const result2 = await createMissionLocaleSnapshot(erpML2);
+      expect(result2?.upserted).toBe(false);
+
+      // Le record existant reste actif, intact, avec sa rupture.
+      const allMlEffectifs = await missionLocaleEffectifsDb().find({}).toArray();
+      const active = allMlEffectifs.filter((e) => !e.soft_deleted);
+      expect(active.length).toBe(1);
+      expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
+      expect(active[0].cfa_rupture_declaration).toBeTruthy();
+    });
+
     it("DECA dans ML-A, puis DECA pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
-      const decaML1 = createBaseDecaEffectif({ apprenant: makeApprenant("PETIT", "Emma", 18) });
+      const decaML1 = createBaseDecaEffectif({ apprenant: makeApprenant("TESTNOM_H", "Prenomh", 18) });
       const result1 = await createMissionLocaleSnapshot(decaML1);
       expect(result1?.upserted).toBe(true);
 
       const decaML2 = createBaseDecaEffectif({
         _id: new ObjectId(),
-        apprenant: makeApprenant("PETIT", "Emma", 18, ML_ID_2),
+        apprenant: makeApprenant("TESTNOM_H", "Prenomh", 18, ML_ID_2),
       });
       const result2 = await createMissionLocaleSnapshot(decaML2);
       expect(result2?.upserted).toBe(true);
@@ -705,11 +741,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // Premier record avec date_de_naissance à 23:00 UTC (= minuit CET, artefact timezone)
       const firstEffectif = createBaseDecaEffectif({
         apprenant: {
-          nom: "CHAMBARD",
-          prenom: "Paul",
+          nom: "TESTNOM_I",
+          prenom: "Prenomi",
           date_de_naissance: new Date("2007-01-08T23:00:00Z"),
           telephone: "0612345678",
-          courriel: "paul@example.com",
+          courriel: "prenomi@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -723,11 +759,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const secondEffectif = createBaseDecaEffectif({
         _id: new ObjectId(),
         apprenant: {
-          nom: "CHAMBARD",
-          prenom: "Paul",
+          nom: "TESTNOM_I",
+          prenom: "Prenomi",
           date_de_naissance: new Date("2007-01-09T00:00:00Z"),
           telephone: "0612345678",
-          courriel: "paul@example.com",
+          courriel: "prenomi@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -748,11 +784,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     it("Bloque un doublon cross-source avec date_de_naissance décalée CEST (22:00 UTC vs 00:00 UTC)", async () => {
       const firstEffectif = createBaseDecaEffectif({
         apprenant: {
-          nom: "TOTTEL",
-          prenom: "Corentin",
+          nom: "TESTNOM_J",
+          prenom: "Prenomj",
           date_de_naissance: new Date("2009-06-25T22:00:00Z"),
           telephone: "0612345678",
-          courriel: "corentin@example.com",
+          courriel: "prenomj@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -765,11 +801,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const secondEffectif = createBaseDecaEffectif({
         _id: new ObjectId(),
         apprenant: {
-          nom: "TOTTEL",
-          prenom: "Corentin",
+          nom: "TESTNOM_J",
+          prenom: "Prenomj",
           date_de_naissance: new Date("2009-06-26T00:00:00Z"),
           telephone: "0612345678",
-          courriel: "corentin@example.com",
+          courriel: "prenomj@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -789,11 +825,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
     it("Bloque un doublon même si date_rupture diffère entre les sources", async () => {
       const firstEffectif = createBaseDecaEffectif({
         apprenant: {
-          nom: "MEDDOUR",
-          prenom: "Mohand",
+          nom: "TESTNOM_K",
+          prenom: "Prenomk",
           date_de_naissance: new Date("2007-02-19T23:00:00Z"),
           telephone: "0612345678",
-          courriel: "mohand@example.com",
+          courriel: "prenomk@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -825,11 +861,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const secondEffectif = createBaseDecaEffectif({
         _id: new ObjectId(),
         apprenant: {
-          nom: "MEDDOUR",
-          prenom: "Mohand",
+          nom: "TESTNOM_K",
+          prenom: "Prenomk",
           date_de_naissance: new Date("2007-02-20T00:00:00Z"),
           telephone: "0612345678",
-          courriel: "mohand@example.com",
+          courriel: "prenomk@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -868,11 +904,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // DECA arrive en premier
       const decaEffectif = createBaseDecaEffectif({
         apprenant: {
-          nom: "FORTIN",
-          prenom: "Alyssia",
+          nom: "TESTNOM_L",
+          prenom: "Prenoml",
           date_de_naissance: new Date("2007-10-17T00:00:00Z"),
           telephone: null as any,
-          courriel: "alyssia@iloud.com",
+          courriel: "prenoml@iloud.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -885,11 +921,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // ERP arrive ensuite pour la même personne (avec tel + bon email)
       const erpEffectif = createBaseErpEffectif({
         apprenant: {
-          nom: "FORTIN",
-          prenom: "Alyssia",
+          nom: "TESTNOM_L",
+          prenom: "Prenoml",
           date_de_naissance: new Date("2007-10-16T22:00:00Z"),
           telephone: "0627845664",
-          courriel: "alyssia@icloud.com",
+          courriel: "prenoml@icloud.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -912,11 +948,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // ERP arrive en premier
       const erpEffectif = createBaseErpEffectif({
         apprenant: {
-          nom: "BONNEAU",
-          prenom: "Ida",
+          nom: "TESTNOM_M",
+          prenom: "Prenomm",
           date_de_naissance: new Date("2009-03-27T23:00:00Z"),
           telephone: "0612345678",
-          courriel: "ida@example.com",
+          courriel: "prenomm@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -930,11 +966,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const decaEffectif = createBaseDecaEffectif({
         _id: new ObjectId(),
         apprenant: {
-          nom: "BONNEAU",
-          prenom: "Ida",
+          nom: "TESTNOM_M",
+          prenom: "Prenomm",
           date_de_naissance: new Date("2009-03-28T00:00:00Z"),
           telephone: "0612345678",
-          courriel: "ida@example.com",
+          courriel: "prenomm@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -955,11 +991,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // DECA arrive en premier
       const decaEffectif = createBaseDecaEffectif({
         apprenant: {
-          nom: "BRUNSON",
-          prenom: "Mathis",
+          nom: "TESTNOM_N",
+          prenom: "Prenomn",
           date_de_naissance: new Date("2005-08-22T00:00:00Z"),
           telephone: "0612345678",
-          courriel: "mathis@example.com",
+          courriel: "prenomn@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },
@@ -977,11 +1013,11 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // ERP arrive ensuite
       const erpEffectif = createBaseErpEffectif({
         apprenant: {
-          nom: "BRUNSON",
-          prenom: "Mathis",
+          nom: "TESTNOM_N",
+          prenom: "Prenomn",
           date_de_naissance: new Date("2005-08-21T22:00:00Z"),
           telephone: "0698765432",
-          courriel: "mathis@example.com",
+          courriel: "prenomn@example.com",
           historique_statut: [],
           has_nir: false,
           adresse: { code_postal: "75001", mission_locale_id: ML_ID },

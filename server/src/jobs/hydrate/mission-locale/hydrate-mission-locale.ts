@@ -17,6 +17,7 @@ import {
   sortKeeperPriority,
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
@@ -542,6 +543,203 @@ export const migrateOrphanMlRecordsDecaToErp = async () => {
     skippedMissingFields,
   };
   logger.info(summary, "migrateOrphanMlRecordsDecaToErp done");
+  return summary;
+};
+
+/**
+ * Repoint les ML records orphans vers l'effectif le plus récent de la même famille
+ * responsable/formateurs (cas double-ingestion). Skip les records avec cfa_rupture_declaration
+ * (déjà revendiqués par un CFA).
+ */
+export const migrateOrphanMlRecordsCrossFamily = async () => {
+  let scanned = 0;
+  let migrated = 0;
+  let mergedIntoSquatter = 0;
+  let skippedHasRuptureDeclaration = 0;
+  let skippedNonRupturant = 0;
+  let skippedNoFamily = 0;
+  let skippedNoCandidate = 0;
+  let skippedAlreadyOnBest = 0;
+  let skippedMissingFields = 0;
+
+  const familyCache = new Map<string, ObjectId[]>();
+  const getFamily = async (orgId: ObjectId): Promise<ObjectId[]> => {
+    const key = orgId.toString();
+    const cached = familyCache.get(key);
+    if (cached) return cached;
+    const family = await getFamilyOrganismeIds(orgId);
+    familyCache.set(key, family);
+    return family;
+  };
+
+  // Cache LRU : pré-normalisation JS-side, robuste aux effectifs legacy non normalisés.
+  type IndexedEffectif = {
+    _id: ObjectId;
+    organisme_id: ObjectId;
+    updated_at: Date | null;
+    normalized: ReturnType<typeof normalisePersonIdentifiant>;
+  };
+  const ORG_CACHE_MAX = 50;
+  const orgIndexCache = new Map<string, IndexedEffectif[]>();
+
+  const loadOrg = async (orgId: ObjectId): Promise<IndexedEffectif[]> => {
+    const key = orgId.toString();
+    const cached = orgIndexCache.get(key);
+    if (cached) {
+      orgIndexCache.delete(key);
+      orgIndexCache.set(key, cached);
+      return cached;
+    }
+    const projected = await effectifsDb()
+      .find(
+        { organisme_id: orgId, "apprenant.nom": { $exists: true } },
+        {
+          projection: {
+            _id: 1,
+            organisme_id: 1,
+            updated_at: 1,
+            "apprenant.nom": 1,
+            "apprenant.prenom": 1,
+            "apprenant.date_de_naissance": 1,
+          },
+        }
+      )
+      .toArray();
+    const indexed: IndexedEffectif[] = [];
+    for (const e of projected) {
+      if (!e.apprenant?.nom || !e.apprenant?.prenom || !e.apprenant?.date_de_naissance) continue;
+      indexed.push({
+        _id: e._id,
+        organisme_id: e.organisme_id,
+        updated_at: e.updated_at ?? null,
+        normalized: normalisePersonIdentifiant({
+          nom: e.apprenant.nom,
+          prenom: e.apprenant.prenom,
+          date_de_naissance: e.apprenant.date_de_naissance,
+        }),
+      });
+    }
+    orgIndexCache.set(key, indexed);
+    if (orgIndexCache.size > ORG_CACHE_MAX) {
+      const oldest = orgIndexCache.keys().next().value;
+      if (oldest) orgIndexCache.delete(oldest);
+    }
+    return indexed;
+  };
+
+  const cursor = missionLocaleEffectifsDb()
+    .find({
+      soft_deleted: { $ne: true },
+      "identifiant_normalise.nom": { $exists: true },
+    })
+    .sort({ _id: 1 })
+    .addCursorFlag("noCursorTimeout", true);
+
+  try {
+    while (await cursor.hasNext()) {
+      const mlRecord = await cursor.next();
+      if (!mlRecord) continue;
+      scanned++;
+
+      if (mlRecord.cfa_rupture_declaration) {
+        skippedHasRuptureDeclaration++;
+        continue;
+      }
+
+      const ddn = mlRecord.identifiant_normalise?.date_de_naissance;
+      const nom = mlRecord.identifiant_normalise?.nom;
+      const prenom = mlRecord.identifiant_normalise?.prenom;
+      const currentOrgId = mlRecord.effectif_snapshot?.organisme_id;
+      if (!ddn || !nom || !prenom || !currentOrgId) {
+        skippedMissingFields++;
+        continue;
+      }
+
+      const family = await getFamily(currentOrgId);
+      if (family.length <= 1) {
+        skippedNoFamily++;
+        continue;
+      }
+
+      const familyOthers = family.filter((id) => !id.equals(currentOrgId));
+      const indexedPerOrg = await Promise.all(familyOthers.map(loadOrg));
+      const matches = indexedPerOrg
+        .flat()
+        .filter(
+          (c) =>
+            c.normalized.nom === nom &&
+            c.normalized.prenom === prenom &&
+            c.normalized.date_de_naissance.getTime() === ddn.getTime()
+        );
+
+      if (matches.length === 0) {
+        skippedNoCandidate++;
+        continue;
+      }
+
+      matches.sort((a, b) => (b.updated_at?.getTime() ?? 0) - (a.updated_at?.getTime() ?? 0));
+      const best = matches[0];
+
+      // Skip si l'effectif actuel est déjà au moins aussi récent (pas de repoint vers plus ancien).
+      const currentEffectif = await effectifsDb().findOne(
+        { _id: mlRecord.effectif_id },
+        { projection: { updated_at: 1 } }
+      );
+      const currentUpdatedAt = currentEffectif?.updated_at?.getTime() ?? 0;
+      const bestUpdatedAt = best.updated_at?.getTime() ?? 0;
+      if (bestUpdatedAt <= currentUpdatedAt) {
+        skippedAlreadyOnBest++;
+        continue;
+      }
+
+      const newEffectif = await effectifsDb().findOne({ _id: best._id });
+      if (!newEffectif) {
+        skippedNoCandidate++;
+        continue;
+      }
+
+      const result = await migrateMlRecordEffectifId(mlRecord._id, mlRecord.effectif_id, newEffectif);
+      if (result.skipped) {
+        skippedNonRupturant++;
+      } else if (result.keeperId.equals(mlRecord._id)) {
+        migrated++;
+      } else {
+        mergedIntoSquatter++;
+      }
+
+      if (scanned % 1000 === 0) {
+        logger.info(
+          {
+            scanned,
+            migrated,
+            mergedIntoSquatter,
+            skippedHasRuptureDeclaration,
+            skippedNonRupturant,
+            skippedNoFamily,
+            skippedNoCandidate,
+            skippedAlreadyOnBest,
+            skippedMissingFields,
+          },
+          "migrateOrphanMlRecordsCrossFamily progress"
+        );
+      }
+    }
+  } finally {
+    await cursor.close();
+  }
+
+  const summary = {
+    scanned,
+    migrated,
+    mergedIntoSquatter,
+    skippedHasRuptureDeclaration,
+    skippedNonRupturant,
+    skippedNoFamily,
+    skippedNoCandidate,
+    skippedAlreadyOnBest,
+    skippedMissingFields,
+  };
+  logger.info(summary, "migrateOrphanMlRecordsCrossFamily done");
   return summary;
 };
 

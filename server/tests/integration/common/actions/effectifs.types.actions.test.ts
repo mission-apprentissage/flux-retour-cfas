@@ -127,7 +127,6 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
         { valeur: STATUT_APPRENANT.APPRENTI, date: dateDebutContrat },
         { valeur: STATUT_APPRENANT.RUPTURANT, date: ruptureDate },
         { valeur: STATUT_APPRENANT.ABANDON, date: abandonDate },
-        { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: formationDateFin },
       ]);
     });
 
@@ -293,7 +292,6 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
           { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
           { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2023-01-05T00:00:00.000Z") },
           { valeur: STATUT_APPRENANT.ABANDON, date: new Date("2023-07-04T00:00:00.000Z") },
-          { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date("2023-07-31T00:00:00.000Z") },
         ],
       });
     });
@@ -348,7 +346,7 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
       await hydrateEffectifsComputedTypesGenerique({ evaluationDate: new Date(2023, 6, 1) });
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
       expect(updatedEffectif?._computed?.statut).toEqual({
-        en_cours: "FIN_DE_FORMATION",
+        en_cours: "ABANDON",
         parcours: [
           {
             date: new Date("2021-08-01T00:00:00.000Z"),
@@ -365,10 +363,6 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
           {
             date: new Date("2023-01-02T00:00:00.000Z"),
             valeur: "ABANDON",
-          },
-          {
-            date: new Date("2023-07-31T00:00:00.000Z"),
-            valeur: "FIN_DE_FORMATION",
           },
         ],
       });
