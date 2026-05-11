@@ -331,6 +331,15 @@ program
   .action(createJobAction("hydrate:effectifs:update_computed_statut"));
 
 program
+  .command("hydrate:effectifs:update_all_computed_statut")
+  .description(
+    "Recalcule _computed.statut sur tous les effectifs (sans filtre updated_at). Optionnel : --id pour cibler un organisme."
+  )
+  .option("--id <string>", "Id de l'organisme", (organismeId) => organismeId, null)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:effectifs:update_all_computed_statut"));
+
+program
   .command("tmp:whatsapp:send-injoignables")
   .description("Envoyer un WhatsApp aux effectifs injoignables (rupture < 3 mois, CONTACTE_SANS_RETOUR < 1 mois)")
   .option("--dry-run", "Affiche le nombre d'effectifs éligibles sans envoyer", false)
