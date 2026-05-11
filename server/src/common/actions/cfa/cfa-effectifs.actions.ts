@@ -607,7 +607,9 @@ export async function declareCfaEffectifRupture(
     const incomingIsDeca = source === "effectifsDECA";
 
     let keeperId = existing._id;
-    if (isMigration && existingIsDeca && !incomingIsDeca) {
+    // Repointer effectif_id sur mismatch sinon le toggle reste OFF (lookup par effectif_id).
+    // Skip si dégradation ERP→DECA — priorité ERP > DECA.
+    if (isMigration && !(incomingIsDeca && !existingIsDeca)) {
       const result = await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, {
         extraSet: ruptureSet,
       });
@@ -622,7 +624,7 @@ export async function declareCfaEffectifRupture(
             incoming_effectif: newEffectifId,
             incoming_source: source,
           },
-          "declareCfaEffectifRupture: mismatch effectif_id sans migration (cas non DECA→ERP)"
+          "declareCfaEffectifRupture: dégradation ERP→DECA bloquée, patch en place sans repointer effectif_id"
         );
       }
       await missionLocaleEffectifsDb().updateOne({ _id: existing._id }, { $set: ruptureSet });
@@ -643,6 +645,57 @@ export async function declareCfaEffectifRupture(
 
   if (!mlOrganisation) {
     throw Boom.badData("Impossible de déclarer en rupture : organisation Mission Locale non trouvée");
+  }
+
+  // Record orphelin sur la même ML mais rattaché à un autre CFA (ex. deux établissements
+  // d'une même CMA). Sans migration proactive, l'INSERT échouerait en E11000 et le
+  // fallback patcherait le squatter sans repointer effectif_id.
+  if (normalizedIdentifiant) {
+    const crossOrganismeOrphan = await missionLocaleEffectifsDb().findOne({
+      "identifiant_normalise.nom": normalizedIdentifiant.nom,
+      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
+      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
+      mission_locale_id: mlOrganisation._id,
+      soft_deleted: { $ne: true },
+    });
+
+    if (crossOrganismeOrphan) {
+      const orphanIsDeca = isDecaSnapshot(crossOrganismeOrphan.effectif_snapshot);
+      const incomingIsDeca = source === "effectifsDECA";
+      const ruptureSet = {
+        cfa_rupture_declaration: declaration,
+        "organisme_data.rupture": true,
+        "organisme_data.reponse_at": now,
+        updated_at: now,
+      };
+
+      // Skip si dégradation ERP→DECA — priorité ERP > DECA. Patch en place.
+      if (incomingIsDeca && !orphanIsDeca) {
+        logger.warn(
+          {
+            ml_record: crossOrganismeOrphan._id,
+            existing_effectif: crossOrganismeOrphan.effectif_id,
+            existing_organisme: crossOrganismeOrphan.effectif_snapshot?.organisme_id,
+            incoming_effectif: newEffectifId,
+            incoming_organisme: organismeId,
+            incoming_source: source,
+          },
+          "declareCfaEffectifRupture: cross-organisme migration ERP→DECA bloquée, patch en place"
+        );
+        await missionLocaleEffectifsDb().updateOne({ _id: crossOrganismeOrphan._id }, { $set: ruptureSet });
+        scoreEffectifInBackground(crossOrganismeOrphan._id, effectif);
+        return { created: false, updated: true };
+      }
+
+      const result = await migrateMlRecordEffectifId(
+        crossOrganismeOrphan._id,
+        crossOrganismeOrphan.effectif_id,
+        effectif,
+        { extraSet: ruptureSet }
+      );
+      scoreEffectifInBackground(result.keeperId, effectif);
+      return { created: false, updated: true };
+    }
   }
 
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
