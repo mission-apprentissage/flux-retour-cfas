@@ -1,0 +1,16 @@
+.bin/scripts/run-playbook.sh:generic-password-assignment:password
+.bin/scripts/sentry-deploy.sh:generic-token-assignment:AUTH_TOKEN
+.bin/scripts/sentry-release.sh:generic-token-assignment:AUTH_TOKEN
+.bin/zsh-completion:generic-password-assignment:password
+.infra/.env_ui:generic-secret-assignment:SECRET_KEY
+.infra/ansible/roles/setup/files/app/.overrides/common/mongodb/docker-entrypoint-initdb.d/01_create_users.js:generic-password-assignment:pwd
+.infra/ansible/roles/setup/tasks/_create-sudoers.yml:generic-password-assignment:password
+.infra/docker-compose.production.yml:generic-password-assignment:PASSWORD
+.infra/docker-compose.production.yml:generic-secret-assignment:SECRET_KEY
+.infra/scripts/vault/generate-vault-password.sh:generic-password-assignment:password
+server/src/common/constants/jobsConstants.js:generic-token-assignment:Token
+server/src/common/constants/userEventsConstants.js:generic-password-assignment:PASSWORD
+server/src/common/constants/usersConstants.js:generic-password-assignment:PASSWORD
+server/src/common/model/constants/index.js:generic-token-assignment:Token
+ui/common/constants/localStorageConstants.js:generic-token-assignment:ACCESS_TOKEN
+ui/src/common/constants/localStorageConstants.js:generic-token-assignment:ACCESS_TOKEN
