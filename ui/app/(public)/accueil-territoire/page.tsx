@@ -2,13 +2,13 @@ import { PAGES } from "@/app/_utils/routes.utils";
 
 import { BaseRupturesContratSection } from "../_components/shared/BaseRupturesContratSection";
 import { EtablissementsConnectesSection } from "../_components/shared/EtablissementsConnectesSection";
-import { FAQSection } from "../_components/shared/FAQSection";
 import { FooterCTASection } from "../_components/shared/FooterCTASection";
 import { TemoignagesSection } from "../_components/shared/TemoignagesSection";
 import { VideoSection } from "../_components/shared/VideoSection";
 import landingStyles from "../landing-page.module.scss";
 
 import { AccesDonneesSection } from "./_components/AccesDonneesSection";
+import { FAQSection } from "./_components/FAQSection";
 import { HeroSection } from "./_components/HeroSection";
 import { MapStatsSection } from "./_components/MapStatsSection";
 

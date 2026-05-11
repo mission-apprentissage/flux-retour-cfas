@@ -1,10 +1,10 @@
 import { PAGES } from "@/app/_utils/routes.utils";
 
 import { ConnexionSection } from "./_components/ConnexionSection";
+import { FAQSection } from "./_components/FAQSection";
 import { FooterCTASection } from "./_components/FooterCTASection";
 import { HeroSection } from "./_components/HeroSection";
 import { BaseRupturesContratSection } from "./_components/shared/BaseRupturesContratSection";
-import { FAQSection } from "./_components/shared/FAQSection";
 import { TemoignagesSection } from "./_components/shared/TemoignagesSection";
 import { VideoSection } from "./_components/shared/VideoSection";
 import { SponsorsSection } from "./_components/SponsorsSection";

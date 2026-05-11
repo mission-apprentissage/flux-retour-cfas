@@ -1,11 +1,11 @@
 import { PAGES } from "@/app/_utils/routes.utils";
 
 import { EtablissementsConnectesSection } from "../_components/shared/EtablissementsConnectesSection";
-import { FAQSection } from "../_components/shared/FAQSection";
 import { FooterCTASection } from "../_components/shared/FooterCTASection";
 import { TemoignagesSection } from "../_components/shared/TemoignagesSection";
 import landingStyles from "../landing-page.module.scss";
 
+import { FAQSection } from "./_components/FAQSection";
 import { FeaturesSection } from "./_components/FeaturesSection";
 import { HeroSection } from "./_components/HeroSection";
 import { PourquoiCollaborerSection } from "./_components/PourquoiCollaborerSection";
