@@ -20,11 +20,14 @@ export function MapStatsSection() {
         </div>
       </div>
       <div className={styles.titleBlock}>
-        <h2 className={styles.title}>+200 Missions Locales · +XXX Établissements de formation</h2>
+        <h2 className={styles.title}>
+          +200 Missions Locales <br />
+          +1000 Établissements de formation
+        </h2>
         <p className={styles.subtitle}>
-          Une grande partie d’entre eux ne bénéficie d’aucun accompagnement. Les relations entre les CFA, les Missions
-          Locales et l’ensemble des acteurs territoriaux existent déjà, le Tableau de bord leur donne un espace de
-          centralisation pour faciliter l’accès à l’information et la collaboration.
+          Les relations entre les CFA, les Missions Locales et l’ensemble des acteurs territoriaux existent déjà, le
+          Tableau de bord leur donne un espace de centralisation pour faciliter l’accès à l’information et la
+          collaboration.
         </p>
       </div>
       <div className={styles.cardDeploiement}>

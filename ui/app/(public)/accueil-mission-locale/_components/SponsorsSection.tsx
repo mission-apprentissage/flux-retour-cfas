@@ -13,10 +13,9 @@ const SPONSORS: Array<Sponsor> = [
     description: "Un service co-construit avec les acteurs terrain CFA et Missions Locales directement",
   },
   {
-    image: null,
-    title: "Des CFA engagés",
-    description:
-      "Le service se déploie sur les territoires avec des CFA engagés pour qualifier les dossiers de rupture et collaborer.",
+    image: { src: "/images/home/cfas.png", width: 360, height: 246 },
+    title: "+1000 CFA",
+    description: "De nombreux CFA sont déjà connectés sur tout le territoire.",
   },
 ];
 
