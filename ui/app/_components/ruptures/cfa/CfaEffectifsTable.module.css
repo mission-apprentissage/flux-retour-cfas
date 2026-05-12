@@ -19,11 +19,11 @@
   max-width: 260px;
 }
 
-.plus25Row {
+.outOfRangeRow {
   opacity: 0.5;
 }
 
-.plus25Badge {
+.outOfRangeBadge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -36,7 +36,7 @@
   white-space: nowrap;
 }
 
-.plus25Tooltip {
+.outOfRangeTooltip {
   text-transform: none;
 }
 
