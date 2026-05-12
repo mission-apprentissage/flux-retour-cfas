@@ -10,6 +10,8 @@ type TypeOrganisationInscription = "missions_locales" | "operateur_public" | "or
 
 export function FooterCTASection({ linkInscription }: { linkInscription?: TypeOrganisationInscription }) {
   const inscriptionHref = PAGES.dynamic.authInscription({ typeOrganisation: linkInscription }).getPath();
+  const demoMailTo = `mailto:tableau-de-bord@apprentissage.beta.gouv.fr?subject=${encodeURIComponent("Tableau de bord de l’apprentissage | Demande de démo")}`;
+
   return (
     <section className={styles.section}>
       <div className={styles.illustrationBand}>
@@ -46,7 +48,7 @@ export function FooterCTASection({ linkInscription }: { linkInscription?: TypeOr
               Inscrire mon établissement
             </Button>
             <DsfrLink
-              href={inscriptionHref}
+              href={demoMailTo}
               className={styles.demoLink}
               aria-label="Demander une démo : Commencez à collaborer sur le Tableau de bord de l’apprentissage."
             >

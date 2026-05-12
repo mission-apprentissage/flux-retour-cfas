@@ -1,4 +1,5 @@
-import Button from "@codegouvfr/react-dsfr/Button";
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Image from "next/image";
 
 import styles from "./map-stats-section.module.scss";
@@ -39,17 +40,11 @@ export function MapStatsSection() {
               les Missions Locales et/ou les établissements de formation de votre territoire.
             </p>
           </div>
-          <Button
-            iconId="fr-icon-external-link-line"
-            iconPosition="right"
-            linkProps={{
-              href: "https://mission-apprentissage.notion.site/Kit-de-d-ploiement-Tableau-de-bord-de-l-apprentissage",
-              target: "_blank",
-              rel: "noopener noreferrer",
-            }}
-          >
-            Consulter le kit de déploiement
-          </Button>
+          <Tooltip kind="hover" title="Bientôt disponible">
+            <Button iconId="fr-icon-external-link-line" iconPosition="right">
+              Consulter le kit de déploiement
+            </Button>
+          </Tooltip>
         </div>
         <div className={styles.cardSeparator} aria-hidden="true" />
         <div className={styles.cardColumn}>
