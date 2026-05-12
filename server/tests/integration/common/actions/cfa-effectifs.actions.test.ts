@@ -197,18 +197,31 @@ describe("CFA Effectifs Actions", () => {
       expect(result.filters.formations).toContain("CAP Boulangerie");
     });
 
-    it("exclut les effectifs de moins de 16 ans", async () => {
+    it("marque les effectifs de moins de 16 ans et plus de 25 ans", async () => {
       await insertEffectif({
         apprenant: { nom: "JEUNE", prenom: "Test", date_de_naissance: new Date(new Date().getFullYear() - 14, 0, 1) },
       });
       await insertEffectif({
-        apprenant: { nom: "ADULTE", prenom: "Test" },
+        apprenant: {
+          nom: "DANSCIBLE",
+          prenom: "Test",
+          date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
+        },
+      });
+      await insertEffectif({
+        apprenant: { nom: "AGE", prenom: "Test", date_de_naissance: new Date(new Date().getFullYear() - 30, 0, 1) },
       });
 
       const result = await getCfaEffectifs(organisation, false, defaultParams);
 
-      expect(result.pagination.total).toBe(1);
-      expect(result.effectifs[0].nom).toBe("ADULTE");
+      expect(result.pagination.total).toBe(3);
+      const byNom = Object.fromEntries(result.effectifs.map((e) => [e.nom, e]));
+      expect(byNom.JEUNE.is_moins_16).toBe(true);
+      expect(byNom.JEUNE.is_plus_25).toBe(false);
+      expect(byNom.DANSCIBLE.is_moins_16).toBe(false);
+      expect(byNom.DANSCIBLE.is_plus_25).toBe(false);
+      expect(byNom.AGE.is_moins_16).toBe(false);
+      expect(byNom.AGE.is_plus_25).toBe(true);
     });
 
     it("date_rupture remontée pour un effectif ABANDON avec contrat rupturé", async () => {

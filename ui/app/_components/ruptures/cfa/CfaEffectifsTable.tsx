@@ -104,14 +104,15 @@ export function CfaEffectifsTable({
         </thead>
         <tbody>
           {effectifs.map((e) => {
-            const rowClass = e.is_plus_25 ? styles.plus25Row : undefined;
+            const isOutOfRange = e.is_plus_25 || e.is_moins_16;
+            const rowClass = isOutOfRange ? styles.outOfRangeRow : undefined;
 
             return (
               <Fragment key={e.id}>
                 <tr>
                   <td>
                     <div className={`${sharedStyles.nameCell} ${rowClass ?? ""}`}>
-                      {e.is_plus_25 ? (
+                      {isOutOfRange ? (
                         <span>
                           {e.prenom} {e.nom}
                         </span>
@@ -124,7 +125,7 @@ export function CfaEffectifsTable({
                   </td>
                   <td>
                     <div className={`${sharedStyles.nowrapCell} ${rowClass ?? ""}`}>
-                      {e.is_plus_25 ? (
+                      {isOutOfRange ? (
                         <div className={sharedStyles.ruptureToggleDisabled}>
                           <span className={sharedStyles.ruptureLabel}>{e.en_rupture ? "En rupture" : "Non"}</span>
                           <ToggleSwitch
@@ -169,15 +170,19 @@ export function CfaEffectifsTable({
                     </div>
                   </td>
                   <td>
-                    <div className={`${sharedStyles.collabCell} ${e.is_plus_25 ? "" : (rowClass ?? "")}`}>
-                      {e.is_plus_25 ? (
-                        <span className={styles.plus25Badge}>
+                    <div className={`${sharedStyles.collabCell} ${isOutOfRange ? "" : (rowClass ?? "")}`}>
+                      {isOutOfRange ? (
+                        <span className={styles.outOfRangeBadge}>
                           <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" />
-                          <span>+ de 25 ans</span>
-                          <span className={styles.plus25Tooltip}>
+                          <span>{e.is_plus_25 ? "+ de 25 ans" : "- de 16 ans"}</span>
+                          <span className={styles.outOfRangeTooltip}>
                             <Tooltip
                               kind="hover"
-                              title="Les Missions Locales s'occupent du public jeune uniquement sur la tranche des 16 à 25 ans. Les apprenants âgés de plus de 25 ans ne pourront pas être renvoyés aux services des Missions Locales et ne sont donc pas éligibles à la collaboration via le Tableau de bord."
+                              title={
+                                e.is_plus_25
+                                  ? "Les Missions Locales s'occupent du public jeune uniquement sur la tranche des 16 à 25 ans. Les apprenants âgés de plus de 25 ans ne pourront pas être renvoyés aux services des Missions Locales et ne sont donc pas éligibles à la collaboration via le Tableau de bord."
+                                  : "Les Missions Locales s'occupent du public jeune uniquement sur la tranche des 16 à 25 ans. Les apprenants âgés de moins de 16 ans ne pourront pas être renvoyés aux services des Missions Locales et ne sont donc pas éligibles à la collaboration via le Tableau de bord."
+                              }
                             />
                           </span>
                         </span>

@@ -34,19 +34,6 @@ interface CfaEffectifsQueryParams {
   formation?: string;
 }
 
-function buildAgeFilter() {
-  const now = new Date();
-  return [
-    {
-      $match: {
-        "apprenant.date_de_naissance": {
-          $lte: new Date(new Date(now).setFullYear(now.getFullYear() - 16)),
-        },
-      },
-    },
-  ];
-}
-
 function stripDiacritics(expr: Record<string, unknown>) {
   const replacements = [
     ["é", "e"],
@@ -146,8 +133,6 @@ export async function getCfaEffectifs(
     });
   }
 
-  pipeline.push(...buildAgeFilter());
-
   pipeline.push(
     {
       $addFields: {
@@ -184,6 +169,8 @@ export async function getCfaEffectifs(
 
   const plus25Cutoff = new Date();
   plus25Cutoff.setFullYear(plus25Cutoff.getFullYear() - 25);
+  const moins16Cutoff = new Date();
+  moins16Cutoff.setFullYear(moins16Cutoff.getFullYear() - 16);
   pipeline.push({
     $addFields: {
       is_plus_25: {
@@ -192,6 +179,7 @@ export async function getCfaEffectifs(
           { $ne: [{ $ifNull: ["$apprenant.rqth", false] }, true] },
         ],
       },
+      is_moins_16: { $gt: ["$apprenant.date_de_naissance", moins16Cutoff] },
       en_rupture: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
       date_rupture_computed: {
         // ABANDON inclus : rupture > 180j toujours pertinente à afficher (sinon date masquée
@@ -360,6 +348,7 @@ export async function getCfaEffectifs(
             prenom: "$apprenant.prenom",
             en_rupture: 1,
             is_plus_25: 1,
+            is_moins_16: 1,
             date_rupture: "$date_rupture_computed",
             libelle_formation: "$formation.libelle_long",
             formation_niveau_libelle: { $ifNull: ["$formation.niveau_libelle", null] },

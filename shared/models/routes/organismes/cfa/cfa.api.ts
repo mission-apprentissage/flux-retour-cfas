@@ -59,6 +59,7 @@ export interface ICfaEffectif {
   prenom: string;
   en_rupture: boolean;
   is_plus_25: boolean;
+  is_moins_16: boolean;
   date_rupture: string | null;
   libelle_formation: string;
   formation_niveau_libelle: string | null;
