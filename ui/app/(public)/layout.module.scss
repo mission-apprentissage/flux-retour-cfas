@@ -1,0 +1,22 @@
+@use "@/styles/breakpoints" as *;
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.main {
+  flex-grow: 1;
+  min-height: 40vh;
+  margin-top: 2rem;
+
+  @include respond-from(md) {
+    margin-top: 2rem;
+  }
+
+  @include respond-from(lg) {
+    margin-top: 4rem;
+  }
+}

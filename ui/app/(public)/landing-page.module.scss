@@ -1,0 +1,5 @@
+@use "./landing-shared" as *;
+
+.mainContainer {
+  @extend %landing-main-container;
+}

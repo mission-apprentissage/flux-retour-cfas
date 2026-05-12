@@ -116,7 +116,7 @@ Voici les étapes pour créer votre clé OpenPGP :
 Avant de lancer l'application, assurez-vous d'installer toutes les dépendances nécessaires en exécutant la commande suivante :
 
 ```bash
-yarn
+yarn install
 yarn setup
 yarn classifier:install
 ```

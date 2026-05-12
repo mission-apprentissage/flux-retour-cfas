@@ -1,0 +1,71 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  margin-right: 0.5rem;
+
+  margin-left: 0.5rem;
+  background: linear-gradient(0deg, #ececfe -22.59%, #fff 166.66%), #d9d9d9;
+  border-radius: 12px;
+
+  @include respond-from(md) {
+    width: var(--container-xl);
+    margin: auto;
+    border-radius: 18px;
+  }
+}
+
+.imageContainer {
+  width: var(--container-sm);
+  max-width: var(--container-sm);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  width: 100%;
+  max-width: var(--container-md);
+  margin-top: -4rem;
+  text-align: center;
+
+  @include respond-from(md) {
+    margin-top: -7rem;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+.description {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+}

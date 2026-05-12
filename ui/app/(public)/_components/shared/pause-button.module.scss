@@ -1,0 +1,24 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.pauseButton {
+  @extend %landing-action-button;
+  z-index: 1;
+  max-width: calc(100% - 1.5rem);
+  text-align: left;
+  background: transparent;
+
+  @include respond-from(md) {
+    right: 1.5rem;
+    bottom: 1.5rem;
+    max-width: calc(100% - 3rem);
+  }
+}
+
+.pauseButtonLabel {
+  display: none;
+
+  @include respond-from(md) {
+    display: inline;
+  }
+}

@@ -1,0 +1,225 @@
+@use "@/styles/breakpoints" as *;
+@use "../../landing-shared" as *;
+
+.section {
+  @extend %landing-section;
+  padding: 0;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  max-width: var(--container-sm);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+
+  @include respond-from(md) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.titleHighlight {
+  padding-top: 0;
+  padding-right: 0.375rem;
+  padding-bottom: 0;
+  padding-left: 0.375rem;
+  background-color: transparent;
+  background-image: linear-gradient(
+    var(--light-decisions-background-background-open-blue-france, #e3e3fd),
+    var(--light-decisions-background-background-open-blue-france, #e3e3fd)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% calc(100% - 0.2em);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.heroBlock {
+  width: 100%;
+  margin-top: 5rem;
+  background: linear-gradient(180deg, #adadf9 50%, rgba(173, 173, 249, 0) 100%);
+
+  @include respond-from(md) {
+    margin-top: 7.5rem;
+  }
+
+  @include respond-from(lg) {
+    margin-top: 9.375rem;
+  }
+}
+
+.figuresBand {
+  position: relative;
+  width: 100%;
+  max-width: var(--container-xl);
+  height: 9.375rem;
+  margin-top: -8.75rem;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+
+  @include respond-from(md) {
+    height: 11.25rem;
+    margin-top: -7.5rem;
+  }
+
+  @include respond-from(lg) {
+    height: 14.1875rem;
+    margin-top: -13.4375rem;
+  }
+}
+
+.cfaFigure,
+.mlFigure,
+.plante,
+.cafe {
+  position: absolute;
+  bottom: 0;
+  height: auto;
+}
+
+.cfaFigure {
+  right: calc(50% + 25px);
+  width: 6.875rem;
+  animation: slideFromLeft 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @include respond-from(md) {
+    width: 8.75rem;
+  }
+
+  @include respond-from(lg) {
+    width: 11rem;
+  }
+}
+
+.mlFigure {
+  left: calc(50% + 25px);
+  width: 7.25rem;
+  animation: slideFromRight 2000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @include respond-from(md) {
+    width: 9.25rem;
+  }
+
+  @include respond-from(lg) {
+    width: 11.5rem;
+  }
+}
+
+.cafe {
+  display: none;
+
+  @include respond-from(md) {
+    right: calc(50% + 130px);
+    display: block;
+    width: 1.5rem;
+  }
+
+  @include respond-from(lg) {
+    right: calc(50% + 225px);
+    width: 2rem;
+    margin-bottom: -1.875rem;
+  }
+}
+
+.plante {
+  display: none;
+
+  @include respond-from(md) {
+    left: calc(50% + 165px);
+    display: block;
+    width: 3.5rem;
+  }
+
+  @include respond-from(lg) {
+    left: calc(50% + 225px);
+    width: 4.5625rem;
+    margin-bottom: -0.625rem;
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    transform: translateX(-110vw);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromRight {
+  from {
+    transform: translateX(110vw);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfaFigure,
+  .mlFigure {
+    animation: none;
+  }
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+}
+
+.dashboardPreviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  max-width: calc(996px + 48px);
+  padding: 0.5rem;
+  margin: auto;
+}
+
+.dashboardPreviewMedia {
+  position: relative;
+  display: block;
+  width: min(100%, 996px);
+  overflow: hidden;
+  background-color: #a1a1f8;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px 0 rgba(0, 0, 18, 0.16);
+}
+
+.dashboardPreview {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.srOnly {
+  @extend %landing-sr-only;
+}
