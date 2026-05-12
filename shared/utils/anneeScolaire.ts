@@ -81,3 +81,15 @@ export function getAnneeScolaireFromDate(date: Date): string {
   const year = date.getUTCFullYear();
   return date.getUTCMonth() < AUGUST_MONTH_INDEX ? `${year - 1}-${year}` : `${year}-${year + 1}`;
 }
+
+/**
+ * Renvoie les années scolaires considérées "actives" pour une date donnée :
+ * l'année scolaire en cours et la précédente.
+ * Ex : 12/05/2026 → ["2025-2026", "2024-2025"]
+ */
+export function getActiveAnneesScolaires(date: Date): string[] {
+  const current = getAnneeScolaireFromDate(date);
+  const [startYear] = current.split("-").map(Number);
+  const previous = `${startYear - 1}-${startYear}`;
+  return [current, previous];
+}

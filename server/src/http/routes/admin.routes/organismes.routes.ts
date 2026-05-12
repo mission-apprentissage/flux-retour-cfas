@@ -1,9 +1,13 @@
 import Boom from "boom";
 import express from "express";
+import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
+import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes/organismes.actions";
 import {
+  activateDecaCfaPilotBatch,
+  deactivateDecaCfaPilotBatch,
   getArchivableOrganismes,
   searchOrganismesSupportInfoBySiret,
 } from "@/common/actions/organismes/organismes.admin.actions";
@@ -18,6 +22,18 @@ const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(organismesFilterSchema())
   .strict();
 type ListSchema = z.infer<typeof listSchema>;
+
+const decaCfaPilotBatchSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        siret: z.string().regex(SIRET_REGEX, "SIRET invalide (14 chiffres attendus)"),
+        uai: z.string().regex(UAI_REGEX, "UAI invalide (7 chiffres + 1 lettre)"),
+      })
+    )
+    .min(1)
+    .max(100),
+});
 
 export default () => {
   const router = express.Router();
@@ -58,6 +74,37 @@ export default () => {
   router.get("/archivables", async (_req, res) => {
     res.json(await getArchivableOrganismes());
   });
+
+  router.get(
+    "/:id/deca-cfa-pilot-eligibility",
+    validateRequestMiddleware({
+      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+    }),
+    async ({ params }, res) => {
+      const result = await checkActivationEligibility(params.id);
+      res.json(result);
+    }
+  );
+
+  router.post(
+    "/deca-cfa-pilot/activate",
+    validateRequestMiddleware({ body: decaCfaPilotBatchSchema }),
+    async (req, res) => {
+      const { items } = req.body as z.infer<typeof decaCfaPilotBatchSchema>;
+      const result = await activateDecaCfaPilotBatch(items, req.user._id.toString());
+      res.json(result);
+    }
+  );
+
+  router.post(
+    "/deca-cfa-pilot/deactivate",
+    validateRequestMiddleware({ body: decaCfaPilotBatchSchema }),
+    async (req, res) => {
+      const { items } = req.body as z.infer<typeof decaCfaPilotBatchSchema>;
+      const result = await deactivateDecaCfaPilotBatch(items, req.user._id.toString());
+      res.json(result);
+    }
+  );
 
   router.get(
     "/:id/parametrage-transmission",
