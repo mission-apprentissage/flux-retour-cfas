@@ -9,13 +9,25 @@ import { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { zArchivableOrganismesResponse } from "shared/models/routes/admin/organismes.api";
 import type { IArchivableOrganismesResponse } from "shared/models/routes/admin/organismes.api";
 
+import {
+  activateOrganisme,
+  updateMissionLocaleEffectifComputedOrganisme,
+} from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
-import { effectifsDb, formationsCatalogueDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  formationsCatalogueDb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 
 import { getTransmissionRelatedToOrganismeByDate } from "../indicateurs/transmissions/transmission.action";
+
+import { checkEligibilityForLoaded, EligibilityResult } from "./deca-cfa-eligibility";
 
 function getFormationEtablissment(formation: OffreFormation, siret: string) {
   if (formation.formateur.siret === siret) return formation.formateur;
@@ -417,4 +429,209 @@ export async function getArchivableOrganismes(): Promise<IArchivableOrganismesRe
     .toArray();
 
   return zArchivableOrganismesResponse.parse(data);
+}
+
+export type DecaCfaPilotBatchItem = { siret: string; uai: string };
+
+export type DecaCfaPilotActivateStatus =
+  | "activated"
+  | "already_active"
+  | "not_eligible"
+  | "not_found"
+  | "partial_failure";
+
+export type DecaCfaPilotDeactivateStatus = "deactivated" | "not_active" | "not_found" | "partial_failure";
+
+export type DecaCfaPilotBatchItemResult<S extends string> = {
+  input: DecaCfaPilotBatchItem;
+  status: S;
+  organismeId?: string;
+  eligibility?: EligibilityResult;
+  mlBetaActivatedAt?: Date;
+  error?: string;
+};
+
+export type DecaCfaPilotBatchResult<S extends string> = {
+  total: number;
+  counts: Record<string, number>;
+  items: DecaCfaPilotBatchItemResult<S>[];
+};
+
+function dedupeBatchItems(items: DecaCfaPilotBatchItem[]): DecaCfaPilotBatchItem[] {
+  const seen = new Set<string>();
+  const out: DecaCfaPilotBatchItem[] = [];
+  for (const item of items) {
+    const key = `${item.siret}|${item.uai}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+function aggregateCounts<S extends string>(results: DecaCfaPilotBatchItemResult<S>[]): Record<string, number> {
+  return results.reduce<Record<string, number>>((acc, r) => {
+    acc[r.status] = (acc[r.status] ?? 0) + 1;
+    return acc;
+  }, {});
+}
+
+export async function activateDecaCfaPilotBatch(
+  items: DecaCfaPilotBatchItem[],
+  adminUserId: string
+): Promise<DecaCfaPilotBatchResult<DecaCfaPilotActivateStatus>> {
+  const now = new Date();
+  const deduped = dedupeBatchItems(items);
+  const results: DecaCfaPilotBatchItemResult<DecaCfaPilotActivateStatus>[] = [];
+
+  for (const input of deduped) {
+    const { siret, uai } = input;
+    const organisme = await organismesDb().findOne(
+      { siret, uai },
+      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, is_allowed_deca: 1 } }
+    );
+
+    if (!organisme) {
+      results.push({ input, status: "not_found" });
+      continue;
+    }
+
+    const organismeId = (organisme._id as ObjectId).toHexString();
+    const eligibility = await checkEligibilityForLoaded(organisme);
+
+    if (eligibility.alreadyActive) {
+      try {
+        const existingOrg = (await organisationsDb().findOne(
+          { type: "ORGANISME_FORMATION", organisme_id: organismeId },
+          { projection: { ml_beta_activated_at: 1 } }
+        )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
+        const mlBetaActivatedAt = existingOrg?.ml_beta_activated_at ?? undefined;
+        // Idempotent re-set of the flags + propagation of computed if stale
+        await organismesDb().updateOne(
+          { _id: organisme._id as ObjectId },
+          { $set: { is_allowed_deca: true, is_allowed_collab: true } }
+        );
+        if (mlBetaActivatedAt) {
+          await updateMissionLocaleEffectifComputedOrganisme(mlBetaActivatedAt, organisme._id as ObjectId);
+        }
+        results.push({ input, status: "already_active", organismeId, eligibility, mlBetaActivatedAt });
+      } catch (err) {
+        logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot activate (already_active replay) failed");
+        results.push({
+          input,
+          status: "partial_failure",
+          organismeId,
+          eligibility,
+          error: (err as Error).message,
+        });
+      }
+      continue;
+    }
+
+    if (!eligibility.eligible) {
+      results.push({ input, status: "not_eligible", organismeId, eligibility });
+      continue;
+    }
+
+    try {
+      await organismesDb().updateOne(
+        { _id: organisme._id as ObjectId },
+        { $set: { is_allowed_deca: true, is_allowed_collab: true } }
+      );
+
+      const existingOrg = (await organisationsDb().findOne(
+        { type: "ORGANISME_FORMATION", organisme_id: organismeId },
+        { projection: { ml_beta_activated_at: 1 } }
+      )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
+
+      if (!existingOrg?.ml_beta_activated_at) {
+        await activateOrganisme(now, organisme._id as ObjectId);
+        results.push({
+          input,
+          status: "activated",
+          organismeId,
+          eligibility,
+          mlBetaActivatedAt: now,
+        });
+      } else {
+        await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, organisme._id as ObjectId);
+        results.push({
+          input,
+          status: "already_active",
+          organismeId,
+          eligibility,
+          mlBetaActivatedAt: existingOrg.ml_beta_activated_at,
+        });
+      }
+    } catch (err) {
+      logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot activate failed");
+      results.push({
+        input,
+        status: "partial_failure",
+        organismeId,
+        eligibility,
+        error: (err as Error).message,
+      });
+    }
+  }
+
+  const counts = aggregateCounts(results);
+  logger.info({ adminUserId, total: items.length, counts }, "deca-cfa-pilot batch activate");
+
+  return { total: items.length, counts, items: results };
+}
+
+export async function deactivateDecaCfaPilotBatch(
+  items: DecaCfaPilotBatchItem[],
+  adminUserId: string
+): Promise<DecaCfaPilotBatchResult<DecaCfaPilotDeactivateStatus>> {
+  const deduped = dedupeBatchItems(items);
+  const results: DecaCfaPilotBatchItemResult<DecaCfaPilotDeactivateStatus>[] = [];
+
+  for (const input of deduped) {
+    const { siret, uai } = input;
+    const organisme = await organismesDb().findOne({ siret, uai }, { projection: { _id: 1, is_allowed_deca: 1 } });
+
+    if (!organisme) {
+      results.push({ input, status: "not_found" });
+      continue;
+    }
+
+    const organismeId = (organisme._id as ObjectId).toHexString();
+    const isActive = organisme.is_allowed_deca === true;
+
+    if (!isActive) {
+      results.push({ input, status: "not_active", organismeId });
+      continue;
+    }
+
+    try {
+      await organismesDb().updateOne(
+        { _id: organisme._id as ObjectId },
+        { $unset: { is_allowed_deca: "", is_allowed_collab: "" } }
+      );
+      await organisationsDb().updateMany(
+        { type: "ORGANISME_FORMATION", organisme_id: organismeId },
+        { $unset: { ml_beta_activated_at: "" } }
+      );
+      await missionLocaleEffectifsDb().updateMany(
+        { "effectif_snapshot.organisme_id": organisme._id as ObjectId },
+        { $unset: { "computed.organisme.ml_beta_activated_at": "" } }
+      );
+      results.push({ input, status: "deactivated", organismeId });
+    } catch (err) {
+      logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot deactivate failed");
+      results.push({
+        input,
+        status: "partial_failure",
+        organismeId,
+        error: (err as Error).message,
+      });
+    }
+  }
+
+  const counts = aggregateCounts(results);
+  logger.info({ adminUserId, total: items.length, counts }, "deca-cfa-pilot batch deactivate");
+
+  return { total: items.length, counts, items: results };
 }
