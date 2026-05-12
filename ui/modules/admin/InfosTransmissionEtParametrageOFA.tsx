@@ -9,6 +9,7 @@ import { _get, _post } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
+import DecaCfaPilotAdminSection from "./DecaCfaPilotAdminSection";
 import InviteCfaAdminModal from "./InviteCfaAdminModal";
 
 interface InfosTransmissionParametrageOFAProps {
@@ -233,6 +234,8 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           onSuccess={() => refetchCounts()}
         />
       )}
+
+      <DecaCfaPilotAdminSection organisme={organisme} />
     </Stack>
   );
 };

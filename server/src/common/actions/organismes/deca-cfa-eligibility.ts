@@ -31,6 +31,9 @@ export type EligibilityResult = {
     uai: string | null | undefined;
     nature: IOrganisme["nature"];
     is_allowed_deca: boolean | null | undefined;
+    nom?: string;
+    raison_sociale?: string;
+    enseigne?: string | null;
   } | null;
 };
 
@@ -44,9 +47,12 @@ function notEvaluated(): EligibilityCheck {
 }
 
 export async function checkEligibilityForLoaded(
-  organisme: Pick<IOrganisme, "_id" | "siret" | "uai" | "nature" | "is_allowed_deca">
+  organisme: Pick<
+    IOrganisme,
+    "_id" | "siret" | "uai" | "nature" | "is_allowed_deca" | "nom" | "raison_sociale" | "enseigne"
+  >
 ): Promise<EligibilityResult> {
-  const { _id, siret, uai, nature, is_allowed_deca } = organisme;
+  const { _id, siret, uai, nature, is_allowed_deca, nom, raison_sociale, enseigne } = organisme;
 
   const exists_with_siret_uai: EligibilityCheck = {
     passed: Boolean(siret && uai),
@@ -69,6 +75,9 @@ export async function checkEligibilityForLoaded(
         uai,
         nature,
         is_allowed_deca,
+        nom,
+        raison_sociale,
+        enseigne,
       },
     };
   }
@@ -158,7 +167,18 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
 
   const organisme = await organismesDb().findOne(
     { _id },
-    { projection: { _id: 1, siret: 1, uai: 1, nature: 1, is_allowed_deca: 1 } }
+    {
+      projection: {
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        nature: 1,
+        is_allowed_deca: 1,
+        nom: 1,
+        raison_sociale: 1,
+        enseigne: 1,
+      },
+    }
   );
 
   if (!organisme) {
