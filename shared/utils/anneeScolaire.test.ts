@@ -1,6 +1,7 @@
 import { it, expect, describe } from "vitest";
 
 import {
+  getActiveAnneesScolaires,
   getAnneeScolaireFromDate,
   getAnneeScolaireListFromDateRange,
   getAnneesScolaireListFromDate,
@@ -125,6 +126,20 @@ describe("getAnneeScolaireFromDate()", () => {
   ].forEach(({ date, expected }) => {
     it(`returns ${expected} for ${date}`, () => {
       expect(getAnneeScolaireFromDate(new Date(`${date}T00:00:00Z`))).toStrictEqual(expected);
+    });
+  });
+});
+
+describe("getActiveAnneesScolaires()", () => {
+  [
+    { date: "2026-05-12", expected: ["2025-2026", "2024-2025"] },
+    { date: "2026-07-31", expected: ["2025-2026", "2024-2025"] },
+    { date: "2026-08-01", expected: ["2026-2027", "2025-2026"] },
+    { date: "2020-09-01", expected: ["2020-2021", "2019-2020"] },
+    { date: "2021-01-10", expected: ["2020-2021", "2019-2020"] },
+  ].forEach(({ date, expected }) => {
+    it(`returns [${expected.join(", ")}] for ${date}`, () => {
+      expect(getActiveAnneesScolaires(new Date(`${date}T00:00:00Z`))).toStrictEqual(expected);
     });
   });
 });
