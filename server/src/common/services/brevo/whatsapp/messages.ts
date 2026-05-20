@@ -1,4 +1,4 @@
-import { IUserResponseType, USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
+import { IUserResponseType, IWhatsAppTemplateType, USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 
 import { MissionLocaleInfo } from "./types";
 
@@ -60,21 +60,26 @@ const EXACT_CALLBACK = new Set([
   "📞",
 ]);
 
-export function parseUserResponse(text: string): IUserResponseType | null {
-  const normalizedText = text
-    .trim()
-    .toLowerCase()
-    .replace(/[\u2018\u2019\u02BC]/g, "'")
-    .replace(/\u00B7/g, "·"); // normaliser le point médian
+const EXACT_PREQUALIF_YES = new Set(["ça m'intéresse", "ca m'interesse", "ça m intéresse", "✅ ça m'intéresse", "✅"]);
 
-  if (EXACT_NO_HELP.has(normalizedText)) {
-    return USER_RESPONSE_TYPE.NO_HELP;
+const EXACT_PREQUALIF_NO = new Set([
+  "je ne veux pas d'aide",
+  "je ne veux pas d aide",
+  "❌ je ne veux pas d'aide",
+  "❌",
+]);
+
+export function parseUserResponse(text: string, templateType?: IWhatsAppTemplateType | null): IUserResponseType | null {
+  const normalizedText = text.trim().toLowerCase().replace(/[‘’ʼ]/g, "'").replace(/·/g, "·");
+
+  if (templateType === "prequalif") {
+    if (EXACT_PREQUALIF_YES.has(normalizedText)) return USER_RESPONSE_TYPE.PREQUALIF_YES;
+    if (EXACT_PREQUALIF_NO.has(normalizedText)) return USER_RESPONSE_TYPE.PREQUALIF_NO;
+    return null;
   }
 
-  if (EXACT_CALLBACK.has(normalizedText)) {
-    return USER_RESPONSE_TYPE.CALLBACK;
-  }
-
+  if (EXACT_NO_HELP.has(normalizedText)) return USER_RESPONSE_TYPE.NO_HELP;
+  if (EXACT_CALLBACK.has(normalizedText)) return USER_RESPONSE_TYPE.CALLBACK;
   return null;
 }
 

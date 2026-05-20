@@ -106,6 +106,7 @@ const config = {
       webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").default("").asString(),
       senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").default("").asString(),
       templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").default("0").asInt(),
+      templatePrequalifInitialId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_PREQUALIF_INITIAL_ID").default("0").asInt(),
     },
   },
 };
