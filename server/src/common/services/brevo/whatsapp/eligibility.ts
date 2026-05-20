@@ -2,12 +2,38 @@ import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 
+import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import logger from "@/common/logger";
 import config from "@/config";
 
 import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
 import { maskPhone, normalizePhoneNumber } from "./phone";
+
+/**
+ * Vérifie si un effectif est éligible pour recevoir un WhatsApp préqualif.
+ *
+ * Cible : "contacts opportuns" (score classifier ≥ 0.75) jamais traités, hors CFA V2
+ * collab et hors `acc_conjoint=true`.
+ */
+export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolean {
+  const phone = effectif.effectif_snapshot?.apprenant?.telephone;
+  if (!phone || !normalizePhoneNumber(phone)) return false;
+
+  if (effectif.whatsapp_contact?.last_message_sent_at) return false;
+  if (effectif.whatsapp_contact?.opted_out) return false;
+
+  const score = effectif.classification_reponse_appel?.score ?? 0;
+  if (score < CONTACT_OPPORTUN_SCORE_THRESHOLD) return false;
+
+  if (effectif.computed?.organisme?.is_allowed_collab === true) return false;
+
+  if (effectif.organisme_data?.acc_conjoint === true) return false;
+
+  if (effectif.situation !== null && effectif.situation !== undefined) return false;
+
+  return true;
+}
 
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp

@@ -94,3 +94,11 @@ export async function notifyMLUserOnCallback(effectif: IMissionLocaleEffectif): 
 export async function notifyMLUserOnNoHelp(effectif: IMissionLocaleEffectif): Promise<void> {
   await sendMLWhatsAppNotification(effectif, "whatsapp_nohelp_notification", "nohelp");
 }
+
+/**
+ * Notifie tous les users ML CONFIRMED quand un effectif a répondu YES à la préqualif.
+ *
+ */
+export async function notifyMLUsersOnPrequalifYes(effectif: IMissionLocaleEffectif): Promise<void> {
+  logger.info({ effectifId: effectif._id }, "notifyMLUsersOnPrequalifYes called (stub, real impl in commit 16)");
+}

@@ -1,6 +1,6 @@
 import { IUserResponseType, IWhatsAppTemplateType, USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 
-import { MissionLocaleInfo } from "./types";
+import { MissionLocaleInfo, MissionLocaleInfoFull } from "./types";
 
 export function buildCallbackMessage(prenom: string, missionLocale: MissionLocaleInfo): string {
   return `Super *${prenom}*, un conseiller ou une conseillère de la *Mission locale ${missionLocale.nom}* devrait vous recontacter.`;
@@ -8,6 +8,22 @@ export function buildCallbackMessage(prenom: string, missionLocale: MissionLocal
 
 export function buildNoHelpMessage(prenom: string, missionLocale: MissionLocaleInfo): string {
   return `C'est noté *${prenom}*. La *Mission locale ${missionLocale.nom}* ne reprendra pas contact avec vous.`;
+}
+
+export function buildPrequalifYesWithoutUrlMessage(prenom: string, missionLocale: MissionLocaleInfo): string {
+  return `C'est noté *${prenom}* ✅. La *Mission locale ${missionLocale.nom}* vous contactera dans les prochains jours.`;
+}
+
+export function buildPrequalifNoMessage(prenom: string, missionLocale: MissionLocaleInfoFull): string {
+  const lines: string[] = [
+    `C'est noté *${prenom}*. La *Mission locale ${missionLocale.nom}* ne vous contactera pas.`,
+    ``,
+    `Si jamais vous avez besoin d'aide plus tard voici les coordonnées de votre Mission Locale :`,
+  ];
+  if (missionLocale.email) lines.push(`✉️ ${missionLocale.email}`);
+  if (missionLocale.telephone) lines.push(`📞 ${missionLocale.telephone}`);
+  if (missionLocale.adresse_inline) lines.push(`📍 ${missionLocale.adresse_inline}`);
+  return lines.join("\n");
 }
 
 export function buildStopConfirmationMessage(): string {
