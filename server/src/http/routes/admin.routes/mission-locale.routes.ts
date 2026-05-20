@@ -8,6 +8,7 @@ import {
 } from "shared/models";
 import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
 import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
+import { httpUrlSchema } from "shared/models/data/organisations.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -193,6 +194,14 @@ export default () => {
   router.get("/:id", returnResult(getMl));
   router.get("/:id/detail", returnResult(getMlDetail));
   router.get("/:id/membres", returnResult(getMlMembres));
+  router.put(
+    "/:id/parametres",
+    validateRequestMiddleware({
+      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+      body: z.object({ rdv_url: httpUrlSchema.nullable() }),
+    }),
+    returnResult(updateMlParametresAdmin)
+  );
   router.get(
     "/:id/stats",
     validateRequestMiddleware({
@@ -395,6 +404,26 @@ const getAccompagnementConjointRoute = async (req) => {
 const getMlDetail = async (req) => {
   const id = req.params.id;
   return getMissionLocaleDetail(new ObjectId(id));
+};
+
+/**
+ * Met à jour les paramètres ML côté admin.
+ * Mirror de la route user `PUT /api/v1/organisation/mission-locale/parametres` (§8.1).
+ */
+const updateMlParametresAdmin = async (req) => {
+  const id = req.params.id;
+  const { rdv_url } = req.body;
+
+  const result = await organisationsDb().updateOne(
+    { _id: new ObjectId(id), type: "MISSION_LOCALE" },
+    { $set: { rdv_url, updated_at: new Date() } }
+  );
+
+  if (result.matchedCount === 0) {
+    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
+  }
+
+  return { rdv_url };
 };
 
 const getMlMembres = async (req) => {
