@@ -19,6 +19,21 @@ import { zAdresse } from "../parts/adresseSchema";
 
 const collectionName = "organisations";
 
+export const httpUrlSchema = z
+  .string()
+  .url()
+  .max(2000)
+  .refine(
+    (s) => {
+      try {
+        return ["http:", "https:"].includes(new URL(s).protocol);
+      } catch {
+        return false;
+      }
+    },
+    { message: "URL must use http:// or https://" }
+  );
+
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1 }, {}],
   [{ ml_id: 1 }, { unique: true, partialFilterExpression: { ml_id: { $exists: true } } }],
@@ -54,6 +69,7 @@ const zOrganisationMissionLocaleCreate = z.object({
     .optional(),
   adresse: zAdresse.optional(),
   arml_id: zObjectId.optional().describe("Identifiant de l'ARML à laquelle la mission locale est rattachée"),
+  rdv_url: httpUrlSchema.nullish().describe("URL de prise de RDV envoyée via WhatsApp préqualif."),
 });
 
 const zOrganisationARMLCreate = z.object({

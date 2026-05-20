@@ -10,6 +10,15 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ mission_locale_effectif_id: 1 }, {}],
   [{ mission_locale_effectif_id: 1, created_at: -1 }, { name: "effectif_id_created_at" }],
 ];
+
+export const MISSION_LOCALE_LOG_EVENT = {
+  WHATSAPP_PREQUALIF_YES: "WHATSAPP_PREQUALIF_YES",
+  WHATSAPP_PREQUALIF_NO: "WHATSAPP_PREQUALIF_NO",
+} as const;
+
+export const zMissionLocaleLogEvent = z.nativeEnum(MISSION_LOCALE_LOG_EVENT);
+export type IMissionLocaleLogEvent = z.infer<typeof zMissionLocaleLogEvent>;
+
 export const zMissionLocaleEffectifLog = z.object({
   _id: zObjectId,
   mission_locale_effectif_id: zObjectId,
@@ -20,6 +29,11 @@ export const zMissionLocaleEffectifLog = z.object({
   commentaires: z.string().nullish(),
   probleme_type: zProblemeTypeEnum.nullish(),
   probleme_detail: z.string().nullish(),
+  event: zMissionLocaleLogEvent
+    .nullish()
+    .describe(
+      "Événement typé non-situationnel (ex: réponse WhatsApp préqualif). Coexiste avec `situation` : l'un OU l'autre peut être renseigné selon le cas."
+    ),
   created_at: z.date(),
   created_by: zObjectId.nullish(),
   read_by: z.array(zObjectId).default([]).describe("Liste des IDs des utilisateurs CFA qui ont lu ce log"),
