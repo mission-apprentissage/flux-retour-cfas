@@ -36,7 +36,18 @@ export default () => {
   router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
   router.get("/parametres", returnResult(getMlParametres));
   router.put("/parametres", returnResult(updateMlParametres));
+  router.get("/banner-stats", returnResult(getMlBannerStats));
   return router;
+};
+
+const getMlBannerStats = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const souhaite_rdv_count = await missionLocaleEffectifsDb().countDocuments({
+    mission_locale_id: new ObjectId(missionLocale._id),
+    souhaite_rdv: true,
+    soft_deleted: { $ne: true },
+  });
+  return { souhaite_rdv_count };
 };
 
 const zMlParametresBody = z.object({
