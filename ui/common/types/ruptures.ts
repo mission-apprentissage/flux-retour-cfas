@@ -17,6 +17,8 @@ export type EffectifData = {
   unread_by_current_user?: boolean;
   whatsapp_callback_requested?: boolean;
   whatsapp_no_help_responded?: boolean;
+  souhaite_rdv?: boolean;
+  souhaite_rdv_at?: string | null;
 };
 
 export type EffectifPriorityData = EffectifData & {

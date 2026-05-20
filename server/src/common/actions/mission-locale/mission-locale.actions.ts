@@ -471,6 +471,8 @@ const addMissionLocaleFieldTraitementStatus = () => {
     $eq: ["$whatsapp_callback_requested", true],
   };
 
+  const SOUHAITE_RDV_CONDITION = { $eq: ["$souhaite_rdv", true] };
+
   const RUPTURE_MOINS_DE_180_JOURS_CONDITION = {
     $gte: [
       "$date_rupture",
@@ -493,6 +495,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
           MINEUR_CONDITION,
           ACCOMPAGNEMENT_CONJOINT_CONDITION,
           WHATSAPP_CALLBACK_CONDITION,
+          SOUHAITE_RDV_CONDITION,
         ],
       },
       {
@@ -526,6 +529,9 @@ const addMissionLocaleFieldTraitementStatus = () => {
         },
         a_risque_whatsapp_callback: {
           $cond: [WHATSAPP_CALLBACK_CONDITION, true, false],
+        },
+        a_risque_souhaite_rdv: {
+          $cond: [SOUHAITE_RDV_CONDITION, true, false],
         },
         a_risque_cfa_sans_mineur_rqth: {
           $cond: [
@@ -626,6 +632,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           whatsapp_callback_requested: "$whatsapp_callback_requested",
           whatsapp_no_help_responded: "$whatsapp_no_help_responded",
           whatsapp_contact: "$whatsapp_contact",
+          souhaite_rdv: "$souhaite_rdv",
+          souhaite_rdv_at: "$souhaite_rdv_at",
           mineur: "$a_risque_mineur",
           contact_opportun: "$a_risque_contact_opportun",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
@@ -651,6 +659,7 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
         a_risque_mineur: -1,
         a_risque_rqth: -1,
         a_risque_cfa_sans_mineur_rqth: -1,
+        a_risque_souhaite_rdv: -1,
         a_risque_whatsapp_callback: -1,
         a_risque_contact_opportun: -1,
         a_risque_accompagnement_conjoint: -1,
