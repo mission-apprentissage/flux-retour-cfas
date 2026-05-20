@@ -8,10 +8,12 @@ import {
   SITUATION_LABEL_ENUM,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
+import { httpUrlSchema } from "shared/models/data/organisations.model";
 import {
   effectifMissionLocaleListe,
   effectifsParMoisFiltersMissionLocaleAPISchema,
 } from "shared/models/routes/mission-locale/missionLocale.api";
+import { z } from "zod";
 
 import {
   getAllEffectifsParMois,
@@ -20,7 +22,7 @@ import {
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
@@ -32,7 +34,30 @@ export default () => {
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
+  router.get("/parametres", returnResult(getMlParametres));
+  router.put("/parametres", returnResult(updateMlParametres));
   return router;
+};
+
+const zMlParametresBody = z.object({
+  rdv_url: httpUrlSchema.nullable(),
+});
+
+const getMlParametres = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  return { rdv_url: missionLocale.rdv_url ?? null };
+};
+
+const updateMlParametres = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const body = zMlParametresBody.parse(req.body);
+
+  await organisationsDb().updateOne(
+    { _id: new ObjectId(missionLocale._id), type: "MISSION_LOCALE" },
+    { $set: { rdv_url: body.rdv_url, updated_at: new Date() } }
+  );
+
+  return { rdv_url: body.rdv_url };
 };
 
 const updateEffectifMissionLocaleData = async (req, { locals }) => {
