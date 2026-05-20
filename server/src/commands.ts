@@ -348,6 +348,14 @@ program
   .action(createJobAction("tmp:whatsapp:send-injoignables"));
 
 program
+  .command("tmp:whatsapp:send-prequalif")
+  .description("Envoyer un WhatsApp préqualif aux contacts opportuns.")
+  .option("--dry-run", "Affiche le nombre d'effectifs éligibles sans envoyer", false)
+  .option("-l, --limit <number>", "Limite le nombre d'envois", (value) => parseInt(value))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:whatsapp:send-prequalif"));
+
+program
   .command("tmp:migrate:autre-situations")
   .description("Migre les situations AUTRE legacy vers les nouveaux buckets à partir d'un CSV")
   .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes _id, nouveau_motif, ...)")
