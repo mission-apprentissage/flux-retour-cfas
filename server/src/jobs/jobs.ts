@@ -83,6 +83,7 @@ import {
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
+import { seedMlRdvUrl } from "./tmp/seed-ml-rdv-url";
 import { sendWhatsAppInjoignables } from "./whatsapp/send-whatsapp-injoignables";
 
 const dailyJobs = async (queued: boolean) => {
@@ -617,6 +618,15 @@ export async function setupJobProcessor() {
             throw new Error("csvPath est requis");
           }
           return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
+        },
+      },
+      "tmp:seed-ml-rdv-url": {
+        handler: async (job) => {
+          const payload = job.payload as { csvPath?: string; dryRun?: boolean } | undefined;
+          if (!payload?.csvPath) {
+            throw new Error("csvPath est requis");
+          }
+          return seedMlRdvUrl({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
         },
       },
     },
