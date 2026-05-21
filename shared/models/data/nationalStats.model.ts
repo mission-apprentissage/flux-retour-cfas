@@ -287,6 +287,41 @@ const zWhatsAppStats = z.object({
 
 export type IWhatsAppStats = z.output<typeof zWhatsAppStats>;
 
+const zPrequalifScope = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("national") }),
+  z.object({ type: z.literal("region"), code: z.string() }),
+  z.object({ type: z.literal("ml"), id: z.string() }),
+]);
+
+const zPrequalifStats = z.object({
+  scope: zPrequalifScope,
+  period: z.string(),
+  volume: z.object({
+    total_sent: z.number(),
+    sent_by_mode: z.object({ backfill: z.number(), daily: z.number() }),
+    failed_send: z.number(),
+    opted_out: z.number(),
+  }),
+  responses: z.object({
+    yes_count: z.number(),
+    no_count: z.number(),
+    no_response: z.number(),
+    auto_reply_sent: z.number(),
+    response_rate: z.number(),
+    yes_rate: z.number(),
+  }),
+  rdv_tracking: z.object({
+    tokens_generated: z.number(),
+    total_clicks: z.number(),
+    unique_clickers: z.number(),
+    click_rate: z.number(),
+  }),
+  ml_activation: z.object({ ml_with_rdv_url: z.number(), ml_total: z.number() }).nullable(),
+});
+
+export type IPrequalifStats = z.output<typeof zPrequalifStats>;
+export type IPrequalifScope = z.output<typeof zPrequalifScope>;
+
 const zSituationDistribution = z.object({
   rdv_pris: z.number(),
   nouveau_projet: z.number(),

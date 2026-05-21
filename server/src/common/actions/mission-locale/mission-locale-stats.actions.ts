@@ -7,6 +7,7 @@ import {
   IClassifierStats,
   IDetailsDossiersTraites,
   IDetailsDossiersTraitesV2,
+  IPrequalifStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
   ITraitementStatsResponse,
@@ -1756,5 +1757,145 @@ export const getClassifierStats = async (period: StatsPeriod = "all"): Promise<I
       total_contact_opportun: scoring?.total_contact_opportun || 0,
       score_moyen: scoring?.total_scored > 0 ? Math.round((scoring.score_sum / scoring.total_scored) * 100) / 100 : 0,
     },
+  };
+};
+
+type PrequalifScope = { national: true } | { region: string } | { ml_id: ObjectId };
+
+/**
+ * Indicateurs admin du flow préqualif WhatsApp.
+ *
+ * 3 scopes : national, region (lookup organisations), ml_id (direct).
+ */
+export const getPrequalifStats = async (
+  scope: PrequalifScope,
+  period: StatsPeriod = "all"
+): Promise<IPrequalifStats> => {
+  const evaluationDate = normalizeToUTCDay(new Date());
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+
+  const baseMatch: Record<string, unknown> = {
+    "whatsapp_contact.template_type": "prequalif",
+    "whatsapp_contact.last_message_sent_at": { $exists: true, $ne: null },
+    soft_deleted: { $ne: true },
+  };
+
+  if (period !== "all") {
+    baseMatch["whatsapp_contact.last_message_sent_at"] = { $gte: startDate, $lte: evaluationDate };
+  }
+
+  if ("ml_id" in scope) {
+    baseMatch.mission_locale_id = scope.ml_id;
+  }
+
+  const pipeline: Record<string, unknown>[] = [{ $match: baseMatch }];
+
+  if ("region" in scope) {
+    pipeline.push(
+      {
+        $lookup: {
+          from: "organisations",
+          let: { mlId: "$mission_locale_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$mlId"] }, type: "MISSION_LOCALE" } },
+            { $project: { region: "$adresse.region" } },
+          ],
+          as: "ml",
+        },
+      },
+      { $match: { "ml.0.region": scope.region } }
+    );
+  }
+
+  pipeline.push({
+    $facet: {
+      totalSent: [{ $count: "count" }],
+      sentByMode: [{ $group: { _id: "$whatsapp_contact.sent_via", count: { $sum: 1 } } }],
+      responses: [
+        { $match: { "whatsapp_contact.user_response": { $in: ["prequalif_yes", "prequalif_no"] } } },
+        { $group: { _id: "$whatsapp_contact.user_response", count: { $sum: 1 } } },
+      ],
+      optedOut: [{ $match: { "whatsapp_contact.opted_out": true } }, { $count: "count" }],
+      failedSend: [{ $match: { "whatsapp_contact.message_status": "failed_send" } }, { $count: "count" }],
+      autoReply: [{ $match: { "whatsapp_contact.auto_reply_sent": true } }, { $count: "count" }],
+      tokens: [{ $match: { "whatsapp_contact.rdv_redirect_token": { $exists: true } } }, { $count: "count" }],
+      clickStats: [
+        { $match: { "whatsapp_contact.rdv_redirect_token": { $exists: true } } },
+        {
+          $project: {
+            clicksCount: { $size: { $ifNull: ["$whatsapp_contact.rdv_clicks", []] } },
+            hasClick: { $gt: [{ $size: { $ifNull: ["$whatsapp_contact.rdv_clicks", []] } }, 0] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalClicks: { $sum: "$clicksCount" },
+            uniqueClickers: { $sum: { $cond: ["$hasClick", 1, 0] } },
+          },
+        },
+      ],
+    },
+  });
+
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
+
+  const totalSent: number = result?.totalSent?.[0]?.count ?? 0;
+  const sentByModeMap: Record<string, number> = { backfill: 0, daily: 0 };
+  for (const row of (result?.sentByMode ?? []) as Array<{ _id: string | null; count: number }>) {
+    if (row._id === "backfill" || row._id === "daily") sentByModeMap[row._id] = row.count;
+  }
+
+  const yesCount: number =
+    (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_yes")?.count ?? 0;
+  const noCount: number = (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_no")?.count ?? 0;
+  const responded = yesCount + noCount;
+
+  const tokensGenerated: number = result?.tokens?.[0]?.count ?? 0;
+  const totalClicks: number = result?.clickStats?.[0]?.totalClicks ?? 0;
+  const uniqueClickers: number = result?.clickStats?.[0]?.uniqueClickers ?? 0;
+
+  let mlActivation: { ml_with_rdv_url: number; ml_total: number } | null = null;
+  if (!("ml_id" in scope)) {
+    const orgaMatch: Record<string, unknown> = { type: "MISSION_LOCALE" };
+    if ("region" in scope) orgaMatch["adresse.region"] = scope.region;
+    const [mlTotal, mlWithUrl] = await Promise.all([
+      organisationsDb().countDocuments(orgaMatch),
+      organisationsDb().countDocuments({ ...orgaMatch, rdv_url: { $exists: true, $ne: null } }),
+    ]);
+    mlActivation = { ml_with_rdv_url: mlWithUrl, ml_total: mlTotal };
+  }
+
+  const scopePayload: IPrequalifStats["scope"] =
+    "ml_id" in scope
+      ? { type: "ml", id: scope.ml_id.toHexString() }
+      : "region" in scope
+        ? { type: "region", code: scope.region }
+        : { type: "national" };
+
+  return {
+    scope: scopePayload,
+    period,
+    volume: {
+      total_sent: totalSent,
+      sent_by_mode: { backfill: sentByModeMap.backfill, daily: sentByModeMap.daily },
+      failed_send: result?.failedSend?.[0]?.count ?? 0,
+      opted_out: result?.optedOut?.[0]?.count ?? 0,
+    },
+    responses: {
+      yes_count: yesCount,
+      no_count: noCount,
+      no_response: Math.max(0, totalSent - responded),
+      auto_reply_sent: result?.autoReply?.[0]?.count ?? 0,
+      response_rate: totalSent > 0 ? Math.round((responded / totalSent) * 100) : 0,
+      yes_rate: responded > 0 ? Math.round((yesCount / responded) * 100) : 0,
+    },
+    rdv_tracking: {
+      tokens_generated: tokensGenerated,
+      total_clicks: totalClicks,
+      unique_clickers: uniqueClickers,
+      click_rate: tokensGenerated > 0 ? Math.round((uniqueClickers / tokensGenerated) * 100) : 0,
+    },
+    ml_activation: mlActivation,
   };
 };

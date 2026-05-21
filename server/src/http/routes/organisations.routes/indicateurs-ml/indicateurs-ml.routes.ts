@@ -22,6 +22,7 @@ import {
   getTraitementExportData,
   getWhatsAppStats,
   getClassifierStats,
+  getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { organisationsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -161,6 +162,22 @@ export default () => {
       }),
     }),
     returnResult(getClassifierRoute)
+  );
+
+  router.get(
+    "/stats/prequalif",
+    validateRequestMiddleware({
+      query: z.object({
+        period: zStatsPeriod.optional(),
+        region: z.string().optional(),
+        ml_id: z
+          .string()
+          .regex(/^[0-9a-f]{24}$/)
+          .optional(),
+        national: z.coerce.boolean().optional(),
+      }),
+    }),
+    returnResult(getPrequalifRoute)
   );
 
   router.get(
@@ -417,6 +434,34 @@ const getClassifierRoute = async (req, { locals }) => {
   }
 
   return await getClassifierStats((period as StatsPeriod) || "all");
+};
+
+/**
+ * GET /api/v1/organisation/indicateurs-ml/stats/prequalif
+ * Admin-only
+ *
+ */
+const getPrequalifRoute = async (req, { locals }) => {
+  const organisation = locals.organisation as { type: string };
+  if (organisation.type !== "ADMINISTRATEUR") {
+    throw Boom.forbidden("Accès réservé aux administrateurs");
+  }
+
+  const { period, region, ml_id, national } = req.query as {
+    period?: string;
+    region?: string;
+    ml_id?: string;
+    national?: boolean;
+  };
+
+  const scopeCount = [national, !!region, !!ml_id].filter(Boolean).length;
+  if (scopeCount !== 1) {
+    throw Boom.badRequest("Préciser exactement un scope : national=true OU region=XX OU ml_id=...");
+  }
+
+  const scope = ml_id ? { ml_id: new ObjectId(ml_id) } : region ? { region } : { national: true as const };
+
+  return await getPrequalifStats(scope, (period as StatsPeriod) || "all");
 };
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {
