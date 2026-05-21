@@ -635,7 +635,6 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           souhaite_rdv: "$souhaite_rdv",
           souhaite_rdv_at: "$souhaite_rdv_at",
           mineur: "$a_risque_mineur",
-          contact_opportun: "$a_risque_contact_opportun",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
         }
       : {
@@ -661,7 +660,6 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
         a_risque_cfa_sans_mineur_rqth: -1,
         a_risque_souhaite_rdv: -1,
         a_risque_whatsapp_callback: -1,
-        a_risque_contact_opportun: -1,
         a_risque_accompagnement_conjoint: -1,
         a_contacter: -1,
       };
@@ -1085,7 +1083,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 prioritaire: "$a_risque",
                 a_contacter: "$a_contacter",
                 mineur: "$a_risque_mineur",
-                contact_opportun: "$a_risque_contact_opportun",
                 acc_conjoint: "$a_risque_accompagnement_conjoint",
                 rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
                 a_traiter: "$$ROOT.a_traiter",
@@ -1405,7 +1402,6 @@ export const getEffectifsListByMissionLocaleId = async (
             [],
           ],
         },
-        contact_opportun: "$a_risque_contact_opportun",
         collaboration_cfa: "$a_risque_accompagnement_conjoint",
         disponible_whatsapp: { $ifNull: ["$whatsapp_callback_requested", false] },
         effectif_choice: "$_effectif_choice_label",
@@ -1459,7 +1455,6 @@ export const getEffectifARisqueByMissionLocaleId = async (
               injoignable: "$injoignable",
               a_contacter: "$a_contacter",
               mineur: "$a_risque_mineur",
-              contact_opportun: "$a_risque_contact_opportun",
               acc_conjoint: "$a_risque_accompagnement_conjoint",
               rqth: "$effectif_snapshot.apprenant.rqth",
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
