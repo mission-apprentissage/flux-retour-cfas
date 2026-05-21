@@ -10,6 +10,7 @@ interface IMissionLocaleEffectifsStats {
   effectifs_a_traiter: number;
   effectifs_a_recontacter: number;
   effectifs_whatsapp_callback: number;
+  effectifs_souhaite_rdv: number;
   total: number;
 }
 
@@ -25,6 +26,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
       effectifs_a_traiter: 0,
       effectifs_a_recontacter: 0,
       effectifs_whatsapp_callback: 0,
+      effectifs_souhaite_rdv: 0,
       total: 0,
     };
   }
@@ -76,6 +78,9 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
             ],
           },
         },
+        effectifs_souhaite_rdv: {
+          $sum: { $cond: [{ $eq: ["$souhaite_rdv", true] }, 1, 0] },
+        },
       },
     },
   ];
@@ -88,6 +93,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
       effectifs_a_traiter: 0,
       effectifs_a_recontacter: 0,
       effectifs_whatsapp_callback: 0,
+      effectifs_souhaite_rdv: 0,
       total: 0,
     };
   }
@@ -98,6 +104,7 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
     effectifs_prioritaire: result.effectifs_prioritaire || 0,
     effectifs_a_traiter: result.effectifs_a_traiter || 0,
     effectifs_a_recontacter: result.effectifs_a_recontacter || 0,
+    effectifs_souhaite_rdv: result.effectifs_souhaite_rdv || 0,
     effectifs_whatsapp_callback: result.effectifs_whatsapp_callback || 0,
     total,
   };

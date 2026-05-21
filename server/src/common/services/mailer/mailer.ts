@@ -228,6 +228,7 @@ export type TemplatePayloads = {
     effectifs_a_traiter: number;
     effectifs_a_recontacter: number;
     effectifs_whatsapp_callback: number;
+    effectifs_souhaite_rdv: number;
     total: number;
     date_debut: string;
     date_fin: string;
@@ -235,6 +236,10 @@ export type TemplatePayloads = {
       id: number;
       nom: string;
     };
+    link_souhaite_rdv: string;
+    link_prioritaire: string;
+    link_a_traiter: string;
+    link_a_recontacter: string;
   };
   mission_locale_daily_recap: {
     recipient: {
