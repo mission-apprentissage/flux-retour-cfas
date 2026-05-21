@@ -5,6 +5,7 @@ import type {
   IClassifierStats,
   IDetailsDossiersTraites,
   IDetailsDossiersTraitesV2,
+  IPrequalifStats,
   IRegionStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
@@ -102,6 +103,8 @@ export const statsQueryKeys = {
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
   classifier: (period: Period) => ["stats", "classifier", period] as const,
+  prequalif: (period: Period, region?: string, mlId?: string, national?: boolean) =>
+    ["stats", "prequalif", period, region, mlId, national] as const,
 };
 
 export interface TraitementMLParams {
@@ -308,6 +311,21 @@ export function useClassifierStats(period: Period) {
     () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/classifier", {
         params: { period },
+      }),
+    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
+  );
+}
+
+/**
+ * Indicateurs préqualif WhatsApp (admin-only).
+ */
+export function usePrequalifStats(period: Period, scope: { national?: boolean; region?: string; mlId?: string }) {
+  const { national, region, mlId } = scope;
+  return useQuery<IPrequalifStats>(
+    statsQueryKeys.prequalif(period, region, mlId, national),
+    () =>
+      _get("/api/v1/organisation/indicateurs-ml/stats/prequalif", {
+        params: buildStatsParams({ period, region, mlId, national }),
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );

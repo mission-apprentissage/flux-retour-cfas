@@ -4,6 +4,7 @@ import { ClassifierSection } from "../sections/ClassifierSection";
 import { CollaborationsAdminSection } from "../sections/CollaborationsAdminSection";
 import { DeploymentSection } from "../sections/DeploymentSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
+import { PrequalifSection } from "../sections/PrequalifSection";
 import { WhatsAppSection } from "../sections/WhatsAppSection";
 import commonStyles from "../ui/common.module.css";
 
@@ -29,6 +30,7 @@ export function SyntheseView({ showDetailColumn = true, isAdmin = false }: Synth
       <DeploymentSection showDetailColumn={showDetailColumn} isAdmin={isAdmin} />
 
       {isAdmin && <WhatsAppSection />}
+      {isAdmin && <PrequalifSection scope="national" />}
       {isAdmin && <ClassifierSection />}
       {isAdmin && <CollaborationsAdminSection />}
     </div>
