@@ -101,6 +101,8 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `La Mission Locale ${payload.mission_locale.nom} a du nouveau sur l'accompagnement de vos jeunes en rupture`,
   whatsapp_callback_notification: (payload) =>
     `📞 ${payload.effectif.prenom} ${payload.effectif.nom} souhaite être recontacté(e)`,
+  mission_locale_prequalif_yes: (payload) =>
+    `✅ ${payload.jeune.prenom} ${payload.jeune.nom} souhaite un RDV avec votre Mission Locale`,
   whatsapp_nohelp_notification: (payload) =>
     `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
   invitation_cfa_admin: () => "Invitation | Tableau de bord de l'apprentissage : activez votre compte d'administrateur",
@@ -297,6 +299,17 @@ export type TemplatePayloads = {
     };
     lien_fiche: string;
     date_contacte_sans_retour: string;
+  };
+  mission_locale_prequalif_yes: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    jeune: {
+      prenom: string;
+      nom: string;
+    };
+    deep_link: string;
   };
   invitation_cfa_admin: {
     recipient: {
