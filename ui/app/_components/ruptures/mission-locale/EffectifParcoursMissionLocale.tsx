@@ -19,6 +19,8 @@ const TIMELINE_EVENTS = {
   WHATSAPP_ECHEC: "WHATSAPP_ECHEC",
   WHATSAPP_CALLBACK: "WHATSAPP_CALLBACK",
   WHATSAPP_NO_HELP: "WHATSAPP_NO_HELP",
+  WHATSAPP_PREQUALIF_YES: "WHATSAPP_PREQUALIF_YES",
+  WHATSAPP_PREQUALIF_NO: "WHATSAPP_PREQUALIF_NO",
 } as const;
 
 const EVENT_LABELS = {
@@ -32,6 +34,8 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.WHATSAPP_ECHEC]: "Échec de l'envoi du message WhatsApp",
   [TIMELINE_EVENTS.WHATSAPP_CALLBACK]: "Le jeune a indiqué vouloir être recontacté par la Mission locale",
   [TIMELINE_EVENTS.WHATSAPP_NO_HELP]: "Le jeune a indiqué ne pas vouloir être recontacté par la Mission locale",
+  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES]: "Le jeune souhaite un rendez-vous",
+  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO]: "Le jeune ne souhaite pas être contacté",
 } as const;
 
 const WhatsAppIcon = ({ color }: { color: string }) => (
@@ -78,22 +82,39 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
 
   if (effectif.mission_locale_logs && effectif.mission_locale_logs.length > 0) {
     effectif.mission_locale_logs.forEach((log) => {
-      if (log.created_at && log.situation) {
-        const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
+      if (!log.created_at) return;
+      const date = log.created_at instanceof Date ? log.created_at : new Date(log.created_at);
 
-        if (log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
-          events.push({
-            date,
-            type: TIMELINE_EVENTS.CONTACTE_SANS_REPONSE,
-            label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_SANS_REPONSE],
-          });
-        } else {
-          events.push({
-            date,
-            type: TIMELINE_EVENTS.TRAITE_CFA,
-            label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
-          });
-        }
+      if (log.event === "WHATSAPP_PREQUALIF_YES") {
+        events.push({
+          date,
+          type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES,
+          label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES],
+        });
+        return;
+      }
+      if (log.event === "WHATSAPP_PREQUALIF_NO") {
+        events.push({
+          date,
+          type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO,
+          label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO],
+        });
+        return;
+      }
+
+      if (!log.situation) return;
+      if (log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+        events.push({
+          date,
+          type: TIMELINE_EVENTS.CONTACTE_SANS_REPONSE,
+          label: EVENT_LABELS[TIMELINE_EVENTS.CONTACTE_SANS_REPONSE],
+        });
+      } else {
+        events.push({
+          date,
+          type: TIMELINE_EVENTS.TRAITE_CFA,
+          label: EVENT_LABELS[TIMELINE_EVENTS.TRAITE_CFA],
+        });
       }
     });
   }
@@ -210,6 +231,12 @@ const getIcon = (type: TimelineEventType) => {
   }
   if (type === TIMELINE_EVENTS.WHATSAPP_NO_HELP) {
     return <WhatsAppIcon color="#CE0500" />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES) {
+    return <i className="ri-chat-check-fill" style={{ color: "#18753C", fontSize: "20px" }} aria-hidden="true" />;
+  }
+  if (type === TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO) {
+    return <i className="ri-chat-delete-fill" style={{ color: "#666666", fontSize: "20px" }} aria-hidden="true" />;
   }
   return (
     <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--text-disabled-grey)" }} />
