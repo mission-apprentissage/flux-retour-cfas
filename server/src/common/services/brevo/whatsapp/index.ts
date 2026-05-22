@@ -13,4 +13,4 @@ export { sendWhatsAppMessage, sendWhatsAppTemplate } from "./brevoApi";
 export { updateWhatsAppContact, getMissionLocaleInfo, updateMessageStatus } from "./database";
 export { handleInboundWhatsAppMessage } from "./handlers";
 export { isEligibleForWhatsApp, triggerWhatsAppIfEligible } from "./eligibility";
-export { notifyMLUserOnCallback, notifyMLUserOnNoHelp } from "./notifications";
+export { notifyMLUserOnCallback, notifyMLUserOnNoHelp, notifyMLUsersOnPrequalifYes } from "./notifications";

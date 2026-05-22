@@ -81,6 +81,13 @@ export async function sendWhatsAppPrequalif({ dryRun, limit, sentVia }: SendOpti
     logger.error("ABANDON : Template préqualif initial non configuré");
     return 1;
   }
+
+  if (!config.brevo.whatsapp?.templatePrequalifYesWithUrlId) {
+    logger.error(
+      "ABANDON : Template préqualif YES-with-URL non configuré (MNA_TDB_WHATSAPP_TEMPLATE_PREQUALIF_YES_WITH_URL_ID)"
+    );
+    return 1;
+  }
   if (!config.brevo.apiKey) {
     logger.error("ABANDON : Clé API Brevo non configurée");
     return 1;

@@ -52,7 +52,8 @@
 .bannerFooter {
   font-weight: 700;
   font-size: 0.875rem;
-  display: flex;
+  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.25rem;
@@ -60,6 +61,7 @@
 
 .bannerBadgeWrapper {
   display: inline-flex;
+  color: initial;
 }
 
 .closeButton,

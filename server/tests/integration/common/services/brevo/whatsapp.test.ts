@@ -23,6 +23,7 @@ import {
   isEligibleForWhatsApp,
   notifyMLUserOnCallback,
   notifyMLUserOnNoHelp,
+  notifyMLUsersOnPrequalifYes,
   handleInboundWhatsAppMessage,
   extractUserResponseText,
   updateMessageStatus,
@@ -1501,6 +1502,154 @@ describe("WhatsApp Service", () => {
       const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       assert.strictEqual(updated?.souhaite_rdv, true);
       assert.strictEqual(updated?.situation, SITUATION_ENUM.DEJA_ACCOMPAGNE);
+    });
+
+    it("YES mais CFA bascule V2 entre envoi et réponse → souhaite_rdv NON posé (exclusion PRD)", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        computed: { organisme: { is_allowed_collab: true } },
+        whatsapp_contact: {
+          phone_normalized: "+33611200000",
+          brevo_visitor_id: "visitor-cfa-v2",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      await handleInboundWhatsAppMessage("+33611200000", "✅", "msg-cfa-v2", "visitor-cfa-v2");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.ok(!updated?.souhaite_rdv, "souhaite_rdv ne doit pas être true pour un CFA V2");
+    });
+  });
+
+  describe("notifyMLUsersOnPrequalifYes (integration)", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      vi.mocked(sendEmail).mockClear();
+      const db = getDatabase();
+      await db.command({ collMod: "usersMigration", validationLevel: "off" }).catch(() => {});
+      await usersMigrationDb().deleteMany({});
+    });
+
+    const buildEffectif = (mlId: ObjectId, prenom = "Jean", nom = "Dupont"): IMissionLocaleEffectif =>
+      ({
+        _id: new ObjectId(),
+        mission_locale_id: mlId,
+        effectif_id: new ObjectId(),
+        created_at: new Date(),
+        brevo: {},
+        current_status: {},
+        effectif_snapshot: {
+          _id: new ObjectId(),
+          organisme_id: new ObjectId(),
+          id_erp_apprenant: "x",
+          source: "test",
+          annee_scolaire: "2024-2025",
+          apprenant: { nom, prenom, telephone: "0600000000" },
+          formation: {},
+          is_lock: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        } as any,
+      }) as IMissionLocaleEffectif;
+
+    it("broadcast à TOUS les users CONFIRMED de la ML", async () => {
+      const mlId = new ObjectId();
+      await usersMigrationDb().insertMany([
+        {
+          _id: new ObjectId(),
+          email: "user1@ml.fr",
+          nom: "Alpha",
+          prenom: "User",
+          civility: "Madame",
+          password: "x",
+          account_status: "CONFIRMED",
+          organisation_id: mlId,
+          created_at: new Date(),
+        },
+        {
+          _id: new ObjectId(),
+          email: "user2@ml.fr",
+          nom: "Beta",
+          prenom: "User",
+          civility: "Monsieur",
+          password: "x",
+          account_status: "CONFIRMED",
+          organisation_id: mlId,
+          created_at: new Date(),
+        },
+      ] as any[]);
+
+      await notifyMLUsersOnPrequalifYes(buildEffectif(mlId));
+
+      expect(sendEmail).toHaveBeenCalledTimes(2);
+      expect(sendEmail).toHaveBeenCalledWith(
+        "user1@ml.fr",
+        "mission_locale_prequalif_yes",
+        expect.objectContaining({ jeune: { prenom: "Jean", nom: "Dupont" } }),
+        { noreply: true }
+      );
+      expect(sendEmail).toHaveBeenCalledWith("user2@ml.fr", "mission_locale_prequalif_yes", expect.anything(), {
+        noreply: true,
+      });
+    });
+
+    it("n'envoie aucun email si la ML n'a aucun user CONFIRMED", async () => {
+      const mlId = new ObjectId();
+      await usersMigrationDb().insertOne({
+        _id: new ObjectId(),
+        email: "pending@ml.fr",
+        nom: "X",
+        prenom: "Y",
+        civility: "Madame",
+        password: "x",
+        account_status: "PENDING",
+        organisation_id: mlId,
+        created_at: new Date(),
+      } as any);
+
+      await notifyMLUsersOnPrequalifYes(buildEffectif(mlId));
+
+      expect(sendEmail).not.toHaveBeenCalled();
+    });
+
+    it("ne notifie QUE les users de la ML de l'effectif (isolation)", async () => {
+      const mlA = new ObjectId();
+      const mlB = new ObjectId();
+      await usersMigrationDb().insertMany([
+        {
+          _id: new ObjectId(),
+          email: "ml-a@example.fr",
+          nom: "A",
+          prenom: "User",
+          civility: "Madame",
+          password: "x",
+          account_status: "CONFIRMED",
+          organisation_id: mlA,
+          created_at: new Date(),
+        },
+        {
+          _id: new ObjectId(),
+          email: "ml-b@example.fr",
+          nom: "B",
+          prenom: "User",
+          civility: "Madame",
+          password: "x",
+          account_status: "CONFIRMED",
+          organisation_id: mlB,
+          created_at: new Date(),
+        },
+      ] as any[]);
+
+      await notifyMLUsersOnPrequalifYes(buildEffectif(mlA));
+
+      expect(sendEmail).toHaveBeenCalledTimes(1);
+      expect(sendEmail).toHaveBeenCalledWith("ml-a@example.fr", "mission_locale_prequalif_yes", expect.anything(), {
+        noreply: true,
+      });
     });
   });
 });

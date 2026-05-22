@@ -51,6 +51,7 @@ interface TimelineEvent {
   label: string;
   showDate?: boolean;
   tooltip?: string;
+  subtitle?: string;
 }
 
 interface EffectifParcoursMissionLocaleProps {
@@ -92,6 +93,7 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES,
           label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES],
+          subtitle: "Demande reçue par message",
           tooltip:
             "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il souhaitait être recontacté par la Mission Locale.",
         });
@@ -102,6 +104,7 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO,
           label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO],
+          subtitle: "Demande reçue par message",
           tooltip:
             "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il ne souhaitait pas être recontacté.",
         });
@@ -270,13 +273,24 @@ export const EffectifParcoursMissionLocale = memo(function EffectifParcoursMissi
               <p className={styles.timelineText}>
                 {event.showDate !== false ? `Le ${formatDate(event.date)} : ` : ""}
                 <strong>{event.label}</strong>
-                {event.tooltip && (
-                  <>
-                    {" "}
-                    <Tooltip kind="hover" title={event.tooltip} />
-                  </>
-                )}
               </p>
+              {event.subtitle && (
+                <p className={styles.timelineSubtitle}>
+                  {event.subtitle}
+                  {event.tooltip && (
+                    <>
+                      {" "}
+                      <Tooltip kind="hover" title={event.tooltip} />
+                    </>
+                  )}
+                </p>
+              )}
+              {!event.subtitle && event.tooltip && (
+                <span>
+                  {" "}
+                  <Tooltip kind="hover" title={event.tooltip} />
+                </span>
+              )}
             </div>
           </div>
         ))}

@@ -53,3 +53,13 @@
 .timelineText.current strong {
   font-weight: 700;
 }
+
+.timelineSubtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--text-mention-grey);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

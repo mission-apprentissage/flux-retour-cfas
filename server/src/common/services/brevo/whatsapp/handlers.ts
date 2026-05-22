@@ -165,6 +165,25 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
 
 async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
   const now = new Date();
+
+  const cfaWentV2 = effectif.computed?.organisme?.is_allowed_collab === true;
+  const cfaAccConjoint = effectif.organisme_data?.acc_conjoint === true;
+  if (cfaWentV2 || cfaAccConjoint) {
+    logger.warn(
+      {
+        effectifId: effectif._id,
+        cfaWentV2,
+        cfaAccConjoint,
+      },
+      "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
+    );
+    captureException(new Error("Prequalif YES skipped: CFA went V2 between send and reply"), {
+      tags: { feature: "whatsapp_prequalif", step: "yes_skipped_cfa_v2" },
+      extra: { effectifId: effectif._id.toString() },
+    });
+    return;
+  }
+
   const currentSituation = effectif.situation;
   const shouldUnsetSituation =
     currentSituation === null ||
@@ -481,8 +500,19 @@ async function handlePrequalifYes(
   }
 
   const targetPhone = effectif.whatsapp_contact?.phone_normalized;
+  const templateId = config.brevo.whatsapp?.templatePrequalifYesWithUrlId;
 
-  if (ml.rdv_url && targetPhone) {
+  // Visibilité ops : si la ML a un rdv_url mais que le template YES-with-URL est manquant,
+  // on fallback gracieusement sur le message texte libre — mais le jeune ne reçoit PAS
+  // le CTA "Prendre rendez-vous". Log Sentry pour détection rapide post-déploiement.
+  if (ml.rdv_url && targetPhone && !templateId) {
+    captureException(new Error("templatePrequalifYesWithUrlId not configured — fallback to text message"), {
+      tags: { feature: "whatsapp_prequalif", step: "follow_up_yes_template_missing" },
+      extra: { effectifId: effectif._id.toString(), mlId: effectif.mission_locale_id.toString() },
+    });
+  }
+
+  if (ml.rdv_url && targetPhone && templateId) {
     const token = uuidv4();
     const now = new Date();
     await missionLocaleEffectifsDb().updateOne(
@@ -496,12 +526,6 @@ async function handlePrequalifYes(
     );
 
     const redirectUrl = `${config.publicUrl}/r/${token}`;
-    const templateId = config.brevo.whatsapp?.templatePrequalifYesWithUrlId;
-
-    if (!templateId) {
-      logger.error("WhatsApp prequalif YES-with-url template ID not configured");
-      return;
-    }
 
     await upsertBrevoContact(targetPhone, {
       TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,

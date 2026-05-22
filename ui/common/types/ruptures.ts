@@ -9,7 +9,6 @@ export type EffectifData = {
   prioritaire: boolean;
   a_contacter: boolean;
   mineur: boolean;
-  contact_opportun: boolean;
   acc_conjoint: boolean;
   rqth: boolean;
   a_traiter: boolean;

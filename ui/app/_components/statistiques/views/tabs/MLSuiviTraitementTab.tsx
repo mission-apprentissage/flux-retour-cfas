@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { AccompagnementConjointSection } from "../../sections/AccompagnementConjointSection";
 import { DossiersTraitesSection } from "../../sections/DossiersTraitesSection";
+import { PrequalifSection } from "../../sections/PrequalifSection";
 import { RupturantsSection } from "../../sections/RupturantsSection";
 import type { Period } from "../../ui/PeriodSelector";
 import { PeriodSelector } from "../../ui/PeriodSelector";
@@ -14,9 +15,10 @@ interface MLSuiviTraitementTabProps {
   mlId: string;
   noData?: boolean;
   hasCfaCollaboration?: boolean;
+  isAdmin?: boolean;
 }
 
-export function MLSuiviTraitementTab({ mlId, noData, hasCfaCollaboration }: MLSuiviTraitementTabProps) {
+export function MLSuiviTraitementTab({ mlId, noData, hasCfaCollaboration, isAdmin }: MLSuiviTraitementTabProps) {
   const [period, setPeriod] = useState<Period>("30days");
 
   return (
@@ -31,6 +33,7 @@ export function MLSuiviTraitementTab({ mlId, noData, hasCfaCollaboration }: MLSu
         {!noData && <RupturantsSection period={period} mlId={mlId} fullWidth />}
         <DossiersTraitesSection period={period} mlId={mlId} fullWidth noData={noData} />
         {hasCfaCollaboration && <AccompagnementConjointSection mlId={mlId} compact noData={noData} />}
+        {isAdmin && <PrequalifSection scope="ml" mlId={mlId} />}
       </div>
     </div>
   );

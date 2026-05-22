@@ -1,11 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMlBannerStats } from "@/app/_components/ruptures/shared/hooks";
 
+import { SouhaiteRdvBadgeInline } from "../shared/ui/EffectifStatusBadge";
+
 import styles from "./SouhaiteRdvBanner.module.css";
+
+const DISMISS_STORAGE_KEY = "souhaite_rdv_banner_dismissed_at";
 
 /**
  * Bannière "Souhaite un RDV" en haut de la page d'accueil ML.
@@ -13,10 +17,28 @@ import styles from "./SouhaiteRdvBanner.module.css";
 export function SouhaiteRdvBanner() {
   const router = useRouter();
   const { data } = useMlBannerStats();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(DISMISS_STORAGE_KEY) !== null);
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      localStorage.setItem(DISMISS_STORAGE_KEY, new Date().toISOString());
+    } catch {
+      //empty
+    }
+    setDismissed(true);
+  };
 
   const count = data?.souhaite_rdv_count ?? 0;
-  if (dismissed || count <= 0) return null;
+  if (dismissed !== false || count <= 0) return null;
 
   const plural = count > 1;
 
@@ -39,18 +61,14 @@ export function SouhaiteRdvBanner() {
           </span>
           <span className={styles.bannerDescription}>Contactez-les dès maintenant.</span>
           <span className={styles.bannerFooter}>
-            Ils sont indiqués par cette étiquette dans votre liste prioritaire.
+            Ils sont indiqués par cette étiquette
+            <span className={styles.bannerBadgeWrapper}>
+              <SouhaiteRdvBadgeInline />
+            </span>
           </span>
         </div>
       </div>
-      <button
-        className={styles.closeButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          setDismissed(true);
-        }}
-        aria-label="Fermer"
-      >
+      <button className={styles.closeButton} onClick={handleDismiss} aria-label="Fermer">
         <span className="fr-icon-close-line" aria-hidden="true" />
       </button>
     </div>

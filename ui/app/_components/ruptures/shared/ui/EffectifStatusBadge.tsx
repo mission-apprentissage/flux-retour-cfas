@@ -11,7 +11,6 @@ interface EffectifStatusBadgeProps {
     | "a_traiter"
     | "prioritaire"
     | "injoignable"
-    | "contact_opportun"
     | "a_contacter"
     | "mineur"
     | "rqth"
@@ -204,7 +203,7 @@ function AContacterBadge({ iconSize, fontSize }: { iconSize: string; fontSize: s
 function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
   return (
     <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif souhaite un RDV">
-      <i className="ri-whatsapp-fill fr-icon--sm" style={{ color: "#18753C" }} />
+      <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
         <span className={styles.availabilityDotInner} />
@@ -215,7 +214,7 @@ function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
         title={
           <span className={styles.tooltipContent}>
             <span className={styles.tooltipIcon} style={{ display: "inline-flex", alignItems: "center" }}>
-              <i className="ri-whatsapp-fill fr-icon--sm" style={{ color: "#18753C" }} />
+              <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
               <span className={styles.availabilityDot} aria-hidden="true">
                 <span className={styles.availabilityDotOuter} />
                 <span className={styles.availabilityDotInner} />
@@ -228,6 +227,19 @@ function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
           </span>
         }
       />
+    </span>
+  );
+}
+
+export function SouhaiteRdvBadgeInline() {
+  return (
+    <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Souhaite un RDV">
+      <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
+      <span className={styles.availabilityDot} aria-hidden="true">
+        <span className={styles.availabilityDotOuter} />
+        <span className={styles.availabilityDotInner} />
+      </span>
+      <span style={{ fontSize: "12px" }}>SOUHAITE UN RDV</span>
     </span>
   );
 }
