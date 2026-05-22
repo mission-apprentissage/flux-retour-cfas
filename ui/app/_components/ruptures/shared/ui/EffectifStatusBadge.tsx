@@ -155,32 +155,6 @@ export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffectifMis
   return badges.length > 0 ? <div className={styles.badgesContainerWithMargin}>{badges}</div> : null;
 }
 
-function ContactOpportunBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
-  return (
-    <span className={`fr-badge ${styles.contactOpportunBadge}`} aria-label="Contact opportun">
-      <i className={`ri-sparkling-fill ${iconSize} ${styles.contactOpportunIcon}`} aria-hidden="true" />
-      <span style={{ fontSize }}>CONTACT OPPORTUN</span>
-      <Tooltip
-        kind="hover"
-        title={
-          <span className={styles.tooltipContent}>
-            <i className={`ri-sparkling-fill fr-icon--sm ${styles.tooltipIcon}`} style={{ color: "#6A6AF4" }} />
-            <span>
-              D&apos;apr&egrave;s plusieurs crit&egrave;res d&apos;analyse, notre algorithme pense que les chances que
-              ce jeune vous r&eacute;ponde sont plus &eacute;lev&eacute;es que la moyenne.{" "}
-              <em>Cette suggestion est une pr&eacute;diction, et ne garantit pas le r&eacute;sultat.</em>
-            </span>
-          </span>
-        }
-      />
-    </span>
-  );
-}
-
-export function EffectifContactOpportunBadge() {
-  return <ContactOpportunBadge iconSize="fr-icon--sm" fontSize="14px" />;
-}
-
 function MineurBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {
   return (
     <span className="fr-badge fr-badge--red" aria-label="Effectif mineur">
