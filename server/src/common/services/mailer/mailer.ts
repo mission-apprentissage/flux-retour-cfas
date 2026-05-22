@@ -89,8 +89,12 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
   validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
   register_unknown_network: () => `[ADMIN] Demande d'accès au tableau de bord : nouveau réseau signalé`,
-  mission_locale_weekly_recap: (payload) =>
-    `${payload.total} jeune${payload.total > 1 ? "s" : ""} en rupture de contrat ${payload.total > 1 ? "attendent" : "attend"} votre aide cette semaine`,
+  mission_locale_weekly_recap: (payload) => {
+    const n = payload.effectifs_souhaite_rdv;
+    if (n === 0) return "Votre rapport hebdomadaire — Tableau de bord de l'apprentissage";
+    if (n === 1) return "1 jeune a confirmé vouloir un accompagnement avec la Mission Locale et attend votre retour.";
+    return `${n} jeunes ont confirmé vouloir un accompagnement avec la Mission Locale et attendent votre retour.`;
+  },
   mission_locale_daily_recap: (payload) =>
     `${payload.effectifs_count} nouveau${payload.effectifs_count > 1 ? "x" : ""} jeune${payload.effectifs_count > 1 ? "s" : ""} à traiter de ${payload.cfa.nom}`,
   cfa_daily_recap: (payload) =>
