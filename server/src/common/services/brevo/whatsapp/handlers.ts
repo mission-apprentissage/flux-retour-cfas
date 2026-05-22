@@ -15,13 +15,14 @@ import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import config from "@/config";
 
-import { sendWhatsAppMessage, sendWhatsAppTemplate, upsertBrevoContact } from "./brevoApi";
+import { sendWhatsAppMessage } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
 import {
   buildAutoReplyMessage,
   buildCallbackMessage,
   buildNoHelpMessage,
   buildPrequalifNoMessage,
+  buildPrequalifYesWithUrlInlineMessage,
   buildPrequalifYesWithoutUrlMessage,
   buildStopConfirmationMessage,
   isStopMessage,
@@ -499,20 +500,8 @@ async function handlePrequalifYes(
     return;
   }
 
-  const targetPhone = effectif.whatsapp_contact?.phone_normalized;
-  const templateId = config.brevo.whatsapp?.templatePrequalifYesWithUrlId;
-
-  // Visibilité ops : si la ML a un rdv_url mais que le template YES-with-URL est manquant,
-  // on fallback gracieusement sur le message texte libre — mais le jeune ne reçoit PAS
-  // le CTA "Prendre rendez-vous". Log Sentry pour détection rapide post-déploiement.
-  if (ml.rdv_url && targetPhone && !templateId) {
-    captureException(new Error("templatePrequalifYesWithUrlId not configured — fallback to text message"), {
-      tags: { feature: "whatsapp_prequalif", step: "follow_up_yes_template_missing" },
-      extra: { effectifId: effectif._id.toString(), mlId: effectif.mission_locale_id.toString() },
-    });
-  }
-
-  if (ml.rdv_url && targetPhone && templateId) {
+  let message: string;
+  if (ml.rdv_url) {
     const token = uuidv4();
     const now = new Date();
     await missionLocaleEffectifsDb().updateOne(
@@ -524,41 +513,12 @@ async function handlePrequalifYes(
         },
       }
     );
-
     const redirectUrl = `${config.publicUrl}/r/${token}`;
-
-    await upsertBrevoContact(targetPhone, {
-      TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,
-      TBA_EFFECTIF_MISSION_LOCALE_NOM_WHATSAPP: ml.nom,
-      TBA_EFFECTIF_REDIRECT_URL_WHATSAPP: redirectUrl,
-    });
-
-    const result = await sendWhatsAppTemplate(targetPhone, { templateId });
-    const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
-    if (result.success) {
-      historyEntries.push({
-        direction: "outbound",
-        content: `[Template prequalif_yes_with_url] prenom=${prenom}, ml=${ml.nom}, redirect=${redirectUrl}`,
-        sent_at: new Date(),
-        brevo_message_id: result.messageId,
-      });
-    }
-    await updateWhatsAppContact(
-      effectif._id,
-      {
-        user_response: USER_RESPONSE_TYPE.PREQUALIF_YES,
-        user_response_at: now,
-        user_response_raw: text,
-        conversation_state: CONVERSATION_STATE.CLOSED,
-        message_status: "read",
-        status_updated_at: now,
-      },
-      historyEntries
-    );
-    return;
+    message = buildPrequalifYesWithUrlInlineMessage(prenom, ml, redirectUrl);
+  } else {
+    message = buildPrequalifYesWithoutUrlMessage(prenom, ml);
   }
 
-  const message = buildPrequalifYesWithoutUrlMessage(prenom, ml);
   try {
     await sendResponseAndUpdateContact(
       effectif,
@@ -571,12 +531,12 @@ async function handlePrequalifYes(
     );
   } catch (err) {
     logger.error(
-      { err, effectifId: effectif._id, mlId: effectif.mission_locale_id },
-      "Échec envoi confirmation YES texte libre (no rdv_url) — YES enregistré côté DB"
+      { err, effectifId: effectif._id, mlId: effectif.mission_locale_id, hasRdvUrl: !!ml.rdv_url },
+      "Échec envoi confirmation YES texte libre — YES enregistré côté DB"
     );
     captureException(err, {
-      tags: { feature: "whatsapp_prequalif", step: "follow_up_yes_no_url" },
-      extra: { effectifId: effectif._id.toString() },
+      tags: { feature: "whatsapp_prequalif", step: "follow_up_yes" },
+      extra: { effectifId: effectif._id.toString(), hasRdvUrl: !!ml.rdv_url },
     });
   }
 }

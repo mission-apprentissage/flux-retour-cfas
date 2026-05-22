@@ -14,6 +14,14 @@ export function buildPrequalifYesWithoutUrlMessage(prenom: string, missionLocale
   return `C'est noté *${prenom}* ✅. La *Mission locale ${missionLocale.nom}* vous contactera dans les prochains jours.`;
 }
 
+export function buildPrequalifYesWithUrlInlineMessage(
+  prenom: string,
+  missionLocale: MissionLocaleInfo,
+  redirectUrl: string
+): string {
+  return `Super *${prenom}* ✅. Prenez rendez-vous avec la *Mission locale ${missionLocale.nom}* directement depuis le lien ci-dessous :\n\n${redirectUrl}`;
+}
+
 export function buildPrequalifNoMessage(prenom: string, missionLocale: MissionLocaleInfoFull): string {
   const lines: string[] = [
     `C'est noté *${prenom}*. La *Mission locale ${missionLocale.nom}* ne vous contactera pas.`,
