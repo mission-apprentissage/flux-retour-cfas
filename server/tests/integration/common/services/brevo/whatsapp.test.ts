@@ -29,6 +29,9 @@ import {
   triggerWhatsAppIfEligible,
   sendWhatsAppMessage,
 } from "@/common/services/brevo/whatsapp";
+import { isEligibleForPrequalif } from "@/common/services/brevo/whatsapp/eligibility";
+import { buildPrequalifNoMessage, buildPrequalifYesWithoutUrlMessage } from "@/common/services/brevo/whatsapp/messages";
+import { isPhoneAlreadyContacted, reserveAndSendPrequalif } from "@/common/services/brevo/whatsapp/prequalif";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -106,6 +109,78 @@ describe("WhatsApp Service", () => {
       assert.strictEqual(parseUserResponse("rappel svp"), null);
       assert.strictEqual(parseUserResponse("je veux être rappelé"), null);
       assert.strictEqual(parseUserResponse("pas intéressé"), null);
+    });
+
+    describe("contextuel par template_type", () => {
+      it("contexte prequalif : ❌ → PREQUALIF_NO (PAS NO_HELP)", () => {
+        assert.strictEqual(parseUserResponse("❌", "prequalif"), USER_RESPONSE_TYPE.PREQUALIF_NO);
+      });
+
+      it("contexte prequalif : ✅ → PREQUALIF_YES", () => {
+        assert.strictEqual(parseUserResponse("✅", "prequalif"), USER_RESPONSE_TYPE.PREQUALIF_YES);
+        assert.strictEqual(parseUserResponse("Ça m'intéresse", "prequalif"), USER_RESPONSE_TYPE.PREQUALIF_YES);
+      });
+
+      it("contexte prequalif : 'je ne veux pas d'aide' → PREQUALIF_NO", () => {
+        assert.strictEqual(parseUserResponse("Je ne veux pas d'aide", "prequalif"), USER_RESPONSE_TYPE.PREQUALIF_NO);
+      });
+
+      it("contexte prequalif : 'oui' / 'non' → null (pas un bouton préqualif)", () => {
+        assert.strictEqual(parseUserResponse("oui", "prequalif"), null);
+        assert.strictEqual(parseUserResponse("non", "prequalif"), null);
+      });
+
+      it("contexte injoignables : ❌ → NO_HELP (legacy)", () => {
+        assert.strictEqual(parseUserResponse("❌", "injoignables"), USER_RESPONSE_TYPE.NO_HELP);
+      });
+
+      it("contexte injoignables : ✅ → null (pas un bouton injoignables)", () => {
+        assert.strictEqual(parseUserResponse("✅", "injoignables"), null);
+      });
+
+      it("contexte injoignables : 'oui' → CALLBACK", () => {
+        assert.strictEqual(parseUserResponse("oui", "injoignables"), USER_RESPONSE_TYPE.CALLBACK);
+      });
+
+      it("rétrocompat : sans templateType → comportement legacy NO_HELP/CALLBACK", () => {
+        assert.strictEqual(parseUserResponse("❌"), USER_RESPONSE_TYPE.NO_HELP);
+        assert.strictEqual(parseUserResponse("oui"), USER_RESPONSE_TYPE.CALLBACK);
+      });
+    });
+  });
+
+  describe("buildPrequalifYesWithoutUrlMessage", () => {
+    it("construit le message de suivi YES sans URL", () => {
+      const message = buildPrequalifYesWithoutUrlMessage("Marie", { nom: "Paris" });
+      expect(message).toContain("C'est noté *Marie* ✅");
+      expect(message).toContain("Mission locale Paris");
+      expect(message).toContain("contactera dans les prochains jours");
+    });
+  });
+
+  describe("buildPrequalifNoMessage", () => {
+    const ml = {
+      nom: "Paris",
+      email: "ml@paris.fr",
+      telephone: "01 23 45 67 89",
+      adresse_inline: "10 rue X, 75001 Paris",
+    };
+
+    it("construit le message NO complet avec contacts inline", () => {
+      const message = buildPrequalifNoMessage("Marie", ml);
+      expect(message).toContain("C'est noté *Marie*");
+      expect(message).toContain("Mission locale Paris");
+      expect(message).toContain("ne vous contactera pas");
+      expect(message).toContain("✉️ ml@paris.fr");
+      expect(message).toContain("📞 01 23 45 67 89");
+      expect(message).toContain("📍 10 rue X, 75001 Paris");
+    });
+
+    it("omet les coordonnées manquantes", () => {
+      const message = buildPrequalifNoMessage("Marie", { nom: "Paris" });
+      expect(message).not.toContain("✉️");
+      expect(message).not.toContain("📞");
+      expect(message).not.toContain("📍");
     });
   });
 
@@ -1034,6 +1109,398 @@ describe("WhatsApp Service", () => {
         },
       } as IMissionLocaleEffectif;
       await expect(triggerWhatsAppIfEligible(effectif, missionLocaleId)).resolves.toBeUndefined();
+    });
+  });
+
+  describe("isEligibleForPrequalif", () => {
+    const baseEffectif: Partial<IMissionLocaleEffectif> = {
+      _id: new ObjectId(),
+      mission_locale_id: new ObjectId(),
+      effectif_id: new ObjectId(),
+      created_at: new Date(),
+      brevo: {},
+      current_status: {},
+      classification_reponse_appel: {
+        score: 0.9,
+        model: "test-model",
+        scored_at: new Date(),
+      },
+      effectif_snapshot: {
+        _id: new ObjectId(),
+        organisme_id: new ObjectId(),
+        id_erp_apprenant: "123",
+        source: "test",
+        annee_scolaire: "2024-2025",
+        apprenant: { nom: "Dupont", prenom: "Jean", telephone: "0612345678" },
+        formation: {},
+        is_lock: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      } as any,
+    };
+
+    it("retourne true pour un effectif éligible (score ≥ 0.75)", () => {
+      assert.strictEqual(isEligibleForPrequalif(baseEffectif as IMissionLocaleEffectif), true);
+    });
+
+    it("retourne false si score < 0.75", () => {
+      const effectif = {
+        ...baseEffectif,
+        classification_reponse_appel: { score: 0.5, model: "x", scored_at: new Date() },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si score absent", () => {
+      const effectif = { ...baseEffectif, classification_reponse_appel: undefined } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si CFA V2 collab (is_allowed_collab)", () => {
+      const effectif = {
+        ...baseEffectif,
+        computed: { organisme: { is_allowed_collab: true } },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si CFA demande acc_conjoint sur cet effectif", () => {
+      const effectif = {
+        ...baseEffectif,
+        organisme_data: { acc_conjoint: true },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si situation déjà posée", () => {
+      const effectif = {
+        ...baseEffectif,
+        situation: SITUATION_ENUM.RDV_PRIS,
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si déjà contacté par WhatsApp", () => {
+      const effectif = {
+        ...baseEffectif,
+        whatsapp_contact: {
+          phone_normalized: "+33612345678",
+          last_message_sent_at: new Date(),
+          opted_out: false,
+        },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si opt-out", () => {
+      const effectif = {
+        ...baseEffectif,
+        whatsapp_contact: { phone_normalized: "+33612345678", opted_out: true },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false si pas de téléphone", () => {
+      const effectif = {
+        ...baseEffectif,
+        effectif_snapshot: {
+          ...baseEffectif.effectif_snapshot,
+          apprenant: { nom: "X", prenom: "Y", telephone: null },
+        },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("inclut les mineurs et les RQTH (décision verrouillée plan §2)", () => {
+      assert.strictEqual(isEligibleForPrequalif(baseEffectif as IMissionLocaleEffectif), true);
+    });
+  });
+
+  describe("isPhoneAlreadyContacted (Verrou 2 §7.7)", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      const db = getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+      await missionLocaleEffectifsDb().deleteMany({});
+    });
+
+    it("retourne false si aucun autre effectif n'a ce phone normalisé", async () => {
+      const effectifId = new ObjectId();
+      assert.strictEqual(await isPhoneAlreadyContacted("+33611111111", effectifId), false);
+    });
+
+    const insertMockEffectifWithPhone = (id: ObjectId, phone: string, extra: any = {}) =>
+      missionLocaleEffectifsDb().insertOne(
+        {
+          _id: id,
+          mission_locale_id: new ObjectId(),
+          effectif_id: new ObjectId(),
+          created_at: new Date(),
+          brevo: {},
+          current_status: {},
+          effectif_snapshot: {
+            _id: new ObjectId(),
+            organisme_id: new ObjectId(),
+            id_erp_apprenant: "123",
+            source: "test",
+            annee_scolaire: "2024-2025",
+            apprenant: { nom: "X", prenom: "Y", telephone: phone },
+            formation: {},
+            is_lock: false,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          whatsapp_contact: { phone_normalized: phone, last_message_sent_at: new Date(), opted_out: false },
+          ...extra,
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+
+    it("retourne true si un autre effectif a déjà reçu un message au même phone", async () => {
+      const otherEffectifId = new ObjectId();
+      const currentEffectifId = new ObjectId();
+      await insertMockEffectifWithPhone(otherEffectifId, "+33611111111");
+      assert.strictEqual(await isPhoneAlreadyContacted("+33611111111", currentEffectifId), true);
+    });
+
+    it("ignore soft_deleted=true du courant mais PAS de la cible (intentional cross-flow dedup)", async () => {
+      const otherEffectifId = new ObjectId();
+      const currentEffectifId = new ObjectId();
+      await insertMockEffectifWithPhone(otherEffectifId, "+33622222222", { soft_deleted: true });
+      assert.strictEqual(await isPhoneAlreadyContacted("+33622222222", currentEffectifId), true);
+    });
+
+    it("ne bloque pas l'effectif courant lui-même", async () => {
+      const effectifId = new ObjectId();
+      await insertMockEffectifWithPhone(effectifId, "+33633333333");
+      assert.strictEqual(await isPhoneAlreadyContacted("+33633333333", effectifId), false);
+    });
+  });
+
+  describe("reserveAndSendPrequalif (Verrou 1 §7.7)", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      vi.clearAllMocks();
+      const db = getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+      await missionLocaleEffectifsDb().deleteMany({});
+    });
+
+    const setupEffectif = async (overrides: Partial<IMissionLocaleEffectif> = {}): Promise<ObjectId> => {
+      const id = new ObjectId();
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          _id: id,
+          mission_locale_id: new ObjectId(),
+          effectif_id: new ObjectId(),
+          created_at: new Date(),
+          brevo: {},
+          current_status: {},
+          effectif_snapshot: {
+            _id: new ObjectId(),
+            organisme_id: new ObjectId(),
+            id_erp_apprenant: "123",
+            source: "test",
+            annee_scolaire: "2024-2025",
+            apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
+            formation: {},
+            is_lock: false,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          ...overrides,
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+      return id;
+    };
+
+    it("retourne 'skipped' si WhatsApp désactivé (config.brevo.whatsapp.enabled=false)", async () => {
+      const id = await setupEffectif();
+      const result = await reserveAndSendPrequalif({
+        effectifId: id,
+        targetPhone: "+33644444444",
+        prenom: "Test",
+        mlNom: "ML",
+        sentVia: "backfill",
+      });
+      assert.strictEqual(result, "skipped");
+    });
+
+    it("skip si phone déjà contacté sur un autre effectif (Verrou 2)", async () => {
+      const otherId = await setupEffectif({
+        whatsapp_contact: { phone_normalized: "+33655555555", last_message_sent_at: new Date(), opted_out: false },
+      } as any);
+      const currentId = await setupEffectif();
+      assert.strictEqual(await isPhoneAlreadyContacted("+33655555555", currentId), true);
+      assert.notStrictEqual(otherId, currentId);
+    });
+
+    it("re-run sur le même effectif est idempotent (Verrou 1)", async () => {
+      const id = await setupEffectif({
+        whatsapp_contact: { phone_normalized: "+33666666666", last_message_sent_at: new Date(), opted_out: false },
+      } as any);
+      const result = await reserveAndSendPrequalif({
+        effectifId: id,
+        targetPhone: "+33677777777",
+        prenom: "Test",
+        mlNom: "ML",
+        sentVia: "backfill",
+      });
+      assert.strictEqual(result, "skipped");
+    });
+  });
+
+  describe("handlePrequalifYes / handlePrequalifNo (timeline log + DB updates)", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      vi.clearAllMocks();
+      const db = getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+      await db.command({ collMod: "organisations", validationLevel: "off" }).catch(() => {});
+      await db.command({ collMod: "missionLocaleEffectifsLog", validationLevel: "off" }).catch(() => {});
+      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifsLogDb().deleteMany({});
+      await organisationsDb().deleteMany({});
+    });
+
+    const setupPrequalifEffectif = async (overrides: any = {}) => {
+      const mlId = new ObjectId();
+      await organisationsDb().insertOne(
+        {
+          _id: mlId,
+          type: "MISSION_LOCALE",
+          nom: "ML Test",
+          ml_id: 1,
+          created_at: new Date(),
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+
+      const effectifId = new ObjectId();
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          _id: effectifId,
+          mission_locale_id: mlId,
+          effectif_id: new ObjectId(),
+          created_at: new Date(),
+          brevo: {},
+          current_status: {},
+          a_traiter: true,
+          situation: null,
+          whatsapp_contact: {
+            phone_normalized: "+33688888888",
+            brevo_visitor_id: "visitor-x",
+            last_message_sent_at: new Date(Date.now() - 60_000),
+            template_type: "prequalif",
+            sent_via: "backfill",
+            message_status: "sent",
+          },
+          effectif_snapshot: {
+            _id: new ObjectId(),
+            organisme_id: new ObjectId(),
+            id_erp_apprenant: "123",
+            source: "test",
+            annee_scolaire: "2024-2025",
+            apprenant: { nom: "Dupont", prenom: "Marie", telephone: "0688888888" },
+            formation: {},
+            is_lock: false,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          ...overrides,
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+
+      return { effectifId, mlId };
+    };
+
+    it("PREQUALIF_YES : pose souhaite_rdv=true + a_traiter=true + log timeline event YES", async () => {
+      const { effectifId } = await setupPrequalifEffectif();
+
+      await handleInboundWhatsAppMessage("+33688888888", "✅ Ça m'intéresse", "msg-1", "visitor-x");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(updated?.souhaite_rdv, true);
+      assert.strictEqual(updated?.souhaite_rdv_source, "whatsapp_prequalif");
+      assert.strictEqual(updated?.a_traiter, true);
+
+      const log = await missionLocaleEffectifsLogDb().findOne({
+        mission_locale_effectif_id: effectifId,
+        event: "WHATSAPP_PREQUALIF_YES",
+      });
+      assert.ok(log, "Log timeline event YES doit être inséré");
+    });
+
+    it("PREQUALIF_NO : pose situation=NE_SOUHAITE_PAS_ETRE_RECONTACTE + log timeline NO + a_traiter=false", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        whatsapp_contact: {
+          phone_normalized: "+33699999999",
+          brevo_visitor_id: "visitor-y",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      await handleInboundWhatsAppMessage("+33699999999", "❌ Je ne veux pas d'aide", "msg-2", "visitor-y");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(updated?.situation, SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
+      assert.strictEqual(updated?.a_traiter, false);
+
+      const log = await missionLocaleEffectifsLogDb().findOne({
+        mission_locale_effectif_id: effectifId,
+        event: "WHATSAPP_PREQUALIF_NO",
+      });
+      assert.ok(log, "Log timeline event NO doit être inséré");
+    });
+
+    it("YES après NO (race) : re-aligne a_traiter=true et lève situation NE_SOUHAITE_PAS_ETRE_RECONTACTE", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        a_traiter: false,
+        situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+        whatsapp_contact: {
+          phone_normalized: "+33677000000",
+          brevo_visitor_id: "visitor-race",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      await handleInboundWhatsAppMessage("+33677000000", "✅", "msg-race", "visitor-race");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(updated?.a_traiter, true);
+      assert.strictEqual(updated?.souhaite_rdv, true);
+      assert.ok(updated?.situation == null);
+    });
+
+    it("YES avec situation hors flow déjà posée → souhaite_rdv true mais situation conservée (bug 3)", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        situation: SITUATION_ENUM.DEJA_ACCOMPAGNE,
+        whatsapp_contact: {
+          phone_normalized: "+33655000000",
+          brevo_visitor_id: "visitor-deja-acc",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      await handleInboundWhatsAppMessage("+33655000000", "✅", "msg-deja", "visitor-deja-acc");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(updated?.souhaite_rdv, true);
+      assert.strictEqual(updated?.situation, SITUATION_ENUM.DEJA_ACCOMPAGNE);
     });
   });
 });
