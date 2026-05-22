@@ -20,6 +20,7 @@ interface EffectifStatusBadgeProps {
     | "situation"
     | "whatsapp_callback_requested"
     | "whatsapp_no_help_responded"
+    | "souhaite_rdv"
   >;
   isHeader?: boolean;
   organisation?: "MISSION_LOCALE" | "ORGANISME_FORMATION";
@@ -109,14 +110,11 @@ function getAllPriorityBadges(
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
-  if (effectif.whatsapp_callback_requested) {
-    badges.push(<WhatsAppCallbackBadge key="whatsapp_callback" fontSize={fontSize} />);
+  if (effectif.souhaite_rdv) {
+    badges.push(<SouhaiteRdvBadge key="souhaite_rdv" fontSize={fontSize} />);
   }
   if (effectif.whatsapp_no_help_responded) {
     badges.push(<WhatsAppNoHelpBadge key="whatsapp_no_help" fontSize={fontSize} />);
-  }
-  if (effectif.contact_opportun) {
-    badges.push(<ContactOpportunBadge key="contact_opportun" iconSize={iconSize} fontSize={fontSize} />);
   }
   if (effectif.mineur) {
     badges.push(<MineurBadge key="mineur" iconSize={iconSize} fontSize={fontSize} />);
@@ -152,10 +150,7 @@ export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffectifMis
     return null;
   }
 
-  const badges = getAllPriorityBadges(
-    { ...effectif, contact_opportun: false },
-    { fontSize: "12px", iconSize: "fr-icon--xs" }
-  );
+  const badges = getAllPriorityBadges(effectif, { fontSize: "12px", iconSize: "fr-icon--xs" });
 
   return badges.length > 0 ? <div className={styles.badgesContainerWithMargin}>{badges}</div> : null;
 }
@@ -232,15 +227,15 @@ function AContacterBadge({ iconSize, fontSize }: { iconSize: string; fontSize: s
   );
 }
 
-function WhatsAppCallbackBadge({ fontSize }: { fontSize: string }) {
+function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
   return (
-    <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif disponible via WhatsApp">
+    <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif souhaite un RDV">
       <i className="ri-whatsapp-fill fr-icon--sm" style={{ color: "#18753C" }} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
         <span className={styles.availabilityDotInner} />
       </span>
-      <span style={{ fontSize }}>DISPONIBLE</span>
+      <span style={{ fontSize }}>SOUHAITE UN RDV</span>
       <Tooltip
         kind="hover"
         title={
@@ -253,11 +248,8 @@ function WhatsAppCallbackBadge({ fontSize }: { fontSize: string }) {
               </span>
             </span>
             <span>
-              Vous avez contact&eacute; ce jeune, nous lui avons renvoy&eacute; un message sur WhatsApp pour requalifier
-              son besoin.{" "}
-              <strong>
-                Il ou elle a demand&eacute; &agrave; &ecirc;tre recontact&eacute;&middot;e par la Mission Locale.
-              </strong>
+              Le jeune a indiqu&eacute; via WhatsApp qu&apos;il souhaite &ecirc;tre recontact&eacute; par la Mission
+              Locale.
             </span>
           </span>
         }
