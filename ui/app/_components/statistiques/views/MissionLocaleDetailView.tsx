@@ -13,6 +13,7 @@ import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { formatDateFr } from "../utils";
 
 import styles from "./MissionLocaleDetailView.module.css";
+import { MlAdminRdvUrlEditor } from "./MlAdminRdvUrlEditor";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
 import { MLSuiviTraitementTab } from "./tabs/MLSuiviTraitementTab";
 
@@ -170,6 +171,14 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
                 <span className={styles.infoLabel}>Téléphone</span>
                 <span className={styles.infoValue}>{data?.ml?.telephone || "—"}</span>
               </div>
+              {isAdmin && data?.ml && (
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Lien RDV</span>
+                  <span className={styles.infoValue}>
+                    <MlAdminRdvUrlEditor mlId={mlId} rdvUrl={data.ml.rdv_url} />
+                  </span>
+                </div>
+              )}
             </div>
 
             {data?.traites_count === 0 ? (

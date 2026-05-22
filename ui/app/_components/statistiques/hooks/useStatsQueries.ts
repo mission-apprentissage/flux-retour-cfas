@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
@@ -15,7 +15,7 @@ import type {
   IWhatsAppStats,
 } from "shared/models/data/nationalStats.model";
 
-import { _get } from "@/common/httpClient";
+import { _get, _put } from "@/common/httpClient";
 
 import type { Period } from "../ui/PeriodSelector";
 
@@ -260,6 +260,7 @@ export interface IMissionLocaleDetailResponse {
     email?: string;
     telephone?: string;
     site_web?: string;
+    rdv_url?: string | null;
     adresse?: {
       commune?: string;
       code_postal?: string;
@@ -281,6 +282,16 @@ export function useMissionLocaleDetail(mlId: string) {
       enabled: !!mlId,
     }
   );
+}
+
+export function useUpdateMlParametresAdmin(mlId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { rdv_url: string | null }) => _put(`/api/v1/admin/mission-locale/${mlId}/parametres`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: statsQueryKeys.missionLocaleDetail(mlId) });
+    },
+  });
 }
 
 export function useMissionLocaleMembres(mlId: string) {
