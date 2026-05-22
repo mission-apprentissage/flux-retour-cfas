@@ -1,5 +1,6 @@
 "use client";
 
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Image from "next/image";
 import { memo } from "react";
 import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
@@ -49,6 +50,7 @@ interface TimelineEvent {
   type: TimelineEventType;
   label: string;
   showDate?: boolean;
+  tooltip?: string;
 }
 
 interface EffectifParcoursMissionLocaleProps {
@@ -90,6 +92,8 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES,
           label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES],
+          tooltip:
+            "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il souhaitait être recontacté par la Mission Locale.",
         });
         return;
       }
@@ -98,6 +102,8 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO,
           label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO],
+          tooltip:
+            "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il ne souhaitait pas être recontacté.",
         });
         return;
       }
@@ -264,6 +270,12 @@ export const EffectifParcoursMissionLocale = memo(function EffectifParcoursMissi
               <p className={styles.timelineText}>
                 {event.showDate !== false ? `Le ${formatDate(event.date)} : ` : ""}
                 <strong>{event.label}</strong>
+                {event.tooltip && (
+                  <>
+                    {" "}
+                    <Tooltip kind="hover" title={event.tooltip} />
+                  </>
+                )}
               </p>
             </div>
           </div>
