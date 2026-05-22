@@ -24,14 +24,12 @@ import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable"
 import notificationStyles from "../shared/ui/NotificationBadge.module.css";
 
 import { DownloadSection } from "./DownloadSection";
-import listViewStyles from "./EffectifsListView.module.css";
 import { useMonthDownload } from "./useMonthDownload";
 
 interface EffectifsListViewProps {
   data: MonthsData;
   initialStatut?: string | null;
   initialRuptureDate?: string | null;
-  whatsappCallbackCount?: number;
 }
 
 const getInitialSection = (statut: string | null): SelectedSection => {
@@ -59,12 +57,7 @@ const SECTION_TO_LIST_TYPE: Record<SelectedSection, IMissionLocaleEffectifList> 
 
 const sectionToListType = (section: SelectedSection): IMissionLocaleEffectifList => SECTION_TO_LIST_TYPE[section];
 
-export function EffectifsListView({
-  data,
-  initialStatut,
-  initialRuptureDate,
-  whatsappCallbackCount = 0,
-}: EffectifsListViewProps) {
+export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -277,15 +270,7 @@ export function EffectifsListView({
       items.splice(1, 0, {
         text:
           totalInjoignable > 0 ? (
-            <span>
-              <strong>{`À recontacter (${totalInjoignable})`}</strong>
-              {whatsappCallbackCount > 0 && (
-                <span className={listViewStyles.sideMenuCallbackHint}>
-                  • {whatsappCallbackCount} {whatsappCallbackCount > 1 ? "jeunes ont demandé" : "jeune a demandé"} à
-                  être recontacté{whatsappCallbackCount > 1 ? "s" : ""}
-                </span>
-              )}
-            </span>
+            <strong>{`À recontacter (${totalInjoignable})`}</strong>
           ) : (
             `À recontacter (${totalInjoignable})`
           ),
@@ -314,7 +299,6 @@ export function EffectifsListView({
     totalInjoignable,
     totalTraite,
     isCfaPage,
-    whatsappCallbackCount,
   ]);
 
   return (
