@@ -7,7 +7,19 @@ export const effectifQueryKeys = {
   all: ["effectifs"] as const,
   detail: (id: string) => [...effectifQueryKeys.all, "detail", id] as const,
   list: (params: Record<string, any>) => [...effectifQueryKeys.all, "list", params] as const,
+  bannerStats: () => ["ml-banner-stats"] as const,
 };
+
+/**
+ * Compteur léger pour la bannière "Souhaite un RDV" en haut de la page d'accueil ML.
+ */
+export function useMlBannerStats() {
+  return useQuery<{ souhaite_rdv_count: number }>({
+    queryKey: effectifQueryKeys.bannerStats(),
+    queryFn: () => _get(`/api/v1/organisation/mission-locale/banner-stats`),
+    staleTime: 30 * 1000,
+  });
+}
 
 const fetchEffectifDetails = async (effectifId: string) => {
   return _get(`/api/mission-locale/effectif/${effectifId}`);

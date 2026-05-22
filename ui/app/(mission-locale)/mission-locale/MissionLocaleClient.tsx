@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
 import { EffectifsListView } from "@/app/_components/ruptures/mission-locale/EffectifsListView";
-import { WhatsAppCallbackBanner } from "@/app/_components/ruptures/mission-locale/WhatsAppCallbackBanner";
+import { SouhaiteRdvBanner } from "@/app/_components/ruptures/mission-locale/SouhaiteRdvBanner";
 import { countWhatsappCallbackRequests } from "@/app/_components/ruptures/shared/utils";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
@@ -30,7 +30,7 @@ export default function MissionLocaleClient() {
 
   return (
     <div className="fr-container">
-      <WhatsAppCallbackBanner count={whatsappCallbackCount} />
+      <SouhaiteRdvBanner />
       <MLHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
         {data && (

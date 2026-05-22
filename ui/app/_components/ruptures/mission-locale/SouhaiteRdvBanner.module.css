@@ -28,17 +28,20 @@
   flex-shrink: 0;
   margin-top: 2px;
   color: white !important;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 0.25rem;
+  border-radius: 0.25rem;
 }
 
 .bannerText {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .bannerTitle {
-  font-weight: bold;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .bannerDescription {
@@ -46,10 +49,17 @@
   line-height: 1.5;
 }
 
-.bannerLink {
-  color: white !important;
+.bannerFooter {
+  font-weight: 700;
   font-size: 0.875rem;
-  text-decoration: underline;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.bannerBadgeWrapper {
+  display: inline-flex;
 }
 
 .closeButton,
