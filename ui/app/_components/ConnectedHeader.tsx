@@ -295,6 +295,16 @@ export function ConnectedHeader() {
       });
     }
 
+    if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
+      baseItems.push({
+        text: "Paramètres",
+        linkProps: {
+          href: "/mission-locale/parametres",
+          target: "_self",
+        },
+      });
+    }
+
     if (!isCfaWithMlBeta) {
       baseItems.push({
         text: "Aide et ressources",
