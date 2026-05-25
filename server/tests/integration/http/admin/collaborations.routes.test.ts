@@ -22,6 +22,7 @@ import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from 
 useMongo();
 
 const HDF = "32";
+const HDF_NOM = "Hauts-de-France";
 const CURRENT_ANNEE = getAnneeScolaireFromDate(new Date());
 
 let httpClient: AxiosInstance;
@@ -200,7 +201,7 @@ describe("admin collaborations routes", () => {
         {
           siret: "12345678900018",
           nom: "CFA Test",
-          region: HDF,
+          region: HDF_NOM,
           date_activation: "2026-03-01T00:00:00.000Z",
           sources: "ERP, DECA",
         },
@@ -209,7 +210,7 @@ describe("admin collaborations routes", () => {
         {
           siret: "12345678900018",
           nom: "CFA Test",
-          region: HDF,
+          region: HDF_NOM,
           nb_collaborations: 2,
         },
       ]);
@@ -217,7 +218,7 @@ describe("admin collaborations routes", () => {
       expect(response.data.details_collaborations[0]).toMatchObject({
         siret_cfa: "12345678900018",
         nom_cfa: "CFA Test",
-        region_cfa: HDF,
+        region_cfa: HDF_NOM,
         nom_ml: "ML Paris",
         dossier_envoye: "Oui",
       });

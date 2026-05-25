@@ -40,10 +40,19 @@ async function insertActiveEffectif(organismeId: ObjectId) {
   );
 }
 
-async function insertCompatible(overrides: Partial<IOrganisme> = {}): Promise<IOrganisme> {
+const DEFAULT_ACTIVATED_AT = new Date("2025-12-01");
+
+async function insertCompatible(
+  overrides: Partial<IOrganisme> = {},
+  options: { activatedAt?: Date | null } = {}
+): Promise<IOrganisme> {
   const org = buildCompatibleOrganisme(overrides);
   await organismesDb().insertOne(org, { bypassDocumentValidation: true });
   await insertActiveEffectif(org._id as ObjectId);
+  const activatedAt = options.activatedAt === undefined ? DEFAULT_ACTIVATED_AT : options.activatedAt;
+  if (activatedAt !== null) {
+    await organisationsDb().insertOne(orgFormationFixture(org._id as ObjectId, activatedAt));
+  }
   return org;
 }
 
@@ -73,22 +82,19 @@ describe("computeStatsForDate", () => {
   });
 
   it("counts compatibles and actives, ignores fermes/ineligibles, ventilates per region (including DROM)", async () => {
-    const compatibleHdf = await insertCompatible({ adresse: { region: HDF } as never });
-    const compatibleIdf = await insertCompatible({ adresse: { region: IDF } as never });
-    const compatibleReunion = await insertCompatible({ adresse: { region: REUNION } as never });
-    await insertCompatible({ ferme: true, adresse: { region: HDF } as never });
-    await insertCompatible({
-      nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-      adresse: { region: HDF } as never,
-    });
+    await insertCompatible(
+      { adresse: { region: HDF } as never },
+      { activatedAt: new Date("2025-12-01") } // pre-cutoff pilot still counts
+    );
+    await insertCompatible({ adresse: { region: IDF } as never }, { activatedAt: null });
+    await insertCompatible({ adresse: { region: REUNION } as never }, { activatedAt: new Date("2026-02-15") });
+    await insertCompatible({ ferme: true, adresse: { region: HDF } as never }, { activatedAt: null });
+    await insertCompatible(
+      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, adresse: { region: HDF } as never },
+      { activatedAt: null }
+    );
     const noEffectifOrg = buildCompatibleOrganisme({ adresse: { region: HDF } as never });
     await organismesDb().insertOne(noEffectifOrg, { bypassDocumentValidation: true });
-
-    await organisationsDb().insertMany([
-      orgFormationFixture(compatibleHdf._id as ObjectId, new Date("2025-12-01")), // pre-cutoff pilot still counts
-      orgFormationFixture(compatibleIdf._id as ObjectId, null),
-      orgFormationFixture(compatibleReunion._id as ObjectId, new Date("2026-02-15")),
-    ]);
 
     const stats = await computeStatsForDate(new Date("2026-05-26"));
 
@@ -105,8 +111,7 @@ describe("computeStatsForDate", () => {
   });
 
   it("activation count respects endExclusive — pilot activated after cutoff excluded for J-7 view", async () => {
-    const org = await insertCompatible({ adresse: { region: HDF } as never });
-    await organisationsDb().insertOne(orgFormationFixture(org._id as ObjectId, new Date("2026-02-15")));
+    await insertCompatible({ adresse: { region: HDF } as never }, { activatedAt: new Date("2026-02-15") });
 
     const before = await computeStatsForDate(new Date("2026-02-10"));
     const after = await computeStatsForDate(new Date("2026-02-20"));
@@ -198,6 +203,38 @@ describe("computeStatsForDate", () => {
     expect(stats.national.usage.dossiers_traites_ml).toBe(1);
     expect(stats.national.usage.jeunes_repondus).toBe(1);
     expect(stats.national.usage.rdv_pris).toBe(1);
+  });
+
+  it("dossiers_traites ignores ml-effectifs with situation field missing (BSON undefined ≠ null)", async () => {
+    const org = await insertCompatible({ adresse: { region: HDF } as never });
+
+    const withNull = buildMlEffectif({
+      organisme_id: org._id,
+      created_at: new Date("2026-03-03"),
+      reponse_at: new Date("2026-03-04"),
+      situation: null,
+    });
+    const withMissing = buildMlEffectif({
+      organisme_id: org._id,
+      created_at: new Date("2026-03-01"),
+      reponse_at: new Date("2026-03-02"),
+    });
+    delete (withMissing as { situation?: unknown }).situation;
+    const withSituation = buildMlEffectif({
+      organisme_id: org._id,
+      created_at: new Date("2026-03-05"),
+      reponse_at: new Date("2026-03-06"),
+      situation: SITUATION_ENUM.AUTRE,
+    });
+
+    await missionLocaleEffectifsDb().insertMany([withMissing, withNull, withSituation], {
+      bypassDocumentValidation: true,
+    });
+
+    const stats = await computeStatsForDate(addDaysUTC(new Date("2026-05-25"), 1));
+
+    expect(stats.national.usage.dossiers_envoyes_cfa).toBe(3);
+    expect(stats.national.usage.dossiers_traites_ml).toBe(1);
   });
 
   it("excludes effectifs from non-compatible CFAs (regardless of activation flag)", async () => {
