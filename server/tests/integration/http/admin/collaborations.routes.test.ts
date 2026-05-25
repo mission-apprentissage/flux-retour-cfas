@@ -1,12 +1,16 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
-import type { IOrganisation } from "shared/models";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import type { IOrganisation, IOrganisme } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { generateMissionLocaleEffectifFixture } from "shared/models/fixtures/missionLocaleEffectif.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
+import { getAnneeScolaireFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  effectifsDb,
+  effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
   organisationsDb,
@@ -18,9 +22,27 @@ import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from 
 useMongo();
 
 const HDF = "32";
+const CURRENT_ANNEE = getAnneeScolaireFromDate(new Date());
 
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
+let uaiCounter = 0;
+const nextUai = () => `010001${(uaiCounter++).toString().padStart(2, "0")}A`;
+
+async function insertCompatibleOrganisme(overrides: Partial<IOrganisme> = {}): Promise<IOrganisme> {
+  const org = generateOrganismeFixture({
+    _id: new ObjectId(),
+    uai: nextUai(),
+    nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+    ...overrides,
+  });
+  await organismesDb().insertOne(org, { bypassDocumentValidation: true });
+  await effectifsDb().insertOne(
+    { _id: new ObjectId(), organisme_id: org._id as ObjectId, annee_scolaire: CURRENT_ANNEE } as never,
+    { bypassDocumentValidation: true }
+  );
+  return org;
+}
 
 const orgFormationFixture = (organismeId: ObjectId, activatedAt: Date | null): IOrganisation =>
   ({
@@ -66,13 +88,8 @@ describe("admin collaborations routes", () => {
     });
 
     it("returns the stats payload for an administrator", async () => {
-      const org = generateOrganismeFixture({
-        _id: new ObjectId(),
-        is_allowed_collab: true,
-        adresse: { region: HDF } as never,
-      });
-      await organismesDb().insertOne(org);
-      await organisationsDb().insertOne(orgFormationFixture(org._id, new Date("2026-02-15")));
+      const org = await insertCompatibleOrganisme({ adresse: { region: HDF } as never });
+      await organisationsDb().insertOne(orgFormationFixture(org._id as ObjectId, new Date("2026-02-15")));
 
       await missionLocaleEffectifsDb().insertMany(
         [
@@ -123,22 +140,21 @@ describe("admin collaborations routes", () => {
     });
 
     it("returns the 4 export datasets for an administrator", async () => {
-      const compatible = generateOrganismeFixture({
-        _id: new ObjectId(),
+      const compatible = await insertCompatibleOrganisme({
         siret: "12345678900018",
         nom: "CFA Test",
-        is_allowed_collab: true,
         adresse: { region: HDF } as never,
       });
-      const compatibleNoEnvoi = generateOrganismeFixture({
-        _id: new ObjectId(),
+      await effectifsDECADb().insertOne(
+        { _id: new ObjectId(), organisme_id: compatible._id as ObjectId, annee_scolaire: CURRENT_ANNEE } as never,
+        { bypassDocumentValidation: true }
+      );
+      await insertCompatibleOrganisme({
         siret: "12345678900026",
         nom: "CFA Sans Envoi",
-        is_allowed_collab: true,
         adresse: { region: HDF } as never,
       });
-      await organismesDb().insertMany([compatible, compatibleNoEnvoi]);
-      await organisationsDb().insertOne(orgFormationFixture(compatible._id, new Date("2026-03-01")));
+      await organisationsDb().insertOne(orgFormationFixture(compatible._id as ObjectId, new Date("2026-03-01")));
 
       const mlId = new ObjectId();
       await organisationsDb().insertOne(
@@ -208,14 +224,11 @@ describe("admin collaborations routes", () => {
     });
 
     it("populates date_traitement_ml from the earliest ML log entry with a situation", async () => {
-      const org = generateOrganismeFixture({
-        _id: new ObjectId(),
+      const org = await insertCompatibleOrganisme({
         siret: "12345678900034",
         nom: "CFA Log",
-        is_allowed_collab: true,
         adresse: { region: HDF } as never,
       });
-      await organismesDb().insertOne(org);
 
       const mleId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
