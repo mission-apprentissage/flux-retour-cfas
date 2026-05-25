@@ -16,7 +16,7 @@ export function CollaborationUsageSection({ data, loading }: CollaborationUsageS
 
   return (
     <StatisticsSection title="Suivi usage CFA et Missions Locales" smallTitle>
-      <div className={styles.kpiCards}>
+      <div className={styles.kpiCardsUsage}>
         <StatCard
           label="Total rupturants identifiés en V2"
           value={usage?.rupturants.current}

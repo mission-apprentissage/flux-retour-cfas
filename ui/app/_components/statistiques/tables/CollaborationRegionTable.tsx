@@ -25,14 +25,7 @@ interface CollaborationRegionTableProps {
   loading: boolean;
 }
 
-type SortColumn = "region_nom" | "cfa_compatibles" | "cfa_actives" | "cfa_with_collab" | "dossiers_envoyes_cfa";
-
-function formatRatioBadge(numerator: number, denominator: number) {
-  if (denominator === 0) return <span className={styles.badgeNeutral}>0%</span>;
-  const pct = Math.round((numerator / denominator) * 100);
-  const className = pct >= 50 ? styles.badgeHigh : pct > 0 ? styles.badgeMedium : styles.badgeNeutral;
-  return <span className={className}>{pct}%</span>;
-}
+type SortColumn = "region_nom" | "cfa_compatibles" | "cfa_actives" | "dossiers_envoyes_cfa";
 
 export function CollaborationRegionTable({ regions, loading }: CollaborationRegionTableProps) {
   const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("cfa_compatibles");
@@ -47,8 +40,6 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           return r.cfa_compatibles;
         case "cfa_actives":
           return r.cfa_actives.current;
-        case "cfa_with_collab":
-          return r.cfa_with_collab.current;
         case "dossiers_envoyes_cfa":
           return r.dossiers_envoyes_cfa;
       }
@@ -101,19 +92,9 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             centered
           />,
           <SortableTableHeader
-            key="collab"
-            column="cfa_with_collab"
-            label="CFA avec collab"
-            currentSortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-            centered
-            tooltip="CFA compatibles ayant envoyé au moins un dossier à une Mission Locale depuis le 1er janvier 2026, ramené au total des CFA compatibles de la région."
-          />,
-          <SortableTableHeader
             key="dossiers"
             column="dossiers_envoyes_cfa"
-            label="Dossiers envoyés"
+            label="Total collab demandées"
             currentSortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
@@ -130,13 +111,6 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
               <strong>{r.cfa_actives.current}</strong>/{r.cfa_compatibles}
             </span>
             {formatDelta(r.cfa_actives.delta)}
-          </div>,
-          <div className={styles.centeredCell} key={`collab-${r.region_code}`}>
-            <span>
-              <strong>{r.cfa_with_collab.current}</strong>/{r.cfa_compatibles}
-            </span>
-            {formatDelta(r.cfa_with_collab.delta)}
-            {formatRatioBadge(r.cfa_with_collab.current, r.cfa_compatibles)}
           </div>,
           <div className={styles.centeredCell} key={`dossiers-${r.region_code}`}>
             {r.dossiers_envoyes_cfa}
