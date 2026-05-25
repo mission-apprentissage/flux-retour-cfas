@@ -1,0 +1,366 @@
+import { ObjectId } from "bson";
+import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
+import { REGIONS_BY_CODE } from "shared/constants/territoires";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
+
+import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+
+const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
+  SITUATION_ENUM.RDV_PRIS,
+  SITUATION_ENUM.NOUVEAU_PROJET,
+  SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
+  SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+  SITUATION_ENUM.CHERCHE_CONTRAT,
+  SITUATION_ENUM.REORIENTATION,
+  SITUATION_ENUM.AUTRE,
+];
+
+export type IStatWithVariation = { current: number; variation: string };
+
+export type ICollaborationRegionRow = {
+  region_code: string;
+  region_nom: string;
+  cfa_compatibles: number;
+  cfa_actives: number;
+  cfa_with_collab: number;
+  rupturants: number;
+  dossiers_envoyes_cfa: number;
+};
+
+export type ICollaborationStatsSnapshot = {
+  national: {
+    activation: { cfa_compatibles: number; cfa_actives: number; cfa_with_collab: number };
+    usage: {
+      rupturants: number;
+      dossiers_envoyes_cfa: number;
+      dossiers_traites_ml: number;
+      jeunes_repondus: number;
+      rdv_pris: number;
+    };
+  };
+  regions: ICollaborationRegionRow[];
+};
+
+export type ICollaborationStatsResponse = {
+  evaluation_date: Date;
+  cutoff_date: Date;
+  national: {
+    activation: {
+      cfa_compatibles: IStatWithVariation;
+      cfa_actives: IStatWithVariation;
+      cfa_with_collab: IStatWithVariation;
+    };
+    usage: {
+      rupturants: IStatWithVariation;
+      dossiers_envoyes_cfa: IStatWithVariation;
+      dossiers_traites_ml: IStatWithVariation;
+      jeunes_repondus: IStatWithVariation;
+      rdv_pris: IStatWithVariation;
+    };
+  };
+  regions: Array<{
+    region_code: string;
+    region_nom: string;
+    cfa_compatibles: number;
+    cfa_actives: { current: number; delta: number };
+    cfa_with_collab: { current: number; delta: number };
+    rupturants: number;
+    dossiers_envoyes_cfa: number;
+  }>;
+};
+
+type ActivationResult = {
+  national: { cfa_compatibles: number; cfa_actives: number };
+  perRegion: Map<string, { cfa_compatibles: number; cfa_actives: number }>;
+  compatibleOrganismeIds: Set<string>;
+};
+
+async function computeActivation(endExclusive: Date): Promise<ActivationResult> {
+  const cursor = organismesDb().aggregate<{
+    _id: ObjectId;
+    region: string | null;
+    is_active: boolean;
+  }>([
+    { $match: { is_allowed_collab: true, ferme: { $ne: true } } },
+    {
+      $lookup: {
+        from: "organisations",
+        let: { organismeId: { $toString: "$_id" } },
+        pipeline: [
+          {
+            $match: {
+              type: "ORGANISME_FORMATION",
+              $expr: { $eq: ["$organisme_id", "$$organismeId"] },
+            },
+          },
+          { $project: { ml_beta_activated_at: 1 } },
+        ],
+        as: "organisation",
+      },
+    },
+    {
+      $project: {
+        region: "$adresse.region",
+        is_active: {
+          $gt: [
+            {
+              $size: {
+                $filter: {
+                  input: "$organisation",
+                  as: "o",
+                  cond: {
+                    $and: [
+                      { $eq: [{ $type: "$$o.ml_beta_activated_at" }, "date"] },
+                      { $lt: ["$$o.ml_beta_activated_at", endExclusive] },
+                    ],
+                  },
+                },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+  ]);
+
+  const perRegion = new Map<string, { cfa_compatibles: number; cfa_actives: number }>();
+  const compatibleOrganismeIds = new Set<string>();
+  let totalCompatibles = 0;
+  let totalActives = 0;
+
+  for await (const doc of cursor) {
+    totalCompatibles += 1;
+    compatibleOrganismeIds.add(doc._id.toString());
+    if (doc.is_active) totalActives += 1;
+    const code = doc.region ?? null;
+    if (!code) continue;
+    const current = perRegion.get(code) ?? { cfa_compatibles: 0, cfa_actives: 0 };
+    current.cfa_compatibles += 1;
+    if (doc.is_active) current.cfa_actives += 1;
+    perRegion.set(code, current);
+  }
+
+  return {
+    national: { cfa_compatibles: totalCompatibles, cfa_actives: totalActives },
+    perRegion,
+    compatibleOrganismeIds,
+  };
+}
+
+type UsageRow = {
+  organisme_id: ObjectId;
+  region: string | null;
+  rupturants: number;
+  dossiers_envoyes_cfa: number;
+  dossiers_traites_ml: number;
+  jeunes_repondus: number;
+  rdv_pris: number;
+};
+
+type RegionUsageAccumulator = {
+  rupturants: number;
+  dossiers_envoyes_cfa: number;
+  cfa_with_collab: number;
+};
+
+async function computeUsage(
+  endExclusive: Date,
+  compatibleOrganismeIds: Set<string>
+): Promise<{
+  national: ICollaborationStatsSnapshot["national"]["usage"];
+  perRegion: Map<string, RegionUsageAccumulator>;
+  cfaWithCollabNational: number;
+}> {
+  const cursor = missionLocaleEffectifsDb().aggregate<UsageRow>([
+    {
+      $match: {
+        soft_deleted: { $ne: true },
+        created_at: { $lt: endExclusive },
+      },
+    },
+    {
+      $addFields: {
+        is_rupturant: { $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] },
+        is_envoye: {
+          $and: [
+            { $gte: ["$organisme_data.reponse_at", COLLABORATION_CUTOFF_DATE] },
+            { $lt: ["$organisme_data.reponse_at", endExclusive] },
+          ],
+        },
+      },
+    },
+    {
+      $addFields: {
+        is_traite: { $and: ["$is_envoye", { $ne: ["$situation", null] }] },
+        is_repondu: { $and: ["$is_rupturant", { $in: ["$situation", REPONDU_SITUATIONS] }] },
+        is_rdv: { $and: ["$is_rupturant", { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] },
+      },
+    },
+    {
+      $group: {
+        _id: "$effectif_snapshot.organisme_id",
+        region_snapshot: { $first: "$effectif_snapshot._computed.organisme.region" },
+        rupturants: { $sum: { $cond: ["$is_rupturant", 1, 0] } },
+        dossiers_envoyes_cfa: { $sum: { $cond: ["$is_envoye", 1, 0] } },
+        dossiers_traites_ml: { $sum: { $cond: ["$is_traite", 1, 0] } },
+        jeunes_repondus: { $sum: { $cond: ["$is_repondu", 1, 0] } },
+        rdv_pris: { $sum: { $cond: ["$is_rdv", 1, 0] } },
+      },
+    },
+    {
+      $lookup: {
+        from: "organismes",
+        localField: "_id",
+        foreignField: "_id",
+        as: "organisme",
+        pipeline: [{ $project: { "adresse.region": 1 } }],
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        organisme_id: "$_id",
+        region: {
+          $ifNull: [{ $arrayElemAt: ["$organisme.adresse.region", 0] }, "$region_snapshot"],
+        },
+        rupturants: 1,
+        dossiers_envoyes_cfa: 1,
+        dossiers_traites_ml: 1,
+        jeunes_repondus: 1,
+        rdv_pris: 1,
+      },
+    },
+  ]);
+
+  const national: ICollaborationStatsSnapshot["national"]["usage"] = {
+    rupturants: 0,
+    dossiers_envoyes_cfa: 0,
+    dossiers_traites_ml: 0,
+    jeunes_repondus: 0,
+    rdv_pris: 0,
+  };
+  const perRegion = new Map<string, RegionUsageAccumulator>();
+  let cfaWithCollabNational = 0;
+
+  for await (const row of cursor) {
+    const isCompatible = compatibleOrganismeIds.has(row.organisme_id.toString());
+    const isActiveCfa = isCompatible && row.dossiers_envoyes_cfa > 0;
+
+    national.rupturants += row.rupturants;
+    national.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
+    national.dossiers_traites_ml += row.dossiers_traites_ml;
+    national.jeunes_repondus += row.jeunes_repondus;
+    national.rdv_pris += row.rdv_pris;
+    if (isActiveCfa) cfaWithCollabNational += 1;
+
+    const code = row.region ?? null;
+    if (!code) continue;
+    const current = perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
+    current.rupturants += row.rupturants;
+    current.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
+    if (isActiveCfa) current.cfa_with_collab += 1;
+    perRegion.set(code, current);
+  }
+
+  return { national, perRegion, cfaWithCollabNational };
+}
+
+export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
+  const activation = await computeActivation(endExclusive);
+  const usage = await computeUsage(endExclusive, activation.compatibleOrganismeIds);
+
+  const regionCodes = new Set<string>([...activation.perRegion.keys(), ...usage.perRegion.keys()]);
+
+  const regions: ICollaborationRegionRow[] = Array.from(regionCodes)
+    .map((code) => {
+      const activ = activation.perRegion.get(code) ?? { cfa_compatibles: 0, cfa_actives: 0 };
+      const us = usage.perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
+      const region = REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE];
+      return {
+        region_code: code,
+        region_nom: region?.nom ?? code,
+        cfa_compatibles: activ.cfa_compatibles,
+        cfa_actives: activ.cfa_actives,
+        cfa_with_collab: us.cfa_with_collab,
+        rupturants: us.rupturants,
+        dossiers_envoyes_cfa: us.dossiers_envoyes_cfa,
+      };
+    })
+    .sort((a, b) => a.region_nom.localeCompare(b.region_nom, "fr"));
+
+  return {
+    national: {
+      activation: {
+        ...activation.national,
+        cfa_with_collab: usage.cfaWithCollabNational,
+      },
+      usage: usage.national,
+    },
+    regions,
+  };
+}
+
+function buildVariation(current: number, previous: number | null): IStatWithVariation {
+  if (previous === null || previous === 0) return { current, variation: "" };
+  const pct = Math.round(((current - previous) / previous) * 100);
+  const sign = pct > 0 ? "+" : "";
+  return { current, variation: `${sign}${pct}%` };
+}
+
+export async function getCollaborationStats(referenceDate?: Date): Promise<ICollaborationStatsResponse> {
+  const today = normalizeToUTCDay(referenceDate ?? new Date());
+  const todayEnd = addDaysUTC(today, 1);
+  const j7End = subtractDaysUTC(todayEnd, 7);
+
+  const [current, previous] = await Promise.all([computeStatsForDate(todayEnd), computeStatsForDate(j7End)]);
+
+  const previousByRegion = new Map(previous.regions.map((r) => [r.region_code, r]));
+
+  return {
+    evaluation_date: today,
+    cutoff_date: COLLABORATION_CUTOFF_DATE,
+    national: {
+      activation: {
+        cfa_compatibles: buildVariation(current.national.activation.cfa_compatibles, null),
+        cfa_actives: buildVariation(current.national.activation.cfa_actives, previous.national.activation.cfa_actives),
+        cfa_with_collab: buildVariation(
+          current.national.activation.cfa_with_collab,
+          previous.national.activation.cfa_with_collab
+        ),
+      },
+      usage: {
+        rupturants: buildVariation(current.national.usage.rupturants, previous.national.usage.rupturants),
+        dossiers_envoyes_cfa: buildVariation(
+          current.national.usage.dossiers_envoyes_cfa,
+          previous.national.usage.dossiers_envoyes_cfa
+        ),
+        dossiers_traites_ml: buildVariation(
+          current.national.usage.dossiers_traites_ml,
+          previous.national.usage.dossiers_traites_ml
+        ),
+        jeunes_repondus: buildVariation(
+          current.national.usage.jeunes_repondus,
+          previous.national.usage.jeunes_repondus
+        ),
+        rdv_pris: buildVariation(current.national.usage.rdv_pris, previous.national.usage.rdv_pris),
+      },
+    },
+    regions: current.regions.map((row) => {
+      const prev = previousByRegion.get(row.region_code);
+      return {
+        region_code: row.region_code,
+        region_nom: row.region_nom,
+        cfa_compatibles: row.cfa_compatibles,
+        cfa_actives: { current: row.cfa_actives, delta: row.cfa_actives - (prev?.cfa_actives ?? 0) },
+        cfa_with_collab: {
+          current: row.cfa_with_collab,
+          delta: row.cfa_with_collab - (prev?.cfa_with_collab ?? 0),
+        },
+        rupturants: row.rupturants,
+        dossiers_envoyes_cfa: row.dossiers_envoyes_cfa,
+      };
+    }),
+  };
+}
