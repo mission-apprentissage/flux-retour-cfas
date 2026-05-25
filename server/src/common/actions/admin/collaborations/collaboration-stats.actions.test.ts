@@ -1,7 +1,9 @@
 import { ObjectId } from "mongodb";
-import type { IMissionLocaleEffectif, IOrganisation } from "shared/models";
+import type { IOrganisation } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { generateMissionLocaleEffectifFixture as buildMlEffectif } from "shared/models/fixtures/missionLocaleEffectif.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
+import { addDaysUTC } from "shared/utils/date";
 import { describe, it, expect } from "vitest";
 
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
@@ -15,40 +17,6 @@ const HDF = "32";
 const IDF = "11";
 const REUNION = "04";
 
-function buildMlEffectif(overrides: {
-  organisme_id: ObjectId;
-  created_at: Date;
-  reponse_at?: Date | null;
-  situation?: SITUATION_ENUM | null;
-  soft_deleted?: boolean;
-  snapshot_region?: string | null;
-}): IMissionLocaleEffectif {
-  return {
-    _id: new ObjectId(),
-    mission_locale_id: new ObjectId(),
-    effectif_id: new ObjectId(),
-    created_at: overrides.created_at,
-    situation: overrides.situation ?? null,
-    soft_deleted: overrides.soft_deleted ?? false,
-    brevo: {},
-    effectif_snapshot: {
-      organisme_id: overrides.organisme_id,
-      ...(overrides.snapshot_region !== undefined
-        ? { _computed: { organisme: { region: overrides.snapshot_region } } }
-        : {}),
-    } as IMissionLocaleEffectif["effectif_snapshot"],
-    organisme_data: overrides.reponse_at
-      ? {
-          reponse_at: overrides.reponse_at,
-          has_unread_notification: false,
-        }
-      : null,
-    current_status: { value: null, date: null },
-    whatsapp_callback_requested: false,
-    whatsapp_no_help_responded: false,
-  };
-}
-
 const orgFormationFixture = (organismeId: ObjectId, activatedAt: Date | null): IOrganisation =>
   ({
     _id: new ObjectId(),
@@ -59,12 +27,6 @@ const orgFormationFixture = (organismeId: ObjectId, activatedAt: Date | null): I
     organisme_id: organismeId.toString(),
     ...(activatedAt ? { ml_beta_activated_at: activatedAt } : {}),
   }) as IOrganisation;
-
-const D_PLUS_1 = (d: Date) => {
-  const out = new Date(d);
-  out.setUTCDate(out.getUTCDate() + 1);
-  return out;
-};
 
 describe("computeStatsForDate", () => {
   it("returns zeros for everything when no data", async () => {
@@ -192,7 +154,7 @@ describe("computeStatsForDate", () => {
       { bypassDocumentValidation: true }
     );
 
-    const stats = await computeStatsForDate(D_PLUS_1(new Date("2026-05-25")));
+    const stats = await computeStatsForDate(addDaysUTC(new Date("2026-05-25"), 1));
 
     expect(stats.national.usage.rupturants).toBe(4);
     expect(stats.national.usage.dossiers_envoyes_cfa).toBe(3);
@@ -223,7 +185,7 @@ describe("computeStatsForDate", () => {
       { bypassDocumentValidation: true }
     );
 
-    const stats = await computeStatsForDate(D_PLUS_1(new Date("2026-05-25")));
+    const stats = await computeStatsForDate(addDaysUTC(new Date("2026-05-25"), 1));
 
     expect(stats.national.usage.rupturants).toBe(1);
     const idf = stats.regions.find((r) => r.region_code === IDF);

@@ -18,6 +18,15 @@ const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
 
 export type IStatWithVariation = { current: number; variation: string };
 
+export type ICompatibleOrganisme = {
+  _id: ObjectId;
+  siret: string;
+  nom: string | null;
+  region: string | null;
+  is_allowed_deca: boolean;
+  date_activation: Date | null;
+};
+
 export type ICollaborationRegionRow = {
   region_code: string;
   region_nom: string;
@@ -70,83 +79,55 @@ export type ICollaborationStatsResponse = {
   }>;
 };
 
-type ActivationResult = {
-  national: { cfa_compatibles: number; cfa_actives: number };
-  perRegion: Map<string, { cfa_compatibles: number; cfa_actives: number }>;
-  compatibleOrganismeIds: Set<string>;
-};
-
-async function computeActivation(endExclusive: Date): Promise<ActivationResult> {
-  const cursor = organismesDb().aggregate<{
-    _id: ObjectId;
-    region: string | null;
-    is_active: boolean;
-  }>([
-    { $match: { is_allowed_collab: true, ferme: { $ne: true } } },
-    {
-      $lookup: {
-        from: "organisations",
-        let: { organismeId: { $toString: "$_id" } },
-        pipeline: [
-          {
-            $match: {
-              type: "ORGANISME_FORMATION",
-              $expr: { $eq: ["$organisme_id", "$$organismeId"] },
-            },
-          },
-          { $project: { ml_beta_activated_at: 1 } },
-        ],
-        as: "organisation",
-      },
-    },
-    {
-      $project: {
-        region: "$adresse.region",
-        is_active: {
-          $gt: [
+export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICompatibleOrganisme[]> {
+  return organismesDb()
+    .aggregate<ICompatibleOrganisme>([
+      { $match: { is_allowed_collab: true, ferme: { $ne: true } } },
+      {
+        $lookup: {
+          from: "organisations",
+          let: { organismeId: { $toString: "$_id" } },
+          pipeline: [
             {
-              $size: {
-                $filter: {
-                  input: "$organisation",
-                  as: "o",
-                  cond: {
-                    $and: [
-                      { $eq: [{ $type: "$$o.ml_beta_activated_at" }, "date"] },
-                      { $lt: ["$$o.ml_beta_activated_at", endExclusive] },
-                    ],
+              $match: {
+                type: "ORGANISME_FORMATION",
+                $expr: { $eq: ["$organisme_id", "$$organismeId"] },
+              },
+            },
+            { $project: { ml_beta_activated_at: 1 } },
+          ],
+          as: "organisation",
+        },
+      },
+      {
+        $project: {
+          siret: 1,
+          nom: { $ifNull: ["$nom", { $ifNull: ["$raison_sociale", "$enseigne"] }] },
+          region: "$adresse.region",
+          is_allowed_deca: { $eq: ["$is_allowed_deca", true] },
+          date_activation: {
+            $let: {
+              vars: {
+                activatedDates: {
+                  $filter: {
+                    input: "$organisation",
+                    as: "o",
+                    cond: {
+                      $and: [
+                        { $eq: [{ $type: "$$o.ml_beta_activated_at" }, "date"] },
+                        { $lt: ["$$o.ml_beta_activated_at", endExclusive] },
+                      ],
+                    },
                   },
                 },
               },
+              in: { $min: "$$activatedDates.ml_beta_activated_at" },
             },
-            0,
-          ],
+          },
         },
       },
-    },
-  ]);
-
-  const perRegion = new Map<string, { cfa_compatibles: number; cfa_actives: number }>();
-  const compatibleOrganismeIds = new Set<string>();
-  let totalCompatibles = 0;
-  let totalActives = 0;
-
-  for await (const doc of cursor) {
-    totalCompatibles += 1;
-    compatibleOrganismeIds.add(doc._id.toString());
-    if (doc.is_active) totalActives += 1;
-    const code = doc.region ?? null;
-    if (!code) continue;
-    const current = perRegion.get(code) ?? { cfa_compatibles: 0, cfa_actives: 0 };
-    current.cfa_compatibles += 1;
-    if (doc.is_active) current.cfa_actives += 1;
-    perRegion.set(code, current);
-  }
-
-  return {
-    national: { cfa_compatibles: totalCompatibles, cfa_actives: totalActives },
-    perRegion,
-    compatibleOrganismeIds,
-  };
+    ])
+    .toArray();
 }
 
 type UsageRow = {
@@ -177,12 +158,17 @@ async function computeUsage(
     {
       $match: {
         soft_deleted: { $ne: true },
-        created_at: { $lt: endExclusive },
+        $or: [
+          { created_at: { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
+          { "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
+        ],
       },
     },
     {
       $addFields: {
-        is_rupturant: { $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] },
+        is_rupturant: {
+          $and: [{ $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] }, { $lt: ["$created_at", endExclusive] }],
+        },
         is_envoye: {
           $and: [
             { $gte: ["$organisme_data.reponse_at", COLLABORATION_CUTOFF_DATE] },
@@ -267,8 +253,40 @@ async function computeUsage(
   return { national, perRegion, cfaWithCollabNational };
 }
 
+type ActivationAggregates = {
+  national: { cfa_compatibles: number; cfa_actives: number };
+  perRegion: Map<string, { cfa_compatibles: number; cfa_actives: number }>;
+  compatibleOrganismeIds: Set<string>;
+};
+
+function aggregateActivation(compatibles: ICompatibleOrganisme[]): ActivationAggregates {
+  const perRegion = new Map<string, { cfa_compatibles: number; cfa_actives: number }>();
+  const compatibleOrganismeIds = new Set<string>();
+  let totalCompatibles = 0;
+  let totalActives = 0;
+
+  for (const org of compatibles) {
+    totalCompatibles += 1;
+    compatibleOrganismeIds.add(org._id.toString());
+    const isActive = org.date_activation !== null;
+    if (isActive) totalActives += 1;
+    if (!org.region) continue;
+    const current = perRegion.get(org.region) ?? { cfa_compatibles: 0, cfa_actives: 0 };
+    current.cfa_compatibles += 1;
+    if (isActive) current.cfa_actives += 1;
+    perRegion.set(org.region, current);
+  }
+
+  return {
+    national: { cfa_compatibles: totalCompatibles, cfa_actives: totalActives },
+    perRegion,
+    compatibleOrganismeIds,
+  };
+}
+
 export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
-  const activation = await computeActivation(endExclusive);
+  const compatibles = await fetchCompatibleOrganismes(endExclusive);
+  const activation = aggregateActivation(compatibles);
   const usage = await computeUsage(endExclusive, activation.compatibleOrganismeIds);
 
   const regionCodes = new Set<string>([...activation.perRegion.keys(), ...usage.perRegion.keys()]);
