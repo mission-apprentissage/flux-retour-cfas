@@ -4,7 +4,8 @@ import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
-import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
+import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
   SITUATION_ENUM.RDV_PRIS,
@@ -24,6 +25,8 @@ export type ICompatibleOrganisme = {
   nom: string | null;
   region: string | null;
   is_allowed_deca: boolean;
+  has_effectifs_erp: boolean;
+  has_effectifs_deca: boolean;
   date_activation: Date | null;
 };
 
@@ -80,54 +83,36 @@ export type ICollaborationStatsResponse = {
 };
 
 export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICompatibleOrganisme[]> {
-  return organismesDb()
-    .aggregate<ICompatibleOrganisme>([
-      { $match: { is_allowed_collab: true, ferme: { $ne: true } } },
+  const eligible = await findEligibleOrganismes();
+  if (eligible.length === 0) return [];
+
+  const orgIdStrings = eligible.map((o) => o._id.toString());
+
+  const activations = await organisationsDb()
+    .aggregate<{ _id: string; date_activation: Date }>([
       {
-        $lookup: {
-          from: "organisations",
-          let: { organismeId: { $toString: "$_id" } },
-          pipeline: [
-            {
-              $match: {
-                type: "ORGANISME_FORMATION",
-                $expr: { $eq: ["$organisme_id", "$$organismeId"] },
-              },
-            },
-            { $project: { ml_beta_activated_at: 1 } },
-          ],
-          as: "organisation",
+        $match: {
+          type: "ORGANISME_FORMATION",
+          organisme_id: { $in: orgIdStrings },
+          ml_beta_activated_at: { $type: "date", $lt: endExclusive },
         },
       },
-      {
-        $project: {
-          siret: 1,
-          nom: { $ifNull: ["$nom", { $ifNull: ["$raison_sociale", "$enseigne"] }] },
-          region: "$adresse.region",
-          is_allowed_deca: { $eq: ["$is_allowed_deca", true] },
-          date_activation: {
-            $let: {
-              vars: {
-                activatedDates: {
-                  $filter: {
-                    input: "$organisation",
-                    as: "o",
-                    cond: {
-                      $and: [
-                        { $eq: [{ $type: "$$o.ml_beta_activated_at" }, "date"] },
-                        { $lt: ["$$o.ml_beta_activated_at", endExclusive] },
-                      ],
-                    },
-                  },
-                },
-              },
-              in: { $min: "$$activatedDates.ml_beta_activated_at" },
-            },
-          },
-        },
-      },
+      { $group: { _id: "$organisme_id", date_activation: { $min: "$ml_beta_activated_at" } } },
     ])
     .toArray();
+
+  const activationByOrgId = new Map(activations.map((a) => [a._id, a.date_activation]));
+
+  return eligible.map((org) => ({
+    _id: org._id,
+    siret: org.siret,
+    nom: org.nom,
+    region: org.region,
+    is_allowed_deca: org.is_allowed_deca,
+    has_effectifs_erp: org.has_effectifs_erp,
+    has_effectifs_deca: org.has_effectifs_deca,
+    date_activation: activationByOrgId.get(org._id.toString()) ?? null,
+  }));
 }
 
 type UsageRow = {
@@ -154,10 +139,13 @@ async function computeUsage(
   perRegion: Map<string, RegionUsageAccumulator>;
   cfaWithCollabNational: number;
 }> {
+  const compatibleObjectIds = Array.from(compatibleOrganismeIds, (id) => new ObjectId(id));
+
   const cursor = missionLocaleEffectifsDb().aggregate<UsageRow>([
     {
       $match: {
         soft_deleted: { $ne: true },
+        "effectif_snapshot.organisme_id": { $in: compatibleObjectIds },
         $or: [
           { created_at: { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
           { "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
@@ -180,8 +168,8 @@ async function computeUsage(
     {
       $addFields: {
         is_traite: { $and: ["$is_envoye", { $ne: ["$situation", null] }] },
-        is_repondu: { $and: ["$is_rupturant", { $in: ["$situation", REPONDU_SITUATIONS] }] },
-        is_rdv: { $and: ["$is_rupturant", { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] },
+        is_repondu: { $and: ["$is_envoye", { $in: ["$situation", REPONDU_SITUATIONS] }] },
+        is_rdv: { $and: ["$is_envoye", { $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }] },
       },
     },
     {
@@ -231,22 +219,21 @@ async function computeUsage(
   let cfaWithCollabNational = 0;
 
   for await (const row of cursor) {
-    const isCompatible = compatibleOrganismeIds.has(row.organisme_id.toString());
-    const isActiveCfa = isCompatible && row.dossiers_envoyes_cfa > 0;
+    const hasEnvoye = row.dossiers_envoyes_cfa > 0;
 
     national.rupturants += row.rupturants;
     national.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
     national.dossiers_traites_ml += row.dossiers_traites_ml;
     national.jeunes_repondus += row.jeunes_repondus;
     national.rdv_pris += row.rdv_pris;
-    if (isActiveCfa) cfaWithCollabNational += 1;
+    if (hasEnvoye) cfaWithCollabNational += 1;
 
     const code = row.region ?? null;
     if (!code) continue;
     const current = perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
     current.rupturants += row.rupturants;
     current.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
-    if (isActiveCfa) current.cfa_with_collab += 1;
+    if (hasEnvoye) current.cfa_with_collab += 1;
     perRegion.set(code, current);
   }
 

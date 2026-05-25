@@ -19,7 +19,6 @@ const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
 
 type CollaborationDetailRow = {
   organisme_id_str: string;
-  date_creation: Date;
   siret_cfa: string | null;
   nom_cfa: string | null;
   region_cfa: string | null;
@@ -79,7 +78,6 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
         $project: {
           _id: 0,
           organisme_id_str: { $toString: "$effectif_snapshot.organisme_id" },
-          date_creation: "$created_at",
           siret_cfa: { $arrayElemAt: ["$organisme.siret", 0] },
           nom_cfa: {
             $ifNull: [
@@ -111,25 +109,22 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
     .toArray();
 }
 
-type UsagePerOrg = { nb_collaborations: number; has_erp: boolean; has_deca: boolean };
+type UsagePerOrg = { nb_collaborations: number };
 
 function aggregateUsageFromDetails(details: CollaborationDetailRow[]): Map<string, UsagePerOrg> {
   const usage = new Map<string, UsagePerOrg>();
   for (const d of details) {
-    const current = usage.get(d.organisme_id_str) ?? { nb_collaborations: 0, has_erp: false, has_deca: false };
+    const current = usage.get(d.organisme_id_str) ?? { nb_collaborations: 0 };
     current.nb_collaborations += 1;
-    if (d.source === "ERP") current.has_erp = true;
-    if (d.source === "DECA") current.has_deca = true;
     usage.set(d.organisme_id_str, current);
   }
   return usage;
 }
 
-function formatSources(usage: UsagePerOrg | undefined): string {
-  if (!usage) return "";
+function formatSources(org: { has_effectifs_erp: boolean; has_effectifs_deca: boolean }): string {
   const parts: string[] = [];
-  if (usage.has_erp) parts.push("ERP");
-  if (usage.has_deca) parts.push("DECA");
+  if (org.has_effectifs_erp) parts.push("ERP");
+  if (org.has_effectifs_deca) parts.push("DECA");
   return parts.join(", ");
 }
 
@@ -158,7 +153,7 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
         nom: c.nom,
         region: c.region,
         date_activation: c.date_activation,
-        sources: formatSources(usageById.get(c._id.toString())),
+        sources: formatSources(c),
       }))
   );
 
@@ -178,7 +173,6 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
       const repondu = d.situation !== null && REPONDU_SITUATIONS.includes(d.situation);
       const rdv = d.situation === SITUATION_ENUM.RDV_PRIS;
       return {
-        date_creation: d.date_creation,
         siret_cfa: d.siret_cfa,
         nom_cfa: d.nom_cfa,
         region_cfa: d.region_cfa,
@@ -192,7 +186,7 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
         source: d.source,
       };
     })
-    .sort((a, b) => b.date_creation.getTime() - a.date_creation.getTime());
+    .sort((a, b) => (b.date_envoi_cfa?.getTime() ?? 0) - (a.date_envoi_cfa?.getTime() ?? 0));
 
   return { cfa_compatibles, cfa_actives, cfa_with_collab, details_collaborations };
 }

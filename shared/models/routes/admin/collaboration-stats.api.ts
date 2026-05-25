@@ -59,7 +59,6 @@ const zCfaWithCollabExportRow = z.object({
 });
 
 const zCollaborationDetailRow = z.object({
-  date_creation: z.date(),
   siret_cfa: z.string().nullable(),
   nom_cfa: z.string().nullable(),
   region_cfa: z.string().nullable(),

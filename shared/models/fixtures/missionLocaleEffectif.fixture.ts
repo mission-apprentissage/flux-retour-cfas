@@ -11,6 +11,7 @@ export function generateMissionLocaleEffectifFixture(overrides: {
   situation?: SITUATION_ENUM | null;
   soft_deleted?: boolean;
   snapshot_region?: string | null;
+  computed_activated_at?: Date | null;
   source?: "ERP" | "DECA";
 }): IMissionLocaleEffectif {
   const snapshot: Record<string, unknown> = { organisme_id: overrides.organisme_id };
@@ -28,6 +29,9 @@ export function generateMissionLocaleEffectifFixture(overrides: {
     soft_deleted: overrides.soft_deleted ?? false,
     brevo: {},
     effectif_snapshot: snapshot as IMissionLocaleEffectif["effectif_snapshot"],
+    ...(overrides.computed_activated_at !== undefined
+      ? { computed: { organisme: { ml_beta_activated_at: overrides.computed_activated_at } } }
+      : {}),
     organisme_data: overrides.reponse_at ? { reponse_at: overrides.reponse_at, has_unread_notification: false } : null,
     current_status: { value: null, date: null },
     whatsapp_callback_requested: false,
