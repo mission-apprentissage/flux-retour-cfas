@@ -1,9 +1,17 @@
 import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
+import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollaborationExportResponseSchema } from "shared/models/routes/admin/collaboration-stats.api";
 import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
+
+const REGION_NON_RENSEIGNEE = "Non renseigné";
+
+function formatRegion(code: string | null | undefined): string {
+  if (!code) return REGION_NON_RENSEIGNEE;
+  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? REGION_NON_RENSEIGNEE;
+}
 
 import { fetchCompatibleOrganismes, type ICompatibleOrganisme } from "./collaboration-stats.actions";
 
@@ -98,7 +106,7 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
           },
           nom_ml: { $arrayElemAt: ["$mission_locale.nom", 0] },
           date_envoi_cfa: "$organisme_data.reponse_at",
-          situation: 1,
+          situation: { $ifNull: ["$situation", null] },
           date_traitement_ml: { $arrayElemAt: ["$first_situation_log.created_at", 0] },
           source: {
             $cond: [{ $in: ["$effectif_snapshot.source", ["ERP", "DECA"]] }, "$effectif_snapshot.source", null],
@@ -143,7 +151,9 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
   const compatiblesById = new Map<string, ICompatibleOrganisme>(compatibles.map((c) => [c._id.toString(), c]));
   const usageById = aggregateUsageFromDetails(details);
 
-  const cfa_compatibles = sortByNom(compatibles.map((c) => ({ siret: c.siret, nom: c.nom, region: c.region })));
+  const cfa_compatibles = sortByNom(
+    compatibles.map((c) => ({ siret: c.siret, nom: c.nom, region: formatRegion(c.region) }))
+  );
 
   const cfa_actives = sortByNom(
     compatibles
@@ -151,7 +161,7 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
       .map((c) => ({
         siret: c.siret,
         nom: c.nom,
-        region: c.region,
+        region: formatRegion(c.region),
         date_activation: c.date_activation,
         sources: formatSources(c),
       }))
@@ -162,20 +172,20 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
       .filter(([id]) => compatiblesById.has(id))
       .map(([id, u]) => {
         const c = compatiblesById.get(id)!;
-        return { siret: c.siret, nom: c.nom, region: c.region, nb_collaborations: u.nb_collaborations };
+        return { siret: c.siret, nom: c.nom, region: formatRegion(c.region), nb_collaborations: u.nb_collaborations };
       })
   );
 
   const details_collaborations = details
     .filter((d) => compatiblesById.has(d.organisme_id_str))
     .map((d) => {
-      const traite = d.situation !== null;
-      const repondu = d.situation !== null && REPONDU_SITUATIONS.includes(d.situation);
+      const traite = d.situation != null;
+      const repondu = d.situation != null && REPONDU_SITUATIONS.includes(d.situation);
       const rdv = d.situation === SITUATION_ENUM.RDV_PRIS;
       return {
         siret_cfa: d.siret_cfa,
         nom_cfa: d.nom_cfa,
-        region_cfa: d.region_cfa,
+        region_cfa: formatRegion(d.region_cfa),
         nom_ml: d.nom_ml,
         dossier_envoye: "Oui" as const,
         date_envoi_cfa: d.date_envoi_cfa,
