@@ -1,6 +1,7 @@
 "use client";
 
 import { ClassifierSection } from "../sections/ClassifierSection";
+import { CollaborationsAdminSection } from "../sections/CollaborationsAdminSection";
 import { DeploymentSection } from "../sections/DeploymentSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
 import { WhatsAppSection } from "../sections/WhatsAppSection";
@@ -29,6 +30,7 @@ export function SyntheseView({ showDetailColumn = true, isAdmin = false }: Synth
 
       {isAdmin && <WhatsAppSection />}
       {isAdmin && <ClassifierSection />}
+      {isAdmin && <CollaborationsAdminSection />}
     </div>
   );
 }

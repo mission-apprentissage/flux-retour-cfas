@@ -1,0 +1,11 @@
+.kpiCards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.description {
+  color: var(--text-mention-grey);
+  margin-top: 0;
+  margin-bottom: 16px;
+}
