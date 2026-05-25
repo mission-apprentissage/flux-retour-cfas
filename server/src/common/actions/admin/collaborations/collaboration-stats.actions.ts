@@ -1,21 +1,11 @@
 import { ObjectId } from "bson";
-import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
+import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
-import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
+import { findEligibleOrganismes, type IEligibleOrganismeRow } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
-
-const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
-  SITUATION_ENUM.RDV_PRIS,
-  SITUATION_ENUM.NOUVEAU_PROJET,
-  SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
-  SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
-  SITUATION_ENUM.CHERCHE_CONTRAT,
-  SITUATION_ENUM.REORIENTATION,
-  SITUATION_ENUM.AUTRE,
-];
 
 export type IStatWithVariation = { current: number; variation: string };
 
@@ -82,8 +72,10 @@ export type ICollaborationStatsResponse = {
   }>;
 };
 
-export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICompatibleOrganisme[]> {
-  const eligible = await findEligibleOrganismes();
+async function attachActivationDates(
+  eligible: IEligibleOrganismeRow[],
+  endExclusive: Date
+): Promise<ICompatibleOrganisme[]> {
   if (eligible.length === 0) return [];
 
   const orgIdStrings = eligible.map((o) => o._id.toString());
@@ -113,6 +105,11 @@ export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICo
     has_effectifs_deca: org.has_effectifs_deca,
     date_activation: activationByOrgId.get(org._id.toString()) ?? null,
   }));
+}
+
+export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICompatibleOrganisme[]> {
+  const eligible = await findEligibleOrganismes();
+  return attachActivationDates(eligible, endExclusive);
 }
 
 type UsageRow = {
@@ -273,8 +270,11 @@ function aggregateActivation(compatibles: ICompatibleOrganisme[]): ActivationAgg
   };
 }
 
-export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
-  const compatibles = await fetchCompatibleOrganismes(endExclusive);
+async function computeStatsForEligible(
+  endExclusive: Date,
+  eligible: IEligibleOrganismeRow[]
+): Promise<ICollaborationStatsSnapshot> {
+  const compatibles = await attachActivationDates(eligible, endExclusive);
   const activation = aggregateActivation(compatibles);
   const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds);
 
@@ -309,6 +309,11 @@ export async function computeStatsForDate(endExclusive: Date): Promise<ICollabor
   };
 }
 
+export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
+  const eligible = await findEligibleOrganismes();
+  return computeStatsForEligible(endExclusive, eligible);
+}
+
 function buildVariation(current: number, previous: number | null): IStatWithVariation {
   if (previous === null || previous === 0) return { current, variation: "" };
   const pct = Math.round(((current - previous) / previous) * 100);
@@ -321,7 +326,11 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
   const todayEnd = addDaysUTC(today, 1);
   const j7End = subtractDaysUTC(todayEnd, 7);
 
-  const [current, previous] = await Promise.all([computeStatsForDate(todayEnd), computeStatsForDate(j7End)]);
+  const eligible = await findEligibleOrganismes();
+  const [current, previous] = await Promise.all([
+    computeStatsForEligible(todayEnd, eligible),
+    computeStatsForEligible(j7End, eligible),
+  ]);
 
   const previousByRegion = new Map(previous.regions.map((r) => [r.region_code, r]));
 

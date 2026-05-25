@@ -1,4 +1,4 @@
-import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
+import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollaborationExportResponseSchema } from "shared/models/routes/admin/collaboration-stats.api";
@@ -6,24 +6,14 @@ import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
+import { fetchCompatibleOrganismes, type ICompatibleOrganisme } from "./collaboration-stats.actions";
+
 const REGION_NON_RENSEIGNEE = "Non renseigné";
 
 function formatRegion(code: string | null | undefined): string {
   if (!code) return REGION_NON_RENSEIGNEE;
   return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? REGION_NON_RENSEIGNEE;
 }
-
-import { fetchCompatibleOrganismes, type ICompatibleOrganisme } from "./collaboration-stats.actions";
-
-const REPONDU_SITUATIONS: SITUATION_ENUM[] = [
-  SITUATION_ENUM.RDV_PRIS,
-  SITUATION_ENUM.NOUVEAU_PROJET,
-  SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT,
-  SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
-  SITUATION_ENUM.CHERCHE_CONTRAT,
-  SITUATION_ENUM.REORIENTATION,
-  SITUATION_ENUM.AUTRE,
-];
 
 type CollaborationDetailRow = {
   organisme_id_str: string;
@@ -137,7 +127,7 @@ function formatSources(org: { has_effectifs_erp: boolean; has_effectifs_deca: bo
 }
 
 function sortByNom<T extends { nom: string | null }>(rows: T[]): T[] {
-  return rows.sort((a, b) => (a.nom ?? "").localeCompare(b.nom ?? "", "fr"));
+  return [...rows].sort((a, b) => (a.nom ?? "").localeCompare(b.nom ?? "", "fr"));
 }
 
 export async function getCollaborationExportData(): Promise<ICollaborationExportResponseSchema> {

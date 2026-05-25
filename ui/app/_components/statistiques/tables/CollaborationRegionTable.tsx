@@ -15,8 +15,6 @@ export interface CollaborationRegionRow {
   region_nom: string;
   cfa_compatibles: number;
   cfa_actives: { current: number; delta: number };
-  cfa_with_collab: { current: number; delta: number };
-  rupturants: number;
   dossiers_envoyes_cfa: number;
 }
 
