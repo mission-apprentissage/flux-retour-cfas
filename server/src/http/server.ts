@@ -150,6 +150,7 @@ import requireBearerAuthentication from "./middlewares/requireBearerAuthenticati
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
+import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
@@ -1025,6 +1026,7 @@ function setupRoutes(app: Application) {
       .use("/opcos", opcosRoutesAdmin())
       .use("/erps", erpsRoutesAdmin())
       .use("/mission-locale", missionLocaleRoutesAdmin())
+      .use("/collaborations", collaborationsAdmin())
       .get(
         "/stats",
         returnResult(async () => {

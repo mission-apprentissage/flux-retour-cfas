@@ -303,3 +303,38 @@ export const traitementRegionExportColumns = [
   { label: "Collab traité", key: "collab_traite", width: 13 },
   { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const collaborationCfaCompatiblesExportColumns = [
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
+  { label: "Nom", key: "nom", width: 50 },
+  { label: "Région", key: "region", width: 30 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const collaborationCfaActivesExportColumns = [
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
+  { label: "Nom", key: "nom", width: 50 },
+  { label: "Région", key: "region", width: 30 },
+  { label: "Date d'activation", key: "date_activation", xlsxType: "date", width: 18 },
+  { label: "Sources", key: "sources", width: 16 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const collaborationCfaWithCollabExportColumns = [
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
+  { label: "Nom", key: "nom", width: 50 },
+  { label: "Région", key: "region", width: 30 },
+  { label: "Nb collaborations", key: "nb_collaborations", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const collaborationDetailsExportColumns = [
+  { label: "SIRET CFA", key: "siret_cfa", xlsxType: "string", width: 18 },
+  { label: "Nom CFA", key: "nom_cfa", width: 40 },
+  { label: "Région CFA", key: "region_cfa", width: 30 },
+  { label: "Mission Locale", key: "nom_ml", width: 40 },
+  { label: "Dossier envoyé", key: "dossier_envoye", width: 14 },
+  { label: "Date envoi CFA", key: "date_envoi_cfa", xlsxType: "date", width: 16 },
+  { label: "Dossier traité", key: "dossier_traite", width: 14 },
+  { label: "Date traitement ML", key: "date_traitement_ml", xlsxType: "date", width: 18 },
+  { label: "Réponse jeune", key: "reponse_jeune", width: 14 },
+  { label: "RDV pris", key: "rdv_pris", width: 10 },
+  { label: "Source", key: "source", width: 10 },
+] as const satisfies ReadonlyArray<ExportColumn>;

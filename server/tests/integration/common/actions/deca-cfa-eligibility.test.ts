@@ -6,7 +6,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { describe, expect, it } from "vitest";
 
-import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
+import { checkActivationEligibility, findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { effectifsDb, effectifsDECADb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -220,5 +220,61 @@ describe("checkActivationEligibility", () => {
       expect(result.checks.no_formateurs_tiers.passed).toBe(false);
       expect(result.eligible).toBe(false);
     });
+  });
+});
+
+describe("findEligibleOrganismes", () => {
+  let uaiCounter = 0;
+  const nextUai = () => `020000${(uaiCounter++).toString().padStart(2, "0")}A`;
+  const nextSiret = () => `1234567890${(uaiCounter * 7).toString().padStart(4, "0")}`;
+
+  async function insertOrg(overrides: Partial<IOrganisme> = {}) {
+    const org = generateOrganismeFixture({
+      siret: nextSiret(),
+      uai: nextUai(),
+      nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+      ...overrides,
+    });
+    await organismesDb().insertOne(org, { bypassDocumentValidation: true });
+    return org;
+  }
+
+  it("returns an empty array when no organisme is eligible", async () => {
+    await insertOrg({ ferme: true });
+    await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE });
+    const eligibleWithoutEffectif = await insertOrg();
+    await insertFormationCatalogue({
+      etablissement_gestionnaire_siret: eligibleWithoutEffectif.siret,
+      etablissement_gestionnaire_uai: eligibleWithoutEffectif.uai!,
+      etablissement_formateur_siret: eligibleWithoutEffectif.siret,
+      etablissement_formateur_uai: eligibleWithoutEffectif.uai!,
+    });
+
+    const rows = await findEligibleOrganismes();
+    expect(rows).toEqual([]);
+  });
+
+  it("excludes organismes where catalogue publishes a gestionnaire=self / formateur=tiers formation", async () => {
+    const withTiers = await insertOrg();
+    await insertEffectif(withTiers._id as ObjectId, currentAnnee);
+    await insertFormationCatalogue({
+      etablissement_gestionnaire_siret: withTiers.siret,
+      etablissement_gestionnaire_uai: withTiers.uai!,
+      etablissement_formateur_siret: SIRET_TIERS,
+      etablissement_formateur_uai: UAI_TIERS,
+    });
+
+    const cleanOrg = await insertOrg();
+    await insertEffectifDECA(cleanOrg._id as ObjectId, currentAnnee);
+
+    const rows = await findEligibleOrganismes();
+
+    const ids = rows.map((r) => r._id.toString());
+    expect(ids).toContain((cleanOrg._id as ObjectId).toString());
+    expect(ids).not.toContain((withTiers._id as ObjectId).toString());
+
+    const cleanRow = rows.find((r) => r._id.toString() === (cleanOrg._id as ObjectId).toString())!;
+    expect(cleanRow.has_effectifs_erp).toBe(false);
+    expect(cleanRow.has_effectifs_deca).toBe(true);
   });
 });
