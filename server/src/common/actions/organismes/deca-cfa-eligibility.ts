@@ -37,10 +37,119 @@ export type EligibilityResult = {
   } | null;
 };
 
-const NATURES_ELIGIBLES: ReadonlyArray<string> = [
+export const NATURES_ELIGIBLES: ReadonlyArray<string> = [
   NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
   NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
 ];
+
+export type IEligibleOrganismeRow = {
+  _id: ObjectId;
+  siret: string;
+  uai: string | null;
+  nom: string | null;
+  region: string | null;
+  is_allowed_deca: boolean;
+  has_effectifs_erp: boolean;
+  has_effectifs_deca: boolean;
+};
+
+/**
+ *   - siret AND uai non vides
+ *   - nature ∈ {FORMATEUR, RESPONSABLE_FORMATEUR}
+ *   - aucune formation catalogue publiée où l'organisme est gestionnaire mais formateur tiers
+ *   - au moins un effectif (ERP + DECA) sur les années scolaires actives
+ *   - ferme !== true
+ */
+export async function findEligibleOrganismes(): Promise<IEligibleOrganismeRow[]> {
+  const activeAnnees = getActiveAnneesScolaires(new Date());
+
+  return organismesDb()
+    .aggregate<IEligibleOrganismeRow>([
+      {
+        $match: {
+          ferme: { $ne: true },
+          siret: { $exists: true, $nin: [null, ""] },
+          uai: { $exists: true, $nin: [null, ""] },
+          nature: { $in: NATURES_ELIGIBLES as string[] },
+        },
+      },
+      {
+        $lookup: {
+          from: "effectifs",
+          let: { orgId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$organisme_id", "$$orgId"] }, annee_scolaire: { $in: activeAnnees } } },
+            { $limit: 1 },
+            { $project: { _id: 1 } },
+          ],
+          as: "_effectifs_erp",
+        },
+      },
+      {
+        $lookup: {
+          from: "effectifsDECA",
+          let: { orgId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$organisme_id", "$$orgId"] }, annee_scolaire: { $in: activeAnnees } } },
+            { $limit: 1 },
+            { $project: { _id: 1 } },
+          ],
+          as: "_effectifs_deca",
+        },
+      },
+      {
+        $lookup: {
+          from: "formationsCatalogue",
+          let: { sir: "$siret", u: "$uai" },
+          pipeline: [
+            {
+              $match: {
+                published: true,
+                $expr: {
+                  $and: [
+                    { $eq: ["$etablissement_gestionnaire_siret", "$$sir"] },
+                    { $eq: ["$etablissement_gestionnaire_uai", "$$u"] },
+                    {
+                      $or: [
+                        { $ne: ["$etablissement_formateur_siret", "$$sir"] },
+                        { $ne: ["$etablissement_formateur_uai", "$$u"] },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            { $limit: 1 },
+            { $project: { _id: 1 } },
+          ],
+          as: "_formateurs_tiers",
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $or: [{ $gt: [{ $size: "$_effectifs_erp" }, 0] }, { $gt: [{ $size: "$_effectifs_deca" }, 0] }] },
+              { $eq: [{ $size: "$_formateurs_tiers" }, 0] },
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          siret: 1,
+          uai: 1,
+          nom: { $ifNull: ["$nom", { $ifNull: ["$raison_sociale", "$enseigne"] }] },
+          region: "$adresse.region",
+          is_allowed_deca: { $eq: ["$is_allowed_deca", true] },
+          has_effectifs_erp: { $gt: [{ $size: "$_effectifs_erp" }, 0] },
+          has_effectifs_deca: { $gt: [{ $size: "$_effectifs_deca" }, 0] },
+        },
+      },
+    ])
+    .toArray();
+}
 
 function notEvaluated(): EligibilityCheck {
   return { passed: false };

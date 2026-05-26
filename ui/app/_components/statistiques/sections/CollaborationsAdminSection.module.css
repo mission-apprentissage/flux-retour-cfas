@@ -1,0 +1,27 @@
+.kpiCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpiCardsUsage {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpiCards > *,
+.kpiCardsUsage > * {
+  flex: none;
+  min-width: 0;
+}
+
+.description {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-mention-grey);
+}
+
+.exportError {
+  margin-bottom: 16px;
+}

@@ -1,0 +1,55 @@
+.table {
+  display: flex;
+  justify-content: center;
+}
+
+.table table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th:first-child,
+.table td:first-child {
+  width: 220px;
+}
+
+.table th:not(:first-child),
+.table td:not(:first-child) {
+  text-align: center;
+}
+
+.centeredCell {
+  composes: centeredCell from "./common.module.css";
+}
+
+.emptyMessage {
+  composes: emptyMessage from "./common.module.css";
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.badgeHigh {
+  composes: badge;
+  background-color: var(--background-contrast-success);
+  color: var(--text-label-green-emeraude);
+}
+
+.badgeMedium {
+  composes: badge;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+}
+
+.badgeNeutral {
+  composes: badge;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+}
