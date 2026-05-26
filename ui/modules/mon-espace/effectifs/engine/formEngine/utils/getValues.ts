@@ -1,4 +1,4 @@
-import setWith from "lodash.setwith";
+import { setWith } from "lodash-es";
 
 export const getValues = (fields: Record<string, any>) => {
   if (!fields) return undefined;
