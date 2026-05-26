@@ -1,5 +1,15 @@
 @use "./landing-shared" as *;
+@use "@/styles/breakpoints" as *;
 
 .mainContainer {
   @extend %landing-main-container;
+  margin-top: 2rem;
+
+  @include respond-from(md) {
+    margin-top: 2rem;
+  }
+
+  @include respond-from(lg) {
+    margin-top: 4rem;
+  }
 }
