@@ -9,7 +9,7 @@ import { cfaQueryKeys } from "@/app/_components/ruptures/cfa/hooks/useCfaQueries
 import { useAuth } from "@/app/_context/UserContext";
 import { _get, _put } from "@/common/httpClient";
 
-export type VerifiedInfo = { [K in keyof IVerifiedInfo]-?: string };
+export type VerifiedInfo = { [_K in keyof IVerifiedInfo]-?: string };
 
 type CollaborationFormPayload = Required<
   Pick<

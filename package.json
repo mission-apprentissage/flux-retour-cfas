@@ -66,7 +66,9 @@
     "lodash": "4.18.1",
     "lodash-es": "4.18.1",
     "handlebars": "^4.7.9",
-    "form-data@~2.3.2": "2.5.4"
+    "form-data@~2.3.2": "2.5.4",
+    "next": "15.5.18",
+    "jws": "^3.2.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
@@ -78,7 +80,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "concurrently": "^9.2.1",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^13.5.7",
+    "eslint-config-next": "15.5.18",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
@@ -87,7 +89,7 @@
     "gitleaks-secret-scanner": "^2.1.1",
     "knip": "^5.34.1",
     "lint-staged": "^15.2.10",
-    "next": "^13.5.7",
+    "next": "15.5.18",
     "node-talisman": "^1.29.11",
     "postcss": "^8.5.14",
     "postcss-scss": "^4.0.9",

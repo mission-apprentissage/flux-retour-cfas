@@ -47,7 +47,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     };
   }, [JSON.stringify(router.query)]);
 
-  const updateState = (newParams: Partial<{ [key in keyof OrganismesFilters]: any }>) => {
+  const updateState = (newParams: Partial<{ [_key in keyof OrganismesFilters]: any }>) => {
     void router.push(
       {
         pathname: router.pathname,
