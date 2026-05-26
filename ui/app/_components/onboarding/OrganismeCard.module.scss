@@ -1,0 +1,51 @@
+.card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  border: 1px solid var(--border-default-grey, #ddd);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--blue-france-sun-113, #000091);
+
+  &::before {
+    font-size: 2rem !important;
+    --icon-size: 2rem;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  line-height: 1.4;
+}
+
+.nom {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.adresse {
+  font-size: 0.875rem;
+  color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+}
+
+.ident {
+  font-size: 0.8125rem;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+
+  .identStrong {
+    font-weight: 600;
+    color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+  }
+}
