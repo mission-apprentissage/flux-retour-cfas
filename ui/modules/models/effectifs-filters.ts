@@ -12,7 +12,7 @@ export interface TerritoireFilters extends DateFilters {
 }
 
 export type QueryFilter<T> = {
-  [K in keyof T]?: string | string[];
+  [_K in keyof T]?: string | string[];
 };
 
 export interface EffectifsFiltersFull extends TerritoireFilters {

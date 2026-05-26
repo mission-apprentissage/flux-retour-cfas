@@ -112,7 +112,7 @@ function IndicateursForm(props: IndicateursFormProps) {
     [indicateursEffectifs]
   );
 
-  function updateState(newParams: Partial<{ [key in keyof EffectifsFiltersFullQuery & PaginationInfos]: any }>) {
+  function updateState(newParams: Partial<{ [_key in keyof EffectifsFiltersFullQuery & PaginationInfos]: any }>) {
     void router.push(
       {
         pathname: router.pathname,

@@ -63,7 +63,7 @@ const DownloadButtonWithModal = ({ children, action, ...props }: AppButtonProps)
   );
 };
 
-const typeToGoalPlausible: { [key in Exclude<TypeEffectifNominatif, "inconnu">]: PlausibleGoalType } = {
+const typeToGoalPlausible: { [_key in Exclude<TypeEffectifNominatif, "inconnu">]: PlausibleGoalType } = {
   inscritSansContrat: "telechargement_liste_sans_contrats",
   rupturant: "telechargement_liste_rupturants",
   abandon: "telechargement_liste_abandons",

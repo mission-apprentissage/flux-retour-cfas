@@ -6,7 +6,7 @@ import { Bin, calculateBins } from "@/modules/models/graphs";
 
 const defaultFillColor = "#ffffff";
 
-interface Props<K extends string, Data extends { [key in K]: number }> {
+interface Props<K extends string, Data extends { [_key in K]: number }> {
   donneesAvecDepartement: (Data & { departement: string })[];
   tooltipContent: (donnees: Data) => JSX.Element;
 
@@ -16,7 +16,7 @@ interface Props<K extends string, Data extends { [key in K]: number }> {
   pourcentage?: boolean;
 }
 
-function CarteFrance<K extends string, Data extends { [key in K]: number }>(props: Props<K, Data>) {
+function CarteFrance<K extends string, Data extends { [_key in K]: number }>(props: Props<K, Data>) {
   const [tooltipInfos, setTooltipInfos] = useState({
     x: 0,
     y: 0,
