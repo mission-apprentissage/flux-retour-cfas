@@ -12,7 +12,7 @@ import {
   buildUser,
   NOW,
   resetFixtureCounters,
-} from "./contact-list.fixtures";
+} from "./fixtures";
 
 useMongo();
 

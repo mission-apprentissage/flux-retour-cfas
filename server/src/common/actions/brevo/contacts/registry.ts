@@ -1,4 +1,4 @@
-import { tbaContactsContactList } from "./tba-contacts.contact-list";
+import { tbaContactsContactList } from "./tba-contacts";
 import { ContactListDefinition } from "./types";
 
 export const contactListRegistry: Record<string, ContactListDefinition> = {

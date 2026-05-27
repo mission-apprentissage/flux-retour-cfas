@@ -2,8 +2,8 @@ import Boom from "boom";
 import express from "express";
 import { z } from "zod";
 
-import { getConnexionInvitationInfoByEmail } from "@/common/actions/brevo-contact-lists/connexion-invitation-info.actions";
-import { getConnexionInvitationByToken } from "@/common/actions/brevo-contact-lists/connexion-invitations.actions";
+import { getConnexionInvitationInfoByEmail } from "@/common/actions/brevo/contacts/connexion-invitation-info.actions";
+import { getConnexionInvitationByToken } from "@/common/actions/brevo/contacts/connexion-invitations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 
 // Le token est généré via `generateKey(50, "hex")` → toujours 100 chars hex.

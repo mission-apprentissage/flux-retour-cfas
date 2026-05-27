@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
 
-import styles from "./brevo-contact-lists.module.scss";
+import styles from "./brevo-contacts.module.scss";
 
 export type SampleContact = { email: string; attributes: Record<string, unknown> };
 type AttributesReport = {
@@ -45,7 +45,7 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
     let cancelled = false;
     (async () => {
       try {
-        const list = (await _get(`/api/v1/admin/brevo-contact-lists/${contactList.slug}/list`)) as ExistingList;
+        const list = (await _get(`/api/v1/admin/brevo-contacts/${contactList.slug}/list`)) as ExistingList;
         if (!cancelled) setExistingList(list);
       } catch (e) {
         captureException(e);
@@ -60,12 +60,12 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
     setRunning(dryRun ? "dryRun" : "sync");
     setError(null);
     try {
-      const data = (await _post(`/api/v1/admin/brevo-contact-lists/${contactList.slug}/sync`, {
+      const data = (await _post(`/api/v1/admin/brevo-contacts/${contactList.slug}/sync`, {
         dryRun,
       })) as SyncResult;
       setResult(data);
       if (!dryRun) {
-        const list = (await _get(`/api/v1/admin/brevo-contact-lists/${contactList.slug}/list`)) as ExistingList;
+        const list = (await _get(`/api/v1/admin/brevo-contacts/${contactList.slug}/list`)) as ExistingList;
         setExistingList(list);
       }
     } catch (e) {

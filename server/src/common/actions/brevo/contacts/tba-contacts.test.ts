@@ -21,8 +21,8 @@ import {
   buildUser,
   NOW,
   resetFixtureCounters,
-} from "./contact-list.fixtures";
-import { tbaContactsContactList } from "./tba-contacts.contact-list";
+} from "./fixtures";
+import { tbaContactsContactList } from "./tba-contacts";
 
 useMongo();
 

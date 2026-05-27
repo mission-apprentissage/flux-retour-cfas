@@ -6,7 +6,6 @@ import {
   importContactsToBrevoList,
   serializeBrevoAttributes,
 } from "@/common/services/brevo/brevo";
-import config from "@/config";
 
 import { getOrCreateContactList } from "./list.actions";
 import { getContactList } from "./registry";
@@ -28,7 +27,7 @@ export const previewContactList = async (params: { slug: string }) => {
   return {
     count: contacts.length,
     sample: serializeSample(contacts),
-    listName: contactList.buildListName({ env: config.env }),
+    listName: contactList.buildListName(),
   };
 };
 
@@ -46,7 +45,7 @@ export const syncContactList = async (params: { slug: string; dryRun?: boolean; 
   const contactList = getContactList(params.slug);
 
   const contacts = await contactList.fetchContacts();
-  const listName = contactList.buildListName({ env: config.env });
+  const listName = contactList.buildListName();
 
   if (params.dumpTo) {
     await fs.writeFile(params.dumpTo, JSON.stringify({ listName, count: contacts.length, contacts }, null, 2), "utf8");

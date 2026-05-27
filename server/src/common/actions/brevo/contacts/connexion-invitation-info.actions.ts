@@ -111,7 +111,7 @@ export const getConnexionInvitationInfoByEmail = async (email: string): Promise<
     return null;
   }
 
-  // Mêmes filtres "en rupture" que `tba-contacts.contact-list.ts` /
+  // Mêmes filtres "en rupture" que `tba-contacts.ts` /
   // `cfa-effectifs-ruptures.actions.ts`. Différence : ici on remonte TOUTES
   // les ML (pas top 2) avec leur adresse.
   let missionsLocales: ConnexionInvitationMissionLocale[] = [];

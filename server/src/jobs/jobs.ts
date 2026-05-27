@@ -2,7 +2,7 @@ import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
-import { syncContactList } from "@/common/actions/brevo-contact-lists/sync";
+import { syncContactList } from "@/common/actions/brevo/contacts/sync";
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
@@ -620,7 +620,7 @@ export async function setupJobProcessor() {
           return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
         },
       },
-      "brevo-contact-lists:sync": {
+      "brevo-contacts:sync": {
         handler: async (job) => {
           const payload = job.payload as
             | {

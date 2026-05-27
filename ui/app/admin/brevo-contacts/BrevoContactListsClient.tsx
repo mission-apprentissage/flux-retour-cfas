@@ -6,11 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import { _get } from "@/common/httpClient";
 
-import styles from "./brevo-contact-lists.module.scss";
+import styles from "./brevo-contacts.module.scss";
 import { BrevoContactListCard, ContactListSummary, type SampleContact } from "./BrevoContactListCard";
 
-const syncConfirmModal = createModal({ id: "brevo-contact-lists-sync-confirm", isOpenedByDefault: false });
-const sampleDetailsModal = createModal({ id: "brevo-contact-lists-sample-details", isOpenedByDefault: false });
+const syncConfirmModal = createModal({ id: "brevo-contacts-sync-confirm", isOpenedByDefault: false });
+const sampleDetailsModal = createModal({ id: "brevo-contacts-sample-details", isOpenedByDefault: false });
 
 type PendingSync = {
   contactList: ContactListSummary;
@@ -36,7 +36,7 @@ export default function BrevoContactListsClient() {
     let cancelled = false;
     (async () => {
       try {
-        const data = (await _get("/api/v1/admin/brevo-contact-lists")) as ContactListSummary[];
+        const data = (await _get("/api/v1/admin/brevo-contacts")) as ContactListSummary[];
         if (!cancelled) setContactLists(data);
       } catch (e) {
         captureException(e);
@@ -116,9 +116,9 @@ export default function BrevoContactListsClient() {
                 déclencher manuellement depuis le dashboard Brevo.
               </li>
               <li>
-                <strong>Le nom de la liste sera préfixé par l&apos;environnement courant</strong> (<code>local_</code>,{" "}
-                <code>recette_</code>, <code>prod_</code>). Vérifiez le préfixe avant d&apos;envoyer une campagne
-                réelle.
+                <strong>L&apos;import est asynchrone côté Brevo.</strong> Une fois la sync lancée, Brevo traite les
+                contacts par batches en arrière-plan (~5–15 min pour ~5 000 contacts). La liste se remplit
+                progressivement — l&apos;avancement est visible dans Brevo &gt; Contacts &gt; Historique des imports.
               </li>
             </ul>
 

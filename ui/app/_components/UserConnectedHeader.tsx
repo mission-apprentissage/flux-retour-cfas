@@ -222,12 +222,7 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Message de maintenance
               </MenuItem>,
-              <MenuItem
-                key="admin-brevo-contact-lists"
-                component="a"
-                href="/admin/brevo-contact-lists"
-                onClick={handleClose}
-              >
+              <MenuItem key="admin-brevo-contacts" component="a" href="/admin/brevo-contacts" onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-mail-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

@@ -703,11 +703,7 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
 
 // Nom utilisé uniquement à la création auto (dev). En prod la liste cible est
 // définie par `config.brevo.tbaContactsListId` et son nom Brevo est préservé.
-const buildListName = ({ env }: { env: string }): string => {
-  const now = new Date();
-  const ddmm = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getFullYear()).slice(-2)}`;
-  return `${env}_${ddmm}_tba_contacts`;
-};
+const buildListName = (): string => "tba_contacts";
 
 export const tbaContactsContactList: ContactListDefinition = {
   slug: "tba-contacts",

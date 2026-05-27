@@ -2,8 +2,8 @@ import Boom from "boom";
 import express from "express";
 import { z } from "zod";
 
-import { listContactLists } from "@/common/actions/brevo-contact-lists/registry";
-import { previewContactList, syncContactList } from "@/common/actions/brevo-contact-lists/sync";
+import { listContactLists } from "@/common/actions/brevo/contacts/registry";
+import { previewContactList, syncContactList } from "@/common/actions/brevo/contacts/sync";
 import { brevoContactListDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
 

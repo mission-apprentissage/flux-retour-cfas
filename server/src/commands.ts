@@ -360,7 +360,7 @@ program
   });
 
 program
-  .command("brevo-contact-lists:sync")
+  .command("brevo-contacts:sync")
   .description("Synchronise une liste de contacts vers Brevo (création/peuplement de la liste)")
   .requiredOption("--slug <slug>", "Slug de la liste (ex: cfa-users)")
   .option("--dry-run", "Simulation : pipeline d'agrégation et mapping exécutés, sans appel Brevo", false)
@@ -369,7 +369,7 @@ program
   .action((options) => {
     const baseDir = process.env.INIT_CWD || process.cwd();
     const dumpTo = options.dump ? path.resolve(baseDir, options.dump) : undefined;
-    return createJobAction("brevo-contact-lists:sync")({
+    return createJobAction("brevo-contacts:sync")({
       slug: options.slug,
       dryRun: options.dryRun,
       dumpTo,

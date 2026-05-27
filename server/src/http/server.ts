@@ -150,7 +150,7 @@ import requireBearerAuthentication from "./middlewares/requireBearerAuthenticati
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
-import brevoContactListsRoutesAdmin from "./routes/admin.routes/brevo-contact-lists.routes";
+import brevoContactsRoutesAdmin from "./routes/admin.routes/brevo-contacts.routes";
 import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
@@ -1029,7 +1029,7 @@ function setupRoutes(app: Application) {
       .use("/erps", erpsRoutesAdmin())
       .use("/mission-locale", missionLocaleRoutesAdmin())
       .use("/collaborations", collaborationsAdmin())
-      .use("/brevo-contact-lists", brevoContactListsRoutesAdmin())
+      .use("/brevo-contacts", brevoContactsRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {

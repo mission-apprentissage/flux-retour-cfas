@@ -22,7 +22,7 @@ export interface ContactListDefinition {
    * automatiquement à la 1ʳᵉ sync via `getOrCreateContactList`.
    */
   brevoListId?: number;
-  buildListName: (ctx: { env: string }) => string;
+  buildListName: () => string;
   attributesSchema: ContactListAttributesSchema;
   fetchContacts: () => Promise<BrevoContact[]>;
 }
