@@ -112,7 +112,6 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
                       mlId={mlId}
                       noData={data?.traites_count === 0}
                       hasCfaCollaboration={data?.has_cfa_collaboration}
-                      isAdmin={isAdmin}
                     />
                   ),
                 },

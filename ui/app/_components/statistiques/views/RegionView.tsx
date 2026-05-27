@@ -4,7 +4,6 @@ import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
 import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
-import { PrequalifSection } from "../sections/PrequalifSection";
 import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
 import { RegionSVG } from "../ui/RegionSVG";
 import { ViewHeader } from "../ui/ViewHeader";
@@ -35,7 +34,6 @@ export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
 
       <SuiviTraitementSection region={regionCode} isAdmin={isAdmin} />
       <AccompagnementConjointSection region={regionCode} />
-      {isAdmin && <PrequalifSection scope="region" code={regionCode} />}
     </div>
   );
 }

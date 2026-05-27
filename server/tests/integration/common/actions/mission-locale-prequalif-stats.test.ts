@@ -17,7 +17,7 @@ describe("getPrequalifStats", () => {
     await organisationsDb().deleteMany({});
   });
 
-  const insertMl = async (overrides: { region?: string; rdvUrl?: string | null } = {}): Promise<ObjectId> => {
+  const insertMl = async (overrides: { rdvUrl?: string | null } = {}): Promise<ObjectId> => {
     const id = new ObjectId();
     await organisationsDb().insertOne(
       {
@@ -26,7 +26,6 @@ describe("getPrequalifStats", () => {
         nom: "ML",
         ml_id: Math.floor(Math.random() * 100000),
         created_at: new Date(),
-        ...(overrides.region ? { adresse: { region: overrides.region } } : {}),
         ...(overrides.rdvUrl !== undefined ? { rdv_url: overrides.rdvUrl } : {}),
       } as any,
       { bypassDocumentValidation: true }
@@ -94,7 +93,7 @@ describe("getPrequalifStats", () => {
     );
   };
 
-  it("scope national : compte tous les envois préqualif, exclut les injoignables", async () => {
+  it("compte tous les envois préqualif, exclut les injoignables", async () => {
     const mlA = await insertMl();
     const mlB = await insertMl();
 
@@ -104,68 +103,30 @@ describe("getPrequalifStats", () => {
     // Cet effectif legacy injoignables ne doit PAS être compté
     await insertEffectifPrequalif(mlA, { templateType: "injoignables", userResponse: "prequalif_yes" });
 
-    const stats = await getPrequalifStats({ national: true });
+    const stats = await getPrequalifStats();
 
-    expect(stats.scope).toEqual({ type: "national" });
     expect(stats.volume.total_sent).toBe(3);
     expect(stats.volume.sent_by_mode).toEqual({ backfill: 1, daily: 2 });
     expect(stats.responses.yes_count).toBe(1);
     expect(stats.responses.no_count).toBe(1);
   });
 
-  it("scope ml_id : isole les envois d'une seule ML", async () => {
-    const mlA = await insertMl();
-    const mlB = await insertMl();
-
-    await insertEffectifPrequalif(mlA, { userResponse: "prequalif_yes" });
-    await insertEffectifPrequalif(mlA);
-    await insertEffectifPrequalif(mlB, { userResponse: "prequalif_yes" });
-    await insertEffectifPrequalif(mlB);
-    await insertEffectifPrequalif(mlB);
-
-    const statsA = await getPrequalifStats({ ml_id: mlA });
-    const statsB = await getPrequalifStats({ ml_id: mlB });
-
-    expect(statsA.volume.total_sent).toBe(2);
-    expect(statsA.responses.yes_count).toBe(1);
-    expect(statsB.volume.total_sent).toBe(3);
-    expect(statsB.responses.yes_count).toBe(1);
-  });
-
-  it("scope region : ne compte que les ML de la région demandée", async () => {
-    const mlIDF = await insertMl({ region: "11" });
-    const mlBretagne = await insertMl({ region: "53" });
-
-    await insertEffectifPrequalif(mlIDF);
-    await insertEffectifPrequalif(mlIDF);
-    await insertEffectifPrequalif(mlBretagne);
-
-    const statsIDF = await getPrequalifStats({ region: "11" });
-    const statsBretagne = await getPrequalifStats({ region: "53" });
-
-    expect(statsIDF.volume.total_sent).toBe(2);
-    expect(statsBretagne.volume.total_sent).toBe(1);
-  });
-
-  it("ml_activation : null si scope ml_id, calculé sinon", async () => {
+  it("ml_activation : compte les ML avec rdv_url sur le total", async () => {
     await insertMl({ rdvUrl: "https://calendly.com/a" });
     await insertMl({ rdvUrl: "https://calendly.com/b" });
     const mlC = await insertMl(); // pas de rdv_url
 
     await insertEffectifPrequalif(mlC);
 
-    const statsNational = await getPrequalifStats({ national: true });
-    expect(statsNational.ml_activation).toEqual({ ml_with_rdv_url: 2, ml_total: 3 });
-
-    const statsMl = await getPrequalifStats({ ml_id: mlC });
-    expect(statsMl.ml_activation).toBeNull();
+    const stats = await getPrequalifStats();
+    expect(stats.ml_activation).toEqual({ ml_with_rdv_url: 2, ml_total: 3 });
   });
 
   it("yes_rate / response_rate : 0% si aucun répondant (pas de NaN)", async () => {
     const mlA = await insertMl();
     await insertEffectifPrequalif(mlA);
 
-    const stats = await getPrequalifStats({ national: true });
+    const stats = await getPrequalifStats();
 
     expect(stats.volume.total_sent).toBe(1);
     expect(stats.responses.yes_count).toBe(0);
@@ -181,7 +142,7 @@ describe("getPrequalifStats", () => {
     await insertEffectifPrequalif(mlA, { rdvToken: "uuid-2", rdvClicks: 1 });
     await insertEffectifPrequalif(mlA, { rdvToken: "uuid-3", rdvClicks: 0 });
 
-    const stats = await getPrequalifStats({ national: true });
+    const stats = await getPrequalifStats();
 
     expect(stats.rdv_tracking.tokens_generated).toBe(3);
     expect(stats.rdv_tracking.total_clicks).toBe(4);
@@ -195,7 +156,7 @@ describe("getPrequalifStats", () => {
     await insertEffectifPrequalif(mlA, { messageStatus: "failed_send" });
     await insertEffectifPrequalif(mlA, { optedOut: true });
 
-    const stats = await getPrequalifStats({ national: true });
+    const stats = await getPrequalifStats();
 
     expect(stats.volume.failed_send).toBe(2);
     expect(stats.volume.opted_out).toBe(1);

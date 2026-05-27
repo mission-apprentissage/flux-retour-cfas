@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
-  IClassifierStats,
   IDetailsDossiersTraites,
   IDetailsDossiersTraitesV2,
   IPrequalifStats,
@@ -102,9 +101,7 @@ export const statsQueryKeys = {
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
-  classifier: (period: Period) => ["stats", "classifier", period] as const,
-  prequalif: (period: Period, region?: string, mlId?: string, national?: boolean) =>
-    ["stats", "prequalif", period, region, mlId, national] as const,
+  prequalif: (period: Period) => ["stats", "prequalif", period] as const,
 };
 
 export interface TraitementMLParams {
@@ -316,27 +313,15 @@ export function useWhatsAppStats(period: Period) {
   );
 }
 
-export function useClassifierStats(period: Period) {
-  return useQuery<IClassifierStats>(
-    statsQueryKeys.classifier(period),
-    () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/classifier", {
-        params: { period },
-      }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
-}
-
 /**
  * Indicateurs préqualif WhatsApp (admin-only).
  */
-export function usePrequalifStats(period: Period, scope: { national?: boolean; region?: string; mlId?: string }) {
-  const { national, region, mlId } = scope;
+export function usePrequalifStats(period: Period = "all") {
   return useQuery<IPrequalifStats>(
-    statsQueryKeys.prequalif(period, region, mlId, national),
+    statsQueryKeys.prequalif(period),
     () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/prequalif", {
-        params: buildStatsParams({ period, region, mlId, national }),
+        params: { period },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
   );
