@@ -7,6 +7,7 @@ import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
 
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { WHATSAPP_EVENT_COPY } from "../shared/collaboration/whatsapp-event-copy";
 import styles from "../shared/ui/EffectifParcours.module.css";
 
 const TIMELINE_EVENTS = {
@@ -35,8 +36,8 @@ const EVENT_LABELS = {
   [TIMELINE_EVENTS.WHATSAPP_ECHEC]: "Échec de l'envoi du message WhatsApp",
   [TIMELINE_EVENTS.WHATSAPP_CALLBACK]: "Le jeune a indiqué vouloir être recontacté par la Mission locale",
   [TIMELINE_EVENTS.WHATSAPP_NO_HELP]: "Le jeune a indiqué ne pas vouloir être recontacté par la Mission locale",
-  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES]: "Le jeune souhaite un rendez-vous",
-  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO]: "Le jeune ne souhaite pas être contacté",
+  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES]: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_YES.title,
+  [TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO]: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_NO.title,
 } as const;
 
 const WhatsAppIcon = ({ color }: { color: string }) => (
@@ -92,10 +93,9 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
         events.push({
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES,
-          label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_YES],
-          subtitle: "Demande reçue par message",
-          tooltip:
-            "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il souhaitait être recontacté par la Mission Locale.",
+          label: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_YES.title,
+          subtitle: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_YES.subtext,
+          tooltip: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_YES.tooltip,
         });
         return;
       }
@@ -103,10 +103,9 @@ const buildTimelineMissionLocale = (effectif: IEffectifMissionLocale["effectif"]
         events.push({
           date,
           type: TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO,
-          label: EVENT_LABELS[TIMELINE_EVENTS.WHATSAPP_PREQUALIF_NO],
-          subtitle: "Demande reçue par message",
-          tooltip:
-            "L'équipe du service a contacté ce jeune par message. Le jeune a indiqué qu'il ne souhaitait pas être recontacté.",
+          label: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_NO.title,
+          subtitle: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_NO.subtext,
+          tooltip: WHATSAPP_EVENT_COPY.WHATSAPP_PREQUALIF_NO.tooltip,
         });
         return;
       }

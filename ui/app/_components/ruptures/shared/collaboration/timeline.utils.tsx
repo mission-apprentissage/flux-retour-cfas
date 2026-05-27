@@ -7,6 +7,7 @@ import { formatDate, formatRelativeDate } from "@/app/_utils/date.utils";
 import { isCurrentUserId } from "@/app/_utils/user.utils";
 
 import { MlLog } from "./collaboration.utils";
+import { WHATSAPP_EVENT_COPY, WHATSAPP_EVENT_ICON, WhatsAppEventKey } from "./whatsapp-event-copy";
 
 export type EventIconType =
   | "rupture"
@@ -17,12 +18,15 @@ export type EventIconType =
   | "injoignable"
   | "attente"
   | "commentaire"
-  | "nouveau-contrat";
+  | "nouveau-contrat"
+  | "whatsapp-yes"
+  | "whatsapp-no";
 
 export interface TimelineEvent {
   date: Date;
   title: string;
   subtext?: string;
+  tooltip?: string;
   icon: EventIconType;
   log?: MlLog;
 }
@@ -45,6 +49,10 @@ export function getEventIcon(icon: EventIconType, styles: Record<string, string>
       return <span className="fr-icon-chat-3-line fr-icon--sm" aria-hidden="true" />;
     case "nouveau-contrat":
       return <span className={`fr-icon-file-text-line fr-icon--sm ${styles.nouveauContratIcon}`} aria-hidden="true" />;
+    case "whatsapp-yes":
+      return <i className="ri-chat-check-fill" style={{ color: "#18753C", fontSize: "18px" }} aria-hidden="true" />;
+    case "whatsapp-no":
+      return <i className="ri-chat-delete-fill" style={{ color: "#666666", fontSize: "18px" }} aria-hidden="true" />;
     case "traite":
     default:
       return <Image src="/images/parcours-dossier-traite.svg" alt="" width={18} height={18} />;
@@ -85,7 +93,10 @@ export function buildLogEvents(
     const date = toDate(log.created_at);
     const subtext = buildLogCreatorSubtext(log, options);
 
-    if (log.situation) {
+    if (log.event && log.event in WHATSAPP_EVENT_COPY) {
+      const key = log.event as WhatsAppEventKey;
+      events.push({ date, ...WHATSAPP_EVENT_COPY[key], icon: WHATSAPP_EVENT_ICON[key], log });
+    } else if (log.situation) {
       if (log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
         events.push({ date, title: "Jeune à recontacter", subtext, icon: "recontacter", log });
       } else if (log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES) {

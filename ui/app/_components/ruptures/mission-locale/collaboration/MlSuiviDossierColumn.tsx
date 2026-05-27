@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useFormik } from "formik";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -230,7 +231,17 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         <p className={styles.suiviCommentText}>{event.log.commentaires}</p>
                       </CollapsibleDetail>
                     ) : (
-                      event.subtext && <p className={styles.suiviEventSubtext}>{event.subtext}</p>
+                      event.subtext && (
+                        <p className={styles.suiviEventSubtext}>
+                          {event.subtext}
+                          {event.tooltip && (
+                            <>
+                              {" "}
+                              <Tooltip kind="hover" title={event.tooltip} />
+                            </>
+                          )}
+                        </p>
+                      )
                     )}
                   </div>
                 </div>
