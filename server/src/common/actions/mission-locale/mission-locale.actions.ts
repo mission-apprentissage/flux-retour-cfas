@@ -655,10 +655,10 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
+        a_risque_souhaite_rdv: -1,
         a_risque_mineur: -1,
         a_risque_rqth: -1,
         a_risque_cfa_sans_mineur_rqth: -1,
-        a_risque_souhaite_rdv: -1,
         a_risque_whatsapp_callback: -1,
         a_risque_accompagnement_conjoint: -1,
         a_contacter: -1,
@@ -1090,6 +1090,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 nouveau_contrat: "$nouveau_contrat",
                 situation: "$$ROOT.situation",
                 whatsapp_callback_requested: { $ifNull: ["$$ROOT.whatsapp_callback_requested", false] },
+                whatsapp_no_help_responded: { $ifNull: ["$$ROOT.whatsapp_no_help_responded", false] },
+                souhaite_rdv: { $ifNull: ["$$ROOT.souhaite_rdv", false] },
                 unread_by_current_user: {
                   $cond: [
                     {
@@ -1459,6 +1461,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
               rqth: "$effectif_snapshot.apprenant.rqth",
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
               whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
+              souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
             },
           },
         ],
