@@ -1,50 +1,64 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Field, Form, Formik, FormikErrors } from "formik";
+import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { useMlParametres, useUpdateMlParametres } from "@/app/_components/ruptures/shared/hooks";
-import useToaster from "@/hooks/useToaster";
+
+const URL_ERROR = "Veuillez saisir une URL publique valide (ex: https://www.exemple.fr/rdv)";
 
 const parametresSchema = z.object({
   rdv_url: z
     .string()
-    .url("Format d'URL invalide")
+    .trim()
     .max(2000)
     .refine(
       (s) => {
         try {
-          return ["http:", "https:"].includes(new URL(s).protocol);
+          const url = new URL(s);
+          if (!["http:", "https:"].includes(url.protocol)) return false;
+          // Doit avoir un domaine type "host.tld" (pas localhost, pas une IP)
+          const parts = url.hostname.split(".");
+          if (parts.length < 2) return false;
+          const tld = parts[parts.length - 1];
+          // TLD = au moins 2 lettres ASCII (rejette ".1" d'une IP, ".a", etc.)
+          return /^[a-z]{2,}$/i.test(tld);
         } catch {
           return false;
         }
       },
-      { message: "L'URL doit commencer par http:// ou https://" }
+      { message: URL_ERROR }
     )
     .or(z.literal("")),
 });
 
 type ParametresForm = z.infer<typeof parametresSchema>;
 
+type FormAlert = { severity: "success" | "error"; message: string };
+
 export default function ParametresClient() {
   const { data, isLoading } = useMlParametres();
   const { mutateAsync: updateParametres } = useUpdateMlParametres();
-  const { toastSuccess, toastError } = useToaster();
+  const [alert, setAlert] = useState<FormAlert | null>(null);
 
   if (isLoading) {
     return null;
   }
 
   const handleSubmit = async (values: ParametresForm, { setSubmitting }: { setSubmitting: (v: boolean) => void }) => {
+    setAlert(null);
+    const trimmed = values.rdv_url.trim();
     try {
-      await updateParametres({ rdv_url: values.rdv_url === "" ? null : values.rdv_url });
-      toastSuccess("Vos paramètres ont été enregistrés.");
+      await updateParametres({ rdv_url: trimmed === "" ? null : trimmed });
+      setAlert({ severity: "success", message: "Vos paramètres ont été enregistrés." });
     } catch (err: any) {
       const errorMessage = err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement";
-      toastError(errorMessage);
+      setAlert({ severity: "error", message: errorMessage });
     } finally {
       setSubmitting(false);
     }
@@ -55,6 +69,17 @@ export default function ParametresClient() {
       <h1 className="fr-h3 fr-mb-3w fr-mt-3w" style={{ color: "var(--background-flat-blue-cumulus)" }}>
         Paramètres de votre Mission Locale
       </h1>
+
+      {alert && (
+        <Alert
+          severity={alert.severity}
+          description={alert.message}
+          closable
+          onClose={() => setAlert(null)}
+          className="fr-mb-2w"
+          small
+        />
+      )}
 
       <Formik<ParametresForm>
         initialValues={{ rdv_url: data?.rdv_url ?? "" }}
