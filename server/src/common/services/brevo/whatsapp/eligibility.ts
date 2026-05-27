@@ -10,11 +10,13 @@ import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
 import { applyTestPhoneOverride, maskPhone, normalizePhoneNumber } from "./phone";
 
+export const PREQUALIF_RUPTURE_MAX_DAYS = 180;
+
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp préqualif.
  *
  * Cible : "contacts opportuns" (score classifier ≥ 0.75) jamais traités, hors CFA V2
- * collab et hors `acc_conjoint=true`.
+ * collab, hors `acc_conjoint=true`, rupture < `PREQUALIF_RUPTURE_MAX_DAYS` jours.
  */
 export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolean {
   const phone = effectif.effectif_snapshot?.apprenant?.telephone;
@@ -31,6 +33,10 @@ export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolea
   if (effectif.organisme_data?.acc_conjoint === true) return false;
 
   if (effectif.situation !== null && effectif.situation !== undefined) return false;
+
+  if (!effectif.date_rupture) return false;
+  const ruptureCutoff = new Date(Date.now() - PREQUALIF_RUPTURE_MAX_DAYS * 24 * 60 * 60 * 1000);
+  if (new Date(effectif.date_rupture) < ruptureCutoff) return false;
 
   return true;
 }

@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
-import { isEligibleForPrequalif } from "@/common/services/brevo/whatsapp/eligibility";
+import { isEligibleForPrequalif, PREQUALIF_RUPTURE_MAX_DAYS } from "@/common/services/brevo/whatsapp/eligibility";
 import { normalizePhoneNumber } from "@/common/services/brevo/whatsapp/phone";
 import { reserveAndSendPrequalif, type PrequalifSentVia } from "@/common/services/brevo/whatsapp/prequalif";
 import { sleep } from "@/common/utils/asyncUtils";
@@ -31,6 +31,7 @@ interface EligibleRow {
  */
 async function getEligibleEffectifs(): Promise<EligibleRow[]> {
   const failedRetryThreshold = new Date(Date.now() - RETRY_FAILED_AFTER_MS);
+  const ruptureCutoff = new Date(Date.now() - PREQUALIF_RUPTURE_MAX_DAYS * 24 * 60 * 60 * 1000);
   return missionLocaleEffectifsDb()
     .aggregate<EligibleRow>([
       {
@@ -41,6 +42,8 @@ async function getEligibleEffectifs(): Promise<EligibleRow[]> {
           "computed.organisme.is_allowed_collab": { $ne: true },
           "organisme_data.acc_conjoint": { $ne: true },
           "whatsapp_contact.opted_out": { $ne: true },
+          "effectif_snapshot.apprenant.telephone": { $exists: true, $nin: [null, ""] },
+          date_rupture: { $gte: ruptureCutoff },
           $or: [
             { whatsapp_contact: { $exists: false } },
             { "whatsapp_contact.last_message_sent_at": { $exists: false } },
@@ -100,6 +103,41 @@ export async function sendWhatsAppPrequalif({ dryRun, limit, sentVia }: SendOpti
   );
 
   if (dryRun) {
+    const previewIds = target.map((t) => t._id);
+    const previews = await missionLocaleEffectifsDb()
+      .find(
+        { _id: { $in: previewIds } },
+        {
+          projection: {
+            _id: 1,
+            mission_locale_id: 1,
+            "classification_reponse_appel.score": 1,
+            "effectif_snapshot.apprenant.prenom": 1,
+            "effectif_snapshot.apprenant.nom": 1,
+            "effectif_snapshot.apprenant.telephone": 1,
+          },
+        }
+      )
+      .toArray();
+    const previewById = new Map(previews.map((p) => [p._id.toHexString(), p]));
+    const rows = target.map(({ _id }) => {
+      const p = previewById.get(_id.toHexString());
+      const rawPhone = p?.effectif_snapshot?.apprenant?.telephone ?? null;
+      const normalized = normalizePhoneNumber(rawPhone);
+      return {
+        effectifId: _id.toHexString(),
+        mlId: p?.mission_locale_id?.toHexString(),
+        prenom: p?.effectif_snapshot?.apprenant?.prenom,
+        nom: p?.effectif_snapshot?.apprenant?.nom,
+        score: p?.classification_reponse_appel?.score,
+        rawPhone,
+        normalizedPhone: normalized,
+        willSkip: !normalized,
+      };
+    });
+    for (const row of rows) {
+      logger.info(row, "[dry-run] effectif ciblé");
+    }
     logger.info({ total }, "Mode dry-run : aucun message envoyé");
     return 0;
   }
