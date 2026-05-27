@@ -8,7 +8,7 @@ import config from "@/config";
 
 import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
-import { maskPhone, normalizePhoneNumber } from "./phone";
+import { applyTestPhoneOverride, maskPhone, normalizePhoneNumber } from "./phone";
 
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp préqualif.
@@ -103,6 +103,9 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
+  // Override de test : en non-prod, redirige vers le numéro de test si défini.
+  const effectivePhone = applyTestPhoneOverride(targetPhone);
+
   const templateId = config.brevo.whatsapp?.templateInjoignablesId;
   if (!templateId) {
     logger.error("WhatsApp template ID not configured (MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID)");
@@ -110,21 +113,22 @@ export async function triggerWhatsAppIfEligible(
   }
 
   // Créer/mettre à jour le contact Brevo avec les attributs du template
-  await upsertBrevoContact(targetPhone, {
+  await upsertBrevoContact(effectivePhone, {
     TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,
     TBA_EFFECTIF_MISSION_LOCALE_NOM_WHATSAPP: missionLocaleInfo.nom,
   });
 
-  const result = await sendWhatsAppTemplate(targetPhone, {
+  const result = await sendWhatsAppTemplate(effectivePhone, {
     templateId,
   });
 
-  // Mettre à jour l'effectif
+  // Mettre à jour l'effectif (on stocke le numéro effectif envoyé pour que le webhook
+  // inbound retrouve l'effectif quand l'utilisateur de test répond).
   const now = new Date();
   await updateWhatsAppContact(
     effectif._id,
     {
-      phone_normalized: targetPhone,
+      phone_normalized: effectivePhone,
       last_message_sent_at: now,
       message_id: result.messageId,
       message_status: result.success ? "sent" : "failed",
@@ -140,7 +144,7 @@ export async function triggerWhatsAppIfEligible(
   );
 
   const templateVars = {
-    phoneNumber: maskPhone(targetPhone),
+    phoneNumber: maskPhone(effectivePhone),
     prenom: prenom.length > 2 ? prenom.slice(0, 2) + "***" : "***",
     missionLocale: missionLocaleInfo.nom,
     templateId,

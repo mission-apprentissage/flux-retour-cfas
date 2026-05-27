@@ -99,15 +99,25 @@ const config = {
   },
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
-    whatsapp: {
-      enabled:
-        env.get("MNA_TDB_ENV").required().asString() === "production" &&
-        env.get("MNA_TDB_WHATSAPP_ENABLED").default("false").asBool(),
-      webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").default("").asString(),
-      senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").default("").asString(),
-      templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").default("0").asInt(),
-      templatePrequalifInitialId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_PREQUALIF_INITIAL_ID").default("0").asInt(),
-    },
+    whatsapp: (() => {
+      const isProd = env.get("MNA_TDB_ENV").required().asString() === "production";
+      const hasTestOverride = !!env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").default("").asString();
+      const featureFlag = env.get("MNA_TDB_WHATSAPP_ENABLED").default("false").asBool();
+      // En production : exige MNA_TDB_WHATSAPP_ENABLED=true.
+      // En non-prod : exige MNA_TDB_WHATSAPP_ENABLED=true ET un TEST_PHONE_OVERRIDE défini
+      // (sinon le toggle est inopérant pour éviter les fuites accidentelles en dev/CI).
+      return {
+        enabled: (isProd || hasTestOverride) && featureFlag,
+        webhookToken: env.get("MNA_TDB_WHATSAPP_WEBHOOK_TOKEN").default("").asString(),
+        senderNumber: env.get("MNA_TDB_WHATSAPP_SENDER_NUMBER").default("").asString(),
+        templateInjoignablesId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID").default("0").asInt(),
+        templatePrequalifInitialId: env.get("MNA_TDB_WHATSAPP_TEMPLATE_PREQUALIF_INITIAL_ID").default("0").asInt(),
+        // Override de test : en non-prod, tous les envois WhatsApp sont redirigés vers ce numéro
+        // (format E.164, ex: "+33682999352"). Ignoré silencieusement en production pour éviter
+        // les fuites accidentelles si l'env var traîne. Vide en prod par défaut.
+        testPhoneOverride: env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").default("").asString(),
+      };
+    })(),
   },
 };
 

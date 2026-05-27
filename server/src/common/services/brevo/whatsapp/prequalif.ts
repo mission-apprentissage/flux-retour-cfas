@@ -7,7 +7,7 @@ import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import config from "@/config";
 
 import { sendWhatsAppTemplate, upsertBrevoContact } from "./brevoApi";
-import { maskPhone } from "./phone";
+import { applyTestPhoneOverride, maskPhone } from "./phone";
 
 export type PrequalifSentVia = "backfill" | "daily";
 
@@ -23,7 +23,23 @@ interface ReserveAndSendOptions {
   sentVia: PrequalifSentVia;
 }
 
+let phoneDedupBypassWarned = false;
+
 export async function isPhoneAlreadyContacted(targetPhone: string, currentEffectifId: ObjectId): Promise<boolean> {
+  // En mode test override (non-prod), Verrou 2 désactivé : tous les envois partent vers le
+  // même numéro de test, donc la dedup phone bloquerait tous les tests successifs. Le risque
+  // de double envoi à un vrai user est inexistant puisque seul le numéro override reçoit.
+  // Note : Brevo peut rate-limiter le numéro de test en cas d'envois en rafale.
+  if (config.brevo.whatsapp?.testPhoneOverride && config.env !== "production") {
+    if (!phoneDedupBypassWarned) {
+      logger.warn(
+        "WhatsApp phone dedup BYPASSED (test override active) — envois en rafale possibles, attention au rate-limit Brevo"
+      );
+      phoneDedupBypassWarned = true;
+    }
+    return false;
+  }
+
   const existing = await missionLocaleEffectifsDb().findOne(
     {
       _id: { $ne: currentEffectifId },
@@ -53,8 +69,13 @@ export async function reserveAndSendPrequalif({
     return "failed";
   }
 
-  if (await isPhoneAlreadyContacted(targetPhone, effectifId)) {
-    logger.info({ effectifId, phone: maskPhone(targetPhone) }, "Phone already contacted on another effectif, skip");
+  // Override de test : en non-prod avec `MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE`, tout part vers
+  // le numéro de test. Le numéro override est utilisé partout (dedup, stockage, envoi Brevo)
+  // pour que le webhook inbound retrouve bien l'effectif quand l'utilisateur répond.
+  const effectivePhone = applyTestPhoneOverride(targetPhone);
+
+  if (await isPhoneAlreadyContacted(effectivePhone, effectifId)) {
+    logger.info({ effectifId, phone: maskPhone(effectivePhone) }, "Phone already contacted on another effectif, skip");
     return "skipped";
   }
 
@@ -78,7 +99,7 @@ export async function reserveAndSendPrequalif({
     },
     {
       $set: {
-        "whatsapp_contact.phone_normalized": targetPhone,
+        "whatsapp_contact.phone_normalized": effectivePhone,
         "whatsapp_contact.last_message_sent_at": now,
         "whatsapp_contact.template_type": "prequalif",
         "whatsapp_contact.sent_via": sentVia,
@@ -96,12 +117,12 @@ export async function reserveAndSendPrequalif({
   }
 
   try {
-    await upsertBrevoContact(targetPhone, {
+    await upsertBrevoContact(effectivePhone, {
       TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,
       TBA_EFFECTIF_MISSION_LOCALE_NOM_WHATSAPP: mlNom,
     });
 
-    const result = await sendWhatsAppTemplate(targetPhone, { templateId });
+    const result = await sendWhatsAppTemplate(effectivePhone, { templateId });
 
     await missionLocaleEffectifsDb().updateOne(
       { _id: effectifId },

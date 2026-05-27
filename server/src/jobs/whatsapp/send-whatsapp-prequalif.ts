@@ -66,8 +66,12 @@ async function getEligibleEffectifs(): Promise<EligibleRow[]> {
  *
  */
 export async function sendWhatsAppPrequalif({ dryRun, limit, sentVia }: SendOptions): Promise<number> {
-  if (config.env !== "production") {
-    logger.warn("whatsapp:send-prequalif can only be run in production environment");
+  // Refuse de tourner en non-prod, SAUF si TEST_PHONE_OVERRIDE est défini : dans ce cas
+  // tout part vers le numéro de test, le risque d'envoi accidentel à de vrais users est nul.
+  if (config.env !== "production" && !config.brevo.whatsapp?.testPhoneOverride) {
+    logger.warn(
+      "whatsapp:send-prequalif can only be run in production (or non-prod with MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE)"
+    );
     return 0;
   }
 
