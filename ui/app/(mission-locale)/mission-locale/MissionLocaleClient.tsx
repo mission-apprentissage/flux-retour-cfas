@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 
 import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
 import { EffectifsListView } from "@/app/_components/ruptures/mission-locale/EffectifsListView";
-import { SouhaiteRdvBanner } from "@/app/_components/ruptures/mission-locale/SouhaiteRdvBanner";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get } from "@/common/httpClient";
@@ -26,12 +25,11 @@ export default function MissionLocaleClient() {
   );
 
   return (
-    <div className="fr-container">
-      <SouhaiteRdvBanner />
+    <>
       <MLHeader />
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
         {data && <EffectifsListView data={data} initialStatut={statutParam} initialRuptureDate={dateRupture} />}
       </SuspenseWrapper>
-    </div>
+    </>
   );
 }
