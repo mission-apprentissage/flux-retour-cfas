@@ -14,6 +14,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 export const MISSION_LOCALE_LOG_EVENT = {
   WHATSAPP_PREQUALIF_YES: "WHATSAPP_PREQUALIF_YES",
   WHATSAPP_PREQUALIF_NO: "WHATSAPP_PREQUALIF_NO",
+  WHATSAPP_YES_HELP: "WHATSAPP_YES_HELP",
+  WHATSAPP_NO_HELP: "WHATSAPP_NO_HELP",
 } as const;
 
 export const zMissionLocaleLogEvent = z.nativeEnum(MISSION_LOCALE_LOG_EVENT);

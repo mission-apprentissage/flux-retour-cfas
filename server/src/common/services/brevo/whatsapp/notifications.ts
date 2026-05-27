@@ -96,13 +96,13 @@ export async function notifyMLUserOnNoHelp(effectif: IMissionLocaleEffectif): Pr
 }
 
 /**
- * Notifie tous les users ML CONFIRMED quand un effectif a répondu YES à la préqualif (plan §6.6).
+ * Notifie tous les users ML CONFIRMED quand un effectif a répondu YES à la préqualif.
  *
- * Appelé uniquement quand `whatsapp_contact.sent_via === "daily"` (gating dans le handler).
- * Backfill J1-J5 (`sent_via="backfill"`) → silencieux (sur-sollicitation inbox évitée).
+ * Gating amont (handler) : appelé uniquement quand `whatsapp_contact.sent_via === "daily"`.
+ * Backfill J1-J5 (`sent_via="backfill"`) → silencieux (évite la sur-sollicitation inbox).
  *
  * Broadcast à TOUS les users CONFIRMED de la ML (pattern identique au callback legacy).
- * Note S7 review : pas de filtre `disabled_at` / `last_login_at` — dette acceptée pour la PR.
+ * Pas de filtre `disabled_at` / `last_login_at` — dette acceptée (cf. review S7).
  */
 export async function notifyMLUsersOnPrequalifYes(effectif: IMissionLocaleEffectif): Promise<void> {
   try {

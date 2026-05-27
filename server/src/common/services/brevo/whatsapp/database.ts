@@ -11,6 +11,11 @@ import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collec
 
 import { MissionLocaleInfo, MissionLocaleInfoFull } from "./types";
 
+// Hard cap appliqué via $slice côté Mongo : borne la taille du document effectif (un échange
+// type fait < 10 messages). Si un audit complet devient nécessaire, brancher un log applicatif
+// séparé plutôt que d'augmenter ce cap.
+const MESSAGES_HISTORY_CAP = 50;
+
 export async function updateWhatsAppContact(
   effectifId: ObjectId,
   update: Partial<{
@@ -50,7 +55,7 @@ export async function updateWhatsAppContact(
   if (historyEntries) {
     const entries = Array.isArray(historyEntries) ? historyEntries : [historyEntries];
     updateOps.$push = {
-      "whatsapp_contact.messages_history": { $each: entries },
+      "whatsapp_contact.messages_history": { $each: entries, $slice: -MESSAGES_HISTORY_CAP },
     };
   }
 

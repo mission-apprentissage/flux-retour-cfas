@@ -94,7 +94,7 @@ const EXACT_PREQUALIF_NO = new Set([
 ]);
 
 export function parseUserResponse(text: string, templateType?: IWhatsAppTemplateType | null): IUserResponseType | null {
-  const normalizedText = text.trim().toLowerCase().replace(/[‘’ʼ]/g, "'").replace(/·/g, "·");
+  const normalizedText = text.trim().toLowerCase().replace(/[‘’ʼ]/g, "'");
 
   if (templateType === "prequalif") {
     if (EXACT_PREQUALIF_YES.has(normalizedText)) return USER_RESPONSE_TYPE.PREQUALIF_YES;

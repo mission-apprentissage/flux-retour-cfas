@@ -118,7 +118,7 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
       _id: new ObjectId(),
       mission_locale_effectif_id: effectif._id,
       situation: null,
-      event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_PREQUALIF_YES,
+      event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_YES_HELP,
       created_at: now,
       created_by: null,
       read_by: [],
@@ -131,8 +131,17 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
 /**
  * Traite les side effects d'une réponse no_help (pas d'aide souhaitée)
  * Nettoie les flags callback si l'utilisateur a changé d'avis
+ *
+ * Idempotence : si la conversation est déjà CLOSED, le premier no_help a été traité —
+ * on skip le $set/log/notif (le brevoMessageId dedup couvre déjà les replays webhook,
+ * cette garde couvre le cas "user envoie un 2e message no_help après clôture").
  */
 async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  if (effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED) {
+    logger.info({ effectifId: effectif._id }, "no_help déjà traité (conversation CLOSED), skip $set + log + notif");
+    return;
+  }
+
   const now = new Date();
   await missionLocaleEffectifsDb().updateOne(
     { _id: effectif._id },
@@ -156,6 +165,7 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
     _id: new ObjectId(),
     mission_locale_effectif_id: effectif._id,
     situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+    event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_NO_HELP,
     created_at: now,
     created_by: null,
     read_by: [],
@@ -166,6 +176,8 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
 
 async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
   const now = new Date();
+
+  const alreadyClosed = effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED;
 
   const cfaWentV2 = effectif.computed?.organisme?.is_allowed_collab === true;
   const cfaAccConjoint = effectif.organisme_data?.acc_conjoint === true;
@@ -185,50 +197,57 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
     return;
   }
 
-  const currentSituation = effectif.situation;
-  const shouldUnsetSituation =
-    currentSituation === null ||
-    currentSituation === undefined ||
-    currentSituation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE;
+  // Idempotence : si la conversation est déjà CLOSED, le premier YES a été traité.
+  // Re-appliquer le $set réécraserait `souhaite_rdv_at` avec un `now` ultérieur (drift métier).
+  // La notif ML conserve sa propre garde (`prequalif_notif_sent_at`).
+  if (alreadyClosed) {
+    logger.info({ effectifId: effectif._id }, "Préqualif YES déjà traité (conversation CLOSED), skip $set + log");
+  } else {
+    const currentSituation = effectif.situation;
+    const shouldUnsetSituation =
+      currentSituation === null ||
+      currentSituation === undefined ||
+      currentSituation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE;
 
-  const update: Record<string, unknown> = {
-    $set: {
-      souhaite_rdv: true,
-      souhaite_rdv_at: now,
-      souhaite_rdv_source: "whatsapp_prequalif",
-      injoignable: false,
-      a_traiter: true,
-      updated_at: now,
-    },
-    $unset: shouldUnsetSituation
-      ? {
-          situation: "",
-          whatsapp_no_help_responded: "",
-          whatsapp_no_help_responded_at: "",
-        }
-      : {
-          whatsapp_no_help_responded: "",
-          whatsapp_no_help_responded_at: "",
-        },
-  };
-  await missionLocaleEffectifsDb().updateOne({ _id: effectif._id }, update);
+    const update: Record<string, unknown> = {
+      $set: {
+        souhaite_rdv: true,
+        souhaite_rdv_at: now,
+        souhaite_rdv_source: "whatsapp_prequalif",
+        injoignable: false,
+        a_traiter: true,
+        updated_at: now,
+      },
+      $unset: shouldUnsetSituation
+        ? {
+            situation: "",
+            whatsapp_no_help_responded: "",
+            whatsapp_no_help_responded_at: "",
+          }
+        : {
+            whatsapp_no_help_responded: "",
+            whatsapp_no_help_responded_at: "",
+          },
+    };
+    await missionLocaleEffectifsDb().updateOne({ _id: effectif._id }, update);
 
-  if (!shouldUnsetSituation) {
-    logger.warn(
-      { effectifId: effectif._id, currentSituation },
-      "Préqualif YES reçu mais situation hors flow déjà posée —> situation conservée"
-    );
+    if (!shouldUnsetSituation) {
+      logger.warn(
+        { effectifId: effectif._id, currentSituation },
+        "Préqualif YES reçu mais situation hors flow déjà posée —> situation conservée"
+      );
+    }
+
+    await missionLocaleEffectifsLogDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: effectif._id,
+      situation: null,
+      event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_PREQUALIF_YES,
+      created_at: now,
+      created_by: null,
+      read_by: [],
+    });
   }
-
-  await missionLocaleEffectifsLogDb().insertOne({
-    _id: new ObjectId(),
-    mission_locale_effectif_id: effectif._id,
-    situation: null,
-    event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_PREQUALIF_YES,
-    created_at: now,
-    created_by: null,
-    read_by: [],
-  });
 
   if (effectif.whatsapp_contact?.sent_via === "daily" && !effectif.whatsapp_contact?.prequalif_notif_sent_at) {
     const reserved = await missionLocaleEffectifsDb().findOneAndUpdate(
@@ -248,6 +267,13 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
 }
 
 async function handlePrequalifNoSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  // Idempotence : symétrique de handlePrequalifYesSideEffects — si conversation CLOSED,
+  // un NO a déjà été traité, on évite de réécrire la situation et de dupliquer le log.
+  if (effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED) {
+    logger.info({ effectifId: effectif._id }, "Préqualif NO déjà traité (conversation CLOSED), skip $set + log");
+    return;
+  }
+
   const now = new Date();
   await missionLocaleEffectifsDb().updateOne(
     { _id: effectif._id },

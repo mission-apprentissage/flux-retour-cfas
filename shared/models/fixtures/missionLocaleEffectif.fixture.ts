@@ -36,5 +36,6 @@ export function generateMissionLocaleEffectifFixture(overrides: {
     current_status: { value: null, date: null },
     whatsapp_callback_requested: false,
     whatsapp_no_help_responded: false,
+    souhaite_rdv: false,
   };
 }
