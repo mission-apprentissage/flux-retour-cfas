@@ -156,6 +156,7 @@ async function computeUsage(
         },
         is_envoye: {
           $and: [
+            { $eq: ["$organisme_data.acc_conjoint", true] },
             { $gte: ["$organisme_data.reponse_at", COLLABORATION_CUTOFF_DATE] },
             { $lt: ["$organisme_data.reponse_at", endExclusive] },
           ],

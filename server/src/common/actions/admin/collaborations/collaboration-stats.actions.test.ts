@@ -135,18 +135,30 @@ describe("computeStatsForDate", () => {
 
     await missionLocaleEffectifsDb().insertMany(
       [
-        buildMlEffectif({ organisme_id: compatibleOrg._id, created_at: postCutoff1, reponse_at: postCutoff1 }),
-        buildMlEffectif({
-          organisme_id: compatibleOrg._id,
-          created_at: postCutoff2,
-          reponse_at: postCutoff2,
-          situation: SITUATION_ENUM.RDV_PRIS,
-        }),
-        buildMlEffectif({ organisme_id: compatibleOrg._id, created_at: preCutoff, reponse_at: preCutoff }),
         buildMlEffectif({
           organisme_id: compatibleOrg._id,
           created_at: postCutoff1,
           reponse_at: postCutoff1,
+          acc_conjoint: true,
+        }),
+        buildMlEffectif({
+          organisme_id: compatibleOrg._id,
+          created_at: postCutoff2,
+          reponse_at: postCutoff2,
+          acc_conjoint: true,
+          situation: SITUATION_ENUM.RDV_PRIS,
+        }),
+        buildMlEffectif({
+          organisme_id: compatibleOrg._id,
+          created_at: preCutoff,
+          reponse_at: preCutoff,
+          acc_conjoint: true,
+        }),
+        buildMlEffectif({
+          organisme_id: compatibleOrg._id,
+          created_at: postCutoff1,
+          reponse_at: postCutoff1,
+          acc_conjoint: true,
           soft_deleted: true,
         }),
         buildMlEffectif({ organisme_id: compatibleOrgNoEnvoi._id, created_at: postCutoff1 }),
@@ -154,6 +166,7 @@ describe("computeStatsForDate", () => {
           organisme_id: nonCompatibleOrg._id,
           created_at: postCutoff1,
           reponse_at: postCutoff1,
+          acc_conjoint: true,
         }),
       ],
       { bypassDocumentValidation: true }
@@ -190,6 +203,7 @@ describe("computeStatsForDate", () => {
           organisme_id: org._id,
           created_at: new Date("2026-03-10"),
           reponse_at: new Date("2026-03-11"),
+          acc_conjoint: true,
           situation: SITUATION_ENUM.RDV_PRIS,
         }),
       ],
@@ -212,18 +226,21 @@ describe("computeStatsForDate", () => {
       organisme_id: org._id,
       created_at: new Date("2026-03-03"),
       reponse_at: new Date("2026-03-04"),
+      acc_conjoint: true,
       situation: null,
     });
     const withMissing = buildMlEffectif({
       organisme_id: org._id,
       created_at: new Date("2026-03-01"),
       reponse_at: new Date("2026-03-02"),
+      acc_conjoint: true,
     });
     delete (withMissing as { situation?: unknown }).situation;
     const withSituation = buildMlEffectif({
       organisme_id: org._id,
       created_at: new Date("2026-03-05"),
       reponse_at: new Date("2026-03-06"),
+      acc_conjoint: true,
       situation: SITUATION_ENUM.AUTRE,
     });
 
@@ -254,11 +271,13 @@ describe("computeStatsForDate", () => {
           organisme_id: compatible._id,
           created_at: new Date("2026-02-01"),
           reponse_at: new Date("2026-02-02"),
+          acc_conjoint: true,
         }),
         buildMlEffectif({
           organisme_id: nonCompatibleOrg._id,
           created_at: new Date("2026-02-01"),
           reponse_at: new Date("2026-02-02"),
+          acc_conjoint: true,
         }),
       ],
       { bypassDocumentValidation: true }
@@ -318,16 +337,19 @@ describe("getCollaborationStats", () => {
           organisme_id: org._id,
           created_at: new Date("2026-04-01"),
           reponse_at: new Date("2026-04-10"),
+          acc_conjoint: true,
         }),
         buildMlEffectif({
           organisme_id: org._id,
           created_at: new Date("2026-05-20"),
           reponse_at: new Date("2026-05-20"),
+          acc_conjoint: true,
         }),
         buildMlEffectif({
           organisme_id: org._id,
           created_at: new Date("2026-05-22"),
           reponse_at: new Date("2026-05-22"),
+          acc_conjoint: true,
         }),
       ],
       { bypassDocumentValidation: true }
