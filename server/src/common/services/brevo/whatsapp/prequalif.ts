@@ -58,6 +58,14 @@ export async function reserveAndSendPrequalif({
   mlNom,
   sentVia,
 }: ReserveAndSendOptions): Promise<ReserveResult> {
+  // Defense-in-depth : refuse tout envoi hors prod sans test override, indépendamment du flag
+  // `enabled`. Évite qu'une mauvaise config (env var inversée, secret partagé) ne provoque
+  // un envoi accidentel à de vrais effectifs depuis preprod/recette/local.
+  if (config.env !== "production" && !config.brevo.whatsapp?.testPhoneOverride) {
+    logger.warn({ effectifId }, "Prequalif send blocked: non-prod env without TEST_PHONE_OVERRIDE");
+    return "skipped";
+  }
+
   if (!config.brevo.whatsapp?.enabled) {
     logger.debug({ effectifId }, "WhatsApp disabled, skip prequalif send");
     return "skipped";

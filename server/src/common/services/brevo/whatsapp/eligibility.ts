@@ -77,6 +77,14 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
+  // Defense-in-depth : refuse tout envoi hors prod sans test override, indépendamment du flag
+  // `enabled`. Évite qu'une mauvaise config (env var inversée, secret partagé) ne provoque
+  // un envoi accidentel à de vrais effectifs depuis preprod/recette/local.
+  if (config.env !== "production" && !config.brevo.whatsapp?.testPhoneOverride) {
+    logger.warn({ effectifId: effectif._id }, "WhatsApp send blocked: non-prod env without TEST_PHONE_OVERRIDE");
+    return;
+  }
+
   if (!config.brevo.whatsapp?.enabled) {
     logger.debug({ effectifId: effectif._id }, "WhatsApp feature is disabled");
     return;
