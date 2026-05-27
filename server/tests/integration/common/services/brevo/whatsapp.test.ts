@@ -3,7 +3,7 @@ import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE, CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
-import { it, describe, beforeEach, vi, expect } from "vitest";
+import { it, describe, beforeEach, afterEach, vi, expect } from "vitest";
 
 import {
   missionLocaleEffectifsDb,
@@ -29,11 +29,14 @@ import {
   updateMessageStatus,
   triggerWhatsAppIfEligible,
   sendWhatsAppMessage,
+  updateWhatsAppContact,
 } from "@/common/services/brevo/whatsapp";
 import { isEligibleForPrequalif } from "@/common/services/brevo/whatsapp/eligibility";
 import { buildPrequalifNoMessage, buildPrequalifYesWithoutUrlMessage } from "@/common/services/brevo/whatsapp/messages";
+import { applyTestPhoneOverride } from "@/common/services/brevo/whatsapp/phone";
 import { isPhoneAlreadyContacted, reserveAndSendPrequalif } from "@/common/services/brevo/whatsapp/prequalif";
 import { sendEmail } from "@/common/services/mailer/mailer";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 
 vi.mock("@/common/services/mailer/mailer");
@@ -1650,6 +1653,159 @@ describe("WhatsApp Service", () => {
       expect(sendEmail).toHaveBeenCalledWith("ml-a@example.fr", "mission_locale_prequalif_yes", expect.anything(), {
         noreply: true,
       });
+    });
+  });
+
+  describe("applyTestPhoneOverride", () => {
+    const originalOverride = config.brevo.whatsapp?.testPhoneOverride;
+    const originalEnv = config.env;
+    const mutableConfig = config as { env: string; brevo: { whatsapp: { testPhoneOverride: string } } };
+
+    afterEach(() => {
+      mutableConfig.env = originalEnv;
+      mutableConfig.brevo.whatsapp.testPhoneOverride = originalOverride ?? "";
+    });
+
+    it("non-prod + override valide → retourne le numéro override normalisé", () => {
+      mutableConfig.env = "local";
+      mutableConfig.brevo.whatsapp.testPhoneOverride = "0612345678";
+      assert.strictEqual(applyTestPhoneOverride("+33688888888"), "+33612345678");
+    });
+
+    it("production + override défini → numéro original (override ignoré)", () => {
+      mutableConfig.env = "production";
+      mutableConfig.brevo.whatsapp.testPhoneOverride = "+33612345678";
+      assert.strictEqual(applyTestPhoneOverride("+33688888888"), "+33688888888");
+    });
+
+    it("override invalide → fallback sur le numéro original", () => {
+      mutableConfig.env = "local";
+      mutableConfig.brevo.whatsapp.testPhoneOverride = "not-a-number";
+      assert.strictEqual(applyTestPhoneOverride("+33688888888"), "+33688888888");
+    });
+
+    it("pas d'override défini → retourne le numéro original", () => {
+      mutableConfig.env = "local";
+      mutableConfig.brevo.whatsapp.testPhoneOverride = "";
+      assert.strictEqual(applyTestPhoneOverride("+33688888888"), "+33688888888");
+    });
+  });
+
+  describe("updateWhatsAppContact: messages_history cap", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      const db = getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+      await missionLocaleEffectifsDb().deleteMany({});
+    });
+
+    it("limite messages_history aux 50 dernières entrées via $slice", async () => {
+      const effectifId = new ObjectId();
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          _id: effectifId,
+          mission_locale_id: new ObjectId(),
+          effectif_id: new ObjectId(),
+          created_at: new Date(),
+          brevo: {},
+          current_status: {},
+          whatsapp_contact: { phone_normalized: "+33611111111" },
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+
+      for (let i = 0; i < 60; i++) {
+        await updateWhatsAppContact(effectifId, {}, {
+          direction: "inbound",
+          message_id: `msg-${i}`,
+          content: `body-${i}`,
+          received_at: new Date(),
+        } as any);
+      }
+
+      const after = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      const history = after?.whatsapp_contact?.messages_history ?? [];
+      assert.strictEqual(history.length, 50, "history doit être capé à 50");
+      assert.strictEqual((history[0] as any).message_id, "msg-10", "doit garder les 50 dernières (msg-10 → msg-59)");
+      assert.strictEqual((history[49] as any).message_id, "msg-59");
+    });
+  });
+
+  describe("handlePrequalifYes idempotence (conversation CLOSED)", () => {
+    useMongo();
+
+    beforeEach(async () => {
+      vi.clearAllMocks();
+      const db = getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+      await db.command({ collMod: "organisations", validationLevel: "off" }).catch(() => {});
+      await db.command({ collMod: "missionLocaleEffectifsLog", validationLevel: "off" }).catch(() => {});
+      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifsLogDb().deleteMany({});
+      await organisationsDb().deleteMany({});
+    });
+
+    it("YES rejoué après CLOSED → ne réécrase pas souhaite_rdv_at + ne duplique pas le log", async () => {
+      const mlId = new ObjectId();
+      await organisationsDb().insertOne(
+        { _id: mlId, type: "MISSION_LOCALE", nom: "ML", ml_id: 1, created_at: new Date() } as any,
+        { bypassDocumentValidation: true }
+      );
+
+      const effectifId = new ObjectId();
+      const initialSouhaiteRdvAt = new Date(Date.now() - 60_000);
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          _id: effectifId,
+          mission_locale_id: mlId,
+          effectif_id: new ObjectId(),
+          created_at: new Date(),
+          brevo: {},
+          current_status: {},
+          a_traiter: true,
+          situation: null,
+          souhaite_rdv: true,
+          souhaite_rdv_at: initialSouhaiteRdvAt,
+          souhaite_rdv_source: "whatsapp_prequalif",
+          whatsapp_contact: {
+            phone_normalized: "+33644000000",
+            brevo_visitor_id: "visitor-replay",
+            last_message_sent_at: new Date(Date.now() - 120_000),
+            template_type: "prequalif",
+            sent_via: "backfill",
+            message_status: "sent",
+            conversation_state: CONVERSATION_STATE.CLOSED,
+          },
+          effectif_snapshot: {
+            _id: new ObjectId(),
+            organisme_id: new ObjectId(),
+            id_erp_apprenant: "123",
+            source: "test",
+            annee_scolaire: "2024-2025",
+            apprenant: { nom: "X", prenom: "Y", telephone: "0644000000" },
+            formation: {},
+            is_lock: false,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        } as any,
+        { bypassDocumentValidation: true }
+      );
+
+      await handleInboundWhatsAppMessage("+33644000000", "✅", "msg-replay", "visitor-replay");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(
+        updated?.souhaite_rdv_at?.getTime(),
+        initialSouhaiteRdvAt.getTime(),
+        "souhaite_rdv_at ne doit PAS dériver sur replay quand conversation CLOSED"
+      );
+
+      const logs = await missionLocaleEffectifsLogDb()
+        .find({ mission_locale_effectif_id: effectifId, event: "WHATSAPP_PREQUALIF_YES" })
+        .toArray();
+      assert.strictEqual(logs.length, 0, "aucun nouveau log YES inséré (idempotence)");
     });
   });
 });
