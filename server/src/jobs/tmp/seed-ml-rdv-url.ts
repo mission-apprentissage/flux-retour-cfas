@@ -88,10 +88,7 @@ export async function seedMlRdvUrl({ csvPath, dryRun }: Options): Promise<number
       continue;
     }
 
-    await organisationsDb().updateOne(
-      { _id: matches[0]._id },
-      { $set: { rdv_url: parsed.data, updated_at: new Date() } }
-    );
+    await organisationsDb().updateOne({ _id: matches[0]._id }, { $set: { rdv_url: parsed.data } });
     report.updated++;
   }
 
