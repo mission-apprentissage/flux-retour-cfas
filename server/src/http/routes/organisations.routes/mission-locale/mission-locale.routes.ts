@@ -65,7 +65,7 @@ const updateMlParametres = async (req, { locals }) => {
 
   await organisationsDb().updateOne(
     { _id: new ObjectId(missionLocale._id), type: "MISSION_LOCALE" },
-    { $set: { rdv_url: body.rdv_url, updated_at: new Date() } }
+    { $set: { rdv_url: body.rdv_url } }
   );
 
   return { rdv_url: body.rdv_url };
