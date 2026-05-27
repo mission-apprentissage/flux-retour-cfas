@@ -22,7 +22,14 @@ export const getOrCreateContactList = async (params: {
     if (existing) {
       await brevoContactListDb().updateOne(
         { _id: existing._id },
-        { $set: { listId: params.listId, listName: params.name, updated_at: now } }
+        {
+          $set: {
+            listId: params.listId,
+            listName: params.name,
+            folderId: params.folderId,
+            updated_at: now,
+          },
+        }
       );
     } else {
       await brevoContactListDb().insertOne({
@@ -39,7 +46,10 @@ export const getOrCreateContactList = async (params: {
   }
 
   if (existing) {
-    await brevoContactListDb().updateOne({ _id: existing._id }, { $set: { listName: params.name, updated_at: now } });
+    await brevoContactListDb().updateOne(
+      { _id: existing._id },
+      { $set: { listName: params.name, folderId: params.folderId, updated_at: now } }
+    );
     return existing.listId;
   }
 

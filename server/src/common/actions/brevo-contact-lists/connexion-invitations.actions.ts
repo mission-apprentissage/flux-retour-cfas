@@ -47,27 +47,31 @@ export const getConnexionInvitationByToken = async (token: string): Promise<ICon
  * Variante batch (1 find + éventuellement 1 insertMany + 1 updateMany) au lieu
  * de N findOneAndUpdate parallèles qui saturent le pool Mongo en prod.
  * Seuls les nouveaux emails consomment `generateKey()`.
+ *
+ * `source` est commune au batch — l'updateMany rafraîchit cette valeur pour
+ * tous les emails existants. Pour mélanger plusieurs sources, faire un appel
+ * par source.
  */
 export const getOrCreateConnexionInvitationsByEmails = async (
-  items: Array<{ email: string; source?: string }>
+  emails: string[],
+  options: { source?: string } = {}
 ): Promise<Map<string, string>> => {
-  if (items.length === 0) return new Map();
+  if (emails.length === 0) return new Map();
   const now = new Date();
   const db = connexionInvitationsDb();
-  const emails = items.map((i) => i.email);
-  const source = items.find((i) => i.source)?.source;
+  const { source } = options;
 
   const existing = await db.find({ email: { $in: emails } }, { projection: { email: 1, token: 1 } }).toArray();
   const existingByEmail = new Map<string, string>();
   for (const e of existing) existingByEmail.set(e.email, e.token);
 
-  const newDocs = items
-    .filter((i) => !existingByEmail.has(i.email))
-    .map(({ email, source: src }) => ({
+  const newDocs = emails
+    .filter((email) => !existingByEmail.has(email))
+    .map((email) => ({
       _id: new ObjectId(),
       token: generateKey(50, "hex"),
       email,
-      ...(src ? { source: src } : {}),
+      ...(source ? { source } : {}),
       created_at: now,
       updated_at: now,
     }));

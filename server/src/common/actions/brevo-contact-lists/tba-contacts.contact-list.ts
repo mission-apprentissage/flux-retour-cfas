@@ -660,7 +660,8 @@ const buildLienConnexionPersonnalise = (token: string): string => {
 
 const buildLienByEmail = async (users: TbaUserContext[]): Promise<Map<string, string>> => {
   const tokenByEmail = await getOrCreateConnexionInvitationsByEmails(
-    users.map((u) => ({ email: u.email, source: "tba-contacts" }))
+    users.map((u) => u.email),
+    { source: "tba-contacts" }
   );
   const lienByEmail = new Map<string, string>();
   for (const [email, token] of tokenByEmail) {

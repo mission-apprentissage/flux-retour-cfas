@@ -208,8 +208,16 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
                           <tr
                             key={`${c.email}-${i}`}
                             className={styles.sampleRow}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Voir tous les attributs du contact ${c.email}`}
                             onClick={() => onShowSampleDetails(c)}
-                            title="Voir tous les attributs de ce contact"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                onShowSampleDetails(c);
+                              }
+                            }}
                           >
                             <td>{c.email}</td>
                             {sampleColumns.map((col) => (

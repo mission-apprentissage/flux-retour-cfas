@@ -6,8 +6,10 @@ import { getConnexionInvitationInfoByEmail } from "@/common/actions/brevo-contac
 import { getConnexionInvitationByToken } from "@/common/actions/brevo-contact-lists/connexion-invitations.actions";
 import { returnResult } from "@/http/middlewares/helpers";
 
+// Le token est généré via `generateKey(50, "hex")` → toujours 100 chars hex.
+// Validation stricte pour éviter les requêtes DB inutiles sur un format invalide.
 const querySchema = z.object({
-  token: z.string().min(10).max(200),
+  token: z.string().regex(/^[a-f0-9]{100}$/, { message: "Format de token invalide" }),
 });
 
 /**

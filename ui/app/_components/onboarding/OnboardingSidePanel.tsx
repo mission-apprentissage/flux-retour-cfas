@@ -68,6 +68,7 @@ export function OnboardingSidePanel({
         </nav>
       )}
 
+      {/* eslint-disable-next-line @next/next/no-img-element -- illustration statique sans dimensions fixes */}
       <img src={illustration.src} alt={illustration.alt} className={styles.illustration} />
       <div className={styles.introContainer}>
         <p className={styles.intro}>{intro}</p>
