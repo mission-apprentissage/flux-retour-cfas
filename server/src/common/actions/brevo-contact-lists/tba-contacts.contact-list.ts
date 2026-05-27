@@ -205,9 +205,7 @@ type TbaAdresse = {
 };
 
 /**
- * Stratégie en 2 phases pour la perf (mesuré : ~3.7 s en 1-pipeline-imbriqué
- * sur 4.5 k users, dominé par les invocations du `$lookup organismes` via `$expr`
- * qui n'exploite pas l'index composé `(uai, siret)`) :
+ * Stratégie en 2 phases pour la perf
  *   1. Aggregate users + organisations (lookup `_id`, indexé).
  *   2. `find` séparé sur `organismes` filtré par `uai ∈ [...]`. Jointure JS sur
  *      le couple (uai, siret) — un même uai peut exister sur plusieurs sirets.
@@ -215,50 +213,47 @@ type TbaAdresse = {
 const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
   type UserWithOrg = Omit<TbaUserContext, "organisme">;
 
-  const usersWithOrgs = (await usersMigrationDb()
-    .aggregate([
-      {
-        $match: {
-          account_status: "CONFIRMED",
-          unsubscribe: { $ne: true },
+  // Phase 1 — Aggregate users + organisations (lookup `_id`, indexé).
+  const usersWithOrgsStages = [
+    { $match: { account_status: "CONFIRMED", unsubscribe: { $ne: true } } },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "organisation_id",
+        foreignField: "_id",
+        as: "organisation",
+      },
+    },
+    { $unwind: "$organisation" },
+    { $match: { "organisation.type": { $in: TYPES_TO_SYNC } } },
+    {
+      $project: {
+        _id: 0,
+        email: 1,
+        prenom: 1,
+        nom: 1,
+        civility: 1,
+        fonction: 1,
+        telephone: 1,
+        created_at: 1,
+        last_connection: 1,
+        account_status: 1,
+        organisation: {
+          _id: "$organisation._id",
+          type: "$organisation.type",
+          nom: "$organisation.nom",
+          siret: "$organisation.siret",
+          uai: "$organisation.uai",
+          ml_beta_activated_at: "$organisation.ml_beta_activated_at",
+          adresse: "$organisation.adresse",
         },
       },
-      {
-        $lookup: {
-          from: "organisations",
-          localField: "organisation_id",
-          foreignField: "_id",
-          as: "organisation",
-        },
-      },
-      { $unwind: "$organisation" },
-      { $match: { "organisation.type": { $in: TYPES_TO_SYNC } } },
-      {
-        $project: {
-          _id: 0,
-          email: 1,
-          prenom: 1,
-          nom: 1,
-          civility: 1,
-          fonction: 1,
-          telephone: 1,
-          created_at: 1,
-          last_connection: 1,
-          account_status: 1,
-          organisation: {
-            _id: "$organisation._id",
-            type: "$organisation.type",
-            nom: "$organisation.nom",
-            siret: "$organisation.siret",
-            uai: "$organisation.uai",
-            ml_beta_activated_at: "$organisation.ml_beta_activated_at",
-            adresse: "$organisation.adresse",
-          },
-        },
-      },
-    ])
-    .toArray()) as UserWithOrg[];
+    },
+  ];
+  const usersWithOrgs = (await usersMigrationDb().aggregate(usersWithOrgsStages).toArray()) as UserWithOrg[];
 
+  // Phase 2 — Fetch organismes en batch (filtre par `uai` indexé) avec
+  // projection ciblée + indexation par `(uai, siret)` côté JS.
   const cfaUaisSet = new Set<string>();
   for (const u of usersWithOrgs) {
     if (u.organisation.type === "ORGANISME_FORMATION" && u.organisation.uai) {
@@ -315,6 +310,8 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
     }
   }
 
+  // Phase 3 — Jointure JS sur le couple `(uai, siret)` — un uai peut couvrir
+  // plusieurs sirets
   return usersWithOrgs.map(
     (u): TbaUserContext => ({
       ...u,
@@ -328,51 +325,40 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
 
 type CfaCounts = { erp: number; deca: number };
 
-const fetchCfaApprenantsCountsByOrgId = async (orgIds: ObjectId[]): Promise<Map<string, CfaCounts>> => {
+// Compte par organisme les effectifs au statut donné, sur l'année scolaire
+// courante, en croisant `effectifs` (ERP) et `effectifsDECA`. Utilise les
+// index `(organisme_id, annee_scolaire)` des 2 collections.
+const fetchCfaCountsByOrgIdForStatus = async (
+  orgIds: ObjectId[],
+  statut: (typeof STATUT_APPRENANT)["APPRENTI"] | (typeof STATUT_APPRENANT)["RUPTURANT"]
+): Promise<Map<string, CfaCounts>> => {
   if (orgIds.length === 0) return new Map();
   const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
 
-  const baseMatch = {
-    organisme_id: { $in: orgIds },
-    annee_scolaire: { $in: anneeScolaireList },
-    "_computed.statut.en_cours": STATUT_APPRENANT.APPRENTI,
-  };
-  const groupStage = { $group: { _id: "$organisme_id", count: { $sum: 1 } } };
+  const pipeline = [
+    {
+      $match: {
+        organisme_id: { $in: orgIds },
+        annee_scolaire: { $in: anneeScolaireList },
+        "_computed.statut.en_cours": statut,
+      },
+    },
+    { $group: { _id: "$organisme_id", count: { $sum: 1 } } },
+  ];
 
   const [erpRows, decaRows] = await Promise.all([
-    effectifsDb()
-      .aggregate<{ _id: ObjectId; count: number }>([{ $match: baseMatch }, groupStage])
-      .toArray(),
-    effectifsDECADb()
-      .aggregate<{ _id: ObjectId; count: number }>([{ $match: baseMatch }, groupStage])
-      .toArray(),
+    effectifsDb().aggregate<{ _id: ObjectId; count: number }>(pipeline).toArray(),
+    effectifsDECADb().aggregate<{ _id: ObjectId; count: number }>(pipeline).toArray(),
   ]);
 
   return mergeCfaCounts(erpRows, decaRows);
 };
 
-const fetchCfaRupturantsCountsByOrgId = async (orgIds: ObjectId[]): Promise<Map<string, CfaCounts>> => {
-  if (orgIds.length === 0) return new Map();
-  const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
+const fetchCfaApprenantsCountsByOrgId = (orgIds: ObjectId[]) =>
+  fetchCfaCountsByOrgIdForStatus(orgIds, STATUT_APPRENANT.APPRENTI);
 
-  const baseMatch = {
-    organisme_id: { $in: orgIds },
-    annee_scolaire: { $in: anneeScolaireList },
-    "_computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-  };
-  const groupStage = { $group: { _id: "$organisme_id", count: { $sum: 1 } } };
-
-  const [erpRows, decaRows] = await Promise.all([
-    effectifsDb()
-      .aggregate<{ _id: ObjectId; count: number }>([{ $match: baseMatch }, groupStage])
-      .toArray(),
-    effectifsDECADb()
-      .aggregate<{ _id: ObjectId; count: number }>([{ $match: baseMatch }, groupStage])
-      .toArray(),
-  ]);
-
-  return mergeCfaCounts(erpRows, decaRows);
-};
+const fetchCfaRupturantsCountsByOrgId = (orgIds: ObjectId[]) =>
+  fetchCfaCountsByOrgIdForStatus(orgIds, STATUT_APPRENANT.RUPTURANT);
 
 const mergeCfaCounts = (
   erpRows: Array<{ _id: ObjectId; count: number }>,
@@ -401,7 +387,7 @@ type CfaRupturantsStats = {
 };
 
 /**
- * Stats « jeunes en rupture suivis par une ML » côté CFA — définition métier
+ * Stats "jeunes en rupture suivis par une ML" côté CFA — définition métier
  * alignée sur `cfa-effectifs-ruptures.actions.ts` (filtres 180j, âge, statut
  * RUPTURANT ou `cfa_rupture_declaration`).
  *
@@ -411,7 +397,11 @@ type CfaRupturantsStats = {
  */
 const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, CfaRupturantsStats>> => {
   if (organismeIds.length === 0) return new Map();
-  const pipeline = [
+
+  // Phase 1 — Filtrage "en rupture" selon la définition métier partagée avec
+  // `cfa-effectifs-ruptures.actions.ts` : age, 180j, statut RUPTURANT ou
+  // déclaration CFA, exclusion des APPRENTI sans déclaration.
+  const enRuptureFilterStages = [
     { $match: { "effectif_snapshot.organisme_id": { $in: organismeIds } } },
     ...buildEffRuptureAgeFilter(),
     {
@@ -447,7 +437,10 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
         ],
       },
     },
-    // Double group : (organisme × ML) → count, puis par organisme → top ML
+  ];
+
+  // Phase 2 — Group fin par (organisme × ML) + lookup pour récupérer le nom ML.
+  const groupByOrgAndMlStages = [
     {
       $group: {
         _id: { organisme_id: "$effectif_snapshot.organisme_id", ml_id: "$mission_locale_id" },
@@ -463,6 +456,10 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
       },
     },
     { $unwind: { path: "$ml_info", preserveNullAndEmptyArrays: true } },
+  ];
+
+  // Phase 3 — Re-group par organisme avec total + top 2 ML (et count des autres).
+  const summarizeByOrgStages = [
     {
       $group: {
         _id: "$_id.organisme_id",
@@ -486,9 +483,9 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
     },
   ];
 
-  const rows = (await missionLocaleEffectifsDb().aggregate(pipeline).toArray()) as Array<
-    { _id: ObjectId } & CfaRupturantsStats
-  >;
+  const rows = (await missionLocaleEffectifsDb()
+    .aggregate([...enRuptureFilterStages, ...groupByOrgAndMlStages, ...summarizeByOrgStages])
+    .toArray()) as Array<{ _id: ObjectId } & CfaRupturantsStats>;
   const byOrgId = new Map<string, CfaRupturantsStats>();
   for (const row of rows) {
     byOrgId.set(String(row._id), {
@@ -643,7 +640,7 @@ const buildAttributes = (
   };
 };
 
-// Fallback quand `adresse.complete` n'est pas disponible : « 13 Rue Dutot 75001 PARIS ».
+// Fallback quand `adresse.complete` n'est pas disponible : "13 Rue Dutot 75001 PARIS".
 const buildAdresseFallback = (adresse: TbaAdresse | null | undefined): string | null => {
   if (!adresse) return null;
   const parts = [[adresse.numero, adresse.voie].filter(Boolean).join(" "), adresse.code_postal, adresse.commune].filter(

@@ -95,8 +95,8 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
           <p className={styles.cardDesc}>{contactList.description}</p>
           {existingList?.updated_at ? (
             <p className={styles.cardMeta}>
-              📋 Dernière sync&nbsp;: <strong>{new Date(existingList.updated_at).toLocaleString("fr-FR")}</strong> —
-              liste « {existingList.listName} » (id {existingList.listId})
+              Dernière sync&nbsp;: <strong>{new Date(existingList.updated_at).toLocaleString("fr-FR")}</strong> — liste
+              « {existingList.listName} » (id {existingList.listId})
             </p>
           ) : (
             <p className={styles.cardMeta}>Pas encore sync</p>
