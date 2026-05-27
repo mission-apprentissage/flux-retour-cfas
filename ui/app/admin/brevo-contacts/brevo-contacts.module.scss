@@ -334,3 +334,63 @@
   background: #f5f5fe;
   border-left: 4px solid var(--blue-france-sun-113, #000091);
 }
+
+// ============================================================================
+// Health-check Brevo — affichage discret (1 ligne + détails dépliables)
+// ============================================================================
+
+.health {
+  margin: -0.5rem 0 0 0;
+  font-size: 0.8125rem;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+}
+
+.healthSummary {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+  }
+}
+
+.healthDot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #888;
+  border-radius: 50%;
+}
+
+.healthDotOk {
+  background: #18753c;
+}
+
+.healthDotWarning {
+  background: #b34000;
+}
+
+.healthDotError {
+  background: #ce0500;
+}
+
+.healthDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0 0.25rem 1rem;
+}
+
+.healthDetailLine {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--light-decisions-text-text-mention-grey, #666);
+}

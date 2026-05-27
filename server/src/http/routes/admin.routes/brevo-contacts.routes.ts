@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getContactList, listContactLists } from "@/common/actions/brevo/contacts/registry";
 import { previewContactList, syncContactList } from "@/common/actions/brevo/contacts/sync";
 import { brevoContactListDb } from "@/common/model/collections";
-import { serializeBrevoAttributes } from "@/common/services/brevo/brevo";
+import { checkBrevoHealth, serializeBrevoAttributes } from "@/common/services/brevo/brevo";
 import { returnResult } from "@/http/middlewares/helpers";
 
 const syncBodySchema = z.object({
@@ -29,6 +29,13 @@ export default () => {
         label: cl.label,
         description: cl.description,
       }));
+    })
+  );
+
+  router.get(
+    "/health",
+    returnResult(async () => {
+      return await checkBrevoHealth();
     })
   );
 

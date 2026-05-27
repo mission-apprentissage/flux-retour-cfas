@@ -7,6 +7,7 @@ import styles from "./brevo-contacts.module.scss";
 import { useBrevoContactListExisting } from "./hooks/useBrevoContactListExisting";
 import { type ContactListSummary } from "./hooks/useBrevoContactLists";
 import { type SampleContact, useBrevoContactListSync } from "./hooks/useBrevoContactListSync";
+import { useBrevoHealth } from "./hooks/useBrevoHealth";
 import { useTbaContactsExport } from "./hooks/useTbaContactsExport";
 
 export type BrevoContactListCardProps = {
@@ -17,8 +18,22 @@ export type BrevoContactListCardProps = {
 
 export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleDetails }: BrevoContactListCardProps) {
   const { data: existingList } = useBrevoContactListExisting(contactList.slug);
+  const { data: health } = useBrevoHealth();
   const syncMutation = useBrevoContactListSync(contactList.slug);
   const [exportError, setExportError] = useState<string | null>(null);
+
+  // Sync réelle bloquée si Brevo injoignable. Le dry-run et l'export n'appellent
+  // pas Brevo (juste l'agrégation Mongo + sérialisation), donc restent actifs.
+  const canSync = Boolean(
+    health && health.apiKey.ok && (!health.tbaContactsList.configured || health.tbaContactsList.ok)
+  );
+  const syncDisabledReason = !health
+    ? "Vérification de la configuration Brevo en cours…"
+    : !health.apiKey.ok
+      ? `Sync impossible — ${health.apiKey.detail}`
+      : !health.tbaContactsList.ok && health.tbaContactsList.configured
+        ? `Sync impossible — ${health.tbaContactsList.detail}`
+        : null;
   const { exportData, isExporting } = useTbaContactsExport({
     slug: contactList.slug,
     onError: (e) => setExportError(e.message),
@@ -88,9 +103,10 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
           </Button>
           <Button
             onClick={handleSync}
-            disabled={running !== null || isExporting}
+            disabled={running !== null || isExporting || !canSync}
             iconId="ri-send-plane-line"
             iconPosition="right"
+            title={syncDisabledReason ?? undefined}
           >
             {running === "sync" ? "Synchronisation…" : "Lancer la sync"}
           </Button>

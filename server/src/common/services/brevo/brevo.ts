@@ -1,4 +1,4 @@
-import brevo, { ContactsApiApiKeys, TransactionalEmailsApiApiKeys } from "@getbrevo/brevo";
+import brevo, { AccountApiApiKeys, ContactsApiApiKeys, TransactionalEmailsApiApiKeys } from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
@@ -312,4 +312,99 @@ export const importContactsToBrevoList = async (listeId: number, contacts: Brevo
   }
 
   return results;
+};
+
+export type BrevoHealthCheck = {
+  configured: boolean;
+  ok: boolean;
+  label: string;
+  detail: string;
+};
+
+export type BrevoHealthReport = {
+  apiKey: BrevoHealthCheck;
+  tbaContactsList: BrevoHealthCheck;
+};
+
+// Helper interne : message court (3 lignes max) à partir d'une erreur Brevo.
+const briefError = (e: unknown): string => {
+  const err = e as { response?: { body?: { message?: string }; statusCode?: number }; message?: string };
+  return err?.response?.body?.message ?? err?.message ?? "erreur inconnue";
+};
+
+/**
+ * Health-check pour le panneau admin : vérifie que la clé API Brevo et la liste
+ * cible TBA sont configurées et joignables. N'écrit jamais côté Brevo.
+ */
+export const checkBrevoHealth = async (): Promise<BrevoHealthReport> => {
+  const apiKey = config.brevo.apiKey;
+  const listId = config.brevo.tbaContactsListId;
+
+  // --- 1. Clé API : configurée + accessible (ping /account)
+  let apiKeyCheck: BrevoHealthCheck;
+  if (!apiKey) {
+    apiKeyCheck = {
+      configured: false,
+      ok: false,
+      label: "Clé API Brevo",
+      detail: "MNA_TDB_BREVO_API_KEY non définie",
+    };
+  } else {
+    try {
+      const accountApi = new brevo.AccountApi();
+      accountApi.setApiKey(AccountApiApiKeys.apiKey, apiKey);
+      const { body } = await accountApi.getAccount();
+      apiKeyCheck = {
+        configured: true,
+        ok: true,
+        label: "Clé API Brevo",
+        detail: `Connectée — ${body.companyName ?? body.email ?? "compte sans nom"}`,
+      };
+    } catch (e) {
+      apiKeyCheck = {
+        configured: true,
+        ok: false,
+        label: "Clé API Brevo",
+        detail: `Inaccessible (${briefError(e)})`,
+      };
+    }
+  }
+
+  // --- 2. Liste TBA : configurée + accessible. Non configurée = warning (la
+  // sync créera la liste auto), pas une erreur bloquante.
+  let listCheck: BrevoHealthCheck;
+  if (listId === undefined) {
+    listCheck = {
+      configured: false,
+      ok: false,
+      label: "Liste cible tba-contacts",
+      detail: "MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS non définie — une nouvelle liste sera créée à la 1ʳᵉ sync",
+    };
+  } else if (!apiKey) {
+    listCheck = {
+      configured: true,
+      ok: false,
+      label: "Liste cible tba-contacts",
+      detail: `Liste #${listId} configurée mais non vérifiable (pas de clé API)`,
+    };
+  } else {
+    try {
+      const { body } = await ContactInstance!.getList(listId);
+      listCheck = {
+        configured: true,
+        ok: true,
+        label: "Liste cible tba-contacts",
+        detail: `Liste #${listId} « ${body.name ?? "(sans nom)"} » accessible`,
+      };
+    } catch (e) {
+      listCheck = {
+        configured: true,
+        ok: false,
+        label: "Liste cible tba-contacts",
+        detail: `Liste #${listId} introuvable (${briefError(e)})`,
+      };
+    }
+  }
+
+  return { apiKey: apiKeyCheck, tbaContactsList: listCheck };
 };
