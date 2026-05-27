@@ -33,6 +33,7 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
       {
         $match: {
           soft_deleted: { $ne: true },
+          "organisme_data.acc_conjoint": true,
           "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
         },
       },
