@@ -134,4 +134,14 @@ describe("formatJoinedList", () => {
     expect(formatJoinedList(undefined)).toBeNull();
     expect(formatJoinedList(["", "   ", ""])).toBeNull();
   });
+
+  it("dédoublonne en préservant l'ordre de première apparition", () => {
+    expect(formatJoinedList(["ymag", "inconnu", "ymag", "erp"])).toBe("ymag, inconnu, erp");
+    expect(formatJoinedList(["AGRI", "CMA", "AGRI"])).toBe("AGRI, CMA");
+  });
+
+  it("dédoublonne après normalisation (lowercase + trim)", () => {
+    expect(formatJoinedList(["Ymag", "ymag", "YMAG", " ymag "], { lowercase: true })).toBe("ymag");
+    expect(formatJoinedList([" CMA ", "cma"], { lowercase: true })).toBe("cma");
+  });
 });

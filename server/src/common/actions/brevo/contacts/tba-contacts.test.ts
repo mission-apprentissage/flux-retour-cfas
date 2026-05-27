@@ -187,6 +187,8 @@ describe("tbaContactsContactList", () => {
           CFA_NB_APPRENANTS_DECA: 0,
           CFA_NB_RUPTURANTS_ERP: 1,
           CFA_NB_RUPTURANTS_DECA: 0,
+          // organisme sans `nature` → ne passe pas les checks d'éligibilité V2
+          CFA_STATUT_V2: "exclu",
           ML_NB_RUPTURANTS_TOTAL: null,
           ML_NB_RUPTURANTS_A_TRAITER: null,
           ML_NB_RUPTURANTS_TRAITES: null,
@@ -521,6 +523,66 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.NB_JEUNES_EN_RUPTURE).toBeNull();
       expect(contacts[0].attributes.NB_MISSIONS_LOCALES_PARTENAIRES).toBeNull();
       expect(contacts[0].attributes.LISTE_MISSIONS_LOCALES).toBeNull();
+    });
+  });
+
+  describe("fetchContacts - CFA_STATUT_V2 (éligibilité activation V2)", () => {
+    it("'oui' quand l'organisme est déjà actif V2 (is_allowed_deca=true)", async () => {
+      const orgaOf = buildOrgaOf();
+      const organisme = buildOrganisme(orgaOf, { is_allowed_deca: true });
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("oui");
+    });
+
+    it("'activable' quand l'organisme passe les 5 checks d'éligibilité mais pas encore actif", async () => {
+      const orgaOf = buildOrgaOf();
+      // nature ∈ NATURES_ELIGIBLES + ferme false (défaut) + siret/uai (défaut) +
+      // pas de formationsCatalogue (rien inséré) + effectifs présents ↓
+      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur" });
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+        bypassDocumentValidation: true,
+      });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("activable");
+    });
+
+    it("'exclu' quand l'organisme est fermé (ferme=true)", async () => {
+      const orgaOf = buildOrgaOf();
+      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur", ferme: true });
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+        bypassDocumentValidation: true,
+      });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("exclu");
+    });
+
+    it("null côté ML (réservé aux OF)", async () => {
+      const orgaMl = buildOrgaMl("ML PARIS");
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBeNull();
     });
   });
 

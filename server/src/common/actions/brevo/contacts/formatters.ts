@@ -62,7 +62,9 @@ export const cleanSiret = (s: string | undefined | null): string | null => {
 
 /**
  * Joint un tableau de chaînes avec un séparateur (défaut ", "). Trim + filter
- * des valeurs vides. Option `lowercase` pour normaliser les ERPs (cf. MDD).
+ * des valeurs vides + dédup (ordre de première apparition préservé). Option
+ * `lowercase` pour normaliser les ERPs (cf. MDD) ; la dédup se fait après
+ * normalisation, donc "Ymag" et "ymag" sont considérés comme doublons.
  */
 export const formatJoinedList = (
   arr: string[] | undefined | null,
@@ -76,5 +78,5 @@ export const formatJoinedList = (
     })
     .filter(Boolean);
   if (cleaned.length === 0) return null;
-  return cleaned.join(opts.separator ?? ", ");
+  return [...new Set(cleaned)].join(opts.separator ?? ", ");
 };

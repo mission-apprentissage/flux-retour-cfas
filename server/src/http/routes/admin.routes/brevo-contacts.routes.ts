@@ -2,9 +2,10 @@ import Boom from "boom";
 import express from "express";
 import { z } from "zod";
 
-import { listContactLists } from "@/common/actions/brevo/contacts/registry";
+import { getContactList, listContactLists } from "@/common/actions/brevo/contacts/registry";
 import { previewContactList, syncContactList } from "@/common/actions/brevo/contacts/sync";
 import { brevoContactListDb } from "@/common/model/collections";
+import { serializeBrevoAttributes } from "@/common/services/brevo/brevo";
 import { returnResult } from "@/http/middlewares/helpers";
 
 const syncBodySchema = z.object({
@@ -58,6 +59,27 @@ export default () => {
       const list = await brevoContactListDb().findOne({ slug });
       if (!list) return null;
       return { listId: list.listId, listName: list.listName, updated_at: list.updated_at };
+    })
+  );
+
+  // Export complet (vs `/preview` qui ne ramène que 10 samples). Réutilise
+  // `fetchContacts` du contact list, applique la même sérialisation que la sync
+  // (dates yyyy-MM-dd, `undefined` filtré) pour que l'Excel reflète exactement
+  // le payload qui partirait à Brevo.
+  router.get(
+    "/:slug/export",
+    returnResult(async (req) => {
+      const { slug } = req.params;
+      ensureContactListExists(slug);
+      const contactList = getContactList(slug);
+      const contacts = await contactList.fetchContacts();
+      return {
+        attributes: Object.keys(contactList.attributesSchema),
+        contacts: contacts.map((c) => ({
+          email: c.email,
+          attributes: serializeBrevoAttributes(c.attributes),
+        })),
+      };
     })
   );
 

@@ -1,13 +1,12 @@
 "use client";
 
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { captureException } from "@sentry/nextjs";
-import { useCallback, useEffect, useState } from "react";
-
-import { _get } from "@/common/httpClient";
+import { useCallback, useState } from "react";
 
 import styles from "./brevo-contacts.module.scss";
-import { BrevoContactListCard, ContactListSummary, type SampleContact } from "./BrevoContactListCard";
+import { BrevoContactListCard } from "./BrevoContactListCard";
+import { type ContactListSummary, useBrevoContactLists } from "./hooks/useBrevoContactLists";
+import { type SampleContact } from "./hooks/useBrevoContactListSync";
 
 const syncConfirmModal = createModal({ id: "brevo-contacts-sync-confirm", isOpenedByDefault: false });
 const sampleDetailsModal = createModal({ id: "brevo-contacts-sample-details", isOpenedByDefault: false });
@@ -27,26 +26,9 @@ const formatValue = (v: unknown): React.ReactNode => {
 };
 
 export default function BrevoContactListsClient() {
-  const [contactLists, setContactLists] = useState<ContactListSummary[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: contactLists, error, isLoading } = useBrevoContactLists();
   const [pendingSync, setPendingSync] = useState<PendingSync | null>(null);
   const [sampleDetails, setSampleDetails] = useState<SampleContact | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = (await _get("/api/v1/admin/brevo-contacts")) as ContactListSummary[];
-        if (!cancelled) setContactLists(data);
-      } catch (e) {
-        captureException(e);
-        if (!cancelled) setError((e as Error).message ?? "Erreur de chargement");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleRequestSync = useCallback((contactList: ContactListSummary, run: () => Promise<void>) => {
     setPendingSync({ contactList, run });
@@ -71,8 +53,12 @@ export default function BrevoContactListsClient() {
       <h1 className={styles.title}>Listes de contacts Brevo</h1>
       <p className={styles.intro}>Génération et synchronisation des utilisateurs vers les contacts Brevo.</p>
 
-      {error && <div className={styles.errorBanner}>Erreur&nbsp;: {error}</div>}
-      {!contactLists && !error && <div className={styles.loading}>Chargement…</div>}
+      {error ? (
+        <div className={styles.errorBanner}>
+          Erreur&nbsp;: {error instanceof Error ? error.message : "Erreur de chargement"}
+        </div>
+      ) : null}
+      {isLoading && <div className={styles.loading}>Chargement…</div>}
 
       {contactLists && (
         <div className={styles.list}>

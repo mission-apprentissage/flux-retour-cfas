@@ -3,6 +3,7 @@ import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, STATUT_APPREN
 import type { IDepartmentCode } from "shared/constants/territoires";
 import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from "shared/utils";
 
+import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
   buildEffRuptureAgeFilter,
   createDernierStatutFieldPipeline,
@@ -89,6 +90,7 @@ export type TbaContactAttributeName =
   | "CFA_NB_APPRENANTS_DECA"
   | "CFA_NB_RUPTURANTS_ERP"
   | "CFA_NB_RUPTURANTS_DECA"
+  | "CFA_STATUT_V2"
   | "ML_DATE_ACTIVATION_ML"
   | "ML_NB_RUPTURANTS_TOTAL"
   | "ML_NB_RUPTURANTS_A_TRAITER"
@@ -144,6 +146,7 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   CFA_NB_APPRENANTS_DECA: "float",
   CFA_NB_RUPTURANTS_ERP: "float",
   CFA_NB_RUPTURANTS_DECA: "float",
+  CFA_STATUT_V2: "text",
   ML_DATE_ACTIVATION_ML: "date",
   ML_NB_RUPTURANTS_TOTAL: "float",
   ML_NB_RUPTURANTS_A_TRAITER: "float",
@@ -190,6 +193,7 @@ type TbaUserContext = {
     reseaux?: string[];
     fiabilisation_statut?: string;
     ferme?: boolean;
+    is_allowed_deca?: boolean | null;
   };
 };
 
@@ -284,6 +288,7 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
             reseaux: 1,
             fiabilisation_statut: 1,
             ferme: 1,
+            is_allowed_deca: 1,
           },
         }
       )
@@ -306,6 +311,7 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
         reseaux: o.reseaux,
         fiabilisation_statut: o.fiabilisation_statut,
         ferme: o.ferme,
+        is_allowed_deca: o.is_allowed_deca,
       });
     }
   }
@@ -539,13 +545,25 @@ const deriveCfaErpOuDeca = (
   return null;
 };
 
+// Statut V2 (cf. MDD) : "oui" = déjà activé V2, "activable" = passe les 5 checks
+// de `findEligibleOrganismes` sans encore l'être, "exclu" sinon.
+const deriveCfaStatutV2 = (
+  organisme: TbaUserContext["organisme"] | undefined,
+  eligibleOrgIds: Set<string>
+): "oui" | "activable" | "exclu" | null => {
+  if (!organisme?._id) return "exclu";
+  if (organisme.is_allowed_deca === true) return "oui";
+  return eligibleOrgIds.has(String(organisme._id)) ? "activable" : "exclu";
+};
+
 const buildAttributes = (
   user: TbaUserContext,
   lienConnexionPersonnalise: string,
   apprenantsCounts: CfaCounts | undefined,
   rupturantsCounts: CfaCounts | undefined,
   mlStats: MlStats | undefined,
-  rupturantsStats: CfaRupturantsStats | undefined
+  rupturantsStats: CfaRupturantsStats | undefined,
+  eligibleOrgIds: Set<string>
 ): TbaContactAttributes => {
   const isCfa = user.organisation.type === "ORGANISME_FORMATION";
   const isMl = user.organisation.type === "MISSION_LOCALE";
@@ -619,6 +637,7 @@ const buildAttributes = (
     CFA_NB_APPRENANTS_DECA: isCfa ? (apprenantsCounts?.deca ?? 0) : null,
     CFA_NB_RUPTURANTS_ERP: isCfa ? (rupturantsCounts?.erp ?? 0) : null,
     CFA_NB_RUPTURANTS_DECA: isCfa ? (rupturantsCounts?.deca ?? 0) : null,
+    CFA_STATUT_V2: isCfa ? deriveCfaStatutV2(user.organisme, eligibleOrgIds) : null,
 
     // `ML_DATE_ACTIVATION_ML` est aussi remonté côté OF : c'est la date
     // d'activation de la collab ML côté CFA, pas une stat ML.
@@ -677,14 +696,23 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
 
   const mlIds = users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id);
 
-  const [apprenantsCountsByOrgId, rupturantsCountsByOrgId, rupturantsStatsByOrgId, mlStatsByMlId, lienByEmail] =
-    await Promise.all([
-      fetchCfaApprenantsCountsByOrgId(cfaOrgIds),
-      fetchCfaRupturantsCountsByOrgId(cfaOrgIds),
-      fetchRupturantsStatsByOrgId(cfaOrgIds),
-      fetchMlStatsByMlId(mlIds),
-      buildLienByEmail(users),
-    ]);
+  const [
+    apprenantsCountsByOrgId,
+    rupturantsCountsByOrgId,
+    rupturantsStatsByOrgId,
+    mlStatsByMlId,
+    lienByEmail,
+    eligibleOrgsRows,
+  ] = await Promise.all([
+    fetchCfaApprenantsCountsByOrgId(cfaOrgIds),
+    fetchCfaRupturantsCountsByOrgId(cfaOrgIds),
+    fetchRupturantsStatsByOrgId(cfaOrgIds),
+    fetchMlStatsByMlId(mlIds),
+    buildLienByEmail(users),
+    findEligibleOrganismes(cfaOrgIds),
+  ]);
+
+  const eligibleOrgIds = new Set(eligibleOrgsRows.map((o) => String(o._id)));
 
   return users.map((user): BrevoContact => {
     const organismeId = user.organisme?._id ? String(user.organisme._id) : null;
@@ -696,7 +724,15 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
     const lien = lienByEmail.get(user.email) ?? "";
     return {
       email: formatEmail(user.email),
-      attributes: buildAttributes(user, lien, apprenantsCounts, rupturantsCounts, mlStats, rupturantsStats),
+      attributes: buildAttributes(
+        user,
+        lien,
+        apprenantsCounts,
+        rupturantsCounts,
+        mlStats,
+        rupturantsStats,
+        eligibleOrgIds
+      ),
     };
   });
 };

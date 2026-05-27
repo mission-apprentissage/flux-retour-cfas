@@ -1,33 +1,13 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { captureException } from "@sentry/nextjs";
-import { useEffect, useMemo, useState } from "react";
-
-import { _get, _post } from "@/common/httpClient";
+import { useMemo, useState } from "react";
 
 import styles from "./brevo-contacts.module.scss";
-
-export type SampleContact = { email: string; attributes: Record<string, unknown> };
-type AttributesReport = {
-  created: string[];
-  skipped: string[];
-  conflicts: Array<{ name: string; existingType: string; expectedType: string }>;
-  casingMismatches: Array<{ codeName: string; brevoName: string }>;
-};
-type SyncResult = {
-  dryRun: boolean;
-  listId?: number;
-  listName: string;
-  count: number;
-  sample?: SampleContact[];
-  batches?: number;
-  failedBatches?: number;
-  attributes?: AttributesReport;
-};
-type ExistingList = { listId: number; listName: string; updated_at: string } | null;
-
-export type ContactListSummary = { slug: string; label: string; description: string };
+import { useBrevoContactListExisting } from "./hooks/useBrevoContactListExisting";
+import { type ContactListSummary } from "./hooks/useBrevoContactLists";
+import { type SampleContact, useBrevoContactListSync } from "./hooks/useBrevoContactListSync";
+import { useTbaContactsExport } from "./hooks/useTbaContactsExport";
 
 export type BrevoContactListCardProps = {
   contactList: ContactListSummary;
@@ -36,44 +16,29 @@ export type BrevoContactListCardProps = {
 };
 
 export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleDetails }: BrevoContactListCardProps) {
-  const [existingList, setExistingList] = useState<ExistingList>(null);
-  const [running, setRunning] = useState<null | "dryRun" | "sync">(null);
-  const [result, setResult] = useState<SyncResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: existingList } = useBrevoContactListExisting(contactList.slug);
+  const syncMutation = useBrevoContactListSync(contactList.slug);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const { exportData, isExporting } = useTbaContactsExport({
+    slug: contactList.slug,
+    onError: (e) => setExportError(e.message),
+    onSuccess: () => setExportError(null),
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const list = (await _get(`/api/v1/admin/brevo-contacts/${contactList.slug}/list`)) as ExistingList;
-        if (!cancelled) setExistingList(list);
-      } catch (e) {
-        captureException(e);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [contactList.slug]);
+  // mutation.isLoading + variables.dryRun = état "Test en cours" vs "Sync en cours".
+  const running: null | "dryRun" | "sync" = syncMutation.isLoading
+    ? syncMutation.variables?.dryRun
+      ? "dryRun"
+      : "sync"
+    : null;
+
+  const result = syncMutation.data ?? null;
+  const error =
+    exportError ?? (syncMutation.error ? (syncMutation.error.message ?? "Erreur lors de la synchronisation") : null);
 
   const callSync = async (dryRun: boolean) => {
-    setRunning(dryRun ? "dryRun" : "sync");
-    setError(null);
-    try {
-      const data = (await _post(`/api/v1/admin/brevo-contacts/${contactList.slug}/sync`, {
-        dryRun,
-      })) as SyncResult;
-      setResult(data);
-      if (!dryRun) {
-        const list = (await _get(`/api/v1/admin/brevo-contacts/${contactList.slug}/list`)) as ExistingList;
-        setExistingList(list);
-      }
-    } catch (e) {
-      captureException(e);
-      setError((e as Error).message ?? "Erreur lors de la synchronisation");
-    } finally {
-      setRunning(null);
-    }
+    setExportError(null);
+    await syncMutation.mutateAsync({ dryRun });
   };
 
   const handleSync = () => {
@@ -105,14 +70,28 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
         <div className={styles.cardActions}>
           <Button
             onClick={() => void callSync(true)}
-            disabled={running !== null}
+            disabled={running !== null || isExporting}
             iconId="ri-eye-line"
             iconPosition="left"
             priority="secondary"
           >
             {running === "dryRun" ? "Test en cours…" : "Tester"}
           </Button>
-          <Button onClick={handleSync} disabled={running !== null} iconId="ri-send-plane-line" iconPosition="right">
+          <Button
+            onClick={() => void exportData()}
+            disabled={running !== null || isExporting}
+            iconId="fr-icon-download-line"
+            iconPosition="left"
+            priority="secondary"
+          >
+            {isExporting ? "Export en cours…" : "Exporter (Excel)"}
+          </Button>
+          <Button
+            onClick={handleSync}
+            disabled={running !== null || isExporting}
+            iconId="ri-send-plane-line"
+            iconPosition="right"
+          >
             {running === "sync" ? "Synchronisation…" : "Lancer la sync"}
           </Button>
         </div>
