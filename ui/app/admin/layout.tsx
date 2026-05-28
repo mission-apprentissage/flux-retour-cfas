@@ -1,4 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { redirect } from "next/navigation";
+import { ORGANISATION_TYPE } from "shared";
 
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
@@ -8,6 +10,11 @@ import { Providers } from "../providers";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
+
+  if (user?.organisation?.type !== ORGANISATION_TYPE.ADMINISTRATEUR) {
+    redirect("/auth/connexion");
+  }
+
   return (
     <Providers>
       <UserContextProvider user={user}>
