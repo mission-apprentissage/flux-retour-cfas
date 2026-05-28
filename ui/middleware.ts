@@ -127,7 +127,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(requestNextData);
   }
 
-  if (pathname === "/france-travail") {
+  if (pathname === "/france-travail" || pathname.startsWith("/france-travail/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
