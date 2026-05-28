@@ -8,6 +8,7 @@ export function generateMissionLocaleEffectifFixture(overrides: {
   created_at: Date;
   mission_locale_id?: ObjectId;
   reponse_at?: Date | null;
+  acc_conjoint?: boolean | null;
   situation?: SITUATION_ENUM | null;
   soft_deleted?: boolean;
   snapshot_region?: string | null;
@@ -32,7 +33,13 @@ export function generateMissionLocaleEffectifFixture(overrides: {
     ...(overrides.computed_activated_at !== undefined
       ? { computed: { organisme: { ml_beta_activated_at: overrides.computed_activated_at } } }
       : {}),
-    organisme_data: overrides.reponse_at ? { reponse_at: overrides.reponse_at, has_unread_notification: false } : null,
+    organisme_data: overrides.reponse_at
+      ? {
+          reponse_at: overrides.reponse_at,
+          acc_conjoint: overrides.acc_conjoint ?? null,
+          has_unread_notification: false,
+        }
+      : null,
     current_status: { value: null, date: null },
     whatsapp_callback_requested: false,
     whatsapp_no_help_responded: false,

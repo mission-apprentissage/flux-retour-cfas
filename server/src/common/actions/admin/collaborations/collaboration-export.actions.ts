@@ -21,6 +21,10 @@ type CollaborationDetailRow = {
   nom_cfa: string | null;
   region_cfa: string | null;
   nom_ml: string | null;
+  nom_jeune: string | null;
+  prenom_jeune: string | null;
+  date_naissance_jeune: Date | null;
+  statut_apprenant: string | null;
   date_envoi_cfa: Date | null;
   situation: SITUATION_ENUM | null;
   date_traitement_ml: Date | null;
@@ -33,6 +37,7 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
       {
         $match: {
           soft_deleted: { $ne: true },
+          "organisme_data.acc_conjoint": true,
           "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
         },
       },
@@ -95,6 +100,10 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
             ],
           },
           nom_ml: { $arrayElemAt: ["$mission_locale.nom", 0] },
+          nom_jeune: { $ifNull: ["$effectif_snapshot.apprenant.nom", null] },
+          prenom_jeune: { $ifNull: ["$effectif_snapshot.apprenant.prenom", null] },
+          date_naissance_jeune: { $ifNull: ["$effectif_snapshot.apprenant.date_de_naissance", null] },
+          statut_apprenant: { $ifNull: ["$effectif_snapshot._computed.statut.en_cours", null] },
           date_envoi_cfa: "$organisme_data.reponse_at",
           situation: { $ifNull: ["$situation", null] },
           date_traitement_ml: { $arrayElemAt: ["$first_situation_log.created_at", 0] },
@@ -177,6 +186,10 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
         nom_cfa: d.nom_cfa,
         region_cfa: formatRegion(d.region_cfa),
         nom_ml: d.nom_ml,
+        nom_jeune: d.nom_jeune,
+        prenom_jeune: d.prenom_jeune,
+        date_naissance_jeune: d.date_naissance_jeune,
+        statut_apprenant: d.statut_apprenant,
         dossier_envoye: "Oui" as const,
         date_envoi_cfa: d.date_envoi_cfa,
         dossier_traite: (traite ? "Oui" : "Non") as "Oui" | "Non",
