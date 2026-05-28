@@ -100,10 +100,7 @@ const config = {
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
     campaignFolderId: env.get("MNA_TDB_BREVO_FOLDER_ID_CAMPAIGNS").default("1").asInt(),
-    // Optionnel : si défini, la sync `tba-contacts` écrit dans cette liste
-    // Brevo existante (prod = liste #22 `202604_tba_bdd_globale`). Sinon créée
-    // auto à la 1ʳᵉ sync.
-    tbaContactsListId: env.get("MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS").asIntPositive(),
+    tbaContactsListId: env.get("MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS").default("1").asInt(),
     whatsapp: {
       enabled:
         env.get("MNA_TDB_ENV").required().asString() === "production" &&
