@@ -584,7 +584,7 @@ const buildAttributes = (
 
   const uai = user.organisation.uai ?? null;
   const siret = cleanSiret(user.organisation.siret);
-  const statutSiret: string | null = !siret ? "inconnu" : user.organisme?.ferme ? "ferme" : "ouvert";
+  const statutSiret: string | null = !siret ? "inconnu" : user.organisme?.ferme ? "fermé" : "ouvert";
   const organisationNom = user.organisme?.nom ?? user.organisme?.raison_sociale ?? user.organisation.nom ?? null;
 
   const mlPourcentageTraites: number | null =
@@ -628,7 +628,7 @@ const buildAttributes = (
     // manuellement par l'équipe lors d'imports CSV des listes clients ERP.
     CFA_ERP_OU_DECA: isCfa ? deriveCfaErpOuDeca(user.organisme, hasDeca) : null,
     CFA_ERP: isCfa ? formatJoinedList(user.organisme?.erps, { lowercase: true }) : null,
-    CFA_STATUT_CLE_API: isCfa ? (user.organisme?.api_key ? "1" : "0") : null,
+    CFA_STATUT_CLE_API: isCfa ? (user.organisme?.api_key ? "oui" : "non") : null,
     CFA_DATE_DERNIERE_TRANSMISSION: isCfa ? (user.organisme?.last_transmission_date ?? null) : null,
     CFA_DATE_ERREURS_TRANSMISSION: isCfa ? (user.organisme?.transmission_errors_date ?? null) : null,
     // v1 : à reporter (agrégation `transmissionDailyReport`).

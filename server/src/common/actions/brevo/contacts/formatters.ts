@@ -19,18 +19,20 @@ export const formatName = (s: string | undefined | null): string | null => {
 };
 
 /**
- * Format E.164 pour un numéro français.
- *   "0123456789" / "01 23 45 67 89" / "01.23.45.67.89" → "+33123456789"
- *   "+33 1 23 45 67 89" → "+33123456789"
- *   Numéro international non français préservé (strip espaces seulement).
+ * Format numérique (chiffres uniquement, sans `+`) avec préfixe pays préservé.
+ *   "0123456789" / "01 23 45 67 89" / "01.23.45.67.89" → "33123456789"
+ *   "+33 1 23 45 67 89" → "33123456789"
+ *   "+44 20 1234 5678" → "442012345678" (indicatif étranger préservé)
+ *
+ * Pas de `+` : Brevo stocke les téléphones en `text` et les exports / segments
+ * downstream préfèrent un nombre pur sans préfixe symbole.
  */
 export const formatPhoneFR = (s: string | undefined | null): string | null => {
   if (!s) return null;
-  const cleaned = s.replace(/[^\d+]/g, "");
-  if (!cleaned) return null;
-  if (cleaned.startsWith("+")) return cleaned;
-  if (cleaned.startsWith("0") && cleaned.length === 10) return `+33${cleaned.slice(1)}`;
-  return cleaned;
+  const digits = s.replace(/\D/g, "");
+  if (!digits) return null;
+  if (digits.length === 10 && digits.startsWith("0")) return `33${digits.slice(1)}`;
+  return digits;
 };
 
 /**

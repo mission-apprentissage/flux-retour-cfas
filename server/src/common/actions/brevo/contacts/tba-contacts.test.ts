@@ -159,7 +159,7 @@ describe("tbaContactsContactList", () => {
           NOM: "Dupont",
           PRENOM: "Alice",
           FONCTION: "Conseillère",
-          TELEPHONE: "+33123456789",
+          TELEPHONE: "33123456789",
           SOURCE_EMAIL: "users_tba",
           STATUT_COMPTE_USER: "CONFIRMED",
           ORGANISATION: "Mon CFA",
@@ -181,7 +181,7 @@ describe("tbaContactsContactList", () => {
           CFA_NB_FORMATEURS: 3,
           CFA_ERP_OU_DECA: "erp",
           CFA_ERP: "ypareo",
-          CFA_STATUT_CLE_API: "1",
+          CFA_STATUT_CLE_API: "oui",
           CFA_NB_ERREURS_TRANSMISSION: null,
           CFA_NB_APPRENANTS_ERP: 2,
           CFA_NB_APPRENANTS_DECA: 0,
@@ -322,7 +322,7 @@ describe("tbaContactsContactList", () => {
   });
 
   describe("fetchContacts - attributs partagés", () => {
-    it("STATUT_SIRET='ferme' quand organisme.ferme=true", async () => {
+    it("STATUT_SIRET='fermé' quand organisme.ferme=true", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf, { ferme: true });
       await organisationsDb().insertOne(orgaOf as any);
@@ -332,7 +332,7 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.STATUT_SIRET).toBe("ferme");
+      expect(contacts[0].attributes.STATUT_SIRET).toBe("fermé");
     });
 
     it("STATUT_SIRET='inconnu' quand la typologie d'organisation n'a pas de SIRET", async () => {
