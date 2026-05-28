@@ -23,6 +23,7 @@ interface EffectifStatusBadgeProps {
   >;
   isHeader?: boolean;
   organisation?: "MISSION_LOCALE" | "ORGANISME_FORMATION";
+  permanentOnly?: boolean;
 }
 
 export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBadgeProps) {
@@ -101,11 +102,7 @@ export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps
 
 function getAllPriorityBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
-  {
-    fontSize,
-    iconSize,
-    organisation,
-  }: { fontSize: string; iconSize: string; organisation?: EffectifStatusBadgeProps["organisation"] }
+  { fontSize, iconSize }: { fontSize: string; iconSize: string }
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
@@ -128,19 +125,42 @@ function getAllPriorityBadges(
     badges.push(<AContacterBadge key="a_contacter" iconSize={iconSize} fontSize={fontSize} />);
   }
   if (effectif.acc_conjoint) {
-    badges.push(
-      <AccConjointBadge key="acc_conjoint" withCollab={organisation === "MISSION_LOCALE"} fontSize={fontSize} />
-    );
+    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
   }
 
   return badges;
 }
 
-export function EffectifPriorityBadgeMultiple({ effectif, isHeader = false, organisation }: EffectifStatusBadgeProps) {
+function getPermanentBadges(
+  effectif: EffectifStatusBadgeProps["effectif"],
+  { fontSize, iconSize }: { fontSize: string; iconSize: string }
+): JSX.Element[] {
+  const badges: JSX.Element[] = [];
+
+  if (effectif.mineur) {
+    badges.push(<MineurBadge key="mineur" iconSize={iconSize} fontSize={fontSize} />);
+  }
+  if (effectif.rqth) {
+    badges.push(<RQTHBadge key="rqth" iconSize={iconSize} fontSize={fontSize} />);
+  }
+  if (effectif.acc_conjoint) {
+    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
+  }
+
+  return badges;
+}
+
+export function EffectifPriorityBadgeMultiple({
+  effectif,
+  isHeader = false,
+  permanentOnly = false,
+}: EffectifStatusBadgeProps) {
   const fontSize = isHeader ? "12px" : "14px";
   const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
 
-  const badges = getAllPriorityBadges(effectif, { fontSize, iconSize, organisation });
+  const badges = permanentOnly
+    ? getPermanentBadges(effectif, { fontSize, iconSize })
+    : getAllPriorityBadges(effectif, { fontSize, iconSize });
 
   if (badges.length === 0) return null;
   if (badges.length === 1) return badges[0];
@@ -208,7 +228,7 @@ function RQTHBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string 
   );
 }
 
-function AccConjointBadge({ withCollab, fontSize }: { withCollab: boolean; fontSize: string }) {
+function AccConjointBadge({ fontSize }: { fontSize: string }) {
   return (
     <span
       className={`fr-badge ${styles.accConjointBadge}`}
@@ -216,7 +236,7 @@ function AccConjointBadge({ withCollab, fontSize }: { withCollab: boolean; fontS
       style={{ fontSize }}
     >
       <i className="ri-school-fill fr-icon--xs" aria-hidden="true" />
-      {withCollab ? "Collaboration CFA" : "CFA"}
+      Collab CFA
     </span>
   );
 }
