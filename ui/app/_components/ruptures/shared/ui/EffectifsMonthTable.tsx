@@ -41,7 +41,12 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     ),
     name: (
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {listType !== API_EFFECTIF_LISTE.TRAITE && <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />}
+        <EffectifPriorityBadgeMultiple
+          effectif={effectif}
+          isHeader
+          organisation={isCfaPage ? "ORGANISME_FORMATION" : "MISSION_LOCALE"}
+          permanentOnly={listType === API_EFFECTIF_LISTE.TRAITE}
+        />
         <div className={notificationStyles.badgeContainer}>
           {isCfaPage && effectif.unread_by_current_user && (
             <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
