@@ -4,10 +4,15 @@ import type { IConnexionInvitation } from "shared/models/data/connexionInvitatio
 import { connexionInvitationsDb } from "@/common/model/collections";
 import { generateKey } from "@/common/utils/cryptoUtils";
 
+import { formatEmail } from "./formatters";
+
 /**
  * Un même email = un même token tant que le document n'est pas supprimé.
  * Pas d'expiration : le token pré-remplit l'email côté UI mais n'authentifie
  * pas (le mot de passe reste requis).
+ *
+ * L'email est normalisé en lowercase + trim à l'écriture pour garantir un
+ * unique mapping (email canonique ↔ token), quelle que soit la casse fournie.
  */
 export const getOrCreateConnexionInvitationByEmail = async ({
   email,
@@ -16,16 +21,17 @@ export const getOrCreateConnexionInvitationByEmail = async ({
   email: string;
   source?: string;
 }): Promise<string> => {
+  const normalizedEmail = formatEmail(email);
   const now = new Date();
   const tentativeToken = generateKey(50, "hex");
 
   const result = await connexionInvitationsDb().findOneAndUpdate(
-    { email },
+    { email: normalizedEmail },
     {
       $setOnInsert: {
         _id: new ObjectId(),
         token: tentativeToken,
-        email,
+        email: normalizedEmail,
         created_at: now,
       },
       $set: {
@@ -48,6 +54,10 @@ export const getConnexionInvitationByToken = async (token: string): Promise<ICon
  * de N findOneAndUpdate parallèles qui saturent le pool Mongo en prod.
  * Seuls les nouveaux emails consomment `generateKey()`.
  *
+ * Les emails sont normalisés (lowercase + trim) et dédupliqués en entrée pour
+ * garantir 1 token par email canonique. La Map retournée est indexée sur les
+ * emails normalisés : les appelants doivent matcher en conséquence.
+ *
  * `source` est commune au batch — l'updateMany rafraîchit cette valeur pour
  * tous les emails existants. Pour mélanger plusieurs sources, faire un appel
  * par source.
@@ -57,15 +67,18 @@ export const getOrCreateConnexionInvitationsByEmails = async (
   options: { source?: string } = {}
 ): Promise<Map<string, string>> => {
   if (emails.length === 0) return new Map();
+  const normalizedEmails = [...new Set(emails.map((e) => formatEmail(e)))];
   const now = new Date();
   const db = connexionInvitationsDb();
   const { source } = options;
 
-  const existing = await db.find({ email: { $in: emails } }, { projection: { email: 1, token: 1 } }).toArray();
+  const existing = await db
+    .find({ email: { $in: normalizedEmails } }, { projection: { email: 1, token: 1 } })
+    .toArray();
   const existingByEmail = new Map<string, string>();
   for (const e of existing) existingByEmail.set(e.email, e.token);
 
-  const newDocs = emails
+  const newDocs = normalizedEmails
     .filter((email) => !existingByEmail.has(email))
     .map((email) => ({
       _id: new ObjectId(),
@@ -108,7 +121,7 @@ export const getOrCreateConnexionInvitationsByEmails = async (
 
   // Filet de sécurité : récupère depuis la DB les tokens des emails perdus par
   // race condition (les `failedIndices`, intentionnellement non poussés ci-dessus).
-  const missing = emails.filter((e) => !byEmail.has(e));
+  const missing = normalizedEmails.filter((e) => !byEmail.has(e));
   if (missing.length > 0) {
     const raced = await db.find({ email: { $in: missing } }, { projection: { email: 1, token: 1 } }).toArray();
     for (const r of raced) byEmail.set(r.email, r.token);

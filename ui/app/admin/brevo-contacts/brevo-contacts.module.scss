@@ -38,7 +38,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background: #fff;
+  background: var(--background-default-grey, #fff);
   border: 1px solid var(--border-default-grey, #ddd);
   transition: border-color 120ms ease;
 
@@ -96,26 +96,8 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
-  background: #f9f9fb;
+  background: var(--background-alt-grey, #f9f9fb);
   border-top: 1px solid var(--border-default-grey, #ddd);
-}
-
-// ============================================================================
-// Bannières d'état
-// ============================================================================
-
-.errorBanner {
-  padding: 0.75rem 1rem;
-  color: var(--text-default-error, #ce0500);
-  background: #fff4f4;
-  border-left: 4px solid var(--border-default-error, #ce0500);
-}
-
-.warningBanner {
-  padding: 0.75rem 1rem;
-  color: #b34000;
-  background: #fff5e6;
-  border-left: 4px solid #b34000;
 }
 
 // ============================================================================
@@ -127,21 +109,6 @@
   flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
-}
-
-.chip {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #555;
-  background: #eee;
-  border-radius: 999px;
-}
-
-.chipSuccess {
-  color: #18753c;
-  background: #b8fec9;
 }
 
 .count {
@@ -162,6 +129,55 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
+}
+
+// DSFR `<Table />` densifié pour un aperçu : padding réduit, font plus petite,
+// lignes cliquables (cf. `.sampleEmailButton` qui étend le click sur tout `<tr>`).
+.sampleTable {
+  margin: 0;
+
+  table {
+    font-size: 0.8125rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    position: relative;
+    cursor: pointer;
+    transition: background-color 80ms ease;
+
+    &:hover {
+      background: var(--background-alt-blue-france, #f5f5fe);
+    }
+  }
+}
+
+// Bouton "stretched link" : visuellement transparent, étire son `::before` sur
+// le `<tr>` parent (en `position: relative`) pour que tout le rang soit cliquable.
+.sampleEmailButton {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--blue-france-sun-113, #000091);
+    outline-offset: 2px;
+  }
 }
 
 .attributesReport {
@@ -186,7 +202,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8125rem;
   word-break: break-all;
-  background: #fff;
+  background: var(--background-default-grey, #fff);
   border: 1px solid var(--border-default-grey, #ddd);
   border-radius: 2px;
 }
@@ -195,56 +211,25 @@
   color: var(--light-decisions-text-text-mention-grey, #666);
 }
 
-.tableWrapper {
-  max-height: 500px;
-  overflow: auto;
-  background: #fff;
-  border: 1px solid var(--border-default-grey, #ddd);
-}
-
-.sampleTable {
-  width: 100%;
-  font-size: 0.8125rem;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    white-space: nowrap;
-    border-bottom: 1px solid #eee;
-  }
-
-  th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    font-weight: 600;
-    background: #f6f6f6;
-  }
-}
-
-.sampleRow {
-  cursor: pointer;
-  transition: background-color 80ms ease;
-
-  &:hover {
-    background: var(--light-decisions-background-background-alt-blue-france, #f5f5fe);
-  }
-}
-
 // ============================================================================
 // Modale détail d'un contact (tableau attribut/valeur)
 // ============================================================================
 
+// La modale DSFR (`.fr-modal__body`) gère déjà son propre scroll vertical ;
+// ne pas re-scroller ici pour éviter un double scrollbar.
 .detailsWrapper {
-  max-height: 70vh;
-  overflow: auto;
+  // Conteneur de positionnement pour le `position: sticky` du `<thead>` :
+  // le sticky se fixera par rapport au scroll de la modale parent.
+  position: relative;
 }
 
 .detailsTable {
+  // `table-layout: fixed` + `width: 100%` empêchent la table de dépasser la
+  // largeur de la modale quand les valeurs sont longues (UTM, JSON, etc.) :
+  // la colonne valeur prend la place restante et son contenu wrap proprement.
   width: 100%;
   font-size: 0.875rem;
+  table-layout: fixed;
   border-collapse: collapse;
 
   th,
@@ -252,7 +237,7 @@
     padding: 0.5rem 0.75rem;
     vertical-align: top;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-default-grey, #eee);
   }
 
   th {
@@ -260,11 +245,11 @@
     top: 0;
     z-index: 1;
     font-weight: 600;
-    background: #f6f6f6;
+    background: var(--background-contrast-grey, #f6f6f6);
   }
 
   tbody tr:hover {
-    background: #fafafa;
+    background: var(--background-alt-grey, #fafafa);
   }
 }
 
@@ -277,7 +262,9 @@
 }
 
 .detailsValue {
-  overflow-wrap: break-word;
+  // `anywhere` (vs `break-word`) autorise la coupure même au milieu d'un mot
+  // sans espace — nécessaire pour URLs UTM et JSON longs.
+  overflow-wrap: anywhere;
 }
 
 .detailsMuted {
@@ -290,7 +277,7 @@
   padding: 0.05rem 0.3rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8125rem;
-  background: #f5f5fe;
+  background: var(--background-alt-blue-france, #f5f5fe);
   border: 1px solid var(--border-default-grey, #ddd);
   border-radius: 2px;
 }
@@ -323,7 +310,7 @@
   code {
     padding: 0.05rem 0.3rem;
     font-size: 0.875em;
-    background: #f5f5fe;
+    background: var(--background-alt-blue-france, #f5f5fe);
     border-radius: 3px;
   }
 }
@@ -331,7 +318,7 @@
 .confirmHint {
   padding: 0.75rem 1rem;
   font-size: 0.9375rem;
-  background: #f5f5fe;
+  background: var(--background-alt-blue-france, #f5f5fe);
   border-left: 4px solid var(--blue-france-sun-113, #000091);
 }
 
@@ -349,16 +336,6 @@
   display: inline-flex;
   gap: 0.5rem;
   align-items: center;
-  cursor: pointer;
-  user-select: none;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
-
-  &:hover {
-    color: var(--light-decisions-text-text-default-grey, #3a3a3a);
-  }
 }
 
 .healthDot {
@@ -366,27 +343,20 @@
   flex-shrink: 0;
   width: 0.5rem;
   height: 0.5rem;
-  background: #888;
+  background: var(--text-mention-grey, #888);
   border-radius: 50%;
 }
 
 .healthDotOk {
-  background: #18753c;
+  background: var(--text-default-success, #18753c);
 }
 
 .healthDotWarning {
-  background: #b34000;
+  background: var(--text-default-warning, #b34000);
 }
 
 .healthDotError {
-  background: #ce0500;
-}
-
-.healthDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem 0 0.25rem 1rem;
+  background: var(--text-default-error, #ce0500);
 }
 
 .healthDetailLine {

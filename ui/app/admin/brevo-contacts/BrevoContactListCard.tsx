@@ -1,6 +1,9 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useMemo, useState } from "react";
 
 import styles from "./brevo-contacts.module.scss";
@@ -115,14 +118,14 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
 
       {expanded && (
         <div className={styles.cardBody}>
-          {error && <div className={styles.errorBanner}>Erreur&nbsp;: {error}</div>}
+          {error && <Alert severity="error" small description={`Erreur : ${error}`} />}
 
           {result && (
             <>
               <div className={styles.resultHeader}>
-                <span className={`${styles.chip} ${result.dryRun ? "" : styles.chipSuccess}`}>
+                <Badge severity={result.dryRun ? "info" : "success"} noIcon>
                   {result.dryRun ? "Dry-run (aucun appel Brevo)" : "Sync réelle effectuée"}
-                </span>
+                </Badge>
                 <span className={styles.count}>
                   {result.count} contact{result.count > 1 ? "s" : ""}
                 </span>
@@ -133,9 +136,11 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
               </div>
 
               {result.failedBatches !== undefined && result.failedBatches > 0 && (
-                <div className={styles.warningBanner}>
-                  {result.failedBatches} batch(s) d&apos;import Brevo en échec sur {result.batches}. Voir Sentry.
-                </div>
+                <Alert
+                  severity="warning"
+                  small
+                  description={`${result.failedBatches} batch(s) d'import Brevo en échec sur ${result.batches}. Voir Sentry.`}
+                />
               )}
 
               {result.attributes && (
@@ -174,13 +179,19 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
                   )}
 
                   {result.attributes.conflicts.length > 0 && (
-                    <div className={styles.warningBanner}>
-                      🔴 <strong>{result.attributes.conflicts.length} conflit(s) de type</strong>&nbsp;:{" "}
-                      {result.attributes.conflicts
-                        .map((c) => `${c.name} (Brevo=${c.existingType}, code=${c.expectedType})`)
-                        .join(", ")}
-                      . L&apos;existant côté Brevo est conservé — modifier le type manuellement ou aligner le code.
-                    </div>
+                    <Alert
+                      severity="warning"
+                      small
+                      description={
+                        <>
+                          <strong>{result.attributes.conflicts.length} conflit(s) de type</strong>&nbsp;:{" "}
+                          {result.attributes.conflicts
+                            .map((c) => `${c.name} (Brevo=${c.existingType}, code=${c.expectedType})`)
+                            .join(", ")}
+                          . L&apos;existant côté Brevo est conservé — modifier le type manuellement ou aligner le code.
+                        </>
+                      }
+                    />
                   )}
                 </div>
               )}
@@ -188,41 +199,26 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
               {result.sample && result.sample.length > 0 && (
                 <>
                   <h3 className={styles.sampleTitle}>Aperçu (10 premiers contacts)</h3>
-                  <div className={styles.tableWrapper}>
-                    <table className={styles.sampleTable}>
-                      <thead>
-                        <tr>
-                          <th>Email</th>
-                          {sampleColumns.map((col) => (
-                            <th key={col}>{col}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.sample.map((c, i) => (
-                          <tr
-                            key={`${c.email}-${i}`}
-                            className={styles.sampleRow}
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`Voir tous les attributs du contact ${c.email}`}
-                            onClick={() => onShowSampleDetails(c)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                onShowSampleDetails(c);
-                              }
-                            }}
-                          >
-                            <td>{c.email}</td>
-                            {sampleColumns.map((col) => (
-                              <td key={col}>{String(c.attributes[col] ?? "")}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <Table
+                    className={styles.sampleTable}
+                    noCaption
+                    headers={["Email", ...sampleColumns]}
+                    data={result.sample.map((c) => [
+                      // Bouton neutre dans la 1ère cellule + `::before` étendu
+                      // (cf. `.sampleEmailButton`) pour rendre toute la ligne cliquable
+                      // tout en restant accessible clavier/screen reader.
+                      <button
+                        key={`email-${c.email}`}
+                        type="button"
+                        className={styles.sampleEmailButton}
+                        onClick={() => onShowSampleDetails(c)}
+                        aria-label={`Voir tous les attributs du contact ${c.email}`}
+                      >
+                        {c.email}
+                      </button>,
+                      ...sampleColumns.map((col) => String(c.attributes[col] ?? "")),
+                    ])}
+                  />
                 </>
               )}
             </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useCallback, useState } from "react";
 
@@ -57,9 +58,11 @@ export function BrevoContactListsClient() {
       <BrevoHealthBanner />
 
       {error ? (
-        <div className={styles.errorBanner}>
-          Erreur&nbsp;: {error instanceof Error ? error.message : "Erreur de chargement"}
-        </div>
+        <Alert
+          severity="error"
+          small
+          description={`Erreur : ${error instanceof Error ? error.message : "Erreur de chargement"}`}
+        />
       ) : null}
       {isLoading && <div className={styles.loading}>Chargement…</div>}
 

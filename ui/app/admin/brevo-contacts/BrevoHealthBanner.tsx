@@ -1,5 +1,7 @@
 "use client";
 
+import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
+
 import styles from "./brevo-contacts.module.scss";
 import { type BrevoHealthCheck, useBrevoHealth } from "./hooks/useBrevoHealth";
 
@@ -41,19 +43,20 @@ export function BrevoHealthBanner() {
   const { dotClass, label } = summarize(data.apiKey, data.tbaContactsList);
 
   return (
-    <details className={styles.health}>
-      <summary className={styles.healthSummary}>
-        <span className={`${styles.healthDot} ${dotClass}`} aria-hidden="true" />
-        <span>{label}</span>
-      </summary>
-      <div className={styles.healthDetails}>
-        <p className={styles.healthDetailLine}>
-          {data.apiKey.label}&nbsp;: {data.apiKey.detail}
-        </p>
-        <p className={styles.healthDetailLine}>
-          {data.tbaContactsList.label}&nbsp;: {data.tbaContactsList.detail}
-        </p>
-      </div>
-    </details>
+    <Accordion
+      label={
+        <span className={styles.healthSummary}>
+          <span className={`${styles.healthDot} ${dotClass}`} aria-hidden="true" />
+          <span>{label}</span>
+        </span>
+      }
+    >
+      <p className={styles.healthDetailLine}>
+        {data.apiKey.label}&nbsp;: {data.apiKey.detail}
+      </p>
+      <p className={styles.healthDetailLine}>
+        {data.tbaContactsList.label}&nbsp;: {data.tbaContactsList.detail}
+      </p>
+    </Accordion>
   );
 }

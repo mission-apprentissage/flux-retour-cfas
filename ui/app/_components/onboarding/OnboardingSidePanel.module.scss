@@ -41,8 +41,7 @@
 
 .separator {
   margin-top: 0;
-  border-bottom: 1px solid #cacafb;
-  // border-color: #cacafb;
+  border-bottom: 1px solid var(--border-action-low-blue-france, #cacafb);
 }
 
 .cfaCountBlock {
@@ -59,7 +58,7 @@
   flex-shrink: 0;
   margin-top: 1px;
   font-size: 1.25rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france, #000091);
 }
 
 .mlBlock {
@@ -79,11 +78,11 @@
 .mlTitle {
   margin-bottom: 16px;
   font-weight: 700;
-  color: #161616;
+  color: var(--text-default-grey, #161616);
 }
 
 .mlTitleCount {
-  color: #6a6af4;
+  color: var(--text-active-blue-france, #6a6af4);
 }
 
 .mlList {
@@ -109,7 +108,7 @@
 
 .mlBullet {
   margin-top: 2px;
-  color: #18753c;
+  color: var(--text-default-success, #18753c);
 }
 
 .mlSubtext {
@@ -125,7 +124,7 @@
   padding: 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #000091;
+  color: var(--text-action-high-blue-france, #000091);
   cursor: pointer;
   background: none;
   border: none;

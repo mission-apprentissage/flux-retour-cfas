@@ -73,7 +73,10 @@ export default () => {
   // `fetchContacts` du contact list, applique la même sérialisation que la sync
   // (dates yyyy-MM-dd, `undefined` filtré) pour que l'Excel reflète exactement
   // le payload qui partirait à Brevo.
-  router.get(
+  //
+  // POST car `fetchContacts` mute les invitations en DB
+  // (`getOrCreateConnexionInvitationsByEmails`), cohérent avec `/preview` et `/sync`.
+  router.post(
     "/:slug/export",
     returnResult(async (req) => {
       const { slug } = req.params;

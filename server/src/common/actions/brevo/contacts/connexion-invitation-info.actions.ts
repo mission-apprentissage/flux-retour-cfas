@@ -58,9 +58,13 @@ const mapAdresseToFrontend = (raw: Record<string, unknown> | null | undefined): 
 };
 
 export const getConnexionInvitationInfoByEmail = async (email: string): Promise<ConnexionInvitationInfo | null> => {
+  // Match case-insensitive ancré, aligné sur la convention du projet
+  // (cf. account.actions.ts / users.routes.ts) pour gérer les emails users
+  // historiques en mixed-case sans migration.
+  const emailEsc = email.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const userResult = (await usersMigrationDb()
     .aggregate([
-      { $match: { email } },
+      { $match: { email: { $regex: `^${emailEsc}$`, $options: "i" } } },
       {
         $lookup: {
           from: "organisations",

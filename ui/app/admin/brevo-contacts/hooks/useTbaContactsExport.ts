@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { _get } from "@/common/httpClient";
+import { _post } from "@/common/httpClient";
 import { exportDataAsXlsx, type ExportColumn } from "@/common/utils/exportUtils";
 
 type ExportResponse = {
@@ -27,7 +27,7 @@ export function useTbaContactsExport({ slug, onSuccess, onError }: UseTbaContact
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const data = await _get<ExportResponse>(`/api/v1/admin/brevo-contacts/${slug}/export`);
+      const data = await _post<unknown, ExportResponse>(`/api/v1/admin/brevo-contacts/${slug}/export`, {});
 
       // Aplatit { email, attributes: {...} } en { EMAIL, CIVILITE, ... } pour Excel.
       const rows = data.contacts.map((c) => ({ EMAIL: c.email, ...c.attributes }));

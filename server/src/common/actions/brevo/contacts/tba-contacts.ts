@@ -19,10 +19,11 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 import { BrevoContact, BrevoContactAttributeValue } from "@/common/services/brevo/brevo";
+import { normalizePhoneNumber } from "@/common/services/brevo/whatsapp/phone";
 import config from "@/config";
 
 import { getOrCreateConnexionInvitationsByEmails } from "./connexion-invitations.actions";
-import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName, formatPhoneFR } from "./formatters";
+import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName } from "./formatters";
 import { BrevoAttributeType, ContactListDefinition, ContactListUtm } from "./types";
 import { buildUtmUrl } from "./utm";
 
@@ -622,7 +623,7 @@ const buildAttributes = (
     NOM: formatName(user.nom),
     PRENOM: formatName(user.prenom),
     FONCTION: user.fonction ?? null,
-    TELEPHONE: formatPhoneFR(user.telephone),
+    TELEPHONE: normalizePhoneNumber(user.telephone),
     SOURCE_EMAIL: "users_tba",
     DATE_INSCRIPTION_USER_TBA: user.created_at ?? null,
     DATE_DERNIERE_CONNEXION_USER_TBA: user.last_connection ?? null,
@@ -761,7 +762,7 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
     const rupturantsStats = organismeId ? rupturantsStatsByOrgId.get(organismeId) : undefined;
     const mlStats =
       user.organisation.type === "MISSION_LOCALE" ? mlStatsByMlId.get(String(user.organisation._id)) : undefined;
-    const lien = lienByEmail.get(user.email) ?? "";
+    const lien = lienByEmail.get(formatEmail(user.email)) ?? "";
     return {
       email: formatEmail(user.email),
       attributes: buildAttributes(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName, formatPhoneFR } from "./formatters";
+import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName } from "./formatters";
 
 describe("formatName", () => {
   it("title case basique", () => {
@@ -33,31 +33,6 @@ describe("formatName", () => {
     expect(formatName("   ")).toBeNull();
     expect(formatName(null)).toBeNull();
     expect(formatName(undefined)).toBeNull();
-  });
-});
-
-describe("formatPhoneFR", () => {
-  it("préfixe 33 sur les numéros français à 10 chiffres", () => {
-    expect(formatPhoneFR("0123456789")).toBe("33123456789");
-    expect(formatPhoneFR("0635353535")).toBe("33635353535");
-  });
-
-  it("strip les espaces, points, tirets et le '+'", () => {
-    expect(formatPhoneFR("01 23 45 67 89")).toBe("33123456789");
-    expect(formatPhoneFR("01.23.45.67.89")).toBe("33123456789");
-    expect(formatPhoneFR("01-23-45-67-89")).toBe("33123456789");
-  });
-
-  it("retire le '+' des numéros déjà au format international", () => {
-    expect(formatPhoneFR("+33 1 23 45 67 89")).toBe("33123456789");
-    expect(formatPhoneFR("+33123456789")).toBe("33123456789");
-    expect(formatPhoneFR("+44 20 1234 5678")).toBe("442012345678");
-  });
-
-  it("gère les valeurs vides", () => {
-    expect(formatPhoneFR("")).toBeNull();
-    expect(formatPhoneFR(null)).toBeNull();
-    expect(formatPhoneFR(undefined)).toBeNull();
   });
 });
 
