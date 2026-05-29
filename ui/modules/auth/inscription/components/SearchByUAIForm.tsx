@@ -21,6 +21,7 @@ import * as Yup from "yup";
 
 import { UAI_REGEX } from "@/common/domain/uai";
 import { _post } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
 import { InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
@@ -45,8 +46,7 @@ export default function SearchByUAIForm({ organisation, setOrganisation }: Inscr
           await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {
-          const errorMessage: string = err?.json?.data?.message || err.message;
-          actions.setFieldError("uai", errorMessage);
+          actions.setFieldError("uai", getApiErrorMessage(err));
         } finally {
           actions.setSubmitting(false);
         }
