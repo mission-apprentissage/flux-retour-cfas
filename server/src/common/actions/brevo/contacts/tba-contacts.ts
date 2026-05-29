@@ -623,7 +623,7 @@ const buildAttributes = (
     NOM: formatName(user.nom),
     PRENOM: formatName(user.prenom),
     FONCTION: user.fonction ?? null,
-    TELEPHONE: normalizePhoneNumber(user.telephone),
+    TELEPHONE: normalizePhoneNumber(user.telephone, { silent: true }),
     SOURCE_EMAIL: "users_tba",
     DATE_INSCRIPTION_USER_TBA: user.created_at ?? null,
     DATE_DERNIERE_CONNEXION_USER_TBA: user.last_connection ?? null,
