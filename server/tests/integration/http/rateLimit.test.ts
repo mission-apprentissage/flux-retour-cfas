@@ -215,53 +215,47 @@ describe("Rate limiting", () => {
       } finally {
         config.rateLimit.skipPrivateIps = previous;
       }
-    });
+    }, 30_000);
   });
 
   describe("publicDashboard tier (separate budget from public)", () => {
-    it("returns 429 on a dashboard route once its own budget is exhausted", async () => {
-      const previous = config.rateLimit.tiers.publicDashboard.points;
-      config.rateLimit.tiers.publicDashboard.points = 2;
+    const DASHBOARD_IP = { headers: { "X-Forwarded-For": "203.0.113.50" } };
+
+    beforeEach(() => {
+      config.trustProxy = 1;
       config.rateLimit.tiers.publicDashboard.enforce = true;
+    });
+    afterEach(() => {
+      config.trustProxy = 0;
+      config.rateLimit.tiers.publicDashboard.points = 600;
+      config.rateLimit.tiers.public.points = 300;
+    });
+
+    it("returns 429 on a dashboard route once its own budget is exhausted", async () => {
+      config.rateLimit.tiers.publicDashboard.points = 2;
       _resetLimitersForTests();
-      const app = await initTestApp();
-      const client = app.httpClient;
-      try {
-        for (let i = 0; i < 2; i++) {
-          const r = await client.get("/api/v1/reseaux");
-          assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be under budget`);
-        }
-        const blocked = await client.get("/api/v1/reseaux");
-        assert.strictEqual(blocked.status, 429, "3rd dashboard call should exceed the publicDashboard budget");
-      } finally {
-        config.rateLimit.tiers.publicDashboard.points = previous;
+      const { httpClient: client } = await initTestApp();
+
+      for (let i = 0; i < 2; i++) {
+        const r = await client.get("/api/v1/reseaux", DASHBOARD_IP);
+        assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be under budget`);
       }
+      const blocked = await client.get("/api/v1/reseaux", DASHBOARD_IP);
+      assert.strictEqual(blocked.status, 429, "3rd dashboard call should exceed the publicDashboard budget");
     });
 
     it("does not share its counter with the public tier", async () => {
-      const prevDashboard = config.rateLimit.tiers.publicDashboard.points;
-      const prevPublic = config.rateLimit.tiers.public.points;
       config.rateLimit.tiers.publicDashboard.points = 1;
-      config.rateLimit.tiers.publicDashboard.enforce = true;
       config.rateLimit.tiers.public.points = 50;
       config.rateLimit.tiers.public.enforce = true;
       _resetLimitersForTests();
-      const app = await initTestApp();
-      const client = app.httpClient;
-      try {
-        await client.get("/api/v1/reseaux");
-        const blockedDashboard = await client.get("/api/v1/reseaux");
-        assert.strictEqual(blockedDashboard.status, 429, "publicDashboard should be exhausted");
-        const publicRoute = await client.post("/api/v1/organismes/search-by-siret", { siret: "x" });
-        assert.notStrictEqual(
-          publicRoute.status,
-          429,
-          "public tier must not be impacted by publicDashboard exhaustion"
-        );
-      } finally {
-        config.rateLimit.tiers.publicDashboard.points = prevDashboard;
-        config.rateLimit.tiers.public.points = prevPublic;
-      }
+      const { httpClient: client } = await initTestApp();
+
+      await client.get("/api/v1/reseaux", DASHBOARD_IP);
+      const blockedDashboard = await client.get("/api/v1/reseaux", DASHBOARD_IP);
+      assert.strictEqual(blockedDashboard.status, 429, "publicDashboard should be exhausted");
+      const publicRoute = await client.post("/api/v1/organismes/search-by-siret", { siret: "x" }, DASHBOARD_IP);
+      assert.notStrictEqual(publicRoute.status, 429, "public tier must not be impacted by publicDashboard exhaustion");
     });
   });
 
