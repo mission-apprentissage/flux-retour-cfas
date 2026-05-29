@@ -32,10 +32,12 @@ export function useTbaContactsExport({ slug, onSuccess, onError }: UseTbaContact
       // Aplatit { email, attributes: {...} } en { EMAIL, CIVILITE, ... } pour Excel.
       const rows = data.contacts.map((c) => ({ EMAIL: c.email, ...c.attributes }));
 
-      const sortedAttrs = [...data.attributes].sort();
+      // L'ordre des colonnes suit celui renvoyé par l'API (= ordre de définition
+      // du schéma côté serveur : Identité → Organisation → CFA → ML). Plus
+      // parlant qu'un tri alphabétique pour parcourir un contact dans Excel.
       const columns: ExportColumn[] = [
         { label: "EMAIL", key: "EMAIL", width: 35 },
-        ...sortedAttrs.map((name) => ({ label: name, key: name, width: 22 })),
+        ...data.attributes.map((name) => ({ label: name, key: name, width: 22 })),
       ];
 
       const today = new Date();

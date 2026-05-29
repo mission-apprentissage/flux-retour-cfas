@@ -124,6 +124,7 @@ describe("tbaContactsContactList", () => {
         erps: ["ypareo"],
         api_key: "key-abc",
         last_transmission_date: new Date("2026-04-01T00:00:00.000Z"),
+        effectifs_current_year_count: 2,
         organismesFormateurs: [
           { siret: "11111111111111", uai: "0111111A" },
           { siret: "22222222222222", uai: "0222222B" },
@@ -147,7 +148,7 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      const lienConnexion = contacts[0].attributes.LIEN_CONNEXION_PERSONNALISE as string;
+      const lienConnexion = contacts[0].attributes.CFA_LIEN_CONNEXION_PERSONNALISE as string;
       expect(lienConnexion).toMatch(/^http:\/\/localhost:3000\/auth\/connexion\?invitationToken=[a-f0-9]+/);
       expect(lienConnexion).toContain("utm_source=brevo");
       expect(lienConnexion).toContain("utm_medium=email");
@@ -179,10 +180,10 @@ describe("tbaContactsContactList", () => {
           STATUT_FIABILISATION: "FIABLE",
           CFA_NATURE: null,
           CFA_NB_FORMATEURS: 3,
-          CFA_ERP_OU_DECA: "erp",
+          CFA_ERP_OU_DECA: "ERP",
           CFA_ERP: "ypareo",
           CFA_STATUT_CLE_API: "oui",
-          CFA_NB_ERREURS_TRANSMISSION: null,
+          CFA_NB_ERREURS_TRANSMISSION: 0,
           CFA_NB_APPRENANTS_ERP: 2,
           CFA_NB_APPRENANTS_DECA: 0,
           CFA_NB_RUPTURANTS_ERP: 1,
@@ -390,21 +391,19 @@ describe("tbaContactsContactList", () => {
   describe("fetchContacts - compteurs CFA APPRENANTS / RUPTURANTS", () => {
     it("compte les apprenants et rupturants ERP et DECA séparément", async () => {
       const orgaOf = buildOrgaOf();
-      const organisme = buildOrganisme(orgaOf);
+      // ERP apprenants = `effectifs_current_year_count` pré-calculé sur l'organisme.
+      const organisme = buildOrganisme(orgaOf, { effectifs_current_year_count: 3 });
       await organisationsDb().insertOne(orgaOf as any);
       await organismesDb().insertOne(organisme as any);
       await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
 
+      // ERP rupturants = contrats avec date_rupture dans l'année civile courante.
       await effectifsDb().insertMany(
-        [
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
-        ],
+        [buildEffectif(organisme._id, "RUPTURANT") as any, buildEffectif(organisme._id, "RUPTURANT") as any],
         { bypassDocumentValidation: true }
       );
+      // DECA = effectifsDECA avec formation.date_entree dans l'année civile courante.
+      // Rupturants DECA = sous-ensemble avec contrats[0].date_rupture non nul.
       await effectifsDECADb().insertMany(
         [
           buildEffectif(organisme._id, "APPRENTI") as any,
@@ -419,12 +418,12 @@ describe("tbaContactsContactList", () => {
 
       expect(contacts).toHaveLength(1);
       expect(contacts[0].attributes.CFA_NB_APPRENANTS_ERP).toBe(3);
-      expect(contacts[0].attributes.CFA_NB_APPRENANTS_DECA).toBe(1);
+      expect(contacts[0].attributes.CFA_NB_APPRENANTS_DECA).toBe(4);
       expect(contacts[0].attributes.CFA_NB_RUPTURANTS_ERP).toBe(2);
       expect(contacts[0].attributes.CFA_NB_RUPTURANTS_DECA).toBe(3);
     });
 
-    it("CFA_ERP_OU_DECA='deca' quand pas de mode_de_transmission API mais effectifs DECA présents", async () => {
+    it("CFA_ERP_OU_DECA='DECA' quand pas d'ERPs déclarés mais apprenants DECA présents", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
       await organisationsDb().insertOne(orgaOf as any);
@@ -436,11 +435,11 @@ describe("tbaContactsContactList", () => {
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
-      expect(contacts[0].attributes.CFA_ERP_OU_DECA).toBe("deca");
+      expect(contacts[0].attributes.CFA_ERP_OU_DECA).toBe("DECA");
     });
   });
 
-  describe("fetchContacts - extension campagne CFA (NB_JEUNES_EN_RUPTURE, LISTE_MISSIONS_LOCALES)", () => {
+  describe("fetchContacts - extension campagne CFA (CFA_NB_JEUNES_EN_RUPTURE, CFA_LISTE_MISSIONS_LOCALES)", () => {
     it("retourne 0 / 0 / '' quand l'organisme n'a aucun rupturant suivi par une ML", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
@@ -451,9 +450,9 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.NB_JEUNES_EN_RUPTURE).toBe(0);
-      expect(contacts[0].attributes.NB_MISSIONS_LOCALES_PARTENAIRES).toBe(0);
-      expect(contacts[0].attributes.LISTE_MISSIONS_LOCALES).toBe("");
+      expect(contacts[0].attributes.CFA_NB_JEUNES_EN_RUPTURE).toBe(0);
+      expect(contacts[0].attributes.CFA_NB_MISSIONS_LOCALES_PARTENAIRES).toBe(0);
+      expect(contacts[0].attributes.CFA_LISTE_MISSIONS_LOCALES).toBe("");
     });
 
     it("compte les jeunes en rupture par ML et formate la liste avec 'et N autres'", async () => {
@@ -482,9 +481,9 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.NB_JEUNES_EN_RUPTURE).toBe(6);
-      expect(contacts[0].attributes.NB_MISSIONS_LOCALES_PARTENAIRES).toBe(3);
-      expect(contacts[0].attributes.LISTE_MISSIONS_LOCALES).toBe("ML A, ML B et 1 autre");
+      expect(contacts[0].attributes.CFA_NB_JEUNES_EN_RUPTURE).toBe(6);
+      expect(contacts[0].attributes.CFA_NB_MISSIONS_LOCALES_PARTENAIRES).toBe(3);
+      expect(contacts[0].attributes.CFA_LISTE_MISSIONS_LOCALES).toBe("ML A, ML B et 1 autre");
     });
 
     it("formate '2 ML' sans suffixe", async () => {
@@ -507,9 +506,9 @@ describe("tbaContactsContactList", () => {
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
-      expect(contacts[0].attributes.NB_JEUNES_EN_RUPTURE).toBe(3);
-      expect(contacts[0].attributes.NB_MISSIONS_LOCALES_PARTENAIRES).toBe(2);
-      expect(contacts[0].attributes.LISTE_MISSIONS_LOCALES).toBe("ML A, ML B");
+      expect(contacts[0].attributes.CFA_NB_JEUNES_EN_RUPTURE).toBe(3);
+      expect(contacts[0].attributes.CFA_NB_MISSIONS_LOCALES_PARTENAIRES).toBe(2);
+      expect(contacts[0].attributes.CFA_LISTE_MISSIONS_LOCALES).toBe("ML A, ML B");
     });
 
     it("les champs d'extension sont null côté ML (réservés aux OF)", async () => {
@@ -520,9 +519,9 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.NB_JEUNES_EN_RUPTURE).toBeNull();
-      expect(contacts[0].attributes.NB_MISSIONS_LOCALES_PARTENAIRES).toBeNull();
-      expect(contacts[0].attributes.LISTE_MISSIONS_LOCALES).toBeNull();
+      expect(contacts[0].attributes.CFA_NB_JEUNES_EN_RUPTURE).toBeNull();
+      expect(contacts[0].attributes.CFA_NB_MISSIONS_LOCALES_PARTENAIRES).toBeNull();
+      expect(contacts[0].attributes.CFA_LISTE_MISSIONS_LOCALES).toBeNull();
     });
   });
 
@@ -601,7 +600,7 @@ describe("tbaContactsContactList", () => {
       expect(invitation?.token).toMatch(/^[a-f0-9]{100}$/);
       expect(invitation?.source).toBe("tba-contacts");
 
-      const lien = contacts[0].attributes.LIEN_CONNEXION_PERSONNALISE as string;
+      const lien = contacts[0].attributes.CFA_LIEN_CONNEXION_PERSONNALISE as string;
       expect(lien).toContain(`invitationToken=${invitation?.token}`);
     });
 
@@ -615,7 +614,9 @@ describe("tbaContactsContactList", () => {
       const first = await tbaContactsContactList.fetchContacts();
       const second = await tbaContactsContactList.fetchContacts();
 
-      expect(first[0].attributes.LIEN_CONNEXION_PERSONNALISE).toBe(second[0].attributes.LIEN_CONNEXION_PERSONNALISE);
+      expect(first[0].attributes.CFA_LIEN_CONNEXION_PERSONNALISE).toBe(
+        second[0].attributes.CFA_LIEN_CONNEXION_PERSONNALISE
+      );
       expect(await connexionInvitationsDb().countDocuments({})).toBe(1);
     });
   });

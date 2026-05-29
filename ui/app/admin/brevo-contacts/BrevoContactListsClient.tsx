@@ -26,7 +26,7 @@ const formatValue = (v: unknown): React.ReactNode => {
   return <code className={styles.detailsCode}>{JSON.stringify(v)}</code>;
 };
 
-export default function BrevoContactListsClient() {
+export function BrevoContactListsClient() {
   const { data: contactLists, error, isLoading } = useBrevoContactLists();
   const [pendingSync, setPendingSync] = useState<PendingSync | null>(null);
   const [sampleDetails, setSampleDetails] = useState<SampleContact | null>(null);
@@ -134,14 +134,14 @@ export default function BrevoContactListsClient() {
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(sampleDetails.attributes)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([k, v]) => (
-                    <tr key={k}>
-                      <td className={styles.detailsKey}>{k}</td>
-                      <td className={styles.detailsValue}>{formatValue(v)}</td>
-                    </tr>
-                  ))}
+                {/* Ordre d'insertion préservé = ordre de définition du schéma côté serveur
+                    (Identité → Organisation → CFA → ML), cohérent avec l'export Excel. */}
+                {Object.entries(sampleDetails.attributes).map(([k, v]) => (
+                  <tr key={k}>
+                    <td className={styles.detailsKey}>{k}</td>
+                    <td className={styles.detailsValue}>{formatValue(v)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

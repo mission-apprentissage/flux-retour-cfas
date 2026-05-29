@@ -15,6 +15,7 @@ import {
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
   organismesDb,
+  transmissionDailyReportDb,
   usersMigrationDb,
 } from "@/common/model/collections";
 import { BrevoContact, BrevoContactAttributeValue } from "@/common/services/brevo/brevo";
@@ -96,10 +97,10 @@ export type TbaContactAttributeName =
   | "ML_NB_RUPTURANTS_A_TRAITER"
   | "ML_NB_RUPTURANTS_TRAITES"
   | "ML_POURCENTAGE_RUPTURANTS_TRAITES"
-  | "NB_JEUNES_EN_RUPTURE"
-  | "NB_MISSIONS_LOCALES_PARTENAIRES"
-  | "LISTE_MISSIONS_LOCALES"
-  | "LIEN_CONNEXION_PERSONNALISE";
+  | "CFA_NB_JEUNES_EN_RUPTURE"
+  | "CFA_NB_MISSIONS_LOCALES_PARTENAIRES"
+  | "CFA_LISTE_MISSIONS_LOCALES"
+  | "CFA_LIEN_CONNEXION_PERSONNALISE";
 
 // `undefined` autorisé : un attribut absent du payload est préservé par Brevo,
 // alors qu'un attribut à `null` est écrasé. Utilisé pour `CFA_ERP_CLIENT` qui est
@@ -152,10 +153,10 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   ML_NB_RUPTURANTS_A_TRAITER: "float",
   ML_NB_RUPTURANTS_TRAITES: "float",
   ML_POURCENTAGE_RUPTURANTS_TRAITES: "float",
-  NB_JEUNES_EN_RUPTURE: "float",
-  NB_MISSIONS_LOCALES_PARTENAIRES: "float",
-  LISTE_MISSIONS_LOCALES: "text",
-  LIEN_CONNEXION_PERSONNALISE: "text",
+  CFA_NB_JEUNES_EN_RUPTURE: "float",
+  CFA_NB_MISSIONS_LOCALES_PARTENAIRES: "float",
+  CFA_LISTE_MISSIONS_LOCALES: "text",
+  CFA_LIEN_CONNEXION_PERSONNALISE: "text",
 };
 
 type TbaUserContext = {
@@ -189,6 +190,7 @@ type TbaUserContext = {
     transmission_errors_date?: Date | null;
     mode_de_transmission?: "API" | "MANUEL";
     organismesFormateursCount?: number;
+    effectifs_current_year_count?: number;
     adresse?: TbaAdresse | null;
     reseaux?: string[];
     fiabilisation_statut?: string;
@@ -284,6 +286,7 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
             transmission_errors_date: 1,
             mode_de_transmission: 1,
             organismesFormateurs: 1,
+            effectifs_current_year_count: 1,
             adresse: 1,
             reseaux: 1,
             fiabilisation_statut: 1,
@@ -307,6 +310,7 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
         transmission_errors_date: o.transmission_errors_date,
         mode_de_transmission: o.mode_de_transmission,
         organismesFormateursCount: o.organismesFormateurs?.length ?? 0,
+        effectifs_current_year_count: o.effectifs_current_year_count ?? 0,
         adresse: o.adresse,
         reseaux: o.reseaux,
         fiabilisation_statut: o.fiabilisation_statut,
@@ -329,60 +333,75 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
   );
 };
 
-type CfaCounts = { erp: number; deca: number };
-
-// Compte par organisme les effectifs au statut donné, sur l'année scolaire
-// courante, en croisant `effectifs` (ERP) et `effectifsDECA`. Utilise les
-// index `(organisme_id, annee_scolaire)` des 2 collections.
-const fetchCfaCountsByOrgIdForStatus = async (
-  orgIds: ObjectId[],
-  statut: (typeof STATUT_APPRENANT)["APPRENTI"] | (typeof STATUT_APPRENANT)["RUPTURANT"]
-): Promise<Map<string, CfaCounts>> => {
+// Apprenants DECA (tous statuts) + rupturants DECA (statut RUPTURANT) en une
+// seule passe, exploite l'index `(organisme_id, annee_scolaire, ...)`.
+const fetchCfaDecaCountsByOrgId = async (
+  orgIds: ObjectId[]
+): Promise<Map<string, { apprenants: number; rupturants: number }>> => {
   if (orgIds.length === 0) return new Map();
   const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
-
-  const pipeline = [
-    {
-      $match: {
-        organisme_id: { $in: orgIds },
-        annee_scolaire: { $in: anneeScolaireList },
-        "_computed.statut.en_cours": statut,
+  const rows = await effectifsDECADb()
+    .aggregate<{ _id: ObjectId; apprenants: number; rupturants: number }>([
+      {
+        $match: {
+          organisme_id: { $in: orgIds },
+          annee_scolaire: { $in: anneeScolaireList },
+        },
       },
-    },
-    { $group: { _id: "$organisme_id", count: { $sum: 1 } } },
-  ];
-
-  const [erpRows, decaRows] = await Promise.all([
-    effectifsDb().aggregate<{ _id: ObjectId; count: number }>(pipeline).toArray(),
-    effectifsDECADb().aggregate<{ _id: ObjectId; count: number }>(pipeline).toArray(),
-  ]);
-
-  return mergeCfaCounts(erpRows, decaRows);
+      {
+        $group: {
+          _id: "$organisme_id",
+          apprenants: { $sum: 1 },
+          rupturants: {
+            $sum: { $cond: [{ $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] }, 1, 0] },
+          },
+        },
+      },
+    ])
+    .toArray();
+  return new Map(
+    rows.filter((r) => r._id).map((r) => [String(r._id), { apprenants: r.apprenants, rupturants: r.rupturants }])
+  );
 };
 
-const fetchCfaApprenantsCountsByOrgId = (orgIds: ObjectId[]) =>
-  fetchCfaCountsByOrgIdForStatus(orgIds, STATUT_APPRENANT.APPRENTI);
+// Rupturants ERP : effectifs au statut courant RUPTURANT.
+const fetchCfaErpRupturantsByOrgId = async (orgIds: ObjectId[]): Promise<Map<string, number>> => {
+  if (orgIds.length === 0) return new Map();
+  const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
+  const rows = await effectifsDb()
+    .aggregate<{ _id: ObjectId; count: number }>([
+      {
+        $match: {
+          organisme_id: { $in: orgIds },
+          annee_scolaire: { $in: anneeScolaireList },
+          "_computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+        },
+      },
+      { $group: { _id: "$organisme_id", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  return new Map(rows.filter((r) => r._id).map((r) => [String(r._id), r.count]));
+};
 
-const fetchCfaRupturantsCountsByOrgId = (orgIds: ObjectId[]) =>
-  fetchCfaCountsByOrgIdForStatus(orgIds, STATUT_APPRENANT.RUPTURANT);
+type TransmissionReport = { error_count: number; current_day: string };
 
-const mergeCfaCounts = (
-  erpRows: Array<{ _id: ObjectId; count: number }>,
-  decaRows: Array<{ _id: ObjectId; count: number }>
-): Map<string, CfaCounts> => {
-  const byOrgId = new Map<string, CfaCounts>();
-  for (const row of erpRows) {
-    if (!row._id) continue;
-    byOrgId.set(String(row._id), { erp: row.count, deca: 0 });
-  }
-  for (const row of decaRows) {
-    if (!row._id) continue;
-    const key = String(row._id);
-    const existing = byOrgId.get(key) ?? { erp: 0, deca: 0 };
-    existing.deca = row.count;
-    byOrgId.set(key, existing);
-  }
-  return byOrgId;
+// Dernière ligne (max `current_day`) de `transmissionDailyReport` par organisme.
+const fetchCfaTransmissionErrorsByOrgId = async (orgIds: ObjectId[]): Promise<Map<string, TransmissionReport>> => {
+  if (orgIds.length === 0) return new Map();
+  const rows = await transmissionDailyReportDb()
+    .aggregate<{ _id: ObjectId; error_count: number; current_day: string }>([
+      { $match: { organisme_id: { $in: orgIds } } },
+      { $sort: { current_day: -1 } },
+      {
+        $group: {
+          _id: "$organisme_id",
+          error_count: { $first: "$error_count" },
+          current_day: { $first: "$current_day" },
+        },
+      },
+    ])
+    .toArray();
+  return new Map(rows.map((r) => [String(r._id), { error_count: r.error_count, current_day: r.current_day }]));
 };
 
 type CfaRupturantsStats = {
@@ -535,13 +554,15 @@ const fetchMlStatsByMlId = async (mlIds: ObjectId[]): Promise<Map<string, MlStat
   return byMlId;
 };
 
+// Arbitrage équipe : "ERP" si l'organisme transmet en API, sinon "DECA"
+// si on a des effectifs DECA, sinon vide. Trois valeurs possibles côté Brevo.
 const deriveCfaErpOuDeca = (
   organisme: TbaUserContext["organisme"] | undefined,
-  hasDeca: boolean
-): "erp" | "deca" | null => {
+  nbApprenantsDeca: number
+): "ERP" | "DECA" | null => {
   if (!organisme) return null;
-  if (organisme.mode_de_transmission === "API") return "erp";
-  if (hasDeca) return "deca";
+  if (organisme.mode_de_transmission === "API") return "ERP";
+  if (nbApprenantsDeca > 0) return "DECA";
   return null;
 };
 
@@ -559,8 +580,9 @@ const deriveCfaStatutV2 = (
 const buildAttributes = (
   user: TbaUserContext,
   lienConnexionPersonnalise: string,
-  apprenantsCounts: CfaCounts | undefined,
-  rupturantsCounts: CfaCounts | undefined,
+  decaCounts: { apprenants: number; rupturants: number } | undefined,
+  erpRupturants: number | undefined,
+  transmissionErrors: TransmissionReport | undefined,
   mlStats: MlStats | undefined,
   rupturantsStats: CfaRupturantsStats | undefined,
   eligibleOrgIds: Set<string>
@@ -590,7 +612,10 @@ const buildAttributes = (
   const mlPourcentageTraites: number | null =
     isMl && mlStats && mlStats.total > 0 ? Math.round((mlStats.traite / mlStats.total) * 100) : isMl ? 0 : null;
 
-  const hasDeca = (apprenantsCounts?.deca ?? 0) > 0 || (rupturantsCounts?.deca ?? 0) > 0;
+  const nbApprenantsErp = user.organisme?.effectifs_current_year_count ?? 0;
+  const nbApprenantsDeca = decaCounts?.apprenants ?? 0;
+  const nbRupturantsErp = erpRupturants ?? 0;
+  const nbRupturantsDeca = decaCounts?.rupturants ?? 0;
 
   return {
     CIVILITE: formatCivilite(user.civility),
@@ -626,17 +651,28 @@ const buildAttributes = (
     CFA_NB_FORMATEURS: isCfa ? (user.organisme?.organismesFormateursCount ?? 0) : null,
     // `CFA_ERP_CLIENT` volontairement absent → Brevo préserve la valeur saisie
     // manuellement par l'équipe lors d'imports CSV des listes clients ERP.
-    CFA_ERP_OU_DECA: isCfa ? deriveCfaErpOuDeca(user.organisme, hasDeca) : null,
+    // Arbitrage équipe (28/05/2026) — `mode_de_transmission` (et non `erps[]`).
+    CFA_ERP_OU_DECA: isCfa ? deriveCfaErpOuDeca(user.organisme, nbApprenantsDeca) : null,
     CFA_ERP: isCfa ? formatJoinedList(user.organisme?.erps, { lowercase: true }) : null,
     CFA_STATUT_CLE_API: isCfa ? (user.organisme?.api_key ? "oui" : "non") : null,
     CFA_DATE_DERNIERE_TRANSMISSION: isCfa ? (user.organisme?.last_transmission_date ?? null) : null,
-    CFA_DATE_ERREURS_TRANSMISSION: isCfa ? (user.organisme?.transmission_errors_date ?? null) : null,
-    // v1 : à reporter (agrégation `transmissionDailyReport`).
-    CFA_NB_ERREURS_TRANSMISSION: null,
-    CFA_NB_APPRENANTS_ERP: isCfa ? (apprenantsCounts?.erp ?? 0) : null,
-    CFA_NB_APPRENANTS_DECA: isCfa ? (apprenantsCounts?.deca ?? 0) : null,
-    CFA_NB_RUPTURANTS_ERP: isCfa ? (rupturantsCounts?.erp ?? 0) : null,
-    CFA_NB_RUPTURANTS_DECA: isCfa ? (rupturantsCounts?.deca ?? 0) : null,
+    // `current_day` du dernier `transmissionDailyReport` plutôt que
+    // `organisme.transmission_errors_date` (qui peut être désynchronisé).
+    CFA_DATE_ERREURS_TRANSMISSION: isCfa
+      ? (transmissionErrors?.current_day ?? user.organisme?.transmission_errors_date ?? null)
+      : null,
+    // Arbitrage : `error_count` du dernier `transmissionDailyReport`.
+    CFA_NB_ERREURS_TRANSMISSION: isCfa ? (transmissionErrors?.error_count ?? 0) : null,
+    // Arbitrage : `organisme.effectifs_current_year_count` (tous statuts,
+    // année scolaire courante, pré-calculé par `updateEffectifsCount`).
+    CFA_NB_APPRENANTS_ERP: isCfa ? nbApprenantsErp : null,
+    // Arbitrage : effectifs DECA année scolaire courante, tous statuts
+    // ("apprenants" = tous statuts ; "apprentis" = statut APPRENTI strict).
+    CFA_NB_APPRENANTS_DECA: isCfa ? nbApprenantsDeca : null,
+    // Arbitrage : effectifs au statut courant RUPTURANT (snapshot, pas
+    // l'historique des contrats rupturés).
+    CFA_NB_RUPTURANTS_ERP: isCfa ? nbRupturantsErp : null,
+    CFA_NB_RUPTURANTS_DECA: isCfa ? nbRupturantsDeca : null,
     CFA_STATUT_V2: isCfa ? deriveCfaStatutV2(user.organisme, eligibleOrgIds) : null,
 
     // `ML_DATE_ACTIVATION_ML` est aussi remonté côté OF : c'est la date
@@ -647,15 +683,15 @@ const buildAttributes = (
     ML_NB_RUPTURANTS_TRAITES: isMl ? (mlStats?.traite ?? 0) : null,
     ML_POURCENTAGE_RUPTURANTS_TRAITES: mlPourcentageTraites,
 
-    NB_JEUNES_EN_RUPTURE: isCfa ? (rupturantsStats?.nb_jeunes_rupture ?? 0) : null,
-    NB_MISSIONS_LOCALES_PARTENAIRES: isCfa ? (rupturantsStats?.nb_ml_total ?? 0) : null,
-    LISTE_MISSIONS_LOCALES: isCfa
+    CFA_NB_JEUNES_EN_RUPTURE: isCfa ? (rupturantsStats?.nb_jeunes_rupture ?? 0) : null,
+    CFA_NB_MISSIONS_LOCALES_PARTENAIRES: isCfa ? (rupturantsStats?.nb_ml_total ?? 0) : null,
+    CFA_LISTE_MISSIONS_LOCALES: isCfa
       ? rupturantsStats
         ? formatMlList(rupturantsStats.ml_names_top, rupturantsStats.nb_ml_others)
         : ""
       : null,
 
-    LIEN_CONNEXION_PERSONNALISE: lienConnexionPersonnalise,
+    CFA_LIEN_CONNEXION_PERSONNALISE: isCfa ? lienConnexionPersonnalise : null,
   };
 };
 
@@ -674,11 +710,12 @@ const buildLienConnexionPersonnalise = (token: string): string => {
   return buildUtmUrl(baseAuthUrl, TBA_CONTACTS_UTM);
 };
 
+// `CFA_LIEN_CONNEXION_PERSONNALISE` est un lien propre aux CFA : on ne génère
+// pas de token d'invitation pour les autres profils (ML, ARML, ...).
 const buildLienByEmail = async (users: TbaUserContext[]): Promise<Map<string, string>> => {
-  const tokenByEmail = await getOrCreateConnexionInvitationsByEmails(
-    users.map((u) => u.email),
-    { source: "tba-contacts" }
-  );
+  const cfaEmails = users.filter((u) => u.organisation.type === "ORGANISME_FORMATION").map((u) => u.email);
+  if (cfaEmails.length === 0) return new Map();
+  const tokenByEmail = await getOrCreateConnexionInvitationsByEmails(cfaEmails, { source: "tba-contacts" });
   const lienByEmail = new Map<string, string>();
   for (const [email, token] of tokenByEmail) {
     lienByEmail.set(email, buildLienConnexionPersonnalise(token));
@@ -697,15 +734,17 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
   const mlIds = users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id);
 
   const [
-    apprenantsCountsByOrgId,
-    rupturantsCountsByOrgId,
+    decaCountsByOrgId,
+    erpRupturantsByOrgId,
+    transmissionErrorsByOrgId,
     rupturantsStatsByOrgId,
     mlStatsByMlId,
     lienByEmail,
     eligibleOrgsRows,
   ] = await Promise.all([
-    fetchCfaApprenantsCountsByOrgId(cfaOrgIds),
-    fetchCfaRupturantsCountsByOrgId(cfaOrgIds),
+    fetchCfaDecaCountsByOrgId(cfaOrgIds),
+    fetchCfaErpRupturantsByOrgId(cfaOrgIds),
+    fetchCfaTransmissionErrorsByOrgId(cfaOrgIds),
     fetchRupturantsStatsByOrgId(cfaOrgIds),
     fetchMlStatsByMlId(mlIds),
     buildLienByEmail(users),
@@ -716,8 +755,9 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
 
   return users.map((user): BrevoContact => {
     const organismeId = user.organisme?._id ? String(user.organisme._id) : null;
-    const apprenantsCounts = organismeId ? apprenantsCountsByOrgId.get(organismeId) : undefined;
-    const rupturantsCounts = organismeId ? rupturantsCountsByOrgId.get(organismeId) : undefined;
+    const decaCounts = organismeId ? decaCountsByOrgId.get(organismeId) : undefined;
+    const erpRupturants = organismeId ? erpRupturantsByOrgId.get(organismeId) : undefined;
+    const transmissionErrors = organismeId ? transmissionErrorsByOrgId.get(organismeId) : undefined;
     const rupturantsStats = organismeId ? rupturantsStatsByOrgId.get(organismeId) : undefined;
     const mlStats =
       user.organisation.type === "MISSION_LOCALE" ? mlStatsByMlId.get(String(user.organisation._id)) : undefined;
@@ -727,8 +767,9 @@ const fetchContacts = async (): Promise<BrevoContact[]> => {
       attributes: buildAttributes(
         user,
         lien,
-        apprenantsCounts,
-        rupturantsCounts,
+        decaCounts,
+        erpRupturants,
+        transmissionErrors,
         mlStats,
         rupturantsStats,
         eligibleOrgIds
