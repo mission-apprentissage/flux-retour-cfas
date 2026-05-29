@@ -17,6 +17,22 @@ const config = {
     .get("MNA_TDB_TRUST_PROXY")
     .default(envName === "local" || envName === "test" ? 0 : 1)
     .asInt(),
+  rateLimit: {
+    skipPrivateIps: env.get("MNA_TDB_RATE_LIMIT_SKIP_PRIVATE_IPS").default("true").asBool(),
+    tiers: {
+      loginIp: { points: 20, duration: 900, enforce: true },
+      loginEmail: { points: 20, duration: 3600, enforce: true },
+      passwordReset: { points: 5, duration: 900, enforce: true },
+      register: { points: 30, duration: 3600, enforce: true },
+      resendEmail: { points: 5, duration: 60, enforce: true },
+      activation: { points: 20, duration: 900, enforce: true },
+      public: { points: 300, duration: 60, enforce: true },
+      publicDashboard: { points: 600, duration: 60, enforce: true },
+      api: { points: 1000, duration: 60, enforce: true },
+      heavy: { points: 10, duration: 60, enforce: true },
+      webhook: { points: 100, duration: 60, enforce: true },
+    },
+  },
   mongodb: {
     uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
     dbName: env.get("MNA_TDB_MONGODB_DB_NAME").required().asString(),
