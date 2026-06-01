@@ -380,6 +380,24 @@ program
   });
 
 program
+  .command("brevo-contacts:sync")
+  .description("Synchronise une liste de contacts vers Brevo (création/peuplement de la liste)")
+  .requiredOption("--slug <slug>", "Slug de la liste (ex: cfa-users)")
+  .option("--dry-run", "Simulation : pipeline d'agrégation et mapping exécutés, sans appel Brevo", false)
+  .option("--dump <path>", "Écrit le payload complet des contacts en JSON dans un fichier")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    const baseDir = process.env.INIT_CWD || process.cwd();
+    const dumpTo = options.dump ? path.resolve(baseDir, options.dump) : undefined;
+    return createJobAction("brevo-contacts:sync")({
+      slug: options.slug,
+      dryRun: options.dryRun,
+      dumpTo,
+      queued: options.queued ?? false,
+    });
+  });
+
+program
   .command("job:run")
   .description("Run a job")
   .requiredOption("-n, --name <string>", "Job name")

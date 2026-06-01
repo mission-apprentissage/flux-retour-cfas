@@ -34,6 +34,43 @@ exports[`validation-schema > should create validation schema for auditLogs > aud
 }
 `;
 
+exports[`validation-schema > should create validation schema for brevoContactList > brevoContactList 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "folderId": {
+      "bsonType": "number",
+    },
+    "listId": {
+      "bsonType": "number",
+    },
+    "listName": {
+      "bsonType": "string",
+    },
+    "slug": {
+      "bsonType": "string",
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+  },
+  "required": [
+    "_id",
+    "slug",
+    "listId",
+    "listName",
+    "folderId",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for brevoMissionLocaleList > brevoMissionLocaleList 1`] = `
 {
   "additionalProperties": false,
@@ -103,6 +140,43 @@ exports[`validation-schema > should create validation schema for brevoMissionLoc
     "templateId",
     "name",
     "type",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for connexionInvitations > connexionInvitations 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "email": {
+      "bsonType": "string",
+      "description": "Email du destinataire",
+    },
+    "source": {
+      "bsonType": "string",
+      "description": "Origine de la génération (ex. 'tba-contacts')",
+    },
+    "token": {
+      "bsonType": "string",
+      "description": "Jeton aléatoire (hex)",
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+  },
+  "required": [
+    "_id",
+    "token",
+    "email",
+    "created_at",
+    "updated_at",
   ],
 }
 `;

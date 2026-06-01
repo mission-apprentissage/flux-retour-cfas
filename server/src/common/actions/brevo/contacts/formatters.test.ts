@@ -1,0 +1,122 @@
+import { describe, expect, it } from "vitest";
+
+import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName } from "./formatters";
+
+describe("formatName", () => {
+  it("title case basique", () => {
+    expect(formatName("DUPONT")).toBe("Dupont");
+    expect(formatName("alice")).toBe("Alice");
+    expect(formatName("jean")).toBe("Jean");
+  });
+
+  it("preserve les tirets dans les noms composés", () => {
+    expect(formatName("jean-pierre")).toBe("Jean-Pierre");
+    expect(formatName("MARIE-CHANTAL")).toBe("Marie-Chantal");
+  });
+
+  it("preserve les apostrophes", () => {
+    expect(formatName("d'artagnan")).toBe("D'Artagnan");
+    expect(formatName("D'ARTAGNAN")).toBe("D'Artagnan");
+  });
+
+  it("preserve les espaces des prénoms/noms composés", () => {
+    expect(formatName("MARIE CHANTAL")).toBe("Marie Chantal");
+    expect(formatName("jean luc")).toBe("Jean Luc");
+  });
+
+  it("trim les espaces de bord", () => {
+    expect(formatName("  Jean  ")).toBe("Jean");
+  });
+
+  it("gère les valeurs vides ou absentes", () => {
+    expect(formatName("")).toBeNull();
+    expect(formatName("   ")).toBeNull();
+    expect(formatName(null)).toBeNull();
+    expect(formatName(undefined)).toBeNull();
+  });
+});
+
+describe("formatCivilite", () => {
+  it("normalise Madame → Mme", () => {
+    expect(formatCivilite("Madame")).toBe("Mme");
+    expect(formatCivilite("MADAME")).toBe("Mme");
+    expect(formatCivilite("madame")).toBe("Mme");
+    expect(formatCivilite("Mme")).toBe("Mme");
+    expect(formatCivilite("Mme.")).toBe("Mme");
+  });
+
+  it("normalise Monsieur → M.", () => {
+    expect(formatCivilite("Monsieur")).toBe("M.");
+    expect(formatCivilite("MONSIEUR")).toBe("M.");
+    expect(formatCivilite("M.")).toBe("M.");
+    expect(formatCivilite("M")).toBe("M.");
+  });
+
+  it("retourne la valeur trim si non reconnue", () => {
+    expect(formatCivilite("Mx")).toBe("Mx");
+    expect(formatCivilite("  Autre  ")).toBe("Autre");
+  });
+
+  it("gère les valeurs vides", () => {
+    expect(formatCivilite("")).toBeNull();
+    expect(formatCivilite(null)).toBeNull();
+    expect(formatCivilite(undefined)).toBeNull();
+  });
+});
+
+describe("formatEmail", () => {
+  it("lowercase + trim", () => {
+    expect(formatEmail("Alice@EXAMPLE.COM")).toBe("alice@example.com");
+    expect(formatEmail("  alice@example.com  ")).toBe("alice@example.com");
+  });
+});
+
+describe("cleanSiret", () => {
+  it("strip les non-chiffres", () => {
+    expect(cleanSiret("78106280700032")).toBe("78106280700032");
+    expect(cleanSiret("781 062 807 000 32")).toBe("78106280700032");
+    expect(cleanSiret("781.062.807.000.32")).toBe("78106280700032");
+  });
+
+  it("gère les valeurs vides", () => {
+    expect(cleanSiret("")).toBeNull();
+    expect(cleanSiret("abc")).toBeNull();
+    expect(cleanSiret(null)).toBeNull();
+    expect(cleanSiret(undefined)).toBeNull();
+  });
+});
+
+describe("formatJoinedList", () => {
+  it("join avec virgule + espace par défaut", () => {
+    expect(formatJoinedList(["CMA", "AGRI", "CFA_EN"])).toBe("CMA, AGRI, CFA_EN");
+  });
+
+  it("supporte un séparateur custom", () => {
+    expect(formatJoinedList(["a", "b", "c"], { separator: ";" })).toBe("a;b;c");
+  });
+
+  it("lowercase optionnel (pour CFA_ERP)", () => {
+    expect(formatJoinedList(["YPAREO", "Gestibase"], { lowercase: true })).toBe("ypareo, gestibase");
+  });
+
+  it("trim les éléments et filtre les vides", () => {
+    expect(formatJoinedList([" CMA ", "", "AGRI", "  "])).toBe("CMA, AGRI");
+  });
+
+  it("gère les valeurs vides ou absentes", () => {
+    expect(formatJoinedList([])).toBeNull();
+    expect(formatJoinedList(null)).toBeNull();
+    expect(formatJoinedList(undefined)).toBeNull();
+    expect(formatJoinedList(["", "   ", ""])).toBeNull();
+  });
+
+  it("dédoublonne en préservant l'ordre de première apparition", () => {
+    expect(formatJoinedList(["ymag", "inconnu", "ymag", "erp"])).toBe("ymag, inconnu, erp");
+    expect(formatJoinedList(["AGRI", "CMA", "AGRI"])).toBe("AGRI, CMA");
+  });
+
+  it("dédoublonne après normalisation (lowercase + trim)", () => {
+    expect(formatJoinedList(["Ymag", "ymag", "YMAG", " ymag "], { lowercase: true })).toBe("ymag");
+    expect(formatJoinedList([" CMA ", "cma"], { lowercase: true })).toBe("cma");
+  });
+});

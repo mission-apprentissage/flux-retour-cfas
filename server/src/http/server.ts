@@ -90,7 +90,7 @@ import {
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
-  getOrganismeByUAIAndSIRET,
+  getPublicOrganismeByUAIAndSIRET,
   getOrganismeDetails,
   getStatOrganismes,
   listContactsOrganisme,
@@ -150,6 +150,7 @@ import requireBearerAuthentication from "./middlewares/requireBearerAuthenticati
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
+import brevoContactsRoutesAdmin from "./routes/admin.routes/brevo-contacts.routes";
 import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
@@ -163,6 +164,7 @@ import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes"
 import usersAdmin from "./routes/admin.routes/users.routes";
 import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
+import connexionInfoRouter from "./routes/onboarding.routes/connexion-info.route";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
 import indicateursMlRoutes from "./routes/organisations.routes/indicateurs-ml/indicateurs-ml.routes";
 import missionLocaleAuthentRoutes from "./routes/organisations.routes/mission-locale/mission-locale.routes";
@@ -307,7 +309,7 @@ function setupRoutes(app: Application) {
           uai: z.string().nullable(),
           siret: z.string(),
         });
-        const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
+        const organisme = await getPublicOrganismeByUAIAndSIRET(uai, siret);
         if (!organisme) {
           throw Boom.badRequest("Aucun organisme trouvé");
         }
@@ -1030,6 +1032,7 @@ function setupRoutes(app: Application) {
       .use("/erps", erpsRoutesAdmin())
       .use("/mission-locale", missionLocaleRoutesAdmin())
       .use("/collaborations", collaborationsAdmin())
+      .use("/brevo-contacts", brevoContactsRoutesAdmin())
       .get(
         "/stats",
         returnResult(async () => {
@@ -1090,5 +1093,6 @@ function setupRoutes(app: Application) {
   );
 
   app.use("/api/v1/campagne", campagneRouter());
+  app.use("/api/v1/onboarding/connexion-info", connexionInfoRouter());
   app.use(authRouter);
 }

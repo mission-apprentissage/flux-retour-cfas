@@ -48,9 +48,15 @@ export function applyTestPhoneOverride(phone: string): string {
 }
 
 /**
- * Normalise un numéro de téléphone (+33612345678)
+ * Normalise un numéro de téléphone (+33612345678).
+ *
+ * `silent: true` désactive le `logger.warn` par-invalide — utile en bulk
+ * (sync TBA p.ex.) où ~N invalides saturent Pino et font exploser la durée.
  */
-export function normalizePhoneNumber(phone: string | null | undefined): string | null {
+export function normalizePhoneNumber(
+  phone: string | null | undefined,
+  options: { silent?: boolean } = {}
+): string | null {
   if (!phone) return null;
 
   try {
@@ -63,7 +69,9 @@ export function normalizePhoneNumber(phone: string | null | undefined): string |
 
     return null;
   } catch (error) {
-    logger.warn("Failed to normalize phone number");
+    if (!options.silent) {
+      logger.warn("Failed to normalize phone number");
+    }
     return null;
   }
 }

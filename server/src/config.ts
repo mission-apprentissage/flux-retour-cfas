@@ -99,6 +99,11 @@ const config = {
   },
   brevo: {
     apiKey: env.get("MNA_TDB_BREVO_API_KEY").asString(),
+    campaignFolderId: env.get("MNA_TDB_BREVO_FOLDER_ID_CAMPAIGNS").default("1").asInt(),
+    // Pas de default : sans cette env, on écraserait la liste Brevo #1.
+    // Laisser `undefined` → `checkBrevoHealth` warn et la sync crée une liste
+    // dédiée à la 1ʳᵉ exécution.
+    tbaContactsListId: env.get("MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS").asInt(),
     whatsapp: (() => {
       const isProd = env.get("MNA_TDB_ENV").required().asString() === "production";
       const hasTestOverride = !!env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").default("").asString();

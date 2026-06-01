@@ -448,6 +448,31 @@ export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: strin
   });
 }
 
+export async function getPublicOrganismeByUAIAndSIRET(
+  uai: string | null,
+  siret: string
+): Promise<Partial<WithId<IOrganisme>> | null> {
+  return await organismesDb().findOne(
+    {
+      uai: uai as any,
+      siret: siret,
+    },
+    {
+      projection: {
+        siret: 1,
+        uai: 1,
+        enseigne: 1,
+        raison_sociale: 1,
+        ferme: 1,
+        nature: {
+          $ifNull: ["$nature", "inconnue"],
+        },
+        adresse: 1,
+      },
+    }
+  );
+}
+
 export async function configureOrganismeERP(
   ctx: AuthContext,
   organismeId: ObjectId,

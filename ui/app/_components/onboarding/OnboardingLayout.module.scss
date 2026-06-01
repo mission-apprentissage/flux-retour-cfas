@@ -1,0 +1,55 @@
+// Mécanique de mise en page commune aux pages d'onboarding (inscription CFA et
+// connexion en mode welcome-back). Layout flex à plat full-width : chaque colonne
+// porte son propre fond qui saigne naturellement jusqu'aux bords de la viewport
+// puisque le parent (le `.main` du layout public) occupe `100vw`.
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 200px);
+}
+
+.sidebar {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  width: 35%;
+  padding: 1.5rem clamp(1.5rem, 4vw, 6rem) 3.5rem;
+  background-color: #ececfe;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  padding: 1.5rem 0 3.5rem;
+  background-color: #f5f5fe;
+}
+
+.content {
+  width: 80%;
+  max-width: 600px;
+}
+
+.title {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .content {
+    width: 100%;
+    padding: 0 1rem;
+  }
+}
