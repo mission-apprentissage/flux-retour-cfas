@@ -52,6 +52,7 @@ export default function ParametresClient() {
   const [selectedERPId, setSelectedERPId] = useState("");
   const [selectedERP, setSelectedERP] = useState({} as IErp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
+  const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null);
 
   const { erps, erpsById } = useErp();
 
@@ -102,6 +103,61 @@ export default function ParametresClient() {
                           {formatDateNumericDayMonthYear(organisme.mode_de_transmission_configuration_date)} par{" "}
                           {organisme.mode_de_transmission_configuration_author_fullname})
                         </p>
+                      )}
+                      {(organisme.api_key_revoked_at || regeneratedApiKey) && (
+                        <Alert
+                          severity={regeneratedApiKey ? "success" : "warning"}
+                          className="fr-mt-2w fr-mb-2w"
+                          title={regeneratedApiKey ? "Nouvelle clé d'échange générée" : "Votre clé d'échange a expiré"}
+                          description={
+                            <>
+                              {organisme.api_key_revoked_at && !regeneratedApiKey && (
+                                <p>
+                                  Votre clé d&apos;échange a été désactivée le{" "}
+                                  {formatDateNumericDayMonthYear(organisme.api_key_revoked_at)} faute de transmission
+                                  depuis plus de 12 mois. Vos effectifs ne sont plus transmis au tableau de bord.
+                                </p>
+                              )}
+                              <p className="fr-mt-1w">
+                                {regeneratedApiKey
+                                  ? "Copiez cette clé et installez-la dans votre ERP pour reprendre les transmissions."
+                                  : "Générez une nouvelle clé, puis installez-la dans votre ERP pour reprendre les transmissions."}
+                              </p>
+                              {regeneratedApiKey ? (
+                                <>
+                                  <div className="fr-mt-2w fr-mb-2w">
+                                    <label className="fr-label" htmlFor="regeneratedApiKey">
+                                      Votre nouvelle clé d&apos;échange
+                                    </label>
+                                    <input
+                                      className="fr-input"
+                                      type="text"
+                                      id="regeneratedApiKey"
+                                      name="regeneratedApiKey"
+                                      value={regeneratedApiKey}
+                                      readOnly
+                                    />
+                                  </div>
+                                  <CopyToClipboard text={regeneratedApiKey} onCopy={() => toastSuccess("Copié !")}>
+                                    <Button>Copier la clé</Button>
+                                  </CopyToClipboard>
+                                </>
+                              ) : (
+                                <Button
+                                  className="fr-mt-2w"
+                                  onClick={async () => {
+                                    const { apiKey } = await _post(`/api/v1/organismes/${organisme._id}/api-key`);
+                                    setRegeneratedApiKey(apiKey);
+                                    toastSuccess("Votre clé d'échange a été correctement générée.");
+                                    await refetchOrganisme();
+                                  }}
+                                >
+                                  Générer une nouvelle clé d&apos;échange
+                                </Button>
+                              )}
+                            </>
+                          }
+                        />
                       )}
                       <DsfrLink href="/cfa" className="fr-mt-2w">
                         Mes effectifs
