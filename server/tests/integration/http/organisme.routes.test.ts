@@ -701,6 +701,38 @@ describe("Routes /organismes/:id", () => {
     // TODO vérifier chaque filtre
   });
 
+  describe("POST /organismes/get-by-uai-siret - route publique d'inscription", () => {
+    const { uai, siret } = organismesByLabel["OF cible"];
+
+    beforeEach(async () => {
+      await organismesDb().updateOne(
+        { _id: organismesByLabel["OF cible"]._id },
+        {
+          $set: {
+            api_key: "super-secret-api-key",
+            api_uai: "0000000A",
+            api_siret: "00000000000018",
+            api_configuration_date: new Date(),
+            mode_de_transmission: "API",
+          },
+        }
+      );
+    });
+
+    it("ne divulgue aucun champ sensible (api_key, mode_de_transmission…) à un appelant anonyme", async () => {
+      const response = await httpClient.post("/api/v1/organismes/get-by-uai-siret", { uai, siret });
+
+      expect(response.status).toStrictEqual(200);
+      expect(response.data).toMatchObject({ siret, uai });
+      // Aucun secret ne doit fuiter
+      expect(response.data).not.toHaveProperty("api_key");
+      expect(response.data).not.toHaveProperty("api_uai");
+      expect(response.data).not.toHaveProperty("api_siret");
+      expect(response.data).not.toHaveProperty("api_configuration_date");
+      expect(response.data).not.toHaveProperty("mode_de_transmission");
+    });
+  });
+
   describe("PUT /organismes/:id/configure-erp - configuration du mode de transmission d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {

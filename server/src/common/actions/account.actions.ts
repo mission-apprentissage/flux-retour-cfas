@@ -350,10 +350,13 @@ export async function getCfaOnboardingInfo(token: string) {
     throw Boom.badRequest("Cette invitation ne concerne pas un CFA");
   }
 
-  const organisme = await organismesDb().findOne({
-    siret: organisation.siret,
-    ...(organisation.uai ? { uai: organisation.uai } : {}),
-  });
+  const organisme = await organismesDb().findOne(
+    {
+      siret: organisation.siret,
+      ...(organisation.uai ? { uai: organisation.uai } : {}),
+    },
+    { projection: { nom: 1, enseigne: 1, raison_sociale: 1, adresse: 1 } }
+  );
 
   const departement = organisme?.adresse?.departement;
 
