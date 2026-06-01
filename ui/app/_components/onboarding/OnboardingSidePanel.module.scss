@@ -1,0 +1,142 @@
+// Panneau gauche partagé entre les pages d'onboarding (inscription CFA et
+// connexion welcome-back). Le wrapper extérieur (largeur 35%, fond mauve foncé)
+// est porté par `OnboardingLayout` ; ce module contient le contenu interne.
+
+.inner {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 3rem;
+}
+
+.breadcrumb {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey, #666);
+}
+
+.breadcrumbLink {
+  color: inherit;
+}
+
+.introContainer {
+  padding-top: 2.5rem;
+  padding-right: 2rem;
+  padding-bottom: 1.5rem;
+  padding-left: 2rem;
+  background-color: #ffffff;
+  border-radius: 0.25rem;
+}
+
+.intro {
+  line-height: 1.6;
+}
+
+.illustration {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 80%;
+  margin: 0 auto -1.5rem;
+}
+
+.separator {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-action-low-blue-france, #cacafb);
+}
+
+.cfaCountBlock {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 36px 1.5rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: #ffffff;
+}
+
+.cfaCountIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 1.25rem;
+  color: var(--text-action-high-blue-france, #000091);
+}
+
+.mlBlock {
+  margin-top: 1rem;
+}
+
+.mlBlockWithSeparator {
+  margin-top: 0;
+}
+
+.mlSeparator {
+  margin: 24px 0 0;
+  border: none;
+  border-top: 1px solid var(--border-default-grey, #ddd);
+}
+
+.mlTitle {
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--text-default-grey, #161616);
+}
+
+.mlTitleCount {
+  color: var(--text-active-blue-france, #6a6af4);
+}
+
+.mlList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.mlItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  background: var(--light-decisions-background-background-alt-blue-france, #f5f5fe);
+  border-top: 1px solid var(--light-decisions-border-border-open-blue-france, #e3e3fd);
+  border-right: 1px solid var(--light-decisions-border-border-open-blue-france, #e3e3fd);
+  border-left: 1px solid var(--light-decisions-border-border-open-blue-france, #e3e3fd);
+  border-radius: 2px;
+}
+
+.mlBullet {
+  margin-top: 2px;
+  color: var(--text-default-success, #18753c);
+}
+
+.mlSubtext {
+  color: var(--text-mention-grey, #666);
+}
+
+.mlShowMoreWrap {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.mlShowMoreBtn {
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-action-high-blue-france, #000091);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+// État vide du bloc ML : pas de liste, juste un message d'absence. Style aligné
+// sur le bloc CFA pour homogénéité visuelle (carte blanche, padding doux).
+.mlEmptyMessage {
+  padding: 1rem 1.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-mention-grey, #666);
+  background: #ffffff;
+}

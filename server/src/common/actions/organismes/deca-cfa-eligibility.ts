@@ -59,14 +59,18 @@ export type IEligibleOrganismeRow = {
  *   - aucune formation catalogue publiée où l'organisme est gestionnaire mais formateur tiers
  *   - au moins un effectif (ERP + DECA) sur les années scolaires actives
  *   - ferme !== true
+ *
+ * `organismeIds` (optionnel) : restreint le scan à un sous-ensemble d'organismes
+ * — utile pour les consommateurs qui ont déjà filtré en amont (ex. sync Brevo).
  */
-export async function findEligibleOrganismes(): Promise<IEligibleOrganismeRow[]> {
+export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise<IEligibleOrganismeRow[]> {
   const activeAnnees = getActiveAnneesScolaires(new Date());
 
   return organismesDb()
     .aggregate<IEligibleOrganismeRow>([
       {
         $match: {
+          ...(organismeIds ? { _id: { $in: organismeIds } } : {}),
           ferme: { $ne: true },
           siret: { $exists: true, $nin: [null, ""] },
           uai: { $exists: true, $nin: [null, ""] },

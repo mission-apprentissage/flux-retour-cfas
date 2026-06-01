@@ -7,34 +7,22 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
-import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { maskEmail } from "shared/utils/maskEmail";
 
-import { _get, _post } from "@/common/httpClient";
+import {
+  type CfaOnboardingInfo,
+  OnboardingError,
+  OnboardingLayout,
+  OnboardingSidePanel,
+  OnboardingSkeleton,
+  type OnboardingMlItem,
+  useCfaInvitationInfo,
+} from "@/app/_components/onboarding";
+import { _post } from "@/common/httpClient";
 
 import styles from "./InscriptionCfa.module.css";
-
-interface CfaOnboardingInfo {
-  email: string;
-  role?: "admin" | "member";
-  etablissement: {
-    nom: string;
-    adresse: string;
-    commune: string;
-    uai: string | null;
-    siret: string | null;
-    departement?: string;
-  };
-  missionsLocales: Array<{
-    _id: string;
-    nom: string;
-    commune?: string;
-    codePostal?: string;
-  }>;
-  cfaConnectesCount: number;
-}
 
 type Step = 1 | 2 | 3;
 
@@ -49,85 +37,13 @@ const PASSWORD_RULES = [
   { label: "1 caractère spécial (ex : ! @ # $ % & * - _)", test: (p: string) => /[^a-zA-Z0-9]/.test(p) },
 ];
 
-function Sidebar({ info }: { info: CfaOnboardingInfo }) {
-  const [showAllMl, setShowAllMl] = useState(false);
-  const ML_VISIBLE_COUNT = 5;
-  const visibleMl = showAllMl ? info.missionsLocales : info.missionsLocales.slice(0, ML_VISIBLE_COUNT);
-  const hasMoreMl = info.missionsLocales.length > ML_VISIBLE_COUNT;
+const SIDE_PANEL_INTRO =
+  "Le Tableau de bord de l'apprentissage : l'outil de collaboration entre les CFA et les Missions Locales pour l'accompagnement des jeunes en rupture de contrat d'apprentissage.";
 
-  return (
-    <div className={styles.sidebarInner}>
-      <nav className={styles.breadcrumb}>
-        <NextLink href="/" className={styles.breadcrumbLink}>
-          Accueil
-        </NextLink>
-        {" > "}
-        <NextLink href="/cfa" className={styles.breadcrumbLink}>
-          CFA
-        </NextLink>
-        {" > "}
-        <span>Création de compte</span>
-      </nav>
-
-      <p className={styles.intro}>
-        Le Tableau de bord de l&apos;apprentissage : l&apos;outil de collaboration entre les CFA et les Missions Locales
-        pour l&apos;accompagnement des jeunes en rupture de contrat d&apos;apprentissage.
-      </p>
-
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/illu-onboarding.png"
-        alt="Illustration collaboration CFA et Missions Locales"
-        className={styles.illustration}
-      />
-
-      {info.cfaConnectesCount > 0 && (
-        <div className={styles.cfaCountBlock}>
-          <i className={`${fr.cx("ri-lightbulb-line")} ${styles.cfaCountIcon}`} />
-          <span>
-            <strong>{info.cfaConnectesCount} CFA</strong> sur votre territoire ont déjà un compte sur le Tableau de bord
-            et collaborent avec les Missions Locales.
-          </span>
-        </div>
-      )}
-
-      {info.missionsLocales.length > 0 && (
-        <div className={info.cfaConnectesCount > 0 ? styles.mlBlockWithSeparator : styles.mlBlock}>
-          {info.cfaConnectesCount > 0 && <hr className={styles.mlSeparator} />}
-          <p className={styles.mlTitle}>
-            <span className={styles.accent}>{info.missionsLocales.length}</span> Missions Locales sont prêtes à
-            collaborer avec vous sur le service
-          </p>
-          <ul className={styles.mlList}>
-            {visibleMl.map((ml) => (
-              <li key={ml._id} className={styles.mlItem}>
-                <span className={styles.mlBullet}>&#9679;</span>
-                <span>
-                  <strong>Mission Locale {ml.nom}</strong>
-                  {ml.commune && (
-                    <>
-                      <br />
-                      <span className={styles.mlSubtext}>
-                        {ml.commune} {ml.codePostal}
-                      </span>
-                    </>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {hasMoreMl && !showAllMl && (
-            <div className={styles.mlShowMoreWrap}>
-              <button type="button" onClick={() => setShowAllMl(true)} className={styles.mlShowMoreBtn}>
-                Voir plus ({info.missionsLocales.length - ML_VISIBLE_COUNT})
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+const SIDE_PANEL_ILLUSTRATION = {
+  src: "/images/illu-onboarding.png",
+  alt: "Illustration collaboration CFA et Missions Locales",
+};
 
 function Step1({ info, onNext }: { info: CfaOnboardingInfo; onNext: () => void }) {
   const [cguAccepted, setCguAccepted] = useState(false);
@@ -482,55 +398,14 @@ function Step3({ email }: { email: string }) {
   );
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className={styles.skeletonLayout}>
-      <div className={styles.skeletonSidebar}>
-        {[120, 200, 160, 140].map((w, i) => (
-          <div key={i} className={styles.skeletonBar} style={{ width: `${w}px` }} />
-        ))}
-      </div>
-      <div className={styles.skeletonMain}>
-        <div className={`${styles.skeletonBarLight} ${styles.skeletonTitle}`} />
-        {[300, 250, "100%", "100%", 200].map((w, i) => (
-          <div
-            key={i}
-            className={`${styles.skeletonBarLight} ${styles.skeletonInput}`}
-            style={{ width: typeof w === "number" ? `${w}px` : w }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function InscriptionCfaClient() {
   const searchParams = useSearchParams();
   const token = searchParams?.get("invitationToken") ?? "";
 
   const [step, setStep] = useState<Step>(1);
-  const [info, setInfo] = useState<CfaOnboardingInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [registeredPrenom, setRegisteredPrenom] = useState("");
 
-  useEffect(() => {
-    if (!token) {
-      setError("Lien d'invitation invalide. Aucun jeton fourni.");
-      setLoading(false);
-      return;
-    }
-    _get<CfaOnboardingInfo>(`/api/v1/onboarding/cfa-info?token=${encodeURIComponent(token)}`)
-      .then((data) => {
-        setInfo(data);
-        setLoading(false);
-      })
-      .catch((err: any) => {
-        const msg = err?.json?.data?.message || err.message || "Erreur lors du chargement";
-        setError(msg);
-        setLoading(false);
-      });
-  }, [token]);
+  const onboarding = useCfaInvitationInfo();
 
   const handleStep2Submit = useCallback(
     async (data: { nom: string; prenom: string; telephone: string; fonction: string; password: string }) => {
@@ -546,22 +421,19 @@ export default function InscriptionCfaClient() {
     [token]
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
+  if (onboarding.status === "loading") {
+    return <OnboardingSkeleton />;
   }
 
-  if (error) {
-    return (
-      <div className={styles.errorContainer}>
-        <Alert severity="error" title="Erreur" description={error} />
-        <Button priority="secondary" linkProps={{ href: "/auth/connexion" }} className={styles.errorBackButton}>
-          Retour à la connexion
-        </Button>
-      </div>
-    );
+  if (onboarding.status === "idle") {
+    return <OnboardingError description="Lien d'invitation invalide. Aucun jeton fourni." backHref="/auth/connexion" />;
   }
 
-  if (!info) return null;
+  if (onboarding.status === "error") {
+    return <OnboardingError description={onboarding.message} backHref="/auth/connexion" />;
+  }
+
+  const info = onboarding.data;
 
   const etablissementVille = info.etablissement.commune || "";
 
@@ -580,22 +452,30 @@ export default function InscriptionCfaClient() {
       </>
     );
 
+  const mlItems: OnboardingMlItem[] = info.missionsLocales.map((ml) => ({
+    id: ml._id,
+    nom: ml.nom,
+    subtext: ml.commune ? `${ml.commune}${ml.codePostal ? ` ${ml.codePostal}` : ""}` : undefined,
+  }));
+
   return (
-    <div className={styles.layout}>
-      <div className={styles.sidebar}>
-        <Sidebar info={info} />
+    <OnboardingLayout
+      sidebar={
+        <OnboardingSidePanel
+          illustration={SIDE_PANEL_ILLUSTRATION}
+          intro={SIDE_PANEL_INTRO}
+          cfaCount={info.cfaConnectesCount}
+          missionsLocales={mlItems}
+        />
+      }
+      title={title}
+    >
+      <div className={styles.card}>
+        {step === 1 && <Step1 info={info} onNext={() => setStep(2)} />}
+        {step === 2 && <Step2 info={info} onSubmit={handleStep2Submit} />}
+        {step === 3 && <Step3 email={info.email} />}
       </div>
-      <div className={styles.main}>
-        <div className={styles.content}>
-          <h1 className={styles.title}>{title}</h1>
-          <div className={styles.card}>
-            {step === 1 && <Step1 info={info} onNext={() => setStep(2)} />}
-            {step === 2 && <Step2 info={info} onSubmit={handleStep2Submit} />}
-            {step === 3 && <Step3 email={info.email} />}
-          </div>
-          {step === 2 && <LoginBlock />}
-        </div>
-      </div>
-    </div>
+      {step === 2 && <LoginBlock />}
+    </OnboardingLayout>
   );
 }

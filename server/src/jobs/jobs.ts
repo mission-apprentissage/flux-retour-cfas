@@ -2,6 +2,7 @@ import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
+import { syncContactList } from "@/common/actions/brevo/contacts/sync";
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
@@ -617,6 +618,27 @@ export async function setupJobProcessor() {
             throw new Error("csvPath est requis");
           }
           return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
+        },
+      },
+      "brevo-contacts:sync": {
+        handler: async (job) => {
+          const payload = job.payload as
+            | {
+                slug?: string;
+                dryRun?: boolean;
+                dumpTo?: string;
+              }
+            | undefined;
+          if (!payload?.slug) {
+            throw new Error("slug est requis");
+          }
+          const result = await syncContactList({
+            slug: payload.slug,
+            dryRun: payload.dryRun ?? false,
+            dumpTo: payload.dumpTo,
+          });
+          logger.info({ contactList: payload.slug, ...result }, "Brevo contact list sync done");
+          return result;
         },
       },
     },
