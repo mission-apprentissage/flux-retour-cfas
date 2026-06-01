@@ -83,6 +83,7 @@ import {
   deleteOrganisationWithoutUser,
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
+import { revokeStaleApiKeysJob } from "./organismes/revoke-stale-api-keys";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 import { seedMlRdvUrl } from "./tmp/seed-ml-rdv-url";
 import { sendWhatsAppInjoignables } from "./whatsapp/send-whatsapp-injoignables";
@@ -239,6 +240,13 @@ export async function setupJobProcessor() {
               handler: async () => {
                 await updateNotActivatedMissionLocaleEffectifSnapshot();
                 await hydrateMissionLocaleStats();
+              },
+            },
+            "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": {
+              cron_string: "0 4 * * *",
+              handler: async () => {
+                await addJob({ name: "organismes:revoke-stale-api-keys", queued: true });
+                return 0;
               },
             },
             "hydrate:contrats-deca-raw": {
@@ -651,6 +659,16 @@ export async function setupJobProcessor() {
         handler: async (job) => {
           const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
           return scoreExistingEffectifs({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
+        },
+      },
+      "organismes:revoke-stale-api-keys": {
+        handler: async (job) => {
+          const payload = job.payload as { dryRun?: boolean; limit?: number; months?: number } | undefined;
+          return revokeStaleApiKeysJob({
+            dryRun: payload?.dryRun ?? false,
+            limit: payload?.limit,
+            months: payload?.months ?? 12,
+          });
         },
       },
       "tmp:migrate:autre-situations": {

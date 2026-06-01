@@ -31,6 +31,7 @@ import {
   organisationsDb,
   usersMigrationDb,
   effectifsDECADb,
+  auditLogsDb,
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { cleanProjection } from "@/common/utils/mongoUtils";
@@ -219,7 +220,10 @@ export const updateOrganismesHasTransmittedWithHierarchy = async (
 export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organismeId },
-    { $set: { api_key: uuidv4() } },
+    {
+      $set: { api_key: uuidv4(), api_key_generated_at: new Date() },
+      $unset: { api_key_revoked_at: "", api_key_revoked_reason: "" },
+    },
     { returnDocument: "after" }
   );
 
@@ -228,6 +232,96 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   }
 
   return updated?.value.api_key;
+};
+
+export const API_KEY_REVOCATION_REASON_INACTIVE = "inactif_12_mois";
+
+/**
+ * Révoque les clés API des organismes inactifs depuis plus de 12 mois.
+ *
+ * Une clé est considérée inactive si la dernière trace d'activité
+ * (max de last_erp_transmission_date, last_transmission_date, api_configuration_date,
+ * api_key_generated_at) est antérieure au seuil, ou totalement absente.
+ *
+ * La révocation déplace le secret de `api_key` vers `api_key_revoked_value` (il n'authentifie
+ * donc plus, mais reste archivé pour l'audit/support) et conserve l'historique sur le document
+ * (api_key_revoked_at / api_key_revoked_reason) + une entrée d'audit.
+ */
+export const revokeStaleApiKeys = async ({
+  months = 12,
+  dryRun = false,
+  limit,
+}: {
+  months?: number;
+  dryRun?: boolean;
+  limit?: number;
+}) => {
+  const cutoff = subMonths(new Date(), months);
+
+  const cursor = organismesDb().aggregate<{ _id: ObjectId; siret?: string; uai?: string; last_activity: Date | null }>([
+    { $match: { api_key: { $ne: null } } },
+    {
+      $addFields: {
+        last_activity: {
+          $max: [
+            "$last_erp_transmission_date",
+            "$last_transmission_date",
+            "$api_configuration_date",
+            "$api_key_generated_at",
+          ],
+        },
+      },
+    },
+    { $match: { $expr: { $lt: ["$last_activity", cutoff] } } },
+    { $project: { _id: 1, siret: 1, uai: 1, last_activity: 1 } },
+    ...(limit ? [{ $limit: limit }] : []),
+  ]);
+
+  const now = new Date();
+  let revoked = 0;
+  const candidates = await cursor.toArray();
+
+  for (const org of candidates) {
+    if (dryRun) {
+      revoked++;
+      continue;
+    }
+
+    // update pipeline : on archive le secret (api_key -> api_key_revoked_value) puis on retire
+    // api_key, atomiquement, sans avoir à relire la valeur. Le guard api_key != null évite de
+    // ré-archiver une clé déjà révoquée ou régénérée entre l'aggregate et l'update.
+    const { modifiedCount } = await organismesDb().updateOne({ _id: org._id, api_key: { $ne: null } }, [
+      {
+        $set: {
+          api_key_revoked_value: "$api_key",
+          api_key_revoked_at: now,
+          api_key_revoked_reason: API_KEY_REVOCATION_REASON_INACTIVE,
+        },
+      },
+      { $unset: "api_key" },
+    ]);
+
+    if (modifiedCount === 0) {
+      continue;
+    }
+
+    await auditLogsDb().insertOne({
+      action: "organisme_api_key_revoked",
+      date: now,
+      data: {
+        organisme_id: org._id,
+        siret: org.siret,
+        uai: org.uai,
+        last_activity: org.last_activity,
+        reason: API_KEY_REVOCATION_REASON_INACTIVE,
+        months,
+      },
+    });
+
+    revoked++;
+  }
+
+  return { revoked, dryRun, months, cutoff };
 };
 
 /**
@@ -833,6 +927,8 @@ export function getOrganismeProjection(
     api_configuration_date: permissionsOrganisme.manageEffectifs,
     api_siret: permissionsOrganisme.manageEffectifs,
     api_uai: permissionsOrganisme.manageEffectifs,
+    api_key_revoked_at: permissionsOrganisme.manageEffectifs,
+    api_key_revoked_reason: permissionsOrganisme.manageEffectifs,
   });
 }
 

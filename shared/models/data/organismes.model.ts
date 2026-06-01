@@ -159,6 +159,12 @@ export const zOrganisme = z
     api_siret: z.string({ description: "Siret envoyé par l'erp" }).optional(),
     api_configuration_date: z.date({ description: "Date de l'interfaçage" }).optional(),
     api_version: z.string({ description: "Version de l'api utilisée (v2 ou v3)" }).nullable().optional(),
+    api_key_generated_at: z.date({ description: "Date de génération de la clé API" }).nullish(),
+    api_key_revoked_at: z.date({ description: "Date de révocation de la clé API (inactivité)" }).nullish(),
+    api_key_revoked_reason: z.string({ description: "Raison de la révocation de la clé API" }).nullish(),
+    api_key_revoked_value: z
+      .string({ description: "Ancienne clé API archivée lors de la révocation (n'authentifie plus)" })
+      .nullish(),
 
     fiabilisation_statut: zodEnumFromObjValues(STATUT_FIABILISATION_ORGANISME)
       .describe("Statut de fiabilisation de l'organisme")

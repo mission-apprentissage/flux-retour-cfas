@@ -505,6 +505,8 @@ export interface Organisme {
   api_uai?: string;
   api_siret?: string;
   api_configuration_date?: string;
+  api_key_revoked_at?: string;
+  api_key_revoked_reason?: string;
   /**
    * Statut de fiabilisation de l'organisme
    */

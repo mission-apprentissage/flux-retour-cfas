@@ -20,6 +20,8 @@ interface InfosTransmissionParametrageOFAProps {
   parametrage_erp_active: boolean;
   api_key_active: boolean;
   api_key: string;
+  api_key_revoked_at?: string;
+  api_key_revoked_reason?: string;
   parametrage_erp_date: Date;
   parametrage_erp_author: string;
   erps: string[];
@@ -119,6 +121,19 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
               {hasCopied ? "Copié !" : "Copier"}
             </Button>
           </HStack>
+        </HStack>
+      )}
+      {parametrage?.api_key_revoked_at && !parametrage?.api_key && (
+        <HStack spacing="1w">
+          <Text>Clé API :</Text>
+          <Tag
+            textTransform="none"
+            variant="badge"
+            colorScheme="red_tag"
+            size="md"
+            borderRadius={0}
+            primaryText={`Clé expirée le ${new Date(parametrage.api_key_revoked_at).toLocaleDateString()} (inactivité)`}
+          />
         </HStack>
       )}
       <HStack spacing="1w">
