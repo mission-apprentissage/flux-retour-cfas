@@ -1,10 +1,10 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
-  IClassifierStats,
   IDetailsDossiersTraites,
   IDetailsDossiersTraitesV2,
+  IPrequalifStats,
   IRegionStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
@@ -14,7 +14,7 @@ import type {
   IWhatsAppStats,
 } from "shared/models/data/nationalStats.model";
 
-import { _get } from "@/common/httpClient";
+import { _get, _put } from "@/common/httpClient";
 
 import type { Period } from "../ui/PeriodSelector";
 
@@ -101,7 +101,7 @@ export const statsQueryKeys = {
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
-  classifier: (period: Period) => ["stats", "classifier", period] as const,
+  prequalif: (period: Period) => ["stats", "prequalif", period] as const,
 };
 
 export interface TraitementMLParams {
@@ -257,6 +257,7 @@ export interface IMissionLocaleDetailResponse {
     email?: string;
     telephone?: string;
     site_web?: string;
+    rdv_url?: string | null;
     adresse?: {
       commune?: string;
       code_postal?: string;
@@ -278,6 +279,16 @@ export function useMissionLocaleDetail(mlId: string) {
       enabled: !!mlId,
     }
   );
+}
+
+export function useUpdateMlParametresAdmin(mlId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { rdv_url: string | null }) => _put(`/api/v1/admin/mission-locale/${mlId}/parametres`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: statsQueryKeys.missionLocaleDetail(mlId) });
+    },
+  });
 }
 
 export function useMissionLocaleMembres(mlId: string) {
@@ -302,11 +313,14 @@ export function useWhatsAppStats(period: Period) {
   );
 }
 
-export function useClassifierStats(period: Period) {
-  return useQuery<IClassifierStats>(
-    statsQueryKeys.classifier(period),
+/**
+ * Indicateurs préqualif WhatsApp (admin-only).
+ */
+export function usePrequalifStats(period: Period = "all") {
+  return useQuery<IPrequalifStats>(
+    statsQueryKeys.prequalif(period),
     () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/classifier", {
+      _get("/api/v1/organisation/indicateurs-ml/stats/prequalif", {
         params: { period },
       }),
     STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA

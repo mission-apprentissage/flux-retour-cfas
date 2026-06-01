@@ -98,6 +98,8 @@ const zEffectifMissionLocale = z
       .boolean()
       .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp")
       .nullish(),
+    souhaite_rdv: z.boolean().describe("Tag unifié : ex-callback historique + nouveaux YES préqualif").nullish(),
+    souhaite_rdv_at: z.date().nullish(),
     whatsapp_contact: zWhatsAppContact.nullish(),
     cfa_rupture_declaration: z
       .object({

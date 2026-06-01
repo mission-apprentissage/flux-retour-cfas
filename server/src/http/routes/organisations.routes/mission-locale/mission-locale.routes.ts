@@ -8,10 +8,12 @@ import {
   SITUATION_LABEL_ENUM,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
+import { httpUrlSchema } from "shared/models/data/organisations.model";
 import {
   effectifMissionLocaleListe,
   effectifsParMoisFiltersMissionLocaleAPISchema,
 } from "shared/models/routes/mission-locale/missionLocale.api";
+import { z } from "zod";
 
 import {
   getAllEffectifsParMois,
@@ -20,7 +22,7 @@ import {
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
@@ -32,7 +34,41 @@ export default () => {
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
+  router.get("/parametres", returnResult(getMlParametres));
+  router.put("/parametres", returnResult(updateMlParametres));
+  router.get("/banner-stats", returnResult(getMlBannerStats));
   return router;
+};
+
+const getMlBannerStats = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const souhaite_rdv_count = await missionLocaleEffectifsDb().countDocuments({
+    mission_locale_id: new ObjectId(missionLocale._id),
+    souhaite_rdv: true,
+    soft_deleted: { $ne: true },
+  });
+  return { souhaite_rdv_count };
+};
+
+const zMlParametresBody = z.object({
+  rdv_url: httpUrlSchema.nullable(),
+});
+
+const getMlParametres = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  return { rdv_url: missionLocale.rdv_url ?? null };
+};
+
+const updateMlParametres = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const body = zMlParametresBody.parse(req.body);
+
+  await organisationsDb().updateOne(
+    { _id: new ObjectId(missionLocale._id), type: "MISSION_LOCALE" },
+    { $set: { rdv_url: body.rdv_url } }
+  );
+
+  return { rdv_url: body.rdv_url };
 };
 
 const updateEffectifMissionLocaleData = async (req, { locals }) => {
@@ -134,7 +170,6 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
     { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
     { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
-    { name: "Contact opportun", id: "contact_opportun", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Collaboration CFA", id: "collaboration_cfa", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Disponible WhatsApp", id: "disponible_whatsapp", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },

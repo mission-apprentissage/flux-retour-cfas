@@ -1,0 +1,73 @@
+.banner {
+  width: 100%;
+  color: white;
+  background-color: #6a6af4;
+}
+
+.bannerInner {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.bannerContent {
+  display: flex;
+  flex: 1;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+  padding: 0.25rem;
+  margin-top: 2px;
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 0.25rem;
+}
+
+.bannerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bannerTitle {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.bannerDescription {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.bannerFooter {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.bannerBadgeWrapper {
+  display: inline-flex;
+  color: initial;
+}
+
+.closeButton,
+.closeButton:hover {
+  flex-shrink: 0;
+  padding: 0.25rem;
+  line-height: 1;
+  color: white !important;
+  cursor: pointer;
+  background: none !important;
+  background-image: none !important;
+  border: none;
+}

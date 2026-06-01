@@ -513,6 +513,136 @@ describe("Mission Locale Routes", () => {
       });
     });
   });
+
+  describe("GET /parametres + PUT /parametres (rdv_url)", () => {
+    beforeEach(async () => {
+      const db = (await import("@/common/mongodb")).getDatabase();
+      await db.command({ collMod: "organisations", validationLevel: "off" }).catch(() => {});
+    });
+
+    it("GET retourne rdv_url=null par défaut", async () => {
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/parametres");
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual({ rdv_url: null });
+    });
+
+    it("PUT met à jour rdv_url avec URL https valide", async () => {
+      const res = await requestAsOrganisation(ML_DATA, "put", "/api/v1/organisation/mission-locale/parametres", {
+        rdv_url: "https://calendly.com/ml",
+      });
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual({ rdv_url: "https://calendly.com/ml" });
+
+      const orga = await organisationsDb().findOne({ _id: ML_ID });
+      expect((orga as any)?.rdv_url).toBe("https://calendly.com/ml");
+    });
+
+    it("PUT rejette une URL javascript: (httpUrlSchema)", async () => {
+      const res = await requestAsOrganisation(ML_DATA, "put", "/api/v1/organisation/mission-locale/parametres", {
+        rdv_url: "javascript:alert(1)",
+      });
+      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(res.status).toBeLessThan(500);
+    });
+
+    it("PUT rdv_url=null efface la valeur", async () => {
+      await requestAsOrganisation(ML_DATA, "put", "/api/v1/organisation/mission-locale/parametres", {
+        rdv_url: "https://calendly.com/ml",
+      });
+      const res = await requestAsOrganisation(ML_DATA, "put", "/api/v1/organisation/mission-locale/parametres", {
+        rdv_url: null,
+      });
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual({ rdv_url: null });
+    });
+
+    it("GET sans auth → 401", async () => {
+      const app = await initTestApp();
+      const res = await app.httpClient.get("/api/v1/organisation/mission-locale/parametres");
+      expectUnauthorizedError(res);
+    });
+  });
+
+  describe("GET /banner-stats (souhaite_rdv count)", () => {
+    beforeEach(async () => {
+      const db = (await import("@/common/mongodb")).getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+    });
+
+    it("compte les effectifs souhaite_rdv=true de la ML courante", async () => {
+      const mlEffectifId1 = new ObjectId();
+      const mlEffectifId2 = new ObjectId();
+      const mlEffectifId3 = new ObjectId();
+      // 2 effectifs souhaite_rdv=true, 1 false → count attendu = 2
+      const baseDoc = {
+        mission_locale_id: ML_ID,
+        effectif_id: new ObjectId(),
+        created_at: new Date(),
+        brevo: {},
+        current_status: {},
+        effectif_snapshot: {
+          _id: new ObjectId(),
+          organisme_id: ORGANISME_ID,
+          id_erp_apprenant: "x",
+          source: "test",
+          annee_scolaire: "2024-2025",
+          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
+          formation: {},
+          is_lock: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      };
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          { ...baseDoc, _id: mlEffectifId1, souhaite_rdv: true } as any,
+          { ...baseDoc, _id: mlEffectifId2, souhaite_rdv: true } as any,
+          { ...baseDoc, _id: mlEffectifId3, souhaite_rdv: false } as any,
+        ],
+        { bypassDocumentValidation: true }
+      );
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual({ souhaite_rdv_count: 2 });
+    });
+
+    it("exclut les effectifs soft-deleted", async () => {
+      const baseDoc = {
+        mission_locale_id: ML_ID,
+        effectif_id: new ObjectId(),
+        created_at: new Date(),
+        brevo: {},
+        current_status: {},
+        souhaite_rdv: true,
+        effectif_snapshot: {
+          _id: new ObjectId(),
+          organisme_id: ORGANISME_ID,
+          id_erp_apprenant: "x",
+          source: "test",
+          annee_scolaire: "2024-2025",
+          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
+          formation: {},
+          is_lock: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      };
+      await missionLocaleEffectifsDb().insertMany(
+        [{ ...baseDoc, _id: new ObjectId() } as any, { ...baseDoc, _id: new ObjectId(), soft_deleted: true } as any],
+        { bypassDocumentValidation: true }
+      );
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    it("sans auth → 401", async () => {
+      const app = await initTestApp();
+      const res = await app.httpClient.get("/api/v1/organisation/mission-locale/banner-stats");
+      expectUnauthorizedError(res);
+    });
+  });
 });
 
 describe("Mission Locale Stats Routes - Public", () => {
@@ -1413,47 +1543,9 @@ describe("Classifier Feedback Routes", () => {
   });
 
   describe("Contact opportun dans la réponse API", () => {
-    it("expose contact_opportun: true quand score >= 0.75 et pas mineur ni RQTH", async () => {
-      await missionLocaleEffectifsDb().updateOne(
-        { effectif_id: EFFECTIF_ID },
-        {
-          $set: {
-            classification_reponse_appel: { score: 0.85, model: "2026-03-16", scored_at: new Date() },
-          },
-        }
-      );
-
-      const res = await requestAsOrganisation(
-        CF_ML_DATA,
-        "get",
-        `/api/v1/organisation/mission-locale/effectifs-per-month`
-      );
-
-      const allEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
-      const effectif = allEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
-      expect(effectif?.contact_opportun).toBe(true);
-    });
-
-    it("expose contact_opportun: false quand score < 0.75", async () => {
-      await missionLocaleEffectifsDb().updateOne(
-        { effectif_id: EFFECTIF_ID },
-        {
-          $set: {
-            classification_reponse_appel: { score: 0.3, model: "2026-03-16", scored_at: new Date() },
-          },
-        }
-      );
-
-      const res = await requestAsOrganisation(
-        CF_ML_DATA,
-        "get",
-        `/api/v1/organisation/mission-locale/effectifs-per-month`
-      );
-
-      const allEffectifs = res.data.a_traiter.flatMap((m: { data: unknown[] }) => m.data);
-      const effectif = allEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
-      expect(effectif?.contact_opportun).toBe(false);
-    });
+    // Tests `expose contact_opportun` retirés : la projection UI a été supprimée
+    // (commit "remove contact_opportun UI exposure" + cleanup branche prequalif-whatsapp).
+    // Le scoring backend reste actif pour les indicateurs admin et le job classifier.
 
     it("n'expose plus presque_6_mois dans la réponse", async () => {
       const res = await requestAsOrganisation(

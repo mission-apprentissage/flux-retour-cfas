@@ -45,19 +45,6 @@
   transform: translate(-50%, -50%);
 }
 
-.contactOpportunBadge {
-  background-color: #ececfe;
-  color: #3a3a3a;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.contactOpportunIcon {
-  color: #6a6af4;
-}
-
 .tooltipContent {
   display: flex;
   gap: 8px;

@@ -4,9 +4,9 @@ import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "sha
 import {
   IAccompagnementConjointStats,
   IAggregatedStats,
-  IClassifierStats,
   IDetailsDossiersTraites,
   IDetailsDossiersTraitesV2,
+  IPrequalifStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
   ITraitementStatsResponse,
@@ -43,7 +43,6 @@ import {
   withMissionLocaleFilter,
 } from "./mission-locale-stats.helpers";
 import { computeMissionLocaleStats } from "./mission-locale.actions";
-import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
   const dateToUse = normalizeToUTCDay(date ?? new Date());
@@ -1605,156 +1604,103 @@ export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
   };
 };
 
-export const getClassifierStats = async (period: StatsPeriod = "all"): Promise<IClassifierStats> => {
+/**
+ * Indicateurs admin du flow préqualif WhatsApp (scope national uniquement).
+ */
+export const getPrequalifStats = async (period: StatsPeriod = "all"): Promise<IPrequalifStats> => {
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const baseMatch: Record<string, unknown> = { soft_deleted: { $ne: true } };
+  const baseMatch: Record<string, unknown> = {
+    "whatsapp_contact.template_type": "prequalif",
+    "whatsapp_contact.last_message_sent_at": { $exists: true, $ne: null },
+    soft_deleted: { $ne: true },
+  };
+
   if (period !== "all") {
-    baseMatch.created_at = { $gte: startDate, $lte: evaluationDate };
+    baseMatch["whatsapp_contact.last_message_sent_at"] = { $gte: startDate, $lte: evaluationDate };
   }
 
-  const pipeline = [
-    { $match: baseMatch },
-    {
-      $facet: {
-        feedback: [
-          { $match: { "classification_reponse_appel.feedback": { $exists: true, $ne: null } } },
-          {
-            $group: {
-              _id: null,
-              total: { $sum: 1 },
-              reactivite_oui: {
-                $sum: { $cond: [{ $eq: ["$classification_reponse_appel.feedback.meilleure_reactivite", true] }, 1, 0] },
-              },
-              reactivite_non: {
-                $sum: {
-                  $cond: [{ $eq: ["$classification_reponse_appel.feedback.meilleure_reactivite", false] }, 1, 0],
-                },
-              },
-              confiance_sum: { $sum: "$classification_reponse_appel.feedback.confiance_indice" },
-              utilite_sum: { $sum: "$classification_reponse_appel.feedback.utilite_indice" },
-            },
+  const pipeline: Record<string, unknown>[] = [{ $match: baseMatch }];
+
+  pipeline.push({
+    $facet: {
+      totalSent: [{ $count: "count" }],
+      sentByMode: [{ $group: { _id: "$whatsapp_contact.sent_via", count: { $sum: 1 } } }],
+      responses: [
+        { $match: { "whatsapp_contact.user_response": { $in: ["prequalif_yes", "prequalif_no"] } } },
+        { $group: { _id: "$whatsapp_contact.user_response", count: { $sum: 1 } } },
+      ],
+      optedOut: [{ $match: { "whatsapp_contact.opted_out": true } }, { $count: "count" }],
+      failedSend: [{ $match: { "whatsapp_contact.message_status": "failed_send" } }, { $count: "count" }],
+      autoReply: [{ $match: { "whatsapp_contact.auto_reply_sent": true } }, { $count: "count" }],
+      tokens: [{ $match: { "whatsapp_contact.rdv_redirect_token": { $exists: true } } }, { $count: "count" }],
+      clickStats: [
+        { $match: { "whatsapp_contact.rdv_redirect_token": { $exists: true } } },
+        {
+          $project: {
+            clicksCount: { $size: { $ifNull: ["$whatsapp_contact.rdv_clicks", []] } },
+            hasClick: { $gt: [{ $size: { $ifNull: ["$whatsapp_contact.rdv_clicks", []] } }, 0] },
           },
-        ],
-        feedback_confiance: [
-          { $match: { "classification_reponse_appel.feedback": { $exists: true, $ne: null } } },
-          { $group: { _id: "$classification_reponse_appel.feedback.confiance_indice", count: { $sum: 1 } } },
-        ],
-        feedback_utilite: [
-          { $match: { "classification_reponse_appel.feedback": { $exists: true, $ne: null } } },
-          { $group: { _id: "$classification_reponse_appel.feedback.utilite_indice", count: { $sum: 1 } } },
-        ],
-        situations_co: [
-          {
-            $match: {
-              "classification_reponse_appel.score": { $gte: CONTACT_OPPORTUN_SCORE_THRESHOLD },
-              "classification_reponse_appel.feedback": { $exists: true, $ne: null },
-              situation: { $ne: null },
-            },
+        },
+        {
+          $group: {
+            _id: null,
+            totalClicks: { $sum: "$clicksCount" },
+            uniqueClickers: { $sum: { $cond: ["$hasClick", 1, 0] } },
           },
-          { $group: { _id: "$situation", count: { $sum: 1 } } },
-        ],
-        situations_autres: [
-          {
-            $match: {
-              "classification_reponse_appel.feedback": { $exists: true, $ne: null },
-              $or: [
-                { "classification_reponse_appel.score": { $lt: CONTACT_OPPORTUN_SCORE_THRESHOLD } },
-                { classification_reponse_appel: { $exists: false } },
-              ],
-              situation: { $ne: null },
-            },
-          },
-          { $group: { _id: "$situation", count: { $sum: 1 } } },
-        ],
-        scoring: [
-          { $match: { "classification_reponse_appel.score": { $exists: true } } },
-          {
-            $group: {
-              _id: null,
-              total_scored: { $sum: 1 },
-              total_contact_opportun: {
-                $sum: {
-                  $cond: [{ $gte: ["$classification_reponse_appel.score", CONTACT_OPPORTUN_SCORE_THRESHOLD] }, 1, 0],
-                },
-              },
-              score_sum: { $sum: "$classification_reponse_appel.score" },
-            },
-          },
-        ],
-      },
+        },
+      ],
     },
-  ];
+  });
 
   const [result] = await missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
 
-  const fb = result?.feedback?.[0];
-  const fbTotal = fb?.total || 0;
+  const totalSent: number = result?.totalSent?.[0]?.count ?? 0;
+  const sentByModeMap: Record<string, number> = { backfill: 0, daily: 0 };
+  for (const row of (result?.sentByMode ?? []) as Array<{ _id: string | null; count: number }>) {
+    if (row._id === "backfill" || row._id === "daily") sentByModeMap[row._id] = row.count;
+  }
 
-  const buildDistribution = (data: Array<{ _id: number; count: number }>) => {
-    const dist = [0, 0, 0, 0, 0, 0];
-    for (const item of data || []) {
-      if (item._id >= 0 && item._id <= 5) dist[item._id] = item.count;
-    }
-    return dist;
-  };
+  const yesCount: number =
+    (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_yes")?.count ?? 0;
+  const noCount: number = (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_no")?.count ?? 0;
+  const responded = yesCount + noCount;
 
-  const confianceDist = buildDistribution(result?.feedback_confiance);
-  const utiliteDist = buildDistribution(result?.feedback_utilite);
+  const tokensGenerated: number = result?.tokens?.[0]?.count ?? 0;
+  const totalClicks: number = result?.clickStats?.[0]?.totalClicks ?? 0;
+  const uniqueClickers: number = result?.clickStats?.[0]?.uniqueClickers ?? 0;
 
-  const buildSituationMap = (data: Array<{ _id: string; count: number }>) => {
-    const situationKeys = new Set([
-      "rdv_pris",
-      "nouveau_projet",
-      "deja_accompagne",
-      "contacte_sans_retour",
-      "coordonnees_incorrect",
-      "injoignable_apres_relances",
-      "autre",
-    ]);
-    const map = {
-      rdv_pris: 0,
-      nouveau_projet: 0,
-      deja_accompagne: 0,
-      contacte_sans_retour: 0,
-      coordonnees_incorrect: 0,
-      injoignable_apres_relances: 0,
-      autre: 0,
-      total: 0,
-    };
-    for (const item of data || []) {
-      const key = item._id?.toLowerCase();
-      if (situationKeys.has(key)) (map as Record<string, number>)[key] += item.count;
-      else map.autre += item.count;
-      map.total += item.count;
-    }
-    return map;
-  };
+  const [mlTotal, mlWithUrl] = await Promise.all([
+    organisationsDb().countDocuments({ type: "MISSION_LOCALE" }),
+    organisationsDb().countDocuments({ type: "MISSION_LOCALE", rdv_url: { $exists: true, $ne: null } }),
+  ]);
 
-  const scoring = result?.scoring?.[0];
+  const optedOutCount: number = result?.optedOut?.[0]?.count ?? 0;
 
   return {
-    feedback: {
-      total: fbTotal,
-      meilleure_reactivite: { oui: fb?.reactivite_oui || 0, non: fb?.reactivite_non || 0 },
-      confiance_indice: {
-        distribution: confianceDist,
-        moyenne: fbTotal > 0 ? Math.round(((fb?.confiance_sum || 0) / fbTotal) * 10) / 10 : 0,
-      },
-      utilite_indice: {
-        distribution: utiliteDist,
-        moyenne: fbTotal > 0 ? Math.round(((fb?.utilite_sum || 0) / fbTotal) * 10) / 10 : 0,
-      },
+    period,
+    volume: {
+      total_sent: totalSent,
+      sent_by_mode: { backfill: sentByModeMap.backfill, daily: sentByModeMap.daily },
+      failed_send: result?.failedSend?.[0]?.count ?? 0,
+      opted_out: optedOutCount,
     },
-    situations: {
-      contact_opportun: buildSituationMap(result?.situations_co),
-      autres: buildSituationMap(result?.situations_autres),
+    responses: {
+      yes_count: yesCount,
+      no_count: noCount,
+      no_response: Math.max(0, totalSent - responded),
+      auto_reply_sent: result?.autoReply?.[0]?.count ?? 0,
+      response_rate: totalSent > 0 ? Math.round((responded / totalSent) * 1000) / 10 : 0,
+      yes_rate: responded > 0 ? Math.round((yesCount / responded) * 1000) / 10 : 0,
+      opt_out_rate: totalSent > 0 ? Math.round((optedOutCount / totalSent) * 1000) / 10 : 0,
     },
-    scoring: {
-      total_scored: scoring?.total_scored || 0,
-      total_contact_opportun: scoring?.total_contact_opportun || 0,
-      score_moyen: scoring?.total_scored > 0 ? Math.round((scoring.score_sum / scoring.total_scored) * 100) / 100 : 0,
+    rdv_tracking: {
+      tokens_generated: tokensGenerated,
+      total_clicks: totalClicks,
+      unique_clickers: uniqueClickers,
+      click_rate: tokensGenerated > 0 ? Math.round((uniqueClickers / tokensGenerated) * 1000) / 10 : 0,
     },
+    ml_activation: { ml_with_rdv_url: mlWithUrl, ml_total: mlTotal },
   };
 };

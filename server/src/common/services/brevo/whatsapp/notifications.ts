@@ -94,3 +94,58 @@ export async function notifyMLUserOnCallback(effectif: IMissionLocaleEffectif): 
 export async function notifyMLUserOnNoHelp(effectif: IMissionLocaleEffectif): Promise<void> {
   await sendMLWhatsAppNotification(effectif, "whatsapp_nohelp_notification", "nohelp");
 }
+
+/**
+ * Notifie tous les users ML CONFIRMED quand un effectif a répondu YES à la préqualif.
+ *
+ * Gating amont (handler) : appelé uniquement quand `whatsapp_contact.sent_via === "daily"`.
+ * Backfill J1-J5 (`sent_via="backfill"`) → silencieux (évite la sur-sollicitation inbox).
+ *
+ * Broadcast à TOUS les users CONFIRMED de la ML (pattern identique au callback legacy).
+ * Pas de filtre `disabled_at` / `last_login_at` — dette acceptée (cf. review S7).
+ */
+export async function notifyMLUsersOnPrequalifYes(effectif: IMissionLocaleEffectif): Promise<void> {
+  try {
+    const users = await usersMigrationDb()
+      .find(
+        {
+          organisation_id: effectif.mission_locale_id,
+          account_status: "CONFIRMED",
+        },
+        { projection: { email: 1, nom: 1, prenom: 1 } }
+      )
+      .toArray();
+
+    if (users.length === 0) {
+      logger.info({ effectifId: effectif._id }, "Aucun user CONFIRMED, skip notif prequalif YES");
+      return;
+    }
+
+    const prenom = effectif.effectif_snapshot?.apprenant?.prenom || "?";
+    const nom = effectif.effectif_snapshot?.apprenant?.nom || "?";
+    const deepLink = getPublicUrl(`/mission-locale/${effectif.effectif_id}`);
+
+    await Promise.all(
+      users.map((u) =>
+        sendEmail(
+          u.email,
+          "mission_locale_prequalif_yes",
+          {
+            recipient: { prenom: u.prenom, nom: u.nom },
+            jeune: { prenom, nom },
+            deep_link: deepLink,
+          },
+          { noreply: true }
+        )
+      )
+    );
+
+    logger.info({ effectifId: effectif._id, count: users.length }, "Notif prequalif YES envoyée");
+  } catch (error) {
+    logger.error(
+      { effectifId: effectif._id, error: error instanceof Error ? error.message : String(error) },
+      "Failed to send notif prequalif YES"
+    );
+    captureException(error);
+  }
+}

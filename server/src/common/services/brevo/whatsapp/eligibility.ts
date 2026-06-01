@@ -2,12 +2,44 @@ import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 
+import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import logger from "@/common/logger";
 import config from "@/config";
 
 import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
-import { maskPhone, normalizePhoneNumber } from "./phone";
+import { applyTestPhoneOverride, maskPhone, normalizePhoneNumber } from "./phone";
+
+export const PREQUALIF_RUPTURE_MAX_DAYS = 180;
+
+/**
+ * Vérifie si un effectif est éligible pour recevoir un WhatsApp préqualif.
+ *
+ * Cible : "contacts opportuns" (score classifier ≥ 0.75) jamais traités, hors CFA V2
+ * collab, hors `acc_conjoint=true`, rupture < `PREQUALIF_RUPTURE_MAX_DAYS` jours.
+ */
+export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolean {
+  const phone = effectif.effectif_snapshot?.apprenant?.telephone;
+  if (!phone || !normalizePhoneNumber(phone)) return false;
+
+  if (effectif.whatsapp_contact?.last_message_sent_at) return false;
+  if (effectif.whatsapp_contact?.opted_out) return false;
+
+  const score = effectif.classification_reponse_appel?.score ?? 0;
+  if (score < CONTACT_OPPORTUN_SCORE_THRESHOLD) return false;
+
+  if (effectif.computed?.organisme?.is_allowed_collab === true) return false;
+
+  if (effectif.organisme_data?.acc_conjoint === true) return false;
+
+  if (effectif.situation !== null && effectif.situation !== undefined) return false;
+
+  if (!effectif.date_rupture) return false;
+  const ruptureCutoff = new Date(Date.now() - PREQUALIF_RUPTURE_MAX_DAYS * 24 * 60 * 60 * 1000);
+  if (new Date(effectif.date_rupture) < ruptureCutoff) return false;
+
+  return true;
+}
 
 /**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp
@@ -45,6 +77,14 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
+  // Defense-in-depth : refuse tout envoi hors prod sans test override, indépendamment du flag
+  // `enabled`. Évite qu'une mauvaise config (env var inversée, secret partagé) ne provoque
+  // un envoi accidentel à de vrais effectifs depuis preprod/recette/local.
+  if (config.env !== "production" && !config.brevo.whatsapp?.testPhoneOverride) {
+    logger.warn({ effectifId: effectif._id }, "WhatsApp send blocked: non-prod env without TEST_PHONE_OVERRIDE");
+    return;
+  }
+
   if (!config.brevo.whatsapp?.enabled) {
     logger.debug({ effectifId: effectif._id }, "WhatsApp feature is disabled");
     return;
@@ -77,6 +117,9 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
+  // Override de test : en non-prod, redirige vers le numéro de test si défini.
+  const effectivePhone = applyTestPhoneOverride(targetPhone);
+
   const templateId = config.brevo.whatsapp?.templateInjoignablesId;
   if (!templateId) {
     logger.error("WhatsApp template ID not configured (MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID)");
@@ -84,21 +127,22 @@ export async function triggerWhatsAppIfEligible(
   }
 
   // Créer/mettre à jour le contact Brevo avec les attributs du template
-  await upsertBrevoContact(targetPhone, {
+  await upsertBrevoContact(effectivePhone, {
     TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,
     TBA_EFFECTIF_MISSION_LOCALE_NOM_WHATSAPP: missionLocaleInfo.nom,
   });
 
-  const result = await sendWhatsAppTemplate(targetPhone, {
+  const result = await sendWhatsAppTemplate(effectivePhone, {
     templateId,
   });
 
-  // Mettre à jour l'effectif
+  // Mettre à jour l'effectif (on stocke le numéro effectif envoyé pour que le webhook
+  // inbound retrouve l'effectif quand l'utilisateur de test répond).
   const now = new Date();
   await updateWhatsAppContact(
     effectif._id,
     {
-      phone_normalized: targetPhone,
+      phone_normalized: effectivePhone,
       last_message_sent_at: now,
       message_id: result.messageId,
       message_status: result.success ? "sent" : "failed",
@@ -114,7 +158,7 @@ export async function triggerWhatsAppIfEligible(
   );
 
   const templateVars = {
-    phoneNumber: maskPhone(targetPhone),
+    phoneNumber: maskPhone(effectivePhone),
     prenom: prenom.length > 2 ? prenom.slice(0, 2) + "***" : "***",
     missionLocale: missionLocaleInfo.nom,
     templateId,

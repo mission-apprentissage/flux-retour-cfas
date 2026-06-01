@@ -9,7 +9,12 @@ import {
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
-import { MissionLocaleInfo } from "./types";
+import { MissionLocaleInfo, MissionLocaleInfoFull } from "./types";
+
+// Hard cap appliqué via $slice côté Mongo : borne la taille du document effectif (un échange
+// type fait < 10 messages). Si un audit complet devient nécessaire, brancher un log applicatif
+// séparé plutôt que d'augmenter ce cap.
+const MESSAGES_HISTORY_CAP = 50;
 
 export async function updateWhatsAppContact(
   effectifId: ObjectId,
@@ -50,7 +55,7 @@ export async function updateWhatsAppContact(
   if (historyEntries) {
     const entries = Array.isArray(historyEntries) ? historyEntries : [historyEntries];
     updateOps.$push = {
-      "whatsapp_contact.messages_history": { $each: entries },
+      "whatsapp_contact.messages_history": { $each: entries, $slice: -MESSAGES_HISTORY_CAP },
     };
   }
 
@@ -75,6 +80,43 @@ export async function getMissionLocaleInfo(missionLocaleId: ObjectId): Promise<M
     telephone: organisation.telephone ?? undefined,
     site_web: organisation.site_web ?? undefined,
     adresse: organisation.adresse?.commune ?? undefined,
+  };
+}
+
+/**
+ * Variante enrichie de `getMissionLocaleInfo` pour les templates préqualif.
+ * Ajoute email, adresse complète inline (pour le message NO) et rdv_url (pour le routage YES).
+ */
+export async function getMissionLocaleInfoFull(missionLocaleId: ObjectId): Promise<MissionLocaleInfoFull | null> {
+  const organisation = (await organisationsDb().findOne({
+    _id: missionLocaleId,
+    type: "MISSION_LOCALE",
+  })) as IOrganisationMissionLocale | null;
+
+  if (!organisation) {
+    return null;
+  }
+
+  const adresse = organisation.adresse;
+  let adresseInline: string | undefined;
+  if (adresse?.complete) {
+    adresseInline = adresse.complete;
+  } else if (adresse) {
+    const parts: string[] = [];
+    if (adresse.voie) parts.push([adresse.numero, adresse.voie].filter(Boolean).join(" "));
+    const codeCommune = [adresse.code_postal, adresse.commune].filter(Boolean).join(" ");
+    if (codeCommune) parts.push(codeCommune);
+    adresseInline = parts.length > 0 ? parts.join(", ") : undefined;
+  }
+
+  return {
+    nom: organisation.nom,
+    telephone: organisation.telephone ?? undefined,
+    site_web: organisation.site_web ?? undefined,
+    adresse: organisation.adresse?.commune ?? undefined,
+    email: organisation.email ?? undefined,
+    adresse_inline: adresseInline,
+    rdv_url: organisation.rdv_url ?? undefined,
   };
 }
 

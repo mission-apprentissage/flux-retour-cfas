@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { SouhaiteRdvBanner } from "@/app/_components/ruptures/mission-locale/SouhaiteRdvBanner";
+
 import MissionLocaleClient from "./MissionLocaleClient";
 import { MlContainer } from "./MlContainer";
 
@@ -9,8 +11,11 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <MlContainer>
-      <MissionLocaleClient />
-    </MlContainer>
+    <>
+      <SouhaiteRdvBanner />
+      <MlContainer>
+        <MissionLocaleClient />
+      </MlContainer>
+    </>
   );
 }

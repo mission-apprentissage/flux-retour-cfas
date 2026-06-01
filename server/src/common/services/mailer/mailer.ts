@@ -89,14 +89,20 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
   validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
   register_unknown_network: () => `[ADMIN] Demande d'accès au tableau de bord : nouveau réseau signalé`,
-  mission_locale_weekly_recap: (payload) =>
-    `${payload.total} jeune${payload.total > 1 ? "s" : ""} en rupture de contrat ${payload.total > 1 ? "attendent" : "attend"} votre aide cette semaine`,
+  mission_locale_weekly_recap: (payload) => {
+    const n = payload.effectifs_souhaite_rdv;
+    if (n === 0) return "Votre rapport hebdomadaire — Tableau de bord de l'apprentissage";
+    if (n === 1) return "1 jeune a confirmé vouloir un accompagnement avec la Mission Locale et attend votre retour.";
+    return `${n} jeunes ont confirmé vouloir un accompagnement avec la Mission Locale et attendent votre retour.`;
+  },
   mission_locale_daily_recap: (payload) =>
     `${payload.effectifs_count} nouveau${payload.effectifs_count > 1 ? "x" : ""} jeune${payload.effectifs_count > 1 ? "s" : ""} à traiter de ${payload.cfa.nom}`,
   cfa_daily_recap: (payload) =>
     `La Mission Locale ${payload.mission_locale.nom} a du nouveau sur l'accompagnement de vos jeunes en rupture`,
   whatsapp_callback_notification: (payload) =>
     `📞 ${payload.effectif.prenom} ${payload.effectif.nom} souhaite être recontacté(e)`,
+  mission_locale_prequalif_yes: (payload) =>
+    `✅ ${payload.jeune.prenom} ${payload.jeune.nom} souhaite un RDV avec votre Mission Locale`,
   whatsapp_nohelp_notification: (payload) =>
     `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
   invitation_cfa_admin: () => "Invitation | Tableau de bord de l'apprentissage : activez votre compte d'administrateur",
@@ -228,6 +234,7 @@ export type TemplatePayloads = {
     effectifs_a_traiter: number;
     effectifs_a_recontacter: number;
     effectifs_whatsapp_callback: number;
+    effectifs_souhaite_rdv: number;
     total: number;
     date_debut: string;
     date_fin: string;
@@ -235,6 +242,10 @@ export type TemplatePayloads = {
       id: number;
       nom: string;
     };
+    link_souhaite_rdv: string;
+    link_prioritaire: string;
+    link_a_traiter: string;
+    link_a_recontacter: string;
   };
   mission_locale_daily_recap: {
     recipient: {
@@ -288,6 +299,17 @@ export type TemplatePayloads = {
     };
     lien_fiche: string;
     date_contacte_sans_retour: string;
+  };
+  mission_locale_prequalif_yes: {
+    recipient: {
+      nom: string;
+      prenom: string;
+    };
+    jeune: {
+      prenom: string;
+      nom: string;
+    };
+    deep_link: string;
   };
   invitation_cfa_admin: {
     recipient: {

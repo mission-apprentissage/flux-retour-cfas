@@ -18107,6 +18107,35 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         "null",
       ],
     },
+    "souhaite_rdv": {
+      "bsonType": "bool",
+      "description": "L'effectif a explicitement demandé un RDV via WhatsApp préqualif ou flow injoignables",
+    },
+    "souhaite_rdv_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
+    "souhaite_rdv_source": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "whatsapp_prequalif",
+            "whatsapp_callback",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Origine du tag : parcours préqualif vs flow injoignables",
+    },
     "updated_at": {
       "bsonType": "date",
     },
@@ -18255,6 +18284,77 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "phone_normalized": {
               "bsonType": "string",
             },
+            "prequalif_notif_sent_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Horodatage de l'envoi de la notif individuelle ML (sent_via='daily' only). Garantit l'idempotence en cas de replay webhook YES.",
+            },
+            "rdv_clicks": {
+              "bsonType": "array",
+              "description": "Historique des clics sur le lien /r/:token (embedded).",
+              "items": {
+                "additionalProperties": false,
+                "bsonType": "object",
+                "properties": {
+                  "clicked_at": {
+                    "bsonType": "date",
+                  },
+                  "redirect_url": {
+                    "bsonType": [
+                      "string",
+                      "null",
+                    ],
+                    "description": "URL cible au moment du clic (snapshot), null si fallback",
+                  },
+                },
+                "required": [
+                  "clicked_at",
+                  "redirect_url",
+                ],
+              },
+            },
+            "rdv_redirect_token": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "UUID v4 généré au moment de l'envoi du template suivi-yes-with-url, utilisé pour la redirection /r/:token",
+            },
+            "rdv_redirect_token_created_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "sent_via": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "backfill",
+                    "daily",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Mode d'envoi du message initial. Conditionne l'envoi de la notif individuelle ML au moment du YES : uniquement si 'daily' (cron quotidien régime stable), jamais si 'backfill'",
+            },
             "status_updated_at": {
               "anyOf": [
                 {
@@ -18265,6 +18365,21 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 },
               ],
             },
+            "template_type": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "injoignables",
+                    "prequalif",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Template Brevo utilisé pour le premier envoi (route les réponses entrantes)",
+            },
             "user_response": {
               "anyOf": [
                 {
@@ -18272,6 +18387,8 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "enum": [
                     "callback",
                     "no_help",
+                    "prequalif_yes",
+                    "prequalif_no",
                   ],
                 },
                 {
@@ -18381,6 +18498,23 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         "bool",
         "null",
       ],
+    },
+    "event": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "WHATSAPP_PREQUALIF_YES",
+            "WHATSAPP_PREQUALIF_NO",
+            "WHATSAPP_YES_HELP",
+            "WHATSAPP_NO_HELP",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Événement typé non-situationnel (ex: réponse WhatsApp préqualif). Coexiste avec \`situation\` : l'un OU l'autre peut être renseigné selon le cas.",
     },
     "mission_locale_effectif_id": {
       "bsonType": "objectId",
@@ -19042,6 +19176,18 @@ exports[`validation-schema > should create validation schema for organisations >
         "nom": {
           "bsonType": "string",
           "description": "Nom de la mission locale",
+        },
+        "rdv_url": {
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "maxLength": 2000,
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "URL de prise de RDV envoyée via WhatsApp préqualif.",
         },
         "siret": {
           "bsonType": [

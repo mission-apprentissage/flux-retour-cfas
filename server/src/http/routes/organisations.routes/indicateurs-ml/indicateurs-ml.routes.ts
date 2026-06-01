@@ -21,7 +21,7 @@ import {
   getCouvertureRegionsStats,
   getTraitementExportData,
   getWhatsAppStats,
-  getClassifierStats,
+  getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { organisationsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
@@ -154,13 +154,13 @@ export default () => {
   );
 
   router.get(
-    "/stats/classifier",
+    "/stats/prequalif",
     validateRequestMiddleware({
       query: z.object({
         period: zStatsPeriod.optional(),
       }),
     }),
-    returnResult(getClassifierRoute)
+    returnResult(getPrequalifRoute)
   );
 
   router.get(
@@ -408,15 +408,20 @@ const getWhatsAppRoute = async (req, { locals }) => {
   return await getWhatsAppStats((period as StatsPeriod) || "all");
 };
 
-const getClassifierRoute = async (req, { locals }) => {
-  const { period } = req.query;
+/**
+ * GET /api/v1/organisation/indicateurs-ml/stats/prequalif
+ * Admin-only
+ *
+ */
+const getPrequalifRoute = async (req, { locals }) => {
   const organisation = locals.organisation as { type: string };
-
   if (organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès réservé aux administrateurs");
   }
 
-  return await getClassifierStats((period as StatsPeriod) || "all");
+  const { period } = req.query as { period?: string };
+
+  return await getPrequalifStats((period as StatsPeriod) || "all");
 };
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {

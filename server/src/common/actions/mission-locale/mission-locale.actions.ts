@@ -471,6 +471,8 @@ const addMissionLocaleFieldTraitementStatus = () => {
     $eq: ["$whatsapp_callback_requested", true],
   };
 
+  const SOUHAITE_RDV_CONDITION = { $eq: ["$souhaite_rdv", true] };
+
   const RUPTURE_MOINS_DE_180_JOURS_CONDITION = {
     $gte: [
       "$date_rupture",
@@ -493,6 +495,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
           MINEUR_CONDITION,
           ACCOMPAGNEMENT_CONJOINT_CONDITION,
           WHATSAPP_CALLBACK_CONDITION,
+          SOUHAITE_RDV_CONDITION,
         ],
       },
       {
@@ -526,6 +529,9 @@ const addMissionLocaleFieldTraitementStatus = () => {
         },
         a_risque_whatsapp_callback: {
           $cond: [WHATSAPP_CALLBACK_CONDITION, true, false],
+        },
+        a_risque_souhaite_rdv: {
+          $cond: [SOUHAITE_RDV_CONDITION, true, false],
         },
         a_risque_cfa_sans_mineur_rqth: {
           $cond: [
@@ -626,8 +632,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           whatsapp_callback_requested: "$whatsapp_callback_requested",
           whatsapp_no_help_responded: "$whatsapp_no_help_responded",
           whatsapp_contact: "$whatsapp_contact",
+          souhaite_rdv: "$souhaite_rdv",
+          souhaite_rdv_at: "$souhaite_rdv_at",
           mineur: "$a_risque_mineur",
-          contact_opportun: "$a_risque_contact_opportun",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
         }
       : {
@@ -648,11 +655,11 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
+        a_risque_souhaite_rdv: -1,
         a_risque_mineur: -1,
         a_risque_rqth: -1,
         a_risque_cfa_sans_mineur_rqth: -1,
         a_risque_whatsapp_callback: -1,
-        a_risque_contact_opportun: -1,
         a_risque_accompagnement_conjoint: -1,
         a_contacter: -1,
       };
@@ -1076,7 +1083,6 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 prioritaire: "$a_risque",
                 a_contacter: "$a_contacter",
                 mineur: "$a_risque_mineur",
-                contact_opportun: "$a_risque_contact_opportun",
                 acc_conjoint: "$a_risque_accompagnement_conjoint",
                 rqth: "$$ROOT.effectif_snapshot.apprenant.rqth",
                 a_traiter: "$$ROOT.a_traiter",
@@ -1084,6 +1090,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 nouveau_contrat: "$nouveau_contrat",
                 situation: "$$ROOT.situation",
                 whatsapp_callback_requested: { $ifNull: ["$$ROOT.whatsapp_callback_requested", false] },
+                whatsapp_no_help_responded: { $ifNull: ["$$ROOT.whatsapp_no_help_responded", false] },
+                souhaite_rdv: { $ifNull: ["$$ROOT.souhaite_rdv", false] },
                 unread_by_current_user: {
                   $cond: [
                     {
@@ -1396,7 +1404,6 @@ export const getEffectifsListByMissionLocaleId = async (
             [],
           ],
         },
-        contact_opportun: "$a_risque_contact_opportun",
         collaboration_cfa: "$a_risque_accompagnement_conjoint",
         disponible_whatsapp: { $ifNull: ["$whatsapp_callback_requested", false] },
         effectif_choice: "$_effectif_choice_label",
@@ -1450,11 +1457,11 @@ export const getEffectifARisqueByMissionLocaleId = async (
               injoignable: "$injoignable",
               a_contacter: "$a_contacter",
               mineur: "$a_risque_mineur",
-              contact_opportun: "$a_risque_contact_opportun",
               acc_conjoint: "$a_risque_accompagnement_conjoint",
               rqth: "$effectif_snapshot.apprenant.rqth",
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
               whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
+              souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
             },
           },
         ],

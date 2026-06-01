@@ -1,5 +1,7 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { MISSION_LOCALE_LOG_EVENT } from "shared/models/data/missionLocaleEffectifLog.model";
 import {
   IConversationState,
   IUserResponseType,
@@ -7,21 +9,26 @@ import {
   CONVERSATION_STATE,
   USER_RESPONSE_TYPE,
 } from "shared/models/data/whatsappContact.model";
+import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
+import config from "@/config";
 
 import { sendWhatsAppMessage } from "./brevoApi";
-import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
+import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
 import {
   buildAutoReplyMessage,
   buildCallbackMessage,
   buildNoHelpMessage,
+  buildPrequalifNoMessage,
+  buildPrequalifYesWithUrlInlineMessage,
+  buildPrequalifYesWithoutUrlMessage,
   buildStopConfirmationMessage,
   isStopMessage,
   parseUserResponse,
 } from "./messages";
-import { notifyMLUserOnCallback, notifyMLUserOnNoHelp } from "./notifications";
+import { notifyMLUserOnCallback, notifyMLUserOnNoHelp, notifyMLUsersOnPrequalifYes } from "./notifications";
 import { maskPhone, normalizePhoneNumber } from "./phone";
 
 /**
@@ -62,7 +69,16 @@ async function handleStopMessage(
 
   await missionLocaleEffectifsDb().updateOne(
     { _id: effectif._id },
-    { $set: { a_traiter: false, injoignable: false, updated_at: new Date() } }
+    {
+      $set: { a_traiter: false, injoignable: false, updated_at: new Date() },
+      $unset: {
+        souhaite_rdv: "",
+        souhaite_rdv_at: "",
+        souhaite_rdv_source: "",
+        whatsapp_callback_requested: "",
+        whatsapp_callback_requested_at: "",
+      },
+    }
   );
 
   logger.info({ effectifId: effectif._id }, "User opted out via STOP");
@@ -85,6 +101,9 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
         injoignable: true,
         whatsapp_callback_requested: true,
         whatsapp_callback_requested_at: now,
+        souhaite_rdv: true,
+        souhaite_rdv_source: "whatsapp_callback",
+        souhaite_rdv_at: now,
         updated_at: now,
       },
       $unset: {
@@ -95,6 +114,16 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
   );
 
   if (!alreadyRequested) {
+    await missionLocaleEffectifsLogDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: effectif._id,
+      situation: null,
+      event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_YES_HELP,
+      created_at: now,
+      created_by: null,
+      read_by: [],
+    });
+
     await notifyMLUserOnCallback(effectif);
   }
 }
@@ -102,8 +131,17 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
 /**
  * Traite les side effects d'une réponse no_help (pas d'aide souhaitée)
  * Nettoie les flags callback si l'utilisateur a changé d'avis
+ *
+ * Idempotence : si la conversation est déjà CLOSED, le premier no_help a été traité —
+ * on skip le $set/log/notif (le brevoMessageId dedup couvre déjà les replays webhook,
+ * cette garde couvre le cas "user envoie un 2e message no_help après clôture").
  */
 async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  if (effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED) {
+    logger.info({ effectifId: effectif._id }, "no_help déjà traité (conversation CLOSED), skip $set + log + notif");
+    return;
+  }
+
   const now = new Date();
   await missionLocaleEffectifsDb().updateOne(
     { _id: effectif._id },
@@ -127,12 +165,142 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
     _id: new ObjectId(),
     mission_locale_effectif_id: effectif._id,
     situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+    event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_NO_HELP,
     created_at: now,
     created_by: null,
     read_by: [],
   });
 
   await notifyMLUserOnNoHelp(effectif);
+}
+
+async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  const now = new Date();
+
+  const alreadyClosed = effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED;
+
+  const cfaWentV2 = effectif.computed?.organisme?.is_allowed_collab === true;
+  const cfaAccConjoint = effectif.organisme_data?.acc_conjoint === true;
+  if (cfaWentV2 || cfaAccConjoint) {
+    logger.warn(
+      {
+        effectifId: effectif._id,
+        cfaWentV2,
+        cfaAccConjoint,
+      },
+      "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
+    );
+    captureException(new Error("Prequalif YES skipped: CFA went V2 between send and reply"), {
+      tags: { feature: "whatsapp_prequalif", step: "yes_skipped_cfa_v2" },
+      extra: { effectifId: effectif._id.toString() },
+    });
+    return;
+  }
+
+  // Idempotence : si la conversation est déjà CLOSED, le premier YES a été traité.
+  // Re-appliquer le $set réécraserait `souhaite_rdv_at` avec un `now` ultérieur (drift métier).
+  // La notif ML conserve sa propre garde (`prequalif_notif_sent_at`).
+  if (alreadyClosed) {
+    logger.info({ effectifId: effectif._id }, "Préqualif YES déjà traité (conversation CLOSED), skip $set + log");
+  } else {
+    const currentSituation = effectif.situation;
+    const shouldUnsetSituation =
+      currentSituation === null ||
+      currentSituation === undefined ||
+      currentSituation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE;
+
+    const update: Record<string, unknown> = {
+      $set: {
+        souhaite_rdv: true,
+        souhaite_rdv_at: now,
+        souhaite_rdv_source: "whatsapp_prequalif",
+        injoignable: false,
+        a_traiter: true,
+        updated_at: now,
+      },
+      $unset: shouldUnsetSituation
+        ? {
+            situation: "",
+            whatsapp_no_help_responded: "",
+            whatsapp_no_help_responded_at: "",
+          }
+        : {
+            whatsapp_no_help_responded: "",
+            whatsapp_no_help_responded_at: "",
+          },
+    };
+    await missionLocaleEffectifsDb().updateOne({ _id: effectif._id }, update);
+
+    if (!shouldUnsetSituation) {
+      logger.warn(
+        { effectifId: effectif._id, currentSituation },
+        "Préqualif YES reçu mais situation hors flow déjà posée —> situation conservée"
+      );
+    }
+
+    await missionLocaleEffectifsLogDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: effectif._id,
+      situation: null,
+      event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_PREQUALIF_YES,
+      created_at: now,
+      created_by: null,
+      read_by: [],
+    });
+  }
+
+  if (effectif.whatsapp_contact?.sent_via === "daily" && !effectif.whatsapp_contact?.prequalif_notif_sent_at) {
+    const reserved = await missionLocaleEffectifsDb().findOneAndUpdate(
+      {
+        _id: effectif._id,
+        "whatsapp_contact.prequalif_notif_sent_at": { $exists: false },
+      },
+      { $set: { "whatsapp_contact.prequalif_notif_sent_at": now } },
+      { returnDocument: "after", includeResultMetadata: false }
+    );
+    if (reserved) {
+      await notifyMLUsersOnPrequalifYes(effectif);
+    } else {
+      logger.info({ effectifId: effectif._id }, "Notif prequalif YES déjà envoyée (idempotence), skip");
+    }
+  }
+}
+
+async function handlePrequalifNoSideEffects(effectif: IMissionLocaleEffectif): Promise<void> {
+  // Idempotence : symétrique de handlePrequalifYesSideEffects — si conversation CLOSED,
+  // un NO a déjà été traité, on évite de réécrire la situation et de dupliquer le log.
+  if (effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED) {
+    logger.info({ effectifId: effectif._id }, "Préqualif NO déjà traité (conversation CLOSED), skip $set + log");
+    return;
+  }
+
+  const now = new Date();
+  await missionLocaleEffectifsDb().updateOne(
+    { _id: effectif._id },
+    {
+      $set: {
+        situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+        a_traiter: false,
+        injoignable: false,
+        updated_at: now,
+      },
+      $unset: {
+        souhaite_rdv: "",
+        souhaite_rdv_at: "",
+        souhaite_rdv_source: "",
+      },
+    }
+  );
+
+  await missionLocaleEffectifsLogDb().insertOne({
+    _id: new ObjectId(),
+    mission_locale_effectif_id: effectif._id,
+    situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+    event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_PREQUALIF_NO,
+    created_at: now,
+    created_by: null,
+    read_by: [],
+  });
 }
 
 /**
@@ -239,7 +407,8 @@ export async function handleInboundWhatsAppMessage(
     return;
   }
 
-  const responseType = parseUserResponse(text);
+  const templateType = effectif.whatsapp_contact?.template_type;
+  const responseType = parseUserResponse(text, templateType);
   if (!responseType) {
     logger.info({ effectifId: effectif._id }, "Unrecognized user response");
 
@@ -293,6 +462,17 @@ export async function handleInboundWhatsAppMessage(
     return;
   }
 
+  if (responseType === USER_RESPONSE_TYPE.PREQUALIF_YES) {
+    await handlePrequalifYes(effectif, resolvedVisitorId, text, inboundHistory, prenom);
+    logger.info({ effectifId: effectif._id, responseType }, "Processed inbound WhatsApp prequalif YES");
+    return;
+  }
+  if (responseType === USER_RESPONSE_TYPE.PREQUALIF_NO) {
+    await handlePrequalifNo(effectif, resolvedVisitorId, text, inboundHistory, prenom);
+    logger.info({ effectifId: effectif._id, responseType }, "Processed inbound WhatsApp prequalif NO");
+    return;
+  }
+
   let responseMessage: string;
   let newState: IConversationState;
 
@@ -326,4 +506,93 @@ export async function handleInboundWhatsAppMessage(
   }
 
   logger.info({ effectifId: effectif._id, responseType, newState }, "Processed inbound WhatsApp message");
+}
+
+async function handlePrequalifYes(
+  effectif: IMissionLocaleEffectif,
+  resolvedVisitorId: string,
+  text: string,
+  inboundHistory: IWhatsAppMessageHistory,
+  prenom: string
+): Promise<void> {
+  await handlePrequalifYesSideEffects(effectif);
+
+  const ml = await getMissionLocaleInfoFull(effectif.mission_locale_id);
+  if (!ml) {
+    logger.error(
+      { missionLocaleId: effectif.mission_locale_id },
+      "Mission Locale not found for prequalif YES follow-up"
+    );
+    return;
+  }
+
+  let message: string;
+  if (ml.rdv_url) {
+    const token = uuidv4();
+    const now = new Date();
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: effectif._id },
+      {
+        $set: {
+          "whatsapp_contact.rdv_redirect_token": token,
+          "whatsapp_contact.rdv_redirect_token_created_at": now,
+        },
+      }
+    );
+    const redirectUrl = `${config.publicUrl}/r/${token}`;
+    message = buildPrequalifYesWithUrlInlineMessage(prenom, ml, redirectUrl);
+  } else {
+    message = buildPrequalifYesWithoutUrlMessage(prenom, ml);
+  }
+
+  try {
+    await sendResponseAndUpdateContact(
+      effectif,
+      resolvedVisitorId,
+      message,
+      USER_RESPONSE_TYPE.PREQUALIF_YES,
+      CONVERSATION_STATE.CLOSED,
+      text,
+      inboundHistory
+    );
+  } catch (err) {
+    logger.error(
+      { err, effectifId: effectif._id, mlId: effectif.mission_locale_id, hasRdvUrl: !!ml.rdv_url },
+      "Échec envoi confirmation YES texte libre — YES enregistré côté DB"
+    );
+    captureException(err, {
+      tags: { feature: "whatsapp_prequalif", step: "follow_up_yes" },
+      extra: { effectifId: effectif._id.toString(), hasRdvUrl: !!ml.rdv_url },
+    });
+  }
+}
+
+async function handlePrequalifNo(
+  effectif: IMissionLocaleEffectif,
+  resolvedVisitorId: string,
+  text: string,
+  inboundHistory: IWhatsAppMessageHistory,
+  prenom: string
+): Promise<void> {
+  await handlePrequalifNoSideEffects(effectif);
+
+  const ml = await getMissionLocaleInfoFull(effectif.mission_locale_id);
+  if (!ml) {
+    logger.error(
+      { missionLocaleId: effectif.mission_locale_id },
+      "Mission Locale not found for prequalif NO follow-up"
+    );
+    return;
+  }
+
+  const message = buildPrequalifNoMessage(prenom, ml);
+  await sendResponseAndUpdateContact(
+    effectif,
+    resolvedVisitorId,
+    message,
+    USER_RESPONSE_TYPE.PREQUALIF_NO,
+    CONVERSATION_STATE.CLOSED,
+    text,
+    inboundHistory
+  );
 }

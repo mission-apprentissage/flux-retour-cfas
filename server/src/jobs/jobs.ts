@@ -84,7 +84,9 @@ import {
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
 import { validationTerritoires } from "./territoire/validationTerritoire";
+import { seedMlRdvUrl } from "./tmp/seed-ml-rdv-url";
 import { sendWhatsAppInjoignables } from "./whatsapp/send-whatsapp-injoignables";
+import { sendWhatsAppPrequalif } from "./whatsapp/send-whatsapp-prequalif";
 
 const dailyJobs = async (queued: boolean) => {
   // # Remplissage des formations issus du catalogue
@@ -193,6 +195,28 @@ export async function setupJobProcessor() {
               cron_string: "30 10 * * *",
               handler: async () => {
                 await addJob({ name: "send-cfa-daily-recap", queued: true });
+                return 0;
+              },
+            },
+
+            "Envoi WhatsApp préqualif quotidien à 9h": {
+              cron_string: "0 9 * * *",
+              handler: async () => {
+                const PREQUALIF_DAILY_CRON_ENABLED = false; // TODO : passer à true après backfill
+                const PREQUALIF_DAILY_CRON_CAP = 500;
+                if (!PREQUALIF_DAILY_CRON_ENABLED) {
+                  logger.info("PREQUALIF_DAILY_CRON_ENABLED=false, skip cron WhatsApp préqualif");
+                  return 0;
+                }
+                if (!config.brevo.whatsapp?.enabled) {
+                  logger.info("WhatsApp désactivé (kill-switch), skip cron WhatsApp préqualif");
+                  return 0;
+                }
+                await addJob({
+                  name: "whatsapp:send-prequalif-daily",
+                  payload: { limit: PREQUALIF_DAILY_CRON_CAP },
+                  queued: true,
+                });
                 return 0;
               },
             },
@@ -605,6 +629,24 @@ export async function setupJobProcessor() {
           return sendWhatsAppInjoignables({ dryRun, limit });
         },
       },
+      // CLI manuel (sentVia="backfill") : J1-J5 du backfill — pas de notif individuelle YES
+      "tmp:whatsapp:send-prequalif": {
+        handler: async (job) => {
+          const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
+          return sendWhatsAppPrequalif({
+            dryRun: payload?.dryRun ?? false,
+            limit: payload?.limit,
+            sentVia: "backfill",
+          });
+        },
+      },
+      // Worker du cron 9h (sentVia="daily") : régime stable post-J5 — notif individuelle YES activée
+      "whatsapp:send-prequalif-daily": {
+        handler: async (job) => {
+          const payload = job.payload as { limit?: number } | undefined;
+          return sendWhatsAppPrequalif({ dryRun: false, limit: payload?.limit, sentVia: "daily" });
+        },
+      },
       "classifier:score-effectifs": {
         handler: async (job) => {
           const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
@@ -618,6 +660,15 @@ export async function setupJobProcessor() {
             throw new Error("csvPath est requis");
           }
           return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
+        },
+      },
+      "tmp:seed-ml-rdv-url": {
+        handler: async (job) => {
+          const payload = job.payload as { csvPath?: string; dryRun?: boolean } | undefined;
+          if (!payload?.csvPath) {
+            throw new Error("csvPath est requis");
+          }
+          return seedMlRdvUrl({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
         },
       },
       "brevo-contacts:sync": {

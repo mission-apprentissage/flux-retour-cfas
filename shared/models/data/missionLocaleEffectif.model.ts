@@ -26,7 +26,20 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   ],
   [{ "whatsapp_contact.phone_normalized": 1 }, { sparse: true }],
   [{ "whatsapp_contact.message_id": 1 }, { sparse: true }],
+  [{ "whatsapp_contact.rdv_redirect_token": 1 }, { name: "rdv_redirect_token_sparse", sparse: true }],
+  [
+    { souhaite_rdv: 1, mission_locale_id: 1 },
+    { name: "souhaite_rdv_by_ml_partial", partialFilterExpression: { souhaite_rdv: true } },
+  ],
 ];
+
+export const SOUHAITE_RDV_SOURCE = {
+  WHATSAPP_PREQUALIF: "whatsapp_prequalif",
+  WHATSAPP_CALLBACK: "whatsapp_callback",
+} as const;
+
+export const zSouhaiteRdvSource = z.enum(["whatsapp_prequalif", "whatsapp_callback"]);
+export type ISouhaiteRdvSource = z.infer<typeof zSouhaiteRdvSource>;
 
 export enum SITUATION_ENUM {
   RDV_PRIS = "RDV_PRIS",
@@ -225,6 +238,14 @@ const zMissionLocaleEffectif = z.object({
     .default(false)
     .describe("L'effectif a indiqué ne pas vouloir d'aide via WhatsApp"),
   whatsapp_no_help_responded_at: z.date().nullish(),
+  souhaite_rdv: z
+    .boolean()
+    .default(false)
+    .describe("L'effectif a explicitement demandé un RDV via WhatsApp préqualif ou flow injoignables"),
+  souhaite_rdv_at: z.date().nullish(),
+  souhaite_rdv_source: zSouhaiteRdvSource
+    .nullish()
+    .describe("Origine du tag : parcours préqualif vs flow injoignables"),
   classification_reponse_appel: z
     .object({
       score: z.number().min(0).max(1).describe("Probabilité de réponse à un appel (0-1)"),

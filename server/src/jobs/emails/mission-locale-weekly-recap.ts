@@ -6,6 +6,7 @@ import { getMissionLocaleEffectifsStats } from "@/common/actions/mission-locale/
 import parentLogger from "@/common/logger";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
+import { buildMlDeepLink } from "@/common/utils/mlDeepLink";
 
 const logger = parentLogger.child({
   module: "job:send-mission-locale-weekly-recap",
@@ -50,7 +51,7 @@ export async function sendMissionLocaleWeeklyRecap() {
         );
       }
 
-      if (stats.total === 0) {
+      if (stats.total === 0 && stats.effectifs_souhaite_rdv === 0) {
         missionsSkipped++;
         continue;
       }
@@ -97,6 +98,7 @@ export async function sendMissionLocaleWeeklyRecap() {
             effectifs_a_traiter: stats.effectifs_a_traiter,
             effectifs_a_recontacter: stats.effectifs_a_recontacter,
             effectifs_whatsapp_callback: stats.effectifs_whatsapp_callback,
+            effectifs_souhaite_rdv: stats.effectifs_souhaite_rdv,
             total: stats.total,
             date_debut: dateDebut,
             date_fin: dateFin,
@@ -104,6 +106,11 @@ export async function sendMissionLocaleWeeklyRecap() {
               id: ml.ml_id,
               nom: ml.nom,
             },
+            // Deep links absolus pour les 4 boutons du mail.
+            link_souhaite_rdv: buildMlDeepLink({ filter: "souhaite_rdv" }),
+            link_prioritaire: buildMlDeepLink({ statut: "prioritaire" }),
+            link_a_traiter: buildMlDeepLink({ statut: "a-traiter" }),
+            link_a_recontacter: buildMlDeepLink({ statut: "injoignable" }),
           },
           { noreply: true }
         );

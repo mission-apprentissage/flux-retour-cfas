@@ -174,6 +174,7 @@ import missionLocaleOrganismeRoutes from "./routes/organismes.routes/mission-loc
 import franceTravailPublicRoutes from "./routes/public.routes/france-travail.routes";
 import missionLocalePublicRoutes from "./routes/public.routes/mission-locale.routes";
 import getAllReseauxRoutes from "./routes/public.routes/reseaux.routes";
+import redirectRoutes from "./routes/redirect.routes";
 import affelnetRoutes from "./routes/specific.routes/affelnet.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import erpRoutes from "./routes/specific.routes/erps.routes";
@@ -317,6 +318,8 @@ function setupRoutes(app: Application) {
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
     .use("/api/webhooks/brevo/whatsapp", brevoWhatsappWebhook())
+    // Redirection opaque RDV — chemin court non préfixé /api (plan §7ter.4)
+    .use("/r", redirectRoutes())
     .use(
       "/api/doc",
       swaggerUi.serve,

@@ -1,0 +1,40 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.kpiColumn {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.kpiColumn > div {
+  height: 140px;
+}
+
+.footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  font-size: 14px;
+  color: #666666;
+  border-top: 1px solid #e5e5e5;
+}
+
+.footer strong {
+  font-weight: 700;
+  color: #161616;
+}
+
+@media (max-width: 992px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpiColumn {
+    grid-template-columns: 1fr;
+  }
+}

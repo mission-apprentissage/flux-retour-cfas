@@ -287,33 +287,30 @@ const zWhatsAppStats = z.object({
 
 export type IWhatsAppStats = z.output<typeof zWhatsAppStats>;
 
-const zSituationDistribution = z.object({
-  rdv_pris: z.number(),
-  nouveau_projet: z.number(),
-  deja_accompagne: z.number(),
-  contacte_sans_retour: z.number(),
-  coordonnees_incorrect: z.number(),
-  injoignable_apres_relances: z.number(),
-  autre: z.number(),
-  total: z.number(),
+const zPrequalifStats = z.object({
+  period: z.string(),
+  volume: z.object({
+    total_sent: z.number(),
+    sent_by_mode: z.object({ backfill: z.number(), daily: z.number() }),
+    failed_send: z.number(),
+    opted_out: z.number(),
+  }),
+  responses: z.object({
+    yes_count: z.number(),
+    no_count: z.number(),
+    no_response: z.number(),
+    auto_reply_sent: z.number(),
+    response_rate: z.number(),
+    yes_rate: z.number(),
+    opt_out_rate: z.number(),
+  }),
+  rdv_tracking: z.object({
+    tokens_generated: z.number(),
+    total_clicks: z.number(),
+    unique_clickers: z.number(),
+    click_rate: z.number(),
+  }),
+  ml_activation: z.object({ ml_with_rdv_url: z.number(), ml_total: z.number() }),
 });
 
-const zClassifierStats = z.object({
-  feedback: z.object({
-    total: z.number(),
-    meilleure_reactivite: z.object({ oui: z.number(), non: z.number() }),
-    confiance_indice: z.object({ distribution: z.array(z.number()).length(6), moyenne: z.number().min(0).max(5) }),
-    utilite_indice: z.object({ distribution: z.array(z.number()).length(6), moyenne: z.number().min(0).max(5) }),
-  }),
-  situations: z.object({
-    contact_opportun: zSituationDistribution,
-    autres: zSituationDistribution,
-  }),
-  scoring: z.object({
-    total_scored: z.number(),
-    total_contact_opportun: z.number(),
-    score_moyen: z.number(),
-  }),
-});
-
-export type IClassifierStats = z.output<typeof zClassifierStats>;
+export type IPrequalifStats = z.output<typeof zPrequalifStats>;
