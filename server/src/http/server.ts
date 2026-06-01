@@ -90,7 +90,7 @@ import {
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
-  getOrganismeByUAIAndSIRET,
+  getPublicOrganismeByUAIAndSIRET,
   getOrganismeDetails,
   getStatOrganismes,
   listContactsOrganisme,
@@ -306,7 +306,7 @@ function setupRoutes(app: Application) {
           uai: z.string().nullable(),
           siret: z.string(),
         });
-        const organisme = await getOrganismeByUAIAndSIRET(uai, siret);
+        const organisme = await getPublicOrganismeByUAIAndSIRET(uai, siret);
         if (!organisme) {
           throw Boom.badRequest("Aucun organisme trouvé");
         }
