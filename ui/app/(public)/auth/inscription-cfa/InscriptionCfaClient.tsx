@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { maskEmail } from "shared/utils/maskEmail";
 
 import { _get, _post } from "@/common/httpClient";
+import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
 import styles from "./InscriptionCfa.module.css";
 
@@ -230,7 +231,7 @@ function Step2({
     try {
       await onSubmit({ nom: nom.trim(), prenom: prenom.trim(), telephone, fonction: fonction.trim(), password });
     } catch (err: any) {
-      setError(err?.json?.data?.message || err.message || "Une erreur est survenue");
+      setError(getApiErrorMessage(err, "Une erreur est survenue"));
       setSubmitting(false);
     }
   };
@@ -391,7 +392,10 @@ function LoginBlock() {
 function Step3({ email }: { email: string }) {
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const [feedback, setFeedback] = useState<{ severity: "success" | "info" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    severity: "success" | "info" | "error" | "warning";
+    message: string;
+  } | null>(null);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -441,10 +445,12 @@ function Step3({ email }: { email: string }) {
           message: "Un nouveau courriel vient de vous être envoyé.",
         });
       }
-    } catch {
+    } catch (err: any) {
       setFeedback({
-        severity: "error",
-        message: "Impossible de renvoyer le courriel pour le moment. Veuillez réessayer plus tard.",
+        severity: isRateLimited(err) ? "warning" : "error",
+        message: isRateLimited(err)
+          ? getApiErrorMessage(err)
+          : "Impossible de renvoyer le courriel pour le moment. Veuillez réessayer plus tard.",
       });
     } finally {
       setSending(false);

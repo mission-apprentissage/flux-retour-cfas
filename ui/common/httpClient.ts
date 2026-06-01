@@ -6,6 +6,7 @@ import mime from "mime";
 import { publicConfig } from "@/config.public";
 
 import { emitter } from "./emitter";
+import { formatRateLimitMessage, RATE_LIMIT_STATUS } from "./rateLimit";
 
 if (publicConfig.env === "local") {
   axios.defaults.withCredentials = true;
@@ -35,7 +36,8 @@ class HTTPError extends Error {
     this.json = json;
     this.messages = messages;
     this.statusCode = statusCode;
-    this.prettyMessage = "Une erreur technique est survenue";
+    this.prettyMessage =
+      statusCode === RATE_LIMIT_STATUS ? formatRateLimitMessage(json) : "Une erreur technique est survenue";
   }
 }
 

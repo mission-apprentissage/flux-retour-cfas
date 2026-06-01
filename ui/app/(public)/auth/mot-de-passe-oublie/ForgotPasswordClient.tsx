@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Container, Stack, Link, Typography } from "@mui/material";
@@ -11,7 +12,7 @@ import React from "react";
 import { z, ZodError } from "zod";
 
 import { _post } from "@/common/httpClient";
-import { AlertRounded } from "@/theme/components/icons";
+import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Format d'email invalide" }),
@@ -32,8 +33,7 @@ export default function ForgotPasswordClient() {
       );
       setTimeout(() => router.push("/"), REDIRECT_TIMEOUT);
     } catch (err: any) {
-      const errorMessage = err?.json?.data?.message || err.message;
-      setStatus({ error: errorMessage });
+      setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     } finally {
       setSubmitting(false);
     }
@@ -104,11 +104,7 @@ export default function ForgotPasswordClient() {
                 Recevoir un courriel de ré-initialisation
               </Button>
 
-              {status.error && (
-                <Typography color="error" sx={{ display: "flex", alignItems: "center" }}>
-                  <AlertRounded sx={{ mr: fr.spacing("1w") }} /> {status.error}
-                </Typography>
-              )}
+              {status.error && <Alert severity={status.severity ?? "error"} small description={status.error} />}
             </Stack>
           </Form>
         )}

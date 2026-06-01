@@ -13,7 +13,6 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import {
   CODE_POSTAL_REGEX,
   SOURCE_APPRENANT,
@@ -145,6 +144,21 @@ import {
   requireIndicateursMlAccess,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
+import { proxyIpVerification } from "./middlewares/proxyIpVerification";
+import {
+  activationLimiter,
+  apiLimiter,
+  clearLoginCounters,
+  heavyLimiter,
+  loginEmailLimiter,
+  loginIpLimiter,
+  passwordResetLimiter,
+  publicDashboardLimiter,
+  publicLimiter,
+  registerLimiter,
+  resendEmailLimiter,
+  webhookLimiter,
+} from "./middlewares/rateLimit";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
@@ -181,30 +195,13 @@ import brevoWhatsappWebhook from "./routes/webhooks.routes/brevo-whatsapp.routes
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
-const resendActivationEmailRateLimiter = new RateLimiterMemory({
-  keyPrefix: "resend_activation_email",
-  points: 5,
-  duration: 60,
-});
-
-async function resendActivationEmailRateLimitMiddleware(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {
-  try {
-    await resendActivationEmailRateLimiter.consume(req.ip || "unknown");
-    next();
-  } catch {
-    return res.status(429).json({ error: "Too many requests" });
-  }
-}
-
 /**
  * Create the express app
  */
 export default async function createServer(): Promise<Application> {
   const app = express();
+
+  app.set("trust proxy", config.trustProxy);
 
   // Configure Sentry
   initSentryExpress(app);
@@ -218,7 +215,19 @@ export default async function createServer(): Promise<Application> {
   }
 
   if (config.env === "local" || config.env === "test") {
-    app.use(cors({ credentials: true, origin: config.publicUrl }));
+    app.use(
+      cors({
+        credentials: true,
+        origin: config.publicUrl,
+        exposedHeaders: [
+          "Retry-After",
+          "RateLimit-Limit",
+          "RateLimit-Remaining",
+          "RateLimit-Reset",
+          "RateLimit-Policy",
+        ],
+      })
+    );
   }
 
   app.use(
@@ -233,6 +242,7 @@ export default async function createServer(): Promise<Application> {
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
+  app.use(proxyIpVerification());
 
   setupRoutes(app);
 
@@ -283,6 +293,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/organismes/search-by-siret",
+      publicLimiter,
       returnResult(async (req) => {
         const { siret } = await validateFullZodObjectSchema(req.body, {
           siret: primitivesV1.etablissement_formateur.siret,
@@ -292,6 +303,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/organismes/search-by-uai",
+      publicLimiter,
       returnResult(async (req) => {
         const { uai } = await validateFullObjectSchema(req.body, {
           uai: Joi.string().required().uppercase(),
@@ -301,6 +313,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/organismes/get-by-uai-siret",
+      publicLimiter,
       returnResult(async (req) => {
         const { uai, siret } = await validateFullZodObjectSchema(req.body, {
           uai: z.string().nullable(),
@@ -313,30 +326,35 @@ function setupRoutes(app: Application) {
         return organisme;
       })
     )
-    .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/webhooks/brevo/whatsapp", brevoWhatsappWebhook())
+    .use("/api/emails", publicLimiter, emails()) // No versionning to be sure emails links are always working
+    .use("/api/webhooks/brevo/whatsapp", webhookLimiter, brevoWhatsappWebhook())
     .use(
       "/api/doc",
+      publicLimiter,
       swaggerUi.serve,
       swaggerUi.setup(openapiSpecs, {
         customCss: ".swagger-ui .topbar { display: none }",
         customSiteTitle: "API Mission Apprentissage",
       })
     )
-    .use("/api/openapi-model", (req, res) => res.download(openApiFilePath))
+    .use("/api/openapi-model", publicLimiter, (req, res) => res.download(openApiFilePath))
     .post(
       "/api/v1/auth/login",
+      loginIpLimiter,
+      loginEmailLimiter,
       returnResult(async (req, res) => {
         const { email, password } = await validateFullZodObjectSchema(req.body, {
           email: z.string().email().toLowerCase(),
           password: z.string(),
         });
         const sessionToken = await login(email, password);
+        await clearLoginCounters(email, req.ip);
         responseWithCookie(res, sessionToken);
       })
     )
     .post(
       "/api/v1/auth/logout",
+      publicLimiter,
       returnResult(async (req, res) => {
         if (!req.cookies[COOKIE_NAME]) {
           throw Boom.unauthorized("invalid jwt");
@@ -347,6 +365,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/auth/register",
+      registerLimiter,
       returnResult(async (req) => {
         const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
         registration.user.email = registration.user.email.toLowerCase();
@@ -355,6 +374,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/auth/register-unknown-network",
+      registerLimiter,
       returnResult(async (req) => {
         const registrationUnknownNetwork = await validateFullZodObjectSchema(
           req.body,
@@ -366,6 +386,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/auth/register-cfa",
+      registerLimiter,
       returnResult(async (req) => {
         const data = await validateFullZodObjectSchema(req.body, registrationCfaSchema);
         return await registerCfa(data);
@@ -373,7 +394,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/auth/resend-activation-email",
-      resendActivationEmailRateLimitMiddleware,
+      resendEmailLimiter,
       returnResult(async (req) => {
         const { email } = await validateFullZodObjectSchema(req.body, {
           email: z.string().email().toLowerCase().trim(),
@@ -390,6 +411,7 @@ function setupRoutes(app: Application) {
     )
     .get(
       "/api/v1/onboarding/cfa-info",
+      publicLimiter,
       returnResult(async (req) => {
         const token = z.string().min(10).max(200).parse(req.query.token);
         return await getCfaOnboardingInfo(token);
@@ -397,6 +419,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/auth/activation",
+      activationLimiter,
       // l'utilisateur est authentifié par JWT envoyé par email
       checkActivationToken(),
       returnResult(async (req) => {
@@ -405,6 +428,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/password/forgotten-password",
+      passwordResetLimiter,
       returnResult(async (req) => {
         const { email } = await validateFullZodObjectSchema(req.body, {
           email: z.string().email().toLowerCase().trim(),
@@ -415,6 +439,7 @@ function setupRoutes(app: Application) {
     )
     .post(
       "/api/v1/password/reset-password",
+      passwordResetLimiter,
       // l'utilisateur est authentifié par JWT envoyé par email
       checkPasswordToken(),
       returnResult(async (req) => {
@@ -428,12 +453,14 @@ function setupRoutes(app: Application) {
     )
     .get(
       "/api/v1/maintenanceMessages",
+      publicLimiter,
       returnResult(async () => {
         return await findMaintenanceMessages();
       })
     )
     .get(
       "/api/v1/indicateurs/national",
+      publicDashboardLimiter,
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
         return await getIndicateursNational(filters);
@@ -441,19 +468,21 @@ function setupRoutes(app: Application) {
     )
     .get(
       "/api/v1/invitations/:token",
+      publicLimiter,
       returnResult(async (req) => {
         return await getInvitationByToken(req.params.token);
       })
     )
     .post(
       "/api/v1/invitations/:token/reject",
+      publicLimiter,
       returnResult(async (req) => {
         await rejectInvitation(req.params.token);
       })
     )
-    .use("/api/v1/reseaux", getAllReseauxRoutes())
-    .use("/api/v1/mission-locale", missionLocalePublicRoutes())
-    .use("/api/v1/france-travail", franceTravailPublicRoutes());
+    .use("/api/v1/reseaux", publicDashboardLimiter, getAllReseauxRoutes())
+    .use("/api/v1/mission-locale", publicDashboardLimiter, missionLocalePublicRoutes())
+    .use("/api/v1/france-travail", publicDashboardLimiter, franceTravailPublicRoutes());
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
@@ -498,6 +527,8 @@ function setupRoutes(app: Application) {
   const authRouter = express.Router();
   authRouter
     .use(authMiddleware())
+    // Rate limit global des routes authed (userId, 1000/min). `heavyLimiter` se superpose sur les routes coûteuses.
+    .use(apiLimiter)
     .get(
       "/api/v1/session",
       returnResult(async (req) => {
@@ -671,6 +702,7 @@ function setupRoutes(app: Application) {
       .use(
         "/upload",
         requireOrganismePermission("manageEffectifs"),
+        heavyLimiter,
         express
           .Router()
           .post(
@@ -927,6 +959,7 @@ function setupRoutes(app: Application) {
       .post(
         "/membres/batch",
         requireCfaAdminIfCfa,
+        heavyLimiter,
         returnResult(async (req) => {
           const batchSchema = {
             emails: z.array(z.string().email()).min(1).max(50),
@@ -1086,6 +1119,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/api/v1/campagne", campagneRouter());
+  app.use("/api/v1/campagne", publicDashboardLimiter, campagneRouter());
   app.use(authRouter);
 }

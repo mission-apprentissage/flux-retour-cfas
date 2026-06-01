@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Container, Stack, Link, Typography, IconButton } from "@mui/material";
@@ -11,7 +12,8 @@ import { useLocalStorage } from "usehooks-ts";
 import { z, ZodError } from "zod";
 
 import { _post } from "@/common/httpClient";
-import { AlertRounded, ShowPassword } from "@/theme/components/icons";
+import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
+import { ShowPassword } from "@/theme/components/icons";
 
 const authConnexionSchema = z.object({
   email: z.string().email({ message: "Format d'email invalide" }),
@@ -35,8 +37,7 @@ export default function ConnexionClient() {
         window.location.href = "/";
       }
     } catch (err: any) {
-      const errorMessage = err?.json?.data?.message || err.message;
-      setStatus({ error: errorMessage });
+      setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     }
   };
 
@@ -137,9 +138,9 @@ export default function ConnexionClient() {
               </Stack>
 
               {status.error && (
-                <Typography color="error" sx={{ display: "flex", alignItems: "center", mt: fr.spacing("4w") }}>
-                  <AlertRounded sx={{ mr: fr.spacing("1w") }} /> {status.error}
-                </Typography>
+                <Stack sx={{ mt: fr.spacing("4w") }}>
+                  <Alert severity={status.severity ?? "error"} small description={status.error} />
+                </Stack>
               )}
             </Stack>
           </Form>

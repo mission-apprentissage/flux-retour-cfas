@@ -7,6 +7,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import Link from "next/link";
 import PlausibleProvider from "next-plausible";
 
+import RateLimitBanner from "@/components/RateLimitBanner";
 import { publicConfig } from "@/config.public";
 
 import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
@@ -41,7 +42,10 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         {
           <AppRouterCacheProvider>
             <DsfrProvider>
-              <MuiDsfrThemeProvider>{children}</MuiDsfrThemeProvider>
+              <MuiDsfrThemeProvider>
+                <RateLimitBanner />
+                {children}
+              </MuiDsfrThemeProvider>
             </DsfrProvider>
           </AppRouterCacheProvider>
         }
