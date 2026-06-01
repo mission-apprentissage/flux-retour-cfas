@@ -125,6 +125,8 @@ export default () => {
         api_version: 1,
         organisme_transmetteur_id: 1,
         last_erp_transmission_date: 1,
+        api_key_revoked_at: 1,
+        api_key_revoked_reason: 1,
       });
 
       if (!organisme) {
@@ -144,6 +146,8 @@ export default () => {
         transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",
         api_key_active: !!organisme.api_key,
         api_key: organisme.mode_de_transmission === "API" ? organisme.api_key : undefined,
+        api_key_revoked_at: organisme.api_key_revoked_at,
+        api_key_revoked_reason: organisme.api_key_revoked_reason,
         parametrage_erp_active: !!organisme.mode_de_transmission_configuration_date,
         parametrage_erp_date: organisme.mode_de_transmission_configuration_date,
         parametrage_erp_author: organisme.mode_de_transmission_configuration_author_fullname,

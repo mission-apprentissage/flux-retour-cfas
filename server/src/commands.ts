@@ -340,6 +340,15 @@ program
   .action(createJobAction("hydrate:effectifs:update_all_computed_statut"));
 
 program
+  .command("organismes:revoke-stale-api-keys")
+  .description("Révoque les clés API des organismes inactifs depuis plus de X mois (défaut 12)")
+  .option("--dry-run", "Affiche le nombre de clés à révoquer sans écrire", false)
+  .option("-l, --limit <number>", "Limite le nombre de révocations", (n) => parseInt(n, 10))
+  .option("--months <number>", "Seuil d'inactivité en mois", (n) => parseInt(n, 10), 12)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("organismes:revoke-stale-api-keys"));
+
+program
   .command("tmp:whatsapp:send-injoignables")
   .description("Envoyer un WhatsApp aux effectifs injoignables (rupture < 3 mois, CONTACTE_SANS_RETOUR < 1 mois)")
   .option("--dry-run", "Affiche le nombre d'effectifs éligibles sans envoyer", false)
