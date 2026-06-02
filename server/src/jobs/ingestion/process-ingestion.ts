@@ -26,6 +26,7 @@ import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTrav
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
+  isTransmissionAuthorizedForOrganismes,
   updateOrganismeTransmission,
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
@@ -175,6 +176,56 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
     if (result.success) {
       const { effectif, organisme } = result.data;
+
+      // Contrôle d'autorisation : la clé API (source_organisme_id) doit être autorisée à transmettre
+      // pour le formateur OU le responsable déclaré. Sinon, n'importe quelle clé valide pourrait écrire
+      // pour n'importe quel organisme du référentiel (l'effectif est attribué au payload, pas à la clé).
+      // Les items sans source_organisme_id (chemins non authentifiés par clé) ne sont pas concernés.
+      const sourceOrganismeId = effectifQueue.source_organisme_id;
+      if (sourceOrganismeId && ObjectId.isValid(sourceOrganismeId)) {
+        const authorized = await isTransmissionAuthorizedForOrganismes(
+          new ObjectId(sourceOrganismeId),
+          effectif.organisme_formateur_id,
+          effectif.organisme_responsable_id
+        );
+
+        if (!authorized) {
+          await effectifsQueueDb().updateOne(
+            { _id: effectifQueue._id },
+            {
+              $set: {
+                validation_errors: [
+                  {
+                    message:
+                      "La clé API utilisée n'est pas autorisée à transmettre pour cet organisme (formateur/responsable non rattaché à la clé).",
+                    path: ["etablissement_formateur_siret", "etablissement_responsable_siret"],
+                  },
+                ],
+                effectifv2_id: effectifv2?._id,
+                updated_at: currentDate,
+                processed_at: currentDate,
+                has_error: true,
+                computed_day,
+              },
+              $unset: {
+                error: 1,
+              },
+            }
+          );
+
+          itemLogger.error(
+            {
+              duration: Date.now() - start,
+              source_organisme_id: sourceOrganismeId,
+              organisme_formateur_id: effectif.organisme_formateur_id,
+              organisme_responsable_id: effectif.organisme_responsable_id,
+            },
+            "transmission refusée : clé API non autorisée pour cet organisme"
+          );
+
+          return false;
+        }
+      }
 
       // création ou mise à jour de l'effectif
       const [{ upsertedEffectif, itemProcessingInfos }] = await Promise.all([

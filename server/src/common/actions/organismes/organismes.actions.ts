@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
@@ -404,6 +406,53 @@ export async function getFamilyOrganismeIds(organismeId: ObjectId): Promise<Obje
   return [...idSet].map((id) => new ObjectId(id));
 }
 
+/**
+ * Contrôle d'autorisation à l'ingestion : vérifie que la transmission (authentifiée par une clé API,
+ * dont le détenteur est `sourceOrganismeId`) a le droit d'écrire pour le couple formateur/responsable
+ * déclaré dans le payload.
+ *
+ * Une transmission est autorisée si l'une des conditions suivantes est remplie pour le formateur
+ * OU le responsable visé :
+ *  1. Lien hiérarchique : l'organisme visé appartient à la famille de la clé (`getFamilyOrganismeIds`,
+ *     calculé depuis la clé : lui-même + ses responsables + ses formateurs + les formateurs de ses
+ *     responsables). Couvre l'auto-transmission et la transmission responsable → formateur.
+ *  2. Même établissement / entité : la clé partage le SIRET (entité juridique) ou l'UAI (établissement)
+ *     de l'organisme visé. Un même établissement est fréquemment éclaté sur plusieurs fiches organisme
+ *     (changement de SIRET, doublons) ; autoriser ce cas est sûr car la clé devrait alors *être* cet
+ *     établissement pour en bénéficier.
+ *
+ * Sans ce contrôle, n'importe quelle clé valide peut écrire pour n'importe quel organisme du référentiel
+ * (l'effectif est attribué à l'organisme du payload, pas à la clé).
+ */
+export async function isTransmissionAuthorizedForOrganismes(
+  sourceOrganismeId: ObjectId,
+  organismeFormateurId: ObjectId | null | undefined,
+  organismeResponsableId: ObjectId | null | undefined
+): Promise<boolean> {
+  const targetIds = [organismeFormateurId, organismeResponsableId].filter(Boolean) as ObjectId[];
+  if (targetIds.length === 0) return false;
+
+  // 1. Lien hiérarchique
+  const familyIds = await getFamilyOrganismeIds(sourceOrganismeId);
+  const familySet = new Set(familyIds.map((id) => id.toString()));
+  if (targetIds.some((id) => familySet.has(id.toString()))) {
+    return true;
+  }
+
+  // 2. Même établissement (UAI) ou même entité juridique (SIRET)
+  const [source, targets] = await Promise.all([
+    organismesDb().findOne({ _id: sourceOrganismeId }, { projection: { siret: 1, uai: 1 } }),
+    organismesDb()
+      .find({ _id: { $in: targetIds } }, { projection: { siret: 1, uai: 1 } })
+      .toArray(),
+  ]);
+  if (!source) return false;
+
+  return targets.some(
+    (target) => (!!source.siret && target.siret === source.siret) || (!!source.uai && target.uai === source.uai)
+  );
+}
+
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
@@ -473,7 +522,10 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    logger.error({ module: "transmission", api_key, queryString }, "Cannot find organisme from api_key");
+    // Ne jamais logger la clé API en clair (secret). On loggue un empreinte non réversible
+    // pour pouvoir corréler des tentatives répétées sans exposer le secret.
+    const apiKeyFingerprint = createHash("sha256").update(api_key).digest("hex").slice(0, 12);
+    logger.error({ module: "transmission", apiKeyFingerprint, queryString }, "Cannot find organisme from api_key");
     throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
   return organisme;
