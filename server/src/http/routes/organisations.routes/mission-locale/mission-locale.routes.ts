@@ -15,6 +15,7 @@ import {
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
 
+import { getCfaListToInviteForMissionLocale } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -60,6 +61,7 @@ const getMlParametres = async (_req, { locals }) => {
 };
 
 const updateMlParametres = async (req, { locals }) => {
+  const router = express.Router();
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   const body = zMlParametresBody.parse(req.body);
 
@@ -68,7 +70,17 @@ const updateMlParametres = async (req, { locals }) => {
     { $set: { rdv_url: body.rdv_url } }
   );
 
-  return { rdv_url: body.rdv_url };
+  router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
+  return router;
+};
+
+const getCfaInvitationsList = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
+  const userId = new ObjectId(req.user._id);
+  return await getCfaListToInviteForMissionLocale(missionLocale, userId);
 };
 
 const updateEffectifMissionLocaleData = async (req, { locals }) => {
