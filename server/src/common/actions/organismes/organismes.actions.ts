@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHmac } from "crypto";
 
 import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
@@ -39,6 +39,7 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
+import config from "@/config";
 
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
@@ -522,9 +523,13 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    // Ne jamais logger la clé API en clair (secret). On loggue un empreinte non réversible
-    // pour pouvoir corréler des tentatives répétées sans exposer le secret.
-    const apiKeyFingerprint = createHash("sha256").update(api_key).digest("hex").slice(0, 12);
+    // Ne jamais logger la clé API en clair (secret). On loggue une empreinte non réversible,
+    // keyée par un secret serveur (HMAC), pour pouvoir corréler des tentatives répétées sans
+    // exposer le secret ni permettre un brute-force hors-ligne de la clé.
+    const apiKeyFingerprint = createHmac("sha256", config.auth.user.jwtSecret)
+      .update(api_key)
+      .digest("hex")
+      .slice(0, 12);
     logger.error({ module: "transmission", apiKeyFingerprint, queryString }, "Cannot find organisme from api_key");
     throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
