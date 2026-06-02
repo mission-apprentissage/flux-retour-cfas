@@ -1,6 +1,7 @@
 import { ObjectId } from "bson";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, STATUT_APPRENANT } from "shared/constants";
 import type { IDepartmentCode } from "shared/constants/territoires";
+import { getOrganisationLabel, type IOrganisationCreate } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
@@ -78,7 +79,6 @@ export type TbaContactAttributeName =
   | "STATUT_SIRET"
   | "ORGANISME_ID"
   | "URL_TBA"
-  | "STATUT_FIABILISATION"
   | "CFA_NATURE"
   | "CFA_NB_FORMATEURS"
   | "CFA_ERP_CLIENT"
@@ -134,7 +134,6 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   STATUT_SIRET: "text",
   ORGANISME_ID: "text",
   URL_TBA: "text",
-  STATUT_FIABILISATION: "text",
   CFA_NATURE: "text",
   CFA_NB_FORMATEURS: "float",
   CFA_ERP_CLIENT: "text",
@@ -178,6 +177,13 @@ type TbaUserContext = {
     uai?: string | null;
     ml_beta_activated_at?: Date | null;
     adresse?: TbaAdresse;
+    // Codes géo/réseau spécifiques aux typologies institutionnelles sans
+    // adresse (DDETS, DREETS, CONSEIL_REGIONAL, ACADEMIE, TETE_DE_RESEAU, …).
+    // Servent à dériver ORGANISATION / REGION / DEPARTEMENT_*.
+    code_region?: string;
+    code_departement?: string;
+    code_academie?: string;
+    reseau?: string;
   };
   organisme?: {
     _id?: ObjectId;
@@ -194,7 +200,6 @@ type TbaUserContext = {
     effectifs_current_year_count?: number;
     adresse?: TbaAdresse | null;
     reseaux?: string[];
-    fiabilisation_statut?: string;
     ferme?: boolean;
     is_allowed_deca?: boolean | null;
   };
@@ -253,6 +258,10 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
           uai: "$organisation.uai",
           ml_beta_activated_at: "$organisation.ml_beta_activated_at",
           adresse: "$organisation.adresse",
+          code_region: "$organisation.code_region",
+          code_departement: "$organisation.code_departement",
+          code_academie: "$organisation.code_academie",
+          reseau: "$organisation.reseau",
         },
       },
     },
@@ -290,7 +299,6 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
             effectifs_current_year_count: 1,
             adresse: 1,
             reseaux: 1,
-            fiabilisation_statut: 1,
             ferme: 1,
             is_allowed_deca: 1,
           },
@@ -314,7 +322,6 @@ const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
         effectifs_current_year_count: o.effectifs_current_year_count ?? 0,
         adresse: o.adresse,
         reseaux: o.reseaux,
-        fiabilisation_statut: o.fiabilisation_statut,
         ferme: o.ferme,
         is_allowed_deca: o.is_allowed_deca,
       });
@@ -555,15 +562,38 @@ const fetchMlStatsByMlId = async (mlIds: ObjectId[]): Promise<Map<string, MlStat
   return byMlId;
 };
 
+/**
+ * Fallback pour les typologies institutionnelles sans adresse (DDETS, DREETS,
+ * CONSEIL_REGIONAL, ACADEMIE, TETE_DE_RESEAU, CARIF_OREF_NATIONAL, …) : on
+ * dérive le `nom` via `getOrganisationLabel`, le département via le code direct
+ * (DDETS), et la région via le `code_region` ou en remontant depuis le
+ * département (DDETS). Pour les CFA/ML, l'adresse prime.
+ */
+const getOrganisationFallbacks = (
+  organisation: TbaUserContext["organisation"]
+): { nom: string; departementCode: string | null; regionCode: string | null } => {
+  const departementCode = organisation.code_departement ?? null;
+  const regionCode =
+    organisation.code_region ??
+    (organisation.code_departement
+      ? (DEPARTEMENTS_BY_CODE[organisation.code_departement as IDepartmentCode]?.region?.code ?? null)
+      : null);
+  return {
+    nom: getOrganisationLabel(organisation as IOrganisationCreate),
+    departementCode,
+    regionCode,
+  };
+};
+
 // Arbitrage équipe : "ERP" si l'organisme transmet en API, sinon "DECA"
 // si on a des effectifs DECA, sinon vide. Trois valeurs possibles côté Brevo.
 const deriveCfaErpOuDeca = (
   organisme: TbaUserContext["organisme"] | undefined,
-  nbApprenantsDeca: number
+  nbApprenantsDeca: number | null
 ): "ERP" | "DECA" | null => {
   if (!organisme) return null;
   if (organisme.mode_de_transmission === "API") return "ERP";
-  if (nbApprenantsDeca > 0) return "DECA";
+  if (nbApprenantsDeca && nbApprenantsDeca > 0) return "DECA";
   return null;
 };
 
@@ -594,29 +624,40 @@ const buildAttributes = (
   // Adresse de l'organisme (CFA) en priorité, sinon celle de l'organisation
   // (ML, ARML, … — `zAdresse` est partagé).
   const adresse = user.organisme?.adresse ?? user.organisation.adresse;
-  const regionLabel = adresse?.region
-    ? (REGIONS_BY_CODE[adresse.region as keyof typeof REGIONS_BY_CODE]?.nom ?? null)
+  // Pour les typologies institutionnelles (DDETS, DREETS, CONSEIL_REGIONAL,
+  // ACADEMIE, TETE_DE_RESEAU, CARIF_OREF_NATIONAL) : pas d'adresse en DB, on
+  // dérive nom + codes géo depuis les champs propres au doc `organisation`.
+  const fallback = getOrganisationFallbacks(user.organisation);
+  const departementCode = adresse?.departement ?? fallback.departementCode;
+  const regionCode = adresse?.region ?? fallback.regionCode;
+  const regionLabel = regionCode ? (REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE]?.nom ?? null) : null;
+  const departementNomLabel = departementCode
+    ? (DEPARTEMENTS_BY_CODE[departementCode as IDepartmentCode]?.nom ?? null)
     : null;
   const academieLabel = adresse?.academie
     ? (ACADEMIES_BY_CODE[adresse.academie as keyof typeof ACADEMIES_BY_CODE]?.nom ?? null)
-    : null;
-  const departementNomLabel = adresse?.departement
-    ? (DEPARTEMENTS_BY_CODE[adresse.departement as IDepartmentCode]?.nom ?? null)
     : null;
   const adresseString = adresse?.complete ?? buildAdresseFallback(adresse);
 
   const uai = user.organisation.uai ?? null;
   const siret = cleanSiret(user.organisation.siret);
-  const statutSiret: string | null = !siret ? "inconnu" : user.organisme?.ferme ? "fermé" : "ouvert";
-  const organisationNom = user.organisme?.nom ?? user.organisme?.raison_sociale ?? user.organisation.nom ?? null;
+  const statutSiret: string | null = !siret ? null : user.organisme?.ferme ? "fermé" : "ouvert";
+  const organisationNom =
+    user.organisme?.nom ?? user.organisme?.raison_sociale ?? user.organisation.nom ?? fallback.nom;
 
   const mlPourcentageTraites: number | null =
     isMl && mlStats && mlStats.total > 0 ? Math.round((mlStats.traite / mlStats.total) * 100) : isMl ? 0 : null;
 
-  const nbApprenantsErp = user.organisme?.effectifs_current_year_count ?? 0;
-  const nbApprenantsDeca = decaCounts?.apprenants ?? 0;
-  const nbRupturantsErp = erpRupturants ?? 0;
-  const nbRupturantsDeca = decaCounts?.rupturants ?? 0;
+  const nbApprenantsErp = user.organisme?.effectifs_current_year_count || null;
+  const nbApprenantsDeca = decaCounts?.apprenants || null;
+  const nbRupturantsErp = erpRupturants || null;
+  const nbRupturantsDeca = decaCounts?.rupturants || null;
+  // CFA_NB_ERREURS_TRANSMISSION : rempli uniquement si CFA transmet par ERP
+  // ET au moins 1 erreur détectée. Pour les CFA-DECA (pas d'ERP) ou les CFA
+  // sans erreur, on laisse vide.
+  const transmetsParErp = (user.organisme?.mode_de_transmission ?? null) === "API";
+  const nbErreursTransmission =
+    transmetsParErp && transmissionErrors?.error_count ? transmissionErrors.error_count : null;
 
   return {
     CIVILITE: formatCivilite(user.civility),
@@ -634,7 +675,7 @@ const buildAttributes = (
     CFA_RESEAUX: isCfa ? formatJoinedList(user.organisme?.reseaux) : null,
     REGION: regionLabel,
     DEPARTEMENT_NOM: departementNomLabel,
-    DEPARTEMENT_NUM: adresse?.departement ?? null,
+    DEPARTEMENT_NUM: departementCode,
     ACADEMIE: academieLabel,
     ADRESSE: adresseString,
     ENSEIGNE: user.organisme?.enseigne ?? null,
@@ -645,8 +686,6 @@ const buildAttributes = (
     STATUT_SIRET: statutSiret,
     ORGANISME_ID: user.organisme?._id ? String(user.organisme._id) : null,
     URL_TBA: isCfa && user.organisme?._id ? `${config.publicUrl}/organismes/${String(user.organisme._id)}` : null,
-
-    STATUT_FIABILISATION: isCfa ? (user.organisme?.fiabilisation_statut ?? null) : null,
 
     CFA_NATURE: isCfa ? (user.organisme?.nature ?? null) : null,
     CFA_NB_FORMATEURS: isCfa ? (user.organisme?.organismesFormateursCount ?? 0) : null,
@@ -662,8 +701,7 @@ const buildAttributes = (
     CFA_DATE_ERREURS_TRANSMISSION: isCfa
       ? (transmissionErrors?.current_day ?? user.organisme?.transmission_errors_date ?? null)
       : null,
-    // Arbitrage : `error_count` du dernier `transmissionDailyReport`.
-    CFA_NB_ERREURS_TRANSMISSION: isCfa ? (transmissionErrors?.error_count ?? 0) : null,
+    CFA_NB_ERREURS_TRANSMISSION: isCfa ? nbErreursTransmission : null,
     // Arbitrage : `organisme.effectifs_current_year_count` (tous statuts,
     // année scolaire courante, pré-calculé par `updateEffectifsCount`).
     CFA_NB_APPRENANTS_ERP: isCfa ? nbApprenantsErp : null,
@@ -676,9 +714,10 @@ const buildAttributes = (
     CFA_NB_RUPTURANTS_DECA: isCfa ? nbRupturantsDeca : null,
     CFA_STATUT_V2: isCfa ? deriveCfaStatutV2(user.organisme, eligibleOrgIds) : null,
 
-    // `ML_DATE_ACTIVATION_ML` est aussi remonté côté OF : c'est la date
-    // d'activation de la collab ML côté CFA, pas une stat ML.
-    ML_DATE_ACTIVATION_ML: user.organisation.ml_beta_activated_at ?? null,
+    // Fix retour recette (28/05) : ce champ doit être renseigné uniquement sur
+    // les contacts ML — sur les OF c'était la date d'activation de la collab
+    // ML côté CFA, ce qui prêtait à confusion.
+    ML_DATE_ACTIVATION_ML: isMl ? (user.organisation.ml_beta_activated_at ?? null) : null,
     ML_NB_RUPTURANTS_TOTAL: isMl ? (mlStats?.total ?? 0) : null,
     ML_NB_RUPTURANTS_A_TRAITER: isMl ? (mlStats?.a_traiter ?? 0) : null,
     ML_NB_RUPTURANTS_TRAITES: isMl ? (mlStats?.traite ?? 0) : null,
