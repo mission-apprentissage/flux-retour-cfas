@@ -150,10 +150,12 @@ export const createRandomDossierApprenantApiInputV3 = (params?: Partial<IDossier
     etablissement_responsable_siret: siret,
     etablissement_formateur_uai: uai,
     etablissement_formateur_siret: siret,
+    // Valeur par défaut surchargeable via `params` : les tests d'ingestion authentifiés doivent
+    // pouvoir cibler l'organisme propriétaire de la clé API (cf. contrôle d'autorisation à la transmission).
+    source_organisme_id: faker.database.mongodbObjectId(),
     ...params,
     api_version: "v3",
     source: SOURCE_APPRENANT.ERP,
-    source_organisme_id: faker.database.mongodbObjectId(),
   };
 };
 

@@ -24,6 +24,9 @@ const SIRET = "77937827200016";
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
+// Propriétaire de la clé API (source_organisme_id) = organisme formateur : transmission autorisée.
+const ORGANISME_ID = new ObjectId();
+
 describe("Processus d'ingestion des adresses des missions locales", () => {
   useNock();
   useMongo();
@@ -34,7 +37,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
     vi.setSystemTime(new Date("2025-04-09T10:00:00Z"));
 
     await organismesDb().insertMany([
-      { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET }) },
+      { _id: ORGANISME_ID, ...createRandomOrganisme({ uai: UAI, siret: SIRET }) },
       { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE }) },
     ]);
 
@@ -58,6 +61,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
   it("Ajoute la mission locale dans l'adresse de l'apprenant", async () => {
     const payload = createRandomDossierApprenantApiInputV3({
+      source_organisme_id: ORGANISME_ID.toString(),
       annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
@@ -87,6 +91,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
   it("L'ajout d'un effectif rupturant doit créer un effectifMissionLocale ", async () => {
     const payload = createRandomRupturantDossierApprenantApiInputV3({
+      source_organisme_id: ORGANISME_ID.toString(),
       annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
@@ -117,6 +122,7 @@ describe("Processus d'ingestion des adresses des missions locales", () => {
 
   it("L'ajout d'un effectif rupturant déja existant ne doit pas créer un effectifMissionLocale ", async () => {
     const payload = createRandomRupturantDossierApprenantApiInputV3({
+      source_organisme_id: ORGANISME_ID.toString(),
       annee_scolaire: "2024-2025",
       etablissement_formateur_uai: UAI,
       etablissement_formateur_siret: SIRET,
