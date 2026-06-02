@@ -177,17 +177,18 @@ describe("tbaContactsContactList", () => {
           STATUT_SIRET: "ouvert",
           ORGANISME_ID: String(organisme._id),
           URL_TBA: `http://localhost:3000/organismes/${String(organisme._id)}`,
-          STATUT_FIABILISATION: "FIABLE",
           CFA_NATURE: null,
           CFA_NB_FORMATEURS: 3,
           CFA_ERP_OU_DECA: "ERP",
           CFA_ERP: "ypareo",
           CFA_STATUT_CLE_API: "oui",
-          CFA_NB_ERREURS_TRANSMISSION: 0,
+          // Pas d'erreur de transmission → null (et non 0).
+          CFA_NB_ERREURS_TRANSMISSION: null,
           CFA_NB_APPRENANTS_ERP: 2,
-          CFA_NB_APPRENANTS_DECA: 0,
+          // 0 traité comme "pas de donnée" → null côté payload Brevo.
+          CFA_NB_APPRENANTS_DECA: null,
           CFA_NB_RUPTURANTS_ERP: 1,
-          CFA_NB_RUPTURANTS_DECA: 0,
+          CFA_NB_RUPTURANTS_DECA: null,
           // organisme sans `nature` → ne passe pas les checks d'éligibilité V2
           CFA_STATUT_V2: "exclu",
           ML_NB_RUPTURANTS_TOTAL: null,
@@ -226,7 +227,7 @@ describe("tbaContactsContactList", () => {
           TYPE_ORGANISATION: "MISSION_LOCALE",
           SIRET: null,
           UAI: null,
-          STATUT_SIRET: "inconnu",
+          STATUT_SIRET: null,
           ORGANISME_ID: null,
           URL_TBA: null,
           CFA_NATURE: null,
@@ -237,7 +238,6 @@ describe("tbaContactsContactList", () => {
           CFA_NB_APPRENANTS_DECA: null,
           CFA_NB_RUPTURANTS_ERP: null,
           CFA_NB_RUPTURANTS_DECA: null,
-          STATUT_FIABILISATION: null,
           ML_NB_RUPTURANTS_TOTAL: 50,
           ML_NB_RUPTURANTS_A_TRAITER: 10,
           ML_NB_RUPTURANTS_TRAITES: 40,
@@ -336,7 +336,7 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.STATUT_SIRET).toBe("fermé");
     });
 
-    it("STATUT_SIRET='inconnu' quand la typologie d'organisation n'a pas de SIRET", async () => {
+    it("STATUT_SIRET=null quand la typologie d'organisation n'a pas de SIRET", async () => {
       const orgaArml = {
         _id: new ObjectId(),
         type: "ARML",
@@ -350,9 +350,29 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.STATUT_SIRET).toBe("inconnu");
+      expect(contacts[0].attributes.STATUT_SIRET).toBeNull();
       expect(contacts[0].attributes.SIRET).toBeNull();
       expect(contacts[0].attributes.TYPE_ORGANISATION).toBe("ARML");
+    });
+
+    it("DDETS : ORGANISATION/REGION/DEPARTEMENT_* dérivés depuis code_departement", async () => {
+      const orgaDdets = {
+        _id: new ObjectId(),
+        type: "DDETS",
+        code_departement: "42",
+        created_at: NOW,
+      };
+      await organisationsDb().insertOne(orgaDdets as any);
+      await usersMigrationDb().insertOne(buildUser(orgaDdets) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.ORGANISATION).toBe("DDETS Loire");
+      expect(contacts[0].attributes.DEPARTEMENT_NUM).toBe("42");
+      expect(contacts[0].attributes.DEPARTEMENT_NOM).toBe("Loire");
+      // Région dérivée du département (Loire → Auvergne-Rhône-Alpes, code 84).
+      expect(contacts[0].attributes.REGION).toBe("Auvergne-Rhône-Alpes");
     });
 
     it("DEPARTEMENT_NOM dérive le libellé depuis le code (75 → Paris)", async () => {
@@ -373,7 +393,7 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.ACADEMIE).toBe("Paris");
     });
 
-    it("ML_DATE_ACTIVATION_ML remonté côté OF aussi (date d'activation collab CFA)", async () => {
+    it("ML_DATE_ACTIVATION_ML null côté OF (réservé aux Mission Locale)", async () => {
       const activatedAt = new Date("2026-01-15T10:00:00.000Z");
       const orgaOf = buildOrgaOf({ ml_beta_activated_at: activatedAt });
       const organisme = buildOrganisme(orgaOf);
@@ -384,7 +404,7 @@ describe("tbaContactsContactList", () => {
       const contacts = await tbaContactsContactList.fetchContacts();
 
       expect(contacts).toHaveLength(1);
-      expect(contacts[0].attributes.ML_DATE_ACTIVATION_ML).toEqual(activatedAt);
+      expect(contacts[0].attributes.ML_DATE_ACTIVATION_ML).toBeNull();
     });
   });
 
