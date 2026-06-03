@@ -539,7 +539,7 @@ async function handlePrequalifYes(
         },
       }
     );
-    const redirectUrl = `${config.publicUrl}/r/${token}`;
+    const redirectUrl = `${config.publicUrl}/api/r/${token}`;
     message = buildPrequalifYesWithUrlInlineMessage(prenom, ml, redirectUrl);
   } else {
     message = buildPrequalifYesWithoutUrlMessage(prenom, ml);

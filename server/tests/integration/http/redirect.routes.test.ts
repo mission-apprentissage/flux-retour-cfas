@@ -68,7 +68,7 @@ const insertEffectifWithToken = async (
   return id;
 };
 
-describe("Route GET /r/:token", () => {
+describe("Route GET /api/r/:token", () => {
   useMongo();
 
   beforeEach(async () => {
@@ -94,7 +94,7 @@ describe("Route GET /r/:token", () => {
     const token = uuidv4();
     const effectifId = await insertEffectifWithToken(mlId, token);
 
-    const response = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(rdvUrl);
@@ -107,7 +107,7 @@ describe("Route GET /r/:token", () => {
   });
 
   it("token inexistant → 302 vers fallback, pas de log", async () => {
-    const response = await httpClient.get(`/r/${uuidv4()}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${uuidv4()}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(FALLBACK_ML_URL);
@@ -123,7 +123,7 @@ describe("Route GET /r/:token", () => {
     const token = uuidv4();
     const effectifId = await insertEffectifWithToken(mlId, token);
 
-    const response = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(FALLBACK_ML_URL);
@@ -139,7 +139,7 @@ describe("Route GET /r/:token", () => {
     const expiredCreatedAt = new Date(Date.now() - 91 * 24 * 60 * 60 * 1000);
     const effectifId = await insertEffectifWithToken(mlId, token, { tokenCreatedAt: expiredCreatedAt });
 
-    const response = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(FALLBACK_ML_URL);
@@ -153,7 +153,7 @@ describe("Route GET /r/:token", () => {
     const token = uuidv4();
     const effectifId = await insertEffectifWithToken(mlId, token, { softDeleted: true });
 
-    const response = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(FALLBACK_ML_URL);
@@ -168,7 +168,7 @@ describe("Route GET /r/:token", () => {
     const effectifId = await insertEffectifWithToken(mlId, token);
 
     for (let i = 0; i < 3; i++) {
-      const response = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+      const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
       expect(response.status).toBe(302);
     }
 
@@ -181,10 +181,10 @@ describe("Route GET /r/:token", () => {
     await insertEffectifWithToken(mlId, token);
 
     for (let i = 0; i < 30; i++) {
-      const r = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+      const r = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
       expect([302, 429]).toContain(r.status);
     }
-    const blocked = await httpClient.get(`/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
+    const blocked = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
     expect(blocked.status).toBe(429);
   });
 });
