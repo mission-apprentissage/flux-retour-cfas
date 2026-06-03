@@ -72,7 +72,7 @@ export const importContacts = async (
     prenom: string;
     nom: string;
     urls?: Record<string, string> | null;
-    telephone?: string | null;
+    sms?: string | null;
     nom_organisme?: string | null;
     mission_locale_id: string;
     nom_mission_locale: string;
@@ -94,7 +94,7 @@ export const importContacts = async (
       PRENOM: contact.prenom,
       NOM: contact.nom,
       ...contact.urls,
-      TELEPHONE: contact.telephone,
+      SMS: contact.sms,
       NOM_ORGANISME: contact.nom_organisme,
       MISSION_LOCALE_ID: contact.mission_locale_id,
       MISSION_LOCALE: contact.nom_mission_locale,

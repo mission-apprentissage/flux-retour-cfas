@@ -58,7 +58,7 @@ export type TbaContactAttributeName =
   | "NOM"
   | "PRENOM"
   | "FONCTION"
-  | "TELEPHONE"
+  | "SMS"
   | "SOURCE_EMAIL"
   | "DATE_INSCRIPTION_USER_TBA"
   | "DATE_DERNIERE_CONNEXION_USER_TBA"
@@ -113,7 +113,7 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   NOM: "text",
   PRENOM: "text",
   FONCTION: "text",
-  TELEPHONE: "text",
+  SMS: "text",
   SOURCE_EMAIL: "text",
   DATE_INSCRIPTION_USER_TBA: "date",
   DATE_DERNIERE_CONNEXION_USER_TBA: "date",
@@ -664,7 +664,7 @@ const buildAttributes = (
     NOM: formatName(user.nom),
     PRENOM: formatName(user.prenom),
     FONCTION: user.fonction ?? null,
-    TELEPHONE: normalizePhoneNumber(user.telephone, { silent: true }),
+    SMS: normalizePhoneNumber(user.telephone, { silent: true }),
     SOURCE_EMAIL: "users_tba",
     DATE_INSCRIPTION_USER_TBA: user.created_at ?? null,
     DATE_DERNIERE_CONNEXION_USER_TBA: user.last_connection ?? null,
