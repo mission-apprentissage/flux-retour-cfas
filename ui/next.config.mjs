@@ -94,6 +94,12 @@ const nextConfig = {
         destination: "/politique-de-confidentialite",
         permanent: true,
       },
+      {
+        source: "/sondage",
+        destination: "https://tally.so/r/rjv1GN",
+        basePath: false,
+        permanent: false,
+      },
     ];
   },
 };
