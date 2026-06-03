@@ -318,8 +318,10 @@ function setupRoutes(app: Application) {
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
     .use("/api/webhooks/brevo/whatsapp", brevoWhatsappWebhook())
-    // Redirection opaque RDV — chemin court non préfixé /api (plan §7ter.4)
-    .use("/r", redirectRoutes())
+    // Redirection opaque RDV — montée sous /api car seul /api est proxifié vers le backend
+    // (nginx envoie tout le reste à l'UI Next). Les anciens liens /r/:token sont redirigés
+    // vers /api/r/:token côté Next (next.config.mjs).
+    .use("/api/r", redirectRoutes())
     .use(
       "/api/doc",
       swaggerUi.serve,
