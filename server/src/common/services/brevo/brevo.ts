@@ -1,4 +1,9 @@
-import brevo, { AccountApiApiKeys, ContactsApiApiKeys, EventsApiApiKeys } from "@getbrevo/brevo";
+import brevo, {
+  AccountApiApiKeys,
+  ContactsApiApiKeys,
+  EventsApiApiKeys,
+  TransactionalEmailsApiApiKeys,
+} from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
@@ -16,6 +21,17 @@ const initContactApi = () => {
   return apiContactInstance;
 };
 
+const initEmailApi = () => {
+  const apiEmailInstance = new brevo.TransactionalEmailsApi();
+  const apiKey = config.brevo.apiKey;
+  if (!apiKey) {
+    captureException(new Error("Brevo API key not set"));
+    return null;
+  }
+  apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
+  return apiEmailInstance;
+};
+
 const initEventApi = () => {
   const apiEventInstance = new brevo.EventsApi();
   const apiKey = config.brevo.apiKey;
@@ -28,7 +44,39 @@ const initEventApi = () => {
 };
 
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
+const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const EventInstance: brevo.EventsApi | null = initEventApi();
+
+export interface SendTransactionalEmailOptions {
+  cc?: string[];
+}
+
+export const sendTransactionalEmail = async (
+  recipientEmail: string,
+  templateId: number,
+  params: Record<string, unknown>,
+  options?: SendTransactionalEmailOptions
+) => {
+  if (!EmailInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const emailParams = params;
+
+  const sendSmtpEmail = new brevo.SendSmtpEmail();
+  sendSmtpEmail.templateId = templateId;
+  sendSmtpEmail.to = [{ email: recipientEmail }];
+  sendSmtpEmail.params = emailParams;
+  if (options?.cc?.length) {
+    sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
+  }
+  try {
+    return await EmailInstance.sendTransacEmail(sendSmtpEmail);
+  } catch (e) {
+    captureException(e);
+    return;
+  }
+};
 
 const BREVO_IMPORT_BATCH_SIZE = 500;
 
