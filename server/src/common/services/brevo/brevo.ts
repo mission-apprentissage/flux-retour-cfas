@@ -30,21 +30,36 @@ const initContactApi = () => {
 const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
 
-export const sendTransactionalEmail = async (recipientEmail: string, templateId: number) => {
+export interface SendTransactionalEmailOptions {
+  cc?: string[];
+}
+
+export const sendTransactionalEmail = async (
+  recipientEmail: string,
+  templateId: number,
+  params?: Record<string, unknown>,
+  options?: SendTransactionalEmailOptions
+) => {
   if (!EmailInstance) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
-  const brevoAttributes = await getContactDetails(recipientEmail);
+  // Par défaut les variables du template proviennent de la fiche contact Brevo du destinataire
+  // (cas des campagnes ML → jeunes). Quand `params` est fourni, on les passe directement : utile
+  // lorsque le destinataire n'est pas un contact Brevo (ex. le directeur d'un CFA invité par une ML).
+  const emailParams = params ?? (await getContactDetails(recipientEmail));
 
-  if (!brevoAttributes) {
+  if (!emailParams) {
     throw Boom.internal("No Brevo attributes found");
   }
 
   const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.templateId = templateId;
   sendSmtpEmail.to = [{ email: recipientEmail }];
-  sendSmtpEmail.params = brevoAttributes;
+  sendSmtpEmail.params = emailParams;
+  if (options?.cc?.length) {
+    sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
+  }
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
   } catch (e) {
