@@ -53,11 +53,18 @@ export interface ICfaToInvite {
   adresse: string | null;
   nb_jeunes_rupture: number;
   statut: CFA_INVITATION_STATUT;
+  // Nom complet du contact CFA s'il existe déjà dans usersMigration (sinon null → salutation générique)
+  destinataire_nom: string | null;
+  // Missions Locales actives de la région du CFA, affichées dans l'email d'invitation
+  ml_partenaires: {
+    count: number;
+    noms: string[];
+  };
 }
 
-export const inviteCfaMissionLocaleApi = z.object({
+export const inviteCfaMissionLocaleApi = {
   organisme_id: z.string(),
   note: z.string().trim().max(2000).optional(),
-});
+};
 
-export type IInviteCfaMissionLocaleApi = z.infer<typeof inviteCfaMissionLocaleApi>;
+export type IInviteCfaMissionLocaleApi = z.infer<z.ZodObject<typeof inviteCfaMissionLocaleApi>>;

@@ -12,10 +12,14 @@ import { httpUrlSchema } from "shared/models/data/organisations.model";
 import {
   effectifMissionLocaleListe,
   effectifsParMoisFiltersMissionLocaleAPISchema,
+  inviteCfaMissionLocaleApi,
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
 
-import { getCfaListToInviteForMissionLocale } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
+import {
+  getCfaListToInviteForMissionLocale,
+  sendCfaInvitationFromMissionLocale,
+} from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -71,6 +75,7 @@ const updateMlParametres = async (req, { locals }) => {
   );
 
   router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
+  router.post("/cfa-invitations", returnResult(inviteCfaFromMissionLocale));
   return router;
 };
 
@@ -81,6 +86,15 @@ const getCfaInvitationsList = async (req, { locals }) => {
   }
   const userId = new ObjectId(req.user._id);
   return await getCfaListToInviteForMissionLocale(missionLocale, userId);
+};
+
+const inviteCfaFromMissionLocale = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
+  const { organisme_id, note } = await validateFullZodObjectSchema(req.body, inviteCfaMissionLocaleApi);
+  return await sendCfaInvitationFromMissionLocale(missionLocale, req.user, organisme_id, note);
 };
 
 const updateEffectifMissionLocaleData = async (req, { locals }) => {

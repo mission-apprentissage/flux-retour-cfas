@@ -1,19 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { CFA_INVITATION_STATUT, ICfaToInvite } from "shared/models/routes/mission-locale/missionLocale.api";
 
-import { useCfaInvitations } from "@/app/_components/ruptures/mission-locale/invitations/hooks";
+import { useCfaInvitations, useInviteCfa } from "@/app/_components/ruptures/mission-locale/invitations/hooks";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 
 import { CfaInvitationList } from "./_components/CfaInvitationList";
+import { InviteCfaModal, inviteCfaModal } from "./_components/InviteCfaModal";
 import { InviterCfaHeader } from "./_components/InviterCfaHeader";
 
 export default function InviterCfaClient() {
   const { data } = useCfaInvitations();
+  const inviteCfa = useInviteCfa();
+  const [selectedCfa, setSelectedCfa] = useState<ICfaToInvite | null>(null);
 
-  const handleInvite = (_cfa: ICfaToInvite) => {
-    // Lot 4 : ouverture de la modale d'invitation + envoi.
+  const handleInvite = (cfa: ICfaToInvite) => {
+    setSelectedCfa(cfa);
+    inviteCfaModal.open();
+  };
+
+  const handleConfirm = async (note: string) => {
+    if (!selectedCfa) return;
+    await inviteCfa.mutateAsync({ organisme_id: selectedCfa.organisme_id, note: note || undefined });
   };
 
   const invitations = data ?? [];
@@ -35,6 +45,7 @@ export default function InviterCfaClient() {
           )}
         </SuspenseWrapper>
       </div>
+      <InviteCfaModal cfa={selectedCfa} onConfirm={handleConfirm} />
     </div>
   );
 }
