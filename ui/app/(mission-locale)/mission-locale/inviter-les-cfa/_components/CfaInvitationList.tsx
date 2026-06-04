@@ -17,7 +17,7 @@ export function CfaInvitationList({ invitations, showEngagementCallout, onInvite
     <section className={styles.invitationsSection}>
       <h2 className={styles.sectionTitle}>Invitez les CFA de votre territoire</h2>
       <p className={styles.sectionIntro}>
-        Pour invitez un CFA à rejoindre le Tableau de bord de l’apprentissage cliquez sur “Inviter ce CFA”, vous pourrez
+        Pour inviter un CFA à rejoindre le Tableau de bord de l’apprentissage cliquez sur “Inviter ce CFA”, vous pourrez
         ajouter votre propre message de recommandation. L’invitation sera directement envoyée au CFA.
       </p>
 

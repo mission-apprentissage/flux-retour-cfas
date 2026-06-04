@@ -1,13 +1,10 @@
-import styles from "../InviterCfa.module.scss";
+import { CallOut } from "@codegouvfr/react-dsfr/CallOut";
 
 export function EngagementCallout() {
   return (
-    <div className={styles.callout}>
-      <p className={styles.calloutTitle}>Merci pour votre engagement&nbsp;! 🎉</p>
-      <p className={styles.calloutText}>
-        Les Missions Locales sont les meilleures ambassadrices de la collaboration entre les CFA et le service public à
-        l’insertion. Toute l’équipe du service vous remercie pour votre engagement.
-      </p>
-    </div>
+    <CallOut title={"Merci pour votre engagement ! 🎉"}>
+      Les Missions Locales sont les meilleures ambassadrices de la collaboration entre les CFA et le service public à
+      l’insertion. Toute l’équipe du service vous remercie pour votre engagement.
+    </CallOut>
   );
 }

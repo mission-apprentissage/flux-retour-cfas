@@ -6,7 +6,6 @@ import { getAnneeScolaireListFromDateRange } from "shared/utils";
 import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect, vi } from "vitest";
 
-import { getBrevoTemplateId } from "@/common/actions/campagnes/campagnes.actions";
 import {
   computeCfaInvitationStatut,
   getCfaListToInviteForMissionLocale,
@@ -24,12 +23,12 @@ import {
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
+import config from "@/config";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/brevo/brevo");
-vi.mock("@/common/actions/campagnes/campagnes.actions");
 vi.mock("@/common/actions/organismes/deca-cfa-eligibility");
 
 const anneeScolaire = getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date())[0];
@@ -282,14 +281,44 @@ describe("getCfaListToInviteForMissionLocale", () => {
 
     expect(result[0].destinataire_nom).toBeNull();
   });
+
+  it("affiche CFA_ACTIF pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
+    // Aucun effectif en rupture pour ce CFA → absent de la liste-rupture. Mais ce conseiller l'a invité
+    // (journal) et le CFA est désormais actif (organisation ORGANISME_FORMATION avec ml_beta_activated_at).
+    await missionLocaleCfaInvitationsDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_id: mlOrganisationId,
+      author_id: userId,
+      organisme_id: organismeId,
+      organisation_id: new ObjectId(),
+      siret: "19040492100016",
+      email_destinataire: "directeur@campus-lac.fr",
+      invitation_token: "token-actif",
+      created_at: new Date(),
+    } as any);
+    await organisationsDb().insertOne({
+      _id: new ObjectId(),
+      type: "ORGANISME_FORMATION",
+      siret: "19040492100016",
+      uai: "0755805C",
+      organisme_id: organismeId.toString(),
+      ml_beta_activated_at: new Date(),
+      created_at: new Date(),
+    } as any);
+
+    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
+
+    const cfa = result.find((c) => c.organisme_id === organismeId.toString());
+    expect(cfa?.statut).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
+    expect(cfa?.nb_jeunes_rupture).toBe(0);
+  });
 });
 
 describe("sendCfaInvitationFromMissionLocale", () => {
   useMongo();
 
   beforeEach(async () => {
-    vi.mocked(getBrevoTemplateId).mockResolvedValue(99);
-    vi.mocked(sendTransactionalEmail).mockResolvedValue(undefined as any);
+    vi.mocked(sendTransactionalEmail).mockResolvedValue({ messageId: "test-message-id" } as any);
     vi.mocked(checkActivationEligibility).mockResolvedValue(eligibleResult as any);
     await invitationsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
@@ -327,14 +356,14 @@ describe("sendCfaInvitationFromMissionLocale", () => {
 
     expect(vi.mocked(sendTransactionalEmail)).toHaveBeenCalledWith(
       "directeur@campus-lac.fr",
-      99,
+      config.brevo.templateInvitationCfaId,
       expect.objectContaining({
         NOM_CFA: "CAMPUS DU LAC",
         NOM_MISSION_LOCALE: "ML Test",
         NOTE_RECOMMANDATION: "Je recommande ce CFA",
         LIEN_INVITATION: expect.stringContaining(`invitationToken=${invitation?.token}`),
       }),
-      { cc: ["conseiller@ml.fr"] }
+      { cc: ["conseiller@ml.fr"], redirectRecipientInNonProdTo: "conseiller@ml.fr" }
     );
   });
 
@@ -360,5 +389,17 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     );
 
     expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
+  });
+
+  it("n'enregistre aucune invitation si l'envoi de l'email Brevo échoue", async () => {
+    // Brevo capture ses erreurs et renvoie `undefined` : l'action doit alors échouer sans rien persister.
+    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined as any);
+
+    await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
+      /échoué/i
+    );
+
+    expect(await invitationsDb().countDocuments({})).toBe(0);
+    expect(await missionLocaleCfaInvitationsDb().countDocuments({})).toBe(0);
   });
 });
