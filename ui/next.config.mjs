@@ -94,6 +94,20 @@ const nextConfig = {
         destination: "/politique-de-confidentialite",
         permanent: true,
       },
+      {
+        source: "/sondage",
+        destination: "https://tally.so/r/rjv1GN",
+        basePath: false,
+        permanent: false,
+      },
+      // Liens RDV WhatsApp déjà envoyés en `/r/<token>` : la route de redirection vit côté
+      // backend, joignable uniquement sous /api (nginx n'y proxifie que /api). On renvoie donc
+      // ces anciens liens vers /api/r/<token>, que nginx route vers le backend.
+      {
+        source: "/r/:token",
+        destination: "/api/r/:token",
+        permanent: false,
+      },
     ];
   },
 };
