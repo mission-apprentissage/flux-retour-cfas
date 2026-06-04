@@ -5,7 +5,7 @@ import styles from "../InviterCfa.module.scss";
 const ARGUMENTS = [
   "Les CFA préqualifient les dossiers : vous en recevez moins, et mieux",
   "Vous êtes informé·e de la situation administrative du jeune avant même de le contacter",
-  "Allégez vous des tentatives de contact avec des jeunes qui ont déjà retrouvé des contrats, les CFA ne vous envoient que les jeunes qui ont vraiment besoin d'aide",
+  "Allégez-vous des tentatives de contact avec des jeunes qui ont déjà retrouvé des contrats, les CFA ne vous envoient que les jeunes qui ont vraiment besoin d'aide",
   "Ne cherchez plus qui contacter dans le CFA, tout est dans la fiche navette",
 ];
 

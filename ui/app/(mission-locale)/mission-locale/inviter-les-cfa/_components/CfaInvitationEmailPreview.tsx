@@ -167,7 +167,7 @@ export function CfaInvitationEmailPreview({
         <ul className={styles.argList}>
           <li className={styles.argItem}>
             <i className="fr-icon-success-fill fr-icon--sm" aria-hidden="true" />
-            <span>Formalisez vos actions de collaborations</span>
+            <span>Formalisez vos actions de collaboration</span>
           </li>
           <li className={styles.argItem}>
             <i className="fr-icon-success-fill fr-icon--sm" aria-hidden="true" />
@@ -189,7 +189,7 @@ export function CfaInvitationEmailPreview({
         <Cta />
       </section>
       <section className={styles.block}>
-        <p className={styles.blockTitle}>Les Missions locale complètent votre accompagnement</p>
+        <p className={styles.blockTitle}>Les Missions locales complètent votre accompagnement</p>
         <p className={styles.blockText}>
           Parfois les dispositifs internes ne suffisent pas sur des ruptures multifactorielles.
         </p>
