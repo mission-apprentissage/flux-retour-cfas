@@ -22,12 +22,7 @@ import { AuthContext } from "../model/internal/AuthContext.js";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
-import {
-  buildOrganisationLabel,
-  createOrganisation,
-  getActiveMissionLocalesByRegions,
-  getOrganisationById,
-} from "./organisations.actions";
+import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
@@ -382,10 +377,15 @@ export async function getCfaOnboardingInfo(token: string) {
   );
 
   const departement = organisme?.adresse?.departement;
-  const region = organisme?.adresse?.region;
 
-  // Missions Locales du territoire : ML actives de la même région (aligné avec l'email d'invitation CFA).
-  const missionsLocales = region ? await getActiveMissionLocalesByRegions([region]) : [];
+  const missionsLocales = departement
+    ? await organisationsDb()
+        .find(
+          { type: "MISSION_LOCALE", "adresse.departement": departement },
+          { projection: { _id: 1, nom: 1, adresse: 1 } }
+        )
+        .toArray()
+    : [];
 
   const cfaBetaOrganisations = departement
     ? await organisationsDb()
