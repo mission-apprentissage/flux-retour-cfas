@@ -91,7 +91,9 @@ describe("Processus d'ingestion", () => {
 
   beforeEach(async () => {
     await organismesDb().insertMany([
-      { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET, reseaux: [] }) },
+      // L'organisme formateur est aussi le propriétaire de la clé API (source_organisme_id) :
+      // c'est le scénario nominal d'une transmission ERP autorisée (le CFA transmet ses propres données).
+      { _id: new ObjectId(ORGANISME_SOURCE_ID), ...createRandomOrganisme({ uai: UAI, siret: SIRET, reseaux: [] }) },
       {
         _id: new ObjectId(),
         ...createRandomOrganisme({ uai: UAI_RESPONSABLE, siret: SIRET_RESPONSABLE, reseaux: [] }),
