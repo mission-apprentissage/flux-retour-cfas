@@ -108,27 +108,23 @@ describe("Inscription CFA (onboarding)", () => {
           type: "MISSION_LOCALE",
           nom: "du Libournais",
           ml_id: 1001,
-          activated_at: new Date(now),
-          adresse: { departement: "33", region: "75", code_postal: "33500", commune: "Arveyres" },
+          adresse: { departement: "33", code_postal: "33500", commune: "Arveyres" },
         } as any,
         {
-          // Même région que le CFA mais NON activée → exclue
           _id: new ObjectId(id(11)),
           created_at: new Date(now),
           type: "MISSION_LOCALE",
           nom: "Bordeaux Avenir Jeune",
           ml_id: 1002,
-          adresse: { departement: "33", region: "75", code_postal: "33000", commune: "Bordeaux" },
+          adresse: { departement: "33", code_postal: "33000", commune: "Bordeaux" },
         } as any,
         {
-          // Active mais autre région → exclue
           _id: new ObjectId(id(12)),
           created_at: new Date(now),
           type: "MISSION_LOCALE",
           nom: "Paris Centre",
           ml_id: 1003,
-          activated_at: new Date(now),
-          adresse: { departement: "75", region: "11", code_postal: "75001", commune: "Paris" },
+          adresse: { departement: "75", code_postal: "75001", commune: "Paris" },
         } as any,
       ]);
       await seedInvitation({ token: "valid-token-12345", organisationId, role: "admin" });
@@ -143,8 +139,7 @@ describe("Inscription CFA (onboarding)", () => {
       expect(response.data.etablissement.siret).toBe(SIRET);
       expect(response.data.etablissement.departement).toBe("33");
       const mlNames = response.data.missionsLocales.map((ml: { nom: string }) => ml.nom).sort();
-      // Seule la ML active de la même région (75) est retournée.
-      expect(mlNames).toEqual(["du Libournais"]);
+      expect(mlNames).toEqual(["Bordeaux Avenir Jeune", "du Libournais"]);
     });
 
     it("retourne 404 pour un token inconnu", async () => {
