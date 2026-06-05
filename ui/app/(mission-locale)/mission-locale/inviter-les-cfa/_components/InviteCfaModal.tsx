@@ -28,11 +28,13 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
   const { user } = useAuth();
   const [note, setNote] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   const resetState = useCallback(() => {
     setNote("");
     setStatus("idle");
+    setErrorMsg(null);
     setShowPreview(false);
   }, []);
 
@@ -40,12 +42,20 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
 
   const handleConfirm = async () => {
     setStatus("loading");
+    setErrorMsg(null);
     try {
       await onConfirm(note);
       modal.close();
       resetState();
-    } catch {
+    } catch (e) {
       setStatus("error");
+      const err = e as { messages?: { message?: string }; statusCode?: number };
+      const backendMsg = err?.messages?.message;
+      setErrorMsg(
+        backendMsg && typeof err?.statusCode === "number" && err.statusCode < 500
+          ? backendMsg
+          : "L'envoi de l'invitation a échoué. Réessayez ; si le problème persiste, contactez l'équipe technique."
+      );
     }
   };
 
@@ -136,7 +146,9 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
           />
         </>
       )}
-      {status === "error" && <p className="fr-error-text">Une erreur est survenue. Veuillez réessayer.</p>}
+      {status === "error" && (
+        <p className="fr-error-text">{errorMsg ?? "Une erreur est survenue. Veuillez réessayer."}</p>
+      )}
     </modal.Component>
   );
 }
