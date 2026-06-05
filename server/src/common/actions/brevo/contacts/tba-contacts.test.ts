@@ -160,7 +160,7 @@ describe("tbaContactsContactList", () => {
           NOM: "Dupont",
           PRENOM: "Alice",
           FONCTION: "Conseillère",
-          SMS: "+33123456789",
+          TELEPHONE: "+33123456789",
           SOURCE_EMAIL: "users_tba",
           STATUT_COMPTE_USER: "CONFIRMED",
           ORGANISATION: "Mon CFA",
