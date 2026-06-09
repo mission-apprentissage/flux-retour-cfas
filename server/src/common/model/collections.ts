@@ -46,9 +46,7 @@ import transmissionDailyReportDescriptor, {
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
-import organismesV2ModelDescriptor, { IOrganismeV2 } from "shared/models/data/v2/organisme.v2.model";
 import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
-import transmissionV2Descriptor, { ITransmissionV2 } from "shared/models/data/v2/transmission.v2.model";
 import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 
 import { getDbCollection } from "@/common/mongodb";
@@ -74,9 +72,7 @@ export const modelDescriptors = [
   opcosRncpDescriptor,
   effectifsV2ModelDescriptor,
   formationV2ModelDescriptor,
-  organismesV2ModelDescriptor,
   personV2ModelDescriptor,
-  transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   regionsModelDescriptor,
@@ -142,8 +138,6 @@ export const romeSecteurActivitesDb = () =>
 
 // v2
 
-export const organismeV2Db = () => getDbCollection<IOrganismeV2>(organismesV2ModelDescriptor.collectionName);
 export const personV2Db = () => getDbCollection<IPersonV2>(personV2ModelDescriptor.collectionName);
 export const formationV2Db = () => getDbCollection<IFormationV2>(formationV2ModelDescriptor.collectionName);
 export const effectifV2Db = () => getDbCollection<IEffectifV2>(effectifsV2ModelDescriptor.collectionName);
-export const transmissionV2Db = () => getDbCollection<ITransmissionV2>(transmissionV2Descriptor.collectionName);
