@@ -22,6 +22,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
+  [{ source_organisme_id: 1, organisme_id: 1, computed_day: 1 }, {}],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;

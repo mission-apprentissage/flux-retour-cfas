@@ -72,6 +72,7 @@ describe("registre des jobs", () => {
       "brevo-contacts:sync-one-organisation",
       "brevo-events:track",
       "classifier:score-effectifs",
+      "clear:queue-orphans",
       "collab:inactivite-cfa",
       "computed:update",
       "db:find-invalid-documents",

@@ -1,7 +1,7 @@
 import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
-import { purgeQueues } from "../clear/purge-queues";
+import { purgeOrphanQueues, purgeQueues } from "../clear/purge-queues";
 import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
 import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
@@ -34,6 +34,15 @@ export const ingestionJobs = {
   "purge:queues": {
     handler: async (job) => {
       return purgeQueues(payloadNumber(job.payload, "nbDaysToKeep"));
+    },
+  },
+  "clear:queue-orphans": {
+    handler: async (job) => {
+      return purgeOrphanQueues({
+        nbDaysToKeep: payloadNumber(job.payload, "nbDaysToKeep"),
+        batchSize: payloadNumber(job.payload, "batchSize"),
+        sleepMs: payloadNumber(job.payload, "sleepMs"),
+      });
     },
   },
   "tmp:migrate:effectifs": {

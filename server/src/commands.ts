@@ -282,6 +282,17 @@ program
   .action(createJobAction("process:effectifs-queue:remove-duplicates"));
 
 program
+  .command("clear:queue-orphans")
+  .description(
+    "Purge one-shot des orphelins d'effectifsQueue (sans organisme_id) : 15 derniers computed_day par source et filet calendaire, par lots"
+  )
+  .option("--batch-size <number>", "Taille des lots de suppression", (value) => parseInt(value))
+  .option("--sleep-ms <number>", "Pause entre chaque lot (ms)", (value) => parseInt(value))
+  .option("--nb-days-to-keep <number>", "Nombre de jours conservés par source", (value) => parseInt(value))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("clear:queue-orphans"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
