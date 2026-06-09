@@ -50,12 +50,12 @@ export const PAGES = {
         title: `Accueil territoire | ${SITE_NAME}`,
       }),
     },
-    webinaire: {
-      getPath: () => "/webinaire",
-      title: "Webinaire",
+    webinaires: {
+      getPath: () => "/webinaires",
+      title: "Webinaires",
       index: true,
       getMetadata: () => ({
-        title: `Webinaire | ${SITE_NAME}`,
+        title: `Webinaires | ${SITE_NAME}`,
       }),
     },
     authConnexion: {
