@@ -104,6 +104,8 @@ const config = {
     // Laisser `undefined` → `checkBrevoHealth` warn et la sync crée une liste
     // dédiée à la 1ʳᵉ exécution.
     tbaContactsListId: env.get("MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS").asInt(),
+    // ID du template Brevo "invitation CFA" (varie selon l'environnement → env var plutôt que migration).
+    templateInvitationCfaId: env.get("MNA_TDB_BREVO_TEMPLATE_INVITATION_CFA_ID").default("0").asInt(),
     whatsapp: (() => {
       const isProd = env.get("MNA_TDB_ENV").required().asString() === "production";
       const hasTestOverride = !!env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").default("").asString();
