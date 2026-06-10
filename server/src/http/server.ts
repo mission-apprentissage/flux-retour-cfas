@@ -105,6 +105,7 @@ import {
 } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
+import { isSipaConfigured, loginSipa, zSipaLoginBody } from "@/common/actions/sipa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import {
   changePassword,
@@ -203,6 +204,21 @@ async function resendActivationEmailRateLimitMiddleware(
   }
 }
 
+const sipaLoginRateLimiter = new RateLimiterMemory({
+  keyPrefix: "sipa_login",
+  points: 20,
+  duration: 15 * 60,
+});
+
+async function sipaLoginRateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    await sipaLoginRateLimiter.consume(req.ip || "unknown");
+    next();
+  } catch {
+    next(Boom.tooManyRequests("Trop de tentatives, réessayez plus tard"));
+  }
+}
+
 /**
  * Create the express app
  */
@@ -236,6 +252,10 @@ export default async function createServer(): Promise<Application> {
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
+
+  if (!isSipaConfigured) {
+    logger.warn("Auth SIPA non configurée (MNA_TDB_AUTH_SIPA_JWT_SECRET absente)");
+  }
 
   setupRoutes(app);
 
@@ -350,6 +370,14 @@ function setupRoutes(app: Application) {
         }
         await removeSession(req.cookies[COOKIE_NAME]);
         res.clearCookie(COOKIE_NAME);
+      })
+    )
+    .post(
+      "/api/v2/auth/login",
+      sipaLoginRateLimitMiddleware,
+      returnResult(async (req) => {
+        const { username, password } = await validateFullZodObjectSchema(req.body, zSipaLoginBody.shape);
+        return loginSipa(username, password);
       })
     )
     .post(
