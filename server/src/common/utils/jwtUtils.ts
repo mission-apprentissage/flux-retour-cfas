@@ -32,3 +32,7 @@ export function createActivationToken(email: string) {
 export function createUserTokenSimple(options = {}) {
   return createToken("user", null, options);
 }
+
+export function createSipaToken(username: string) {
+  return createToken("sipa", username, { payload: { scope: "sipa" } });
+}

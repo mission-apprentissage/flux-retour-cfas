@@ -36,6 +36,10 @@ const config = {
       jwtSecret: env.get("MNA_TDB_AUTH_PASSWORD_JWT_SECRET").asString(),
       expiresIn: "1h",
     },
+    sipa: {
+      jwtSecret: env.get("MNA_TDB_AUTH_SIPA_JWT_SECRET").asString(),
+      expiresIn: env.get("MNA_TDB_AUTH_SIPA_TOKEN_EXPIRES_IN").default(604800).asInt(),
+    },
   },
   log: {
     type: env.get("MNA_TDB_LOG_TYPE").default("json").asString(),
