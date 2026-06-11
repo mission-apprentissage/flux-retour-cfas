@@ -222,6 +222,24 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(response.data.effectifs[0].apprenant.ine, "123456789AA");
     });
 
+    it("INE chaîne vide → null émis, fallback de fusion utilisé", async () => {
+      await insertEffectif(orgLille, { apprenant: { ...identite, ine: "123456789AB" } });
+      await insertEffectifDECA(orgLille, { apprenant: { ...identite, ine: "" } });
+
+      const response = await getSuivi();
+
+      assert.strictEqual(response.data.metadonnees.totalElements, 1);
+      assert.strictEqual(response.data.effectifs[0].source, "DECA");
+      assert.strictEqual(response.data.effectifs[0].apprenant.ine, "123456789AB");
+
+      await insertEffectif(orgLille, {
+        apprenant: { nom: "MARTIN", prenom: "Lucas", date_de_naissance: D("2009-04-04"), ine: "" },
+      });
+      const seul = await getSuivi();
+      const ligneMartin = seul.data.effectifs.find((e: any) => e.apprenant.nom === "MARTIN");
+      assert.strictEqual(ligneMartin.apprenant.ine, null);
+    });
+
     it("même jeune sur 2 lignes ERP → date_inscription la plus récente retenue", async () => {
       await insertEffectif(orgLille, {
         apprenant: identite,
@@ -249,6 +267,20 @@ describe("GET /api/v2/affelnet/suivi", () => {
       const response = await getSuivi();
 
       assert.strictEqual(response.data.metadonnees.totalElements, 1);
+    });
+
+    it("accents non français : 'Núñez García' ERP et 'NUNEZ GARCIA' DECA sont dédupliqués", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: { nom: "Núñez García", prenom: "José", date_de_naissance: D("2009-06-06") },
+      });
+      await insertEffectifDECA(orgLille, {
+        apprenant: { nom: "NUNEZ GARCIA", prenom: "Jose", date_de_naissance: D("2009-06-06") },
+      });
+
+      const response = await getSuivi();
+
+      assert.strictEqual(response.data.metadonnees.totalElements, 1);
+      assert.strictEqual(response.data.effectifs[0].source, "DECA");
     });
 
     it("INE ambigus dans le groupe (homonymes réels) → aucun INE de repli attribué", async () => {
@@ -379,6 +411,14 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(response.status, 403);
     });
 
+    it("422 : page hors borne (0, négative, non entière) — bien typée mais non conforme", async () => {
+      for (const page of ["0", "-1", "1.5"]) {
+        const response = await getSuivi({ page });
+        assert.strictEqual(response.status, 422, `page=${page}`);
+        assert.match(response.data.message, /entier positif/);
+      }
+    });
+
     it("422 avec message explicite : date impossible, dateMin > dateMax, > 10 départements", async () => {
       const dateImpossible = await getSuivi({ dateDebutFormationMin: "2026-02-31" });
       assert.strictEqual(dateImpossible.status, 422);
@@ -397,12 +437,12 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.match(onzeDepartements.data.message, /Maximum 10/);
     });
 
-    it("400 : paramètre obligatoire absent, page invalide", async () => {
+    it("400 : paramètre obligatoire absent, page non numérique", async () => {
       const sansDateMin = await getSuivi({ dateDebutFormationMin: undefined });
       assert.strictEqual(sansDateMin.status, 400);
 
-      const pageZero = await getSuivi({ page: "0" });
-      assert.strictEqual(pageZero.status, 400);
+      const pageNonNumerique = await getSuivi({ page: "abc" });
+      assert.strictEqual(pageNonNumerique.status, 400);
     });
 
     it("paramètre de query inconnu ignoré (cache-buster, trace id d'un proxy) → 200", async () => {
