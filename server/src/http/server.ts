@@ -228,7 +228,7 @@ async function sipaLoginRateLimitMiddleware(req: express.Request, res: express.R
 
 const sipaSuiviRateLimiter = new RateLimiterMemory({
   keyPrefix: "sipa_suivi",
-  points: 120,
+  points: 2000,
   duration: 60,
 });
 
@@ -248,6 +248,23 @@ export default async function createServer(): Promise<Application> {
   const app = express();
 
   app.set("trust proxy", config.trustProxy);
+
+  let proxyIpVerified = false;
+  app.use((req, _res, next) => {
+    if (!proxyIpVerified) {
+      proxyIpVerified = true;
+      logger.info(
+        {
+          trustProxy: config.trustProxy,
+          reqIp: req.ip,
+          xForwardedFor: req.headers["x-forwarded-for"],
+          xRealIp: req.headers["x-real-ip"],
+        },
+        "proxy IP verification (première requête)"
+      );
+    }
+    next();
+  });
 
   // Configure Sentry
   initSentryExpress(app);
