@@ -223,7 +223,7 @@ program
   .command("sipa:user:create")
   .description("Crée un compte SIPA")
   .requiredOption("-u, --username <username>", "identifiant (alphanumérique + . - _, max 64 caractères)")
-  .option("-p, --password <password>", "mot de passe (≥20 caractères), généré aléatoirement si absent")
+  .option("-p, --password <password>", "mot de passe (20 à 128 caractères), généré aléatoirement si absent")
   .action(async ({ username, password }) => {
     const finalPassword = password ?? crypto.randomBytes(24).toString("base64url");
     try {
