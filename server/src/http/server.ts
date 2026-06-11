@@ -105,7 +105,13 @@ import {
 } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
-import { isSipaConfigured, loginSipa, zSipaLoginBody } from "@/common/actions/sipa.actions";
+import {
+  getSuiviSipaEffectifs,
+  isSipaConfigured,
+  loginSipa,
+  parseSuiviQuery,
+  zSipaLoginBody,
+} from "@/common/actions/sipa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import {
   changePassword,
@@ -148,6 +154,7 @@ import {
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
+import requireSipaAuthentication from "./middlewares/requireSipaAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -219,11 +226,28 @@ async function sipaLoginRateLimitMiddleware(req: express.Request, res: express.R
   }
 }
 
+const sipaSuiviRateLimiter = new RateLimiterMemory({
+  keyPrefix: "sipa_suivi",
+  points: 120,
+  duration: 60,
+});
+
+async function sipaSuiviRateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    await sipaSuiviRateLimiter.consume(req.ip || "unknown");
+    next();
+  } catch {
+    next(Boom.tooManyRequests("Trop de requêtes, réessayez plus tard"));
+  }
+}
+
 /**
  * Create the express app
  */
 export default async function createServer(): Promise<Application> {
   const app = express();
+
+  app.set("trust proxy", config.trustProxy);
 
   // Configure Sentry
   initSentryExpress(app);
@@ -378,6 +402,14 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const { username, password } = await validateFullZodObjectSchema(req.body, zSipaLoginBody.shape);
         return loginSipa(username, password);
+      })
+    )
+    .get(
+      "/api/v2/affelnet/suivi",
+      sipaSuiviRateLimitMiddleware,
+      requireSipaAuthentication(),
+      returnResult(async (req) => {
+        return getSuiviSipaEffectifs(await parseSuiviQuery(req.query));
       })
     )
     .post(
