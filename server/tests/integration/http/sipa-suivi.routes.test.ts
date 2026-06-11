@@ -437,12 +437,16 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.match(onzeDepartements.data.message, /Maximum 10/);
     });
 
-    it("400 : paramètre obligatoire absent, page non numérique", async () => {
+    it("400 : paramètre obligatoire absent, page non numérique, departements vide", async () => {
       const sansDateMin = await getSuivi({ dateDebutFormationMin: undefined });
       assert.strictEqual(sansDateMin.status, 400);
 
       const pageNonNumerique = await getSuivi({ page: "abc" });
       assert.strictEqual(pageNonNumerique.status, 400);
+
+      // "departements=" → split CSV de "" = [""] → valeurs vides écartées → .min(1)
+      const departementsVide = await getSuivi({ departements: "" });
+      assert.strictEqual(departementsVide.status, 400);
     });
 
     it("paramètre de query inconnu ignoré (cache-buster, trace id d'un proxy) → 200", async () => {
