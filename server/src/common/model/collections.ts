@@ -37,6 +37,7 @@ import regionsModelDescriptor, { IRegion } from "shared/models/data/regions.mode
 import ReseauxModelDescriptor, { IReseau } from "shared/models/data/reseaux.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import romeSecteurActivitesDescriptor, { IRomeSecteurActivites } from "shared/models/data/romeSecteurActivites.model";
+import sipaUsersModelDescriptor, { ISipaUser } from "shared/models/data/sipaUsers.model";
 import telechargementListesNominativesLogsDescriptor, {
   ITelechargementListeNomLogs,
 } from "shared/models/data/telechargementListesNomLogs.model";
@@ -89,12 +90,14 @@ export const modelDescriptors = [
   missionLocaleStatsDescriptor,
   franceTravailEffectifDescriptor,
   romeSecteurActivitesDescriptor,
+  sipaUsersModelDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
+export const sipaUsersDb = () => getDbCollection<ISipaUser>(sipaUsersModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
 export const invitationsArchiveDb = () =>

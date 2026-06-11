@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import path from "node:path";
 
 import { captureException } from "@sentry/node";
@@ -6,6 +7,7 @@ import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor"
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
+import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
 import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
@@ -216,6 +218,40 @@ program
   .option("-d, --drop", "Drop indexes before recreating them")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("indexes:recreate"));
+
+program
+  .command("sipa:user:create")
+  .description("Crée un compte SIPA")
+  .requiredOption("-u, --username <username>", "identifiant (alphanumérique + . - _, max 64 caractères)")
+  .option("-p, --password <password>", "mot de passe (20 à 128 caractères), généré aléatoirement si absent")
+  .action(async ({ username, password }) => {
+    const finalPassword = password ?? crypto.randomBytes(24).toString("base64url");
+    try {
+      await createSipaUser(username, finalPassword);
+    } catch (err: any) {
+      program.error(err.message || "Command failed", { exitCode: 2 });
+    }
+    // eslint-disable-next-line no-console
+    console.log(`Compte SIPA créé : ${username}`);
+    if (!password) {
+      // eslint-disable-next-line no-console
+      console.log(`Mot de passe généré (affiché une seule fois, à ranger dans le coffre) : ${finalPassword}`);
+    }
+  });
+
+program
+  .command("sipa:user:delete")
+  .description("Supprime un compte SIPA")
+  .requiredOption("-u, --username <username>", "identifiant du compte à supprimer")
+  .action(async ({ username }) => {
+    try {
+      await deleteSipaUser(username);
+    } catch (err: any) {
+      program.error(err.message || "Command failed", { exitCode: 2 });
+    }
+    // eslint-disable-next-line no-console
+    console.log(`Compte SIPA supprimé : ${username}`);
+  });
 
 program
   .command("db:find-invalid-documents")

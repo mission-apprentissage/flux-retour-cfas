@@ -69,7 +69,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ created_at: 1 }, { name: "created_at" }],
   [{ transmitted_at: 1 }, {}],
   [{ "_computed.organisme.region": 1 }, {}],
-  [{ "_computed.organisme.departement": 1 }, {}],
+  [{ "_computed.organisme.departement": 1, "formation.date_entree": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
   [{ "_computed.organisme.bassinEmploi": 1 }, {}],
   [{ "_computed.organisme.reseaux": 1 }, {}],

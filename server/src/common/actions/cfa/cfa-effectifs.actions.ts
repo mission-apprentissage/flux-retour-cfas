@@ -22,6 +22,7 @@ import {
   organismesDb,
 } from "@/common/model/collections";
 import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
+import { stripDiacritics } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -32,54 +33,6 @@ interface CfaEffectifsQueryParams {
   en_rupture?: "oui" | "non";
   collab_status?: string;
   formation?: string;
-}
-
-function stripDiacritics(expr: Record<string, unknown>) {
-  const replacements = [
-    ["é", "e"],
-    ["è", "e"],
-    ["ê", "e"],
-    ["ë", "e"],
-    ["à", "a"],
-    ["â", "a"],
-    ["ä", "a"],
-    ["ù", "u"],
-    ["û", "u"],
-    ["ü", "u"],
-    ["ô", "o"],
-    ["ö", "o"],
-    ["î", "i"],
-    ["ï", "i"],
-    ["ç", "c"],
-    ["ÿ", "y"],
-    ["É", "e"],
-    ["È", "e"],
-    ["Ê", "e"],
-    ["Ë", "e"],
-    ["À", "a"],
-    ["Â", "a"],
-    ["Ä", "a"],
-    ["Ù", "u"],
-    ["Û", "u"],
-    ["Ü", "u"],
-    ["Ô", "o"],
-    ["Ö", "o"],
-    ["Î", "i"],
-    ["Ï", "i"],
-    ["Ç", "c"],
-    ["Ÿ", "y"],
-    ["\u0301", ""],
-    ["\u0300", ""],
-    ["\u0302", ""],
-    ["\u0308", ""],
-    ["\u0327", ""],
-  ];
-
-  let result: Record<string, unknown> = expr;
-  for (const [from, to] of replacements) {
-    result = { $replaceAll: { input: result, find: from, replacement: to } };
-  }
-  return result;
 }
 
 function getSortField(sort: string): string {

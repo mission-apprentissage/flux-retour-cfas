@@ -1,5 +1,7 @@
 import env from "env-var";
 
+const envName = env.get("MNA_TDB_ENV").required().asString();
+
 const config = {
   email: env.get("MNA_TDB_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
   email_from: env.get("MNA_TDB_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
@@ -8,9 +10,13 @@ const config = {
   appName: env.get("MNA_TDB_NAME").default("Flux Retour Cfas").asString(),
   version: env.get("PUBLIC_VERSION").default("0.0.0-local").asString(),
   port: env.get("MNA_TDB_SERVER_PORT").default(5000).asPortNumber(),
-  env: env.get("MNA_TDB_ENV").required().asString(),
+  env: envName,
   publicUrl: env.get("MNA_TDB_PUBLIC_URL").required().asString(),
   bodyParserLimit: env.get("MNA_TDB_BODY_PARSER_LIMIT").default("10mb").asString(),
+  trustProxy: env
+    .get("MNA_TDB_TRUST_PROXY")
+    .default(envName === "local" || envName === "test" ? 0 : 1)
+    .asInt(),
   mongodb: {
     uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
     dbName: env.get("MNA_TDB_MONGODB_DB_NAME").required().asString(),
@@ -35,6 +41,10 @@ const config = {
     resetPasswordToken: {
       jwtSecret: env.get("MNA_TDB_AUTH_PASSWORD_JWT_SECRET").asString(),
       expiresIn: "1h",
+    },
+    sipa: {
+      jwtSecret: env.get("MNA_TDB_AUTH_SIPA_JWT_SECRET").asString(),
+      expiresIn: env.get("MNA_TDB_AUTH_SIPA_TOKEN_EXPIRES_IN").default(604800).asInt(),
     },
   },
   log: {

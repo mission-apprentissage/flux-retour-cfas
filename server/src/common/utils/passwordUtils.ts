@@ -16,6 +16,13 @@ export function compare(password: string, hash: string) {
   return sha512crypt(password, array.join("$")) === hash;
 }
 
+let dummyHash: string | undefined;
+export function compareWithTimingSafety(password: string, storedHash: string | null | undefined): boolean {
+  dummyHash ??= hash("dummy-password-never-matches");
+  const ok = compare(password, storedHash ?? dummyHash);
+  return ok && storedHash != null;
+}
+
 export function isTooWeak(hash) {
   const array = hash.split("$");
   const round = array[2].split("=")[1];

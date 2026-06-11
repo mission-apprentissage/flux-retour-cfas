@@ -7,7 +7,7 @@ import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
-import { hash, compare, isTooWeak } from "@/common/utils/passwordUtils";
+import { hash, compareWithTimingSafety, isTooWeak } from "@/common/utils/passwordUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 import config from "@/config";
@@ -53,16 +53,14 @@ const updateUserPassword = async (userId: ObjectId, password: string) => {
 
 export const authenticate = async (email: string, password: string) => {
   const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
+  const passOk = compareWithTimingSafety(password, user?.password);
+  if (!user || !passOk) {
     return null;
   }
-  if (compare(password, user.password)) {
-    if (isTooWeak(user.password)) {
-      await updateUserPassword(user._id, password);
-    }
-    return user;
+  if (isTooWeak(user.password)) {
+    await updateUserPassword(user._id, password);
   }
-  return null;
+  return user;
 };
 
 export const getUserByEmail = async (email: string) => {

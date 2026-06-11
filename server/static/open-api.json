@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "API mission apprentissage",
-    "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
+    "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leurs données effectifs au tableau de bord de l'apprentissage (v3), ainsi que des partenaires institutionnels qui consomment les données du tableau de bord, comme SIPA — Éducation Nationale (v2).",
     "contact": {
       "url": "/contact",
       "name": "API Support"
@@ -22,6 +22,10 @@
     {
       "name": "v3",
       "description": "Version 2023. L'authentification se fait à l'aide d'une apiKey."
+    },
+    {
+      "name": "v2 - SIPA",
+      "description": "Interface dédiée à SIPA. Authentification par compte technique + JWT."
     }
   ],
   "components": {
@@ -30,6 +34,12 @@
         "description": "Méthode d'authentification pour la V3 avec une clé d'API",
         "type": "http",
         "scheme": "bearer"
+      },
+      "sipaBearerAuth": {
+        "description": "JWT obtenu via POST /v2/auth/login (validité 7 jours, scope sipa)",
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {},
@@ -127,19 +137,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-06-15T15:11:26.405Z"
+                      "example": "2025-12-13T13:50:56.221Z"
                     },
                     "contrat_date_fin": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "contrat_date_rupture": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "custom_statut_apprenant": {
                       "type": "string",
@@ -158,8 +168,7 @@
                     },
                     "code_postal_de_naissance_apprenant": {
                       "type": "string",
-                      "pattern": "^[0-9]{5}$",
-                      "description": "Code postal de l'apprenant"
+                      "nullable": true
                     },
                     "code_commune_insee_apprenant": {
                       "type": "string",
@@ -209,13 +218,13 @@
                       "type": "string",
                       "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "date_exclusion_formation": {
                       "type": "string",
                       "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "cause_exclusion_formation": {
                       "type": "string",
@@ -255,19 +264,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-06-15T15:11:26.405Z"
+                      "example": "2025-12-13T13:50:56.221Z"
                     },
                     "contrat_date_fin_2": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "contrat_date_rupture_2": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "cause_rupture_contrat_2": {
                       "type": "string",
@@ -285,19 +294,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-06-15T15:11:26.405Z"
+                      "example": "2025-12-13T13:50:56.221Z"
                     },
                     "contrat_date_fin_3": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "contrat_date_rupture_3": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "cause_rupture_contrat_3": {
                       "type": "string",
@@ -315,19 +324,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-06-15T15:11:26.405Z"
+                      "example": "2025-12-13T13:50:56.221Z"
                     },
                     "contrat_date_fin_4": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "contrat_date_rupture_4": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "cause_rupture_contrat_4": {
                       "type": "string",
@@ -343,23 +352,19 @@
                     },
                     "siret_employeur": {
                       "type": "string",
-                      "pattern": "^[0-9]{14}$",
-                      "description": "SIRET de l'employeur"
+                      "nullable": true
                     },
                     "siret_employeur_2": {
                       "type": "string",
-                      "pattern": "^[0-9]{14}$",
-                      "description": "SIRET de l'employeur"
+                      "nullable": true
                     },
                     "siret_employeur_3": {
                       "type": "string",
-                      "pattern": "^[0-9]{14}$",
-                      "description": "SIRET de l'employeur"
+                      "nullable": true
                     },
                     "siret_employeur_4": {
                       "type": "string",
-                      "pattern": "^[0-9]{14}$",
-                      "description": "SIRET de l'employeur"
+                      "nullable": true
                     },
                     "formation_presentielle": {
                       "type": "boolean",
@@ -368,15 +373,11 @@
                     },
                     "duree_theorique_formation": {
                       "type": "integer",
-                      "minimum": 1,
-                      "maximum": 4,
-                      "description": "Durée théorique de la formation en années"
+                      "nullable": true
                     },
                     "duree_theorique_formation_mois": {
                       "type": "integer",
-                      "minimum": 1,
-                      "maximum": 48,
-                      "description": "Durée théorique de la formation en mois"
+                      "nullable": true
                     },
                     "date_inscription_formation": {
                       "type": "string",
@@ -387,13 +388,13 @@
                       "type": "string",
                       "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-06-15T15:11:26.405Z"
+                      "example": "2025-12-13T13:50:56.221Z"
                     },
                     "date_fin_formation": {
                       "type": "string",
                       "description": "Date de fin de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2025-11-12T16:11:26.405Z"
+                      "example": "2026-05-12T12:50:56.221Z"
                     },
                     "etablissement_responsable_uai": {
                       "type": "string",
@@ -427,9 +428,7 @@
                     },
                     "etablissement_lieu_de_formation_siret": {
                       "type": "string",
-                      "pattern": "^[0-9]{14}$",
-                      "description": "SIRET de l'établissement (lieu de formation)",
-                      "example": "19750655300019"
+                      "nullable": true
                     },
                     "etablissement_lieu_de_formation_adresse": {
                       "type": "string",
@@ -845,19 +844,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-06-15T15:11:26.405Z"
+                            "example": "2025-12-13T13:50:56.221Z"
                           },
                           "contrat_date_fin": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "contrat_date_rupture": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "custom_statut_apprenant": {
                             "type": "string",
@@ -879,8 +878,7 @@
                           },
                           "code_postal_de_naissance_apprenant": {
                             "type": "string",
-                            "pattern": "^[0-9]{5}$",
-                            "description": "Code postal de l'apprenant"
+                            "nullable": true
                           },
                           "code_commune_insee_apprenant": {
                             "type": "string",
@@ -930,13 +928,13 @@
                             "type": "string",
                             "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "date_exclusion_formation": {
                             "type": "string",
                             "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "cause_exclusion_formation": {
                             "type": "string",
@@ -976,19 +974,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-06-15T15:11:26.405Z"
+                            "example": "2025-12-13T13:50:56.221Z"
                           },
                           "contrat_date_fin_2": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "contrat_date_rupture_2": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "cause_rupture_contrat_2": {
                             "type": "string",
@@ -1006,19 +1004,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-06-15T15:11:26.405Z"
+                            "example": "2025-12-13T13:50:56.221Z"
                           },
                           "contrat_date_fin_3": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "contrat_date_rupture_3": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "cause_rupture_contrat_3": {
                             "type": "string",
@@ -1036,19 +1034,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-06-15T15:11:26.405Z"
+                            "example": "2025-12-13T13:50:56.221Z"
                           },
                           "contrat_date_fin_4": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "contrat_date_rupture_4": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "cause_rupture_contrat_4": {
                             "type": "string",
@@ -1064,23 +1062,19 @@
                           },
                           "siret_employeur": {
                             "type": "string",
-                            "pattern": "^[0-9]{14}$",
-                            "description": "SIRET de l'employeur"
+                            "nullable": true
                           },
                           "siret_employeur_2": {
                             "type": "string",
-                            "pattern": "^[0-9]{14}$",
-                            "description": "SIRET de l'employeur"
+                            "nullable": true
                           },
                           "siret_employeur_3": {
                             "type": "string",
-                            "pattern": "^[0-9]{14}$",
-                            "description": "SIRET de l'employeur"
+                            "nullable": true
                           },
                           "siret_employeur_4": {
                             "type": "string",
-                            "pattern": "^[0-9]{14}$",
-                            "description": "SIRET de l'employeur"
+                            "nullable": true
                           },
                           "formation_presentielle": {
                             "type": "boolean",
@@ -1089,15 +1083,11 @@
                           },
                           "duree_theorique_formation": {
                             "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "description": "Durée théorique de la formation en années"
+                            "nullable": true
                           },
                           "duree_theorique_formation_mois": {
                             "type": "integer",
-                            "minimum": 1,
-                            "maximum": 48,
-                            "description": "Durée théorique de la formation en mois"
+                            "nullable": true
                           },
                           "date_inscription_formation": {
                             "type": "string",
@@ -1108,13 +1098,13 @@
                             "type": "string",
                             "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-06-15T15:11:26.405Z"
+                            "example": "2025-12-13T13:50:56.221Z"
                           },
                           "date_fin_formation": {
                             "type": "string",
                             "description": "Date de fin de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2025-11-12T16:11:26.405Z"
+                            "example": "2026-05-12T12:50:56.221Z"
                           },
                           "etablissement_responsable_uai": {
                             "type": "string",
@@ -1148,9 +1138,7 @@
                           },
                           "etablissement_lieu_de_formation_siret": {
                             "type": "string",
-                            "pattern": "^[0-9]{14}$",
-                            "description": "SIRET de l'établissement (lieu de formation)",
-                            "example": "19750655300019"
+                            "nullable": true
                           },
                           "etablissement_lieu_de_formation_adresse": {
                             "type": "string",
@@ -1553,6 +1541,341 @@
                         "La clé API n'est pas valide",
                         "La clé API doit etre au format Bearer"
                       ]
+                    }
+                  },
+                  "required": ["error", "message"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue est survenue"
+          }
+        }
+      }
+    },
+    "/v2/auth/login": {
+      "post": {
+        "summary": "Authentification SIPA",
+        "description": "Authentifie un compte technique SIPA et retourne un JWT à présenter en `Authorization: Bearer` sur les routes v2. Validité 7 jours.",
+        "tags": ["v2 - SIPA"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Identifiant du compte technique (alphanumérique + . - _, max 64)"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Mot de passe (max 128)"
+                  }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentification réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "JWT (HS256, scope sipa)"
+                    },
+                    "expiresIn": {
+                      "type": "integer",
+                      "description": "Durée de validité en secondes",
+                      "example": 604800
+                    }
+                  },
+                  "required": ["token", "expiresIn"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corps de requête mal formé"
+          },
+          "401": {
+            "description": "Identifiant ou mot de passe incorrect"
+          },
+          "429": {
+            "description": "Trop de tentatives (20 / 15 min par IP)"
+          }
+        }
+      }
+    },
+    "/v2/affelnet/suivi": {
+      "get": {
+        "summary": "Suivi des inscriptions/contrats d'apprentissage (croisement Affelnet)",
+        "description": "Retourne les jeunes de moins de 18 ans inscrits en apprentissage (niveaux 3/4/5) sur la fenêtre de dates et les départements demandés. Dédoublonné (DECA prioritaire sur ERP), paginé par 1000. Une page au-delà de totalPages renvoie 200 avec une liste vide.",
+        "security": [
+          {
+            "sipaBearerAuth": []
+          }
+        ],
+        "tags": ["v2 - SIPA"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Borne basse (incluse) de formation.dateDebutFormation, AAAA-MM-JJ",
+              "example": "2025-06-01"
+            },
+            "required": true,
+            "name": "dateDebutFormationMin",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Borne haute (incluse) de formation.dateDebutFormation, AAAA-MM-JJ",
+              "example": "2025-12-31"
+            },
+            "required": true,
+            "name": "dateDebutFormationMax",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Codes départements INSEE 3 caractères, séparés par des virgules (max 10)",
+              "example": "059,062"
+            },
+            "required": true,
+            "name": "departements",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Numéro de page (défaut 1)",
+              "example": "1"
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste paginée des effectifs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "metadonnees": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "totalElements": {
+                          "type": "integer",
+                          "example": 9342
+                        }
+                      },
+                      "required": ["page", "totalPages", "totalElements"]
+                    },
+                    "effectifs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "description": "Source de la donnée (taille max 10)",
+                            "enum": ["CFA", "DECA"]
+                          },
+                          "dateActualisation": {
+                            "type": "string",
+                            "description": "Date de dernière actualisation de la donnée",
+                            "format": "date",
+                            "example": "2025-09-01"
+                          },
+                          "apprenant": {
+                            "type": "object",
+                            "properties": {
+                              "ine": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "INE de l'apprenant (taille 11) — null si inconnu"
+                              },
+                              "nom": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Nom (taille max 200)"
+                              },
+                              "prenom": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Prénom (taille max 50)"
+                              },
+                              "dateNaissance": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              }
+                            },
+                            "required": ["ine", "nom", "prenom", "dateNaissance"]
+                          },
+                          "formation": {
+                            "type": "object",
+                            "properties": {
+                              "dateDebutFormation": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              },
+                              "dateFinFormation": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              },
+                              "dateInscriptionCfa": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              },
+                              "diplomeNiveau": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Niveau du diplôme préparé",
+                                "enum": ["3", "4", "5"]
+                              },
+                              "intituleDiplome": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Intitulé du diplôme ou titre visé (taille max 500)"
+                              }
+                            },
+                            "required": [
+                              "dateDebutFormation",
+                              "dateFinFormation",
+                              "dateInscriptionCfa",
+                              "diplomeNiveau",
+                              "intituleDiplome"
+                            ]
+                          },
+                          "organismeFormation": {
+                            "type": "object",
+                            "properties": {
+                              "denomination": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Dénomination de l'organisme (taille max 500)"
+                              },
+                              "uaiCfa": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "UAI du lieu de formation (taille 8)"
+                              },
+                              "siret": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "SIRET du lieu de formation (taille 14)"
+                              },
+                              "adresse": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Adresse de l'organisme (taille max 870)"
+                              },
+                              "departement": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Code département INSEE sur 3 caractères",
+                                "example": "059"
+                              }
+                            },
+                            "required": ["denomination", "uaiCfa", "siret", "adresse", "departement"]
+                          },
+                          "contrats": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "dateDebutContrat": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              },
+                              "dateFinContrat": {
+                                "type": "string",
+                                "description": "Date au format AAAA-MM-JJ (UTC)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              },
+                              "dateConclusionContrat": {
+                                "type": "string",
+                                "description": "Toujours null (non disponible dans le TBA)",
+                                "format": "date",
+                                "example": "2025-09-01"
+                              }
+                            },
+                            "required": ["dateDebutContrat", "dateFinContrat", "dateConclusionContrat"],
+                            "description": "Dernier contrat d'apprentissage (par date de début) — null si aucun contrat"
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "dateActualisation",
+                          "apprenant",
+                          "formation",
+                          "organismeFormation",
+                          "contrats"
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["metadonnees", "effectifs"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requête mal formatée (paramètre manquant, type non respecté)"
+          },
+          "401": {
+            "description": "Token manquant, invalide ou expiré, ou compte révoqué"
+          },
+          "403": {
+            "description": "Token valide mais scope incorrect"
+          },
+          "422": {
+            "description": "Données en entrée non conformes (date invalide, département non conforme, > 10 départements…)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unprocessable Entity"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message d'erreur explicite",
+                      "example": "Département inconnu : 999"
                     }
                   },
                   "required": ["error", "message"]
