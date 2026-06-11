@@ -23,10 +23,10 @@ const sipaTestPasswordHash = hash(SIPA_PASSWORD);
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
-function runSipaMiddleware(authHeader?: string): Promise<any> {
+function runSipaMiddleware(authHeader?: string): Promise<{ err: any; req: any }> {
   return new Promise((resolve) => {
     const req: any = { headers: authHeader ? { authorization: authHeader } : {} };
-    requireSipaAuthentication()(req, {} as any, (err?: any) => resolve(err));
+    requireSipaAuthentication()(req, {} as any, (err?: any) => resolve({ err, req }));
   });
 }
 
@@ -109,61 +109,63 @@ describe("Authentification SIPA", () => {
   });
 
   describe("Middleware requireSipaAuthentication", () => {
-    it("Passe avec un token SIPA valide", async () => {
-      const err = await runSipaMiddleware(`Bearer ${createSipaToken(SIPA_USERNAME)}`);
+    it("Passe avec un token SIPA valide et pose l'identité d'acteur sur req.user (access logs)", async () => {
+      const { err, req } = await runSipaMiddleware(`Bearer ${createSipaToken(SIPA_USERNAME)}`);
       assert.strictEqual(err, undefined);
+      assert.strictEqual(req.user.username, SIPA_USERNAME);
+      assert.ok(req.user._id instanceof ObjectId);
     });
 
     it("401 sans header Authorization", async () => {
-      const err = await runSipaMiddleware();
+      const { err } = await runSipaMiddleware();
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si schéma non-Bearer", async () => {
-      const err = await runSipaMiddleware("Basic dXNlcjpwYXNz");
+      const { err } = await runSipaMiddleware("Basic dXNlcjpwYXNz");
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si mauvaise signature", async () => {
       const token = jwt.sign({ scope: "sipa" }, "wrong-secret", { issuer: config.appName });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si token expiré", async () => {
       const token = jwt.sign({ scope: "sipa" }, SIPA_JWT_SECRET, { issuer: config.appName, expiresIn: -10 });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si mauvais issuer", async () => {
       const token = jwt.sign({ scope: "sipa" }, SIPA_JWT_SECRET, { issuer: "autre-app" });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si token signé avec le secret user (cloisonnement des tiers)", async () => {
       const token = jwt.sign({ scope: "sipa" }, config.auth.user.jwtSecret, { issuer: config.appName });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("401 si token valide mais compte supprimé (révocation immédiate)", async () => {
       const token = createSipaToken(SIPA_USERNAME);
       await sipaUsersDb().deleteOne({ username: SIPA_USERNAME });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 401);
     });
 
     it("403 si scope absent", async () => {
       const token = jwt.sign({}, SIPA_JWT_SECRET, { issuer: config.appName });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 403);
     });
 
     it("403 si scope différent", async () => {
       const token = jwt.sign({ scope: "user" }, SIPA_JWT_SECRET, { issuer: config.appName });
-      const err = await runSipaMiddleware(`Bearer ${token}`);
+      const { err } = await runSipaMiddleware(`Bearer ${token}`);
       assert.strictEqual(err.output.statusCode, 403);
     });
   });
@@ -189,6 +191,13 @@ describe("Authentification SIPA", () => {
 
     it("Refuse un mot de passe trop court (RGS : 20 caractères minimum)", async () => {
       await assert.rejects(createSipaUser("autre-compte", "trop-court"), (err: any) => err.output.statusCode === 400);
+    });
+
+    it("Refuse un mot de passe trop long (>128, borne du login : un compte créé doit pouvoir se connecter)", async () => {
+      await assert.rejects(
+        createSipaUser("autre-compte", "x".repeat(129)),
+        (err: any) => err.output.statusCode === 400
+      );
     });
 
     it("Refuse un username hors format", async () => {
