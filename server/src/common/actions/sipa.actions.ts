@@ -76,7 +76,7 @@ const zSuiviQuery = z.object({
   dateDebutFormationMin: z.string(),
   dateDebutFormationMax: z.string(),
   departements: z.preprocess((v) => (typeof v === "string" ? v.split(",") : v), z.array(z.string()).min(1)),
-  page: z.coerce.number().int().positive().default(1),
+  page: z.coerce.number().default(1),
 });
 
 function parseDateUTC(s: string, label: string): Date {
@@ -99,6 +99,7 @@ export async function parseSuiviQuery(query: unknown): Promise<ISipaSuiviParams>
   const dateMax = parseDateUTC(parsed.dateDebutFormationMax, "dateDebutFormationMax");
   if (dateMin > dateMax) throw Boom.badData("dateDebutFormationMin est postérieure à dateDebutFormationMax");
   if (parsed.departements.length > 10) throw Boom.badData("Maximum 10 départements par appel");
+  if (!Number.isInteger(parsed.page) || parsed.page < 1) throw Boom.badData("page : entier positif attendu");
   return { dateMin, dateMax, departementsDb: parsed.departements.map(sipaDeptToDb), page: parsed.page };
 }
 
@@ -134,7 +135,8 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
     updated_at: 1,
     created_at: 1,
     organisme_id: 1,
-    contrats: 1,
+    "contrats.date_debut": 1,
+    "contrats.date_fin": 1,
     "apprenant.ine": 1,
     "apprenant.nom": 1,
     "apprenant.prenom": 1,
@@ -232,7 +234,7 @@ function serializeSipaEffectif(doc: any) {
     source: truncate(doc.source === "DECA" ? "DECA" : "CFA", 10),
     dateActualisation: toDateStr(doc.updated_at ?? doc.created_at),
     apprenant: {
-      ine: truncate(doc.apprenant?.ine ?? ineFallback, 11),
+      ine: truncate(doc.apprenant?.ine || ineFallback, 11),
       nom: truncate(doc.apprenant?.nom, 200),
       prenom: truncate(doc.apprenant?.prenom, 50),
       dateNaissance: toDateStr(doc.apprenant?.date_de_naissance),
