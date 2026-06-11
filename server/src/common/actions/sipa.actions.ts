@@ -8,7 +8,7 @@ import { z } from "zod";
 import { effectifsDb, sipaUsersDb } from "@/common/model/collections";
 import { createSipaToken } from "@/common/utils/jwtUtils";
 import { stripDiacritics } from "@/common/utils/mongoUtils";
-import { compare, hash } from "@/common/utils/passwordUtils";
+import { compareWithTimingSafety, hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
 export const zSipaLoginBody = z.object({
@@ -18,13 +18,9 @@ export const zSipaLoginBody = z.object({
 
 export const isSipaConfigured = !!config.auth.sipa.jwtSecret;
 
-// Hash factice pour éviter les attaques par timing
-let dummyHash: string | undefined;
-const getDummyHash = () => (dummyHash ??= hash("dummy-password-never-matches"));
-
 export async function loginSipa(username: string, password: string): Promise<{ token: string; expiresIn: number }> {
   const user = isSipaConfigured ? await sipaUsersDb().findOne({ username }) : null;
-  const passOk = compare(password, user?.password ?? getDummyHash());
+  const passOk = compareWithTimingSafety(password, user?.password);
   if (!user || !passOk) throw Boom.unauthorized("Identifiant ou mot de passe incorrect");
   await sipaUsersDb().updateOne({ _id: user._id }, { $set: { last_connection: new Date() } });
 
@@ -75,7 +71,10 @@ export function dbDeptToSipa(code: string | null | undefined): string | null {
 const zSuiviQuery = z.object({
   dateDebutFormationMin: z.string(),
   dateDebutFormationMax: z.string(),
-  departements: z.preprocess((v) => (typeof v === "string" ? v.split(",") : v), z.array(z.string()).min(1)),
+  departements: z.preprocess((v) => {
+    const arr = typeof v === "string" ? v.split(",") : v;
+    return Array.isArray(arr) ? arr.filter((s) => s !== "") : arr;
+  }, z.array(z.string()).min(1)),
   page: z.coerce.number().default(1),
 });
 
@@ -164,11 +163,15 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
         source_priority: { $cond: [{ $eq: ["$source", "DECA"] }, 0, 1] },
       },
     },
-    { $sort: { source_priority: 1, "formation.date_inscription": -1, _id: 1 } },
     {
       $group: {
         _id: { nom: "$_dedup_nom", prenom: "$_dedup_prenom", ddn: "$_dedup_ddn" },
-        doc: { $first: "$$ROOT" },
+        doc: {
+          $top: {
+            sortBy: { source_priority: 1, "formation.date_inscription": -1, _id: 1 },
+            output: "$$ROOT",
+          },
+        },
         ines: { $addToSet: "$apprenant.ine" },
       },
     },
