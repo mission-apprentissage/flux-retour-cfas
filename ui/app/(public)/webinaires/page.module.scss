@@ -1,0 +1,12 @@
+.iframeWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.iframe {
+  display: block;
+  width: 640px;
+  height: 900px;
+  border: 0;
+}
