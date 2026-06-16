@@ -9,6 +9,7 @@ import { _get, _post } from "@/common/httpClient";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
+import CollabV2AdminSection from "./CollabV2AdminSection";
 import DecaCfaPilotAdminSection from "./DecaCfaPilotAdminSection";
 import InviteCfaAdminModal from "./InviteCfaAdminModal";
 
@@ -251,6 +252,8 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       )}
 
       <DecaCfaPilotAdminSection organisme={organisme} />
+
+      <CollabV2AdminSection organisme={organisme} />
     </Stack>
   );
 };
