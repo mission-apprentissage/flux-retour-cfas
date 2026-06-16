@@ -514,6 +514,161 @@ describe("Mission Locale Routes", () => {
     });
   });
 
+  describe("Collab V2 — visibilité et priorité forcées par le CFA", () => {
+    const dayAgo = (n: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - n);
+      return d;
+    };
+
+    // Insère directement un missionLocaleEffectif pour contrôler finement l'état temporel
+    // (rupture +180j, retour en formation, envoi auto 45j) sans dépendre du flux d'ingestion.
+    const makeDoc = ({
+      accConjoint = false,
+      isAllowedCollab = true,
+      mlBeta = true,
+      ruptureDaysAgo = 60,
+      statusValue = "RUPTURANT",
+      enCours = "RUPTURANT",
+      mlActivatedDaysAgo,
+    }: {
+      accConjoint?: boolean;
+      isAllowedCollab?: boolean;
+      mlBeta?: boolean;
+      ruptureDaysAgo?: number;
+      statusValue?: string;
+      enCours?: string;
+      mlActivatedDaysAgo?: number;
+    }) => {
+      const snapshotId = new ObjectId();
+      const ruptureDate = dayAgo(ruptureDaysAgo);
+      const doc = {
+        _id: new ObjectId(),
+        mission_locale_id: ML_ID,
+        effectif_id: new ObjectId(),
+        created_at: new Date(),
+        brevo: {},
+        current_status: { value: statusValue, date: ruptureDate },
+        date_rupture: ruptureDate,
+        ...(accConjoint ? { organisme_data: { acc_conjoint: true, rupture: true, reponse_at: new Date() } } : {}),
+        computed: {
+          organisme: {
+            ...(mlBeta ? { ml_beta_activated_at: dayAgo(120) } : {}),
+            is_allowed_collab: isAllowedCollab,
+          },
+          ...(mlActivatedDaysAgo !== undefined ? { mission_locale: { activated_at: dayAgo(mlActivatedDaysAgo) } } : {}),
+        },
+        effectif_snapshot: {
+          _id: snapshotId,
+          organisme_id: ORGANISME_ID,
+          id_erp_apprenant: "x",
+          source: "test",
+          annee_scolaire: "2025-2026",
+          apprenant: {
+            nom: "DOE",
+            prenom: "John",
+            date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - 20)),
+            telephone: "0600000000",
+          },
+          formation: {},
+          _computed: { statut: { en_cours: enCours } },
+          is_lock: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      };
+      return { snapshotId, doc };
+    };
+
+    const insertDoc = async (doc: object) => {
+      await missionLocaleEffectifsDb().insertOne(doc as any, { bypassDocumentValidation: true });
+    };
+
+    const getPerMonth = () =>
+      requestAsOrganisation(ML_DATA, "get", `/api/v1/organisation/mission-locale/effectifs-per-month`);
+
+    const isInPrioritaire = (res: { data: { prioritaire?: { effectifs?: { id: string }[] } } }, id: string) =>
+      (res.data.prioritaire?.effectifs ?? []).some((e) => e.id === id);
+
+    // Visibilité brute : présent dans n'importe quelle liste mensuelle (à traiter, traité, injoignable).
+    const isVisible = (res: { data: Record<string, { data: { id: string }[] }[]> }, id: string) =>
+      ["a_traiter", "traite", "injoignable"].some((liste) =>
+        (res.data[liste] ?? []).flatMap((m) => m.data ?? []).some((e) => e.id === id)
+      );
+
+    beforeEach(async () => {
+      await missionLocaleEffectifsDb().deleteMany({});
+      const db = (await import("@/common/mongodb")).getDatabase();
+      await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
+    });
+
+    // Règle : « Si le CFA demande une collaboration, l'affichage est forcé dans le bloc
+    // prioritaire (jeune en abandon +180j) → la ML doit toujours le voir. »
+    it("Demande de collaboration + rupture > 180j : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 200 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    // Règle : « ... (jeune en fin de formation) ... » — modélisé par un retour en apprentissage.
+    it("Demande de collaboration + retour en formation (APPRENTI) : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: true,
+        ruptureDaysAgo: 30,
+        statusValue: "APPRENTI",
+        enCours: "APPRENTI",
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    // Règle : « ... ou non visible dans l'outil ML pour quelqu'autre raison ». Ici la rupture
+    // (300j) est antérieure à la fenêtre d'activation de la ML (activée il y a 10j, soit
+    // activated_at - 180j = il y a 190j) : sans le bypass collab, in_activation_range exclurait
+    // le jeune. La demande de collab doit malgré tout le rendre visible ET prioritaire.
+    it("Demande de collaboration + rupture hors fenêtre d'activation ML : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 300, mlActivatedDaysAgo: 10 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    // Règle : « Si un effectif est envoyé automatiquement (après 45j) depuis un CFA en V2 :
+    // le jeune n'est pas prioritaire mais doit quand même être visible. »
+    it("CFA en V2 sans demande de collab + rupture > 45j : visible MAIS non prioritaire (envoi auto)", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: true, ruptureDaysAgo: 60 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
+
+    // Garde-fou : un CFA hors V2 collab ne doit PAS voir ses ruptures remonter à la ML
+    // (sinon le bypass collab sur-exposerait des effectifs non concernés).
+    it("CFA hors collab + rupture > 45j sans demande : non visible (pas de sur-exposition)", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: false, ruptureDaysAgo: 60 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(false);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
+  });
+
   describe("GET /parametres + PUT /parametres (rdv_url)", () => {
     beforeEach(async () => {
       const db = (await import("@/common/mongodb")).getDatabase();
@@ -1594,5 +1749,178 @@ describe("Classifier Feedback Routes", () => {
       const inInjoignable = injoignableEffectifs.find((e: { id: string }) => e.id === EFFECTIF_ID.toString());
       expect(inInjoignable).toBeDefined();
     });
+  });
+});
+
+/**
+ * Garantit l'ordre de priorité de tri de la liste prioritaire (getSortedRulesByListeType) :
+ *   1. Collab CFA (accompagnement conjoint) — avant tout
+ *   2. Souhaite un RDV
+ *   3. RQTH / Mineur — au même niveau (départagés ensuite par whatsapp_callback puis a_contacter)
+ */
+describe("Priorité de tri de la liste prioritaire (PRIORITAIRE)", () => {
+  useNock();
+  useMongo();
+
+  const P_ORGANISME_ID = new ObjectId();
+  const P_ML_ID = new ObjectId();
+  const P_ML_DATA = { ml_id: 609, nom: "ML PRIORITE TEST", type: "MISSION_LOCALE" as const };
+  const P_UAI = "0802004U";
+  const P_SIRET = "77937827200016";
+
+  let requestAsOrganisation: RequestAsOrganisationFunc;
+
+  // Crée un rupturant via le flux normal (queue) et renvoie son effectif_id.
+  const createEffectif = async (nom: string): Promise<ObjectId> => {
+    const payload = createRupturantEffectifPayload({
+      nom_apprenant: nom,
+      etablissement_formateur_uai: P_UAI,
+      etablissement_formateur_siret: P_SIRET,
+      etablissement_responsable_uai: P_UAI,
+      etablissement_responsable_siret: P_SIRET,
+      code_postal_apprenant: "75001",
+    });
+
+    const { insertedId } = await effectifsQueueDb().insertOne({
+      _id: new ObjectId(),
+      created_at: new Date(),
+      ...payload,
+    });
+    await processEffectifsQueue();
+
+    const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
+    return effQ?.effectif_id as ObjectId;
+  };
+
+  // Date de naissance correspondant à un mineur (≈ 17 ans), dans la fenêtre [16, 18] ans.
+  const dateNaissanceMineur = () => new Date(new Date().setFullYear(new Date().getFullYear() - 17));
+
+  // Renvoie la liste ordonnée des ids d'effectifs de l'encart prioritaire.
+  const getPrioritaireOrder = async (): Promise<string[]> => {
+    const res = await requestAsOrganisation(
+      P_ML_DATA,
+      "get",
+      `/api/v1/organisation/mission-locale/effectifs-per-month`
+    );
+    return (res.data.prioritaire?.effectifs ?? []).map((e: { id: string }) => e.id);
+  };
+
+  beforeEach(async () => {
+    const app = await initTestApp();
+    requestAsOrganisation = app.requestAsOrganisation;
+
+    await organisationsDb().insertOne({
+      _id: P_ML_ID,
+      created_at: new Date(),
+      email: "",
+      telephone: "",
+      site_web: "",
+      ...P_ML_DATA,
+    });
+
+    await organismesDb().insertOne({
+      _id: P_ORGANISME_ID,
+      ...createRandomOrganisme({ uai: P_UAI, siret: P_SIRET }),
+    });
+  });
+
+  it("ordonne Collab CFA, puis Souhaite RDV, puis RQTH/Mineur", async () => {
+    const collabId = await createEffectif("COLLAB");
+    const rdvId = await createEffectif("RDV");
+    const mineurId = await createEffectif("MINEUR");
+    const rqthId = await createEffectif("RQTH");
+
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: collabId },
+      { $set: { "organisme_data.acc_conjoint": true } }
+    );
+    await missionLocaleEffectifsDb().updateOne({ effectif_id: rdvId }, { $set: { souhaite_rdv: true } });
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: mineurId },
+      { $set: { "effectif_snapshot.apprenant.date_de_naissance": dateNaissanceMineur() } }
+    );
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: rqthId },
+      { $set: { "effectif_snapshot.apprenant.rqth": true } }
+    );
+
+    const order = await getPrioritaireOrder();
+
+    // Les 4 effectifs sont bien dans l'encart prioritaire.
+    expect(order).toEqual(
+      expect.arrayContaining([collabId.toString(), rdvId.toString(), mineurId.toString(), rqthId.toString()])
+    );
+
+    // Collab CFA en tête, puis Souhaite RDV, puis le groupe RQTH/Mineur.
+    expect(order.indexOf(collabId.toString())).toBeLessThan(order.indexOf(rdvId.toString()));
+    expect(order.indexOf(rdvId.toString())).toBeLessThan(order.indexOf(mineurId.toString()));
+    expect(order.indexOf(rdvId.toString())).toBeLessThan(order.indexOf(rqthId.toString()));
+  });
+
+  it("place Collab CFA avant un effectif cumulant Souhaite RDV + Mineur + RQTH", async () => {
+    const collabId = await createEffectif("COLLAB");
+    const cumulId = await createEffectif("CUMUL");
+
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: collabId },
+      { $set: { "organisme_data.acc_conjoint": true } }
+    );
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: cumulId },
+      {
+        $set: {
+          souhaite_rdv: true,
+          "effectif_snapshot.apprenant.rqth": true,
+          "effectif_snapshot.apprenant.date_de_naissance": dateNaissanceMineur(),
+        },
+      }
+    );
+
+    const order = await getPrioritaireOrder();
+
+    // Collab CFA reste prioritaire même face à un effectif cumulant tous les critères inférieurs.
+    expect(order.indexOf(collabId.toString())).toBeLessThan(order.indexOf(cumulId.toString()));
+  });
+
+  it("place Souhaite RDV avant Mineur et avant RQTH", async () => {
+    const rdvId = await createEffectif("RDV");
+    const mineurId = await createEffectif("MINEUR");
+    const rqthId = await createEffectif("RQTH");
+
+    await missionLocaleEffectifsDb().updateOne({ effectif_id: rdvId }, { $set: { souhaite_rdv: true } });
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: mineurId },
+      { $set: { "effectif_snapshot.apprenant.date_de_naissance": dateNaissanceMineur() } }
+    );
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: rqthId },
+      { $set: { "effectif_snapshot.apprenant.rqth": true } }
+    );
+
+    const order = await getPrioritaireOrder();
+
+    expect(order.indexOf(rdvId.toString())).toBeLessThan(order.indexOf(mineurId.toString()));
+    expect(order.indexOf(rdvId.toString())).toBeLessThan(order.indexOf(rqthId.toString()));
+  });
+
+  it("traite RQTH et Mineur au même niveau (départagés par whatsapp_callback, non par mineur)", async () => {
+    // RQTH + whatsapp_callback contre Mineur seul.
+    // Ancienne règle : Mineur passait systématiquement avant RQTH → Mineur premier.
+    // Nouvelle règle : RQTH/Mineur au même niveau, donc whatsapp_callback départage → RQTH premier.
+    const rqthWhatsappId = await createEffectif("RQTH_WA");
+    const mineurId = await createEffectif("MINEUR");
+
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: rqthWhatsappId },
+      { $set: { "effectif_snapshot.apprenant.rqth": true, whatsapp_callback_requested: true } }
+    );
+    await missionLocaleEffectifsDb().updateOne(
+      { effectif_id: mineurId },
+      { $set: { "effectif_snapshot.apprenant.date_de_naissance": dateNaissanceMineur() } }
+    );
+
+    const order = await getPrioritaireOrder();
+
+    expect(order.indexOf(rqthWhatsappId.toString())).toBeLessThan(order.indexOf(mineurId.toString()));
   });
 });
