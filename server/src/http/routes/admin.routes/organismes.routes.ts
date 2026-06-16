@@ -3,10 +3,13 @@ import express from "express";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
+import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes/organismes.actions";
 import {
+  activateCollabV2,
   activateDecaCfaPilotBatch,
+  deactivateCollabV2,
   deactivateDecaCfaPilotBatch,
   getArchivableOrganismes,
   searchOrganismesSupportInfoBySiret,
@@ -102,6 +105,39 @@ export default () => {
     async (req, res) => {
       const { items } = req.body as z.infer<typeof decaCfaPilotBatchSchema>;
       const result = await deactivateDecaCfaPilotBatch(items, req.user._id.toString());
+      res.json(result);
+    }
+  );
+
+  router.get(
+    "/:id/collab-v2-eligibility",
+    validateRequestMiddleware({
+      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+    }),
+    async ({ params }, res) => {
+      const result = await checkCollabV2Eligibility(params.id);
+      res.json(result);
+    }
+  );
+
+  router.post(
+    "/:id/collab-v2/activate",
+    validateRequestMiddleware({
+      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+    }),
+    async (req, res) => {
+      const result = await activateCollabV2(req.params.id, req.user._id.toString());
+      res.json(result);
+    }
+  );
+
+  router.post(
+    "/:id/collab-v2/deactivate",
+    validateRequestMiddleware({
+      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+    }),
+    async (req, res) => {
+      const result = await deactivateCollabV2(req.params.id, req.user._id.toString());
       res.json(result);
     }
   );
