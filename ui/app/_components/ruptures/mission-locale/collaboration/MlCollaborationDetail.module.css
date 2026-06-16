@@ -563,3 +563,23 @@
   margin: 0.5rem 0 0 0;
   line-height: 1.5;
 }
+
+.dateBlock {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.dateBlockLineContainer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.dateBlockLine {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  line-height: 1rem;
+}

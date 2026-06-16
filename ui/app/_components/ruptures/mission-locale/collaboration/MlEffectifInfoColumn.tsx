@@ -12,6 +12,7 @@ import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatAnnee, formatDate, formatRelativeDate, getAge } from "@/app/_utils/date.utils";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { getInitials } from "@/app/_utils/user.utils";
+import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
@@ -106,6 +107,25 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
         </p>
       )}
 
+      {(effectif.formation?.date_entree || effectif.formation?.date_fin) && (
+        <div className={localStyles.dateBlock}>
+          <i className="ri-calendar-todo-line fr-icon--sm" aria-hidden="true" />
+          <div className={localStyles.dateBlockLineContainer}>
+            {effectif.formation?.date_entree && (
+              <p className={`${styles.infoLine} ${localStyles.dateBlockLine}`}>
+                <span>Début de formation</span>
+                <span>{formatDateNumericDayMonthYear(effectif.formation?.date_entree)}</span>
+              </p>
+            )}
+            {effectif.formation?.date_fin && (
+              <p className={`${styles.infoLine} ${localStyles.dateBlockLine}`}>
+                <span>Fin de formation</span>
+                <span>{formatDateNumericDayMonthYear(effectif.formation?.date_fin)}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       {effectif.contact_cfa ? (
         <>
           <DsfrLink
