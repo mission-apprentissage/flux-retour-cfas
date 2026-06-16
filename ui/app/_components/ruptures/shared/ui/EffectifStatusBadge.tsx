@@ -69,7 +69,7 @@ export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBa
     return (
       <span className="fr-badge fr-badge--yellow-tournesol" aria-label="Effectif à traiter">
         <i className="fr-icon-flashlight-fill fr-icon--sm" />
-        <span className={styles.badgeTextSpacing}>A TRAITER</span>
+        <span className={styles.badgeTextSpacing}>À TRAITER</span>
       </span>
     );
   }

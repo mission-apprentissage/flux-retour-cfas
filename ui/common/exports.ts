@@ -261,7 +261,7 @@ export const traitementMLExportColumns = [
   { label: "Mission Locale", key: "nom", width: 40 },
   { label: "SIRET", key: "siret", xlsxType: "string", width: 15 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },
-  { label: "A traiter", key: "a_traiter", width: 12 },
+  { label: "À traiter", key: "a_traiter", width: 12 },
   { label: "Traités", key: "traites", width: 12 },
   { label: "% Traités", key: "pourcentage_traites", width: 12 },
   { label: "% A recontacter", key: "pourcentage_a_recontacter", width: 15 },
@@ -284,7 +284,7 @@ export const traitementMLExportColumns = [
 export const traitementRegionExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },
-  { label: "A traiter", key: "a_traiter", width: 12 },
+  { label: "À traiter", key: "a_traiter", width: 12 },
   { label: "Traités", key: "traites", width: 12 },
   { label: "% Traités", key: "pourcentage_traites", width: 12 },
   { label: "% A recontacter", key: "pourcentage_a_recontacter", width: 15 },
