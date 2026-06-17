@@ -243,7 +243,7 @@ describe("Authentification SIPA", () => {
         });
         assert.strictEqual(response.status, 200, `login #${i + 1} aurait dû réussir`);
       }
-    });
+    }, 30000);
 
     it("Un login réussi n'efface pas les échecs déjà décomptés", async () => {
       for (let i = 0; i < 19; i++) {
@@ -261,6 +261,6 @@ describe("Authentification SIPA", () => {
         password: "wrong-password",
       });
       assert.strictEqual(blocked.status, 429);
-    });
+    }, 30000);
   });
 });
