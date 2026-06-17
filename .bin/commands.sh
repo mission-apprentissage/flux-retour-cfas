@@ -2,74 +2,103 @@
 
 set -euo pipefail
 
-if [ ! -f "${ROOT_DIR}/.bin/shared/commands.sh" ]; then
+SUBMODULE_PATH="${ROOT_DIR}/.bin/shared"
 
-  echo "Mise à jour du sous-module mna-shared-bin"
+if [[ ! -f "$SUBMODULE_PATH/.git" ]] && [[ ! -d "$SUBMODULE_PATH/.git" ]]; then
 
-  git submodule update --init "${ROOT_DIR}/.bin/shared"
+  echo "Initialisation du sous-module : $SUBMODULE_PATH"
+  git submodule update --init -- "$SUBMODULE_PATH"
 
-fi
+else
 
-if [ ! -f "${ROOT_DIR}/.infra/inventories/env.ini" ]; then
+  expected=$(git ls-files --stage -- "$SUBMODULE_PATH" | awk '{print $2}')
+  current=$(git -C "$SUBMODULE_PATH" rev-parse HEAD)
 
-  echo "Mise à jour du sous-module mna-shared-inventories"
+  if [[ "$expected" != "$current" ]]; then
 
-  git submodule update --init "${ROOT_DIR}/.infra/inventories"
+    echo "Mise à jour du sous-module :"
+    echo "$current → $expected"
+    git submodule update -- "$SUBMODULE_PATH"
 
-fi
-
-if [ ! -f "${ROOT_DIR}/.infra/authorizations/habilitations.yml" ]; then
-
-  echo "Mise à jour du sous-module mna-shared-authorizations"
-
-  git submodule update --init "${ROOT_DIR}/.infra/authorizations"
+  fi
 
 fi
 
 . "${ROOT_DIR}/.bin/shared/commands.sh"
 
 ################################################################################
+# Shared commands
+################################################################################
+
+_register "app:deploy"
+_register "app:deploy:log:encrypt"
+_register "app:deploy:log:decrypt"
+_register "dev:dependencies:check"
+_register "dev:setup"
+_register "docker:login"
+_register "seed:apply"
+_register "seed:update"
+_register "vault:edit"
+
+################################################################################
+# Local commands
+################################################################################
+
+#app:release                    Build & push Docker image releases
+#app:release:interactive        Interactivelly build & push Docker image releases
+#dev:dependencies:check         Check dependencies on system
+#preprod:sync                   Synchronize preprod database with production
+#
+################################################################################
 # Non-shared commands
 ################################################################################
 
-_meta_help["app:build"]="Build Ui & Server Docker images"
+_local_app_build__help="Build Ui & Server Docker images"
+_register "app:build" "_local_app_build"
 
-function app:build() {
-  "${SCRIPT_DIR}/app-build.sh" "$@"
+function _local_app_build() {
+  "${SCRIPTS_DIR}/app-build.sh" "$@"
 }
 
-_meta_help["app:release"]="Build & push Docker image releases"
+_local_app_release__help="Build & push Docker image releases"
+_register "app:release" "_local_app_release"
 
-function app:release() {
-  "${SCRIPT_DIR}/app-release.sh" "$@"
+function _local_app_release() {
+  "${SCRIPTS_DIR}/app-release.sh" "$@"
 }
 
-_meta_help["app:release:interactive"]="Interactivelly build & push Docker image releases"
+_local_app_release_interactive__help="Interactivelly build & push Docker image releases"
+_register "app:release:interactive" "_local_app_release_interactive"
 
-function app:release:interactive() {
-  "${SCRIPT_DIR}/app-release-interactive.sh" "$@"
+function _local_app_release_interactive() {
+  "${SCRIPTS_DIR}/app-release-interactive.sh" "$@"
 }
 
-_meta_help["env:init"]="Update local env files using values from SOPS files"
+_local_env_init__help="Update local env files using values from SOPS files"
+_register "env:init" "_local_env_init"
 
-function env:init() {
-  "${SCRIPT_DIR}/env-init.sh" "$@"
+function _local_env_init() {
+  "${SCRIPTS_DIR}/env-init.sh" "$@"
 }
 
-_meta_help["sentry:deploy"]="Notify deployment to sentry for existing sentry release"
+_local_sentry_deploy__help="Notify deployment to Sentry for existing release"
+_register "sentry:deploy" "_local_sentry_deploy"
 
-function sentry:deploy() {
-  "${SCRIPT_DIR}/sentry-deploy.sh" "$@"
+function _local_sentry_deploy() {
+  "${SCRIPTS_DIR}/sentry-deploy.sh" "$@"
 }
 
-_meta_help["sentry:release"]="Create sentry release for existing Docker image"
+_local_sentry_release__help="Create Sentry release for existing Docker image"
+_register "sentry:release" "_local_sentry_release"
 
-function sentry:release() {
-  "${SCRIPT_DIR}/sentry-release.sh" "$@"
+function _local_sentry_release() {
+  "${SCRIPTS_DIR}/sentry-release.sh" "$@"
 }
 
-_meta_help["preprod:sync"]="Synchronize preprod database with production"
+_local_preprod_sync__help="Synchronize preprod database with production"
+_register "preprod:sync" "_local_preprod_sync"
 
-function preprod:sync() {
-  "${SCRIPT_SHARED_DIR}/run-playbook.sh" "sync-preprod.yml" "production"
+function _local_preprod_sync() {
+  "${SCRIPTS_SHARED_DIR}/run-playbook.sh" "sync-preprod.yml" "production"
 }
+
