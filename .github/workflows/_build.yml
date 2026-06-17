@@ -45,7 +45,6 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v6
         with:
-          token: ${{ secrets.TOKEN_MNA_SHARED }}
           persist-credentials: false
           submodules: true
           fetch-depth: 0
@@ -92,7 +91,7 @@ jobs:
         run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
 
       - name: bump and release
-        run: .bin/mna-tdb app:build "${{ inputs.version }}" push $(git rev-parse HEAD) "${{ inputs.environment }}"
+        run: .bin/mna app:build "${{ inputs.version }}" push $(git rev-parse HEAD) "${{ inputs.environment }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -117,4 +116,3 @@ jobs:
       SLACK_WEBHOOK_NOTIF: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_WEBHOOK_ALERTING: ${{ secrets.SLACK_WEBHOOK_ALERTING }}
       OPENPGP_PRIVATE_SUBKEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
-      TOKEN_MNA_SHARED: ${{ secrets.TOKEN_MNA_SHARED }}
