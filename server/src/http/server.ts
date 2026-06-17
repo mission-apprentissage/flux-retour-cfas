@@ -105,6 +105,13 @@ import {
 } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
+import {
+  getSuiviSipaEffectifs,
+  isSipaConfigured,
+  loginSipa,
+  parseSuiviQuery,
+  zSipaLoginBody,
+} from "@/common/actions/sipa.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import {
   changePassword,
@@ -147,6 +154,7 @@ import {
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
+import requireSipaAuthentication from "./middlewares/requireSipaAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
@@ -203,11 +211,60 @@ async function resendActivationEmailRateLimitMiddleware(
   }
 }
 
+export const sipaLoginRateLimiter = new RateLimiterMemory({
+  keyPrefix: "sipa_login",
+  points: 20,
+  duration: 15 * 60,
+});
+
+async function sipaLoginRateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    await sipaLoginRateLimiter.consume(req.ip || "unknown");
+    next();
+  } catch {
+    next(Boom.tooManyRequests("Trop de tentatives, réessayez plus tard"));
+  }
+}
+
+const sipaSuiviRateLimiter = new RateLimiterMemory({
+  keyPrefix: "sipa_suivi",
+  points: 2000,
+  duration: 60,
+});
+
+async function sipaSuiviRateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    await sipaSuiviRateLimiter.consume(req.ip || "unknown");
+    next();
+  } catch {
+    next(Boom.tooManyRequests("Trop de requêtes, réessayez plus tard"));
+  }
+}
+
 /**
  * Create the express app
  */
 export default async function createServer(): Promise<Application> {
   const app = express();
+
+  app.set("trust proxy", config.trustProxy);
+
+  let proxyIpVerified = false;
+  app.use((req, _res, next) => {
+    if (!proxyIpVerified) {
+      proxyIpVerified = true;
+      logger.info(
+        {
+          trustProxy: config.trustProxy,
+          reqIp: req.ip,
+          xForwardedFor: req.headers["x-forwarded-for"],
+          xRealIp: req.headers["x-real-ip"],
+        },
+        "proxy IP verification (première requête)"
+      );
+    }
+    next();
+  });
 
   // Configure Sentry
   initSentryExpress(app);
@@ -236,6 +293,10 @@ export default async function createServer(): Promise<Application> {
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
+
+  if (!isSipaConfigured) {
+    logger.warn("Auth SIPA non configurée (MNA_TDB_AUTH_SIPA_JWT_SECRET absente)");
+  }
 
   setupRoutes(app);
 
@@ -350,6 +411,24 @@ function setupRoutes(app: Application) {
         }
         await removeSession(req.cookies[COOKIE_NAME]);
         res.clearCookie(COOKIE_NAME);
+      })
+    )
+    .post(
+      "/api/v2/auth/login",
+      sipaLoginRateLimitMiddleware,
+      returnResult(async (req) => {
+        const { username, password } = await validateFullZodObjectSchema(req.body, zSipaLoginBody.shape);
+        const result = await loginSipa(username, password);
+        await sipaLoginRateLimiter.reward(req.ip || "unknown");
+        return result;
+      })
+    )
+    .get(
+      "/api/v2/affelnet/suivi",
+      sipaSuiviRateLimitMiddleware,
+      requireSipaAuthentication(),
+      returnResult(async (req) => {
+        return getSuiviSipaEffectifs(await parseSuiviQuery(req.query));
       })
     )
     .post(

@@ -20832,6 +20832,43 @@ exports[`validation-schema > should create validation schema for romeSecteurActi
 }
 `;
 
+exports[`validation-schema > should create validation schema for sipaUsers > sipaUsers 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création du compte",
+    },
+    "last_connection": {
+      "bsonType": "date",
+      "description": "Date du dernier login réussi",
+    },
+    "password": {
+      "bsonType": "string",
+      "description": "Le mot de passe hashé (sha512crypt)",
+    },
+    "username": {
+      "bsonType": "string",
+      "description": "Identifiant du compte technique SIPA (alphanumérique + . - _, max 64 caractères)",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+    },
+  },
+  "required": [
+    "_id",
+    "username",
+    "password",
+    "created_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for telechargementListeNomLogs > telechargementListeNomLogs 1`] = `
 {
   "additionalProperties": false,
