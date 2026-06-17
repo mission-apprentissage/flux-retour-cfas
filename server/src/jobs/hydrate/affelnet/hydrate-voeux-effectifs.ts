@@ -5,11 +5,16 @@ import { getAcademieById } from "shared/constants";
 import logger from "@/common/logger";
 import { effectifsDb, effectifsDECADb, voeuxAffelnetDb } from "@/common/model/collections";
 
-export const hydrateVoeuxEffectifsRelations = async () => {
+export const hydrateVoeuxEffectifsRelations = async (anneeScolaireRentree?: string) => {
   let foundCount = 0;
 
-  const cursor = voeuxAffelnetDb().find();
-  const totalFound = await voeuxAffelnetDb().countDocuments();
+  const baseFilter = {
+    deleted_at: null,
+    ...(anneeScolaireRentree ? { annee_scolaire_rentree: anneeScolaireRentree } : {}),
+  };
+
+  const cursor = voeuxAffelnetDb().find(baseFilter);
+  const totalFound = await voeuxAffelnetDb().countDocuments(baseFilter);
 
   while (await cursor.hasNext()) {
     const voeux = await cursor.next();
@@ -39,11 +44,16 @@ export const hydrateVoeuxEffectifsRelations = async () => {
   logger.info(` ${foundCount} voeux trouvés sur un total de ${totalFound} voeux`);
 };
 
-export const hydrateVoeuxEffectifsDECARelations = async () => {
+export const hydrateVoeuxEffectifsDECARelations = async (anneeScolaireRentree?: string) => {
   let foundCount = 0;
 
-  const cursor = voeuxAffelnetDb().find();
-  const totalFound = await voeuxAffelnetDb().countDocuments();
+  const baseFilter = {
+    deleted_at: null,
+    ...(anneeScolaireRentree ? { annee_scolaire_rentree: anneeScolaireRentree } : {}),
+  };
+
+  const cursor = voeuxAffelnetDb().find(baseFilter);
+  const totalFound = await voeuxAffelnetDb().countDocuments(baseFilter);
 
   while (await cursor.hasNext()) {
     const voeux = await cursor.next();
