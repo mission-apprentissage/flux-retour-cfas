@@ -211,7 +211,7 @@ async function resendActivationEmailRateLimitMiddleware(
   }
 }
 
-const sipaLoginRateLimiter = new RateLimiterMemory({
+export const sipaLoginRateLimiter = new RateLimiterMemory({
   keyPrefix: "sipa_login",
   points: 20,
   duration: 15 * 60,
@@ -418,7 +418,9 @@ function setupRoutes(app: Application) {
       sipaLoginRateLimitMiddleware,
       returnResult(async (req) => {
         const { username, password } = await validateFullZodObjectSchema(req.body, zSipaLoginBody.shape);
-        return loginSipa(username, password);
+        const result = await loginSipa(username, password);
+        await sipaLoginRateLimiter.reward(req.ip || "unknown");
+        return result;
       })
     )
     .get(

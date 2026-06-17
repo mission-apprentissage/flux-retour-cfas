@@ -11,6 +11,7 @@ import { createSipaToken } from "@/common/utils/jwtUtils";
 import { compare, hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 import requireSipaAuthentication from "@/http/middlewares/requireSipaAuthentication";
+import { sipaLoginRateLimiter } from "@/http/server";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
 
@@ -216,6 +217,12 @@ describe("Authentification SIPA", () => {
   });
 
   describe("Rate limiting POST /api/v2/auth/login", () => {
+    beforeEach(async () => {
+      await Promise.all(
+        ["unknown", "127.0.0.1", "::1", "::ffff:127.0.0.1"].map((key) => sipaLoginRateLimiter.delete(key))
+      );
+    });
+
     it("Renvoie 429 après épuisement des 20 tentatives / 15 min", async () => {
       let last: any;
       for (let i = 0; i < 21; i++) {
@@ -226,6 +233,34 @@ describe("Authentification SIPA", () => {
       }
       assert.strictEqual(last.status, 429);
       assert.strictEqual(last.data.message, "Trop de tentatives, réessayez plus tard");
+    });
+
+    it("Ne décompte pas les logins réussis (seuls les échecs comptent)", async () => {
+      for (let i = 0; i < 25; i++) {
+        const response = await httpClient.post("/api/v2/auth/login", {
+          username: SIPA_USERNAME,
+          password: SIPA_PASSWORD,
+        });
+        assert.strictEqual(response.status, 200, `login #${i + 1} aurait dû réussir`);
+      }
+    });
+
+    it("Un login réussi n'efface pas les échecs déjà décomptés", async () => {
+      for (let i = 0; i < 19; i++) {
+        await httpClient.post("/api/v2/auth/login", { username: SIPA_USERNAME, password: "wrong-password" });
+      }
+      const success = await httpClient.post("/api/v2/auth/login", {
+        username: SIPA_USERNAME,
+        password: SIPA_PASSWORD,
+      });
+      assert.strictEqual(success.status, 200);
+
+      await httpClient.post("/api/v2/auth/login", { username: SIPA_USERNAME, password: "wrong-password" });
+      const blocked = await httpClient.post("/api/v2/auth/login", {
+        username: SIPA_USERNAME,
+        password: "wrong-password",
+      });
+      assert.strictEqual(blocked.status, 429);
     });
   });
 });
