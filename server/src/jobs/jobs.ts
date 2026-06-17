@@ -386,9 +386,10 @@ export async function setupJobProcessor() {
         },
       },
       "hydrate:voeux-effectifs-relations": {
-        handler: async () => {
-          await hydrateVoeuxEffectifsRelations();
-          await hydrateVoeuxEffectifsDECARelations();
+        handler: async (job) => {
+          const anneeScolaireRentree = (job.payload as any)?.anneeScolaireRentree as string | undefined;
+          await hydrateVoeuxEffectifsRelations(anneeScolaireRentree);
+          await hydrateVoeuxEffectifsDECARelations(anneeScolaireRentree);
           return;
         },
       },

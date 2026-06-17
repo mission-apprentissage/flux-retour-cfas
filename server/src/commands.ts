@@ -448,6 +448,10 @@ program
   .requiredOption("-n, --name <string>", "Job name")
   .option("--dry-run", "Run job in dry-run mode", false)
   .option("-q, --queued", "Run job asynchronously", false)
+  .option(
+    "--annee-scolaire-rentree <year>",
+    "Millésime à traiter (ex: hydrate:voeux-effectifs-relations, restreint le scan à cette année)"
+  )
   .action(({ name, ...options }) => {
     return createJobAction(name)(options);
   });
