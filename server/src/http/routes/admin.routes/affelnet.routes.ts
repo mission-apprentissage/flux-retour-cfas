@@ -206,6 +206,7 @@ const createVoeux = async (req, res) => {
       const previous = await voeuxAffelnetDb().findOne({
         "raw.ine": voeuRaw.ine,
         "raw.cle_ministere_educatif": voeuRaw.cle_ministere_educatif,
+        annee_scolaire_rentree: voeuRaw.annee_scolaire_rentree,
       });
       try {
         if (!previous) {
