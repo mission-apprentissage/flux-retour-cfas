@@ -106,12 +106,27 @@
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
+  position: relative;
+}
+
+/* Trait vertical reliant les icônes pour symboliser la ligne temporelle */
+.suiviEvent::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  transform: translateX(-50%);
+  top: 26px;
+  bottom: -1.25rem;
+  width: 1px;
+  background-color: var(--border-default-grey);
 }
 
 .suiviEventIcon {
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
+  justify-content: center;
+  width: 20px;
   padding-top: 2px;
 }
 
@@ -145,6 +160,10 @@
   font-size: 0.75rem;
   color: var(--text-mention-grey);
   margin: 0;
+}
+
+.suiviEventInfoLabel {
+  color: var(--text-action-high-blue-france);
 }
 
 .sentBubble {
@@ -568,6 +587,10 @@
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+}
+
+.dateBlock i {
+  color: var(--text-mention-grey);
 }
 
 .dateBlockLineContainer {

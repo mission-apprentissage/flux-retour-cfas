@@ -20,6 +20,7 @@ interface EffectifStatusBadgeProps {
     | "whatsapp_callback_requested"
     | "whatsapp_no_help_responded"
     | "souhaite_rdv"
+    | "fin_de_formation"
   >;
   isHeader?: boolean;
   organisation?: "MISSION_LOCALE" | "ORGANISME_FORMATION";
@@ -100,9 +101,11 @@ export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps
   return <EffectifStatusBadge effectif={effectif} />;
 }
 
+type BadgeBuilderOptions = { fontSize: string; iconSize: string; includeFinDeFormation?: boolean };
+
 function getAllPriorityBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
-  { fontSize, iconSize }: { fontSize: string; iconSize: string }
+  { fontSize, iconSize, includeFinDeFormation = false }: BadgeBuilderOptions
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
@@ -124,13 +127,16 @@ function getAllPriorityBadges(
   if (effectif.acc_conjoint) {
     badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
   }
+  if (includeFinDeFormation && effectif.fin_de_formation) {
+    badges.push(<FinDeFormationBadge key="fin_de_formation" fontSize={fontSize} />);
+  }
 
   return badges;
 }
 
 function getPermanentBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
-  { fontSize, iconSize }: { fontSize: string; iconSize: string }
+  { fontSize, iconSize, includeFinDeFormation = false }: BadgeBuilderOptions
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
@@ -142,6 +148,9 @@ function getPermanentBadges(
   }
   if (effectif.acc_conjoint) {
     badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
+  }
+  if (includeFinDeFormation && effectif.fin_de_formation) {
+    badges.push(<FinDeFormationBadge key="fin_de_formation" fontSize={fontSize} />);
   }
 
   return badges;
@@ -156,8 +165,8 @@ export function EffectifPriorityBadgeMultiple({
   const iconSize = isHeader ? "fr-icon--xs" : "fr-icon--sm";
 
   const badges = permanentOnly
-    ? getPermanentBadges(effectif, { fontSize, iconSize })
-    : getAllPriorityBadges(effectif, { fontSize, iconSize });
+    ? getPermanentBadges(effectif, { fontSize, iconSize, includeFinDeFormation: !isHeader })
+    : getAllPriorityBadges(effectif, { fontSize, iconSize, includeFinDeFormation: !isHeader });
 
   if (badges.length === 0) return null;
   if (badges.length === 1) return badges[0];
@@ -204,7 +213,20 @@ function AccConjointBadge({ fontSize }: { fontSize: string }) {
       style={{ fontSize }}
     >
       <i className="ri-school-fill fr-icon--xs" aria-hidden="true" />
-      Collab CFA
+      Collaboration CFA
+    </span>
+  );
+}
+
+function FinDeFormationBadge({ fontSize = "14px" }: { fontSize?: string }) {
+  return (
+    <span
+      className={`fr-badge ${styles.finDeFormationBadge}`}
+      aria-label="Effectif en fin de formation"
+      style={{ fontSize }}
+    >
+      <i className="ri-information-fill fr-icon--sm" aria-hidden="true" />
+      Fin de formation
     </span>
   );
 }

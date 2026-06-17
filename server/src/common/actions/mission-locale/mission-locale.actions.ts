@@ -630,6 +630,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     },
     nouveau_contrat: "$nouveau_contrat",
     current_status: "$current_status",
+    fin_de_formation: {
+      $eq: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION],
+    },
     organisme_data: "$organisme_data",
     acc_conjoint_by_user: "$contact_cfa_user",
     date_rupture: "$date_rupture",
