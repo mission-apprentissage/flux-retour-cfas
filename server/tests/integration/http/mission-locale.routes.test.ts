@@ -667,6 +667,45 @@ describe("Mission Locale Routes", () => {
       expect(isVisible(res, id)).toBe(false);
       expect(isInPrioritaire(res, id)).toBe(false);
     });
+
+    // Règle d'ordre dans le bloc prioritaire : « Collab CFA avant tout / Souhaite un RDV /
+    // RQTH = Mineur au même niveau ». On insère un effectif déclenchant exactement UN critère
+    // chacun et on vérifie l'ordre renvoyé dans prioritaire.effectifs.
+    it("Ordonne le bloc prioritaire : Collab CFA > Souhaite RDV > Mineur/RQTH", async () => {
+      // Collab CFA uniquement (acc_conjoint), majeur, non rqth, pas de rdv
+      const collab = makeDoc({ accConjoint: true, ruptureDaysAgo: 60 });
+
+      // Souhaite un RDV uniquement
+      const rdv = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
+      (rdv.doc as any).souhaite_rdv = true;
+
+      // Mineur uniquement (16-18 ans)
+      const mineur = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
+      (mineur.doc as any).effectif_snapshot.apprenant.date_de_naissance = new Date(
+        new Date().setFullYear(new Date().getFullYear() - 17)
+      );
+
+      // Insertion volontairement dans un ordre non trié pour ne pas valider par hasard.
+      await insertDoc(rdv.doc);
+      await insertDoc(mineur.doc);
+      await insertDoc(collab.doc);
+
+      const res = await getPerMonth();
+      const orderedIds: string[] = (res.data.prioritaire?.effectifs ?? []).map((e: { id: string }) => e.id);
+
+      const idxCollab = orderedIds.indexOf(collab.snapshotId.toString());
+      const idxRdv = orderedIds.indexOf(rdv.snapshotId.toString());
+      const idxMineur = orderedIds.indexOf(mineur.snapshotId.toString());
+
+      // Les trois sont bien prioritaires...
+      expect(idxCollab).toBeGreaterThanOrEqual(0);
+      expect(idxRdv).toBeGreaterThanOrEqual(0);
+      expect(idxMineur).toBeGreaterThanOrEqual(0);
+
+      // ... et ordonnés Collab CFA < Souhaite RDV < Mineur.
+      expect(idxCollab).toBeLessThan(idxRdv);
+      expect(idxRdv).toBeLessThan(idxMineur);
+    });
   });
 
   describe("GET /parametres + PUT /parametres (rdv_url)", () => {
