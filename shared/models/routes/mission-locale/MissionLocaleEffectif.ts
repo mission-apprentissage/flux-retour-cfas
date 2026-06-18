@@ -93,6 +93,10 @@ const zEffectifMissionLocale = z
     situation: z.object(updateMissionLocaleEffectifApi).nullish(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),
+    fin_de_formation: z
+      .boolean()
+      .describe("Indique si le jeune a un statut de fin de formation (date dépassée par rapport à l'ERP)")
+      .nullish(),
     whatsapp_callback_requested: z.boolean().describe("L'effectif a demandé à être recontacté via WhatsApp").nullish(),
     whatsapp_no_help_responded: z
       .boolean()

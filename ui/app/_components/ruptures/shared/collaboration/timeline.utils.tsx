@@ -19,6 +19,7 @@ export type EventIconType =
   | "attente"
   | "commentaire"
   | "nouveau-contrat"
+  | "fin-de-formation"
   | "whatsapp-yes"
   | "whatsapp-no";
 
@@ -49,6 +50,8 @@ export function getEventIcon(icon: EventIconType, styles: Record<string, string>
       return <span className="fr-icon-chat-3-line fr-icon--sm" aria-hidden="true" />;
     case "nouveau-contrat":
       return <span className={`fr-icon-file-text-line fr-icon--sm ${styles.nouveauContratIcon}`} aria-hidden="true" />;
+    case "fin-de-formation":
+      return <i className="fr-icon-information-fill fr-icon--sm" style={{ color: "#666666" }} aria-hidden="true" />;
     case "whatsapp-yes":
       return <i className="ri-chat-check-fill" style={{ color: "#18753C", fontSize: "18px" }} aria-hidden="true" />;
     case "whatsapp-no":

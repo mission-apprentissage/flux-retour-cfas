@@ -10,6 +10,17 @@
   background-color: #6a6af4;
   color: white;
   font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.finDeFormationBadge {
+  background-color: var(--beige-gris-galet-925, #eee4d9);
+  color: var(--beige-gris-galet-sun-40, #6a6156);
+  font-weight: 700;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -60,12 +71,20 @@
 
 .badgesContainer {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
+}
+
+.badgesContainer > *,
+.badgesContainerWithMargin > * {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .badgesContainerWithMargin {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 1.5rem;
 }

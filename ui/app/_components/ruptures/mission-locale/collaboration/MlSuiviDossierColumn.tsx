@@ -59,6 +59,21 @@ function buildSuiviTimeline(effectif: IEffectifMissionLocale["effectif"], ctx: {
     });
   }
 
+  if (effectif.fin_de_formation && effectif.formation?.date_fin) {
+    const date = toDate(effectif.formation.date_fin);
+    events.push({
+      date,
+      title: "Fin de formation",
+      subtext: effectif.transmitted_at
+        ? effectif.source === "DECA"
+          ? `Donnée captée depuis DECA le ${formatDate(effectif.transmitted_at)}`
+          : `Donnée transmise par le CFA le ${formatDate(effectif.transmitted_at)}`
+        : undefined,
+      tooltip: "Le jeune peut avoir terminé sa formation ou avoir quitté le CFA sans valider son diplôme.",
+      icon: "fin-de-formation",
+    });
+  }
+
   if (effectif.organisme_data?.reponse_at && effectif.organisme_data.acc_conjoint === true) {
     const date = toDate(effectif.organisme_data.reponse_at);
 
@@ -234,12 +249,19 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       event.subtext && (
                         <p className={styles.suiviEventSubtext}>
                           {event.subtext}
-                          {event.tooltip && (
-                            <>
-                              {" "}
-                              <Tooltip kind="hover" title={event.tooltip} />
-                            </>
-                          )}
+                          {event.tooltip &&
+                            (event.icon === "fin-de-formation" ? (
+                              <>
+                                {" • "}
+                                <span className={styles.suiviEventInfoLabel}>Infos</span>{" "}
+                                <Tooltip kind="hover" title={event.tooltip} />
+                              </>
+                            ) : (
+                              <>
+                                {" "}
+                                <Tooltip kind="hover" title={event.tooltip} />
+                              </>
+                            ))}
                         </p>
                       )
                     )}

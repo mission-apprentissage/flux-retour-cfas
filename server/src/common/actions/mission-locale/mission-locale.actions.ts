@@ -54,6 +54,34 @@ import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
+const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
+
+/**
+ * Expression d'agrégation : l'effectif a été "envoyé" à la Mission Locale par le CFA.
+ * Deux cas (V2 collab) :
+ *  - explicitement, via une demande de collaboration (`organisme_data.acc_conjoint`) ;
+ *  - automatiquement, pour un CFA en collab (`is_allowed_collab`) dès que la rupture
+ *    dépasse 45 jours.
+ * Dans les deux cas la ML doit voir l'effectif même s'il sortirait sinon de l'outil
+ * (jeune en fin de formation, en abandon +180j, ou non visible pour une autre raison).
+ */
+const cfaForceVisibleExpr = () => ({
+  $or: [
+    { $eq: [{ $ifNull: ["$organisme_data.acc_conjoint", false] }, true] },
+    {
+      $and: [
+        { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
+        { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
+        {
+          $lte: [
+            "$date_rupture",
+            { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
+          ],
+        },
+      ],
+    },
+  ],
+});
 
 /**
  * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
@@ -119,6 +147,20 @@ export const getAllEffectifForMissionLocaleCursor = (
 
 const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
+/**
+ * Prédicat "prioritaire" pour la Mission Locale.
+ * Une demande de collaboration du CFA (`a_risque_accompagnement_conjoint`) force le
+ * passage dans le bloc prioritaire, même si le jeune est revenu en formation
+ * (`nouveau_contrat`) ou en abandon +180j.
+ */
+const buildPrioritaireMatchOr = () => ({
+  $or: [
+    { a_contacter: true },
+    { a_risque_accompagnement_conjoint: true },
+    { $and: [{ a_risque: true }, { nouveau_contrat: false }] },
+  ],
+});
+
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
   type: "MISSION_LOCALE" | "ORGANISME_FORMATION"
@@ -133,11 +175,7 @@ const matchTraitementEffectifPipelineMl = (
       return [
         {
           $match: {
-            $and: [
-              { a_traiter: false },
-              { injoignable: true },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
+            $and: [{ a_traiter: false }, { injoignable: true }, buildPrioritaireMatchOr()],
           },
         },
       ];
@@ -145,11 +183,7 @@ const matchTraitementEffectifPipelineMl = (
       return [
         {
           $match: {
-            $and: [
-              { a_traiter: false },
-              { injoignable: false },
-              { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-            ],
+            $and: [{ a_traiter: false }, { injoignable: false }, buildPrioritaireMatchOr()],
           },
         },
       ];
@@ -166,10 +200,7 @@ const matchTraitementEffectifPipelineMl = (
         return [
           {
             $match: {
-              $and: [
-                { $or: [{ a_traiter: true }, WHATSAPP_CALLBACK_INJOIGNABLE] },
-                { $or: [{ a_contacter: true }, { $and: [{ a_risque: true }, { nouveau_contrat: false }] }] },
-              ],
+              $and: [{ $or: [{ a_traiter: true }, WHATSAPP_CALLBACK_INJOIGNABLE] }, buildPrioritaireMatchOr()],
             },
           },
         ];
@@ -227,6 +258,9 @@ const matchDernierStatutPipelineMl = (): any => {
         // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
         // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
         { situation: { $exists: true, $ne: null } },
+        // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
+        // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
+        { $expr: cfaForceVisibleExpr() },
       ],
     },
   };
@@ -304,6 +338,8 @@ const addFieldFromActivationDate = () => {
           },
         ],
       },
+      // Collab V2 : un effectif "envoyé" par le CFA reste dans la plage d'activation.
+      cfaForceVisibleExpr(),
     ],
   };
 
@@ -328,23 +364,12 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
           { $ne: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
         ],
       },
-      // Organisme collab → visible seulement après 45 jours de rupture
-      {
-        $and: [
-          { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
-          { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
-          {
-            $lte: ["$date_rupture", { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: 45 } }],
-          },
-        ],
-      },
+      // Effectif "envoyé" par le CFA : demande de collaboration (acc_conjoint)
+      // ou envoi automatique après 45j de rupture (CFA en V2 collab).
+      cfaForceVisibleExpr(),
       // Situation déjà définie → toujours visible
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
-      },
-      // Accompagnement conjoint → toujours visible
-      {
-        $eq: ["$organisme_data.acc_conjoint", true],
       },
     ],
   };
@@ -487,24 +512,30 @@ const addMissionLocaleFieldTraitementStatus = () => {
   };
 
   const A_RISQUE_CONDITION = {
-    $and: [
+    $or: [
+      // Collab V2 : une demande de collaboration du CFA force le caractère prioritaire,
+      // indépendamment d'un retour en formation ou d'une rupture de plus de 180 jours.
+      ACCOMPAGNEMENT_CONJOINT_CONDITION,
       {
-        $or: [
-          RQTH_CONDITION,
-          CONTACT_OPPORTUN_CONDITION,
-          MINEUR_CONDITION,
-          ACCOMPAGNEMENT_CONJOINT_CONDITION,
-          WHATSAPP_CALLBACK_CONDITION,
-          SOUHAITE_RDV_CONDITION,
+        $and: [
+          {
+            $or: [
+              RQTH_CONDITION,
+              MINEUR_CONDITION,
+              ACCOMPAGNEMENT_CONJOINT_CONDITION,
+              WHATSAPP_CALLBACK_CONDITION,
+              SOUHAITE_RDV_CONDITION,
+            ],
+          },
+          {
+            $or: [
+              { $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI] },
+              { $ifNull: ["$cfa_rupture_declaration", false] },
+            ],
+          },
+          RUPTURE_MOINS_DE_180_JOURS_CONDITION,
         ],
       },
-      {
-        $or: [
-          { $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI] },
-          { $ifNull: ["$cfa_rupture_declaration", false] },
-        ],
-      },
-      RUPTURE_MOINS_DE_180_JOURS_CONDITION,
     ],
   };
 
@@ -533,14 +564,8 @@ const addMissionLocaleFieldTraitementStatus = () => {
         a_risque_souhaite_rdv: {
           $cond: [SOUHAITE_RDV_CONDITION, true, false],
         },
-        a_risque_cfa_sans_mineur_rqth: {
-          $cond: [
-            {
-              $and: [ACCOMPAGNEMENT_CONJOINT_CONDITION, { $not: [MINEUR_CONDITION] }, { $not: [RQTH_CONDITION] }],
-            },
-            true,
-            false,
-          ],
+        a_risque_mineur_ou_rqth: {
+          $cond: [{ $or: [MINEUR_CONDITION, RQTH_CONDITION] }, true, false],
         },
       },
     },
@@ -604,6 +629,9 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     },
     nouveau_contrat: "$nouveau_contrat",
     current_status: "$current_status",
+    fin_de_formation: {
+      $eq: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION],
+    },
     organisme_data: "$organisme_data",
     acc_conjoint_by_user: "$contact_cfa_user",
     date_rupture: "$date_rupture",
@@ -655,12 +683,10 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
       return {
-        a_risque_souhaite_rdv: -1,
-        a_risque_mineur: -1,
-        a_risque_rqth: -1,
-        a_risque_cfa_sans_mineur_rqth: -1,
-        a_risque_whatsapp_callback: -1,
         a_risque_accompagnement_conjoint: -1,
+        a_risque_souhaite_rdv: -1,
+        a_risque_mineur_ou_rqth: -1,
+        a_risque_whatsapp_callback: -1,
         a_contacter: -1,
       };
   }

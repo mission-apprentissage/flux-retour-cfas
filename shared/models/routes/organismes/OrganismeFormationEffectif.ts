@@ -44,6 +44,10 @@ const zEffectifOrganismeFormation = z
     organisme_data: z.object(updateOrganismeFormationEffectifApi).optional(),
     current_status: zMissionLocaleEffectif.zod.shape.current_status.nullish(),
     a_contacter: z.boolean().nullish(),
+    fin_de_formation: z
+      .boolean()
+      .describe("Indique si le jeune a un statut de fin de formation (date dépassée par rapport à l'ERP)")
+      .nullish(),
   })
   .merge(zApprenantPick);
 
