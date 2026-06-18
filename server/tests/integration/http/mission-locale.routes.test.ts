@@ -1962,4 +1962,22 @@ describe("Priorité de tri de la liste prioritaire (PRIORITAIRE)", () => {
 
     expect(order.indexOf(rqthWhatsappId.toString())).toBeLessThan(order.indexOf(mineurId.toString()));
   });
+
+  it("n'affiche pas dans le bloc prioritaire un jeune retenu uniquement par le score contact opportun", async () => {
+    const contactOpportunId = await createEffectif("CONTACT_OPP");
+
+    const res = await requestAsOrganisation(
+      P_ML_DATA,
+      "get",
+      `/api/v1/organisation/mission-locale/effectifs-per-month`
+    );
+
+    // Présent dans la liste « à traiter » (donc bien visible et pris en charge)...
+    const aTraiterIds = res.data.a_traiter.flatMap((m: { data: { id: string }[] }) => m.data).map((e) => e.id);
+    expect(aTraiterIds).toContain(contactOpportunId.toString());
+
+    // ... mais absent du bloc prioritaire.
+    const prioritaireIds = (res.data.prioritaire?.effectifs ?? []).map((e: { id: string }) => e.id);
+    expect(prioritaireIds).not.toContain(contactOpportunId.toString());
+  });
 });

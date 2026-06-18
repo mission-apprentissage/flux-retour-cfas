@@ -521,7 +521,6 @@ const addMissionLocaleFieldTraitementStatus = () => {
           {
             $or: [
               RQTH_CONDITION,
-              CONTACT_OPPORTUN_CONDITION,
               MINEUR_CONDITION,
               ACCOMPAGNEMENT_CONJOINT_CONDITION,
               WHATSAPP_CALLBACK_CONDITION,

@@ -169,11 +169,6 @@ export function EffectifsPriorityTable({
                       <strong>les jeunes ayant exprimé un besoin d&apos;accompagnement (campagne mailing)</strong>
                     </li>
                     <li>
-                      <strong>
-                        les jeunes identifiés comme « Contact opportun » par l&apos;algorithme de priorisation
-                      </strong>
-                    </li>
-                    <li>
                       <strong>les jeunes ayant demandé à être recontactés via WhatsApp</strong>
                     </li>
                   </ul>
