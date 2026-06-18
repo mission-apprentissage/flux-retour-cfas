@@ -358,7 +358,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         {/* À traiter */}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
           <>
-            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-france)" }}>
               À traiter
             </h2>
             {downloadError && (

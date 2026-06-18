@@ -3,8 +3,10 @@
   background: white;
 }
 
-.backLink {
-  margin-bottom: 1.5rem;
+.detailNav {
+  margin-left: -3rem;
+  margin-right: -3rem;
+  background: var(--light-decisions-background-background-default-grey-active, #ededed);
 }
 
 @media (max-width: 991px) {

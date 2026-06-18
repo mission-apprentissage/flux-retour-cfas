@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useCallback, useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -61,15 +61,18 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
 
   return (
     <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
-      <div className={styles.backLink}>
-        <Link
-          href="/cfa"
-          className="fr-link fr-link--icon-left fr-icon-arrow-left-line"
-          onClick={() => trackPlausibleEvent("cfa_fiche_retour_liste")}
-        >
-          Retour à la liste
-        </Link>
-      </div>
+      <Breadcrumb
+        currentPageLabel={effectifName}
+        segments={[
+          {
+            label: "Collaborations avec les Missions Locales",
+            linkProps: {
+              href: "/cfa",
+              onClick: () => trackPlausibleEvent("cfa_fiche_retour_liste"),
+            },
+          },
+        ]}
+      />
 
       <div className={styles.columns}>
         <CfaEffectifInfoColumn effectif={effectif} onToggleRupture={handleToggleRupture} />
