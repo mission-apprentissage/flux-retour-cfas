@@ -56,6 +56,12 @@ export const UserConnectedHeader = () => {
     );
   };
 
+  const getSettingsUrl = () => {
+    const organisationType = user?.organisation?.type;
+    if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) return "/mission-locale/parametres";
+    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) return "/parametres";
+  };
+
   return (
     <>
       {user && (
@@ -128,7 +134,7 @@ export const UserConnectedHeader = () => {
             </MenuItem>
 
             {shouldShowSettings() && (
-              <MenuItem component="a" href="/parametres" onClick={handleClose}>
+              <MenuItem component="a" href={getSettingsUrl()} onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("ri-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

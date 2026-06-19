@@ -170,6 +170,19 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                       key={`row_${row.original.id}`}
                       className={`${isExpanded ? "table-row-expanded" : ""}`}
                       onClick={() => props.enableRowExpansion && toggleRowExpansion(row.original.id)}
+                      onKeyDown={
+                        props.enableRowExpansion
+                          ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                toggleRowExpansion(row.original.id);
+                              }
+                            }
+                          : undefined
+                      }
+                      tabIndex={props.enableRowExpansion ? 0 : undefined}
+                      role={props.enableRowExpansion ? "button" : undefined}
+                      aria-expanded={props.enableRowExpansion ? isExpanded : undefined}
                       cursor={props.enableRowExpansion ? "pointer" : "default"}
                       bg={isExpanded ? "#E3E3FD" : "inherit"}
                     >

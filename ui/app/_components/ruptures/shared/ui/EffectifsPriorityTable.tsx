@@ -141,7 +141,7 @@ export function EffectifsPriorityTable({
       {priorityData.length > 0 && (
         <div style={{ padding: "1rem" }}>
           <h3 style={{ color: "var(--text-title-blue-france)" }}>
-            Dossier à traiter en priorité ({priorityData.length})
+            Dossiers à traiter en priorité ({priorityData.length})
           </h3>
           {isMissionLocaleUser(user.organisation.type) && (
             <div style={{ marginBottom: "16px" }}>

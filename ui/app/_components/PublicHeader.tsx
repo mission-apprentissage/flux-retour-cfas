@@ -21,7 +21,7 @@ export function PublicHeader({ withNav = true }: { withNav?: boolean }) {
   const accueilMissionLocale = PAGES.static.accueilMissionLocale;
   const accueilTerritoire = PAGES.static.accueilTerritoire;
 
-  const getQuickAccesItems = (): Array<HeaderProps.QuickAccessItem> => [
+  const getQuickAccessItems = (): Array<HeaderProps.QuickAccessItem> => [
     {
       iconId: "fr-icon-add-circle-line",
       linkProps: {
@@ -102,7 +102,7 @@ export function PublicHeader({ withNav = true }: { withNav?: boolean }) {
         imgUrl: "/images/numerique_gouv.png",
         orientation: "horizontal",
       }}
-      quickAccessItems={getQuickAccesItems()}
+      quickAccessItems={getQuickAccessItems()}
       navigation={getNavigationItems()}
     />
   );

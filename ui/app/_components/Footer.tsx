@@ -3,6 +3,8 @@
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 import { CRISP_FAQ } from "shared";
 
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+
 export function Footer() {
   return (
     <DsfrFooter
@@ -10,7 +12,7 @@ export function Footer() {
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Nom de l'entité (ministère, secrétariat d'état, gouvernement)",
+        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
       }}
       contentDescription={
         <>
