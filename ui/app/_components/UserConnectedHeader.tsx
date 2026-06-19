@@ -48,6 +48,14 @@ export const UserConnectedHeader = () => {
     }
   };
 
+  const shouldShowSettings = () => {
+    const organisationType = user?.organisation?.type;
+    return (
+      organisationType === ORGANISATION_TYPE.MISSION_LOCALE ||
+      (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta)
+    );
+  };
+
   return (
     <>
       {user && (
@@ -59,11 +67,35 @@ export const UserConnectedHeader = () => {
                   style={{ fontWeight: 700 }}
                 >{`${user.prenom.charAt(0).toUpperCase()}${user.prenom.slice(1)} ${user.nom.charAt(0).toUpperCase()}.`}</span>
                 {user.organisation_nom && (
-                  <span style={{ fontSize: "0.75rem", fontWeight: 400 }}>{user.organisation_nom}</span>
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 400,
+                      maxWidth: 300,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={user.organisation_nom}
+                  >
+                    {user.organisation_nom}
+                  </span>
                 )}
               </span>
             ) : (
-              getAccountLabel(user as AuthContext)
+              <span
+                style={{
+                  display: "inline-block",
+                  maxWidth: 300,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  verticalAlign: "middle",
+                }}
+                title={getAccountLabel(user as AuthContext)}
+              >
+                {getAccountLabel(user as AuthContext)}
+              </span>
             )}
           </Button>
           <Menu
@@ -95,8 +127,17 @@ export const UserConnectedHeader = () => {
               Mon compte
             </MenuItem>
 
+            {shouldShowSettings() && (
+              <MenuItem component="a" href="/parametres" onClick={handleClose}>
+                <ListItemIcon>
+                  <i className={fr.cx("ri-settings-5-fill", "fr-icon--sm")}></i>
+                </ListItemIcon>
+                Paramètres
+              </MenuItem>
+            )}
+
             {hasRight("ROLES") && (
-              <MenuItem component="a" href="/organisation/membres" onClick={handleClose}>
+              <MenuItem component="a" href="/organisation/membres" target="_self" onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
