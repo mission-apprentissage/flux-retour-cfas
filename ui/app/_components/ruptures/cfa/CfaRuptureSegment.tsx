@@ -191,7 +191,7 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
         <p className={styles.emptyMessage}>Aucun effectif en rupture dans cette tranche.</p>
       ) : (
         <>
-          <Table headers={headers} data={data} />
+          <Table headers={headers} data={data} className={sharedStyles.hoverTable} />
           {!isExpanded && remaining > 0 && (
             <div className={styles.expandContainer}>
               <Button

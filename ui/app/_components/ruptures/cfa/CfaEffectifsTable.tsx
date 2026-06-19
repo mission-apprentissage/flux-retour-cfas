@@ -3,6 +3,7 @@
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 
 import type { ICfaEffectif } from "@/common/types/cfaRuptures";
@@ -32,6 +33,8 @@ export function CfaEffectifsTable({
   onToggleRupture,
   showNonRuptureAlerts,
 }: CfaEffectifsTableProps) {
+  const router = useRouter();
+
   if (effectifs.length === 0) {
     return <p className={styles.emptyMessage}>Aucun effectif trouvé.</p>;
   }
@@ -109,7 +112,10 @@ export function CfaEffectifsTable({
 
             return (
               <Fragment key={e.id}>
-                <tr>
+                <tr
+                  className={isOutOfRange ? undefined : sharedStyles.clickableRow}
+                  onClick={isOutOfRange ? undefined : () => router.push(`/cfa/${e.id}`)}
+                >
                   <td>
                     <div className={`${sharedStyles.nameCell} ${rowClass ?? ""}`}>
                       {isOutOfRange ? (
@@ -123,7 +129,7 @@ export function CfaEffectifsTable({
                       )}
                     </div>
                   </td>
-                  <td>
+                  <td onClick={(event) => event.stopPropagation()}>
                     <div className={`${sharedStyles.nowrapCell} ${rowClass ?? ""}`}>
                       {isOutOfRange ? (
                         <div className={sharedStyles.ruptureToggleDisabled}>
@@ -169,7 +175,7 @@ export function CfaEffectifsTable({
                       )}
                     </div>
                   </td>
-                  <td>
+                  <td onClick={(event) => event.stopPropagation()}>
                     <div className={`${sharedStyles.collabCell} ${isOutOfRange ? "" : (rowClass ?? "")}`}>
                       {isOutOfRange ? (
                         <span className={styles.outOfRangeBadge}>
