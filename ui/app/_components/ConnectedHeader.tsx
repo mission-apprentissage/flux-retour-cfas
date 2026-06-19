@@ -4,6 +4,7 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
 import { useAuth } from "../_context/UserContext";
@@ -285,26 +286,6 @@ export function ConnectedHeader() {
       text: "Glossaire",
     });
 
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) {
-      baseItems.push({
-        text: "Paramètres",
-        linkProps: {
-          href: "/parametres",
-          target: "_self",
-        },
-      });
-    }
-
-    if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
-      baseItems.push({
-        text: "Paramètres",
-        linkProps: {
-          href: "/mission-locale/parametres",
-          target: "_self",
-        },
-      });
-    }
-
     if (!isCfaWithMlBeta) {
       baseItems.push({
         text: "Aide et ressources",
@@ -320,10 +301,10 @@ export function ConnectedHeader() {
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Nom de l'entité (ministère, secrétariat d'état, gouvernement)",
+        title: `Accueil - ${PRODUCT_NAME_TITLE} (ministère, secrétariat d'état, gouvernement)`,
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
+      serviceTitle={PRODUCT_NAME_TITLE}
       quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
       navigation={getNavigationItems()}
     />

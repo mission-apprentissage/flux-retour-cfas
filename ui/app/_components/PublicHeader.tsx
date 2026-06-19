@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { CRISP_FAQ } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") {
@@ -27,7 +28,12 @@ export function PublicHeader() {
         title: "Accueil - Tableau de bord de l'apprentissage",
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
+      serviceTitle={PRODUCT_NAME_TITLE}
+      operatorLogo={{
+        alt: "Un service proposé par numerique.gouv",
+        imgUrl: "/images/numerique_gouv.png",
+        orientation: "horizontal",
+      }}
       quickAccessItems={[
         {
           iconId: "fr-icon-add-circle-line",
