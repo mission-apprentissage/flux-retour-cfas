@@ -176,18 +176,7 @@ export async function calculateStartDateAsync(period: StatsPeriod, referenceDate
 }
 
 export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
-  $add: [
-    { $ifNull: [`${statsPath}.rdv_pris`, 0] },
-    { $ifNull: [`${statsPath}.nouveau_projet`, 0] },
-    { $ifNull: [`${statsPath}.contacte_sans_retour`, 0] },
-    { $ifNull: [`${statsPath}.injoignables`, 0] },
-    { $ifNull: [`${statsPath}.coordonnees_incorrectes`, 0] },
-    { $ifNull: [`${statsPath}.autre_avec_contact`, 0] },
-    { $ifNull: [`${statsPath}.cherche_contrat`, 0] },
-    { $ifNull: [`${statsPath}.reorientation`, 0] },
-    { $ifNull: [`${statsPath}.ne_veut_pas_accompagnement`, 0] },
-    { $ifNull: [`${statsPath}.ne_souhaite_pas_etre_recontacte`, 0] },
-  ],
+  $ifNull: [`${statsPath}.traite`, 0],
 });
 
 /**
