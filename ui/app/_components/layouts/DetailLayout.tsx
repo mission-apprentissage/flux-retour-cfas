@@ -1,8 +1,8 @@
 import { getSession } from "../../_utils/session.utils";
 import { Providers } from "../../providers";
+import { ConnectedHeader } from "../ConnectedHeader";
 import { UserContextProvider } from "../context/UserContext";
 import { Footer } from "../Footer";
-import { PublicHeaderWithoutAuth } from "../PublicHeaderWithoutAuth";
 
 export async function DetailLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
@@ -11,7 +11,7 @@ export async function DetailLayout({ children }: { children: React.ReactNode }) 
     <Providers>
       <UserContextProvider user={user}>
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <PublicHeaderWithoutAuth />
+          <ConnectedHeader withNav={false} />
           <div
             style={{
               flex: 1,

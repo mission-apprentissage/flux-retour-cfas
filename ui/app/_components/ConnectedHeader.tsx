@@ -14,7 +14,7 @@ import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
-export function ConnectedHeader() {
+export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const { user } = useAuth();
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -43,6 +43,8 @@ export function ConnectedHeader() {
   };
 
   const getNavigationItems = () => {
+    if (!withNav) return undefined;
+
     const organisationType = user?.organisation?.type;
     const baseItems: any[] = [];
 
