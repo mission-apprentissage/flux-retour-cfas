@@ -11,7 +11,7 @@ import { create as createMigration, status as statusMigration, up as upMigration
 
 import { verifyMissionLocaleEffectifMail } from "./bal/bal.job";
 import { scoreExistingEffectifs } from "./classifier/score-effectifs";
-import { purgeQueues } from "./clear/purge-queues";
+import { purgeOrphanQueues, purgeQueues } from "./clear/purge-queues";
 import { updateComputedFields } from "./computed/update-computed";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
@@ -429,6 +429,16 @@ export async function setupJobProcessor() {
       "purge:queues": {
         handler: async (job) => {
           return purgeQueues((job.payload as any)?.nbDaysToKeep);
+        },
+      },
+      "clear:queue-orphans": {
+        handler: async (job) => {
+          const payload = (job.payload as any) ?? {};
+          return purgeOrphanQueues({
+            nbDaysToKeep: payload.nbDaysToKeep,
+            batchSize: payload.batchSize,
+            sleepMs: payload.sleepMs,
+          });
         },
       },
       "fiabilisation:uai-siret:run": {

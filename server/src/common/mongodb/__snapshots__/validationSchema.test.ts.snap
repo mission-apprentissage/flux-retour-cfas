@@ -12404,6 +12404,10 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
     "_id": {
       "bsonType": "objectId",
     },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création de la session (support du TTL)",
+    },
     "jwt": {
       "bsonType": "string",
       "description": "Session token",
@@ -12412,6 +12416,7 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
   "required": [
     "_id",
     "jwt",
+    "created_at",
   ],
 }
 `;
@@ -19756,21 +19761,6 @@ exports[`validation-schema > should create validation schema for organisations >
 }
 `;
 
-exports[`validation-schema > should create validation schema for organismeV2 > organismeV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-  },
-  "required": [
-    "_id",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for organismes > organismes 1`] = `
 {
   "additionalProperties": false,
@@ -20993,21 +20983,6 @@ exports[`validation-schema > should create validation schema for transmissionDai
     "success_count",
     "error_count",
     "current_day",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for transmissionV2 > transmissionV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-  },
-  "required": [
-    "_id",
   ],
 }
 `;

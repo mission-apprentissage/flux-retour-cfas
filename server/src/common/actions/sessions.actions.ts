@@ -5,7 +5,7 @@ import { createUserTokenSimple } from "@/common/utils/jwtUtils";
 
 export async function createSession(email: string, additionalProperties?: Record<string, any>): Promise<string> {
   const token = createUserTokenSimple({ payload: { email, ...additionalProperties } });
-  await jwtSessionsDb().insertOne({ _id: new ObjectId(), jwt: token });
+  await jwtSessionsDb().insertOne({ _id: new ObjectId(), jwt: token, created_at: new Date() });
   return token;
 }
 

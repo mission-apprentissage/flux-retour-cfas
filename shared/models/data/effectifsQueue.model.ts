@@ -18,13 +18,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1 }, { name: "organisme_id" }],
   [{ processed_at: 1 }, { name: "processed_at" }],
   [{ created_at: 1 }, { name: "created_at" }],
-  [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
-  [{ source: 1 }, { name: "source" }],
   [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
-  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
-  [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
-  [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
-  [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
 ];
 
