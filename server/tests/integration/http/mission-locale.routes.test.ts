@@ -62,6 +62,8 @@ describe("Mission Locale Routes", () => {
   describe("CFA non activé", () => {
     it("La ML doit voir le nouvel effectif", async () => {
       const payload = createRupturantEffectifPayload({
+        // L'organisme formateur déclaré est le propriétaire de la clé API : transmission autorisée.
+        source_organisme_id: ORGANISME_ID.toString(),
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
@@ -94,6 +96,8 @@ describe("Mission Locale Routes", () => {
       });
 
       const payload = createRupturantEffectifPayload({
+        // L'organisme formateur déclaré est le propriétaire de la clé API : transmission autorisée.
+        source_organisme_id: ORGANISME_ID.toString(),
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
@@ -155,6 +159,8 @@ describe("Mission Locale Routes", () => {
       );
 
       const payload = createRupturantEffectifPayload({
+        // L'organisme formateur déclaré est le propriétaire de la clé API : transmission autorisée.
+        source_organisme_id: ORGANISME_ID.toString(),
         etablissement_formateur_uai: UAI,
         etablissement_formateur_siret: SIRET,
         etablissement_responsable_uai: UAI,
@@ -1718,6 +1724,7 @@ describe("Classifier Feedback Routes", () => {
 
     // Create an effectif via the normal flow
     const payload = createRupturantEffectifPayload({
+      source_organisme_id: CF_ORGANISME_ID.toString(),
       etablissement_formateur_uai: "0802004U",
       etablissement_formateur_siret: "77937827200016",
       etablissement_responsable_uai: "0802004U",

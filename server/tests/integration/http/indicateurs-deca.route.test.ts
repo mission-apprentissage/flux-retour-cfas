@@ -82,7 +82,7 @@ const createEff = (org) => ({
   id_erp_apprenant: new ObjectId().toString(),
   api_version: "v3",
   source: SOURCE_APPRENANT.FICHIER,
-  source_organisme_id: getRandomSourceOrganismeId(),
+  source_organisme_id: org._id.toString(),
   date_inscription_formation: `2023-09-01T00:00:00.000Z`,
   date_entree_formation: `2023-09-01T00:00:00.000Z`,
   date_fin_formation: `2024-06-30T00:00:00.000Z`,
