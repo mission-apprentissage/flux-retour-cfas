@@ -27,6 +27,7 @@ import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
+import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
@@ -379,6 +380,9 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
       organisationLabel: await buildOrganisationLabel(user.organisation_id),
     }
   );
+
+  // Le compte passe à CONFIRMED : on synchronise le contact Brevo.
+  await enqueueBrevoContactSync(user._id);
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {

@@ -295,18 +295,6 @@ describe("tbaContactsContactList", () => {
       expect(contacts).toEqual([]);
     });
 
-    it("exclut un user non CONFIRMED", async () => {
-      const orgaOf = buildOrgaOf();
-      const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf, { account_status: "PENDING_EMAIL_VALIDATION" }) as any);
-
-      const contacts = await tbaContactsContactList.fetchContacts();
-
-      expect(contacts).toEqual([]);
-    });
-
     it("exclut un user ADMINISTRATEUR (compte interne TBA)", async () => {
       const orgaAdmin = {
         _id: new ObjectId(),
@@ -317,6 +305,59 @@ describe("tbaContactsContactList", () => {
       await usersMigrationDb().insertOne(buildUser(orgaAdmin) as any);
 
       const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toEqual([]);
+    });
+  });
+
+  describe("fetchContacts - statuts de compte", () => {
+    it("inclut les 3 statuts (CONFIRMED, PENDING_ADMIN_VALIDATION, PENDING_EMAIL_VALIDATION) et reflète STATUT_COMPTE_USER", async () => {
+      const orgaOf = buildOrgaOf();
+      const organisme = buildOrganisme(orgaOf);
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      await usersMigrationDb().insertMany([
+        buildUser(orgaOf, { account_status: "CONFIRMED" }) as any,
+        buildUser(orgaOf, { account_status: "PENDING_ADMIN_VALIDATION" }) as any,
+        buildUser(orgaOf, { account_status: "PENDING_EMAIL_VALIDATION" }) as any,
+        // exclus malgré un statut valide
+        buildUser(orgaOf, { account_status: "CONFIRMED", unsubscribe: true }) as any,
+      ]);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(3);
+      expect(new Set(contacts.map((c) => c.attributes.STATUT_COMPTE_USER))).toEqual(
+        new Set(["CONFIRMED", "PENDING_ADMIN_VALIDATION", "PENDING_EMAIL_VALIDATION"])
+      );
+    });
+  });
+
+  describe("fetchContacts - filtre unitaire (userIds)", () => {
+    it("ne renvoie que les utilisateurs ciblés", async () => {
+      const orgaOf = buildOrgaOf();
+      const organisme = buildOrganisme(orgaOf);
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      const user1 = buildUser(orgaOf);
+      const user2 = buildUser(orgaOf);
+      await usersMigrationDb().insertMany([user1 as any, user2 as any]);
+
+      const contacts = await tbaContactsContactList.fetchContacts({ userIds: [user1._id] });
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].email).toBe(user1.email.toLowerCase());
+    });
+
+    it("renvoie un tableau vide si l'utilisateur ciblé est hors-périmètre (unsubscribe)", async () => {
+      const orgaOf = buildOrgaOf();
+      const organisme = buildOrganisme(orgaOf);
+      await organisationsDb().insertOne(orgaOf as any);
+      await organismesDb().insertOne(organisme as any);
+      const user = buildUser(orgaOf, { unsubscribe: true });
+      await usersMigrationDb().insertOne(user as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts({ userIds: [user._id] });
 
       expect(contacts).toEqual([]);
     });

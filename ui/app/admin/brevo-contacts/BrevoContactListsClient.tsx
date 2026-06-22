@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import styles from "./brevo-contacts.module.scss";
 import { BrevoContactListCard } from "./BrevoContactListCard";
 import { BrevoHealthBanner } from "./BrevoHealthBanner";
+import { BrevoSyncSettingsPanel } from "./BrevoSyncSettingsPanel";
 import { type ContactListSummary, useBrevoContactLists } from "./hooks/useBrevoContactLists";
 import { type SampleContact } from "./hooks/useBrevoContactListSync";
 
@@ -56,6 +57,8 @@ export function BrevoContactListsClient() {
       <p className={styles.intro}>Génération et synchronisation des utilisateurs vers les contacts Brevo.</p>
 
       <BrevoHealthBanner />
+
+      <BrevoSyncSettingsPanel />
 
       {error ? (
         <Alert

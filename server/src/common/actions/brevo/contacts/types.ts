@@ -1,4 +1,13 @@
+import { ObjectId } from "bson";
+
 import { BrevoContact } from "@/common/services/brevo/brevo";
+
+/**
+ * Filtre optionnel passé à `fetchContacts`. Sans filtre → synchro full
+ * (comportement historique). Avec `userIds` → synchro ciblée (unitaire),
+ * pour la synchro instantanée d'un compte.
+ */
+export type FetchContactsFilter = { userIds?: ObjectId[] };
 
 export type ContactListUtm = {
   source: string;
@@ -24,5 +33,5 @@ export interface ContactListDefinition {
   brevoListId?: number;
   buildListName: () => string;
   attributesSchema: ContactListAttributesSchema;
-  fetchContacts: () => Promise<BrevoContact[]>;
+  fetchContacts: (filter?: FetchContactsFilter) => Promise<BrevoContact[]>;
 }

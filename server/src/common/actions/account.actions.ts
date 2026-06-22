@@ -20,6 +20,7 @@ import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
 
+import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
@@ -90,6 +91,7 @@ export async function register(registration: RegistrationSchema): Promise<{
     );
     await invitationsArchiveDb().insertOne(invitation);
     await invitationsDb().deleteOne({ _id: invitation._id });
+    await enqueueBrevoContactSync(userId);
     return {
       account_status: "CONFIRMED",
     };
@@ -105,6 +107,8 @@ export async function register(registration: RegistrationSchema): Promise<{
     });
 
     await usersMigrationDb().updateOne({ _id: userId }, { $set: { last_activation_email_sent_at: new Date() } });
+
+    await enqueueBrevoContactSync(userId);
 
     return {
       account_status: "PENDING_EMAIL_VALIDATION",
@@ -202,6 +206,10 @@ export async function activateUser(ctx: AuthContext) {
         organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
       });
     }
+
+    // Le statut vient de changer (→ CONFIRMED ou PENDING_ADMIN_VALIDATION) : on
+    // synchronise le contact Brevo. `ctx._id` car `activateUser` n'a pas de `userId`.
+    await enqueueBrevoContactSync(ctx._id);
   }
 
   // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
@@ -326,6 +334,10 @@ export async function registerCfa(data: RegistrationCfaSchema): Promise<{
   });
 
   await usersMigrationDb().updateOne({ _id: userId }, { $set: { last_activation_email_sent_at: new Date() } });
+
+  if (userId) {
+    await enqueueBrevoContactSync(userId);
+  }
 
   return { account_status: "PENDING_EMAIL_VALIDATION" };
 }

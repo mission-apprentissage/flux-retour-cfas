@@ -22,6 +22,26 @@
   gap: 1rem;
 }
 
+// ============================================================================
+// Panneau de pilotage de la synchronisation (toggles)
+// ============================================================================
+
+.settingsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--background-default-grey, #fff);
+  border: 1px solid var(--border-default-grey, #ddd);
+}
+
+.settingsTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--light-decisions-text-text-title-grey, #161616);
+}
+
 .empty,
 .loading {
   padding: 2rem;
