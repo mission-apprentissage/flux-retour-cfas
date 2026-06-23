@@ -4,6 +4,12 @@
   flex-direction: column;
 }
 
+.breadcrumb {
+  margin: 0.5rem;
+  margin-top: -1rem;
+  margin-left: -1rem;
+}
+
 .columns {
   display: grid;
   grid-template-columns: 1fr 1.7fr 1.3fr;

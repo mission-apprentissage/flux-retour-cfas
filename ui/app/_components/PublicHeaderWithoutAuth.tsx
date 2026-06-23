@@ -1,15 +1,17 @@
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+
 export function PublicHeaderWithoutAuth() {
   return (
     <DsfrHeader
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Tableau de bord de l'apprentissage",
+        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
+      serviceTitle={PRODUCT_NAME_TITLE}
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { ICfaEffectif } from "@/common/types/cfaRuptures";
 
@@ -20,6 +21,8 @@ interface CfaCollaborationsTableProps {
 }
 
 export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCollaborationsTableProps) {
+  const router = useRouter();
+
   if (effectifs.length === 0) {
     return <p className={styles.emptyMessage}>Aucun dossier trouvé.</p>;
   }
@@ -64,10 +67,26 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
         </thead>
         <tbody>
           {effectifs.map((e) => (
-            <tr key={e.id}>
+            <tr
+              key={e.id}
+              className={sharedStyles.clickableRow}
+              onClick={() => router.push(`/cfa/${e.id}`)}
+              onKeyDown={(event) => {
+                // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
+                if (event.target !== event.currentTarget) return;
+                if (event.key === "Enter") router.push(`/cfa/${e.id}`);
+              }}
+              tabIndex={0}
+              role="link"
+              aria-label={`Voir le dossier de ${e.prenom} ${e.nom}`}
+            >
               <td>
                 <div className={sharedStyles.nameCell}>
-                  <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
+                  <Link
+                    href={`/cfa/${e.id}`}
+                    className={sharedStyles.nameText}
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     {e.prenom} {e.nom}
                   </Link>
                   {e.has_unread_notification && (
@@ -91,7 +110,7 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
                   {e.date_rupture ? <DateRuptureCell dateStr={e.date_rupture} /> : <span>—</span>}
                 </div>
               </td>
-              <td>
+              <td onClick={(event) => event.stopPropagation()}>
                 <div className={sharedStyles.collabCell}>
                   {e.collab_status && <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />}
                 </div>

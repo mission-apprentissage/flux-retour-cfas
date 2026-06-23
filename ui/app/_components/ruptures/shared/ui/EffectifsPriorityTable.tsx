@@ -139,8 +139,10 @@ export function EffectifsPriorityTable({
       )}
 
       {priorityData.length > 0 && (
-        <>
-          <PriorityBadge priorityData={priorityData} listType={listType} />
+        <div style={{ padding: "1rem" }}>
+          <h3 style={{ color: "var(--text-title-blue-france)" }}>
+            Dossiers à traiter en priorité ({priorityData.length})
+          </h3>
           {isMissionLocaleUser(user.organisation.type) && (
             <div style={{ marginBottom: "16px" }}>
               <DsfrLink
@@ -218,7 +220,7 @@ export function EffectifsPriorityTable({
               </Button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

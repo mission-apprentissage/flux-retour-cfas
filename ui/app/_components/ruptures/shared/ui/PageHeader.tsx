@@ -64,7 +64,11 @@ export function PageHeader({
   return (
     <div className={styles.pageHeaderContainer}>
       {previous ? (
-        <DsfrLink href={getHref(previous.id)} arrow="none" className="fr-link--icon-left fr-icon-arrow-left-s-line">
+        <DsfrLink
+          href={getHref(previous.id)}
+          arrow="none"
+          className={`fr-link--icon-left fr-icon-arrow-left-s-line ${styles.pageHeaderLink}`}
+        >
           Précédent
         </DsfrLink>
       ) : (
@@ -95,7 +99,11 @@ export function PageHeader({
       </div>
 
       {next ? (
-        <DsfrLink href={getHref(next.id)} arrow="none" className="fr-link--icon-right fr-icon-arrow-right-s-line">
+        <DsfrLink
+          href={getHref(next.id)}
+          arrow="none"
+          className={`fr-link--icon-right fr-icon-arrow-right-s-line ${styles.pageHeaderLink}`}
+        >
           Suivant
         </DsfrLink>
       ) : (

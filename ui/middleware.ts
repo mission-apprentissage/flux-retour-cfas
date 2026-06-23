@@ -160,6 +160,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/decommissionnement", request.url));
   }
 
+  // Hub unifié compte + paramètres : accessible à toute typologie authentifiée.
+  if (pathname === "/compte" || pathname.startsWith("/compte/")) {
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next(requestNextData);
+  }
+
   if (pathname === "/parametres") {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));

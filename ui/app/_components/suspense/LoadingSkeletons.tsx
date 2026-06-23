@@ -15,6 +15,16 @@ export function TableSkeleton() {
   );
 }
 
+export function ContentSkeleton() {
+  return (
+    <div className="fr-container">
+      <Skeleton animation="wave" variant="rectangular" width="40%" height={32} sx={{ mb: 3 }} />
+      <Skeleton animation="wave" variant="rectangular" width="100%" height={56} sx={{ mb: 2, maxWidth: 720 }} />
+      <Skeleton animation="wave" variant="rectangular" width={160} height={40} />
+    </div>
+  );
+}
+
 export function PageWithSidebarSkeleton() {
   return (
     <Grid container spacing={2}>

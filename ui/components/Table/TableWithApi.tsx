@@ -14,7 +14,6 @@ import { Fragment, useState, useMemo } from "react";
 import { IPaginationFilters } from "shared/models/routes/pagination";
 
 import { FirstPageIcon, LastPageIcon } from "@/modules/dashboard/icons";
-import { AddFill, SubtractLine } from "@/theme/components/icons";
 
 const DEFAULT_COL_SIZE = 220;
 
@@ -104,6 +103,7 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
           <Thead>
             {table.getHeaderGroups().map((headerGroup, index) => (
               <Tr key={`headerGroup_${index}`}>
+                {props.enableRowExpansion && <Th width="48px" minWidth="48px" />}
                 {headerGroup.headers.map((header, headerIndex) => {
                   const columnId =
                     "accessorKey" in header.column.columnDef ? header.column.columnDef.accessorKey : header.column.id;
@@ -150,7 +150,6 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                     </Th>
                   );
                 })}
-                {props.enableRowExpansion && <Th />}
               </Tr>
             ))}
           </Thead>
@@ -170,10 +169,44 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                     <Tr
                       key={`row_${row.original.id}`}
                       className={`${isExpanded ? "table-row-expanded" : ""}`}
-                      onClick={() => props.enableRowExpansion && toggleRowExpansion(row.original.id)}
+                      onClick={(e) => {
+                        if (!props.enableRowExpansion) return;
+                        // Ne pas basculer l'expansion quand le clic provient d'un élément interactif de la ligne
+                        // (lien, bouton…) : on le laisse gérer sa propre action.
+                        if ((e.target as HTMLElement).closest("a, button, input, select, textarea, label")) return;
+                        toggleRowExpansion(row.original.id);
+                      }}
+                      onKeyDown={
+                        props.enableRowExpansion
+                          ? (e) => {
+                              // N'agir que lorsque la ligne elle-même a le focus, pas un contrôle interne :
+                              // sinon Espace/Entrée sur un lien/bouton interne déclencherait l'expansion et
+                              // preventDefault() annulerait l'action attendue (navigation, scroll).
+                              if (e.target !== e.currentTarget) return;
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                toggleRowExpansion(row.original.id);
+                              }
+                            }
+                          : undefined
+                      }
+                      tabIndex={props.enableRowExpansion ? 0 : undefined}
+                      role={props.enableRowExpansion ? "button" : undefined}
+                      aria-expanded={props.enableRowExpansion ? isExpanded : undefined}
                       cursor={props.enableRowExpansion ? "pointer" : "default"}
                       bg={isExpanded ? "#E3E3FD" : "inherit"}
                     >
+                      {props.enableRowExpansion && (
+                        <Td width="48px" minWidth="48px" px={3} textAlign="center">
+                          <ChevronRightIcon
+                            boxSize={5}
+                            color="bluefrance"
+                            transform={isExpanded ? "rotate(90deg)" : "rotate(0deg)"}
+                            transition="transform 0.2s ease"
+                            aria-hidden="true"
+                          />
+                        </Td>
+                      )}
                       {row.getVisibleCells().map((cell, cellIndex) => {
                         const columnId =
                           "accessorKey" in cell.column.columnDef ? cell.column.columnDef.accessorKey : cell.column.id;
@@ -196,24 +229,6 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                           </Td>
                         );
                       })}
-                      {props.enableRowExpansion && (
-                        <Td>
-                          <Flex justifyContent="end">
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRowExpansion(row.original.id);
-                              }}
-                            >
-                              {isExpanded ? (
-                                <SubtractLine fontSize="12px" color="bluefrance" />
-                              ) : (
-                                <AddFill fontSize="12px" color="bluefrance" />
-                              )}
-                            </Button>
-                          </Flex>
-                        </Td>
-                      )}
                     </Tr>
 
                     {isExpanded && props.renderSubComponent && (

@@ -49,10 +49,11 @@ function ContactCfaButton({
   );
 }
 
-function CfaCard({ effectif, minimal }: { effectif: IEffectifMissionLocale["effectif"]; minimal?: boolean }) {
+function CfaCard({ effectif }: { effectif: IEffectifMissionLocale["effectif"] }) {
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "CFA non renseigné";
   const commune = effectif.organisme?.adresse?.commune;
   const codePostal = effectif.organisme?.adresse?.code_postal;
+  const isTdbUser = !!effectif.organisme?.ml_beta_activated_at;
 
   return (
     <div className={styles.mlCallOut}>
@@ -60,9 +61,13 @@ function CfaCard({ effectif, minimal }: { effectif: IEffectifMissionLocale["effe
       {(commune || codePostal) && (
         <p className={styles.mlCallOutLocation}>{[commune, codePostal].filter(Boolean).join(" ")}</p>
       )}
-      {!minimal && !!effectif.organisme?.ml_beta_activated_at && (
+      {isTdbUser ? (
         <Badge as="span" severity="success">
           Utilise le Tableau de bord
+        </Badge>
+      ) : (
+        <Badge as="span" severity="error">
+          N&apos;utilise pas encore le Tableau de bord
         </Badge>
       )}
     </div>
@@ -122,7 +127,7 @@ export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) 
             <p className={styles.collabQuestion}>
               Le CFA formateur de ce jeune n&apos;est pas encore utilisateur du Tableau de bord de l&apos;apprentissage.
             </p>
-            <CfaCard effectif={effectif} minimal />
+            <CfaCard effectif={effectif} />
           </>
         )}
       </div>

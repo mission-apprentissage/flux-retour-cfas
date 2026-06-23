@@ -188,7 +188,7 @@ function MineurBadge({ iconSize, fontSize }: { iconSize: string; fontSize: strin
     <span className="fr-badge fr-badge--red" aria-label="Effectif mineur">
       <i className={`fr-icon-fire-fill ${iconSize}`} aria-hidden="true" />
       <span className={styles.badgeTextSpacing} style={{ fontSize }}>
-        {"16-18 ANS"}
+        {"Mineur"}
       </span>
     </span>
   );

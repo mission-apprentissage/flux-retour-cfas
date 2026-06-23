@@ -17,6 +17,18 @@
   flex: 1;
 }
 
+.mlHeaderContent h1 {
+  color: var(--light-primary-blue-france-sun-113, #000091) !important;
+}
+
+.mlHeaderContentSubtext {
+  color: var(--light-decisions-text-text-mention-grey, #666);
+}
+
+.mlHeaderContentSubtext a {
+  color: var(--light-primary-blue-france-sun-113, #000091) !important;
+}
+
 .mlHeaderActions {
   display: flex;
   flex-direction: row;

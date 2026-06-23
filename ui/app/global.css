@@ -74,3 +74,47 @@
   --hover: var(--text-default-success);
   --active: var(--text-default-success);
 }
+
+.fr-header__operator img {
+  width: auto !important;
+  max-width: none !important;
+  height: 4rem !important;
+}
+
+@media (min-width: 62em) {
+  .fr-header__brand-top {
+    display: contents;
+  }
+  .fr-header__service {
+    order: 1;
+  }
+  .fr-header__operator {
+    order: 2;
+  }
+}
+
+/* Titre du service sur 2 lignes, comme la maquette (largeur de ~176px). */
+.fr-header__service-title {
+  max-width: 11rem;
+}
+
+.fr-text--blue-france {
+  color: var(--text-title-blue-france);
+}
+
+.footer-operator-logo {
+  display: block;
+  height: 4rem;
+  width: auto;
+  margin-left: auto;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 61.99em) {
+  .fr-header__operator {
+    display: none;
+  }
+  .footer-operator-logo {
+    margin-left: 0;
+  }
+}

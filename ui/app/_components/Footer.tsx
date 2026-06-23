@@ -3,6 +3,8 @@
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 import { CRISP_FAQ } from "shared";
 
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+
 export function Footer() {
   return (
     <DsfrFooter
@@ -10,16 +12,22 @@ export function Footer() {
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Nom de l'entité (ministère, secrétariat d'état, gouvernement)",
+        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
       }}
       contentDescription={
-        <>Cette plateforme est proposée par le Ministère du Travail, de la Santé, des Solidarités et des Familles.</>
+        <>
+          <img
+            src="/images/numerique_gouv.png"
+            alt="Un service proposé par numerique.gouv"
+            className="footer-operator-logo"
+          />
+          Mandatée par le Ministère du Travail, de l&apos;Emploi et de l&apos;Insertion, le Ministère de la
+          Transformation et de la Fonction publiques, le Ministère de l&apos;Éducation Nationale, de la Jeunesse et des
+          Sports, le Ministère de la Recherche, de l&apos;Enseignement Supérieur et de l&apos;Innovation, la Mission
+          interministérielle pour l&apos;apprentissage développe plusieurs services destinés à faciliter les entrées en
+          apprentissage.
+        </>
       }
-      operatorLogo={{
-        alt: "France relance",
-        imgUrl: "/images/france_relance.svg",
-        orientation: "vertical",
-      }}
       bottomItems={[
         {
           text: "Plan du site",

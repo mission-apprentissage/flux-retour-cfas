@@ -1,29 +1,11 @@
-import { Box, Flex } from "@chakra-ui/react";
-import Head from "next/head";
-import React from "react";
+import { GetServerSideProps } from "next";
 
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
-import NavigationCompte from "@/modules/mon-compte/NavigationCompte";
-import ProfileInformation from "@/modules/mon-compte/ProfileInformation";
+// « Mon compte » est désormais regroupé dans le hub unifié /compte (App Router).
+// On redirige côté serveur (307, sans flash) ; l'authentification est gérée par le middleware sur /compte.
+export const getServerSideProps: GetServerSideProps = async () => ({
+  redirect: { destination: "/compte", permanent: false },
+});
 
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
-
-const ProfilePage = () => {
-  return (
-    <Page>
-      <Head>
-        <title>Mon compte</title>
-      </Head>
-      <Flex>
-        <NavigationCompte />
-        <Box w="100%" pt={[4, 8]} mb={5}>
-          <ProfileInformation />
-        </Box>
-      </Flex>
-    </Page>
-  );
-};
-
-export default withAuth(ProfilePage);
+export default function MonComptePage() {
+  return null;
+}

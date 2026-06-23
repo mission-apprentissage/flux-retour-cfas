@@ -1,12 +1,11 @@
-import { withSharedStyles } from "./withSharedStyles";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 
-const styles = withSharedStyles({});
-
+// Tag « partie distante pas encore utilisatrice du Tableau de bord ».
+// Symétrique du tag affiché côté ML pour un CFA non utilisateur (même style DSFR error, même libellé).
 export function MlInactiveBadge() {
   return (
-    <p className={styles.mlInactiveBadge}>
-      <span className="fr-icon-information-fill fr-icon--sm" aria-hidden="true" />
-      Inactive sur le Tableau de bord
-    </p>
+    <Badge as="span" severity="error">
+      N&apos;utilise pas encore le Tableau de bord
+    </Badge>
   );
 }

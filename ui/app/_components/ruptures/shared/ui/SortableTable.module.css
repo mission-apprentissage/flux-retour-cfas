@@ -27,6 +27,19 @@
   color: var(--border-default-grey);
 }
 
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow td {
+  transition: background-color 0.2s ease;
+}
+
+.clickableRow:hover td,
+.clickableRow:focus-within td {
+  background-color: var(--background-alt-blue-france) !important;
+}
+
 .nameCell {
   display: inline-flex;
   align-items: baseline;
