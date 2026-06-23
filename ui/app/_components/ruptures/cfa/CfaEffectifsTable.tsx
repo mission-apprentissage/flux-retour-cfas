@@ -115,6 +115,18 @@ export function CfaEffectifsTable({
                 <tr
                   className={isOutOfRange ? undefined : sharedStyles.clickableRow}
                   onClick={isOutOfRange ? undefined : () => router.push(`/cfa/${e.id}`)}
+                  onKeyDown={
+                    isOutOfRange
+                      ? undefined
+                      : (event) => {
+                          // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
+                          if (event.target !== event.currentTarget) return;
+                          if (event.key === "Enter") router.push(`/cfa/${e.id}`);
+                        }
+                  }
+                  tabIndex={isOutOfRange ? undefined : 0}
+                  role={isOutOfRange ? undefined : "link"}
+                  aria-label={isOutOfRange ? undefined : `Voir le dossier de ${e.prenom} ${e.nom}`}
                 >
                   <td>
                     <div className={`${sharedStyles.nameCell} ${rowClass ?? ""}`}>

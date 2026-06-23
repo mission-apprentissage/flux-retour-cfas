@@ -35,15 +35,8 @@
   transition: background-color 0.2s ease;
 }
 
-.clickableRow:hover td {
-  background-color: var(--background-alt-blue-france) !important;
-}
-
-.hoverTable tbody td {
-  transition: background-color 0.2s ease;
-}
-
-.hoverTable tbody tr:hover td {
+.clickableRow:hover td,
+.clickableRow:focus-within td {
   background-color: var(--background-alt-blue-france) !important;
 }
 

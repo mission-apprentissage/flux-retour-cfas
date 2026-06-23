@@ -169,10 +169,20 @@ function TableWithApi<T>(props: TableWithApiProps<T & { id: string; prominent?: 
                     <Tr
                       key={`row_${row.original.id}`}
                       className={`${isExpanded ? "table-row-expanded" : ""}`}
-                      onClick={() => props.enableRowExpansion && toggleRowExpansion(row.original.id)}
+                      onClick={(e) => {
+                        if (!props.enableRowExpansion) return;
+                        // Ne pas basculer l'expansion quand le clic provient d'un élément interactif de la ligne
+                        // (lien, bouton…) : on le laisse gérer sa propre action.
+                        if ((e.target as HTMLElement).closest("a, button, input, select, textarea, label")) return;
+                        toggleRowExpansion(row.original.id);
+                      }}
                       onKeyDown={
                         props.enableRowExpansion
                           ? (e) => {
+                              // N'agir que lorsque la ligne elle-même a le focus, pas un contrôle interne :
+                              // sinon Espace/Entrée sur un lien/bouton interne déclencherait l'expansion et
+                              // preventDefault() annulerait l'action attendue (navigation, scroll).
+                              if (e.target !== e.currentTarget) return;
                               if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
                                 toggleRowExpansion(row.original.id);
