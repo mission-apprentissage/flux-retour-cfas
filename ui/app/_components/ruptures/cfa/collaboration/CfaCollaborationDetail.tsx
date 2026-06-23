@@ -31,10 +31,12 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const pageRef = useRef<HTMLDivElement>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
+  // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
+  // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
   useEffect(() => {
     pageRef.current?.scrollIntoView({ behavior: "instant" });
     trackPlausibleEvent("cfa_fiche_ouverte", undefined, { effectifId: String(effectif.id) });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleRupture = useCallback(() => {
     if (effectif.date_rupture) {
@@ -72,6 +74,7 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
             },
           },
         ]}
+        className={styles.breadcrumb}
       />
 
       <div className={styles.columns}>

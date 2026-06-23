@@ -57,13 +57,15 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
 
   const { label: listLabel, href: listHref } = getMlListInfo(effectif, nomListe);
 
+  // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
+  // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
   useEffect(() => {
     pageRef.current?.scrollIntoView({ behavior: "instant" });
     trackPlausibleEvent("ml_fiche_ouverte", undefined, {
       effectifId: String(effectif.id),
       collaboration: collabReceived,
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
