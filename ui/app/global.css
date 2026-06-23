@@ -98,6 +98,10 @@
   max-width: 11rem;
 }
 
+.fr-text--blue-france {
+  color: var(--text-title-blue-france);
+}
+
 .footer-operator-logo {
   display: block;
   height: 4rem;

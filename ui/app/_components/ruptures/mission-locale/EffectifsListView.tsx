@@ -358,9 +358,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         {/* À traiter */}
         {selectedSection === "a-traiter" && groupedDataATraiter.length !== 0 && (
           <>
-            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-france)" }}>
-              À traiter
-            </h2>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w">À traiter</h2>
             {downloadError && (
               <Alert
                 severity="error"
@@ -391,9 +389,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         {/* Déjà traité */}
         {selectedSection === "deja-traite" && sortedDataTraite.length !== 0 && (
           <>
-            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
-              Déjà traité
-            </h2>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w">Déjà traité</h2>
             {downloadError && (
               <Alert
                 severity="error"
@@ -421,9 +417,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
         {/* Injoignable */}
         {selectedSection === "injoignable" && groupedInjoignable.length !== 0 && (
           <>
-            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w" style={{ color: "var(--text-label-blue-cumulus)" }}>
-              À recontacter
-            </h2>
+            <h2 className="fr-h2 fr-text--blue-france fr-mb-2w">À recontacter</h2>
             {downloadError && (
               <Alert
                 severity="error"
