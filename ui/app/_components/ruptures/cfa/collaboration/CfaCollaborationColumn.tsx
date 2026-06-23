@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import { formatDate } from "@/app/_utils/date.utils";
 
 import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
 import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
@@ -37,7 +36,7 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
       )}
       {ml.activated_at ? (
         <Badge as="span" severity="success">
-          Active depuis le {formatDate(ml.activated_at)}
+          Utilise le Tableau de bord
         </Badge>
       ) : showInactiveMessage ? (
         <MlInactiveBadge />
