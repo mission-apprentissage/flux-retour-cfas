@@ -1,0 +1,16 @@
+.logoutButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-default-error);
+}
+
+.logoutButton:hover {
+  text-decoration: underline;
+}

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { useMlParametres, useUpdateMlParametres } from "@/app/_components/ruptures/shared/hooks";
+import { ContentSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 
 const URL_ERROR = "Veuillez saisir une URL publique valide (ex: https://www.exemple.fr/rdv)";
 
@@ -47,7 +48,7 @@ export default function ParametresClient() {
   const [alert, setAlert] = useState<FormAlert | null>(null);
 
   if (isLoading) {
-    return null;
+    return <ContentSkeleton />;
   }
 
   const handleSubmit = async (values: ParametresForm, { setSubmitting }: { setSubmitting: (v: boolean) => void }) => {
@@ -66,9 +67,7 @@ export default function ParametresClient() {
 
   return (
     <div className="fr-container">
-      <h1 className="fr-h3 fr-mb-3w fr-mt-3w" style={{ color: "var(--background-flat-blue-cumulus)" }}>
-        Paramètres de votre Mission Locale
-      </h1>
+      <h1 className="fr-h3 fr-text--blue-france fr-mb-3w fr-mt-3w">Paramètres de votre Mission Locale</h1>
 
       {alert && (
         <Alert

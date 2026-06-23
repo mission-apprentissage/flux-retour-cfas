@@ -1,17 +1,9 @@
-import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { MlContainer } from "../MlContainer";
+import { COMPTE_SETTINGS_HREF } from "@/common/utils/compteSettings";
 
-import ParametresClient from "./ParametresClient";
-
-export const metadata: Metadata = {
-  title: "Paramètres | Tableau de bord de l'apprentissage",
-};
-
-export default function ParametresPage() {
-  return (
-    <MlContainer>
-      <ParametresClient />
-    </MlContainer>
-  );
+// Les paramètres de la Mission Locale sont regroupés dans le hub unifié /compte.
+// Redirection côté serveur (307, sans flash).
+export default function ParametresRedirectPage() {
+  redirect(COMPTE_SETTINGS_HREF);
 }

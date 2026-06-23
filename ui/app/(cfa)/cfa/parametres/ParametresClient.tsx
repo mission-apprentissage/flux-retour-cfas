@@ -12,11 +12,12 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { IErp } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { ContentSkeleton, PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _delete, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import { COMPTE_SETTINGS_HREF } from "@/common/utils/compteSettings";
 import { formatDateDayMonthYear, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { useErp } from "@/hooks/useErp";
@@ -71,20 +72,18 @@ export default function ParametresClient() {
     }
     setSelectedERPId(erpV3);
     setStepConfigurationERP("v3");
-    router.replace("/cfa/parametres"); // supprime le paramètre en query
+    router.replace(COMPTE_SETTINGS_HREF); // nettoie le ?erpV3 de l'URL (la page vit désormais dans le hub /compte)
   }, [erpV3]);
 
   if (!organisme) {
-    return null;
+    return <ContentSkeleton />;
   }
 
   const title = "Paramétrage de votre moyen de transmission";
   return (
     <div className="fr-container">
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        <h1 className="fr-h3 fr-mb-3w fr-mt-3w" style={{ color: "var(--background-flat-blue-cumulus)" }}>
-          {title}
-        </h1>
+        <h1 className="fr-h3 fr-text--blue-france fr-mb-3w fr-mt-3w">{title}</h1>
 
         {stepConfigurationERP === "none" &&
           (organisme.mode_de_transmission ? (

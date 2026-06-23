@@ -12,6 +12,7 @@ import { _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
+import { COMPTE_ACCOUNT_HREF, COMPTE_SETTINGS_HREF, getCompteSettingsTab } from "@/common/utils/compteSettings";
 
 import { useAuth } from "../_context/UserContext";
 
@@ -21,6 +22,20 @@ export const UserConnectedHeader = () => {
   const open = Boolean(anchorEl);
 
   const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
+  const isMissionLocale = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
+  // Onglet "Paramètres" géré par le hub /compte (ML, CFA-beta), source unique partagée avec le hub.
+  const settingsTab = getCompteSettingsTab(user?.organisation);
+
+  // Nom de l'organisation affiché sous le nom de l'utilisateur : le nom de l'organisme pour un CFA,
+  // le nom de la Mission Locale pour un agent ML.
+  const organisationLabel = isCfaWithMlBeta
+    ? user?.organisation_nom
+    : user?.organisation?.type === "MISSION_LOCALE"
+      ? `Mission Locale ${user.organisation.nom}`
+      : undefined;
+
+  // Affichage à deux lignes (prénom/nom au-dessus de l'organisation), identique entre CFA et ML.
+  const showUserNameHeader = (isCfaWithMlBeta || isMissionLocale) && !!user?.prenom && !!user?.nom;
 
   const logout = async () => {
     await _post("/api/v1/auth/logout");
@@ -57,9 +72,8 @@ export const UserConnectedHeader = () => {
   };
 
   const getSettingsUrl = () => {
-    const organisationType = user?.organisation?.type;
-    if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) return "/mission-locale/parametres";
-    if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) return "/parametres";
+    if (settingsTab) return COMPTE_SETTINGS_HREF;
+    if (user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) return "/parametres";
   };
 
   return (
@@ -67,24 +81,24 @@ export const UserConnectedHeader = () => {
       {user && (
         <>
           <Button iconId="ri-account-circle-fill" priority="tertiary no outline" onClick={handleClick}>
-            {isCfaWithMlBeta && user.prenom && user.nom ? (
+            {showUserNameHeader ? (
               <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.3 }}>
                 <span
                   style={{ fontWeight: 700 }}
                 >{`${user.prenom.charAt(0).toUpperCase()}${user.prenom.slice(1)} ${user.nom.charAt(0).toUpperCase()}.`}</span>
-                {user.organisation_nom && (
+                {organisationLabel && (
                   <span
                     style={{
                       fontSize: "0.75rem",
                       fontWeight: 400,
-                      maxWidth: 300,
+                      maxWidth: 200,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
-                    title={user.organisation_nom}
+                    title={organisationLabel}
                   >
-                    {user.organisation_nom}
+                    {organisationLabel}
                   </span>
                 )}
               </span>
@@ -92,7 +106,7 @@ export const UserConnectedHeader = () => {
               <span
                 style={{
                   display: "inline-block",
-                  maxWidth: 300,
+                  maxWidth: 200,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -103,6 +117,11 @@ export const UserConnectedHeader = () => {
                 {getAccountLabel(user as AuthContext)}
               </span>
             )}
+            <i
+              className={fr.cx(open ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line", "fr-icon--sm")}
+              aria-hidden="true"
+              style={{ marginLeft: "0.25rem" }}
+            />
           </Button>
           <Menu
             anchorEl={anchorEl}
@@ -126,7 +145,7 @@ export const UserConnectedHeader = () => {
               },
             }}
           >
-            <MenuItem component="a" href="/mon-compte" onClick={handleClose}>
+            <MenuItem component="a" href={COMPTE_ACCOUNT_HREF} onClick={handleClose}>
               <ListItemIcon>
                 <i className={fr.cx("ri-account-circle-fill", "fr-icon--sm")}></i>
               </ListItemIcon>
@@ -138,7 +157,7 @@ export const UserConnectedHeader = () => {
                 <ListItemIcon>
                   <i className={fr.cx("ri-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Paramètres
+                {settingsTab?.label ?? "Paramètres"}
               </MenuItem>
             )}
 
@@ -170,11 +189,11 @@ export const UserConnectedHeader = () => {
             )}
 
             {isCfaWithMlBeta && [
-              <MenuItem key="cfa-parametres" component="a" href="/cfa/parametres" onClick={handleClose}>
+              <MenuItem key="cfa-parametres" component="a" href={COMPTE_SETTINGS_HREF} onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Paramètres de connexion ERP
+                {settingsTab?.label ?? "Paramètres de connexion ERP"}
               </MenuItem>,
               <ListSubheader
                 key="cfa-aide-header"
