@@ -303,7 +303,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
-        title: `Accueil - ${PRODUCT_NAME_TITLE} (ministère, secrétariat d'état, gouvernement)`,
+        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={PRODUCT_NAME_TITLE}

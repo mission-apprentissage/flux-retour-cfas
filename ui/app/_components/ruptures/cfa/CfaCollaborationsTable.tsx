@@ -82,7 +82,11 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
             >
               <td>
                 <div className={sharedStyles.nameCell}>
-                  <Link href={`/cfa/${e.id}`} className={sharedStyles.nameText}>
+                  <Link
+                    href={`/cfa/${e.id}`}
+                    className={sharedStyles.nameText}
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     {e.prenom} {e.nom}
                   </Link>
                   {e.has_unread_notification && (

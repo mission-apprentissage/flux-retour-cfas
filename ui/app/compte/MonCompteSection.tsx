@@ -5,13 +5,14 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Field, Form, Formik, FormikErrors } from "formik";
+import { Field, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { _put } from "@/common/httpClient";
 
+import { TrackFormDirty } from "../_components/UnsavedChangesContext";
 import { useAuth } from "../_context/UserContext";
 
 const profilSchema = z.object({
@@ -30,7 +31,7 @@ export function MonCompteSection() {
   const router = useRouter();
   const [alert, setAlert] = useState<FormAlert | null>(null);
 
-  const handleSubmit = async (values: ProfilForm, { setSubmitting }: { setSubmitting: (v: boolean) => void }) => {
+  const handleSubmit = async (values: ProfilForm, { setSubmitting, resetForm }: FormikHelpers<ProfilForm>) => {
     setAlert(null);
     try {
       await _put("/api/v1/profile/user", {
@@ -39,6 +40,8 @@ export function MonCompteSection() {
         nom: values.nom.trim(),
         telephone: values.telephone?.trim() || undefined,
       });
+      // Remet le formulaire à l'état "non modifié" tout de suite (dirty=false) pour ne pas redéclencher le garde.
+      resetForm({ values });
       // Le user est injecté côté serveur (getSession) dans le layout : on rafraîchit pour répercuter la modif.
       router.refresh();
       setAlert({ severity: "success", message: "Vos informations ont été enregistrées." });
@@ -97,6 +100,7 @@ export function MonCompteSection() {
       >
         {({ values, isSubmitting, dirty, isValid, handleChange }) => (
           <Form noValidate style={{ maxWidth: 720 }}>
+            <TrackFormDirty dirty={dirty} />
             <RadioButtons
               legend="Civilité"
               name="civility"

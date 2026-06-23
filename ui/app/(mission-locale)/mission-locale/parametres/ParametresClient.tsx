@@ -4,12 +4,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Field, Form, Formik, FormikErrors } from "formik";
+import { Field, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { useMlParametres, useUpdateMlParametres } from "@/app/_components/ruptures/shared/hooks";
 import { ContentSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { TrackFormDirty } from "@/app/_components/UnsavedChangesContext";
 
 const URL_ERROR = "Veuillez saisir une URL publique valide (ex: https://www.exemple.fr/rdv)";
 
@@ -51,11 +52,13 @@ export default function ParametresClient() {
     return <ContentSkeleton />;
   }
 
-  const handleSubmit = async (values: ParametresForm, { setSubmitting }: { setSubmitting: (v: boolean) => void }) => {
+  const handleSubmit = async (values: ParametresForm, { setSubmitting, resetForm }: FormikHelpers<ParametresForm>) => {
     setAlert(null);
     const trimmed = values.rdv_url.trim();
     try {
       await updateParametres({ rdv_url: trimmed === "" ? null : trimmed });
+      // Remet le formulaire à l'état "non modifié" (dirty=false) pour ne pas redéclencher le garde de navigation.
+      resetForm({ values: { rdv_url: trimmed } });
       setAlert({ severity: "success", message: "Vos paramètres ont été enregistrés." });
     } catch (err: any) {
       const errorMessage = err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement";
@@ -102,6 +105,7 @@ export default function ParametresClient() {
       >
         {({ isSubmitting, dirty, isValid }) => (
           <Form noValidate style={{ maxWidth: 720 }}>
+            <TrackFormDirty dirty={dirty} />
             <Field name="rdv_url">
               {({ field, meta }: any) => (
                 <Input

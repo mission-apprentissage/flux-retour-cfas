@@ -202,24 +202,6 @@
   margin: 0 0 0.5rem 0;
 }
 
-.mlInactiveBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  background: var(--background-contrast-error);
-  color: var(--text-default-error);
-  font-family: Marianne, sans-serif;
-  font-weight: 700;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  margin: 0.25rem 0 0.5rem 0;
-  width: fit-content;
-}
-
 .collabCta {
   margin-top: 1rem;
   display: flex;

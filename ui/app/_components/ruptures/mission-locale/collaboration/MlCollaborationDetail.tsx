@@ -50,7 +50,11 @@ interface MlCollaborationDetailProps {
 export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   const { effectif, previous, next, total, currentIndex } = data;
   const searchParams = useSearchParams();
-  const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) ?? null;
+  const nomListeParam = searchParams?.get("nom_liste");
+  // On valide la valeur du query param contre l'enum : une valeur inattendue produirait un back-link cassé.
+  const nomListe = (Object.values(API_EFFECTIF_LISTE) as string[]).includes(nomListeParam ?? "")
+    ? (nomListeParam as API_EFFECTIF_LISTE)
+    : null;
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const collabReceived = !!effectif.organisme_data?.acc_conjoint;
   const pageRef = useRef<HTMLDivElement>(null);

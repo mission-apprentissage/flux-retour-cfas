@@ -189,7 +189,10 @@ export function CfaRuptureSegment({ segment, effectifs }: CfaRuptureSegmentProps
                         <Link
                           href={`/cfa/${e.id}`}
                           className={sharedStyles.nameText}
-                          onClick={() => trackPlausibleEvent("cfa_liste_jeune_ouvert", undefined, { effectifId: e.id })}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            trackPlausibleEvent("cfa_liste_jeune_ouvert", undefined, { effectifId: e.id });
+                          }}
                         >
                           {e.prenom} {e.nom}
                         </Link>

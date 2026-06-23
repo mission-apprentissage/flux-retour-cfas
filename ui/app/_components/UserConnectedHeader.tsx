@@ -63,18 +63,11 @@ export const UserConnectedHeader = () => {
     }
   };
 
-  const shouldShowSettings = () => {
-    const organisationType = user?.organisation?.type;
-    return (
-      organisationType === ORGANISATION_TYPE.MISSION_LOCALE ||
-      (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta)
-    );
-  };
-
-  const getSettingsUrl = () => {
-    if (settingsTab) return COMPTE_SETTINGS_HREF;
-    if (user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta) return "/parametres";
-  };
+  const settingsUrl = settingsTab
+    ? COMPTE_SETTINGS_HREF
+    : user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta
+      ? "/parametres"
+      : undefined;
 
   return (
     <>
@@ -152,8 +145,8 @@ export const UserConnectedHeader = () => {
               Mon compte
             </MenuItem>
 
-            {shouldShowSettings() && (
-              <MenuItem component="a" href={getSettingsUrl()} onClick={handleClose}>
+            {settingsUrl && (
+              <MenuItem component="a" href={settingsUrl} onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("ri-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
