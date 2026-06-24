@@ -153,7 +153,7 @@ export function CollaborationSentView({
 
           {od?.cause_rupture && (
             <div className={styles.sentBubbleSection}>
-              <p className={styles.sentSectionTitle}>A propos de la rupture</p>
+              <p className={styles.sentSectionTitle}>À propos de la rupture</p>
               <p className={styles.sentBody}>{od.cause_rupture}</p>
             </div>
           )}
