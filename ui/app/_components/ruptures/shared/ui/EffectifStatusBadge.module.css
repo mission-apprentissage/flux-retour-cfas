@@ -69,6 +69,11 @@
   margin-top: 2px;
 }
 
+.tooltipText {
+  font-size: 12px;
+  line-height: 20px;
+}
+
 .badgesContainer {
   display: flex;
   flex-wrap: wrap;
