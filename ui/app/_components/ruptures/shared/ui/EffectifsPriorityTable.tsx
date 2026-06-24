@@ -42,6 +42,29 @@ function PriorityBadge({
   );
 }
 
+// Wording partagé entre la vue ML (bloc dépliable) et la vue CFA, pour garantir un libellé identique.
+const PRIORITY_LIST_ITEMS = (
+  <>
+    <li>
+      <strong>
+        CFA : les jeunes qui vous ont été adressés manuellement par un utilisateur du service dans un CFA ;
+      </strong>
+    </li>
+    <li>
+      <strong>
+        SOUHAITE UN RDV : les jeunes qui ont répondu “Je souhaite un RDV avec la Mission Locale” à notre maraude
+        numérique par message ;
+      </strong>
+    </li>
+    <li>
+      <strong>MINEUR : les jeunes en obligation de formation (16 à 18 ans)</strong>
+    </li>
+    <li>
+      <strong>RQTH : les jeunes en situation de handicap</strong>
+    </li>
+  </>
+);
+
 export function EffectifsPriorityTable({
   priorityData = [],
   searchTerm,
@@ -160,42 +183,16 @@ export function EffectifsPriorityTable({
               {infoOpen && (
                 <div style={{ marginTop: "12px", fontSize: "14px", lineHeight: "1.4" }}>
                   <p style={{ margin: "0 0 8px 0" }}>Nous affichons dans cette liste :</p>
-                  <ul style={{ margin: "0 0 12px 20px", padding: "0" }}>
-                    <li>
-                      <strong>les jeunes âgés de 16 à 18 ans (obligation de formation)</strong>
-                    </li>
-                    <li>
-                      <strong>les jeunes en situation de handicap (RQTH)</strong>
-                    </li>
-                    <li>
-                      <strong>les jeunes ayant exprimé un besoin d&apos;accompagnement (campagne mailing)</strong>
-                    </li>
-                    <li>
-                      <strong>les jeunes ayant demandé à être recontactés via WhatsApp</strong>
-                    </li>
-                  </ul>
-                  <p style={{ margin: "0 0 8px 0" }}>
-                    Dans le cadre d&apos;une expérimentation avec les CFA, cette liste inclut également :
-                  </p>
-                  <ul style={{ margin: "0 0 0 20px", padding: "0" }}>
-                    <li>
-                      <strong>
-                        les jeunes pour lesquels un CFA a formulé une demande d&apos;accompagnement conjoint avec la
-                        Mission Locale
-                      </strong>
-                    </li>
-                  </ul>
+                  <ul style={{ margin: "0 0 12px 20px", padding: "0" }}>{PRIORITY_LIST_ITEMS}</ul>
                 </div>
               )}
             </div>
           )}
           {user.organisation.type !== "MISSION_LOCALE" && (
-            <p style={{ margin: "0 0 16px 0", fontSize: "14px" }}>
-              Nous affichons dans cette liste <strong>les jeunes âgés de 16 à 18 ans</strong> (obligation de formation)
-              ainsi que <strong>les jeunes en situation de handicap (RQTH)</strong> et les{" "}
-              <strong>jeunes qui ont indiqué avoir besoin d&apos;être accompagnés par vos services</strong> (campagne
-              mailing)..
-            </p>
+            <div style={{ margin: "0 0 16px 0", fontSize: "14px", lineHeight: "1.4" }}>
+              <p style={{ margin: "0 0 8px 0" }}>Nous affichons dans cette liste :</p>
+              <ul style={{ margin: "0 0 0 20px", padding: "0" }}>{PRIORITY_LIST_ITEMS}</ul>
+            </div>
           )}
           <SimpleTable
             data={tableData}
