@@ -70,8 +70,13 @@
 }
 
 .tooltipText {
+  margin: 0;
   font-size: 12px;
   line-height: 20px;
+}
+
+.tooltipText + .tooltipText {
+  margin-top: 4px;
 }
 
 .badgesContainer {
