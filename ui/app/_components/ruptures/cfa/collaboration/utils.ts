@@ -1,15 +1,16 @@
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
+import { isValidPhone } from "@/app/_utils/phone.utils";
+
 import { FREINS_MOTIFS } from "./constants";
 import { VerifiedInfo } from "./hooks";
 import { FormValues } from "./types";
 
-const PHONE_RE = /^(?:(?:\+|00)33[\s.-]?|0)[1-9](?:[\s.-]?\d{2}){4}$/;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Validation du téléphone centralisée (libphonenumber, gère métropole + DOM-TOM),
+// alignée sur la validation serveur pour éviter toute divergence front/back.
+export { isValidPhone };
 
-export function isValidPhone(value: string): boolean {
-  return PHONE_RE.test(value.replace(/\s/g, ""));
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(value: string): boolean {
   return EMAIL_RE.test(value.trim());
