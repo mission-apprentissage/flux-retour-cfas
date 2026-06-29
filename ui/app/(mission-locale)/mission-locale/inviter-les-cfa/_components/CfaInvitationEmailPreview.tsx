@@ -122,11 +122,11 @@ export function CfaInvitationEmailPreview({
         toujours porter seul.
       </p>
       <section className={styles.block}>
-        <h3 className={styles.blockTitle}>
+        <p className={styles.blockTitle}>
           Le Tableau de bord de l’apprentissage vous permet de{" "}
           <span className={styles.accent}>collaborer avec les Missions Locales de votre territoire</span> en quelque
           clics.
-        </h3>
+        </p>
         <ul className={styles.argList}>
           {ARGUMENTS.map((arg) => (
             <li key={arg} className={styles.argItem}>
@@ -157,9 +157,9 @@ export function CfaInvitationEmailPreview({
           height={110}
           className={styles.blockImg}
         />
-        <h3 className={styles.blockTitle}>
+        <p className={styles.blockTitle}>
           Un levier concret pour vos engagements <span className={styles.accent}>Qualiopi</span>
-        </h3>
+        </p>
         <p>
           La collaboration avec des acteurs externes comme le réseau des Missions Locales fait partie des attendus du
           référentiel <strong>Qualiopi</strong>.
@@ -178,9 +178,9 @@ export function CfaInvitationEmailPreview({
       </section>
       <section className={styles.block}>
         <Image src="/images/mission-locale/email/ml.png" alt="" width={100} height={80} className={styles.blockImg} />
-        <h3 className={styles.blockTitle}>
+        <p className={styles.blockTitle}>
           <span className={styles.accent}>{nbMl}</span> Missions Locales de votre territoire utilisent déjà le service
-        </h3>
+        </p>
         <p>
           En vous connectant sur la nouvelle version, vous pouvez dès maintenant déclencher des collaborations avec les
           Missions Locales de rattachement de vos jeunes.
@@ -189,7 +189,7 @@ export function CfaInvitationEmailPreview({
         <Cta />
       </section>
       <section className={styles.block}>
-        <h3 className={styles.blockTitle}>Les Missions locale complètent votre accompagnement</h3>
+        <p className={styles.blockTitle}>Les Missions locale complètent votre accompagnement</p>
         <p className={styles.blockText}>
           Parfois les dispositifs internes ne suffisent pas sur des ruptures multifactorielles.
         </p>
@@ -239,10 +239,10 @@ export function CfaInvitationEmailPreview({
         </p>
         <hr className={styles.footerSep} />
         <p className={styles.footerText}>Vous ne souhaitez plus recevoir ce genre de courrier ?</p>
-        <a href="#" className={styles.unsubscribeLink}>
+        <span className={styles.unsubscribeLink}>
           Demander à ne plus recevoir ces courriels de la part de l’outil professionnel Tableau de Bord de
           l’apprentissage.
-        </a>
+        </span>
       </footer>
     </div>
   );

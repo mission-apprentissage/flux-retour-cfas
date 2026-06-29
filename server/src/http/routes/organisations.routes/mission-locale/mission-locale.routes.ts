@@ -96,19 +96,15 @@ const updateMlParametres: RouteHandler<MissionLocaleLocals> = async (req, { loca
 };
 
 const getCfaInvitationsList: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
+  // `requireMissionLocale` garantit déjà le type MISSION_LOCALE et peuple `locals.missionLocale`
+  // (même usage direct que les autres handlers du fichier, ex. getMlBannerStats).
   const missionLocale = locals.missionLocale;
-  if (!missionLocale) {
-    throw Boom.forbidden("No mission locale in session");
-  }
   const userId = new ObjectId(req.user._id);
   return await getCfaListToInviteForMissionLocale(missionLocale, userId);
 };
 
 const inviteCfaFromMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
   const missionLocale = locals.missionLocale;
-  if (!missionLocale) {
-    throw Boom.forbidden("No mission locale in session");
-  }
   const { organisme_id, note } = await validateFullZodObjectSchema(req.body, inviteCfaMissionLocaleApi);
   return await sendCfaInvitationFromMissionLocale(missionLocale, req.user, organisme_id, note);
 };

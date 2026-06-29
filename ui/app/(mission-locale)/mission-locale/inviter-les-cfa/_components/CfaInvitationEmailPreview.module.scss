@@ -8,7 +8,7 @@
 }
 
 .accent {
-  color: var(--light-decisions-artwork-artwork-minor-blue-france, #6a6af4);
+  color: #6a6af4;
 }
 
 .preheader {
@@ -48,12 +48,6 @@
   font-weight: 700;
 }
 
-.messageTitle {
-  margin: 0 0 1rem;
-  font-size: 1.125rem;
-  font-weight: 700;
-}
-
 .introLabel {
   font-size: 1rem;
   font-weight: 400;
@@ -69,14 +63,9 @@
   font-weight: 400;
 }
 
-.messageBody {
-  margin: 0 0 1rem;
-  text-align: left;
-}
-
 .note {
   padding: 2rem;
-  background: var(--light-decisions-background-background-alt-grey, #f6f6f6);
+  background: #f6f6f6;
   border-radius: 0.75rem;
 }
 
@@ -294,9 +283,6 @@
   padding: 1.5rem;
   font-size: 0.75rem;
   color: #666666;
-
-  p {
-  }
 }
 
 .footerText {
@@ -317,4 +303,9 @@
   margin: 1rem 0;
   border: none;
   border-top: 1px solid #dddddd;
+}
+
+.unsubscribeLink {
+  font-weight: 500;
+  text-decoration: underline;
 }
