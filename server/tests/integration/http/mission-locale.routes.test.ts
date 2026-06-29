@@ -82,6 +82,10 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
       expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+
+      const effectifs = res.data.a_traiter.flatMap((curr) => curr.data);
+      expect(effectifs).toHaveLength(1);
+      expect(effectifs[0]).toMatchObject({ commune: "Paris", code_postal: "75001" });
     });
   });
 
@@ -602,16 +606,43 @@ describe("Mission Locale Routes", () => {
       await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
     });
 
+    // GET /villes : options du filtre "Villes" construites sur TOUS les effectifs de la ML
+    // (distinct par code postal, trié, dédupliqué, codes postaux absents ignorés).
+    it("GET /villes : liste distincte, triée, dédupliquée, sans code postal absent", async () => {
+      const withAdresse = (doc: object, adresse: Record<string, string>) => {
+        (doc as any).effectif_snapshot.apprenant.adresse = adresse;
+        return doc;
+      };
+
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Marseille", code_postal: "13001" }));
+      // même code postal, libellé de commune différent -> doit être dédupliqué et le libellé
+      // retenu doit être déterministe ($min => "Marseille" < "Marseille 1er Arrondissement").
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Marseille 1er Arrondissement", code_postal: "13001" }));
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Paris", code_postal: "75001" }));
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Inconnue" })); // pas de code postal -> ignoré
+
+      const res = await requestAsOrganisation(ML_DATA, "get", `/api/v1/organisation/mission-locale/villes`);
+
+      expect(res.data).toEqual([
+        { value: "13001", label: "13001, Marseille" },
+        { value: "75001", label: "75001, Paris" },
+      ]);
+    });
+
     // Règle : « Si le CFA demande une collaboration, l'affichage est forcé dans le bloc
     // prioritaire (jeune en abandon +180j) → la ML doit toujours le voir. »
     it("Demande de collaboration + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 200 });
+      (doc as any).effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
       await insertDoc(doc);
 
       const res = await getPerMonth();
       const id = snapshotId.toString();
       expect(isVisible(res, id)).toBe(true);
       expect(isInPrioritaire(res, id)).toBe(true);
+
+      const prioritaire = (res.data.prioritaire?.effectifs ?? []).find((e: { id: string }) => e.id === id);
+      expect(prioritaire).toMatchObject({ commune: "Marseille", code_postal: "13001" });
     });
 
     // Règle : « ... (jeune en fin de formation) ... » — modélisé par un retour en apprentissage.

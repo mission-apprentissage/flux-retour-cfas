@@ -1118,6 +1118,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                   $ifNull: ["$$ROOT.identifiant_normalise.prenom", "$$ROOT.effectif_snapshot.apprenant.prenom"],
                 },
                 libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
+                commune: "$$ROOT.effectif_snapshot.apprenant.adresse.commune",
+                code_postal: "$$ROOT.effectif_snapshot.apprenant.adresse.code_postal",
                 organisme_nom: "$$ROOT.organisme.nom",
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
@@ -1459,6 +1461,42 @@ export const getEffectifsListByMissionLocaleId = async (
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
+/**
+ * Retourne la liste des codes postaux / communes du "territoire" d'une Mission Locale,
+ * construite à partir de TOUS ses effectifs (toutes listes confondues). Déduplique par code
+ * postal, ignore les codes postaux absents et trie par code postal croissant. Sert à peupler
+ * les options du filtre "Villes" (le filtrage lui-même reste côté client).
+ */
+export const getPostalCodesByMissionLocaleId = async (
+  missionLocale: IOrganisationMissionLocale
+): Promise<Array<{ value: string; label: string }>> => {
+  const results = await missionLocaleEffectifsDb()
+    .aggregate<{ _id: string; commune: string | null }>([
+      {
+        $match: {
+          mission_locale_id: new ObjectId(missionLocale._id),
+          soft_deleted: { $ne: true },
+          "effectif_snapshot.apprenant.adresse.code_postal": { $nin: [null, ""] },
+        },
+      },
+      {
+        $group: {
+          _id: "$effectif_snapshot.apprenant.adresse.code_postal",
+          // $min (et non $first) pour un libellé déterministe lorsqu'un même code postal porte
+          // plusieurs libellés de commune (communes fusionnées, CEDEX, casse/accents hétérogènes).
+          commune: { $min: "$effectif_snapshot.apprenant.adresse.commune" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+    .toArray();
+
+  return results.map(({ _id, commune }) => ({
+    value: _id,
+    label: commune ? `${_id}, ${commune}` : _id,
+  }));
+};
+
 export const getEffectifARisqueByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   nom_liste: API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE | API_EFFECTIF_LISTE.PRIORITAIRE
@@ -1489,6 +1527,8 @@ export const getEffectifARisqueByMissionLocaleId = async (
               nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
               prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
               libelle_formation: "$effectif_snapshot.formation.libelle_long",
+              commune: "$effectif_snapshot.apprenant.adresse.commune",
+              code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
               organisme_nom: "$organisme.nom",
               organisme_raison_sociale: "$organisme.raison_sociale",
               organisme_enseigne: "$organisme.enseigne",

@@ -2,7 +2,7 @@ import format from "date-fns/format/index";
 import { fr } from "date-fns/locale";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
-import { MonthItem } from "../../common/types/ruptures";
+import { EffectifData, MonthItem } from "../../common/types/ruptures";
 
 export const DEFAULT_ITEMS_TO_SHOW = 10;
 
@@ -78,4 +78,15 @@ export function groupMonthsOlderThan180Days(items: MonthItem[]): MonthItem[] {
 
 export const getPriorityLabel = (listType: IMissionLocaleEffectifList): string => {
   return listType === API_EFFECTIF_LISTE.INJOIGNABLE ? "À RECONTACTER EN PRIORITÉ" : "À TRAITER EN PRIORITÉ";
+};
+
+export type PostalCodeOption = { value: string; label: string };
+
+/**
+ * Indique si un effectif passe le filtre "Villes". Une sélection vide ne filtre rien (tout affiché).
+ * Un effectif sans code postal est exclu dès qu'au moins un code postal est sélectionné.
+ */
+export const matchesPostalCodes = (effectif: EffectifData, selected: string[]): boolean => {
+  if (selected.length === 0) return true;
+  return !!effectif.code_postal && selected.includes(effectif.code_postal);
 };

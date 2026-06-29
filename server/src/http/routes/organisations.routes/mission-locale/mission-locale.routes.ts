@@ -19,6 +19,7 @@ import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMissionLocaleId,
+  getPostalCodesByMissionLocaleId,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -32,6 +33,7 @@ export default () => {
   const router = express.Router();
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
+  router.get("/villes", returnResult(getVillesMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
   router.get("/parametres", returnResult(getMlParametres));
@@ -96,6 +98,14 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   return await getAllEffectifsParMois(missionLocale, userId);
+};
+
+const getVillesMissionLocale = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
+  return await getPostalCodesByMissionLocaleId(missionLocale);
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
