@@ -5,7 +5,6 @@ import { zObjectId } from "zod-mongodb-schema";
 export enum BREVO_TEMPLATE_NAME {
   CONFIRMATION = "CONFIRMATION",
   REFUS = "REFUS",
-  INVITATION_CFA = "INVITATION_CFA",
 }
 
 export enum BREVO_TEMPLATE_TYPE {

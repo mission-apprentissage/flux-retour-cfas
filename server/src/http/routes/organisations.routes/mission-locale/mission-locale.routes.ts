@@ -42,6 +42,8 @@ export default () => {
   router.get("/parametres", returnResult(getMlParametres));
   router.put("/parametres", returnResult(updateMlParametres));
   router.get("/banner-stats", returnResult(getMlBannerStats));
+  router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
+  router.post("/cfa-invitations", returnResult(inviteCfaFromMissionLocale));
   return router;
 };
 
@@ -65,7 +67,6 @@ const getMlParametres = async (_req, { locals }) => {
 };
 
 const updateMlParametres = async (req, { locals }) => {
-  const router = express.Router();
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   const body = zMlParametresBody.parse(req.body);
 
@@ -74,25 +75,19 @@ const updateMlParametres = async (req, { locals }) => {
     { $set: { rdv_url: body.rdv_url } }
   );
 
-  router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
-  router.post("/cfa-invitations", returnResult(inviteCfaFromMissionLocale));
-  return router;
+  return { rdv_url: body.rdv_url };
 };
 
 const getCfaInvitationsList = async (req, { locals }) => {
+  // `requireMissionLocale` garantit déjà le type MISSION_LOCALE et peuple `locals.missionLocale`
+  // (même usage direct que les autres handlers du fichier, ex. getMlBannerStats).
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  if (!missionLocale) {
-    throw Boom.forbidden("No mission locale in session");
-  }
   const userId = new ObjectId(req.user._id);
   return await getCfaListToInviteForMissionLocale(missionLocale, userId);
 };
 
 const inviteCfaFromMissionLocale = async (req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  if (!missionLocale) {
-    throw Boom.forbidden("No mission locale in session");
-  }
   const { organisme_id, note } = await validateFullZodObjectSchema(req.body, inviteCfaMissionLocaleApi);
   return await sendCfaInvitationFromMissionLocale(missionLocale, req.user, organisme_id, note);
 };
