@@ -19,6 +19,7 @@ import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMissionLocaleId,
+  missionLocaleBaseAggregation,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -42,12 +43,18 @@ export default () => {
 
 const getMlBannerStats = async (_req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const souhaite_rdv_count = await missionLocaleEffectifsDb().countDocuments({
-    mission_locale_id: new ObjectId(missionLocale._id),
-    souhaite_rdv: true,
-    soft_deleted: { $ne: true },
-  });
-  return { souhaite_rdv_count };
+  // Le compteur du bandeau doit refléter exactement ce que le conseiller retrouve dans la liste.
+  // On réutilise donc le pipeline de visibilité (mêmes filtres âge / année scolaire / activation que
+  // la liste et le récap hebdo) plutôt qu'un countDocuments brut : ce dernier comptait aussi des jeunes
+  // filtrés hors liste (≥ 26 ans, année scolaire hors plage, sans date de rupture) et gonflait le bandeau.
+  const result = await missionLocaleEffectifsDb()
+    .aggregate([
+      { $match: { souhaite_rdv: true } },
+      ...(await missionLocaleBaseAggregation(missionLocale)),
+      { $count: "souhaite_rdv_count" },
+    ])
+    .next();
+  return { souhaite_rdv_count: result?.souhaite_rdv_count ?? 0 };
 };
 
 const zMlParametresBody = z.object({
