@@ -281,13 +281,44 @@ describe("getCfaListToInviteForMissionLocale", () => {
 
     expect(result[0].destinataire_nom).toBeNull();
   });
+
+  it("affiche CFA_ACTIF pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
+    // Aucun effectif en rupture pour ce CFA → absent de la liste-rupture. Mais ce conseiller l'a invité
+    // (journal) et le CFA est désormais actif (organisation ORGANISME_FORMATION avec ml_beta_activated_at).
+    await missionLocaleCfaInvitationsDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_id: mlOrganisationId,
+      author_id: userId,
+      organisme_id: organismeId,
+      organisation_id: new ObjectId(),
+      siret: "19040492100016",
+      email_destinataire: "directeur@campus-lac.fr",
+      invitation_token: "token-actif",
+      created_at: new Date(),
+    } as any);
+    await organisationsDb().insertOne({
+      _id: new ObjectId(),
+      type: "ORGANISME_FORMATION",
+      siret: "19040492100016",
+      uai: "0755805C",
+      organisme_id: organismeId.toString(),
+      ml_beta_activated_at: new Date(),
+      created_at: new Date(),
+    } as any);
+
+    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
+
+    const cfa = result.find((c) => c.organisme_id === organismeId.toString());
+    expect(cfa?.statut).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
+    expect(cfa?.nb_jeunes_rupture).toBe(0);
+  });
 });
 
 describe("sendCfaInvitationFromMissionLocale", () => {
   useMongo();
 
   beforeEach(async () => {
-    vi.mocked(sendTransactionalEmail).mockResolvedValue(undefined as any);
+    vi.mocked(sendTransactionalEmail).mockResolvedValue({ messageId: "test-message-id" } as any);
     vi.mocked(checkActivationEligibility).mockResolvedValue(eligibleResult as any);
     await invitationsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
@@ -332,7 +363,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
         NOTE_RECOMMANDATION: "Je recommande ce CFA",
         LIEN_INVITATION: expect.stringContaining(`invitationToken=${invitation?.token}`),
       }),
-      { cc: ["conseiller@ml.fr"] }
+      { cc: ["conseiller@ml.fr"], redirectRecipientInNonProdTo: "conseiller@ml.fr" }
     );
   });
 
@@ -358,5 +389,17 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     );
 
     expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
+  });
+
+  it("n'enregistre aucune invitation si l'envoi de l'email Brevo échoue", async () => {
+    // Brevo capture ses erreurs et renvoie `undefined` : l'action doit alors échouer sans rien persister.
+    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined as any);
+
+    await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
+      /échoué/i
+    );
+
+    expect(await invitationsDb().countDocuments({})).toBe(0);
+    expect(await missionLocaleCfaInvitationsDb().countDocuments({})).toBe(0);
   });
 });

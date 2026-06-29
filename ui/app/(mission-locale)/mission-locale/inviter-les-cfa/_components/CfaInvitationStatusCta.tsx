@@ -21,7 +21,7 @@ export function CfaInvitationStatusCta({ cfa, onInvite }: Props) {
     case CFA_INVITATION_STATUT.INVITATION_ENVOYEE:
       return (
         <span className={`fr-badge ${styles.statusBadge} ${styles.statusSent}`}>
-          <i className="fr-icon-plane-fill fr-icon--sm" aria-hidden="true" />
+          <i className="fr-icon-send-plane-fill fr-icon--sm" aria-hidden="true" />
           <span className={styles.statusText}>Invitation envoyée</span>
         </span>
       );

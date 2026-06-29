@@ -1,11 +1,14 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Input } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useCallback, useState } from "react";
 import { ICfaToInvite } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import { useAuth } from "@/app/_context/UserContext";
+import { publicConfig } from "@/config.public";
 
 import { CfaInvitationEmailPreview } from "./CfaInvitationEmailPreview";
 
@@ -90,6 +93,19 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
       }
       buttons={buttons as [any, ...any[]]}
     >
+      {publicConfig.env !== "production" && user?.email && (
+        <Alert
+          severity="warning"
+          small
+          className="fr-mb-2w"
+          description={
+            <>
+              Environnement de test (<strong>{publicConfig.env}</strong>) : cette invitation ne sera pas envoyée au CFA,
+              mais à votre adresse <strong>{user.email}</strong>.
+            </>
+          }
+        />
+      )}
       {showPreview ? (
         <CfaInvitationEmailPreview
           nbJeunesRupture={cfa?.nb_jeunes_rupture ?? 0}
@@ -107,19 +123,17 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
             L’invitation sera envoyée directement au CFA. Nous avons préparé un message automatique que vous pouvez
             compléter avec une note ou votre message de recommandation si vous le souhaitez.
           </p>
-          <div className="fr-input-group">
-            <label className="fr-label" htmlFor="invite-cfa-note">
-              Ajoutez un mot de recommandation à votre invitation (facultatif)
-            </label>
-            <textarea
-              id="invite-cfa-note"
-              className="fr-input"
-              rows={4}
-              placeholder="Écrivez votre message ici..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
+          <Input
+            textArea
+            label="Ajoutez un mot de recommandation à votre invitation (facultatif)"
+            nativeTextAreaProps={{
+              id: "invite-cfa-note",
+              rows: 4,
+              placeholder: "Écrivez votre message ici...",
+              value: note,
+              onChange: (e) => setNote(e.target.value),
+            }}
+          />
         </>
       )}
       {status === "error" && <p className="fr-error-text">Une erreur est survenue. Veuillez réessayer.</p>}
