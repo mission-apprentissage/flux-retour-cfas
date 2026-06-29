@@ -84,6 +84,16 @@ const cfaForceVisibleExpr = () => ({
 });
 
 /**
+ * Expression d'agrégation : le jeune a explicitement demandé un rendez-vous
+ * (`souhaite_rdv`, posé via la préqualification / le rappel WhatsApp).
+ * Comme une demande de collaboration CFA, ce signal fort force la visibilité de
+ * l'effectif côté Mission Locale même s'il sortirait sinon de l'outil (jeune en fin
+ * de formation, en abandon +180j, revenu en contrat, ou non visible pour une autre raison).
+ * Aligne la liste sur le compteur de la bannière "Souhaite un RDV", qui ne filtre pas sur ces critères.
+ */
+const souhaiteRdvForceVisibleExpr = () => ({ $eq: [{ $ifNull: ["$souhaite_rdv", false] }, true] });
+
+/**
  * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
  * Retourne true si cfa_rupture_declaration doit être nettoyé.
  */
@@ -149,14 +159,15 @@ const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
 /**
  * Prédicat "prioritaire" pour la Mission Locale.
- * Une demande de collaboration du CFA (`a_risque_accompagnement_conjoint`) force le
- * passage dans le bloc prioritaire, même si le jeune est revenu en formation
- * (`nouveau_contrat`) ou en abandon +180j.
+ * Une demande de collaboration du CFA (`a_risque_accompagnement_conjoint`) ou une demande
+ * de RDV du jeune (`a_risque_souhaite_rdv`) force le passage dans le bloc prioritaire,
+ * même si le jeune est revenu en formation (`nouveau_contrat`) ou en abandon +180j.
  */
 const buildPrioritaireMatchOr = () => ({
   $or: [
     { a_contacter: true },
     { a_risque_accompagnement_conjoint: true },
+    { a_risque_souhaite_rdv: true },
     { $and: [{ a_risque: true }, { nouveau_contrat: false }] },
   ],
 });
@@ -261,6 +272,9 @@ const matchDernierStatutPipelineMl = (): any => {
         // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
         // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
         { $expr: cfaForceVisibleExpr() },
+        // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
+        // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
+        { souhaite_rdv: true },
       ],
     },
   };
@@ -340,6 +354,8 @@ const addFieldFromActivationDate = () => {
       },
       // Collab V2 : un effectif "envoyé" par le CFA reste dans la plage d'activation.
       cfaForceVisibleExpr(),
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous reste dans la plage d'activation.
+      souhaiteRdvForceVisibleExpr(),
     ],
   };
 
@@ -367,6 +383,8 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       // Effectif "envoyé" par le CFA : demande de collaboration (acc_conjoint)
       // ou envoi automatique après 45j de rupture (CFA en V2 collab).
       cfaForceVisibleExpr(),
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible côté ML.
+      souhaiteRdvForceVisibleExpr(),
       // Situation déjà définie → toujours visible
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
@@ -516,16 +534,13 @@ const addMissionLocaleFieldTraitementStatus = () => {
       // Collab V2 : une demande de collaboration du CFA force le caractère prioritaire,
       // indépendamment d'un retour en formation ou d'une rupture de plus de 180 jours.
       ACCOMPAGNEMENT_CONJOINT_CONDITION,
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous est prioritaire,
+      // indépendamment d'un retour en formation ou d'une rupture de plus de 180 jours.
+      SOUHAITE_RDV_CONDITION,
       {
         $and: [
           {
-            $or: [
-              RQTH_CONDITION,
-              MINEUR_CONDITION,
-              ACCOMPAGNEMENT_CONJOINT_CONDITION,
-              WHATSAPP_CALLBACK_CONDITION,
-              SOUHAITE_RDV_CONDITION,
-            ],
+            $or: [RQTH_CONDITION, MINEUR_CONDITION, WHATSAPP_CALLBACK_CONDITION],
           },
           {
             $or: [

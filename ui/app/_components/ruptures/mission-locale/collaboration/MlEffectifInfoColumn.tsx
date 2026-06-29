@@ -29,6 +29,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const age = getAge(effectif.date_de_naissance);
+  const isMineur = typeof age === "number" && age < 18;
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "Organisme non renseigné";
 
   return (
@@ -55,7 +56,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
 
       {effectif.date_de_naissance ? (
         <p className={styles.infoLine}>
-          Né(e) le {formatDate(effectif.date_de_naissance)} <strong>{age} ans</strong>
+          Né(e) le {formatDate(effectif.date_de_naissance)} {isMineur ? <strong>{age} ans</strong> : `${age} ans`}
         </p>
       ) : (
         <p className={styles.infoLine}>Date de naissance non renseignée</p>
@@ -83,7 +84,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
         {effectif.adresse?.code_postal && `(${effectif.adresse.code_postal})`}
       </p>
 
-      <p className={styles.rqthLine}>RQTH {effectif.rqth ? "Oui" : "Non"}</p>
+      <p className={styles.rqthLine}>RQTH {effectif.rqth ? <strong>Oui</strong> : "Non"}</p>
 
       <hr className={styles.separator} />
 

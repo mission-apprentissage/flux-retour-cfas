@@ -127,6 +127,11 @@
   margin: 0.25rem 0;
 }
 
+.rqthLine strong {
+  font-weight: 700;
+  color: var(--text-action-high-blue-france);
+}
+
 .formationLevel {
   font-size: 0.875rem;
   margin: 0.25rem 0;
@@ -474,6 +479,9 @@
   font-size: 0.75rem;
   cursor: pointer;
   text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
 }
 
 .detailToggle:hover {

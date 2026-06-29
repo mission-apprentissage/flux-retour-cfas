@@ -82,7 +82,7 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
       <p className={styles.sectionTitle}>Infos et coordonnées</p>
 
       <p className={styles.infoLine}>
-        Né(e) le {formatDate(effectif.date_de_naissance)} <strong>{age} ans</strong>
+        Né(e) le {formatDate(effectif.date_de_naissance)} {isMineur ? <strong>{age} ans</strong> : `${age} ans`}
       </p>
 
       {isMineur && (
@@ -128,7 +128,7 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
         {effectif.adresse?.code_postal && `(${effectif.adresse.code_postal})`}
       </p>
 
-      <p className={styles.rqthLine}>RQTH {effectif.rqth ? "Oui" : "Non"}</p>
+      <p className={styles.rqthLine}>RQTH {effectif.rqth ? <strong>Oui</strong> : "Non"}</p>
 
       <hr className={styles.separator} />
 

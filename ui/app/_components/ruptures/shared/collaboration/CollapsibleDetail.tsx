@@ -22,9 +22,14 @@ export function CollapsibleDetail({ subtext, subtextClassName, children }: Colla
           type="button"
           className={sharedStyles.detailToggle}
           aria-expanded={isOpen}
+          aria-label={isOpen ? "masquer le détail" : "voir le détail"}
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isOpen ? "masquer le détail" : "voir le détail"}
+          Détails
+          <span
+            className={`fr-icon--sm ${isOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}
+            aria-hidden="true"
+          />
         </button>
       </p>
       {isOpen && children}

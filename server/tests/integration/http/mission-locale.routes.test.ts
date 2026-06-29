@@ -706,6 +706,74 @@ describe("Mission Locale Routes", () => {
       expect(idxCollab).toBeLessThan(idxRdv);
       expect(idxRdv).toBeLessThan(idxMineur);
     });
+
+    // Règle (miroir de la collab CFA) : « Si le jeune a explicitement demandé un RDV
+    // (souhaite_rdv), l'affichage est forcé dans le bloc prioritaire même s'il sortirait
+    // sinon de l'outil — fin de formation, rupture > 180j, ou hors fenêtre d'activation. »
+    // Les docs sont volontairement hors collab (accConjoint:false, isAllowedCollab:false)
+    // pour isoler le signal souhaite_rdv comme seule cause de la visibilité/priorité.
+
+    it("Souhaite un RDV + fin de formation : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 30,
+        statusValue: "FIN_DE_FORMATION",
+        enCours: "FIN_DE_FORMATION",
+      });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    it("Souhaite un RDV + rupture > 180j : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: false, ruptureDaysAgo: 200 });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    it("Souhaite un RDV + rupture hors fenêtre d'activation ML : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 300,
+        mlActivatedDaysAgo: 10,
+      });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    // Témoin : même situation (fin de formation, hors collab) SANS demande de RDV →
+    // le jeune reste masqué. Prouve que souhaite_rdv est bien la cause de l'affichage forcé.
+    it("Sans demande de RDV + fin de formation : non visible (comportement inchangé)", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 30,
+        statusValue: "FIN_DE_FORMATION",
+        enCours: "FIN_DE_FORMATION",
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(false);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
   });
 
   describe("GET /parametres + PUT /parametres (rdv_url)", () => {
