@@ -51,6 +51,11 @@ const getMlBannerStats = async (_req, { locals }) => {
     .aggregate([
       { $match: { souhaite_rdv: true } },
       ...(await missionLocaleBaseAggregation(missionLocale)),
+      // On ne compte que les jeunes encore actionnables : « à traiter » (situation nulle) ou
+      // « à recontacter » (CONTACTE_SANS_RETOUR). On exclut les « déjà traités » (RDV déjà pris,
+      // nouveau projet…), sinon le bandeau « contactez-les » compte des jeunes déjà pris en charge,
+      // absents des listes que le conseiller consulte.
+      { $match: { $or: [{ a_traiter: true }, { injoignable: true }] } },
       { $count: "souhaite_rdv_count" },
     ])
     .next();

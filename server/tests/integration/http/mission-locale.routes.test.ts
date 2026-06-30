@@ -846,7 +846,14 @@ describe("Mission Locale Routes", () => {
       ageYears = 20,
       anneeScolaire = "2025-2026",
       softDeleted = false,
-    }: { souhaiteRdv?: boolean; ageYears?: number; anneeScolaire?: string; softDeleted?: boolean } = {}) =>
+      situation = null,
+    }: {
+      souhaiteRdv?: boolean;
+      ageYears?: number;
+      anneeScolaire?: string;
+      softDeleted?: boolean;
+      situation?: SITUATION_ENUM | null;
+    } = {}) =>
       ({
         _id: new ObjectId(),
         mission_locale_id: ML_ID,
@@ -855,6 +862,7 @@ describe("Mission Locale Routes", () => {
         brevo: {},
         souhaite_rdv: souhaiteRdv,
         ...(softDeleted ? { soft_deleted: true } : {}),
+        ...(situation ? { situation } : {}),
         current_status: { value: "RUPTURANT", date: dayAgo(60) },
         date_rupture: dayAgo(60),
         effectif_snapshot: {
@@ -911,6 +919,23 @@ describe("Mission Locale Routes", () => {
         makeBannerDoc({ anneeScolaire: "2025-2026" }),
         makeBannerDoc({ anneeScolaire: "2022-2023" }),
       ]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Régression SANTERRE : un jeune souhaite_rdv déjà traité (RDV déjà pris) n'apparaît dans aucune
+    // liste actionnable → il ne doit pas être compté par le bandeau « contactez-les ».
+    it("exclut un jeune souhaite_rdv déjà traité (RDV_PRIS)", async () => {
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ situation: SITUATION_ENUM.RDV_PRIS })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Un jeune souhaite_rdv « à recontacter » (CONTACTE_SANS_RETOUR) reste actionnable → compté.
+    it("compte un jeune souhaite_rdv à recontacter (CONTACTE_SANS_RETOUR)", async () => {
+      await insertBannerDocs([makeBannerDoc({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR })]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.data).toEqual({ souhaite_rdv_count: 1 });
