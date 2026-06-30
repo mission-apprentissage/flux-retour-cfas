@@ -831,38 +831,66 @@ describe("Mission Locale Routes", () => {
       await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
     });
 
-    it("compte les effectifs souhaite_rdv=true de la ML courante", async () => {
-      const mlEffectifId1 = new ObjectId();
-      const mlEffectifId2 = new ObjectId();
-      const mlEffectifId3 = new ObjectId();
-      // 2 effectifs souhaite_rdv=true, 1 false → count attendu = 2
-      const baseDoc = {
+    const dayAgo = (n: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - n);
+      return d;
+    };
+
+    // Doc réaliste qui traverse missionLocaleBaseAggregation : âge dans la fenêtre 16-26,
+    // année scolaire active, date_rupture présente. souhaite_rdv force la visibilité ; on fait
+    // varier l'âge / l'année scolaire pour vérifier que le compteur s'aligne désormais sur les
+    // filtres de la liste (et ne compte plus les jeunes que le conseiller ne retrouve pas).
+    const makeBannerDoc = ({
+      souhaiteRdv = true,
+      ageYears = 20,
+      anneeScolaire = "2025-2026",
+      softDeleted = false,
+      situation = null,
+    }: {
+      souhaiteRdv?: boolean;
+      ageYears?: number;
+      anneeScolaire?: string;
+      softDeleted?: boolean;
+      situation?: SITUATION_ENUM | null;
+    } = {}) =>
+      ({
+        _id: new ObjectId(),
         mission_locale_id: ML_ID,
         effectif_id: new ObjectId(),
         created_at: new Date(),
         brevo: {},
-        current_status: {},
+        souhaite_rdv: souhaiteRdv,
+        ...(softDeleted ? { soft_deleted: true } : {}),
+        ...(situation ? { situation } : {}),
+        current_status: { value: "RUPTURANT", date: dayAgo(60) },
+        date_rupture: dayAgo(60),
         effectif_snapshot: {
           _id: new ObjectId(),
           organisme_id: ORGANISME_ID,
           id_erp_apprenant: "x",
           source: "test",
-          annee_scolaire: "2024-2025",
-          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            nom: "X",
+            prenom: "Y",
+            telephone: "0600000000",
+            date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - ageYears)),
+          },
           formation: {},
+          _computed: { statut: { en_cours: "RUPTURANT" } },
           is_lock: false,
           created_at: new Date(),
           updated_at: new Date(),
         },
-      };
-      await missionLocaleEffectifsDb().insertMany(
-        [
-          { ...baseDoc, _id: mlEffectifId1, souhaite_rdv: true } as any,
-          { ...baseDoc, _id: mlEffectifId2, souhaite_rdv: true } as any,
-          { ...baseDoc, _id: mlEffectifId3, souhaite_rdv: false } as any,
-        ],
-        { bypassDocumentValidation: true }
-      );
+      }) as any;
+
+    const insertBannerDocs = (docs: object[]) =>
+      missionLocaleEffectifsDb().insertMany(docs as any, { bypassDocumentValidation: true });
+
+    it("compte les effectifs souhaite_rdv=true visibles de la ML courante", async () => {
+      // 2 effectifs souhaite_rdv=true (dans le périmètre) + 1 false → count attendu = 2
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc(), makeBannerDoc({ souhaiteRdv: false })]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.status).toBe(200);
@@ -870,30 +898,44 @@ describe("Mission Locale Routes", () => {
     });
 
     it("exclut les effectifs soft-deleted", async () => {
-      const baseDoc = {
-        mission_locale_id: ML_ID,
-        effectif_id: new ObjectId(),
-        created_at: new Date(),
-        brevo: {},
-        current_status: {},
-        souhaite_rdv: true,
-        effectif_snapshot: {
-          _id: new ObjectId(),
-          organisme_id: ORGANISME_ID,
-          id_erp_apprenant: "x",
-          source: "test",
-          annee_scolaire: "2024-2025",
-          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
-          formation: {},
-          is_lock: false,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      };
-      await missionLocaleEffectifsDb().insertMany(
-        [{ ...baseDoc, _id: new ObjectId() } as any, { ...baseDoc, _id: new ObjectId(), soft_deleted: true } as any],
-        { bypassDocumentValidation: true }
-      );
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ softDeleted: true })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Régression du bug bandeau ↔ liste : un jeune souhaite_rdv hors fenêtre d'âge (≥ 26 ans)
+    // sort de la liste (filtre âge ML) → il ne doit plus être compté par le bandeau.
+    it("exclut un jeune souhaite_rdv hors fenêtre d'âge (≥ 26 ans)", async () => {
+      await insertBannerDocs([makeBannerDoc({ ageYears: 20 }), makeBannerDoc({ ageYears: 27 })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Idem pour une année scolaire hors de la plage active : comptée avant, exclue maintenant.
+    it("exclut un jeune souhaite_rdv dont l'année scolaire est hors plage", async () => {
+      await insertBannerDocs([
+        makeBannerDoc({ anneeScolaire: "2025-2026" }),
+        makeBannerDoc({ anneeScolaire: "2022-2023" }),
+      ]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Régression SANTERRE : un jeune souhaite_rdv déjà traité (RDV déjà pris) n'apparaît dans aucune
+    // liste actionnable → il ne doit pas être compté par le bandeau « contactez-les ».
+    it("exclut un jeune souhaite_rdv déjà traité (RDV_PRIS)", async () => {
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ situation: SITUATION_ENUM.RDV_PRIS })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Un jeune souhaite_rdv « à recontacter » (CONTACTE_SANS_RETOUR) reste actionnable → compté.
+    it("compte un jeune souhaite_rdv à recontacter (CONTACTE_SANS_RETOUR)", async () => {
+      await insertBannerDocs([makeBannerDoc({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR })]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.data).toEqual({ souhaite_rdv_count: 1 });
