@@ -22,8 +22,6 @@ export function VillesFilter({ options, value, onChange }: VillesFilterProps) {
   const allValues = useMemo(() => options.map((o) => o.value), [options]);
 
   // Sélection "brouillon" (cases cochées dans le dropdown) : toutes les villes cochées par défaut
-  // (RG1/RG2), resynchronisée sur la sélection appliquée à chaque changement externe
-  // (validation, réinitialisation, retrait d'une étiquette).
   const [draft, setDraft] = useState<string[]>(value.length > 0 ? value : allValues);
 
   useEffect(() => {
@@ -49,6 +47,7 @@ export function VillesFilter({ options, value, onChange }: VillesFilterProps) {
             value={draft}
             onChange={setDraft}
             placeholder="Villes"
+            fitContent
             enableSelectAll
             // Fermeture sans valider = abandon : on réaligne le brouillon sur la sélection appliquée.
             onClose={() => setDraft(value.length > 0 ? value : allValues)}

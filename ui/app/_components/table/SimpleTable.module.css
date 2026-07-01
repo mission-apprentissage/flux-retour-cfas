@@ -46,6 +46,14 @@
   transition: background-color 0.2s ease;
 }
 
+.cell:first-child {
+  padding-left: 8px;
+}
+
+.cell:last-child {
+  padding-right: 8px;
+}
+
 .cell.numeric {
   justify-content: flex-end;
 }

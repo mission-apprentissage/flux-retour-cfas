@@ -17,7 +17,7 @@
 }
 
 .selectField {
-  min-width: 260px;
+  width: fit-content;
 }
 
 .tagsRow {

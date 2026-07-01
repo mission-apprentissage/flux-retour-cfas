@@ -132,9 +132,13 @@ export function EffectifsPriorityTable({
               <strong>{effectif.prenom}</strong>
             </div>
           ),
-          formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
+          formation: <span className="line-clamp-2">{effectif.libelle_formation}</span>,
           commune: <CommuneCell commune={effectif.commune} code_postal={effectif.code_postal} />,
-          arrow: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+          arrow: (
+            <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+              <i className="fr-icon-arrow-right-line fr-icon--sm" />
+            </div>
+          ),
         },
       };
     });

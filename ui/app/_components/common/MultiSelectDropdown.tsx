@@ -20,6 +20,7 @@ interface MultiSelectDropdownProps {
   enableSelectAll?: boolean;
   renderFooter?: (api: { close: () => void }) => ReactNode;
   onClose?: () => void;
+  fitContent?: boolean;
 }
 
 function defaultDisplayText(_selected: string[], _options: Option[], placeholder: string): string {
@@ -36,6 +37,7 @@ export function MultiSelectDropdown({
   enableSelectAll = false,
   renderFooter,
   onClose,
+  fitContent = false,
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -119,12 +121,16 @@ export function MultiSelectDropdown({
   const displayText = getDisplayText(value, options, placeholder);
 
   return (
-    <div className={styles.container} ref={dropdownRef} onKeyDown={handleKeyDown}>
+    <div
+      className={`${styles.container} ${fitContent ? styles.containerFit : ""}`}
+      ref={dropdownRef}
+      onKeyDown={handleKeyDown}
+    >
       {label && <label className="fr-label">{label}</label>}
       <div className={styles.selectWrapper}>
         <button
           type="button"
-          className={styles.selectButton}
+          className={`${styles.selectButton} ${fitContent ? styles.selectButtonFit : ""}`}
           onClick={() => {
             if (isOpen) {
               dismiss();
@@ -141,7 +147,11 @@ export function MultiSelectDropdown({
         </button>
 
         {isOpen && (
-          <div className={styles.dropdown} role="listbox" aria-multiselectable="true">
+          <div
+            className={`${styles.dropdown} ${fitContent ? styles.dropdownFit : ""}`}
+            role="listbox"
+            aria-multiselectable="true"
+          >
             <div className={styles.dropdownContent}>
               {enableSelectAll && options.length > 1 && (
                 <div
