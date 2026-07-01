@@ -121,12 +121,13 @@ const getVillesMissionLocale = async (_req, { locals }) => {
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
-  const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const { nom_liste, code_postal } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId);
+  const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId, codesPostaux);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {

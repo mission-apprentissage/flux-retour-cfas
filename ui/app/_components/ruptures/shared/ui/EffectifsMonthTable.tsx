@@ -148,14 +148,17 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
     element: buildRowData(effectif, listType, pathname?.startsWith("/cfa") || false),
   }));
 
+  // Transmet le filtre villes à la fiche pour que le calcul précédent/suivant reste dans le sous-ensemble filtré.
+  const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
+
   const getRowLink = (rawData: EffectifData) => {
     if (pathname && pathname.startsWith("/cfa")) {
-      return `/cfa/${rawData.id}?nom_liste=${listType}`;
+      return `/cfa/${rawData.id}?nom_liste=${listType}${cpQuery}`;
     }
 
     return user.organisation.type === "ADMINISTRATEUR" && mlId
-      ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}`
-      : `/mission-locale/${rawData.id}?nom_liste=${listType}`;
+      ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}${cpQuery}`
+      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}`;
   };
 
   const monthHeaderClassName = styles.monthSection;

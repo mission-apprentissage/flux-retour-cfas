@@ -945,11 +945,16 @@ export const missionLocaleBaseAggregation = async (
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
-  nom_liste: API_EFFECTIF_LISTE
+  nom_liste: API_EFFECTIF_LISTE,
+  codesPostaux?: string[]
 ) => {
   const aggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(nom_liste, organisation.type),
+    // Filtre villes : restreint le précédent/suivant au sous-ensemble filtré côté liste.
+    ...(codesPostaux && codesPostaux.length > 0
+      ? [{ $match: { "effectif_snapshot.apprenant.adresse.code_postal": { $in: codesPostaux } } }]
+      : []),
     {
       $sort: getSortedRulesByListeType(nom_liste),
     },
@@ -1206,7 +1211,8 @@ export const getEffectifFromMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
-  userId?: ObjectId
+  userId?: ObjectId,
+  codesPostaux?: string[]
 ) => {
   const aggregation = [
     ...(await generateOrganisationMatchStage(organisation)),
@@ -1319,7 +1325,8 @@ export const getEffectifFromMissionLocaleId = async (
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
     organisation,
     new ObjectId(effectifId),
-    nom_liste
+    nom_liste,
+    codesPostaux
   );
   return { effectif, ...next };
 };

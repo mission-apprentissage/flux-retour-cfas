@@ -218,9 +218,11 @@ export function EffectifsPriorityTable({
             columns={columns}
             emptyMessage="Aucun élément prioritaire"
             getRowLink={(rowData) => {
+              // Transmet le filtre villes à la fiche pour un précédent/suivant cohérent avec le filtre.
+              const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
               return user.organisation.type === "ADMINISTRATEUR" && mlId
-                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}`
-                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}`;
+                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`
+                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`;
             }}
           />
           {hasMoreItems && !isFiltering && (

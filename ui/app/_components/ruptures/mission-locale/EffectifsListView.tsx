@@ -2,7 +2,7 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
@@ -66,10 +66,34 @@ export function EffectifsListView({
   initialStatut,
   initialRuptureDate,
 }: EffectifsListViewProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPostalCodes, setSelectedPostalCodes] = useState<string[]>([]);
+  // Le filtre villes est porté par l'URL (?cp=80100,80120) pour survivre à la navigation
+  // vers une fiche puis au retour, et pour être transmis au calcul précédent/suivant.
+  const [selectedPostalCodes, setSelectedPostalCodes] = useState<string[]>(() => {
+    const cp = searchParams?.get("cp");
+    return cp ? cp.split(",").filter(Boolean) : [];
+  });
   const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  const handlePostalCodesChange = useCallback(
+    (codes: string[]) => {
+      setSelectedPostalCodes(codes);
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      if (codes.length > 0) {
+        params.set("cp", codes.join(","));
+      } else {
+        params.delete("cp");
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : (pathname ?? ""), { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   useEffect(() => {
     trackPlausibleEvent("ml_liste_a_traiter_ouverte");
@@ -118,7 +142,6 @@ export function EffectifsListView({
   const [selectedSection, setSelectedSection] = useState<SelectedSection>(getInitialSection(initialStatut || null));
   const [activeAnchor, setActiveAnchor] = useState("");
 
-  const pathname = usePathname();
   const isCfaPage = pathname?.startsWith("/cfa");
 
   const aTraiter = data.a_traiter || [];
@@ -410,7 +433,7 @@ export function EffectifsListView({
                 showVillesFilter={!isCfaPage}
                 postalCodeOptions={postalCodeOptions}
                 selectedPostalCodes={selectedPostalCodes}
-                onPostalCodesChange={setSelectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>
@@ -442,7 +465,7 @@ export function EffectifsListView({
                 showVillesFilter={!isCfaPage}
                 postalCodeOptions={postalCodeOptions}
                 selectedPostalCodes={selectedPostalCodes}
-                onPostalCodesChange={setSelectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>
@@ -477,7 +500,7 @@ export function EffectifsListView({
                 showVillesFilter={!isCfaPage}
                 postalCodeOptions={postalCodeOptions}
                 selectedPostalCodes={selectedPostalCodes}
-                onPostalCodesChange={setSelectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>
