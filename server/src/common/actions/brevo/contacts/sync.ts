@@ -2,7 +2,6 @@ import { promises as fs } from "node:fs";
 
 import { ObjectId } from "bson";
 
-import logger from "@/common/logger";
 import {
   BrevoContact,
   ensureBrevoAttributes,
@@ -103,7 +102,7 @@ export const syncContactList = async (params: {
  */
 export const syncSingleContact = async (userId: ObjectId | string) => {
   const _id = typeof userId === "string" ? new ObjectId(userId) : userId;
-  const result = await syncContactList({ slug: "tba-contacts", userIds: [_id] });
-  logger.info({ userId: String(_id), count: result.count }, "Brevo single contact sync done");
-  return result;
+  // Le log de complétion est émis par le handler `brevo-contacts:sync-one` (comme pour la
+  // synchro full via son handler), afin d'éviter un double 'Brevo single contact sync done'.
+  return await syncContactList({ slug: "tba-contacts", userIds: [_id] });
 };

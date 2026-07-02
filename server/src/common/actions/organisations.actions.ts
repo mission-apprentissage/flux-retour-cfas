@@ -399,6 +399,11 @@ export async function rejectMembre(ctx: AuthContext, userId: string): Promise<vo
     }
   }
 
+  // Limite connue : la synchro Brevo est un upsert pur (jamais de retrait de contact,
+  // cf. sync.ts). Depuis l'élargissement aux statuts PENDING, un compte rejeté a pu être
+  // poussé dans Brevo ; sa suppression ici ne le retire PAS de la liste Brevo. Acceptable
+  // en l'état (hors périmètre 'changement de statut') ; à traiter le jour où un mécanisme
+  // de suppression/désinscription Brevo devient nécessaire.
   await usersMigrationDb().deleteOne({ _id: user._id });
   await sendEmail(user.email, "notify_access_rejected", {
     recipient: {
@@ -432,6 +437,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
     }
   }
 
+  // Idem rejectMembre : pas de retrait du contact côté Brevo (synchro upsert-only).
   await usersMigrationDb().deleteOne({ _id: userObjectId, organisation_id: ctx.organisation_id });
 }
 
