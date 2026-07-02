@@ -8,11 +8,17 @@ import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 import { MlSuccessCard } from "@/app/_components/card/MlSuccessCard";
 import { SimpleTable } from "@/app/_components/table/SimpleTable";
 import { useAuth } from "@/app/_context/UserContext";
-import { formatMonthAndYear, anchorFromLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.utils";
+import {
+  formatMonthAndYear,
+  anchorFromLabel,
+  DEFAULT_ITEMS_TO_SHOW,
+  matchesPostalCodes,
+} from "@/app/_utils/ruptures.utils";
 import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
 import { matchesSearchTerm } from "../utils/searchUtils";
 
+import { CommuneCell } from "./CommuneCell";
 import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 import notificationStyles from "./NotificationBadge.module.css";
@@ -23,6 +29,7 @@ type EffectifsMonthTableProps = {
   handleSectionChange?: (section: SelectedSection) => void;
   listType: IMissionLocaleEffectifList;
   onDownloadMonth?: (month: string, listType: IMissionLocaleEffectifList) => void;
+  selectedPostalCodes?: string[];
 };
 
 type ColumnData = {
@@ -57,8 +64,13 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
         </div>
       </div>
     ),
-    formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-    icon: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+    formation: <span className="line-clamp-2">{effectif.libelle_formation}</span>,
+    commune: <CommuneCell commune={effectif.commune} code_postal={effectif.code_postal} />,
+    icon: (
+      <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+        <i className="fr-icon-arrow-right-line fr-icon--sm" />
+      </div>
+    ),
   };
 }
 
@@ -85,6 +97,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   handleSectionChange,
   listType,
   onDownloadMonth,
+  selectedPostalCodes = [],
 }: EffectifsMonthTableProps) {
   const { user } = useAuth();
   const params = useParams();
@@ -95,9 +108,6 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const anchorId = anchorFromLabel(labelString);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const hasMoreItems = monthItem.data.length > DEFAULT_ITEMS_TO_SHOW;
-  const remainingItems = monthItem.data.length - DEFAULT_ITEMS_TO_SHOW;
-
   function getColumns(listType: API_EFFECTIF_LISTE): ColumnData[] {
     switch (listType) {
       case API_EFFECTIF_LISTE.A_TRAITER:
@@ -106,6 +116,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
         return [
           { label: "Apprenant", dataKey: "name", width: 250 },
           { label: "Formation", dataKey: "formation", width: "auto" },
+          ...(isCfaPage ? [] : [{ label: "Commune", dataKey: "commune", width: 120 }]),
           { label: "Statut", dataKey: "badge", width: 230 },
           { label: "", dataKey: "icon", width: 40 },
         ];
@@ -117,11 +128,18 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   const columns: ColumnData[] = getColumns(listType);
 
-  const filteredData = searchTerm
-    ? monthItem.data.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm))
-    : monthItem.data;
+  const isFiltering = !!searchTerm || selectedPostalCodes.length > 0;
 
-  const dataToShow = searchTerm
+  const filteredData = monthItem.data.filter(
+    (effectif) =>
+      (!searchTerm || matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm)) &&
+      matchesPostalCodes(effectif, selectedPostalCodes)
+  );
+
+  const hasMoreItems = filteredData.length > DEFAULT_ITEMS_TO_SHOW;
+  const remainingItems = filteredData.length - DEFAULT_ITEMS_TO_SHOW;
+
+  const dataToShow = isFiltering
     ? filteredData
     : filteredData.slice(0, isExpanded ? filteredData.length : DEFAULT_ITEMS_TO_SHOW);
 
@@ -130,14 +148,17 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
     element: buildRowData(effectif, listType, pathname?.startsWith("/cfa") || false),
   }));
 
+  // Transmet le filtre villes à la fiche pour que le calcul précédent/suivant reste dans le sous-ensemble filtré.
+  const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
+
   const getRowLink = (rawData: EffectifData) => {
     if (pathname && pathname.startsWith("/cfa")) {
-      return `/cfa/${rawData.id}?nom_liste=${listType}`;
+      return `/cfa/${rawData.id}?nom_liste=${listType}${cpQuery}`;
     }
 
     return user.organisation.type === "ADMINISTRATEUR" && mlId
-      ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}`
-      : `/mission-locale/${rawData.id}?nom_liste=${listType}`;
+      ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}${cpQuery}`
+      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}`;
   };
 
   const monthHeaderClassName = styles.monthSection;
@@ -188,7 +209,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
               getRowLink={getRowLink}
               emptyMessage="Aucun élément à afficher"
             />
-            {hasMoreItems && !searchTerm && (
+            {hasMoreItems && !isFiltering && (
               <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
                 <Button
                   iconId={isExpanded ? "ri-subtract-line" : "ri-add-line"}

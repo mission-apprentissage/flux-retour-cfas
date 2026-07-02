@@ -4,10 +4,12 @@ import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { memo } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
+import { PostalCodeOption } from "@/app/_utils/ruptures.utils";
 import { EffectifPriorityData, MonthItem, SelectedSection } from "@/common/types/ruptures";
 
 import { EffectifsMonthTable } from "./EffectifsMonthTable";
 import { EffectifsPriorityTable } from "./EffectifsPriorityTable";
+import { VillesFilter } from "./VillesFilter";
 
 type EffectifsSearchableTableProps = {
   data: MonthItem[];
@@ -19,6 +21,10 @@ type EffectifsSearchableTableProps = {
   handleSectionChange?: (section: SelectedSection) => void;
   listType: IMissionLocaleEffectifList;
   onDownloadMonth?: (month: string, listType: IMissionLocaleEffectifList) => void;
+  showVillesFilter?: boolean;
+  postalCodeOptions?: PostalCodeOption[];
+  selectedPostalCodes?: string[];
+  onPostalCodesChange?: (value: string[]) => void;
 };
 
 export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
@@ -31,6 +37,10 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   handleSectionChange,
   listType,
   onDownloadMonth,
+  showVillesFilter = false,
+  postalCodeOptions = [],
+  selectedPostalCodes = [],
+  onPostalCodesChange,
 }: EffectifsSearchableTableProps) {
   return (
     <div>
@@ -49,6 +59,9 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
           )}
         />
       </div>
+      {showVillesFilter && postalCodeOptions.length > 0 && onPostalCodesChange && (
+        <VillesFilter options={postalCodeOptions} value={selectedPostalCodes} onChange={onPostalCodesChange} />
+      )}
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
         <div style={{ marginBottom: "2rem" }}>
           <EffectifsPriorityTable
@@ -56,6 +69,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
             searchTerm={searchTerm}
             hadEffectifsPrioritaires={hadEffectifsPrioritaires}
             listType={listType}
+            selectedPostalCodes={selectedPostalCodes}
           />
         </div>
       )}
@@ -67,6 +81,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
           handleSectionChange={handleSectionChange}
           listType={listType}
           onDownloadMonth={onDownloadMonth}
+          selectedPostalCodes={selectedPostalCodes}
         />
       ))}
     </div>

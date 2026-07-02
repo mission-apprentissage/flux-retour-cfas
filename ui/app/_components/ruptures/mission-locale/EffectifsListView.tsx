@@ -2,7 +2,7 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
@@ -12,22 +12,25 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import {
   sortDataByMonthDescending,
-  getTotalEffectifs,
   formatMonthAndYear,
   anchorFromLabel,
   get180DaysAgo,
+  matchesPostalCodes,
+  PostalCodeOption,
 } from "@/app/_utils/ruptures.utils";
 import { _get } from "@/common/httpClient";
 import { MonthItem, MonthsData, SelectedSection, EffectifPriorityData } from "@/common/types/ruptures";
 
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
 import notificationStyles from "../shared/ui/NotificationBadge.module.css";
+import { matchesSearchTerm } from "../shared/utils/searchUtils";
 
 import { DownloadSection } from "./DownloadSection";
 import { useMonthDownload } from "./useMonthDownload";
 
 interface EffectifsListViewProps {
   data: MonthsData;
+  postalCodeOptions?: PostalCodeOption[];
   initialStatut?: string | null;
   initialRuptureDate?: string | null;
 }
@@ -57,10 +60,40 @@ const SECTION_TO_LIST_TYPE: Record<SelectedSection, IMissionLocaleEffectifList> 
 
 const sectionToListType = (section: SelectedSection): IMissionLocaleEffectifList => SECTION_TO_LIST_TYPE[section];
 
-export function EffectifsListView({ data, initialStatut, initialRuptureDate }: EffectifsListViewProps) {
+export function EffectifsListView({
+  data,
+  postalCodeOptions = [],
+  initialStatut,
+  initialRuptureDate,
+}: EffectifsListViewProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState("");
+  // Le filtre villes est porté par l'URL (?cp=80100,80120) pour survivre à la navigation
+  // vers une fiche puis au retour, et pour être transmis au calcul précédent/suivant.
+  const [selectedPostalCodes, setSelectedPostalCodes] = useState<string[]>(() => {
+    const cp = searchParams?.get("cp");
+    return cp ? cp.split(",").filter(Boolean) : [];
+  });
   const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+
+  const handlePostalCodesChange = useCallback(
+    (codes: string[]) => {
+      setSelectedPostalCodes(codes);
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      if (codes.length > 0) {
+        params.set("cp", codes.join(","));
+      } else {
+        params.delete("cp");
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : (pathname ?? ""), { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   useEffect(() => {
     trackPlausibleEvent("ml_liste_a_traiter_ouverte");
@@ -109,7 +142,6 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const [selectedSection, setSelectedSection] = useState<SelectedSection>(getInitialSection(initialStatut || null));
   const [activeAnchor, setActiveAnchor] = useState("");
 
-  const pathname = usePathname();
   const isCfaPage = pathname?.startsWith("/cfa");
 
   const aTraiter = data.a_traiter || [];
@@ -120,9 +152,24 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
   const groupedInjoignable = useMemo(() => sortDataByMonthDescending(injoignableList), [injoignableList]);
   const sortedDataTraite = useMemo(() => sortDataByMonthDescending(dejaTraite), [dejaTraite]);
 
-  const totalToTreat = useMemo(() => getTotalEffectifs(groupedDataATraiter), [groupedDataATraiter]);
-  const totalTraite = useMemo(() => getTotalEffectifs(sortedDataTraite), [sortedDataTraite]);
-  const totalInjoignable = useMemo(() => getTotalEffectifs(groupedInjoignable), [groupedInjoignable]);
+  const countVisibleInMonth = useCallback(
+    (monthItem: MonthItem) =>
+      monthItem.data.filter(
+        (effectif) =>
+          (!searchTerm || matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm)) &&
+          matchesPostalCodes(effectif, selectedPostalCodes)
+      ).length,
+    [searchTerm, selectedPostalCodes]
+  );
+
+  const countVisible = useCallback(
+    (months: MonthItem[]) => months.reduce((sum, month) => sum + countVisibleInMonth(month), 0),
+    [countVisibleInMonth]
+  );
+
+  const totalToTreat = useMemo(() => countVisible(groupedDataATraiter), [groupedDataATraiter, countVisible]);
+  const totalTraite = useMemo(() => countVisible(sortedDataTraite), [sortedDataTraite, countVisible]);
+  const totalInjoignable = useMemo(() => countVisible(groupedInjoignable), [groupedInjoignable, countVisible]);
 
   const countUnreadNotifications = (items: MonthItem[]): number => {
     return items.reduce((total, month) => {
@@ -190,11 +237,12 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     const getItems = (items: MonthItem[], section: SelectedSection) => {
       if (selectedSection !== section) return [];
       return items.map((monthItem) => {
-        const label = buildMonthLabel(monthItem.month, monthItem.data.length, section);
+        const monthCount = countVisibleInMonth(monthItem);
+        const label = buildMonthLabel(monthItem.month, monthCount, section);
         const anchorId = anchorFromLabel(label.labelString);
         const unreadCount = countUnreadNotificationsForMonth(monthItem);
         const displayText =
-          monthItem.data.length > 0 ? (
+          monthCount > 0 ? (
             <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <strong>
                 {monthItem.month === "plus-de-180-j" ? (
@@ -202,7 +250,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 ) : (
                   <>
                     {label.labelElement}
-                    {` (${monthItem.data.length})`}
+                    {` (${monthCount})`}
                   </>
                 )}
               </strong>
@@ -298,6 +346,7 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
     totalToTreat,
     totalInjoignable,
     totalTraite,
+    countVisibleInMonth,
     isCfaPage,
   ]);
 
@@ -381,6 +430,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.A_TRAITER}
                 onDownloadMonth={downloadMonth}
+                showVillesFilter={!isCfaPage}
+                postalCodeOptions={postalCodeOptions}
+                selectedPostalCodes={selectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>
@@ -409,6 +462,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 onSearchChange={setSearchTerm}
                 listType={API_EFFECTIF_LISTE.TRAITE}
                 onDownloadMonth={downloadMonth}
+                showVillesFilter={!isCfaPage}
+                postalCodeOptions={postalCodeOptions}
+                selectedPostalCodes={selectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>
@@ -440,6 +497,10 @@ export function EffectifsListView({ data, initialStatut, initialRuptureDate }: E
                 handleSectionChange={handleSectionChange}
                 listType={API_EFFECTIF_LISTE.INJOIGNABLE}
                 onDownloadMonth={downloadMonth}
+                showVillesFilter={!isCfaPage}
+                postalCodeOptions={postalCodeOptions}
+                selectedPostalCodes={selectedPostalCodes}
+                onPostalCodesChange={handlePostalCodesChange}
               />
             </SuspenseWrapper>
           </>

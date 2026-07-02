@@ -29,7 +29,9 @@ export function PageHeader({
   const searchParams = useSearchParams();
   const rawList = searchParams ? (searchParams.get("nom_liste") as API_EFFECTIF_LISTE | null) : null;
   const nomListe = rawList || API_EFFECTIF_LISTE.A_TRAITER;
-  const listQuery = `?nom_liste=${nomListe}`;
+  // Conserve le filtre villes en naviguant entre dossiers (précédent/suivant).
+  const codePostal = searchParams?.get("cp") || null;
+  const listQuery = `?nom_liste=${nomListe}${codePostal ? `&cp=${codePostal}` : ""}`;
 
   const basePath = (() => {
     if (pathname && pathname.startsWith("/cfa")) {

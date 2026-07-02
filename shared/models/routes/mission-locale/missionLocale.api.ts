@@ -20,6 +20,8 @@ export const effectifsParMoisFiltersMissionLocaleSchema = {
 
 export const effectifMissionLocaleListe = {
   nom_liste: zApiEffectifListeEnum,
+  // Filtre villes (codes postaux séparés par des virgules) pour restreindre le calcul précédent/suivant.
+  code_postal: z.string().optional(),
 };
 
 export type IEffectifsParMoisFiltersMissionLocaleAPISchema = z.infer<

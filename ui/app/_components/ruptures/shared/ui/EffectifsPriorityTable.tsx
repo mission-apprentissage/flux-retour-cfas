@@ -2,19 +2,20 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { SimpleTable } from "@/app/_components/table/SimpleTable";
 import { useAuth } from "@/app/_context/UserContext";
-import { getPriorityLabel, DEFAULT_ITEMS_TO_SHOW } from "@/app/_utils/ruptures.utils";
+import { getPriorityLabel, DEFAULT_ITEMS_TO_SHOW, matchesPostalCodes } from "@/app/_utils/ruptures.utils";
 import { EffectifPriorityData } from "@/common/types/ruptures";
 
 import { isMissionLocaleUser } from "../utils";
 import { matchesSearchTerm } from "../utils/searchUtils";
 
+import { CommuneCell } from "./CommuneCell";
 import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
 
@@ -23,6 +24,7 @@ type EffectifsPriorityTableProps = {
   searchTerm: string;
   hadEffectifsPrioritaires?: boolean;
   listType?: IMissionLocaleEffectifList;
+  selectedPostalCodes?: string[];
 };
 
 function PriorityBadge({
@@ -70,32 +72,43 @@ export function EffectifsPriorityTable({
   searchTerm,
   hadEffectifsPrioritaires = false,
   listType,
+  selectedPostalCodes = [],
 }: EffectifsPriorityTableProps) {
   const { user } = useAuth();
   const params = useParams();
+  const pathname = usePathname();
+  const isCfaPage = pathname?.startsWith("/cfa");
   const mlId = params?.id as string | undefined;
   const [infoOpen, setInfoOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const PRIORITY_LIST_NAME = `${listType}_${API_EFFECTIF_LISTE.PRIORITAIRE}`;
 
-  const hasMoreItems = priorityData.length > DEFAULT_ITEMS_TO_SHOW;
-  const remainingItems = priorityData.length - DEFAULT_ITEMS_TO_SHOW;
-
   const columns = useMemo(() => {
     return [
       { label: "", dataKey: "name", width: 250 },
       { label: "", dataKey: "formation", width: "auto" },
+      ...(isCfaPage ? [] : [{ label: "", dataKey: "commune", width: 120 }]),
       { label: "", dataKey: "badge", width: 230 },
       { label: "", dataKey: "arrow", width: 40 },
     ];
-  }, []);
+  }, [isCfaPage]);
 
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return priorityData;
-    return priorityData.filter((effectif) => matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm));
-  }, [priorityData, searchTerm]);
+  const isFiltering = !!searchTerm || selectedPostalCodes.length > 0;
 
-  const dataToShow = searchTerm
+  const filteredData = useMemo(
+    () =>
+      priorityData.filter(
+        (effectif) =>
+          (!searchTerm || matchesSearchTerm(effectif.nom, effectif.prenom, searchTerm)) &&
+          matchesPostalCodes(effectif, selectedPostalCodes)
+      ),
+    [priorityData, searchTerm, selectedPostalCodes]
+  );
+
+  const hasMoreItems = filteredData.length > DEFAULT_ITEMS_TO_SHOW;
+  const remainingItems = filteredData.length - DEFAULT_ITEMS_TO_SHOW;
+
+  const dataToShow = isFiltering
     ? filteredData
     : isExpanded
       ? filteredData
@@ -115,11 +128,17 @@ export function EffectifsPriorityTable({
           name: (
             <div style={{ display: "flex", flexDirection: "column" }}>
               <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />
-              <strong>{`${effectif.nom} ${effectif.prenom}`}</strong>
+              <strong>{effectif.nom}</strong>
+              <strong>{effectif.prenom}</strong>
             </div>
           ),
-          formation: <span className="line-clamp-1">{effectif.libelle_formation}</span>,
-          arrow: <i className="fr-icon-arrow-right-line fr-icon--sm" />,
+          formation: <span className="line-clamp-2">{effectif.libelle_formation}</span>,
+          commune: <CommuneCell commune={effectif.commune} code_postal={effectif.code_postal} />,
+          arrow: (
+            <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+              <i className="fr-icon-arrow-right-line fr-icon--sm" />
+            </div>
+          ),
         },
       };
     });
@@ -164,7 +183,7 @@ export function EffectifsPriorityTable({
       {priorityData.length > 0 && (
         <div style={{ padding: "1rem" }}>
           <h3 style={{ color: "var(--text-title-blue-france)" }}>
-            Dossiers à traiter en priorité ({priorityData.length})
+            Dossiers à traiter en priorité ({filteredData.length})
           </h3>
           {isMissionLocaleUser(user.organisation.type) && (
             <div style={{ marginBottom: "16px" }}>
@@ -199,12 +218,14 @@ export function EffectifsPriorityTable({
             columns={columns}
             emptyMessage="Aucun élément prioritaire"
             getRowLink={(rowData) => {
+              // Transmet le filtre villes à la fiche pour un précédent/suivant cohérent avec le filtre.
+              const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
               return user.organisation.type === "ADMINISTRATEUR" && mlId
-                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}`
-                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}`;
+                ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`
+                : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`;
             }}
           />
-          {hasMoreItems && !searchTerm && (
+          {hasMoreItems && !isFiltering && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
               <Button
                 iconId={isExpanded ? "ri-subtract-line" : "ri-add-line"}
