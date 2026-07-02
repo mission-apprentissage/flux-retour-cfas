@@ -27,6 +27,7 @@ import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
+import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
@@ -379,6 +380,9 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
       organisationLabel: await buildOrganisationLabel(user.organisation_id),
     }
   );
+
+  // Le compte passe à CONFIRMED : on synchronise le contact Brevo.
+  await enqueueBrevoContactSync(user._id);
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {
@@ -395,6 +399,11 @@ export async function rejectMembre(ctx: AuthContext, userId: string): Promise<vo
     }
   }
 
+  // Limite connue : la synchro Brevo est un upsert pur (jamais de retrait de contact,
+  // cf. sync.ts). Depuis l'élargissement aux statuts PENDING, un compte rejeté a pu être
+  // poussé dans Brevo ; sa suppression ici ne le retire PAS de la liste Brevo. Acceptable
+  // en l'état (hors périmètre 'changement de statut') ; à traiter le jour où un mécanisme
+  // de suppression/désinscription Brevo devient nécessaire.
   await usersMigrationDb().deleteOne({ _id: user._id });
   await sendEmail(user.email, "notify_access_rejected", {
     recipient: {
@@ -428,6 +437,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
     }
   }
 
+  // Idem rejectMembre : pas de retrait du contact côté Brevo (synchro upsert-only).
   await usersMigrationDb().deleteOne({ _id: userObjectId, organisation_id: ctx.organisation_id });
 }
 

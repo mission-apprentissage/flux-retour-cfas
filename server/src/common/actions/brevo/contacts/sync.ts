@@ -1,5 +1,7 @@
 import { promises as fs } from "node:fs";
 
+import { ObjectId } from "bson";
+
 import {
   BrevoContact,
   ensureBrevoAttributes,
@@ -41,10 +43,16 @@ export const previewContactList = async (params: { slug: string }) => {
  *   créées/rafraîchies en DB (les tokens vivent en DB, pas dans des emails déjà envoyés).
  * - `dumpTo: <path>` : écrit le payload complet en JSON pour inspection.
  */
-export const syncContactList = async (params: { slug: string; dryRun?: boolean; dumpTo?: string }) => {
+export const syncContactList = async (params: {
+  slug: string;
+  dryRun?: boolean;
+  dumpTo?: string;
+  // Restreint la synchro à ces utilisateurs (synchro unitaire). Absent → full.
+  userIds?: ObjectId[];
+}) => {
   const contactList = getContactList(params.slug);
 
-  const contacts = await contactList.fetchContacts();
+  const contacts = await contactList.fetchContacts(params.userIds?.length ? { userIds: params.userIds } : undefined);
   const listName = contactList.buildListName();
 
   if (params.dumpTo) {
@@ -84,4 +92,17 @@ export const syncContactList = async (params: { slug: string; dryRun?: boolean; 
     failedBatches,
     attributes: attributesReport,
   };
+};
+
+/**
+ * Synchro Brevo d'UN SEUL utilisateur (réutilise tout le pipeline `tba-contacts`).
+ * No-op silencieux si l'utilisateur n'est pas dans le périmètre (statut/orga non
+ * éligibles, `unsubscribe:true`) : le `$match` en amont renvoie 0 contact et
+ * `importContactsToBrevoList([])` ne fait rien.
+ */
+export const syncSingleContact = async (userId: ObjectId | string) => {
+  const _id = typeof userId === "string" ? new ObjectId(userId) : userId;
+  // Le log de complétion est émis par le handler `brevo-contacts:sync-one` (comme pour la
+  // synchro full via son handler), afin d'éviter un double 'Brevo single contact sync done'.
+  return await syncContactList({ slug: "tba-contacts", userIds: [_id] });
 };

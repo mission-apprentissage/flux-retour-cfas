@@ -443,6 +443,18 @@ program
   });
 
 program
+  .command("brevo-contacts:sync-one")
+  .description("Synchronise un seul utilisateur vers Brevo (par userId)")
+  .requiredOption("--user-id <id>", "ObjectId de l'utilisateur (usersMigration._id)")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    return createJobAction("brevo-contacts:sync-one")({
+      userId: options.userId,
+      queued: options.queued ?? false,
+    });
+  });
+
+program
   .command("job:run")
   .description("Run a job")
   .requiredOption("-n, --name <string>", "Job name")
