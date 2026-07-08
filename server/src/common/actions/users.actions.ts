@@ -468,6 +468,7 @@ export const removeUser = async (_idStr) => {
     throw new Error("Unable to find user");
   }
 
+  // Idem rejectMembre : pas de retrait du contact côté Brevo (synchro upsert-only).
   return await usersMigrationDb().deleteOne({ _id });
 };
 

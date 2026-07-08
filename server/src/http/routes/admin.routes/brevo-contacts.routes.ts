@@ -4,12 +4,18 @@ import { z } from "zod";
 
 import { getContactList, listContactLists } from "@/common/actions/brevo/contacts/registry";
 import { previewContactList, syncContactList } from "@/common/actions/brevo/contacts/sync";
+import { getBrevoSyncSettings, setBrevoSyncSetting } from "@/common/actions/brevo/contacts/sync-settings.actions";
 import { brevoContactListDb } from "@/common/model/collections";
 import { checkBrevoHealth, serializeBrevoAttributes } from "@/common/services/brevo/brevo";
 import { returnResult } from "@/http/middlewares/helpers";
 
 const syncBodySchema = z.object({
   dryRun: z.boolean().default(false),
+});
+
+const syncSettingsBodySchema = z.object({
+  field: z.enum(["dailyFullSyncEnabled", "instantSyncEnabled", "eventsEnabled"]),
+  enabled: z.boolean(),
 });
 
 const ensureContactListExists = (slug: string) => {
@@ -36,6 +42,23 @@ export default () => {
     "/health",
     returnResult(async () => {
       return await checkBrevoHealth();
+    })
+  );
+
+  // Pilotage des synchros Brevo (toggles persistés, activables en prod uniquement
+  // — la garde est dans `setBrevoSyncSetting`).
+  router.get(
+    "/sync-settings",
+    returnResult(async () => {
+      return await getBrevoSyncSettings();
+    })
+  );
+
+  router.put(
+    "/sync-settings",
+    returnResult(async (req) => {
+      const { field, enabled } = syncSettingsBodySchema.parse(req.body ?? {});
+      return await setBrevoSyncSetting(field, enabled, req.user.email);
     })
   );
 

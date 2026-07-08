@@ -2,7 +2,9 @@ import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
-import { syncContactList } from "@/common/actions/brevo/contacts/sync";
+import { syncContactList, syncSingleContact } from "@/common/actions/brevo/contacts/sync";
+import { isBrevoDailyFullSyncActive } from "@/common/actions/brevo/contacts/sync-settings.actions";
+import { trackBrevoEvent } from "@/common/actions/brevo/events/track";
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
@@ -218,6 +220,18 @@ export async function setupJobProcessor() {
                   payload: { limit: PREQUALIF_DAILY_CRON_CAP },
                   queued: true,
                 });
+                return 0;
+              },
+            },
+
+            "Synchro Brevo de tous les contacts TBA à 5h": {
+              cron_string: "0 5 * * *",
+              handler: async () => {
+                if (!(await isBrevoDailyFullSyncActive())) {
+                  logger.info("Brevo daily full sync désactivé (toggle/hors prod), skip cron sync full");
+                  return 0;
+                }
+                await addJob({ name: "brevo-contacts:sync", payload: { slug: "tba-contacts" }, queued: true });
                 return 0;
               },
             },
@@ -709,6 +723,29 @@ export async function setupJobProcessor() {
           });
           logger.info({ contactList: payload.slug, ...result }, "Brevo contact list sync done");
           return result;
+        },
+      },
+      "brevo-contacts:sync-one": {
+        handler: async (job) => {
+          const payload = job.payload as { userId?: string } | undefined;
+          if (!payload?.userId) {
+            throw new Error("userId est requis");
+          }
+          const result = await syncSingleContact(payload.userId);
+          if (result) {
+            logger.info({ userId: payload.userId, ...result }, "Brevo single contact sync done");
+          }
+          return result;
+        },
+      },
+      "brevo-events:track": {
+        handler: async (job) => {
+          const payload = job.payload as { key?: string; userId?: string } | undefined;
+          if (!payload?.key || !payload?.userId) {
+            throw new Error("key et userId sont requis");
+          }
+          await trackBrevoEvent(payload.key, { userId: payload.userId });
+          return { key: payload.key, userId: payload.userId };
         },
       },
     },

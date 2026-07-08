@@ -1,5 +1,8 @@
 import { promises as fs } from "node:fs";
 
+import { ObjectId } from "bson";
+
+import logger from "@/common/logger";
 import {
   BrevoContact,
   ensureBrevoAttributes,
@@ -9,6 +12,7 @@ import {
 
 import { getOrCreateContactList } from "./list.actions";
 import { getContactList } from "./registry";
+import { isBrevoInstantSyncActive } from "./sync-settings.actions";
 
 // Sample affiché dans l'UI admin : on applique la même sérialisation que celle
 // envoyée à Brevo (dates en `yyyy-MM-dd`, `undefined` filtré) pour que l'aperçu
@@ -41,10 +45,16 @@ export const previewContactList = async (params: { slug: string }) => {
  *   créées/rafraîchies en DB (les tokens vivent en DB, pas dans des emails déjà envoyés).
  * - `dumpTo: <path>` : écrit le payload complet en JSON pour inspection.
  */
-export const syncContactList = async (params: { slug: string; dryRun?: boolean; dumpTo?: string }) => {
+export const syncContactList = async (params: {
+  slug: string;
+  dryRun?: boolean;
+  dumpTo?: string;
+  // Restreint la synchro à ces utilisateurs (synchro unitaire). Absent → full.
+  userIds?: ObjectId[];
+}) => {
   const contactList = getContactList(params.slug);
 
-  const contacts = await contactList.fetchContacts();
+  const contacts = await contactList.fetchContacts(params.userIds?.length ? { userIds: params.userIds } : undefined);
   const listName = contactList.buildListName();
 
   if (params.dumpTo) {
@@ -84,4 +94,19 @@ export const syncContactList = async (params: { slug: string; dryRun?: boolean; 
     failedBatches,
     attributes: attributesReport,
   };
+};
+
+/**
+ * Synchro Brevo d'UN SEUL utilisateur (réutilise tout le pipeline `tba-contacts`).
+ * No-op silencieux si l'utilisateur n'est pas dans le périmètre (statut/orga non
+ * éligibles, `unsubscribe:true`) : le `$match` en amont renvoie 0 contact et
+ * `importContactsToBrevoList([])` ne fait rien.
+ */
+export const syncSingleContact = async (userId: ObjectId | string) => {
+  if (!(await isBrevoInstantSyncActive())) {
+    logger.info({ userId: String(userId) }, "Brevo single contact sync skipped (inactif ou hors production)");
+    return;
+  }
+  const _id = typeof userId === "string" ? new ObjectId(userId) : userId;
+  return await syncContactList({ slug: "tba-contacts", userIds: [_id] });
 };

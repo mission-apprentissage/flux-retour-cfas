@@ -443,6 +443,32 @@ program
   });
 
 program
+  .command("brevo-contacts:sync-one")
+  .description("Synchronise un seul utilisateur vers Brevo (par userId)")
+  .requiredOption("--user-id <id>", "ObjectId de l'utilisateur (usersMigration._id)")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    return createJobAction("brevo-contacts:sync-one")({
+      userId: options.userId,
+      queued: options.queued ?? false,
+    });
+  });
+
+program
+  .command("brevo-events:track-one")
+  .description("Émet un événement Brevo pour un utilisateur (par userId et clé d'événement)")
+  .requiredOption("--user-id <id>", "ObjectId de l'utilisateur (usersMigration._id)")
+  .option("--key <key>", "Clé de l'événement (voir registry)", "account-confirmed")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    return createJobAction("brevo-events:track")({
+      key: options.key,
+      userId: options.userId,
+      queued: options.queued ?? false,
+    });
+  });
+
+program
   .command("job:run")
   .description("Run a job")
   .requiredOption("-n, --name <string>", "Job name")
