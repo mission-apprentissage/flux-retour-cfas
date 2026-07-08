@@ -16,21 +16,28 @@ import config from "@/config";
  */
 const SETTINGS_KEY = "brevo-contact-sync" as const;
 
-export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled";
+export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled" | "eventsEnabled";
 
 export type BrevoSyncSettings = {
   dailyFullSyncEnabled: boolean;
   instantSyncEnabled: boolean;
+  eventsEnabled: boolean;
 };
 
-const FIELD_TO_DB: Record<BrevoSyncSettingField, "daily_full_sync_enabled" | "instant_sync_enabled"> = {
+type BrevoSyncSettingDbField = "daily_full_sync_enabled" | "instant_sync_enabled" | "events_enabled";
+
+const FIELD_TO_DB: Record<BrevoSyncSettingField, BrevoSyncSettingDbField> = {
   dailyFullSyncEnabled: "daily_full_sync_enabled",
   instantSyncEnabled: "instant_sync_enabled",
+  eventsEnabled: "events_enabled",
 };
+
+const ALL_DB_FIELDS: BrevoSyncSettingDbField[] = ["daily_full_sync_enabled", "instant_sync_enabled", "events_enabled"];
 
 const toSettings = (doc: IBrevoSyncSettings | null): BrevoSyncSettings => ({
   dailyFullSyncEnabled: doc?.daily_full_sync_enabled ?? false,
   instantSyncEnabled: doc?.instant_sync_enabled ?? false,
+  eventsEnabled: doc?.events_enabled ?? false,
 });
 
 export const getBrevoSyncSettings = async (): Promise<BrevoSyncSettings> => {
@@ -46,10 +53,10 @@ export const setBrevoSyncSetting = async (
     throw Boom.badRequest("La synchronisation Brevo n'est activable qu'en production");
   }
   const dbField = FIELD_TO_DB[field];
-  // L'autre toggle est initialisé à `false` à la création pour garantir que les
-  // deux booléens (requis par le schéma) existent dès le premier upsert. La `key`
-  // est posée automatiquement par le filtre de l'upsert, pas besoin de la répéter.
-  const otherDbField = field === "dailyFullSyncEnabled" ? "instant_sync_enabled" : "daily_full_sync_enabled";
+  // Les autres toggles sont initialisés à `false` à la création pour garantir que
+  // les booléens du schéma existent dès le premier upsert. La `key` est posée
+  // automatiquement par le filtre de l'upsert, pas besoin de la répéter.
+  const setOnInsert = Object.fromEntries(ALL_DB_FIELDS.filter((f) => f !== dbField).map((f) => [f, false]));
   const set = { [dbField]: enabled, updated_at: new Date(), updated_by: userEmail };
 
   try {
@@ -57,7 +64,7 @@ export const setBrevoSyncSetting = async (
     // à jour est renvoyé directement, pas de second `findOne`).
     const res = await brevoSyncSettingsDb().findOneAndUpdate(
       { key: SETTINGS_KEY },
-      { $set: set, $setOnInsert: { [otherDbField]: false } },
+      { $set: set, $setOnInsert: setOnInsert },
       { upsert: true, returnDocument: "after" }
     );
     return toSettings(res.value);
@@ -80,3 +87,8 @@ export const isBrevoDailyFullSyncActive = async (): Promise<boolean> =>
 
 export const isBrevoInstantSyncActive = async (): Promise<boolean> =>
   config.env === "production" && (await getBrevoSyncSettings()).instantSyncEnabled;
+
+// Émission d'événements Brevo : PRODUCTION UNIQUEMENT (garde 2). Même hors prod avec
+// un flag `events_enabled: true` en base, cette fonction renvoie false → aucun envoi.
+export const isBrevoEventsActive = async (): Promise<boolean> =>
+  config.env === "production" && (await getBrevoSyncSettings()).eventsEnabled;

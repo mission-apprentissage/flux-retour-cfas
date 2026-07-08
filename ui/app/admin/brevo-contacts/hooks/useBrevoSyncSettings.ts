@@ -7,9 +7,10 @@ import { BREVO_CONTACTS_QUERY_CONFIG, brevoContactsQueryKeys } from "./useBrevoC
 export type BrevoSyncSettings = {
   dailyFullSyncEnabled: boolean;
   instantSyncEnabled: boolean;
+  eventsEnabled: boolean;
 };
 
-export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled";
+export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled" | "eventsEnabled";
 
 const syncSettingsQueryKey = [...brevoContactsQueryKeys.all, "sync-settings"] as const;
 

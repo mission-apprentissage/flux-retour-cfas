@@ -6,16 +6,19 @@ import { useMongo } from "@tests/jest/setupMongo";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrgaOf, buildUser } from "./brevo/contacts/fixtures";
+import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { rejectMembre, validateMembre } from "./organisations.actions";
 
 // Voir account.actions.test.ts : on espionne le câblage, pas le comportement interne
 // de l'enqueue (qui est no-op hors prod).
 vi.mock("./brevo/contacts/enqueue-sync", () => ({ enqueueBrevoContactSync: vi.fn() }));
+vi.mock("./brevo/events/enqueue-event", () => ({ enqueueBrevoEvent: vi.fn() }));
 vi.mock("@/common/services/mailer/mailer");
 
 useMongo();
 
 const enqueueMock = vi.mocked(enqueueBrevoContactSync);
+const eventMock = vi.mocked(enqueueBrevoEvent);
 
 // Contexte administrateur : `type === "ADMINISTRATEUR"` court-circuite la vérification
 // de rôle/organisation dans validateMembre/rejectMembre.
@@ -33,6 +36,7 @@ const seedPendingMembre = async () => {
 describe("organisations.actions — câblage de la synchro Brevo instantanée", () => {
   beforeEach(() => {
     enqueueMock.mockReset();
+    eventMock.mockReset();
   });
 
   describe("validateMembre", () => {
@@ -45,6 +49,7 @@ describe("organisations.actions — câblage de la synchro Brevo instantanée", 
       expect(updated!.account_status).toBe("CONFIRMED");
       expect(enqueueMock).toHaveBeenCalledOnce();
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(user._id));
+      expect(eventMock).toHaveBeenCalledWith("account-confirmed", { userId: user._id.toString() });
     });
   });
 
@@ -61,6 +66,7 @@ describe("organisations.actions — câblage de la synchro Brevo instantanée", 
       const deleted = await usersMigrationDb().findOne({ _id: user._id });
       expect(deleted).toBeNull();
       expect(enqueueMock).not.toHaveBeenCalled();
+      expect(eventMock).not.toHaveBeenCalled();
     });
   });
 });

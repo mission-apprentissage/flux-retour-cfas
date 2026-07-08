@@ -21,6 +21,7 @@ import config from "@/config";
 import { AuthContext } from "../model/internal/AuthContext.js";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
+import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
@@ -92,6 +93,8 @@ export async function register(registration: RegistrationSchema): Promise<{
     await invitationsArchiveDb().insertOne(invitation);
     await invitationsDb().deleteOne({ _id: invitation._id });
     await enqueueBrevoContactSync(userId);
+    // Transition -> CONFIRMED (invitation) : émet l'événement Brevo pour le scénario d'automation.
+    await enqueueBrevoEvent("account-confirmed", { userId: userId.toString() });
     return {
       account_status: "CONFIRMED",
     };
@@ -179,6 +182,9 @@ export async function activateUser(ctx: AuthContext) {
         recipient: { prenom: ctx.prenom },
         cfaName,
       });
+
+      // Transition -> CONFIRMED (activation CFA) : émet l'événement Brevo.
+      await enqueueBrevoEvent("account-confirmed", { userId: ctx._id.toString() });
     } else {
       const res = await usersMigrationDb().updateOne(
         {

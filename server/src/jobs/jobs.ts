@@ -4,6 +4,7 @@ import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import { syncContactList, syncSingleContact } from "@/common/actions/brevo/contacts/sync";
 import { isBrevoDailyFullSyncActive } from "@/common/actions/brevo/contacts/sync-settings.actions";
+import { trackBrevoEvent } from "@/common/actions/brevo/events/track";
 import logger from "@/common/logger";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
@@ -733,6 +734,16 @@ export async function setupJobProcessor() {
           const result = await syncSingleContact(payload.userId);
           logger.info({ userId: payload.userId, ...result }, "Brevo single contact sync done");
           return result;
+        },
+      },
+      "brevo-events:track": {
+        handler: async (job) => {
+          const payload = job.payload as { key?: string; userId?: string } | undefined;
+          if (!payload?.key || !payload?.userId) {
+            throw new Error("key et userId sont requis");
+          }
+          await trackBrevoEvent(payload.key, { userId: payload.userId });
+          return { key: payload.key, userId: payload.userId };
         },
       },
     },

@@ -13,6 +13,12 @@ export const zBrevoSyncSettings = z.object({
   instant_sync_enabled: z
     .boolean()
     .describe("Active la synchro instantanée unitaire (création de compte / changement de statut)"),
+  // Optionnel pour rétrocompat : les documents créés avant l'ajout des événements
+  // n'ont pas ce champ ; `toSettings` le lit avec `?? false`.
+  events_enabled: z
+    .boolean()
+    .optional()
+    .describe("Active l'émission d'événements Brevo (API Events) sur transitions métier — prod uniquement"),
   updated_at: z.date().optional().describe("Date de dernière modification d'un toggle"),
   updated_by: z.string().optional().describe("Email de l'administrateur ayant modifié un toggle"),
 });

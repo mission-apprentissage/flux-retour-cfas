@@ -6,6 +6,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import {
   getBrevoSyncSettings,
   isBrevoDailyFullSyncActive,
+  isBrevoEventsActive,
   isBrevoInstantSyncActive,
   setBrevoSyncSetting,
 } from "./sync-settings.actions";
@@ -14,17 +15,18 @@ useMongo();
 
 // Note : en environnement de test, `config.env === "test"` (≠ "production").
 describe("sync-settings.actions", () => {
-  it("retourne les deux toggles désactivés par défaut (aucun document)", async () => {
+  it("retourne les trois toggles désactivés par défaut (aucun document)", async () => {
     expect(await getBrevoSyncSettings()).toEqual({
       dailyFullSyncEnabled: false,
       instantSyncEnabled: false,
+      eventsEnabled: false,
     });
   });
 
   it("persiste la désactivation, initialise l'autre champ et trace l'auteur", async () => {
     const result = await setBrevoSyncSetting("instantSyncEnabled", false, "admin@example.com");
 
-    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: false });
+    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: false, eventsEnabled: false });
     const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
     expect(doc).toMatchObject({
       key: "brevo-contact-sync",
@@ -46,7 +48,7 @@ describe("sync-settings.actions", () => {
     // On modifie daily : instant doit rester à true.
     const result = await setBrevoSyncSetting("dailyFullSyncEnabled", false, "b@example.com");
 
-    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: true });
+    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: true, eventsEnabled: false });
     const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
     expect(doc?.instant_sync_enabled).toBe(true);
     expect(doc?.updated_by).toBe("b@example.com");
@@ -63,9 +65,17 @@ describe("sync-settings.actions", () => {
       key: "brevo-contact-sync",
       daily_full_sync_enabled: true,
       instant_sync_enabled: true,
+      events_enabled: true,
     } as any);
 
     expect(await isBrevoDailyFullSyncActive()).toBe(false);
     expect(await isBrevoInstantSyncActive()).toBe(false);
+    expect(await isBrevoEventsActive()).toBe(false);
+  });
+
+  it("refuse d'activer les événements hors production (garde 1) et ne persiste rien", async () => {
+    await expect(setBrevoSyncSetting("eventsEnabled", true, "admin@example.com")).rejects.toThrow();
+    const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
+    expect(doc?.events_enabled ?? false).toBe(false);
   });
 });

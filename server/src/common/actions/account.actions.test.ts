@@ -7,6 +7,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { activateUser, register, registerCfa } from "./account.actions";
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrgaOf, buildUser } from "./brevo/contacts/fixtures";
+import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { createOrganisation } from "./organisations.actions";
 
 // On espionne l'enqueue directement plutôt que d'activer le toggle : hors prod,
@@ -14,12 +15,14 @@ import { createOrganisation } from "./organisations.actions";
 // Ce qu'on teste ici, c'est le *câblage* (l'action appelle bien l'enqueue avec le
 // bon userId), pas le comportement interne de l'enqueue (couvert par enqueue-sync.test.ts).
 vi.mock("./brevo/contacts/enqueue-sync", () => ({ enqueueBrevoContactSync: vi.fn() }));
+vi.mock("./brevo/events/enqueue-event", () => ({ enqueueBrevoEvent: vi.fn() }));
 // Le mailer part sur le réseau : on le neutralise.
 vi.mock("@/common/services/mailer/mailer");
 
 useMongo();
 
 const enqueueMock = vi.mocked(enqueueBrevoContactSync);
+const eventMock = vi.mocked(enqueueBrevoEvent);
 
 const buildRegistrationUser = (email: string) => ({
   email,
@@ -35,6 +38,7 @@ const buildRegistrationUser = (email: string) => ({
 describe("account.actions — câblage de la synchro Brevo instantanée", () => {
   beforeEach(() => {
     enqueueMock.mockReset();
+    eventMock.mockReset();
   });
 
   describe("register", () => {
@@ -48,6 +52,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       expect(enqueueMock).toHaveBeenCalledOnce();
       const created = await usersMigrationDb().findOne({ email: "nouveau@example.com" });
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(created!._id));
+      expect(eventMock).not.toHaveBeenCalled();
     });
 
     it("enfile la synchro du compte créé (chemin invitation → CONFIRMED)", async () => {
@@ -70,6 +75,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       expect(enqueueMock).toHaveBeenCalledOnce();
       const created = await usersMigrationDb().findOne({ email: "invite@example.com" });
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(created!._id));
+      expect(eventMock).toHaveBeenCalledWith("account-confirmed", { userId: created!._id.toString() });
     });
   });
 
@@ -107,6 +113,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       expect(result.account_status).toBe("CONFIRMED");
       expect(enqueueMock).toHaveBeenCalledOnce();
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(user._id));
+      expect(eventMock).toHaveBeenCalledWith("account-confirmed", { userId: user._id.toString() });
     });
 
     it("branche standard → PENDING_ADMIN_VALIDATION : enfile la synchro du compte", async () => {
@@ -118,6 +125,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       expect(result.account_status).toBe("PENDING_ADMIN_VALIDATION");
       expect(enqueueMock).toHaveBeenCalledOnce();
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(user._id));
+      expect(eventMock).not.toHaveBeenCalled();
     });
 
     it("n'enfile rien si le compte n'est plus PENDING_EMAIL_VALIDATION (double activation)", async () => {
@@ -127,6 +135,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       await activateUser(ctx);
 
       expect(enqueueMock).not.toHaveBeenCalled();
+      expect(eventMock).not.toHaveBeenCalled();
     });
   });
 
@@ -156,6 +165,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       expect(enqueueMock).toHaveBeenCalledOnce();
       const created = await usersMigrationDb().findOne({ email: "cfa@example.com" });
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(created!._id));
+      expect(eventMock).not.toHaveBeenCalled();
     });
   });
 });

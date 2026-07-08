@@ -28,6 +28,7 @@ import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
+import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
@@ -358,6 +359,8 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     {
       $set: {
         account_status: "CONFIRMED",
+        // Cohérence avec les autres chemins de confirmation ; sert aussi d'event_date Brevo.
+        confirmed_at: new Date(),
       },
     }
   );
@@ -381,8 +384,9 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     }
   );
 
-  // Le compte passe à CONFIRMED : on synchronise le contact Brevo.
+  // Le compte passe à CONFIRMED : on synchronise le contact Brevo et on émet l'événement.
   await enqueueBrevoContactSync(user._id);
+  await enqueueBrevoEvent("account-confirmed", { userId: user._id.toString() });
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {

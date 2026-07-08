@@ -69,6 +69,17 @@ export function BrevoSyncSettingsPanel() {
         disabled={disabled}
         onChange={handleToggle("instantSyncEnabled")}
       />
+
+      <ToggleSwitch
+        inputTitle="Événements Brevo"
+        label="Événements Brevo (scénarios d'automation)"
+        helperText="Émet un événement vers Brevo lors des transitions de statut (ex. passage à CONFIRMED)."
+        labelPosition="left"
+        showCheckedHint
+        checked={settings?.eventsEnabled ?? false}
+        disabled={disabled}
+        onChange={handleToggle("eventsEnabled")}
+      />
     </section>
   );
 }
