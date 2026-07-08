@@ -27,11 +27,15 @@ describe("Routes admin brevo-contacts/sync-settings", () => {
       expectUnauthorizedError(response);
     });
 
-    it("Retourne les deux toggles désactivés par défaut (aucun document)", async () => {
+    it("Retourne les trois toggles désactivés par défaut (aucun document)", async () => {
       const response = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "get", SYNC_SETTINGS_URL);
 
       expect(response.status).toBe(200);
-      expect(response.data).toStrictEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: false });
+      expect(response.data).toStrictEqual({
+        dailyFullSyncEnabled: false,
+        instantSyncEnabled: false,
+        eventsEnabled: false,
+      });
     });
   });
 
@@ -48,7 +52,11 @@ describe("Routes admin brevo-contacts/sync-settings", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data).toStrictEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: false });
+      expect(response.data).toStrictEqual({
+        dailyFullSyncEnabled: false,
+        instantSyncEnabled: false,
+        eventsEnabled: false,
+      });
       const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
       expect(doc?.instant_sync_enabled).toBe(false);
     });
