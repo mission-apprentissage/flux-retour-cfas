@@ -732,7 +732,9 @@ export async function setupJobProcessor() {
             throw new Error("userId est requis");
           }
           const result = await syncSingleContact(payload.userId);
-          logger.info({ userId: payload.userId, ...result }, "Brevo single contact sync done");
+          if (result) {
+            logger.info({ userId: payload.userId, ...result }, "Brevo single contact sync done");
+          }
           return result;
         },
       },

@@ -5,8 +5,7 @@ import { brevoSyncSettingsDb } from "@/common/model/collections";
 import config from "@/config";
 
 /**
- * Pilotage des synchronisations Brevo via deux toggles persistés en base
- * (document singleton `key: "brevo-contact-sync"`).
+ * Pilotage des synchronisations et événements Brevo via trois toggles persistés en base
  *
  * Sécurité : ces synchronisations ne sont **activables qu'en production**.
  * - Garde 1 : `setBrevoSyncSetting` refuse de persister `true` hors prod.

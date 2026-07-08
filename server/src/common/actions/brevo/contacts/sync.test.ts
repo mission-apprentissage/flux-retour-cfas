@@ -7,6 +7,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { buildOrganisme, buildOrgaOf, buildUser } from "./fixtures";
 import { getOrCreateContactList } from "./list.actions";
 import { syncSingleContact } from "./sync";
+import { isBrevoInstantSyncActive } from "./sync-settings.actions";
 
 // On mocke uniquement les appels réseau Brevo : le pipeline `fetchContacts`
 // tourne en vrai contre le mongo en mémoire (filtre `userIds` inclus).
@@ -18,12 +19,17 @@ vi.mock("@/common/services/brevo/brevo", () => ({
 vi.mock("./list.actions", () => ({
   getOrCreateContactList: vi.fn().mockResolvedValue(999),
 }));
+// Garde prod-only : active par défaut ici (config.env vaut "test" sinon → syncSingleContact no-op).
+vi.mock("./sync-settings.actions", () => ({
+  isBrevoInstantSyncActive: vi.fn().mockResolvedValue(true),
+}));
 
 useMongo();
 
 const importMock = vi.mocked(importContactsToBrevoList);
 const ensureMock = vi.mocked(ensureBrevoAttributes);
 const getOrCreateMock = vi.mocked(getOrCreateContactList);
+const isActiveMock = vi.mocked(isBrevoInstantSyncActive);
 
 const seedCfa = async () => {
   const orgaOf = buildOrgaOf();
@@ -37,6 +43,8 @@ describe("syncSingleContact", () => {
     importMock.mockClear();
     ensureMock.mockClear();
     getOrCreateMock.mockClear();
+    isActiveMock.mockReset();
+    isActiveMock.mockResolvedValue(true);
   });
 
   it("ne synchronise QUE l'utilisateur ciblé vers la liste tba-contacts", async () => {
@@ -47,7 +55,7 @@ describe("syncSingleContact", () => {
 
     const result = await syncSingleContact(u1._id);
 
-    expect(result.count).toBe(1);
+    expect(result?.count).toBe(1);
     expect(importMock).toHaveBeenCalledOnce();
     const [listId, contacts] = importMock.mock.calls[0];
     expect(listId).toBe(999);
@@ -62,7 +70,7 @@ describe("syncSingleContact", () => {
 
     const result = await syncSingleContact(u1._id.toString());
 
-    expect(result.count).toBe(1);
+    expect(result?.count).toBe(1);
   });
 
   it("synchronise un compte PENDING (statut élargi)", async () => {
@@ -72,7 +80,7 @@ describe("syncSingleContact", () => {
 
     const result = await syncSingleContact(u1._id);
 
-    expect(result.count).toBe(1);
+    expect(result?.count).toBe(1);
     expect(importMock.mock.calls[0][1][0].attributes.STATUT_COMPTE_USER).toBe("PENDING_EMAIL_VALIDATION");
   });
 
@@ -83,7 +91,19 @@ describe("syncSingleContact", () => {
 
     const result = await syncSingleContact(u._id);
 
-    expect(result.count).toBe(0);
+    expect(result?.count).toBe(0);
     expect(importMock).toHaveBeenCalledWith(999, []);
+  });
+
+  it("no-op prod-only : ne synchronise rien si la synchro instantanée est inactive / hors production", async () => {
+    isActiveMock.mockResolvedValue(false);
+    const orgaOf = await seedCfa();
+    const u = buildUser(orgaOf);
+    await usersMigrationDb().insertOne(u as any);
+
+    const result = await syncSingleContact(u._id);
+
+    expect(result).toBeUndefined();
+    expect(importMock).not.toHaveBeenCalled();
   });
 });

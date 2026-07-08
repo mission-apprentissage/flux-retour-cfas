@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 
 import { ObjectId } from "bson";
 
+import logger from "@/common/logger";
 import {
   BrevoContact,
   ensureBrevoAttributes,
@@ -11,6 +12,7 @@ import {
 
 import { getOrCreateContactList } from "./list.actions";
 import { getContactList } from "./registry";
+import { isBrevoInstantSyncActive } from "./sync-settings.actions";
 
 // Sample affiché dans l'UI admin : on applique la même sérialisation que celle
 // envoyée à Brevo (dates en `yyyy-MM-dd`, `undefined` filtré) pour que l'aperçu
@@ -101,8 +103,10 @@ export const syncContactList = async (params: {
  * `importContactsToBrevoList([])` ne fait rien.
  */
 export const syncSingleContact = async (userId: ObjectId | string) => {
+  if (!(await isBrevoInstantSyncActive())) {
+    logger.info({ userId: String(userId) }, "Brevo single contact sync skipped (inactif ou hors production)");
+    return;
+  }
   const _id = typeof userId === "string" ? new ObjectId(userId) : userId;
-  // Le log de complétion est émis par le handler `brevo-contacts:sync-one` (comme pour la
-  // synchro full via son handler), afin d'éviter un double 'Brevo single contact sync done'.
   return await syncContactList({ slug: "tba-contacts", userIds: [_id] });
 };
