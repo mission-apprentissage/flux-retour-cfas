@@ -19,7 +19,7 @@ export const zDeclareCfaRuptureApi = z.object({
 export const CFA_COLLAB_STATUS = {
   DEMARRER_COLLAB: "demarrer_collab",
   COLLAB_DEMANDEE: "collab_demandee",
-  CONTACTE_PAR_ML: "contacte_par_ml",
+  CONTACTE_PAR_ML_HORS_COLLAB: "contacte_par_ml_hors_collab",
   TRAITE_PAR_ML: "traite_par_ml",
 } as const;
 
@@ -31,22 +31,58 @@ export interface ICfaRuptureEffectif {
   prenom: string;
   date_rupture: string;
   jours_depuis_rupture: number;
+  // true si le dossier est transmis automatiquement à la ML (rupture >= 45j) -> section "+45j après rupture".
+  is_transmis_auto: boolean;
   libelle_formation: string;
   formation_niveau_libelle: string | null;
   collab_status: CfaCollaborationStatus;
   has_unread_notification: boolean;
 }
 
-export type CfaRuptureSegmentKey = "moins_45j" | "46_90j" | "91_180j";
-
-export interface ICfaRuptureSegment {
-  segment: CfaRuptureSegmentKey;
-  count: number;
+export interface ICfaRupturesResponse {
   effectifs: ICfaRuptureEffectif[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  counts: {
+    moins_45j: number;
+    plus_45j: number;
+  };
+  filters: {
+    formations: string[];
+  };
+  isAllowedDeca: boolean;
 }
 
-export interface ICfaRupturesResponse {
-  segments: ICfaRuptureSegment[];
+// --- Suivi Missions Locales (3 sous-onglets) ---
+
+export const CFA_SUIVI_CATEGORY = {
+  COLLAB: "collab",
+  HORS_COLLAB: "hors_collab",
+  TOUS: "tous",
+} as const;
+
+export type CfaSuiviCategory = (typeof CFA_SUIVI_CATEGORY)[keyof typeof CFA_SUIVI_CATEGORY];
+
+export interface ICfaSuiviMissionLocaleResponse {
+  effectifs: ICfaEffectif[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  counts: {
+    collab: number;
+    hors_collab: number;
+    tous: number;
+  };
+  filters: {
+    formations: string[];
+  };
   isAllowedDeca: boolean;
 }
 

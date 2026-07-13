@@ -12,7 +12,12 @@ import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/miss
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
-import { buildCollabStatusSwitch } from "@/common/actions/shared/rupture-pipeline.utils";
+import {
+  buildCollabStatusSwitch,
+  buildCsvInConditions,
+  buildDistinctFacet,
+  buildNameSearchConditions,
+} from "@/common/actions/shared/rupture-pipeline.utils";
 import logger from "@/common/logger";
 import {
   effectifsDb,
@@ -233,47 +238,16 @@ export async function getCfaEffectifs(
     }
   );
 
-  const filterConditions: Record<string, unknown>[] = [];
-
-  if (search) {
-    const words = search
-      .trim()
-      .split(/\s+/)
-      .filter((w) => w.length > 0);
-
-    if (words.length > 0) {
-      const wordConditions = words.map((word) => {
-        const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return {
-          $or: [
-            { "apprenant.nom": { $regex: escaped, $options: "i" } },
-            { "apprenant.prenom": { $regex: escaped, $options: "i" } },
-          ],
-        };
-      });
-
-      filterConditions.push(wordConditions.length === 1 ? wordConditions[0] : { $and: wordConditions });
-    }
-  }
+  const filterConditions: Record<string, unknown>[] = [
+    ...buildNameSearchConditions(search, "apprenant.nom", "apprenant.prenom"),
+    ...buildCsvInConditions("collab_status", collab_status),
+    ...buildCsvInConditions("formation.libelle_long", formation),
+  ];
 
   if (en_rupture === "oui") {
     filterConditions.push({ en_rupture: true });
   } else if (en_rupture === "non") {
     filterConditions.push({ en_rupture: false });
-  }
-
-  if (collab_status) {
-    const statuses = collab_status.split(",").filter(Boolean);
-    if (statuses.length > 0) {
-      filterConditions.push({ collab_status: { $in: statuses } });
-    }
-  }
-
-  if (formation) {
-    const formations = formation.split(",").filter(Boolean);
-    if (formations.length > 0) {
-      filterConditions.push({ "formation.libelle_long": { $in: formations } });
-    }
   }
 
   if (filterConditions.length > 0) {
@@ -312,11 +286,7 @@ export async function getCfaEffectifs(
           },
         },
       ],
-      formations: [
-        { $match: { "formation.libelle_long": { $exists: true, $ne: null } } },
-        { $group: { _id: "$formation.libelle_long" } },
-        { $sort: { _id: 1 } },
-      ],
+      formations: buildDistinctFacet("formation.libelle_long"),
     },
   });
 

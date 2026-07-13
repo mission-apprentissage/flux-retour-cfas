@@ -120,6 +120,7 @@ export const plausibleGoals = [
   "cfa_liste_afficher_plus",
   "cfa_liste_onglet_collab",
   "cfa_collab_en_cours_ouverte",
+  "cfa_suivi_ml_export",
   "cfa_liste_onglet_tous",
   "cfa_tous_effectifs_ouverte",
   "cfa_rupture_declaree_manuellement",

@@ -71,6 +71,8 @@ async function createMlEffectif(overrides: Record<string, any> = {}) {
   };
 }
 
+const baseParams = { page: 1, limit: 100, sort: "date_rupture", order: "desc" as const };
+
 describe("getCfaEffectifsEnRupture", () => {
   useMongo();
 
@@ -80,16 +82,16 @@ describe("getCfaEffectifsEnRupture", () => {
     await organismesDb().insertOne(sampleOrganisme);
   });
 
-  it("retourne les 3 segments même vides", async () => {
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+  it("retourne une réponse paginée vide", async () => {
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    expect(result.segments).toHaveLength(3);
-    expect(result.segments.map((s) => s.segment)).toEqual(["moins_45j", "46_90j", "91_180j"]);
-    expect(result.segments.every((s) => s.count === 0)).toBe(true);
+    expect(result.effectifs).toHaveLength(0);
+    expect(result.pagination.total).toBe(0);
+    expect(result.counts).toEqual({ moins_45j: 0, plus_45j: 0 });
     expect(result.isAllowedDeca).toBe(true);
   });
 
-  it("segmente les ruptures par durée", async () => {
+  it("répartit les ruptures entre moins de 45j et +45j (transmis auto)", async () => {
     const now = new Date();
     const docs = await Promise.all([
       createMlEffectif({ date_rupture: new Date(now.getTime() - 10 * DAY) }),
@@ -98,11 +100,12 @@ describe("getCfaEffectifsEnRupture", () => {
     ]);
     await missionLocaleEffectifsDb().insertMany(docs as any[]);
 
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    expect(result.segments.find((s) => s.segment === "moins_45j")?.count).toBe(1);
-    expect(result.segments.find((s) => s.segment === "46_90j")?.count).toBe(1);
-    expect(result.segments.find((s) => s.segment === "91_180j")?.count).toBe(1);
+    expect(result.pagination.total).toBe(3);
+    expect(result.counts).toEqual({ moins_45j: 1, plus_45j: 2 });
+    // Tri : les < 45j d'abord (is_transmis_auto = false), puis les +45j.
+    expect(result.effectifs.map((e) => e.is_transmis_auto)).toEqual([false, true, true]);
   });
 
   it("exclut les ruptures de plus de 180 jours", async () => {
@@ -110,10 +113,9 @@ describe("getCfaEffectifsEnRupture", () => {
     const doc = await createMlEffectif({ date_rupture: new Date(now.getTime() - 200 * DAY) });
     await missionLocaleEffectifsDb().insertOne(doc as any);
 
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
-    expect(totalCount).toBe(0);
+    expect(result.pagination.total).toBe(0);
   });
 
   it("inclut les déclarations manuelles CFA", async () => {
@@ -132,10 +134,9 @@ describe("getCfaEffectifsEnRupture", () => {
     });
     await missionLocaleEffectifsDb().insertOne(doc as any);
 
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
-    expect(totalCount).toBe(1);
+    expect(result.pagination.total).toBe(1);
   });
 
   it("n'exclut pas les APPRENTI quand cfa_rupture_declaration existe", async () => {
@@ -160,19 +161,17 @@ describe("getCfaEffectifsEnRupture", () => {
     ]);
     await missionLocaleEffectifsDb().insertMany(docs as any[]);
 
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
-    expect(totalCount).toBe(1);
+    expect(result.pagination.total).toBe(1);
   });
 
   it("exclut les effectifs soft_deleted", async () => {
     const doc = await createMlEffectif({ soft_deleted: true });
     await missionLocaleEffectifsDb().insertOne(doc as any);
 
-    const result = await getCfaEffectifsEnRupture(organisation, true);
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
-    const totalCount = result.segments.reduce((sum, s) => sum + s.count, 0);
-    expect(totalCount).toBe(0);
+    expect(result.pagination.total).toBe(0);
   });
 });
